@@ -14,8 +14,7 @@ import type { SolverRun } from '../../platform/search';
 import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
 import type { ProgramMask } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
-import type { useDialogs } from '../Dialogs';
-import { useT } from '../T';
+import { type useDialogs, useT } from '../common';
 
 export interface RibbonProps {
   ui: ToolState;

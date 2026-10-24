@@ -55,8 +55,7 @@
 
 import { useMemo } from 'react';
 import { health } from '../../pure/feasibility';
-import { useDialogs } from '../Dialogs';
-import { useLang, useT } from '../T';
+import { useDialogs, useLang, useT } from '../common';
 import type { RibbonProps, StripContext } from './parts';
 import { availabilityStrip } from './AvailabilityStrip';
 import { checkStrip } from './CheckStrip';

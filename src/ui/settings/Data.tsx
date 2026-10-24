@@ -13,7 +13,7 @@
 // data destroys it.
 
 import { useEffect, useRef, useState } from 'react';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, type PlanControls, T, useT, type Translate } from '../common';
 import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
@@ -31,15 +31,12 @@ import {
 } from '../../platform/storage';
 import type { State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
-import type { PlanControls } from '../props';
 import type { UpdateRun } from '../../platform/update';
 import { SITE_ADRESI } from '../../platform/update';
 import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/exe';
 import { surumEtiketi, tarihYazisi } from '../../leaf/app';
 import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
 import Plans from './Plans';
-import { T, useT } from '../T';
-import type { Translate } from '../T';
 import { searchLog } from '../../platform/search';
 
 interface Props {

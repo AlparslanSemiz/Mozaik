@@ -18,7 +18,7 @@ import { reorderList, type ListKind } from '../../pure/entities';
 import { canReorder, type ListQuery } from '../../pure/listview';
 import { attachRowDrag, clampIndex } from '../../platform/dom';
 import type { State } from '../../leaf/model';
-import { useT } from '../T';
+import { useT } from '../common';
 
 interface Options {
   kind: ListKind;

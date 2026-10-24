@@ -8,9 +8,7 @@
 // to count what would be lost rather than assume there is nothing.
 
 import { useCallback } from 'react';
-import { useDialogs } from './Dialogs';
-import { useT } from './T';
-import { useToast } from './Toasts';
+import { useDialogs, useT, useToast } from './common';
 import { markIntroSeen } from '../platform/prefs';
 import { sampleState } from '../pure/io';
 import type { State } from '../leaf/model';

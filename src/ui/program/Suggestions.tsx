@@ -34,9 +34,7 @@ import {
   type Suggestion,
 } from '../../pure/relax';
 import type { Relaxation, State } from '../../leaf/model';
-import { useT } from '../T';
-import type { Translate } from '../T';
-import { useToast } from '../Toasts';
+import { useT, type Translate, useToast } from '../common';
 
 /** What each way asks for, in a few words: the row's name while it is looked for. */
 export function wayName(t: Translate, family: RelaxFamily): string {

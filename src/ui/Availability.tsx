@@ -28,7 +28,7 @@ import { buildIndex, closedConflicts, closedKey } from '../pure/constraints';
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../leaf/i18n';
 import type { Kind } from '../platform/prefs';
-import { T } from './T';
+import { T } from './common';
 
 interface Props {
   state: State;

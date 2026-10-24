@@ -22,13 +22,9 @@ import {
 import type { ClassGroup } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, ColorPick, LimitBox, type PanelProps, T, useT } from '../common';
 import { parseClasses } from '../../pure/io';
-import ColorPick from '../ColorPick';
-import LimitBox from '../LimitBox';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
-import type { PanelProps } from '../props';
-import { T, useT } from '../T';
 import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 

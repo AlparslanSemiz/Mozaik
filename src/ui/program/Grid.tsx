@@ -15,7 +15,7 @@ import { attachGridChrome, attachGridFit } from '../../platform/dom';
 import { paletteColor, type Settings, type Id } from '../../leaf/model';
 import type { MaskMode } from '../../pure/program';
 import type { GridRow } from '../../pure/program';
-import { useT } from '../T';
+import { useT } from '../common';
 
 export type GridMenuTarget =
   | { kind: 'card'; rowId: Id; day: number; hour: number }

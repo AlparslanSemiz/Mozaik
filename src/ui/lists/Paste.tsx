@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import type { ParseResult } from '../../pure/io';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 /** The Excel paste box: preview, then add. It never adds directly. */
 export default function Paste<T>({

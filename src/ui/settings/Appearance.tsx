@@ -37,7 +37,7 @@ import {
   type Theme,
 } from '../../platform/prefs';
 import { DILLER, DIL_ADI } from '../../leaf/i18n';
-import { T, useLang } from '../T';
+import { T, useLang } from '../common';
 import { type State, paletteColor } from '../../leaf/model';
 
 interface Props {

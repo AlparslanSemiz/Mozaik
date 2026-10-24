@@ -43,14 +43,10 @@ import {
   updateTeacher,
   type InspectKind,
 } from '../../pure/entities';
-import ColorPick from '../ColorPick';
-import LimitBox from '../LimitBox';
+import { ColorPick, LimitBox, useDialogs, useToast, T, useT } from '../common';
 import { placedBlocks } from '../../pure/constraints';
-import { useDialogs } from '../Dialogs';
-import { useToast } from '../Toasts';
 import { paletteColor, type Gender, type State } from '../../leaf/model';
 import { KIND_ICON } from './steps';
-import { T, useT } from '../T';
 
 interface Target {
   kind: InspectKind;

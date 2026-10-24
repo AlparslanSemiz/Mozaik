@@ -39,7 +39,7 @@ import {
   attachScrollFade,
 } from '../../platform/dom';
 import type { PoolCard } from '../../pure/program';
-import { useT } from '../T';
+import { useT } from '../common';
 
 interface Props {
   cards: PoolCard[];

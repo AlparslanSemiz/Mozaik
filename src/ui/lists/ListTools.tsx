@@ -14,7 +14,7 @@ import {
   type ListConfig,
   type ListQuery,
 } from '../../pure/listview';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 interface Props<T> {
   items: T[];

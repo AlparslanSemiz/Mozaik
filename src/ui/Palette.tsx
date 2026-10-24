@@ -18,7 +18,7 @@ import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Search } from 'lucide-react';
 import { fold } from '../pure/listview';
-import { useT } from './T';
+import { useT } from './common';
 
 export interface Command {
   id: string;

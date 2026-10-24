@@ -37,7 +37,15 @@ import {
   type ListQuery,
 } from '../../pure/listview';
 import type { LessonMode } from '../../platform/prefs';
-import { useDialogs } from '../Dialogs';
+import {
+  useDialogs,
+  LimitBox,
+  BlockPatternPicker as BlockCounts,
+  blockCeiling,
+  Field,
+  T,
+  useT,
+} from '../common';
 import { parseLessons } from '../../pure/io';
 import {
   addLesson,
@@ -56,11 +64,7 @@ import {
   weeklyLoad,
 } from '../../pure/entities';
 import { KIND_ICON } from '../program';
-import LimitBox from '../LimitBox';
-import BlockCounts, { blockCeiling } from '../BlockCounts';
 import { Paste, Summary, ListTools, AddPanel, useRowOrder } from '../lists';
-import Field from '../Field';
-import { T, useT } from '../T';
 
 interface Props {
   state: State;

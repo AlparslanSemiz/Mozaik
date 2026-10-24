@@ -15,7 +15,7 @@
 
 import { paletteColor, type Id } from '../../leaf/model';
 import type { ReportRow } from '../../pure/feasibility';
-import { useT } from '../T';
+import { useT } from '../common';
 
 const BADGE: Record<ReportRow['level'], string> = {
   ok: 'ok',

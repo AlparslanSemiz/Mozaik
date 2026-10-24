@@ -20,10 +20,7 @@ import {
   type SettingsLoss,
 } from '../../pure/entities';
 import type { Day, State } from '../../leaf/model';
-import { useDialogs } from '../Dialogs';
-import Field from '../Field';
-import type { PanelProps } from '../props';
-import { T, useT } from '../T';
+import { useDialogs, Field, type PanelProps, T, useT } from '../common';
 
 /**
  * The week with one weekday added or removed, in calendar order, or null when

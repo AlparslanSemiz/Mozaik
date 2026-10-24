@@ -32,9 +32,9 @@ import { PRINT_DEFAULTS, type PoolSort, type ProgramColorMode } from './platform
 import type { State, View } from './leaf/model/types';
 import Program from './ui/program/Program';
 import Print, { NOTHING_EXCLUDED } from './ui/print/Print';
-import { LangProvider } from './ui/T';
-import { DialogProvider } from './ui/Dialogs';
-import { ToastProvider } from './ui/Toasts';
+import { LangProvider } from './ui/common/T';
+import { DialogProvider } from './ui/common/Dialogs';
+import { ToastProvider } from './ui/common/Toasts';
 import { InspectorProvider } from './ui/program/Inspector';
 import { LessonEditProvider } from './ui/LessonEdit';
 import { readFileSync } from 'node:fs';

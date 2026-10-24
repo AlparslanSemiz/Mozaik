@@ -11,10 +11,8 @@
  * two callers share a definition rather than to teach the test a workaround.
  */
 import App from './App';
-import { DialogProvider } from './Dialogs';
-import { LangProvider } from './T';
+import { DialogProvider, LangProvider, ToastProvider } from './common';
 import { ShortcutsHelpProvider } from './ShortcutsHelp';
-import { ToastProvider } from './Toasts';
 import '../leaf/lang';
 
 export default function Root() {

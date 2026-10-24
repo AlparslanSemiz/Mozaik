@@ -4,7 +4,7 @@
 
 import { paletteColor } from '../../leaf/model';
 import type { Sheet as SheetModel, SheetHour } from '../../pure/paper';
-import { useT } from '../T';
+import { useT } from '../common';
 
 interface Props {
   sheet: SheetModel;

@@ -13,8 +13,8 @@ import {
   type ClassGroup,
   type Lesson,
   type State,
-} from '../leaf/model';
-import { lessonLimit, ruleLevel } from '../pure/constraints';
+} from '../../leaf/model';
+import { lessonLimit, ruleLevel } from '../../pure/constraints';
 import { useT } from './T';
 
 /**

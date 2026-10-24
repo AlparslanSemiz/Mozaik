@@ -8,7 +8,7 @@ import { buildReport, type ReportRow } from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import type { CheckView } from '../../platform/prefs';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 interface Props {
   state: State;

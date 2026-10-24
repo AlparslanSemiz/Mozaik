@@ -27,7 +27,7 @@
 
 import { useState } from 'react';
 import { AddPanel, useRowOrder } from '../lists';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, type PanelProps, T, useT } from '../common';
 import { EMPTY_QUERY } from '../../pure/listview';
 import {
   addSubject,
@@ -41,9 +41,7 @@ import {
   subjectTeachers,
 } from '../../pure/entities';
 import type { ReactElement } from 'react';
-import type { PanelProps } from '../props';
 import type { Settings } from '../../leaf/model';
-import { T, useT } from '../T';
 
 interface RowProps extends PanelProps {
   subject: string;

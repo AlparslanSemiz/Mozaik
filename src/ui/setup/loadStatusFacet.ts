@@ -1,7 +1,7 @@
 import { type ReportRow, type LoadStatus, loadStatus } from '../../pure/feasibility';
 import type { Facet } from '../../pure/listview';
 import type { Id } from '../../leaf/model';
-import type { Translate } from '../T';
+import type { Translate } from '../common';
 
 const STATUS_KEYS: Record<LoadStatus, string> = {
   empty: 'Boş',

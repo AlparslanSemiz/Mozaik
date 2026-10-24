@@ -27,7 +27,7 @@ import {
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, parseCellKey, type State, type Id } from '../../leaf/model';
-import { useToast } from '../Toasts';
+import { useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from '../LessonEdit';
 import { dayLabel, lessonSubject, subjectShort } from '../../pure/entities';
@@ -59,7 +59,6 @@ import type { GridMenuTarget } from './Grid';
 import LessonPool from './LessonPool';
 import Suggestions, { wayName } from './Suggestions';
 import type { Preview } from './Suggestions';
-import { T, useT } from '../T';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */

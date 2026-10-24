@@ -24,7 +24,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/common/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -163,13 +163,13 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/ribbon/index.tsx` | sekmeye göre araç şeridi: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
 | `ui/ribbon/parts.tsx` | şeritlerin ortak parçaları (`Group`, `Sep`, `Spacer`, `ICON`) ve şerit fonksiyonlarının aldığı `StripContext`. Şeritler bileşen değil fonksiyon: sekme değişince React aynı `.ribbon` öğesini yeniden kullanır |
 | `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `SetupStrip`, `LessonsStrip`, `AvailabilityStrip`, `ProgramStrip`, `CheckStrip`, `PrintStrip`, `SettingsStrip` |
-| `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
-| `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
+| `ui/common/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
+| `ui/common/Toasts.tsx` | olan biteni söyleyen kısa satır |
 | `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
 | `ui/Palette.tsx` | Ctrl+K kutusu |
 | `ui/Commands.tsx` | paletin komut listesi |
 | `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
-| `ui/T.tsx` | `useT()` ve `<T>` |
+| `ui/common/T.tsx` | `useT()` ve `<T>` |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `loadStatusFacet` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/index.tsx` | Dersler |
@@ -186,13 +186,13 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
-| `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
-| `ui/ColorPick.tsx` | renk seçme diyaloğu |
+| `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
+| `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
 | `ui/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
-| `ui/Field.tsx` | etiketli kontrol |
-| `ui/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
+| `ui/common/Field.tsx` | etiketli kontrol |
+| `ui/common/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
 | `ui/useSample.ts` | örnek okulu yükleme sorusu |
-| `ui/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
+| `ui/common/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
 
 ### Yalnız testler için
 

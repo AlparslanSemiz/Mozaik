@@ -22,7 +22,7 @@ import School from './School';
 import Rules from './Rules';
 import Appearance from './Appearance';
 import Data from './Data';
-import type { PanelProps, PlanControls } from '../props';
+import type { PanelProps, PlanControls } from '../common';
 import type { Density, Motion, Theme, SectionId } from '../../platform/prefs';
 import type { FolderRun } from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';

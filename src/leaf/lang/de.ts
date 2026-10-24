@@ -242,7 +242,7 @@ const DE: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "Der Berater hat nichts zu sagen.",
   Öneri: "Hinweis",
 
-  // src/ui/ColorPick.tsx
+  // src/ui/common/ColorPick.tsx
   Vazgeç: "Abbrechen",
 
   // src/ui/Commands.tsx

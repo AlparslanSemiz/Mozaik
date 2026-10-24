@@ -5,8 +5,7 @@ import Commands from './Commands';
 import { health } from '../pure/feasibility';
 import { Check, InspectorProvider, Program, lessonIcon } from './program';
 import { LessonEditProvider } from './LessonEdit';
-import { useDialogs } from './Dialogs';
-import { useToast } from './Toasts';
+import { useDialogs, useToast, T, useLang, useT } from './common';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION, readPlanFile } from '../pure/io';
 import {
@@ -49,7 +48,6 @@ import { APP_NAME, surumEtiketi } from '../leaf/app';
 import Setup from './setup';
 import Lessons from './lessons';
 import Availability from './Availability';
-import { T, useLang, useT } from './T';
 import Ribbon from './ribbon';
 import { NOTHING_EXCLUDED, Print, type Excluded } from './print';
 import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions, type ProgramMask } from '../pure/program';

@@ -29,8 +29,15 @@ import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import BlockCounts, { blockCeiling } from './BlockCounts';
-import LimitBox from './LimitBox';
+import {
+  BlockPatternPicker as BlockCounts,
+  blockCeiling,
+  LimitBox,
+  useDialogs,
+  useToast,
+  T,
+  useT,
+} from './common';
 import { paletteColor, type Id, type State } from '../leaf/model';
 import {
   addNotSameDay,
@@ -44,9 +51,6 @@ import {
   transferLesson,
   updateLesson,
 } from '../pure/entities';
-import { useDialogs } from './Dialogs';
-import { useToast } from './Toasts';
-import { T, useT } from './T';
 
 type Open = (lessonId: Id) => void;
 

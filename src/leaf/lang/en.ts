@@ -241,7 +241,7 @@ const EN: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "The advisor has nothing to say.",
   Öneri: "Note",
 
-  // src/ui/ColorPick.tsx
+  // src/ui/common/ColorPick.tsx
   Vazgeç: "Cancel",
 
   // src/ui/Commands.tsx

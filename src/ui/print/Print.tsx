@@ -31,7 +31,7 @@ import {
   type PrintOptions,
 } from '../../platform/prefs';
 import Sheet from './Sheet';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 interface Props {
   state: State;

@@ -10,11 +10,9 @@
 // What genuinely differed was the label on the button and whether a toast went
 // out, so those are the props. Everything else is here.
 
-import { useDialogs } from './Dialogs';
-import { useT } from './T';
+import { useDialogs, useT, type PlanControls } from './common';
 import { loadPlan } from '../platform/storage';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/grid';
-import type { PlanControls } from './props';
 
 interface Props {
   plans: PlanControls;

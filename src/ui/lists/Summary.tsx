@@ -37,7 +37,7 @@ import type { Gender, State } from '../../leaf/model';
 
 /** The three values, in the order the teacher list offers them. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 /**
  * Colour repair, offered where the colours are CHOSEN.

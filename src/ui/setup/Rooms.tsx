@@ -21,11 +21,9 @@ import {
 import type { Room } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, type PanelProps, useT } from '../common';
 import { parseRooms } from '../../pure/io';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
-import type { PanelProps } from '../props';
-import { useT } from '../T';
 import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 

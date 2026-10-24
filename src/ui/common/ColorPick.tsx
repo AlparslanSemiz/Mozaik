@@ -24,7 +24,7 @@
 // mean nine hundred buttons sitting in the document.
 
 import { useEffect, useRef, useState } from 'react';
-import { PALETTE_SIZE, paletteColor } from '../leaf/model';
+import { PALETTE_SIZE, paletteColor } from '../../leaf/model';
 import { useT } from './T';
 
 interface Props {
