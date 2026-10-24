@@ -843,7 +843,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
       Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
       "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
-- [x] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
+- [~] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
       `package.json` ile `Cargo.toml` yazıldı, kilit dosyasının kökü 2.1.1'de kaldı; ilk
       `npm install` onu değiştirip ağacı kirletiyor ve `yayinla`'nın temiz ağaç kapısını
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
@@ -854,7 +854,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       olmayan dosyada durur), `yayinla` bütün yeni metinleri ilk yazımdan önce hesaplıyor ve
       kilidi sürüm commit'ine katıyor. Testi `src/surum.test.ts`. Doğrulama yalnız
       `npm run yayinla -- --kuru` ile, worktree'de: yer kapısında durdu (çıkış 1), sürüm yazma
-      yolu koşmadı; ana klasördeki kuru koşu birleşmeden sonra.
+      yolu koşmadı; ana klasördeki kuru koşu birleşmeden sonra. Yazılan iki alan: kökteki
+      `version` ve `packages[""].version`; `surum.test.ts` ikisini de soruyor (iki satır, ikisi de
+      yeni sürüm). **Yazıldı, doğrulanmadı** (kullanıcının kararı, 2026-10-24): zincir `main`'e
+      birleştikten sonra ana klasörde `npm run yayinla -- --kuru` geçene kadar bitti sayılmaz.
 - [ ] **B7.33 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
       `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
       köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
