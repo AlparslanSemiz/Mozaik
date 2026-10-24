@@ -3,7 +3,7 @@
 // user can watch and stop.
 //
 // When a run ends stuck, the same hook goes on to the second search
-// (pure/relax.ts, TODO B5.9): what would have to change for the week to be
+// (pure/relax/, TODO B5.9): what would have to change for the week to be
 // built. Its suggestions arrive one family at a time, "Durdur" stops it and
 // keeps what it has, and applying one is a single undo step.
 //
@@ -12,15 +12,25 @@
 // would throw away work with no explanation.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createSolver } from '../../pure/solver';
-import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../../pure/solver';
-import { applySuggestion, suggestionUses } from '../../pure/relax';
-import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../../pure/relax';
-import { activePlacements } from '../../pure/program';
-import { buildIndex } from '../../pure/constraints';
-import { pinnedRelationBreaches } from '../../pure/rules';
+import {
+  createSolver,
+  type Solver,
+  type SolverOptions,
+  type SolverProgress,
+  type SolverResult,
+} from '../../pure/solver';
+import {
+  applySuggestion,
+  suggestionUses,
+  type RelaxOptions,
+  type RelaxProgress,
+  type Relaxer,
+  type Suggestion,
+} from '../../pure/relax';
+import { activePlacements } from '../../pure/grid';
+import { buildIndex, pinnedRelationBreaches } from '../../pure/constraints';
 import { startRelax } from './relaxPool';
-import type { Answers, Id, State } from '../../leaf/types';
+import type { Answers, Id, State } from '../../leaf/model';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:

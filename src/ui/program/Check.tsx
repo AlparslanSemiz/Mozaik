@@ -2,15 +2,14 @@
 // This is the thing aSc does not do and that hurts most at the school.
 
 import { useMemo } from 'react';
+import { CapacityRows } from '../lists';
 import { buildIndex, closedConflicts, placementKey } from '../../pure/constraints';
-import { buildReport } from '../../pure/feasibility';
-import { pinnedRelationBreaches } from '../../pure/rules';
-import type { ReportRow } from '../../pure/feasibility';
-import type { Id, State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
+import { buildReport, type ReportRow } from '../../pure/feasibility';
+import type { Id, State } from '../../leaf/model';
+import { activePlacements } from '../../pure/grid';
+import { pinnedRelationBreaches } from '../../pure/constraints';
 import type { CheckView } from '../../platform/prefs';
-import CapacityRows from '../CapacityRows';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 interface Props {
   state: State;

@@ -227,6 +227,9 @@ jobs:
             exit 1
           fi
           boyut=$(stat -c%s teslim/Mozaik.exe)
+          # The digest update.rs holds the download against (2026-10-24): the
+          # same file, the same sha256sum line SHA256SUMS.txt carries.
+          ozet=$(sha256sum teslim/Mozaik.exe | cut -d' ' -f1)
           # ADRES DEPONUN BUGÜNKÜ ADINDAN GELMEZ, ve bu bilerek.
           #
           # `update.rs`'in kabul ettiği adres önekleri, dağıtılmış her exe'nin
@@ -251,8 +254,9 @@ jobs:
               date: new Date().toISOString().slice(0, 10),
               exe: process.argv[2],
               boyut: Number(process.argv[3]),
+              sha256: process.argv[4],
             }, null, 2) + '\n');
-          " "$surum" "$adres" "$boyut"
+          " "$surum" "$adres" "$boyut" "$ozet"
           cat teslim/surum.json
 
       # WHAT WAS DOWNLOADED, in a form somebody can check. The .exe is unsigned

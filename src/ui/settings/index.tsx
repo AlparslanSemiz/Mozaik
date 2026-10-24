@@ -7,7 +7,7 @@
 // about the school changes, and that is rare.
 //
 // Görünüm is the one section that describes the MACHINE rather than the school
-// (`theme.ts`). It is here and not in the top bar for the same reason Sıfırla
+// (`platform/prefs/`). It is here and not in the top bar for the same reason Sıfırla
 // is: the top bar is the row where no single click can cost an afternoon.
 //
 // SIX sections since 2026-08-28. "Veri" was seven panels and about nine
@@ -17,14 +17,14 @@
 // holds both because the bundle is written by the same handlers that read the
 // library, and splitting the file would have split those in two.
 
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import School from './School';
 import Rules from './Rules';
 import Appearance from './Appearance';
 import Data from './Data';
-import type { PanelProps, PlanControls } from '../props';
+import type { PanelProps, PlanControls } from '../common';
 import type { Density, Motion, Theme, SectionId } from '../../platform/prefs';
-import type { FolderRun } from '../../platform/useFolder';
+import type { FolderRun } from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';
 
 interface Props extends PanelProps {

@@ -29,6 +29,8 @@ export class Oturum {
   id: string;
   program: import('node:child_process').ChildProcess | undefined;
   static ac(secenek: { port?: number; ikili: string; bekleMs?: number }): Promise<Oturum>;
+  /** Windows: attaches to a program the suite did not start (the one an update restarted). */
+  static windowsBaglan(secenek: { port?: number; bekleMs?: number }): Promise<Oturum>;
   turkceYap(son: number): Promise<void>;
   bul(secici: string): Promise<string>;
   tikla(secici: string): Promise<void>;

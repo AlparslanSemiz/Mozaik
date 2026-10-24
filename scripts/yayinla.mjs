@@ -15,14 +15,15 @@
 //               -> windows.yml (Windows E2E; the site does not wait for it)
 //               -> exe-windows.yml (the real exe on Windows, when the push
 //                  touches the exe; the version commit always does)
-//               -> guncelleme-windows.yml (the last released exe's data
-//                  opened by this one; waited for only when the schema
-//                  moved since the last tag, started here if it did not run)
+//               -> guncelleme-windows.yml (the last released exe's data,
+//                  and update.rs's own update into this build; waited for
+//                  before every release, started here if it did not run)
 //   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
 // So the order is: commit, push main ALONE, wait for that commit's ci.yml,
-// windows.yml and exe-windows.yml runs (and guncelleme-windows.yml's, when
-// the schema moved), and only when all are green tag it and push the tag. The tag used to go in the same push as the commit, i.e.
+// windows.yml, exe-windows.yml and guncelleme-windows.yml runs, and only when
+// all four are green tag it and push the tag. The upgrade gate waits for every
+// release, whatever it changed (the user's decision, 2026-10-24). The tag used to go in the same push as the commit, i.e.
 // before any test had looked at it (2026-10-08); the Windows run joined on
 // 2026-10-09 and the real exe on 2026-10-10, because the tag is what reaches
 // my father's exe and his machine is Windows. Those Windows waits are the one
@@ -48,7 +49,6 @@ import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
 import { kilitSurumunuYaz } from './kilit-surumu.mjs';
-import { semaSurumu, sonEtiket } from './sema-surumu.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -131,11 +131,9 @@ async function kosuYesilMi(is, sha, kirmizidaNe) {
   console.log(`  ${kisa}'in ${is} koşusu yeşil.\n`);
 }
 
-// The two Windows exe workflows do not run on every push: exe-windows.yml's
-// paths filter takes the version commit (package.json, Cargo.toml) but not a
-// tag-only release, or `--kuru` on a commit that never touched the exe, and
-// guncelleme-windows.yml's takes the schema and the storage code, not the
-// version commit. Then the run is started here, on main, which has to BE this
+// The two Windows exe workflows do not run on every push: their paths filters
+// take the version commit (package.json, Cargo.toml) but not a tag-only
+// release, or `--kuru` on a commit that never touched the exe. Then the run is started here, on main, which has to BE this
 // commit or the run would judge another one.
 async function kosuVarMi(is, sha) {
   const kisa = sha.slice(0, 7);
@@ -157,41 +155,16 @@ async function kosuVarMi(is, sha) {
   console.log(`\n  ${kisa} için ${is} koşusu yoktu, başlatıldı.\n`);
 }
 
-// Whether this release migrates plans: the schema at the last release tag
-// against HEAD's. Asked before anything is written or pushed. With no tag to
-// compare against, it waits (the safe answer). Local tags only, no fetch, so
-// `--kuru` still touches nothing: a tag missing here can only make it compare
-// against an older release, which at worst waits once more than needed.
-function semaDegistiMi() {
-  const etiket = sonEtiket(git('tag', '--merged', 'HEAD'));
-  let eski;
-  let yeni;
-  try {
-    yeni = semaSurumu(git('show', 'HEAD:src/leaf/types.ts'));
-    if (etiket === null) return true;
-    eski = semaSurumu(git('show', `${etiket}:src/leaf/types.ts`));
-  } catch (e) {
-    dur(e.message);
-  }
-  console.log(
-    eski === yeni
-      ? `\n  Şema ${yeni}, ${etiket}'teki gibi: güncelleme kapısı beklenmiyor.\n`
-      : `\n  Şema ${eski} → ${yeni} (${etiket}'ten beri): güncelleme kapısı bekleniyor.\n`,
-  );
-  return eski !== yeni;
-}
-
-// The runs a tag waits for. ci.yml first: it is the shortest, and the
-// Windows runs are started by the same push, so they are already under way.
-// The upgrade gate only when this release changes the schema (`semaDegisti`),
-// started together with the exe run so the two Rust builds overlap.
-async function ciYesilMi(sha, kirmizidaNe, semaDegisti) {
+// The runs a tag waits for. The two exe runs are started first, so their two
+// Rust builds overlap with each other and with the wait for ci.yml, the
+// shortest; the Windows runs were started by the same push anyway.
+async function ciYesilMi(sha, kirmizidaNe) {
   await kosuVarMi('exe-windows.yml', sha);
-  if (semaDegisti) await kosuVarMi('guncelleme-windows.yml', sha);
+  await kosuVarMi('guncelleme-windows.yml', sha);
   await kosuYesilMi('ci.yml', sha, kirmizidaNe);
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
   await kosuYesilMi('exe-windows.yml', sha, kirmizidaNe);
-  if (semaDegisti) await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
+  await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
 }
 
 // The first gate, before the arguments are even read: a release run from a
@@ -231,7 +204,7 @@ if (kuru) {
       'git status -sb',
     );
   }
-  await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.'], semaDegistiMi());
+  await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.']);
   const ad = surum === undefined ? 'etiket' : `v${surum} etiketi`;
   console.log(`  Kuru koşu: gerçek koşu burada ${ad} atar ve iterdi. Hiçbir şey atılmadı.\n`);
   process.exit(0);
@@ -253,8 +226,6 @@ if (git('status', '--porcelain') !== '') {
 }
 
 ghHazir();
-
-const semaDegisti = semaDegistiMi();
 
 const etiketler = git('tag', '--list', etiket);
 if (etiketler !== '') {
@@ -420,15 +391,11 @@ try {
 }
 
 const sha = git('rev-parse', 'HEAD');
-await ciYesilMi(
-  sha,
-  [
-    `${etiket} etiketi ATILMADI. Site ci.yml yeşilse güncellendi, exe güncellenmedi.`,
-    'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
-    'olduğu için yalnız etiket atılır.',
-  ],
-  semaDegisti,
-);
+await ciYesilMi(sha, [
+  `${etiket} etiketi ATILMADI. Site ci.yml yeşilse güncellendi, exe güncellenmedi.`,
+  'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
+  'olduğu için yalnız etiket atılır.',
+]);
 
 // ANNOTATED, and that is not a style preference — it is a bug this script
 // already had once. `--follow-tags` pushed annotated tags only; a lightweight

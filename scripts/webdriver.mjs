@@ -408,6 +408,46 @@ export class Oturum {
   }
 
   /**
+   * Attaches to a program somebody else started, on Windows: the one the old
+   * copy's own update started (update.rs, `apply_update`), which the suite
+   * did not spawn and so cannot kill by its process. The port is the same
+   * port, and for a moment it may still be the OLD program's: so the caller
+   * marks the old page (`window.__mozaikEski = true`) before it goes, and a
+   * session that lands on a marked page, or on none, is dropped and tried
+   * again until the new program's page answers.
+   */
+  static async windowsBaglan({ port = 4444, bekleMs = 120_000 }) {
+    const son = Date.now() + bekleMs;
+    let hata = new Error('süre doldu');
+    while (Date.now() < son) {
+      await new Promise((r) => setTimeout(r, 500));
+      if (!(await sayfaVar())) continue;
+      let oturum;
+      try {
+        const cevap = await istek(port, 'POST', '/session', {
+          capabilities: {
+            alwaysMatch: {
+              browserName: 'webview2',
+              'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
+            },
+          },
+        });
+        oturum = new Oturum(port, cevap.sessionId);
+        const yeni = await oturum.js(
+          `return location.origin === 'http://tauri.localhost' && !window.__mozaikEski;`,
+        );
+        if (!yeni) throw new Error('eski programın sayfası');
+        await oturum.turkceYap(son);
+        return oturum;
+      } catch (e) {
+        hata = e;
+        await oturum?.komut('DELETE', '').catch(() => undefined);
+      }
+    }
+    throw new Error(`Yeni programa bağlanılamadı: ${hata?.message ?? hata}`);
+  }
+
+  /**
    * The language, pinned the only way WebView2 leaves open. It follows the
    * user's Windows display language (wry's `--lang` comes after ours and wins),
    * the runner's is English, and changing it needs a sign-out. So the
@@ -456,7 +496,7 @@ export class Oturum {
   // script, screenshots and the window. So a click is a pointerdown/up pair
   // plus `click()` dispatched on the element, a key is a KeyboardEvent on the
   // focused element, and a drag is pointer events along a path, which is all
-  // platform/drag.ts listens to. The page cannot tell them from a hand except
+  // platform/dom/drag.ts listens to. The page cannot tell them from a hand except
   // by `isTrusted`, which nothing in src reads.
 
   /**
@@ -544,7 +584,7 @@ export class Oturum {
 
   /**
    * Drags from one element's centre to another's, in `adim` pointer moves one
-   * frame apart -- the drag in platform/drag.ts reads the cell under the
+   * frame apart -- the drag in platform/dom/drag.ts reads the cell under the
    * pointer once a frame, so a jump straight to the end would skip what a hand
    * shows on the way.
    */

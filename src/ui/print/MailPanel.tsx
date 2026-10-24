@@ -14,13 +14,11 @@
 
 import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
-import { looksLikeEmail } from '../../leaf/email';
-import { paletteColor } from '../../leaf/palette';
-import type { State } from '../../leaf/types';
-import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/desktop';
+import { paletteColor, type State, looksLikeEmail } from '../../leaf/model';
+import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
 import type { Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';
-import { useT } from '../T';
+import { useT } from '../common';
 
 interface Props {
   state: State;

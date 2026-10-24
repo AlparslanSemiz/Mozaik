@@ -12,13 +12,11 @@
 // subject already carries. A week that does not fit even then is not sent at
 // all, rather than sent with its end missing.
 
-import { dayPeriods } from '../bell';
 import type { Index } from '../constraints';
-import { shortDay } from '../entities';
+import { dayPeriods, shortDay } from '../entities';
 import { teacherSheet } from './sheet';
-import { mailtoUrl } from '../../leaf/email';
 import type { Vars } from '../../leaf/i18n';
-import type { State, Teacher } from '../../leaf/types';
+import { type State, type Teacher, mailtoUrl } from '../../leaf/model';
 
 type Translate = (key: string, vars?: Vars) => string;
 
