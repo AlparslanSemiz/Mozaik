@@ -725,8 +725,9 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
   //
   // The source is the SMALL variant, not site/icon.svg. A tab icon is always
   // drawn at 16-32 px, and the detailed mark was rendered at those sizes and
-  // LOOKED AT: its six columns merge into a blue smear. site/icon.svg is what
-  // the top bar and the 192/512 PWA icons use, where there is room for it.
+  // LOOKED AT: its hooks and five columns turn to mush at 16. site/icon.svg is
+  // what the 192/512 PWA icons and the .ico from 32 px up use, where there is
+  // room for it.
 
   /** Every <rect> in an SVG, as a sorted list of "x,y,w,h,rx,fill". */
   function rects(svg: string): string[] {
@@ -773,9 +774,10 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
     );
     const source = readFileSync('site/icon-small.svg', 'utf8').replace(/#ffffff/g, '#fff');
 
-    // Four: the ground plus three lessons. Thirteen would mean the detailed
-    // mark got put back here, which is the thing this section exists to stop.
-    expect(rects(embedded).length, 'gömülü işaret sade varyant değil').toBe(4);
+    // Five: the ground, the page and three lessons. Seven would mean the
+    // detailed mark got put back here, which is the thing this section exists
+    // to stop.
+    expect(rects(embedded).length, 'gömülü işaret sade varyant değil').toBe(5);
     expect(rects(embedded)).toEqual(rects(source));
   });
 });
@@ -902,11 +904,10 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
   // Both were decided by looking (scripts/ikon-karsilastir.mjs renders both
   // drawings at 16/20/24/32/40/48 on light and dark).
   //
-  // Latest explicit decision (2026-09-01): the supplied taskbar screenshot
-  // showed that the simplified 20/24 px mark reads as the wrong logo. Only the
-  // true 16 px small-icon slot remains simplified; every taskbar size uses the
-  // detailed mark. The release still verifies that the .exe embeds this file
-  // byte-for-byte (`scripts/exe-ikon.mjs`).
+  // The rule today: 16, 20 and 24 are simplified, 32 and up detailed. The
+  // detailed mark's hooks and five columns are a blur at 24, and 24 is what
+  // the taskbar shows at 100 %. The release still verifies that the .exe
+  // embeds this file byte-for-byte (`scripts/exe-ikon.mjs`).
   //
   // This test exists because that decision lived NOWHERE. `scripts/ikon.mjs`
   // has a constant; the committed .ico is what actually ships, and the two
@@ -932,7 +933,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
     for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
   });
 
-  test('20 ve üstü AYRINTILI çizim, yalnız 16 sade', async ({ page }) => {
+  test('32 ve üstü AYRINTILI çizim, 16, 20 ve 24 sade', async ({ page }) => {
     // Compared by pixels, because the .ico holds PNGs and the .svg files hold
     // rectangles: the only thing the two have in common is what they look
     // like. Each entry is decoded and put next to a fresh render of both
@@ -950,7 +951,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
       offset += bytes;
       if (size > 48) continue; // above the threshold on both sides; nothing to tell apart
 
-      const beklenen = size < 20 ? sade : detay;
+      const beklenen = size < 32 ? sade : detay;
       await page.setViewportSize({ width: size, height: size });
       await page.setContent(
         `<style>html,body{margin:0;padding:0}svg{display:block;width:${size}px;height:${size}px}</style>${beklenen}`,

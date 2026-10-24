@@ -7,10 +7,11 @@ denendi mi" sorusu için var. Bir duruşun değişmesi de, bir şeyi yapmamaya k
 vermek de bir karardır: çürütülmüş bir teori kaydı olmazsa aylar sonra yeniden
 üretilir ve bir iş planına dönüşür.
 
-Kayıtlar en yeni üstte. Her kayıt ne değiştiğini, eski hâlini ve gerekçesini
-söyler. Denenip bırakılan bir yol **denendi** diye işaretlidir. Kayıtlar geriye
-dönük düzeltilmez: o günkü kuralı aktaran bir alıntı o günün diliyle kalır, bir
-ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
+Kayıtlar en yeni üstte. Her kayıt ne değiştiğini ve gerekçesini söyler. Bir kuralın
+yerine yenisi gelince eski kuralın kaydı silinir ve yeni kayıt onu anan bir geçmiş
+satırı taşımaz: dosyada bir kuralın yalnız bugünkü hâli durur, eskisi git geçmişinde.
+Denenip bırakılan bir yol **denendi** diye işaretlidir ve kalır, çünkü yeniden
+denenmesini önleyen kayıt odur.
 
 ## Eski ilke numaraları
 
@@ -21,8 +22,8 @@ ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
 | Numara | 2026-08-24 ile 2026-08-29 arası | 2026-08-30 ile 2026-09-10 arası | Bugünkü adı |
 |---|---|---|---|
 | 1 | Kurulum yok | Çift tıkla çalışır | Çift tıkla çalışır |
-| 2 | Sunucu yok | Sunucu yok | Sunucusuz |
-| 3 | İnternet gerekmez | İnternet gerekmez | Çevrimdışı |
+| 2 | Sunucu yok | Sunucu yok | kaldırıldı (2026-10-08) |
+| 3 | İnternet gerekmez | İnternet gerekmez | kaldırıldı (2026-10-08) |
 | 4 | Türkçe, tek dil | Türkçe kaynak dildir | Türkçe kaynak dil |
 | 5 | Bir dönem kullanılmadan özellik eklenmez | Veri kaybı kabul edilemez | 5 eskiden: kaldırıldı · 5 yeniden: Veri kaybı olmaz |
 | 6 | Veri kaybı kabul edilemez | Kolay kullanılabilir ve yenilikçi | Veri kaybı olmaz · Kullanılabilirlik |
@@ -81,6 +82,25 @@ sürekli iki worktree (çalışma yeri, aşağıda).
 kanıtı ve dört belge güncellemesi istiyordu, bir belge cümlesi değişikliği bir test
 değişikliği oluyordu. Babayı koruyan şey verisinin ve programının güncellemesinin bozulmaması,
 o yollar teste bağlı kaldı. Gerisi CI'a ve haftalık koşuya bırakıldı.
+
+### 2026-10-23 · İşaret takvim sayfası oldu, küçük boylar sade çizimden
+
+**Kural.** `kurulum/icon.ico` 16, 20 ve 24 px'te sade, 32 px ve üstünde ayrıntılı
+çizimden (`scripts/ikon.mjs`, `SADE_ALTINDA = 32`). Windows %100 ölçekte görev
+çubuğunda 24 px'i gösteriyor (Alp), yani babanın her gün gördüğü sade çizim; bu
+Windows'ta henüz görülmedi, bir sonraki etiketten önce %100 ve %125'te bakılacak.
+**Çizim.** Kullanıcının "asıl ikon" diye seçtiği resimden (`asıl_ikon.jpeg`) ölçülerek
+elle çizildi, kopyalanmadı: indigo zemin üstünde iki laciverde kancaya asılı beyaz bir
+sayfa ve beş ders sütunu (sarı, mavi, uzun mercan, mor, nane yeşili), resmin kendi
+renkleriyle; mavisi zaten `palette.ts`'in `#65b6ec`'i. Sade çizimi kancasız sayfa ve
+üç ders: mor `#c576f3` (beyaza karşı 2,89:1), mercan `#fd6454` (2,95:1), mavi
+`#3f9fe3` (2,88:1). Sade çizimde sarının yerine mor, çünkü sarı beyaza karşı 1,6:1, ve
+mavisi büyük çizimin `#65b6ec`'inden koyu, çünkü o beyaza karşı 2,22:1 (Alp).
+**Gerekçe.** Çizim 16, 20, 24, 32, 40 ve 48 px'te açık ve koyu zeminde çizilip
+bakıldı (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizimin kancaları ve beş sütunun
+aralıkları 16 ve 20 px'te leke, 24 px'te bulanık, 32 px'te okunuyor.
+**Denendi, bırakıldı.** Aynı gün önce çizilen dört sütunlu takvim, kullanıcı asıl
+ikonu istediği için bırakıldı ve dalı (`ozellik/ikon`) silindi.
 
 ### 2026-10-23 · Tek kalıcı checkout; paralel oturuma ve ajana geçici worktree
 
@@ -499,8 +519,8 @@ ve onaylandı:
 
 - **Babanın bir tercihine dayanan, artık geçerli değil:** Sunucusuz, Çevrimdışı, ve
   "Şu an yapılmıyor" listesinden kullanıcı hesapları, veriyi bir servise yükleyen
-  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilkenin metni
-  PRINCIPLES'ın sonunda "Artık geçerli olmayanlar" altında o günkü hâliyle duruyor.
+  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilke PRINCIPLES'tan
+  silindi, bugünkü duruş orada "Ağ ve servisler" altında.
 - **Bir gerçeği koruyan, kalıyor:** Çift tıkla çalışır (eski makine, bilinmeyen
   Windows sürümü), Veri kaybı olmaz, Kullanılabilirlik (babanın zor görmesi), Hedef
   makine (4 GB RAM, çok eski işlemci).
@@ -1728,15 +1748,6 @@ pencereyi o ekrana sığdırılamaz yapıyordu (tuzak 107).
 **Denendi, istenmedi.** Sığdır'da kartın alt satırını kaldırmak satırı kısaltıp
 1920×1080'de 25 satırın 25'ini sığdırıyordu. Dikey düzene dokunulmadı, kullanıcı
 kararı.
-
-### 2026-09-01 · İkon eşiği 32'den 20'ye
-
-**Değişen.** `kurulum/icon.ico` artık yalnız 16 px'te sade, 20 px ve üstünde
-ayrıntılı çizimi taşıyor (`scripts/ikon.mjs`, `SADE_ALTINDA = 20`, commit
-`507fd00`). **Eski hâli.** 2026-08-30'dan beri eşik 32'ydi. **Gerekçe.**
-Kullanıcı isteği ("ayrıntılı simge"), dokuz boyun pikselleri karşılaştırılarak
-doğrulandı. 2026-08-30 kaydındaki 24 px ölçümüyle nasıl bağdaştığı kayıtlı
-değil.
 
 ### 2026-09-01 · Sürükleme durumu React'ten çıktı
 

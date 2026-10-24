@@ -849,7 +849,14 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
-- [ ] **B7.36 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
+- [ ] **B7.33 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
+      `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
+      köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
+      Yapılacak: `site/`'ta yeni bir dosya, icon-maskable-512.png (henüz yok); zemin kenardan
+      kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
+      `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
+      ayrı bir dalda.
+- [ ] **B7.37 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
       inceleyicinin yoklamasından: `lessons[0].id = null` olan dosya kimliği `''` olan bir dersle,
       aynı kimliği taşıyan iki ders (`l2`, `l2`) olduğu gibi açılıyor, yani yerleşimler hangi derse
       ait belirsiz kalıyor; onaydan sonra açık planın yerine geçiyor. `fuzz.test.ts`'in
@@ -1602,7 +1609,7 @@ testi o commit'te sıradan bir teste döner.
       okunamadı" diyor ve açık plan değişmiyor; testleri `src/fuzz.test.ts` (fuzz artık
       istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29; okunamayan dosya (`file.text()`
       reddi) da aynı uyarıyı veriyor. **Kalan:** açılıştaki `parseState` (yukarıda), ölçülmedi.
-      İncelemenin bulduğu, TB1'den eski bir delik B7.36'da.
+      İncelemenin bulduğu, TB1'den eski bir delik B7.37'de.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
       denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.
