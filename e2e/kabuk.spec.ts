@@ -123,10 +123,12 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
     // mark is 1.75rem, i.e. 24.5 px at 100 %, and this project's own icon
     // comparison puts 20-32 px in the band where the six columns are blurry
     // but separable. The tab already read from this file, so what used to be
-    // three drawings of one mark is now two.
+    // three drawings of one mark is now two. The calendar mark of 2026-10-23
+    // kept the simple variant: at 24 px its hooks are a blur.
     const source = readFileSync('site/icon-small.svg', 'utf8').replace(/#ffffff/g, '#fff');
 
-    expect(rects(drawn).length, 'üst çubuktaki işaret sade varyant değil').toBe(4);
+    // Five: the ground, the page and three lessons.
+    expect(rects(drawn).length, 'üst çubuktaki işaret sade varyant değil').toBe(5);
     expect(rects(drawn)).toEqual(rects(source));
   });
 

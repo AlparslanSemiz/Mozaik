@@ -53,12 +53,14 @@ dalda gerileme testiyle.
 
 **Sıradaki iş.** Önce TB8 (veri kaybı sınıfı, TODO §8l): "Tümünü dosyadan aç" eksik planı
 boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalında
-(`~/GitHub/Mozaikler/Mozaik-tb8`), henüz `main`'de değil. Birleşmeyi bekleyen öteki iki dal:
-`ozellik/asil-ikon` (`Mozaik-ikon`) ve `ruflo/kurulum` (Alp'in deny testi, o dalın TODO B7.33'ü).
+(`~/GitHub/Mozaikler/Mozaik-tb8`), henüz `main`'de değil. Birleşmeyi bekleyen öteki dal:
+`ruflo/kurulum` (Alp'in deny testi). Onun TODO B7.33'ünü `ozellik/asil-ikon` önce birleşerek
+maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır.
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
-   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
+   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı;
+   bir sonraki etiketten önce exe'nin simgesi Windows görev çubuğunda %100 ve %125'te görülür)
    → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları
    haftalık koşunun işi. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
    `scripts/linux-kur.sh` `~/GitHub/Mozaikler/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
@@ -103,11 +105,24 @@ boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalın
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
    (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
+11. Yeni işaret `main`'de (2026-10-23, `ozellik/asil-ikon`): kullanıcının seçtiği resimden
+   elle çizilen takvim sayfası; `.ico`'da 16, 20 ve 24 sade, 32 ve üstü ayrıntılı. Exe
+   simgesi Windows görev çubuğunda yazıldı, doğrulanmadı (yayın kapısında, madde 0).
+   Sade çizimin dersleri mor, mercan ve `#3f9fe3` mavisi, beyaza karşı 2,88 ile 2,95:1
+   arası (2026-10-24); büyük çizimin mavisi `#65b6ec`. Maskable ikonun kendi dosyası
+   TODO B7.33, ayrı dalda.
+12. Kayıt kuralı (2026-10-24, aşağıdaki girdi): CLAUDE.md, PRINCIPLES ve DECISIONS bugünkü
+   kuralı taşır, yerine yenisi gelen kural silinir, geçmiş satırı bırakılmaz; WORKLOG'un
+   tarihli girdileri ve TODO arşivi geriye dönük düzeltilmez (CONVENTIONS). PRINCIPLES'ın
+   emekli iki ilkesi silindi. DECISIONS'ın eski kayıtlarındaki "Eski hâli" blokları ve
+   yerine yenisi gelmiş kayıtlar taranmadı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
 - DENETIM'in kullanım kolaylığı sorunları (KS) ve önerileri (Ö) açık, TODO'ya taşınmadı.
 - Sığdır'da babanın tam haftası Windows %125'te hâlâ kırpılıyor.
+- Yeni işaretin Windows görev çubuğundaki ve exe'deki simgesi yazıldı, doğrulanmadı:
+  %100'de 24 px'lik sade çizim görünmeli, Windows'ta görülmedi.
 - Kurulamayan haftadaki öneri "bundan azı yok"u kanıtlayamıyor. Fikstürde ret
   sonrası 6 ve karma yolun daha az saatli haftası açık.
 - Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi. Exe penceresinin
@@ -147,7 +162,7 @@ boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalın
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -156,7 +171,75 @@ boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalın
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
+
 ---
+
+## 2026-10-24 · B7.32: `yayinla` kilit dosyasının kök sürümünü de yazıyor (`b7-32-kilit`)
+
+**Önce kırmızı.** `src/surum.test.ts`'e beş test: kilidin iki kök sürümü `package.json`'daki
+sürüm (bugün de yeşil, el ile eşitlendiği için), `yayinla` kilidi sürüm commit'ine katıyor,
+yalnız iki satır değişiyor, zaten o sürümdeyse metin aynı, npm'in biçiminde olmayan dosya
+yeniden biçimlenmiyor. Dördü kırmızıydı (modül yoktu, `git add` listelerinde kilit yoktu).
+
+**Çare.** `scripts/kilit-surumu.mjs` iki kök sürümü JSON'dan geçirerek yazıyor, yalnız
+`JSON.stringify(…, null, 2)` dosyayı birebir geri veriyorsa (npm'in biçimi); başka biçimde
+duruyor. `npm install --package-lock-only` değil: ağa çıkabilir. İnceleme (taze bağlamlı alt
+ajan) bir yarım yazım buldu: kilidin reddi `package.json` yazıldıktan sonra düşerse ağaç kirli
+kalıyordu; artık üç yeni metin de ilk yazımdan önce hesaplanıyor, Cargo.toml'un "satır yok"
+durması da öne geldi. Düzelen bayat yorumlar ve TRAPS 77. Reddedilen: CRLF'li kilidin reddi
+(ana klasör Linux'ta, ret ağaca dokunmuyor), `npm version --no-git-tag-version` (yeniden
+biçimler, yaşam döngüsü kancaları koşar), `cargoSurumuYaz` ile ortak yardımcı (iki satır).
+
+**Doğrulama.** `npm run yayinla -- --kuru` worktree'de yer kapısında durdu (çıkış 1): yeni
+modül yüklendi, sürüm yazma yolu koşmadı. Ana klasördeki kuru koşu birleşmeden sonra; etiket
+ve gerçek sürüm yok. Koşulan: `hizli` (1344 geçti), `surum`, `docs`, `gitKomut` testleri,
+`eslint`, `tsc`, `knip`, `node --check`. Koşulmayan: E2E (dokunulmadı).
+
+---
+
+## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
+
+**Mavi.** Kullanıcının kararı: yalnız `site/icon-small.svg`'de mavi `#65b6ec` → `#3f9fe3`,
+beyaza karşı 2,22:1 → 2,88:1 (WCAG göreli parlaklığıyla hesaplandı: 2,8847), yani mor
+(2,89:1) ve mercanla (2,95:1) aynı düzeyde. Büyük çizim `#65b6ec`'de kaldı. Ondan
+üretilenler yeniden: `index.html`'in favicon URI'si (`favicon.mjs`), `kurulum/icon.ico`'nun
+16, 20 ve 24'ü (`ikon.mjs`, 13 010 → 13 028 bayt), `App.tsx`'teki üst çubuk işareti.
+DECISIONS'ın 2026-10-23 işaret kaydı ve svg'nin yorumu aynı commit'te.
+
+**Bakılan.** `scratch/ikon-onizleme.png` (.ico'nun kendi girdileri, açık ve koyu şerit),
+`scratch/ikon-boylar.png`, `scratch/ikon-ustcubuk-1920.png` ile `-3x.png` ve `-tam.png`
+(1920×1080, işaret 22,75 px, beş dikdörtgen, mavisi `#3f9fe3`), sekme
+`scratch/ikon-sekme-1920.png` ile `ikon-sekme-yakin.png` (gerçek Chrome penceresi
+1920×1080, Xwayland'de `import -window`; sekme simgesinin piksellerinde `#3F9FE3` var).
+
+**Kayıt kuralı.** DECISIONS'ın başı "kayıtlar geriye dönük düzeltilmez" diyordu, projenin
+kuralıyla çelişiyordu. Yeni hâli: yerine yenisi gelen kuralın kaydı silinir, yeni kayıt onu
+anan bir geçmiş satırı taşımaz, denenip bırakılan yollar kalır. CONVENTIONS'ın aynı maddesi
+DECISIONS'ı da sayıyordu, ikiye ayrıldı: günlükler (WORKLOG girdileri, TODO arşivi)
+düzeltilmez, kurallar (CLAUDE.md, PRINCIPLES, DECISIONS) düzeltilir. PRINCIPLES'ta aynı
+çelişki vardı: emekli iki ilke (sunucusuz, çevrimdışı) "eski kayıtlarda okunabilsin diye"
+o günkü hâliyle duruyordu ve "Şu an yapılmıyor" listesinin altında hangi maddenin hangi
+gün çıktığı yazıyordu. İkisi silindi, bugün geçerli olan kısmı (ağa çıkan özellik tasarım
+ve KVKK sorusu, açılış ağa bağlı değil) "Ağ ve servisler" altında. Onlara işaret eden
+CLAUDE.md'nin giriş cümlesi, DECISIONS'ın 2026-10-08 kaydındaki cümle ve eski ilke
+numaraları tablosunun iki satırı aynı commit'te. CLAUDE.md'de bu kuralla çelişen bir
+cümle yoktu.
+
+**`main` alındı.** `surec-sadelestirme`'nin on iki commit'i. Çatışmalar DECISIONS, TODO ve
+WORKLOG'da, iki taraf da kaldı. `main` B7.32'yi `yayinla`'nın kilit dosyasına verdiği için
+bu dalın maskable ikon maddesi B7.33 oldu. CI koşarken `main` bir commit daha ilerledi
+(19772c9, tek kalıcı checkout), o da alındı: DECISIONS'ta eski worktree kaydının yerinde
+yenisi, WORKLOG'da iki 2026-10-24 girdisi de kaldı.
+
+**Ölçülen.** `dist/index.html` 1 164 918 bayt, brotli 280,63 kB (`npm run boyut`, sınır
+289 kB; `main` alınmadan önce 280,56 kB), `dist-site/` 1 184 501 bayt.
+
+**Koşulan.** `npm run hizli` (merge'den önce ve sonra, 52 dosya, 1339 geçti, 1 atlandı),
+`eslint src/ui/App.tsx`, `prettier --check src/ui/App.tsx site/icon-small.svg`, `npm run
+build`, `build:site`, `boyut`, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `agir.sh`
+altında 7/7. `index.html` `prettier --check`'te uyarı veriyor, `main`'de de, `favicon.mjs`
+üretiyor ve `bicim`'in kapsamında değil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta
+görev çubuğu ve exe.
 
 ## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
 
@@ -239,6 +322,53 @@ beklenen), dalın CI'ı. **Koşulmayan.** `npm test`, E2E, `kontrol` yerelde (po
   yalnız iki `node_modules`. Yerel `refactor/storage` dalı duruyor.
 - `main` (be3ff75, `fix/windows-e2e`) alındı; TODO'daki çatışmada bu dalın hâli kaldı,
   `main`'in TP22 cümlesi arşivdeki kopyaya işlendi.
+
+## 2026-10-23 · Yeni işaret: asıl ikon (`ozellik/asil-ikon`)
+
+**Ne.** Kullanıcının seçtiği `asıl_ikon.jpeg` (2048 px) ölçüldü ve elle temiz SVG
+olarak çizildi, raster kopyalanmadı: `site/icon.svg` 1024'lük viewBox'ta indigo zemin
+(köşe 180, resimde ölçülen), beyaz sayfa, iki ayna kanca, beş ders; `site/icon-small.svg`
+kancasız sayfa ve üç ders. Ondan üretilenler: `index.html`'in favicon URI'si
+(`favicon.mjs`), `site/icon-192.png` ve `icon-512.png` (`simge.mjs`; manifest'in
+`maskable` girdisi de 512'yi gösteriyor, kendi dosyası TODO B7.33), `kurulum/icon.ico`
+(`ikon.mjs`; Tauri `bundle.icon` ile exe'ye, `linux-kur.sh` ile Linux'a da bu dosyalar
+gidiyor), `App.tsx`'teki üst çubuk işareti. `src-tauri/icons` yok ve `tauri icon`
+kullanılmıyor, `tauri.conf.json` dokunulmadı. Aynı gün önce çizilen dört sütunlu takvim
+kullanıcının isteğiyle bırakıldı, dalı `ozellik/ikon` yerelde ve origin'de silindi.
+
+**Kullanıcının cevapları (ikinci tur).** Eşik kalıyor: 16, 20 ve 24 sade, 32 ve üstü
+ayrıntılı; Windows %100 ölçekte görev çubuğunda 24 px'i gösteriyor, yani babanın her gün
+gördüğü sade çizim. DECISIONS'ın 2026-09-01 eşik kaydı kullanıcının isteğiyle kaldırıldı,
+kural 2026-10-23 kaydında, geçmiş satırı olmadan. Büyük çizim resmin renklerinde kaldı;
+sade çizimde sarının yerine büyük çizimin moru: beyaza karşı mor `#c576f3` 2,89:1, mercan
+`#fd6454` 2,95:1, mavi `#65b6ec` 2,22:1 (mavi ~2,8'e varmıyor, kullanıcıya soruldu).
+
+**Bakılan.** `scripts/ikon-karsilastir.mjs` iki çizimi 16-48 px'te açık ve koyu zeminde
+çizdi: ayrıntılı çizimin kancaları ve sütun aralıkları 16 ve 20'de leke, 24'te bulanık,
+32'de okunuyor. Resim ile SVG 512 px'te yan yana karşılaştırıldı. Önizleme
+`scratch/ikon-onizleme.png` (.ico'nun kendi girdileri, 16/24/32/48/256, açık ve koyu görev
+çubuğu) ve `scratch/ikon-boylar.png`, mor sade çizimle yeniden. Sekme
+`scratch/ikon-sekme-1920.png` ve `scratch/ikon-sekme-yakin.png` (gerçek Chrome penceresi
+1920×1080; ekran 2x, yani sekme simgesi 32 fiziksel pikselde çizildi). Üst çubuk işareti
+1920×1080'de, kök 13 px iken 22,75 px çiziliyor, yani 24'ün altında ve sade çizim
+(5 dikdörtgen); `scratch/ikon-ustcubuk-1920.png` ve `-3x.png`.
+
+**Windows görev çubuğu ve exe ikonu: yazıldı, doğrulanmadı.** `.ico`'nun girdileri ve
+eşiği `temel.spec.ts` 79'da piksel piksel ölçülüyor, exe'ye gömülmesini `surum.yml`'de
+`exe-ikon.mjs` ölçüyor; ama simgenin görev çubuğunda nasıl göründüğü Windows'ta
+görülmedi. **Yayından önce:** bir sonraki etiketten önce exe'nin simgesi Windows görev
+çubuğunda %100 ve %125 ölçekte görülür.
+
+**Ölçülen.** `dist/index.html` 1 164 737 → 1 164 918 bayt (+181), brotli 280,5 kB
+(`npm run boyut`, sınır 289 kB); `dist-site/` toplam 1 187 237 → 1 184 501 bayt;
+`kurulum/icon.ico` 14 859 → 13 010 bayt.
+
+**Koşulan.** `git merge main` (`fix/windows-e2e`'nin commit'i, WORKLOG'da çatışma: iki
+girdi de kaldı), sonra `npm run hizli`, `eslint src/ui/App.tsx`, dokunulan dosyalarda
+`prettier --check`, `npm run build`, `build:site`, `boyut`, ve `temel.spec.ts` 72 ve 79 ile
+`kabuk.spec.ts` 76 `agir.sh` altında 7/7. `hizli`'nin ilk koşusunda A1 belge kapısı
+kırmızıydı: B7.33 henüz olmayan dosyayı ters tırnak içinde yol olarak anıyordu, cümle
+düzeldi. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta gerçek exe ve görev çubuğu.
 
 ## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
 

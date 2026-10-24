@@ -855,6 +855,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kilidi sürüm commit'ine katıyor. Testi `src/surum.test.ts`. Doğrulama yalnız
       `npm run yayinla -- --kuru` ile, worktree'de: yer kapısında durdu (çıkış 1), sürüm yazma
       yolu koşmadı; ana klasördeki kuru koşu birleşmeden sonra.
+- [ ] **B7.33 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
+      `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
+      köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
+      Yapılacak: `site/`'ta yeni bir dosya, icon-maskable-512.png (henüz yok); zemin kenardan
+      kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
+      `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
+      ayrı bir dalda.
 
 ---
 
