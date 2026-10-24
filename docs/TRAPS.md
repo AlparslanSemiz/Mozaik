@@ -263,7 +263,7 @@ sayılmadığını ölçüyor.
 
 ### 154 · Hangi push neyi tetikler: dal CI'ı, `v*` etiketi babanın exe'sini
 Ölçüldü 2026-10-24, `.github/workflows/` okunarak. `ci.yml` `branches: ['**']` ile her dalın
-her push'unda koşar; yeni bir dal (ör. `stabil`) itmek bir CI koşusu başlatır, ama site işi
+her push'unda koşar; yeni bir dal itmek bir CI koşusu başlatır, ama site işi
 yalnız `refs/heads/main`'de ve `github-pages` ortamı yalnız `main`'e açık, yani deploy yok.
 `windows.yml` yalnız `main`. `surum.yml` `tags: ['v*']` ile her `v` ile başlayan etikette
 derler ve Release yayınlar; `gh release create` onu "Latest" yapar ve exe en son

@@ -36,31 +36,6 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
-### 2026-10-24 · `stabil` son sürümün dalı, yalnız `yayinla` ileri alır; biten dallar `dal-temizle` ile gider
-
-**Ne.** `stabil` dalı babanın exe'sinin koştuğu commit'i gösterir: son yayınlanan etiketin
-commit'i (bugün `v2.2.0`, `cbe6526`; Release sayfasında "Latest" ve yayınlanmış `surum.json`
-da 2.2.0 diyor). Onu yalnız `npm run yayinla` hareket ettirir: etiket itilip uzakta
-görüldükten sonra son adım olarak `stabil`'i etikete fast-forward eder ve iter. Zorla push
-yok, `reset` yok; ileri alınamıyorsa (yerel ya da uzak `stabil` etiketin atası değilse)
-betik bunu söyler ve yalnız o adım için sıfırdan farklı çıkar, sürüm zaten çıkmıştır.
-`stabil`, `main` ve `gh-pages` `dal-temizle`'nin hiç dokunmadığı dallar.
-
-Biten dal ve worktree'ler `npm run dal-temizle` ile temizlenir: varsayılanı kuru koşu,
-`--uygula` uygular. Yalnız `origin/main`'in atası olan dal silinir, birleşmemiş olan
-listelenir ve karar kullanıcıda kalır. Silmeden önce doğrulanmış bir `git bundle`
-(`~/GitHub/Mozaikler/_arsiv/`), hiç itilmeyen yerel `arsiv/<dal>` etiketleri, ve
-kaldırılan worktree'nin `scratch/` gibi yoksayılan dosyaları `_arsiv/<dal>/`'a (tuzak 153).
-
-**Gerekçe.** "Babada hangi sürüm var" sorusunun cevabı bir etiket listesinde en yeniyi
-aramak yerine tek bir dal: bir hata babadan gelince `git switch stabil` onu kurar.
-Fast-forward'a bağlı olması dalın geçmişini sürümlerin sırası yapıyor. Dalı yayınlamanın
-dışında kimse hareket ettirmediği için yanlış bir commit'i gösteremez.
-
-**Açık kalan.** `stabil` bugün yalnız yerelde: yeni bir dal itmek `ci.yml`'i tetikliyor
-(deploy ve sürüm yok, tuzak 154) ve görev "hiçbir şey tetiklenmiyorsa it" diyordu. İlk
-`yayinla` onu zaten iter; o koşu da bir `ci.yml` koşusu başlatır.
-
 ### 2026-10-23 · Süreç sadeleşti: beş durma sebebi, riske göre test, yapısal belge kapısı
 
 **Ne.** Kullanıcının kararı (dal `surec-sadelestirme`): CLAUDE.md fazla kurallıydı ve test
