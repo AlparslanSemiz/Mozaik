@@ -24,7 +24,6 @@ mod update;
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tauri::{Emitter, Manager};
 
@@ -172,10 +171,6 @@ const KAPANIYOR: &str = "kapaniyor";
 /// milliseconds; this is for a page that is not going to answer.
 const KAPANIS_SURESI: Duration = Duration::from_secs(5);
 
-/// Set by the first close request, so a second click while the page writes
-/// neither tells it twice nor starts a second timer.
-static KAPANIS_ISTENDI: AtomicBool = AtomicBool::new(false);
-
 /// The page has written everything: the window may go.
 #[tauri::command]
 fn kapanabilir(window: tauri::Window) {
@@ -183,15 +178,12 @@ fn kapanabilir(window: tauri::Window) {
     let _ = window.destroy();
 }
 
+/// No "already asked" flag: a second click while the page writes tells it
+/// again and starts a second timer, both harmless, and a flag that stuck would
+/// be the one way to a window nobody can close.
 fn kapanis_istendi(window: &tauri::Window, api: &tauri::CloseRequestApi) {
     api.prevent_close();
-    if KAPANIS_ISTENDI.swap(true, Ordering::SeqCst) {
-        return;
-    }
-    if window.emit(KAPANIYOR, ()).is_err() {
-        let _ = window.destroy();
-        return;
-    }
+    let _ = window.emit(KAPANIYOR, ());
     let pencere = window.clone();
     std::thread::spawn(move || {
         std::thread::sleep(KAPANIS_SURESI);

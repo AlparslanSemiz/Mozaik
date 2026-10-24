@@ -492,8 +492,10 @@ export default function App() {
   // exe. The double-clicked .html has neither and says so; it cannot replace
   // itself, and it is the build the offline principle is checked on (temel.spec.ts).
   //
-  // `park` goes in because the exe route ENDS by closing this window: the
-  // pending autosave has to be on disk before it does (pitfall 28).
+  // `park` goes in because the exe route ENDS with `app.exit(0)`, which the
+  // close hold below never sees: the pending autosave has to be on disk
+  // before it (pitfall 28). The folder's pending write is not waited for
+  // there; the next launch writes the folder again.
   const update = useUpdate(park);
   // The exe's window waits for this before it closes (TB7): the pending
   // autosave and the folder's two-second write land first. A ref, so the

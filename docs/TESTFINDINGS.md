@@ -125,7 +125,8 @@ Bulgu: klasör seçiliyken bir derslik eklenip 2 s'lik yazım gecikmesi dolmadan
 açılışta klasörü kendisi yazıyor; ikinci ölçüm programı açmayan aynı kökenli bir sayfadan okudu.
 Tür: ürün kusuru (yedek gecikmesi; depo veriyi tutuyor).
 Ne yapıldı: TODO §8l TB7, `klasor.spec.ts`'te "BİLİNEN KUSUR"; `fix/veri-kaybi` birleştikten
-sonra ayrı bir dalda düzeltilecek.
+sonra ayrı bir dalda düzeltilecek. Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):
+pencere sayfanın yazımını bekliyor; tarayıcı yarısı düzelmez (TODO TB7).
 Kalıcı kural: yok.
 
 ### 2026-10-09 · test programının analizi (Playwright kütüphanesi ve Linux exe, sahte ev) · iki kopya ve kota
