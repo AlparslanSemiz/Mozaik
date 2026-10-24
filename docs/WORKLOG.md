@@ -43,7 +43,9 @@ olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de ko�
 komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-turları ve test programı 2026-10-23'te donduruldu. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
+turları ve test programı 2026-10-23'te donduruldu; kullanıcının isteğiyle açılan
+`refactor/moduller` dalı (2026-10-24, aşağıdaki girdi) her kaynak dosyayı bir alana koydu ve
+birleşmeyi bekliyor, `main`'e girene kadar aşağıdaki yollar `main`'in yolları. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
 paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi,
 `platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
@@ -172,6 +174,65 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · Modül modül yapısal refactor (`refactor/moduller`)
+
+Kullanıcının yapıştırdığı görev ve aynı günün ek talimatı: her modül tek sorumluluklu ve bir
+alanda, davranış değişmeden ([DECISIONS.md](DECISIONS.md), aynı gün). Worktree
+`~/GitHub/Mozaikler/Mozaik-refactor`, kontrol için ikinci bir checkout
+(`Mozaik-refactor-kontrol`, her modülün commit'i orada tam kontrol edildi, çalışma ağacı
+ölçüme karışmasın diye). Plan, envanter (121 modül) ve modül başına kayıt
+`scratch/refactor/plan.md`'de, git dışında.
+
+**Yöntem.** Taşıma: `git mv` ve yollar, aynı HEAD'de derlemenin sha'sı taşımadan önce ve sonra
+aynı (her taşıma commit'inin mesajında). Bölme: eski dosyanın dolu satırlarının yeni
+dosyalarda aynı çokluk olarak durduğu betikle sayıldı, farklar commit mesajlarında. Her
+modülden sonra tam kontrol: prettier, tipler, sinir, lint (0 uyarı), knip, bütün birim, derleme,
+`size-limit`, ana E2E süiti, ve 68 ekran görüntüsü (34 sahne × iki tema: `e2e/helpers.ts`'in
+sahneleri ile on beş ek diyalog ve ekran, hareket kapalı, kısa satırlar gizli, çözücünün süresi
+sabit; aynı derlemede iki koşu piksel piksel aynı çıktı) tabana karşı ImageMagick ile
+piksel piksel.
+
+**Sonuç, modül başına.** On bir modülün hepsinde ekran 0 piksel fark ve birim yeşil; E2E onunda
+ilk koşuda 642/642. Altıncı modülün ilk koşusunda altı E2E makine yükünden düştü (yük
+ortalaması 58, kendi derlemelerim de koşuyordu, tuzak 118); aynı commit'te sessiz makinede
+serit ve otomatik 41/41. Birim testleri 56 dosyada 1453'ten 58 dosyada 1470'e (1469 geçti, 1
+atlandı): yeni saf fonksiyonların testleri (describeStrip, keepPinnedOnly, describeMenu,
+poolMenuFacts, blockMaskedDays, dropNotice, liste eksenleri, ders formu). Taşınan testlerde
+iddia değişmedi; taşıma öncesi ve sonrası 56 dosya, 1457 test.
+
+**Ölçüm (`main` c41223c'ye karşı, 1f9678d, temiz koşul, dönüşümlü iki tur, dokuzar koşu).**
+
+```
+dist/index.html          1 164 918 → 1 168 018 bayt (+3 100, %0,27; size-limit 1 171 000)
+açılış, boş depo, hazır  111,6 / 109,6 → 108,7 / 104,5 ms medyan
+açılış, dolu plan, hazır 213,9 / 192,7 → 199,1 / 194,9 ms medyan
+açılış, dolu plan, DCL    63,9 /  55,4 →  57,7 /  57,1 ms medyan
+Program'a geçiş x1        34,9 /  35,4 →  37,0 /  35,9 ms medyan
+Program'a geçiş x4       164,5 / 162,9 → 168,0 / 163,7 ms medyan
+```
+
+Kapanış ölçümü, son kod commit'i baa0c2f (aynı yöntem, dört koşu da temiz koşulda):
+
+```
+dist/index.html          1 164 918 → 1 168 018 bayt
+açılış, boş depo, hazır  108,9 / 110,5 → 109,9 / 108,7 ms medyan
+açılış, dolu plan, hazır 195,7 / 200,7 → 199,3 / 200,6 ms medyan
+açılış, dolu plan, DCL    56,1 /  57,4 →  57,9 /  57,7 ms medyan
+Program'a geçiş x1        36,0 /  36,7 →  36,7 /  36,8 ms medyan
+Program'a geçiş x4       164,5 / 219,3 → 170,3 / 164,3 ms medyan (tabanın ikinci turu sapkın)
+```
+
+İki ölçümde de farklar tabanın kendi iki turu arasındaki yayılımın içinde; açılış gerilemedi. Boyutun neredeyse tamamı kabuğun
+bölmesi (+1 688: prop adları küçültülemiyor), Program bölmesi (+659) ve ders formu (+308).
+
+**Yolda bulunanlar.** TODO §8k'ye: RK16 (`i18n.test.ts`'in ölü anahtar süzgeci bayat), RF21
+(scripts/ alt klasörleri), RF22 (`src/fixtures/`'ın yeri), RF23 (kökte bilerek kalanlar), RO1
+ve RO2 (ölçülmeden yapılmayan iki optimizasyon), iki tuzak adayı. Hiçbiri veri kaybı sınıfında
+değil.
+
+**Koşulmayan.** Stryker (haftalık), Windows ve WebKit süitleri, site süiti (`test:site`),
+`cozucu` stres süiti; dalın CI'ı push edilmediği için okunmadı.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

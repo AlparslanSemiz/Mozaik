@@ -1284,6 +1284,19 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 (`refactor/program` `main`'de), yeni paket turu açılmıyor. RF ve RK maddeleri açık kalır,
 bir RK özellik ya da düzeltme dalında aynı kuralla (gerileme testiyle) düzeltilebilir.
 
+**2026-10-24 turu (`refactor/moduller`, kullanıcının isteğiyle; [DECISIONS.md](DECISIONS.md)
+aynı gün).** Yapılan: aşağıdaki tablonun 4, 6, 9'un taşıma yarısı, 10 ve 11'i; ek talimatla
+her kaynak dosya bir alanda (`pure/grid`, `pure/constraints`, `pure/entities`, `pure/relax`,
+`pure/feasibility`, `pure/solver`, `pure/listview`, `pure/lists`, `pure/forms`, `pure/undo`,
+`pure/worlds`, `leaf/model`, `leaf/i18n`, `leaf/preference`, `leaf/app`, `platform/storage`,
+`platform/dom`, `platform/exe`, `ui/shell`, `ui/common`, `ui/plans`, `ui/availability`,
+`ui/ribbon`), testler modüllerinin yanında, katman kökü için iki kural; RF1, RF5, RF6, RF10;
+`theme.ts`, `feasibility.ts`, App, Program, Data, Grid, Suggestions ve Inspector bölündü.
+İlerlemenin ve ölçümlerin tablosu `scratch/refactor/plan.md`'de, git dışında; özeti WORKLOG'da.
+Açık kalan: RF11, RF12, RF20 (adım 5'in kalanı), RF2'nin kalanı, RF3 ve adım 3 (RF18); RF4 park.
+Teachers, Dersler'in formu ve Program'ın sağ tık menülerinin bileşenlere bölünmesi bayt
+bütçesi yüzünden yapılmadı: `size-limit` 1 171 000, dal sonunda `dist/index.html` 1 168 018.
+
 Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
 altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
 Bulgular RF1 ile RF20 arası adını taşıyor (raporda R16, burada RF16), refactor dışı
@@ -1564,6 +1577,13 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       ölçülür, sonra `useMemo`.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
+- Bir test kaynağı DOSYA ADIYLA süzüyorsa (`i18n.test.ts`'in `endsWith('worlds.ts')`'i), o
+  dosyayı bölmek testin taradığı kümeyi sessizce değiştirir; iddia değişmeden test başka
+  şey ölçmeye başlar. Bölmeden önce kaynağı tarayan testlerin süzgeçleri okunur
+  (2026-10-24, `refactor/moduller`, `worlds.ts` bu yüzden bölünmedi).
+- `git mv`'li bir taşımanın `index` adımında taşıma aracının ürettiği `from './'` belirteci
+  çalışır ama kendi paketinin index'ini çağıran bir modülde döngü kurar; `no-circular`
+  yakalar, testteki hâli (çalışan ama okunmaz) yakalanmaz (2026-10-24).
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
   HEAD'de, commit'ten önce derlenerek ölçülür (tuzak 114'ün yanında).
