@@ -185,6 +185,10 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 ---
 
+## 2026-10-24 gece · Birleşme sonrası: boyut bütçesi, taşınan şeridin görüntüsü, yayın kapısı (`birlesme-sonrasi`)
+
+**Boyut.** Ham eşik 1 186 500'den 1 180 000'e (ölçülen 1 173 991 + ~%0,5): fix dalı ölçülenin üstünde yükseltmişti; bütçe ölçüme göre.
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`

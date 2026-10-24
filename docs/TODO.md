@@ -1595,7 +1595,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 
 **Birleşmeden sonraki bileşen bölmeleri (2026-10-24, kullanıcının kararı).** Her biri
 `main`'den açılan kendi dalında; dal bölmenin `dist/index.html`'e maliyetini ölçer, ve
-`size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
+`size-limit` (bugün 1 180 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
 değişmez, ekran 0 piksel.
 
 - [ ] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.

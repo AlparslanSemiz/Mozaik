@@ -113,7 +113,9 @@ Ham eşik on iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 171 000. 
 bayt altına. Ondan önce birleşecek `tb7-sekme-kapanis` (`tb8-eksik-plan` içinde) kendisi
 3 175 bayt getiriyor, ve üçü birlikte 1 174 043 bayt, eşiğin 3 kB üstü. Ham eşik birleşik boyun
 on iki buçuk kilobayt kadar üstüne çekildi, 1 186 500; brotli hâli birlikte 282,4 kB, eşiği
-yerinde (WORKLOG 2026-10-24).
+yerinde (WORKLOG 2026-10-24). `refactor/moduller` birleşince `main`'in ham boyu 1 173 991 bayt
+oldu, ve ham eşik ölçüme göre yaklaşık %0,5 üstüne indi, 1 180 000 (WORKLOG 2026-10-24 gece);
+`tb7-sekme-kapanis`'in 3 175 baytı bunun altına sığar.
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
