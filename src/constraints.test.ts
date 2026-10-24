@@ -24,7 +24,12 @@ import {
   setBlockPinned,
 } from './pure/constraints/constraints';
 import type { BlockRef } from './pure/constraints/constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import {
+  DEFAULT_BELL,
+  DEFAULT_LIMITS,
+  DEFAULT_RULES,
+  NO_TEACHER_LIMITS,
+} from './pure/entities/entities';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 import { makeWorld } from './worlds';

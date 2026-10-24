@@ -41,13 +41,13 @@ import {
   updateClass,
   updateRoom,
   updateTeacher,
+  type InspectKind,
 } from '../../pure/entities';
 import ColorPick from '../ColorPick';
 import LimitBox from '../LimitBox';
 import { placedBlocks } from '../../pure/constraints';
 import { useDialogs } from '../Dialogs';
 import { useToast } from '../Toasts';
-import type { InspectKind } from '../../pure/entities';
 import { paletteColor } from '../../leaf/palette';
 import { KIND_ICON } from './steps';
 import type { Gender, State } from '../../leaf/types';

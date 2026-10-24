@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { blocker, buildIndex, dropMap, place } from './pure/constraints/constraints';
-import { addNotSameDay } from './pure/entities';
+import { addNotSameDay } from './pure/entities/entities';
 import { activePlacements } from './pure/grid/programs';
 import { suggest, verifySuggestion } from './pure/relax';
 import { findViolations } from './pure/constraints/rules';

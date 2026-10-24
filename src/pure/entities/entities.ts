@@ -4,7 +4,7 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
-import { clampBlocks } from '../leaf/blocks';
+import { clampBlocks } from '../../leaf/blocks';
 import {
   activePinned,
   activePlacements,
@@ -13,7 +13,7 @@ import {
   replaceActiveGrid,
   blankProgram,
   DEFAULT_PROGRAM_ID,
-} from './grid';
+} from '../grid';
 import {
   blocker,
   buildIndex,
@@ -23,11 +23,11 @@ import {
   placedBlocks,
   placementKey,
   sanitize,
-} from './constraints';
-import { keyOnDay, parseKey } from '../leaf/keys';
+} from '../constraints';
+import { keyOnDay, parseKey } from '../../leaf/keys';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
-import type { ClassRow, LessonRow, TeacherRow } from './io';
+import type { ClassRow, LessonRow, TeacherRow } from '../io';
 import type {
   Bell,
   ClassGroup,
@@ -43,10 +43,10 @@ import type {
   Settings,
   State,
   Teacher,
-} from '../leaf/types';
-import { t } from '../leaf/i18n';
-import { firstFreeColor, PALETTE_SIZE } from '../leaf/palette';
-import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from '../leaf/subjects';
+} from '../../leaf/types';
+import { t } from '../../leaf/i18n';
+import { firstFreeColor, PALETTE_SIZE } from '../../leaf/palette';
+import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from '../../leaf/subjects';
 import {
   DEFAULT_DAY_NAMES,
   DEFAULT_SUBJECT_SHORTS,
@@ -56,8 +56,8 @@ import {
   dayLabel,
   shortDay,
   subjectLabel,
-} from '../leaf/names';
-import { SCHEMA_VERSION } from '../leaf/types';
+} from '../../leaf/names';
+import { SCHEMA_VERSION } from '../../leaf/types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1
 

@@ -18,10 +18,15 @@ import {
   emptyState,
   setAvailability,
   setWholeWeek,
-} from './pure/entities';
+} from './pure/entities/entities';
 import { buildIndex } from './pure/constraints/constraints';
 import { closedKey } from './pure/constraints/constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import {
+  DEFAULT_BELL,
+  DEFAULT_LIMITS,
+  DEFAULT_RULES,
+  NO_TEACHER_LIMITS,
+} from './pure/entities/entities';
 import type { State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 

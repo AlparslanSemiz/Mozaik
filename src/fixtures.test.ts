@@ -31,7 +31,7 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { defaultSubjects, emptyState } from './pure/entities';
+import { defaultSubjects, emptyState } from './pure/entities/entities';
 import { parseState, readPlanFile } from './pure/io/parseState';
 import { activeProgram } from './pure/grid/programs';
 import { SCHEMA_VERSION, type State } from './leaf/types';

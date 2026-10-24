@@ -22,7 +22,12 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { blocker, buildIndex, place } from './pure/constraints/constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import {
+  DEFAULT_BELL,
+  DEFAULT_LIMITS,
+  DEFAULT_RULES,
+  NO_TEACHER_LIMITS,
+} from './pure/entities/entities';
 import { defaultLibrary } from './pure/io/library';
 import { storageReport } from './platform/storage/storageReport';
 import AppRoot from './ui/Root';

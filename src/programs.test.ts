@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deleteLesson, remapDays } from './pure/entities';
+import { deleteLesson, remapDays } from './pure/entities/entities';
 import { place, setBlockPinned, togglePinScope } from './pure/constraints/constraints';
 import { parseState } from './pure/io/parseState';
 import {

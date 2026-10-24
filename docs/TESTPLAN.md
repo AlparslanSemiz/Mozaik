@@ -297,7 +297,7 @@ girdisinde.
 
 Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints/constraints.ts`, `pure/constraints/rules.ts`,
 `leaf/blocks.ts`, `pure/io/parseState.ts`, `pure/undo.ts`, `pure/io/library.ts`,
-`pure/feasibility.ts`, `pure/entities.ts`, `pure/solver.ts`): bütün depoyu ölçmek
+`pure/feasibility.ts`, `pure/entities/entities.ts`, `pure/solver.ts`): bütün depoyu ölçmek
 pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.
 `solver.ts` 2026-09-12'de listeye girdi. Ondan önce yoktu ve sebebi bir tercih
 değil bir arızaydı: aracın enstrümantasyonu `classOnDay[g]!++` biçimini

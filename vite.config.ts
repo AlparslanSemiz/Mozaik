@@ -97,7 +97,7 @@ export default defineConfig({
         'src/pure/undo.ts',
         'src/pure/io/library.ts',
         'src/pure/feasibility.ts',
-        'src/pure/entities.ts',
+        'src/pure/entities/entities.ts',
         'src/pure/solver.ts',
       ],
     },

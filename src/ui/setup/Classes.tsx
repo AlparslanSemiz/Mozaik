@@ -4,14 +4,8 @@
 import { useMemo, useState } from 'react';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
 import type { ListConfig, ListQuery } from '../../pure/listview';
-import { roomName } from '../../pure/entities';
-import type { ClassGroup } from '../../leaf/types';
-import { PanelRight } from 'lucide-react';
-import { useInspect } from '../program';
-import { useDialogs } from '../Dialogs';
-import { parseClasses } from '../../pure/io';
-import ColorPick from '../ColorPick';
 import {
+  roomName,
   addClass,
   addClassesFromRows,
   deleteClass,
@@ -19,6 +13,12 @@ import {
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
+import type { ClassGroup } from '../../leaf/types';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../program';
+import { useDialogs } from '../Dialogs';
+import { parseClasses } from '../../pure/io';
+import ColorPick from '../ColorPick';
 import LimitBox from '../LimitBox';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import type { PanelProps } from '../props';

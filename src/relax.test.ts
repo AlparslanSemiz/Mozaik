@@ -17,7 +17,7 @@ import { buildIndex } from './pure/constraints/constraints';
 import { findViolations } from './pure/constraints/rules';
 import { parseKey } from './leaf/keys';
 import { WORLDS, closeHours, closeWeek, illegalBlocks, makeWorld } from './worlds';
-import { forbids } from './pure/entities';
+import { forbids } from './pure/entities/entities';
 import type { State } from './leaf/types';
 
 // TODO B5.9: when a week cannot be built, what would have to change. The rules

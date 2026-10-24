@@ -7,9 +7,15 @@
 // own, which sending a teacher their timetable needs (B3.8); `Sheet.tsx`
 // draws it, and `src/programScreen.test.tsx` pins the drawing.
 
-import { periodGroups } from '../bell';
+import {
+  periodGroups,
+  dayLabel,
+  lessonSubject,
+  shortDay,
+  subjectShort,
+  teacherSubjects,
+} from '../entities';
 import { closedKey, placementKey, type Index } from '../constraints';
-import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { activePlacements } from '../grid';
 import { cellSpan } from './cut';
 import type { Vars } from '../../leaf/i18n';

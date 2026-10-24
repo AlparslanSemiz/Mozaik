@@ -14,8 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GripVertical } from 'lucide-react';
 import type { ReactElement } from 'react';
-import { reorderList } from '../../pure/entities';
-import type { ListKind } from '../../pure/entities';
+import { reorderList, type ListKind } from '../../pure/entities';
 import { canReorder } from '../../pure/listview';
 import type { ListQuery } from '../../pure/listview';
 import { attachRowDrag, clampIndex } from '../../platform/dom';

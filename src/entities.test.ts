@@ -72,7 +72,7 @@ import {
   deleteLesson,
   notSameDayOf,
   removeRelation,
-} from './pure/entities';
+} from './pure/entities/entities';
 import type { Day, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 

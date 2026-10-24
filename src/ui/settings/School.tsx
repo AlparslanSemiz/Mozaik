@@ -4,10 +4,11 @@
 // keystroke with onChange loses focus (docs/TRAPS.md pitfall 3).
 
 import { useMemo, useState } from 'react';
-import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../pure/bell';
-import type { Day } from '../../leaf/types';
-import type { State } from '../../leaf/types';
 import {
+  clockParts,
+  dayPeriods,
+  formatClock,
+  minuteOptions,
   WEEK,
   dayLabel,
   extraNames,
@@ -16,8 +17,10 @@ import {
   settingsLoss,
   updateBell,
   updateSettings,
+  type SettingsLoss,
 } from '../../pure/entities';
-import type { SettingsLoss } from '../../pure/entities';
+import type { Day } from '../../leaf/types';
+import type { State } from '../../leaf/types';
 import { useDialogs } from '../Dialogs';
 import Field from '../Field';
 import type { PanelProps } from '../props';
