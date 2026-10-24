@@ -6757,12 +6757,14 @@ body.row-dragging {
    reader who needs this most is the one with low vision (2026-10-24).
    `field-sizing` (Chromium, which is the exe and the browser it ships for)
    fits the box to the text; elsewhere 34ch holds the usual address and a
-   longer one scrolls, as before. Body size, never the table's smaller one. */
+   longer one scrolls, as before. Body size, never the table's smaller one.
+   The focus rules repeat the box's attributes: they have to outrank the 6ch
+   floor above, or their own floor never applies (review, 2026-10-24). */
 .table-scroll table.list td.email-cell {
   position: relative;
 }
 
-.table-scroll table.list td.email-cell > input:focus {
+.table-scroll table.list td.email-cell > input[type='text'][inputmode='email']:not(.num):not(.text-sm):focus {
   position: absolute;
   z-index: 6;
   top: 50%;
@@ -6781,7 +6783,7 @@ body.row-dragging {
 @supports (field-sizing: content) {
   /* Half a ch past the text: content-sized to the pixel, the box rounded
      one pixel short of its last letter and the caret, measured. */
-  .table-scroll table.list td.email-cell > input:focus {
+  .table-scroll table.list td.email-cell > input[type='text'][inputmode='email']:not(.num):not(.text-sm):focus {
     field-sizing: content;
     width: auto;
     min-width: max(calc(100% - 12px), 24ch);

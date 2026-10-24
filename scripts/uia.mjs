@@ -45,12 +45,17 @@ while ((Get-Date) -lt $son) {
   foreach ($p in $A::RootElement.FindAll($T::Children, $pencereKosulu)) {
     $gorulen = @()
     foreach ($e in $p.FindAll($T::Descendants, [System.Windows.Automation.Condition]::TrueCondition)) {
-      $ad = $e.Current.Name
+      # An element React redrew away between the listing and the read throws;
+      # it is skipped, and the next round of the loop lists the new one.
+      try {
+        $ad = $e.Current.Name
+        $tur = $e.Current.ControlType.ProgrammaticName
+        $acik = $e.Current.IsEnabled
+      } catch { continue }
       if ([string]::IsNullOrWhiteSpace($ad)) { continue }
-      $tur = $e.Current.ControlType.ProgrammaticName
       $gorulen += "$tur '$ad'"
       if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem') { continue }
-      if (-not (Uyar $ad) -or -not $e.Current.IsEnabled) { continue }
+      if (-not (Uyar $ad) -or -not $acik) { continue }
       $o = $null
       if ($e.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$o)) {
         $o.Invoke(); "basildi Invoke $tur '$ad'"; exit 0

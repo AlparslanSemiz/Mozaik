@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (`ogretmene-eposta`, on dallık zincirin ucu).
+Son güncelleme: 2026-10-24 gece (`ogretmene-eposta`; zincirin ucu artık `rk2-bozuk-iliski`).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -56,12 +56,21 @@ okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kap
 
 **Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
 `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik` → `tb1-acilis` →
-`tp7-windows-exe` → `ogretmene-eposta`) tek doğrusal zincir, sırayla `--ff-only` ile alınır
-(CLAUDE.md); birleşince
+`tp7-windows-exe` → `ogretmene-eposta` → `rk2-bozuk-iliski`) tek doğrusal zincir, sırayla
+`--ff-only` ile alınır (CLAUDE.md). **Ama `main` 2026-10-24 akşamı ilerledi** (`fix/okunamayan-plan`,
+d8426d6) ve zincirin hiçbir dalı onu içermiyor: ilk beş dala `main` çakışmasız giriyor, `dosya-okuma-b7`
+ve `okunabilirlik`'te yalnız boyut eşiği, `tb1-acilis`'te `planStore.ts` ile `App.tsx`'te iki
+"okunamayan plan" tasarımı çakışıyor (dondurma ve boş plan mı, kenara koyup başka planı açmak mı);
+hangisinin kalacağı kullanıcıda, zincir ondan sonra `main`'e bağlanır (`scratch/zincir/main-ilerledi.md`
+`ogretmene-eposta` worktree'sinde). Birleşince
 ana klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). `tb1-acilis` açılışta bozuk
 planı kenara koyuyor; `tp7-windows-exe` Windows'ta gerçek exe süitini yeşil koşuyor, kapanış
 senaryosu içinde, `yayinla` etiketten önce onu bekliyor. `ogretmene-eposta` şema v17'yi
-(öğretmenin e-postası) ve Çıktı'da öğretmen başına "E-postada aç"ı getiriyor, yalnız `mailto:`.
+(öğretmenin e-postası) ve Çıktı'da öğretmen başına "E-postada aç"ı getiriyor, yalnız `mailto:`; e-posta
+kutusu yazarken adresin boyunda açılıyor, ekleme formunda ve yapıştırmada da var; güncelleme kapısı
+`guncelleme-windows.yml` (yayınlanmış son exe'nin verisi yeni exe'de eksiksiz) yeşil ve `yayinla` şema
+değişince onu bekliyor. `rk2-bozuk-iliski`: sabitlenmiş iki ders bir ilişkiyi bozuyorsa öneri araması
+başlamıyor, panel ve Kontrol tek cümleyle söylüyor (TODO RK2).
 Eyotek'e bir şey başlatılmadı: sorular okula gidiyor (kullanıcı, 2026-10-24). Zebra mozaik-ed'in `zebra-liste` dalında
 (kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi (`scratch/zebra-devir.md`). Kodu
 değiştiren her dal "bitti"den önce bitti kontrolünü yapar; bir TODO maddesine başlamadan önce
@@ -156,7 +165,7 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
+| Şema sürümü | 16 (2026-09-26) `main`'de; 17 `ogretmene-eposta`'da (2026-10-24) | `src/leaf/types.ts` |
 | Ana E2E süiti | 644 test, 34 dosya (2026-10-24, zincir) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
@@ -173,7 +182,8 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 183 782 bayt, brotli 284,87 kB (2026-10-24, zincirin ucu `ogretmene-eposta`); eşikler 1 196 000 (aynı gece çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 185 367 bayt, brotli yaklaşık 285,1 kB (2026-10-24 gece, `ogretmene-eposta`); eşikler 1 196 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| Güncelleme kapısı | 1 geçti, iki koşuda; eski sürümün evresi yaklaşık 20 s (2026-10-24, `ogretmene-eposta`) | `guncelleme-windows.yml` 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -184,6 +194,40 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 
 
+
+---
+
+## 2026-10-24 gece · E-posta girişi okunur, güncelleme kapısı (`ogretmene-eposta`)
+
+**E-posta girişi.** Tablodaki kutu 54 px'ti, adres altı harf okunuyordu. Sütun büyüyemiyor (125 %'te
+tablo taşar), bu yüzden odaklanan kutu satırın üstüne çıkıyor: `position: absolute`, Chromium'da
+`field-sizing: content`, en az 24 ch, en çok 60 ch, gövde yazı boyunda; sütun ve komşuları yerinde.
+Ekleme formunda isteğe bağlı E-posta kutusu (30 ch'ten büyüyor, yarım adres kırmızı kenarlı);
+yapıştırmada altıncı sütun, adres biçimindeki her hücre o sütunun değeri sayılmıyor, ilki e-posta,
+"Ad Soyad" başlığı atlanıyor. Tıklama testi `scratch/eposta-okunur/` (worktree'de): 48 harflik adres
+formda ve tabloda 100 %'te 390 px'lik kutuda tam görünüyor, 125 %'te 489 px'te; komşu sütun 1092 px'te
+kaldı, tablo taşması 0; yapıştırmanın önizlemesi ve Çıktı'nın satırı adresi gösteriyor; koyu tema;
+konsol hatası yok. 1 px'lik `scrollWidth` farkı kesirli genişliğin yuvarlanması, sonda yarım ch pay var.
+
+**Güncelleme kapısı.** Yayınlanmış exe'de port yok ve dışarıdan verilemiyor, ama UI Automation'a cevap
+veriyor (TESTFINDINGS). İlk koşuda yeşil. `yayinla` şema son etiketten beri değiştiyse kapıyı da
+bekliyor; şemaya, itmeden önce ve yalnız yerel etiketlerle bakıyor (eksik etiket en kötü bir kez fazla
+bekletir). v2.2.0 → bu dal: şema 16 → 17, bekleniyor.
+
+**Zincir.** `main` bu oturumda ilerledi (`fix/okunamayan-plan`); bağlama çakışması "Şu an"da.
+
+**İnceleme** (taze bağlamlı alt ajan, 9 bulgu). Düzelen: odaktaki kutunun tabanı 6 ch'lik kurala
+yeniliyordu (özgüllük); ikinci adres hücresi branş olarak kaydoluyordu; "Ad Soyad" başlığı öğretmen
+oluyordu; testin kendi yazdığı adres v17'den sonra kayıp sayılacaktı; kaybolan UI öğesi betiği
+düşürebilirdi; `yayinla`'nın `fetch --tags`'i `--kuru`'da bile ağa çıkıyordu ve şemaya itmeden sonra
+bakılıyordu; `constraints.ts` (sanitize) yol süzgecinde yoktu. Reddedilen: kapının her sürümde
+beklenmesi (kullanıcının tarifi "şema değişince"; soru raporda); 150 %'te odaktaki kutunun tabloyu
+yazarken yana kaydırması (yalnız odakta, kabul).
+
+**Koşulan.** `hizli` (1459 geçti, 1 atlandı), dokunulan E2E dosyaları 169/169 (`kurulum`, `liste`,
+`sira`, `temel`, `yazdir`), `tsc`, `lint`, `knip`, `prettier`, `boyut`, iki tıklama testi; CI: `ci`
+40117527749 ve 40118278546 yeşil, `exe-windows` 40117527763 yeşil (2783f36; sonraki commit'ler
+exe yollarına dokunmuyor), `guncelleme-windows` iki koşuda yeşil. **Koşulmayan.** Tam E2E yerelde.
 
 ---
 

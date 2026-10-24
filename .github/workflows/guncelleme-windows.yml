@@ -18,10 +18,11 @@ name: guncelleme-windows
 on:
   workflow_dispatch:
   push:
-    branches: [main, ogretmene-eposta] # geçici: dalın koşusu, birleşmeden önce kalkar
+    branches: [main]
     paths:
       - 'src/leaf/types.ts'
       - 'src/pure/parseState.ts'
+      - 'src/pure/constraints.ts'
       - 'src/pure/library.ts'
       - 'src/pure/bundle.ts'
       - 'src-tauri/tauri.conf.json'

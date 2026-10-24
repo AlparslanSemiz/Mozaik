@@ -97,9 +97,9 @@ export interface TeacherRow {
  * The address (schema v17) is the sixth column by the same rule, and it is
  * also found by its SHAPE wherever it sits after the name: a school's own
  * sheet puts it where it likes, and a cell holding one address is never a
- * short form, a subject or a gender. That cell is then read as empty in its
- * own column, so "ali@okul.com" in column four is not a gender and in column
- * five is not a second subject. A sixth cell that is not an address is kept
+ * short form, a subject or a gender. Every such cell is then read as empty in
+ * its own column, so "ali@okul.com" in column four is not a gender and in
+ * column five is not a second subject; the first one is the address. A sixth cell that is not an address is kept
  * as typed, the way the table keeps it, and Çıktı does not offer to send.
  */
 export function parseTeachers(text: string): ParseResult<TeacherRow> {
@@ -107,12 +107,13 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
   const errors: string[] = [];
 
   for (const [i, cells] of splitGrid(text).entries()) {
-    if (i === 0 && isHeader(cells, ['ad', 'isim', 'öğretmen', 'ogretmen'])) continue;
+    if (i === 0 && isHeader(cells, ['ad', 'ad soyad', 'isim', 'öğretmen', 'ogretmen'])) continue;
     const name = cells[0] ?? '';
     if (name === '') continue;
 
-    const at = cells.findIndex((c, k) => k > 0 && looksLikeEmail(cleanEmail(c)));
-    const cell = (k: number) => (k === at ? '' : (cells[k] ?? ''));
+    const address = (k: number) => k > 0 && looksLikeEmail(cleanEmail(cells[k]));
+    const at = cells.findIndex((_, k) => address(k));
+    const cell = (k: number) => (address(k) ? '' : (cells[k] ?? ''));
 
     const subject = cell(2);
     if (subject === '')

@@ -26,6 +26,22 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `guncelleme-windows.yml` 40117527794, 40118278485 (`ogretmene-eposta`) · yayınlanmış exe'den yeni exe'ye
+Bulgu: (1) Portsuz yayınlanmış `Mozaik.exe` (v2.2.0, özeti `SHA256SUMS.txt`'le tuttu) Windows UI
+Automation'la sürülebiliyor: WebView2'nin erişilebilirlik ağacında düğmeler adlarıyla
+(`ControlType.Button`, İngilizce, "Fill with sample data", "Load", "Timetable", "Fill automatically
+(367)") ve Invoke deseniyle basılıyor; ilk açılışta düğme 6 s'de bulundu. Eski sürüm örnek okulu
+yükledi ve 433 saati dizdi (şema 16, 1 plan, 25 öğretmen, 99 ders), X ile 0,5 s'de kapandı. (2) Test
+exe'si `update.rs`'in takasıyla aynı dosyaya geçince `.eski` açılışta silindi, plan şema 17'de açıldı,
+eski paketteki hiçbir değer depoda ve Belgeler'de kaybolmadı, günlük kopya yerinde. İki koşuda da 1
+geçti. (3) İnceleme iki test kusuru buldu, ikisi koşu yeşilken: testin kendi yazdığı adres, eski sürüm
+v17 olduğunda "kayıp" sayılacaktı; UI Automation, React'in yeniden çizdiği bir öğeyi okurken
+yeniden denemeden düşebilirdi.
+Tür: test altyapısı; ürün kusuru yok.
+Ne yapıldı: kapı `guncelleme-windows.yml` oldu, `yayinla` şema değişince onu bekliyor (BUILD,
+TESTPLAN); iki test kusuru düzeldi (1c99dd8'in öncesi, dalda).
+Kalıcı kural: yok.
+
 ### 2026-10-24 · `mailto-olcum.yml` 40104303724, 40105704173, 40105976835, 40106637571 (`ogretmene-eposta`, geçici) · Windows'ta `mailto:`
 Bulgu: (1) Kayıtlı e-posta programı yokken `AssocQueryStringW("mailto")` 0x80070483
 (ERROR_NO_ASSOCIATION) dönüyor, `ShellExecuteW` ise 42 (başarı) dönüp Windows'un "Bunu nasıl
