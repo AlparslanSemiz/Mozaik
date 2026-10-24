@@ -17,9 +17,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 // EVERY size Windows actually asks for, and that list is longer than it looks.
-// 16 is the tree and the small tab; 20 and 24 are small taskbar buttons and
-// list views; 32 is the taskbar at 100%, 40 at 125%, 48 at 150%; 256 is the
-// "extra large icons" view, with 64 and 128 in between.
+// 16 is the tree and the small tab; 24 is the taskbar at 100 % scaling (Alp,
+// 2026-10-23; not yet checked on a Windows taskbar), 20 list views; 32, 40
+// and 48 are the larger scalings; 256 is the "extra large icons" view, with
+// 64 and 128 in between.
 //
 // 20, 24 and 40 were MISSING, and that was the visible bug: an .ico that does
 // not carry the size being asked for gets one scaled from the nearest, so a
@@ -30,13 +31,14 @@ import { resolve } from 'node:path';
 // rendered at 16/20/24/32/40/48 on light and dark strips and looked at
 // (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
 //
-// The latest explicit decision (2026-09-01) is that the Windows taskbar must
-// show the DETAILED mark even at 20/24 px; the simplified mark in the supplied
-// taskbar screenshot read as the wrong logo. Only the true 16 px small-icon
-// slot keeps the simplified source. `e2e/temel.spec.ts` pixel-compares every
-// shipped entry so this source decision and the committed .ico cannot drift.
+// The rule: 16, 20 and 24 from the simplified mark, 32 and up from the
+// detailed one. The detailed mark's hooks and the gaps between its five
+// columns are mush at 16 and still a blur at 24. So the taskbar at 100 %
+// shows the simplified mark, the same page with three of the lessons.
+// `e2e/temel.spec.ts` pixel-compares every shipped entry so this source
+// decision and the committed .ico cannot drift.
 const SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256];
-const SADE_ALTINDA = 20;
+const SADE_ALTINDA = 32;
 
 const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
 const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');

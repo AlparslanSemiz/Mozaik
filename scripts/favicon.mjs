@@ -7,7 +7,7 @@
 //
 // The SMALL variant is the source, not site/icon.svg: a tab icon is always
 // rendered at 16-32 px, and the detailed mark was measured and looked at at
-// that size — its six columns merge into a smear.
+// that size — its hooks and five columns merge into a smear.
 //
 //   node scripts/favicon.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
