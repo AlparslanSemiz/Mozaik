@@ -849,6 +849,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
+- [ ] **B7.33 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
+      `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
+      köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
+      Yapılacak: `site/`'ta yeni bir dosya, icon-maskable-512.png (henüz yok); zemin kenardan
+      kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
+      `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
+      ayrı bir dalda.
 
 ---
 
