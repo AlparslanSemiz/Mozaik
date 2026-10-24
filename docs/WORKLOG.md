@@ -210,9 +210,15 @@ paket → "…daha yeni bir sürümüyle yazılmış. Programı güncelleyin."; 
 ve not güncellemeyi söylüyor, "bozuk" demiyor; üst çubukta aynı kimlikli iki dersli dosya →
 "Bu dosya okunamadı", 25 öğretmen yerinde; komşu: geçerli dosya açılıyor. Konsol hatası yok.
 
+**Boyut eşiği.** Zincirin üstüne oturunca (`b7-32-kilit` birleşti) CI'ın `denetim`'i kırmızı:
+çift tıklanan dosya 1 171 145 bayt, eşik 1 171 000 (40092506405). Büyüme 2026-09-27'den beri
+yedi dalın toplamı (1 158 660 → 1 171 212 bayt, `okunabilirlik` ucunda), tek bir dalın değil.
+Ham eşik on iki buçuk kilobayt pay bırakacak yere çekildi, 1 184 000 (BUILD, "Doğrulama
+komutları"); brotli 281,8 kB, eşik 289 kB, yerinde.
+
 **Koşulan.** `hizli`, `fuzz`, `bundle`, `fixtures`, `storeContract`, `tsc`, `eslint`,
-`planlar.spec.ts` (24/24), iki E2E'nin düzeltmesiz kırmızısı, tıklama testi. **Koşulmayan.** Tam
-E2E yerelde (CI'da).
+`planlar.spec.ts` (24/24), iki E2E'nin düzeltmesiz kırmızısı, tıklama testi, üç uçta `npm run
+build` ve boyut. **Koşulmayan.** Tam E2E yerelde (CI'da).
 
 ---
 
