@@ -69,6 +69,8 @@ npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve te
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
+npm run dal-temizle        # biten dal ve worktree'lerin planı, hiçbir şey değiştirmeden
+npm run dal-temizle -- --uygula  # planı uygular: önce bundle ve arsiv/ etiketi, sonra siler
 scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kurar ya da günceller
 ```
 
@@ -157,7 +159,9 @@ scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-so
 scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
-scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
+scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur, stabil'i ileri alır
+scripts/dal-temizle.mjs      biten dal ve worktree'leri arşivleyip siler (kuru koşu varsayılan)
+scripts/dal-plan.mjs         dal-temizle'nin kararları: neyin silinip neyin korunduğu, saf
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop
@@ -417,6 +421,12 @@ worktree `main`'in commit'inde ayrık durabilir.
 
 `npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml` ve
 `windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur.
+
+Son adım `stabil`: etiket uzakta görülünce `stabil` etiketin commit'ine fast-forward edilir
+ve itilir (DECISIONS 2026-10-24). Zorla push ve `reset` yok. Yerel ya da uzak `stabil`
+etiketin atası değilse betik bunu söyler ve sıfırdan farklı çıkar; sürüm o noktada zaten
+yayındadır. `stabil`'i itmek bir `ci.yml` koşusu başlatır, deploy ya da sürüm başlatmaz
+(tuzak 154).
 
 ## İşaret ve ikon
 
