@@ -39,7 +39,7 @@ import {
   maxDockHeight,
   attachScrollFade,
 } from '../../platform/dom';
-import type { PoolCard } from '../../pure/programView';
+import type { PoolCard } from '../../pure/program';
 import { useT } from '../T';
 
 interface Props {

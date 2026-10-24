@@ -15,7 +15,7 @@ import { attachGridChrome, attachGridFit } from '../../platform/dom';
 import { paletteColor } from '../../leaf/palette';
 import type { Settings, Id } from '../../leaf/types';
 import type { MaskMode } from '../../pure/program';
-import type { GridRow } from '../../pure/programView';
+import type { GridRow } from '../../pure/program';
 import { useT } from '../T';
 
 export type GridMenuTarget =

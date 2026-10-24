@@ -1419,7 +1419,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       iş mantığının saf katmana taşınması. Sonra öğretmen ve sınıf kâğıdının saf modeli.
       RF9 babanın gönderme isteğinin (B3.8) önkoşulu ve RF8'e bağlı.
       Bitti (2026-10-10, `refactor/program`, WORKLOG): Program'ın satırları, havuzu ve
-      araç çubuğunun satırı `pure/programView.ts`'te, kâğıt `pure/paper/`'da bir model
+      araç çubuğunun satırı `pure/program/programView.ts`'te, kâğıt `pure/paper/`'da bir model
       (`classSheet`, `teacherSheet`, `sheetHead`), `ui/print/Sheet.tsx` onu çiziyor. RF8'in
       Program dışındaki maddeleri (Ribbon, Check, Summary, Suggestions'ın satır süzgeci,
       CapacityRows) yapılmadı: bu tur Program'la sınırlıydı. Analizin `cellSpans`'i
@@ -1555,7 +1555,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 (6b282ce), `platform/prefs` paketi (185e9cc, 7334d19; WORKLOG 2026-10-09, `refactor/prefs`).
 `useSolver`'ın birim testi ve `platform/search` paketi (947a4cc, c423037; WORKLOG
 2026-10-09, `refactor/search`). Adım 4: Program ile kâğıdın karakterizasyon testi, `pure/program`,
-`ui/program`, `pure/programView` (RF8), `pure/paper` ve `ui/print` (RF9), RK15 (WORKLOG
+`ui/program`, `pure/program/programView` (RF8), `pure/paper` ve `ui/print` (RF9), RK15 (WORKLOG
 2026-10-10, `refactor/program`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den

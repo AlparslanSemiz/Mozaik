@@ -11,7 +11,7 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
                    names · subjects · blocks · version · dateStamp · storage
    |
 src/pure/          constraints · rules · feasibility · bell · entities · solver
-                   relax · sat · grid/* · program/* · programView · paper/* · io/* · listview · undo
+                   relax · sat · grid/* · program/* · paper/* · io/* · listview · undo
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
    |
@@ -89,9 +89,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
-| `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske |
+| `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `grid/`'i |
+| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `constraints.ts` ile `entities.ts` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |

@@ -21,7 +21,7 @@ import {
   waitingSubjects,
   type BarRun,
   type ColorOf,
-} from './pure/programView';
+} from './pure/program/programView';
 import { translate } from './leaf/i18n';
 import type { PoolSort, State } from './leaf/types';
 import { makeWorld } from './worlds';

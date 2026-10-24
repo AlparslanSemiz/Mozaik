@@ -40,7 +40,7 @@ import {
   visibleDays,
   waitingSubjects,
   type ColorOf,
-} from '../../pure/programView';
+} from '../../pure/program';
 import { useDrag, type DragData } from '../../platform/dom';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { applySuggestion, suggestionDiff } from '../../pure/relax';

@@ -36,7 +36,7 @@ import {
   validProgramName,
 } from '../../pure/grid';
 import { togglePinScope } from '../../pure/constraints';
-import { describeStrip } from '../../pure/programView';
+import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';

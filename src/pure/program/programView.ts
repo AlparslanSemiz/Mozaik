@@ -8,9 +8,10 @@
 // each of these runs: the rows and the tray are memoised there, because the
 // grid's memo boundary is the identity of `rows` (pitfall 10).
 //
-// Not in `pure/program/`: this file reads `constraints.ts` and `entities.ts`,
-// both of those read `pure/program/`, and one index for both would be an import
-// cycle (TODO §8k, 2026-10-10).
+// In `pure/program/` since 2026-10-24, beside the mask it reads. It stood at
+// the pure layer's root until then: this file reads `constraints.ts` and
+// `entities.ts`, both of those read the timetable variants, and the variants
+// lived here. They are `pure/grid/` now, so one index no longer closes a cycle.
 
 import {
   buildIndex,
@@ -20,22 +21,28 @@ import {
   pinScopeCells,
   placedBlocks,
   placementKey,
-} from './constraints';
-import type { Index } from './constraints';
-import { lessonSubject, subjectKey, subjectLabel, subjectShort, teacherSubjects } from './entities';
-import { compareTr } from './listview';
+} from '../constraints';
+import type { Index } from '../constraints';
+import {
+  lessonSubject,
+  subjectKey,
+  subjectLabel,
+  subjectShort,
+  teacherSubjects,
+} from '../entities';
+import { compareTr } from '../listview';
 import {
   maskCount,
   solverExclusions,
   type MaskMode,
   type ProgramMask,
   type SolverExclusions,
-} from './program';
-import { activePinned, activePlacements } from './grid';
-import type { SuggestionDiff } from './relax';
-import type { SolverProgress, SolverResult } from './solver';
-import type { Vars } from '../leaf/i18n';
-import type { Id, Lesson, PoolSort, State, View } from '../leaf/types';
+} from './programMask';
+import { activePinned, activePlacements } from '../grid';
+import type { SuggestionDiff } from '../relax';
+import type { SolverProgress, SolverResult } from '../solver';
+import type { Vars } from '../../leaf/i18n';
+import type { Id, Lesson, PoolSort, State, View } from '../../leaf/types';
 
 /** The `t()` the screen hands down, so a language switch rebuilds what it reads. */
 type Translate = (key: string, vars?: Vars) => string;

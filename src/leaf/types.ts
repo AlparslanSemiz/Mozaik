@@ -308,7 +308,7 @@ export type View = 'teacher' | 'class';
  * `toolState.ts` rather than in `theme.ts`: it says what is being looked at
  * right now. No new localStorage key, and so no new row owed to the "Veriler
  * nerede" table. DEFINED here for the reason `View` is: the tray's order is
- * worked out in `pure/programView.ts`, and a pure module does not import the
+ * worked out in `pure/program/programView.ts`, and a pure module does not import the
  * plumbing layer, not even for a type.
  */
 export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';

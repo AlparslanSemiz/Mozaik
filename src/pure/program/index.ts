@@ -5,3 +5,4 @@
  * `pure/grid/`.
  */
 export * from './programMask';
+export * from './programView';
