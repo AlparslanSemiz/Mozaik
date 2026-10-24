@@ -156,7 +156,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `ui/Ribbon.tsx` | sekmeye göre araç şeridi, iş mantığı yok |
+| `ui/ribbon/index.tsx` | sekmeye göre araç şeridi |
 | `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
 | `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
 | `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
@@ -203,7 +203,7 @@ için Vite budar, `dist/index.html`'e girmez.
 ### İş mantığı bileşende durmaz
 
 Çakışma, sınır, kapasite ya da blok hesabı saf mantık katmanında yazılır.
-`Ribbon.tsx`'teki "Otomatik diz (N)"in N'i `entities.ts`'teki saf bir fonksiyondan,
+`ribbon/index.tsx`'teki "Otomatik diz (N)"in N'i `entities.ts`'teki saf bir fonksiyondan,
 Kontrol'ün sayıları `feasibility.ts`'ten gelir. Program'ın satırları, havuzu ve
 araç çubuğunun altındaki satır `programView.ts`'te hesaplanır; ne zaman
 hesaplanacakları `Program.tsx`'te kalır, çünkü `Grid`'in memo sınırı `rows`'un

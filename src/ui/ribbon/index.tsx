@@ -51,7 +51,7 @@
 
 import type React from 'react';
 import type { ReactNode } from 'react';
-import { useDialogs } from './Dialogs';
+import { useDialogs } from '../Dialogs';
 import { useMemo } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
@@ -84,9 +84,9 @@ import {
   TriangleAlert,
   Trash2,
 } from 'lucide-react';
-import { health } from '../pure/feasibility';
-import type { State } from '../leaf/types';
-import type { SolverRun } from '../platform/search';
+import { health } from '../../pure/feasibility';
+import type { State } from '../../leaf/types';
+import type { SolverRun } from '../../platform/search';
 import {
   applyDensity,
   applyTheme,
@@ -99,9 +99,9 @@ import {
   type View,
   type CheckView,
   type ProgramColorMode,
-} from '../platform/prefs';
-import { surumEtiketi } from '../leaf/version';
-import { paletteColor } from '../leaf/palette';
+} from '../../platform/prefs';
+import { surumEtiketi } from '../../leaf/version';
+import { paletteColor } from '../../leaf/palette';
 import {
   activePinned,
   activePlacements,
@@ -119,11 +119,11 @@ import {
   setRowMask,
   solverExclusions,
   type ProgramMask,
-} from '../pure/program';
-import { newId } from '../pure/entities';
-import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
-import { KIND_ICON, STEPS, classIcon, teacherIcon } from './program';
-import { useLang, useT } from './T';
+} from '../../pure/program';
+import { newId } from '../../pure/entities';
+import { pendingBlocks, pinScopeCells, togglePinScope } from '../../pure/constraints';
+import { KIND_ICON, STEPS, classIcon, teacherIcon } from '../program';
+import { useLang, useT } from '../T';
 
 interface Props {
   ui: ToolState;

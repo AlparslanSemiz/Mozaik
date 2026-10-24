@@ -1,6 +1,6 @@
 // Kurulum's three lists — ONE definition, three readers.
 //
-// The list used to be written out three times (setup/index.tsx, Ribbon.tsx and
+// The list used to be written out three times (setup/index.tsx, the ribbon and
 // setup/Progress.tsx), which was survivable while a step was a label and a
 // count. Adding a SYMBOL to each would have made it three drawings of the same
 // door, and the next person to change one would have changed one.

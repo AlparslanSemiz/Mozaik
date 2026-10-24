@@ -50,7 +50,7 @@ import Setup from './setup';
 import Lessons from './lessons';
 import Availability from './Availability';
 import { T, useLang, useT } from './T';
-import Ribbon from './Ribbon';
+import Ribbon from './ribbon';
 import { NOTHING_EXCLUDED, Print, type Excluded } from './print';
 import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions, type ProgramMask } from '../pure/program';
 import Settings from './settings';
