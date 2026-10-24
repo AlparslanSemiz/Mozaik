@@ -1,0 +1,129 @@
+# GEÇİCİ ÖLÇÜM (ogretmene-eposta, 2026-10-24): bir mailto: adresinin Windows'ta
+# ShellExecute'tan ve Chromium'dan e-posta programına ne kadarının ulaştığı, ve
+# kayıtlı bir program yokken ikisinin ne dediği. Runner atılan bir makine: sahte
+# program yalnız onun HKCU'suna kaydediliyor. Dal birleşmeden önce kalkar.
+name: mailto-olcum
+
+on:
+  push:
+    branches: [ogretmene-eposta]
+    paths: ['.github/workflows/mailto-olcum.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  olc:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+
+      - name: Betikler
+        shell: pwsh
+        run: |
+          $d = "$env:RUNNER_TEMP\olc"; New-Item -ItemType Directory -Force $d | Out-Null
+          # Sahte e-posta programı: aldığı adresi olduğu gibi bir dosyaya yazar.
+          Set-Content "$d\yakala.mjs" @'
+          import { appendFileSync } from 'node:fs';
+          appendFileSync(process.env.YAKALA_DOSYA ?? 'C:\\yakala.txt', JSON.stringify(process.argv.slice(2)) + '\n');
+          '@
+          Set-Content "$d\Kabuk.cs" @'
+          using System; using System.Runtime.InteropServices; using System.Text;
+          public static class Kabuk {
+            [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+            public static extern IntPtr ShellExecuteW(IntPtr h, string op, string file, string args, string dir, int show);
+            [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+            public static extern int AssocQueryStringW(int flags, int str, string assoc, string extra, StringBuilder outp, ref int len);
+            public static string Assoc(string scheme, int what) {
+              var sb = new StringBuilder(2048); int n = 2048;
+              int hr = AssocQueryStringW(0x1000, what, scheme, null, sb, ref n);
+              return hr == 0 ? "ok: " + sb.ToString() : "hr=0x" + hr.ToString("X8");
+            }
+          }
+          '@
+
+      - name: Kayıtlı program yokken
+        shell: pwsh
+        run: |
+          Add-Type -Path "$env:RUNNER_TEMP\olc\Kabuk.cs"
+          foreach ($k in 'HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\mailto\UserChoice','HKCU:\Software\Classes\mailto','HKLM:\Software\Classes\mailto') {
+            if (Test-Path $k) { Write-Host "VAR $k"; Get-ItemProperty $k | Format-List | Out-String | Write-Host } else { Write-Host "YOK $k" }
+          }
+          Write-Host "Assoc komut: $([Kabuk]::Assoc('mailto', 1))"
+          Write-Host "Assoc exe:   $([Kabuk]::Assoc('mailto', 2))"
+          $once = @(Get-Process | Select-Object -ExpandProperty ProcessName)
+          $r = [Kabuk]::ShellExecuteW([IntPtr]::Zero, 'open', 'mailto:a@ornek.com?subject=deneme', $null, $null, 1)
+          Write-Host "ShellExecuteW dönüşü: $r"
+          Start-Sleep -Seconds 5
+          $yeni = @(Get-Process | Where-Object { $once -notcontains $_.ProcessName } | Select-Object -ExpandProperty ProcessName)
+          Write-Host "Yeni süreçler: $($yeni -join ', ')"
+          Get-Process OpenWith, ApplicationFrameHost, SystemSettings -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  açık pencere: $($_.ProcessName) '$($_.MainWindowTitle)'"; Stop-Process -Id $_.Id -Force }
+
+      - name: Sahte programı kaydet
+        shell: pwsh
+        run: |
+          $node = (Get-Command node).Source
+          $k = 'HKCU:\Software\Classes\mailto'
+          New-Item -Force $k | Out-Null
+          Set-ItemProperty $k '(default)' 'URL:MailTo Protocol'
+          Set-ItemProperty $k 'URL Protocol' ''
+          New-Item -Force "$k\shell\open\command" | Out-Null
+          Set-ItemProperty "$k\shell\open\command" '(default)' "`"$node`" `"$env:RUNNER_TEMP\olc\yakala.mjs`" `"%1`""
+          Add-Type -Path "$env:RUNNER_TEMP\olc\Kabuk.cs"
+          Write-Host "Assoc komut: $([Kabuk]::Assoc('mailto', 1))"
+
+      - name: ShellExecuteW, uzunluk
+        shell: pwsh
+        run: |
+          Add-Type -Path "$env:RUNNER_TEMP\olc\Kabuk.cs"
+          $env:YAKALA_DOSYA = "$env:RUNNER_TEMP\olc\se.txt"
+          foreach ($n in 500, 1000, 2000, 2047, 2048, 2049, 2083, 2084, 2100, 4000, 8000, 8192, 16000, 32000, 40000) {
+            Remove-Item $env:YAKALA_DOSYA -ErrorAction SilentlyContinue
+            $on = 'mailto:a@ornek.com?subject=S&body='
+            # Türkçe harfler kodlanmış hâlde, satır sonu %0D%0A: gerçek gövdenin karışımı.
+            $parca = 'Pazartesi%0D%0A%20%201.%20ders%2008%3A30%20%20510A%20Mat%20%C4%9F%C3%BC%C5%9F%C4%B1%0D%0A'
+            $u = $on; while ($u.Length -lt $n) { $u += $parca }; $u = $u.Substring(0, $n)
+            $r = [Kabuk]::ShellExecuteW([IntPtr]::Zero, 'open', $u, $null, $null, 1)
+            $gelen = $null
+            for ($i = 0; $i -lt 40 -and -not $gelen; $i++) { Start-Sleep -Milliseconds 250; if (Test-Path $env:YAKALA_DOSYA) { $gelen = Get-Content $env:YAKALA_DOSYA -Raw } }
+            if ($gelen) { $a = ($gelen | ConvertFrom-Json)[0]; Write-Host "SE gönderilen $n dönüş $r -> gelen $($a.Length) aynı mı $($a -eq $u)" }
+            else { Write-Host "SE gönderilen $n dönüş $r -> GELMEDİ" }
+          }
+
+      - name: Chromium ve Edge, bağlantı tıklaması
+        shell: pwsh
+        run: |
+          $env:YAKALA_DOSYA = "$env:RUNNER_TEMP\olc\br.txt"
+          Set-Content "$env:RUNNER_TEMP\olc\tarayici.mjs" @'
+          import { chromium } from 'playwright';
+          import { existsSync, readFileSync, rmSync } from 'node:fs';
+          const dosya = process.env.YAKALA_DOSYA;
+          const parca = 'Pazartesi%0D%0A%20%201.%20ders%2008%3A30%20%20510A%20Mat%20%C4%9F%C3%BC%C5%9F%C4%B1%0D%0A';
+          for (const channel of [undefined, 'msedge']) {
+            const ad = channel ?? 'chromium';
+            let tarayici;
+            try { tarayici = await chromium.launch({ headless: false, channel }); }
+            catch (e) { console.log(ad, 'açılmadı', String(e).slice(0, 200)); continue; }
+            const sayfa = await tarayici.newPage();
+            await sayfa.goto('data:text/html,<a id=a>x</a>');
+            for (const n of [500, 1000, 2000, 2047, 2048, 2049, 2083, 2100, 4000, 8000, 32000]) {
+              rmSync(dosya, { force: true });
+              let u = 'mailto:a@ornek.com?subject=S&body='; while (u.length < n) u += parca; u = u.slice(0, n);
+              await sayfa.evaluate((h) => { document.getElementById('a').href = h; }, u);
+              await sayfa.click('#a');
+              let gelen = null;
+              for (let i = 0; i < 24 && gelen === null; i++) { await new Promise((r) => setTimeout(r, 250)); if (existsSync(dosya)) gelen = JSON.parse(readFileSync(dosya, 'utf8').split('\n')[0])[0]; }
+              console.log(ad, 'gönderilen', n, '->', gelen === null ? 'GELMEDİ' : `gelen ${gelen.length} aynı mı ${gelen === u}`);
+            }
+            await tarayici.close();
+          }
+          '@
+          Copy-Item "$env:RUNNER_TEMP\olc\tarayici.mjs" "$env:GITHUB_WORKSPACE\olc-tarayici.mjs"
+          node "$env:GITHUB_WORKSPACE\olc-tarayici.mjs"
