@@ -19,7 +19,7 @@ import {
 import { activePlacements } from '../grid';
 import { parseKey, placementKey } from '../../leaf/keys';
 import { blockPlan } from '../../leaf/blocks';
-import { dayLabel } from '../../leaf/names';
+import { dayLabel } from '../../leaf/lang';
 import type { State, Id } from '../../leaf/types';
 
 /** Above this ratio of load the "this will be hard" warning is raised. */

@@ -56,7 +56,7 @@ import {
   dayLabel,
   shortDay,
   subjectLabel,
-} from '../../leaf/names';
+} from '../../leaf/lang';
 import { SCHEMA_VERSION } from '../../leaf/types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1

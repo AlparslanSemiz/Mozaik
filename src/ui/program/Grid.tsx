@@ -9,7 +9,7 @@ import * as ContextMenu from '@radix-ui/react-context-menu';
 import { Pin } from 'lucide-react';
 import { useInspect } from './Inspector';
 import type React from 'react';
-import { dayLabel } from '../../leaf/names';
+import { dayLabel } from '../../leaf/lang';
 import { dayPeriods } from '../../pure/entities';
 import { attachGridChrome, attachGridFit } from '../../platform/dom';
 import { paletteColor } from '../../leaf/palette';

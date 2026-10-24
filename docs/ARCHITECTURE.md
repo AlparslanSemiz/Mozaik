@@ -8,7 +8,7 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 
 ```
 src/leaf/          types · keys · palette · i18n/* · lang/* · preference · preferenceKeys
-                   names · subjects · blocks · version · dateStamp · storage
+                   subjects · blocks · version · dateStamp · storage
    |
 src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
                    grid/* · program/* · paper/* · io/* · listview/* · undo/*
@@ -67,7 +67,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `leaf/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
 | `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
 | `leaf/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
-| `leaf/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
+| `leaf/lang/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
 | `leaf/subjects.ts` | bir şeyin hangi branştan olduğu |
 | `leaf/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
 | `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |

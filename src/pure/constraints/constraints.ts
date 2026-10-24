@@ -9,7 +9,7 @@ import { cellKey, closedKey, parseKey, placementKey } from '../../leaf/keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
-import { dayLabel, subjectLabel } from '../../leaf/names';
+import { dayLabel, subjectLabel } from '../../leaf/lang';
 import { activePinned, activePlacements, blankProgram, replaceActiveGrid } from '../grid';
 import { hasTwoSubjects } from '../../leaf/subjects';
 import {

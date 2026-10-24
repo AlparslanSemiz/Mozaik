@@ -15,7 +15,7 @@
 // there is no runtime import cycle.
 
 import { t } from '../../leaf/i18n';
-import { dayLabel, subjectLabel } from '../../leaf/names';
+import { dayLabel, subjectLabel } from '../../leaf/lang';
 import { lessonSubject } from '../../leaf/subjects';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from '../../leaf/keys';

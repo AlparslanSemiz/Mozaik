@@ -53,7 +53,7 @@ import type { Lit } from './sat';
 import { blockPlan } from '../../leaf/blocks';
 import { t } from '../../leaf/i18n';
 import { closedKey, parseKey, placementKey } from '../../leaf/keys';
-import { dayLabel } from '../../leaf/names';
+import { dayLabel } from '../../leaf/lang';
 import { lessonSubject, subjectKey, teacherSubjects } from '../../leaf/subjects';
 import type { Answers, Id, Lesson, Refusal, Relaxation, State } from '../../leaf/types';
 

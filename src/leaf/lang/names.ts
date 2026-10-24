@@ -16,9 +16,9 @@
  * program itself wrote are translated, and anything the reader typed is handed
  * back untouched — translating that would be a guess about somebody else's word.
  */
-import { aktifDil, t } from './i18n';
-import { KISALTMALAR } from './lang';
-import { subjectKey } from './subjects';
+import { aktifDil, t } from '../i18n';
+import { KISALTMALAR } from './kisaltmalar';
+import { subjectKey } from '../subjects';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */
 export const WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
