@@ -323,3 +323,68 @@ describe('oturum yedekleri (madde 7)', () => {
     ]);
   });
 });
+
+// TB1's opening half, on A1's design (the user's decision, 2026-10-24): the
+// plan open at startup cannot be read, another one can. The other one opens
+// instead of an empty stand-in, the unreadable one stays frozen byte for byte
+// in its key and in the directory, and one line names it for the session.
+describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
+  function brokenFirst(broken: string) {
+    twoPlans(FULL);
+    localStorage.setItem(BASE_KEY, broken);
+  }
+
+  for (const [ad, broken] of [
+    ['yarıda kesilmiş', CUT],
+    ['parseState’i attıran', THROWS],
+    ['daha yeni şemalı', NEWER],
+  ] as const) {
+    it(`açık plan ${ad} ise okunabilen ilk plan açılıyor, okunamayan bayt bayt yerinde`, async () => {
+      brokenFirst(broken);
+      const { get, act, settle } = await mount();
+      expect(get().plans.planId).toBe('zz');
+      expect(get().state.teachers.length).toBe(JSON.parse(FULL).teachers.length);
+      expect(get().unreadable).toBeNull();
+      expect(get().setAside).toEqual(['1. plan']);
+      const lib = JSON.parse(localStorage.getItem(LIBRARY_KEY)!);
+      expect(lib.activeId).toBe('zz');
+      expect(lib.plans.map((p: { id: string }) => p.id)).toEqual(['1', 'zz']);
+      act(() => get().change((d) => ({ ...d, settings: { ...d.settings, schoolName: 'Yeni' } })));
+      settle();
+      expect(JSON.parse(localStorage.getItem(planKey('zz'))!).settings.schoolName).toBe('Yeni');
+      expect(localStorage.getItem(BASE_KEY)).toBe(broken);
+    });
+  }
+
+  it('açılan plan yedek zincirine giriyor, okunamayanın metni değil', async () => {
+    brokenFirst(CUT);
+    await mount();
+    expect(localStorage.getItem(backupKey(0))).toBe(FULL);
+  });
+
+  it('okunabilen plan yoksa boş yerine-geçen açılıyor, şerit söylüyor, kenara konan yok', async () => {
+    twoPlans(CUT);
+    localStorage.setItem(BASE_KEY, NEWER);
+    const { get, settle } = await mount();
+    settle();
+    expect(get().plans.planId).toBe('1');
+    expect(get().unreadable).toBe('yeni');
+    expect(get().setAside).toEqual([]);
+    expect(localStorage.getItem(BASE_KEY)).toBe(NEWER);
+    expect(localStorage.getItem(planKey('zz'))).toBe(CUT);
+  });
+
+  // The review finding of tb1-acilis: a backup or a plan whose body makes
+  // parseState throw took Ayarlar → Planlar ve yedek down with it. Those two
+  // reads are what the screen makes (Data.tsx, Plans.tsx).
+  it('parseState’i attıran yedek ve plan Planlar ve yedek’in iki okumasını düşürmüyor', async () => {
+    twoPlans(THROWS);
+    localStorage.setItem(backupKey(0), THROWS);
+    const { listBackups, loadPlan } = await import('./planStore');
+    expect(() => listBackups()).not.toThrow();
+    expect(listBackups()[0]).toEqual({ index: 0, problem: 'okunamadi' });
+    expect(() => loadPlan('zz')).not.toThrow();
+    expect(loadPlan('zz')).toBeNull();
+    expect(localStorage.getItem(planKey('zz'))).toBe(THROWS);
+  });
+});
