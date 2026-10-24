@@ -80,8 +80,8 @@
    renk.spec.ts:
      paper luminance      1.000 light / 0.017 dark   (contract: >0.9 / <0.1)
      text on paper        17.47  / 13.26
-     muted on paper        7.28  /  7.28
-     muted on closed       5.09  /  4.69
+     muted on paper        8.53  /  7.28
+     muted on closed       5.97  /  4.69
      accent on accent-bg   6.59  /  6.47
      on-accent on accent   7.70  /  9.48
      section min AA        5.63  /  4.89
@@ -105,10 +105,14 @@
      instead of 78 columns. Far below the 14 that separates two functional
      colours, or it would read as a state (pitfall 40). */
   --band:        #f8fafd;
-  /* Every second row of a list (table.list, table.stat): the reader asked for
-     rows one after another on slightly different grounds, the same in every
-     list. Light borrows the input recess rather than adding a twelfth grey. */
-  --zebra:       var(--paper-sunk);
+  /* Every second row of a list: the reader asked for rows one after another
+     on slightly different grounds, the same in every list. The same value as
+     --chrome-2, written out rather than borrowed so the two cannot drift into
+     each other: one is a plane of the shell, the other a row of data. Measured
+     against --paper: ΔL* -5.34, ΔE 6.31, ratio 1.14, i.e. seen at once and
+     still far below anything that reads as a state. The dark twin moves the
+     same ΔL* the other way (+5.43). */
+  --zebra:       #ecf0f6;
 
   /* Three rules, three jobs: --hairline shell, --line control edge and table
      head, --line-dark the loudest there is (day separator, row head). */
@@ -120,7 +124,11 @@
   --day-edge:    #5b6572;
 
   --text:        #131a25;
-  --muted:       #505763;
+  /* One step darker than the ramp's first pick (#505763) since the zebra:
+     on --zebra that one measured 6.65 and the rows a low-vision reader scans
+     hold their numbers and hints in this ink. Now 8.53 on --paper, 7.46 on
+     --zebra, and still well behind --text (17.47), so it stays secondary. */
+  --muted:       #464d58;
 
   /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
      ink blue on the grounds that 36 identity colours plus three functional
@@ -534,8 +542,9 @@
   --paper-sunk: #0b0e12;
   --band: #1a1e23;
   /* Not --paper-sunk: in this theme the recess is darker than the paper.
-     The zebra row is one step LIGHTER than it instead. */
-  --zebra: #1d2127;
+     The zebra row is one step LIGHTER than it instead, by the light theme's
+     ΔL* (+5.43 against -5.34): the same load in both. --muted on it 7.28. */
+  --zebra: #20242b;
 
   --hairline: #242930;
   --line: #39404a;
@@ -4044,9 +4053,9 @@ table.stat tbody tr:hover {
   background: var(--bg);
 }
 
-/* A field in a list row gives up its recess. In the light theme --zebra IS
-   --paper-sunk, so on every second row a sunk box would vanish into the row
-   it sits in. It goes to paper, and with the recess gone its edge is its only
+/* A field in a list row gives up its recess. In the light theme --zebra is a
+   hair from --paper-sunk (ΔE 1.7), so on every second row a sunk box would
+   vanish into the row it sits in. It goes to paper, and with the recess gone its edge is its only
    boundary, which is the button's case: --line, not --hairline. The split
    picker is a bare <button> and was on the browser's own grey (4.53 for its
    text in the dark theme); in a list it is a field like its neighbours. */

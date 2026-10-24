@@ -814,13 +814,17 @@ test.describe('93. Listelerde zebra', () => {
         '--line',
       ]);
 
-      // The token itself. Light borrows the input recess; dark has a ground of
-      // its own, one step LIGHTER than the paper (the dark recess is darker).
-      if (theme === 'light') expect(t['--zebra']).toBe(t['--paper-sunk']);
-      else expect(t['--zebra']).toBe('rgb(29, 33, 39)');
-      expect(t['--zebra']).not.toBe(t['--paper']);
+      // The token itself: darker than the paper in light, LIGHTER in dark (the
+      // dark recess is darker than its paper), by the same load in both.
+      expect(t['--zebra']).toBe(theme === 'light' ? 'rgb(236, 240, 246)' : 'rgb(32, 36, 43)');
+      // Seen at once (ΔE 6.31 / 5.58), and never as loud as a state.
+      expect(deltaE(t['--zebra']!, t['--paper']!), 'zebra ile kâğıt ΔE').toBeGreaterThanOrEqual(5);
+      expect(contrast(t['--zebra']!, t['--paper']!), 'zebra ile kâğıt oranı').toBeLessThan(1.2);
+      // A list row's ink holds 7:1 on both stripes (DESIGN, Erişilebilirlik).
       for (const ink of ['--text', '--muted'] as const) {
-        expect(contrast(t[ink]!, t['--zebra']!), `${ink} on --zebra`).toBeGreaterThanOrEqual(4.5);
+        for (const ground of ['--zebra', '--paper'] as const) {
+          expect(contrast(t[ink]!, t[ground]!), `${ink} on ${ground}`).toBeGreaterThanOrEqual(7);
+        }
       }
 
       // table.list: the first row keeps the panel's paper, the second is zebra.
