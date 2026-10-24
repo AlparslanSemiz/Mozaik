@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 gece (`ogretmene-eposta`; zincirin ucu artık `rk2-bozuk-iliski`).
+Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -182,7 +182,7 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 185 367 bayt, brotli yaklaşık 285,1 kB (2026-10-24 gece, `ogretmene-eposta`); eşikler 1 196 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 188 680 bayt (2026-10-24 gece, zincirin ucu `rk2-bozuk-iliski`; `ogretmene-eposta`'da 1 185 367, brotli yaklaşık 285,1 kB); eşikler 1 196 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Güncelleme kapısı | 1 geçti, iki koşuda; eski sürümün evresi yaklaşık 20 s (2026-10-24, `ogretmene-eposta`) | `guncelleme-windows.yml` 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
@@ -194,6 +194,33 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 
 
+
+---
+
+## 2026-10-24 gece · RK2: sabitlenmiş iki ders bozuk bir ilişkide (`rk2-bozuk-iliski`)
+
+`ogretmene-eposta`'nın ucundan. **Neden bu iş.** ROADMAP'te sıradaki sürüm v2, tek açık işi B5.3; onun
+sıradaki ilişki türü R6'nın Roboders verisine bağlanmış (TODO §8b, 2026-10-09). Kanıta bağlı olmayan
+ve dalı olmayan B5.3 işi ilk dilimin kusuru RK2, çaresine karar verilmişti (analiz
+`scratch/siradaki/analiz.md`, `ogretmene-eposta` worktree'sinde).
+
+**Çare.** `pinnedRelationBreaches` (`rules.ts`): aynı güne sabitlenmiş ilişkili iki ders. O durumda
+aramanın her haftası sabitleri tuttuğu ve doğrulama ihlali reddettiği için arama yalnız boş dönebilir;
+`useSolver` aramayı başlatmıyor, panel sebebi gövde yazı boyunda tek cümleyle söylüyor, Kontrol'ün kural
+ihlalleri panelinde bir cümle. Yalnız yerleşmiş iki ders için arama sürüyor (baştan dizen yol taşıyor).
+
+**Tıklama testi** (`scratch/rk2/`, rk2 worktree'sinde; örnek okul, ilişki, iki sabit ve bir öğretmenin
+kapalı günleri deponun kendisine yazılıp sayfa yenilendi). Otomatik diz → panel 1,5 s'de "310 · MÇ
+Matematik ile 311 · YM Biyoloji Salı günü sabitlenmiş…", 15 px; Kontrol'de cümle; komşu akış: bir sabit
+kalkınca Kontrol cümlesi gidiyor ve arama başlıyor. Konsol hatası yok.
+
+**İnceleme** (taze bağlamlı alt ajan): hata yok; "arama yalnız boş dönebilir" iddiası kodda doğrulandı.
+Düzelen: plan değişince panelin bayat cümlesi, Kontrol'de düğmenin adı, atlamanın gerekçesini ölçen test
+(sabitsiz yol var, sabitliyken yok). Bırakılan: gizli satır ve günde aynı belirti (TODO RK2b), panelin
+yalnız ilk ihlali söylemesi (Kontrol hepsini listeliyor), noktalı virgül.
+
+**Koşulan.** `hizli` (1462 geçti, 1 atlandı), `relations`, `useSolver`, `i18n`, `docs`, `tsc`, `eslint`,
+`prettier`, `boyut`, tıklama testi üç kez. **Koşulmayan.** E2E yerelde (CI'da).
 
 ---
 
