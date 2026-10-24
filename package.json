@@ -36,7 +36,8 @@
     "exe:test": "cargo test --manifest-path src-tauri/Cargo.toml",
     "exe:linux": "npm run exe && node scripts/exe-linux.mjs",
     "exe:e2e": "npm run exe:linux && playwright test --config playwright.gercek-exe.config.ts",
-    "yayinla": "node scripts/yayinla.mjs"
+    "yayinla": "node scripts/yayinla.mjs",
+    "dal-temizle": "node scripts/dal-temizle.mjs"
   },
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.3.7",
