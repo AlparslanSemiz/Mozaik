@@ -35,6 +35,53 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-23 · Süreç sadeleşti: beş durma sebebi, riske göre test, yapısal belge kapısı
+
+**Ne.** Kullanıcının kararı (dal `surec-sadelestirme`): CLAUDE.md fazla kurallıydı ve test
+her işi yavaşlatıyordu, özellik işi hızlanmalı. Kesilenler:
+- CLAUDE.md 147 satırdan 80'e indi. Ayrıntısı BUILD ve TESTPLAN'da olan her kural oradan
+  bağlantıyla anılıyor, eski kurallar tarihçe olarak tutulmadı.
+- Durma sebepleri beşe indi: veri kaybı riski, Roboders'e ya da gerçek veriye yazmak, etiket
+  ya da sürüm, geri alınamaz dış bir eylem, kullanıcının parası ya da hesapları. Kapsam dışı
+  bir değişiklik, planı çürüten bir ölçüm, dışarıdan gelen bir CI kırmızısı ve `dist`'e
+  giren yeni bir paket artık öncelik sırasıyla verilen bir karar, raporda "Aldığım
+  kararlar" altında. Yeni paketin WORKLOG notu (neden, alternatifler, boyut, `file://`
+  açılış süresi) kaldı.
+- Test riske göre (TESTPLAN, "Test politikası"). Arayüzün düzeni ve metni için yeni test
+  yazılmıyor, 1920×1080'de bir ekran görüntüsü yetiyor. Değişiklik başına mutasyon kanıtı
+  kalktı, mutasyon yalnız haftalık (betik duruyor). "BİLİNEN KUSUR" ile ayrı düzeltme dalı
+  kuralı kalktı: bulunan hata aynı dalda, kendi commit'inde, gerileme testiyle düzeltiliyor,
+  refactor dalı onu §8k'ye yazıyor.
+- Belge kapısı (`src/docs.test.ts`) yalnız yapıyı ölçüyor: bağlantı ve çapa, yol, tuzak
+  numarası, yapılandırma yolu, oturumun okuduğu bölümler. Cümle içeriğini sabitleyen
+  kapılar (dosya haritası, katman şeması, tarihsiz sayı, `schemaVersion` ile sürüm tablosu,
+  anahtar tablosu, tuzak dizini, sıradaki tuzak numarası, TESTPLAN'ın mutasyon cümlesi)
+  çıktı.
+- Oturum sonunda şart olan yalnız TODO ile WORKLOG'un "Şu an"ı ve tarihli girdisi.
+  CHANGELOG kullanıcıya görünen bir değişiklikte, TRAPS, DECISIONS ve TESTFINDINGS gerçek
+  bir içerik çıkınca.
+- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Refactor
+  turları da: süren tur yoktu (`refactor/program` `main`'de), yeni tur açılmıyor ve sürekli
+  `Mozaik-refactor` worktree'si kuralı CLAUDE.md'den çıktı.
+- CI: ölçüm, `ci.yml`'in mutasyon, kapsam ya da yavaş süit beklemediğini gösterdi. Kritik yol
+  `playwright install --with-deps`'in apt yarısıydı (main'in koşusunda tek işte 597 sn), o
+  yüzden `ci.yml`'de `--with-deps` kalktı. `kanarya.yml` onu tutuyor.
+
+**Babayı koruyan ve kalan.** Veri kaybı riski her zaman durdurur. Şema, göç, `sanitize`,
+yedeğin açılması, dizme ve güncelleme yolu teste bağlı, şema değişince hem birim hem E2E.
+Etiketi yalnız `npm run yayinla` atıyor ve `ci.yml` ile `windows.yml`'i bekliyor, etiketten
+önce Windows'ta gerçek güncelleme testi yeşil olmalı. Var olan E2E ve birim süitleri her push'ta
+CI'da koşuyor, site yalnız yeşil bir `main` push'unda yayınlanıyor, birleştirme Alp'in.
+
+**Eski hâli.** Yedi durma sebebi, test programının kuralları (2026-10-09), değişiklik başına
+mutasyon kanıtı, belge kapısında cümle içeriğini sabitleyen on bir test, oturum sonunda yedi zorunlu belge,
+sürekli iki worktree (2026-10-23, aşağıda).
+
+**Gerekçe.** Sürecin maliyeti özellik işinin önüne geçti: bir arayüz değişikliği E2E, mutasyon
+kanıtı ve dört belge güncellemesi istiyordu, bir belge cümlesi değişikliği bir test
+değişikliği oluyordu. Babayı koruyan şey verisinin ve programının güncellemesinin bozulmaması,
+o yollar teste bağlı kaldı. Gerisi CI'a ve haftalık koşuya bırakıldı.
+
 ### 2026-10-23 · İşaret takvim sayfası oldu, küçük boylar sade çizimden
 
 **Kural.** `kurulum/icon.ico` 16, 20 ve 24 px'te sade, 32 px ve üstünde ayrıntılı
