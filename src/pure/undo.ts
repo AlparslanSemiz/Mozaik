@@ -2,7 +2,7 @@
 //
 // Pure, and split out of `store.ts` for that reason — it takes a value and
 // returns a value, so it can be reasoned about and tested without a browser,
-// a document or React. The hook that drives it lives in `platform/useStore.ts`
+// a document or React. The hook that drives it lives in `platform/storage/useStore.ts`
 // and is the only caller.
 //
 // The word "box" rather than "state": what moves through here is the present

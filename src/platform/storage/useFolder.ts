@@ -9,10 +9,10 @@
 // kaydet" produces. Not the open plan: a folder that holds one of three plans
 // is a backup that is wrong in the way nobody checks.
 
-import { t } from '../leaf/i18n';
+import { t } from '../../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { buildBundle } from '../pure/bundle';
-import { isDesktop, openDesktopFolder } from './desktop';
+import { buildBundle } from '../../pure/bundle';
+import { isDesktop, openDesktopFolder } from '../desktop';
 import {
   askPermission,
   dailyName,
@@ -27,10 +27,10 @@ import {
 } from './folder';
 import { writesClosed } from './otherWindow';
 import { mayWritePlan } from './libraryStore';
-import type { Library } from '../pure/library';
+import type { Library } from '../../pure/library';
 import { collectStates } from './download';
-import { searchLog } from './search';
-import type { Id, State } from '../leaf/types';
+import { searchLog } from '../search';
+import type { Id, State } from '../../leaf/types';
 
 /**
  * Two seconds, not the store's 400 ms.

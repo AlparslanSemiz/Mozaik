@@ -147,10 +147,10 @@ export default defineConfig([
   {
     files: [
       'src/leaf/preference.ts',
-      'src/platform/folder.ts',
-      'src/platform/libraryStore.ts',
-      'src/platform/planStore.ts',
-      'src/platform/storageReport.ts',
+      'src/platform/storage/folder.ts',
+      'src/platform/storage/libraryStore.ts',
+      'src/platform/storage/planStore.ts',
+      'src/platform/storage/storageReport.ts',
       'src/**/*.test.{ts,tsx}',
     ],
     rules: { 'no-restricted-globals': 'off' },

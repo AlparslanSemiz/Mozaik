@@ -18,19 +18,20 @@ import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
 import { emptyState } from '../../pure/entities';
-import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
 import {
+  KEEP_DAILY,
+  MAIN_NAME,
   routeName,
   storageAddress,
   storageKind,
   storageReport,
-} from '../../platform/storageReport';
-import { downloadBundle } from '../../platform/download';
-import { listBackups } from '../../platform/planStore';
+  downloadBundle,
+  listBackups,
+  type FolderRun,
+} from '../../platform/storage';
 import type { State } from '../../leaf/types';
 import { activePlacements } from '../../pure/program';
 import type { PlanControls } from '../props';
-import type { FolderRun } from '../../platform/useFolder';
 import type { UpdateRun } from '../../platform/update';
 import { SITE_ADRESI } from '../../platform/update';
 import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/desktop';

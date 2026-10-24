@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // The mark lives in the module, so every test gets a fresh one.
 async function taze() {
   vi.resetModules();
-  return await import('./platform/libraryStore');
+  return await import('./platform/storage/libraryStore');
 }
 
 beforeEach(() => localStorage.clear());

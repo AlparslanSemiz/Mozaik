@@ -14,10 +14,8 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
                    relax · sat · program/* · programView · paper/* · listview · library · bundle
                    sample · parseState · undo
    |
-src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
-                   desktop · update · download
+src/platform/      storage/* · prefs/* · search/* · changelog · desktop · update
                    drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useStore · usePlans · useFolder · search/* · otherWindow
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -29,7 +27,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `platform/prefs/`,
-`platform/search/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -110,20 +108,21 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
-| `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
-| `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
-| `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
-| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
-| `platform/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
-| `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
+| `platform/storage/index.ts` | depolama paketinin giriş noktası: kutuyu süren kanca, plan deposunun okunan yarısı, diske inen dosyalar, klasör ve "Veriler nerede"; ham localStorage tarafı (`libraryStore`), öteki pencerenin bekçisi (`otherWindow`) ve plan işlemleri (`usePlans`) paketin içinde kalır |
+| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
+| `platform/storage/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
+| `platform/storage/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
+| `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
+| `platform/storage/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
+| `platform/storage/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
+| `platform/storage/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
 | `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
 | `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `platform/prefs/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
-| `platform/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
+| `platform/storage/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
 | `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
 | `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
@@ -148,7 +147,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/search/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
 | `platform/search/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
 | `platform/search/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
-| `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
+| `platform/storage/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
 | `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
 | `ui/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |

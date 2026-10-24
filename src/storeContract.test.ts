@@ -22,9 +22,9 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
 
-import { isTextInput, useStore } from './platform/useStore';
-import { collectStates, downloadBackup, downloadBundle } from './platform/download';
-import { listBackups, loadPlan, savePlan, storageWorks } from './platform/planStore';
+import { isTextInput, useStore } from './platform/storage/useStore';
+import { collectStates, downloadBackup, downloadBundle } from './platform/storage/download';
+import { listBackups, loadPlan, savePlan, storageWorks } from './platform/storage/planStore';
 import { parseState } from './pure/parseState';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';

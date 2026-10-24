@@ -11,11 +11,11 @@
 // here: the per-plan key that is written on every change, and the chain of
 // session backups. The third is the file the user downloads (`download.ts`).
 
-import { parseState } from '../pure/parseState';
-import { BACKUP_COUNT, backupKey, BASE_KEY } from '../pure/library';
+import { parseState } from '../../pure/parseState';
+import { BACKUP_COUNT, backupKey, BASE_KEY } from '../../pure/library';
 import { readPlanText, readPlanTextAtStart, writePlanText } from './libraryStore';
-import { safely } from '../leaf/storage';
-import type { Id, State } from '../leaf/types';
+import { safely } from '../../leaf/storage';
+import type { Id, State } from '../../leaf/types';
 
 // The storage key lives in library.ts now: it is the key of plan "1", and which
 // key belongs to which plan is that module's job. It is still USER DATA and

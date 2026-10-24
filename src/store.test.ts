@@ -889,8 +889,8 @@ describe('parseState — v10 → v11 göçü', () => {
 // plan's move into another plan's file — can be pinned without mounting React.
 
 import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/library';
-import { collectStates } from './platform/download';
-import { loadPlan, savePlan } from './platform/planStore';
+import { collectStates } from './platform/storage/download';
+import { loadPlan, savePlan } from './platform/storage/planStore';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
 import type { State } from './leaf/types';

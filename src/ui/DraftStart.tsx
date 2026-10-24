@@ -12,7 +12,7 @@
 
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
-import { loadPlan } from '../platform/planStore';
+import { loadPlan } from '../platform/storage';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/program';
 import type { PlanControls } from './props';
 

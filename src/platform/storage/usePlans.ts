@@ -28,8 +28,8 @@
 
 import { useCallback, useState } from 'react';
 
-import type { Bundle } from '../pure/bundle';
-import { parseState } from '../pure/parseState';
+import type { Bundle } from '../../pure/bundle';
+import { parseState } from '../../pure/parseState';
 import {
   addPlan,
   findPlan,
@@ -39,12 +39,12 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from '../pure/library';
-import { sanitize } from '../pure/constraints';
-import { emptyState, newId } from '../pure/entities';
+} from '../../pure/library';
+import { sanitize } from '../../pure/constraints';
+import { emptyState, newId } from '../../pure/entities';
 import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
 import { loadPlan, savePlan } from './planStore';
-import type { Id, State } from '../leaf/types';
+import type { Id, State } from '../../leaf/types';
 
 /** What the plan controls need from whoever owns the box and the autosave. */
 export interface PlanSeam {

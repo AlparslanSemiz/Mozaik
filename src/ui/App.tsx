@@ -9,9 +9,13 @@ import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
-import { useStore, isTextInput } from '../platform/useStore';
-import { downloadBackup } from '../platform/download';
-import { storageWorks } from '../platform/planStore';
+import {
+  useStore,
+  isTextInput,
+  downloadBackup,
+  storageWorks,
+  useFolder,
+} from '../platform/storage';
 import { readPlanFile } from '../pure/parseState';
 import { planSummary } from '../pure/entities';
 import {
@@ -42,7 +46,6 @@ import {
 import { attachScrollFade } from '../platform/scrollFade';
 import { attachRibbonScroll } from '../platform/ribbonScroll';
 import { useSolver } from '../platform/search';
-import { useFolder } from '../platform/useFolder';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';
 import Setup from './setup';

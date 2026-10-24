@@ -12,11 +12,11 @@
 // `collectStates`, and it is here rather than one layer down because it reads
 // the plans that are not on screen out of storage.
 
-import { buildBundle } from '../pure/bundle';
-import { backupFileName, bundleFileName, type Library } from '../pure/library';
+import { buildBundle } from '../../pure/bundle';
+import { backupFileName, bundleFileName, type Library } from '../../pure/library';
 import { loadPlan } from './planStore';
-import { searchLog } from './search';
-import type { Id, State } from '../leaf/types';
+import { searchLog } from '../search';
+import type { Id, State } from '../../leaf/types';
 
 /** Hands the browser a file to save. Both file kinds go through here. */
 function download(name: string, text: string): void {

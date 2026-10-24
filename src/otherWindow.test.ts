@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { watchOtherWindows, writesClosed } from './platform/otherWindow';
-import { dropPlanText, writeLibrary, writePlanText } from './platform/libraryStore';
+import { watchOtherWindows, writesClosed } from './platform/storage/otherWindow';
+import { dropPlanText, writeLibrary, writePlanText } from './platform/storage/libraryStore';
 import { LIBRARY_KEY, defaultLibrary } from './pure/library';
 
 function baskaPencere(key: string | null, newValue: string | null = 'yeni') {
@@ -59,7 +59,7 @@ describe('başka pencere · temizlik', () => {
     // A fresh module: the gate above is closed for the rest of that file.
     const { vi } = await import('vitest');
     vi.resetModules();
-    const taze = await import('./platform/otherWindow');
+    const taze = await import('./platform/storage/otherWindow');
     let haber = 0;
     const birak = taze.watchOtherWindows(
       () => undefined,

@@ -1440,7 +1440,7 @@ slot".
   işaretlenince dersler dönmüyor, havuzda 57 blok bekliyor. Üst çubuktaki Geri al
   düğmesi hepsini geri getiriyor. Günlük ders sayısını 12'den 10'a indirmek aynısını
   yapıyor: 33 saat, 6'sı sabitli. Ctrl+Z'nin çalışmama sebebi kaynakta görülüyor:
-  `isTextInput()` (`src/platform/useStore.ts`) etiketi INPUT olan her şeyi, onay kutusu
+  `isTextInput()` (`src/platform/storage/useStore.ts`) etiketi INPUT olan her şeyi, onay kutusu
   ve sayı kutusu dahil, yazı kutusu sayıyor ve odak değiştirilen kutuda kalıyor. DATA.md
   "Sabitlenmiş bir blok yalnız sabitleme kaldırılınca iner … Bilinen tek istisna, bir
   dersi başka bir öğretmene ya da sınıfa aktarmak" diyor, bu iki yol o listede yok.

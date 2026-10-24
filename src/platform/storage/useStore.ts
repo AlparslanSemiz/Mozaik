@@ -17,15 +17,15 @@
 // indir" — the ONE habit my father will be taught — is `download.ts`.
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { type Box, reduce } from '../pure/undo';
+import { type Box, reduce } from '../../pure/undo';
 import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
-import { emptyState } from '../pure/entities';
-import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
-import { parseState } from '../pure/parseState';
+import { emptyState } from '../../pure/entities';
+import { LIBRARY_KEY, parseLibrary, planKey } from '../../pure/library';
+import { parseState } from '../../pure/parseState';
 import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
-import type { Id, State } from '../leaf/types';
+import type { Id, State } from '../../leaf/types';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
 
