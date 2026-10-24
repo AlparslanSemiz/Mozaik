@@ -171,6 +171,48 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
+
+---
+
+## 2026-10-24 · TB7'nin exe yarısı (`tb7-sekme-kapanis`)
+
+**Önce kırmızı, tarayıcıda.** `klasor.spec.ts`'in BİLİNEN KUSUR testi çevrilince (klasör
+"Kapanış2"yi taşımalı) kırmızı. Deneme: bekleyen klasör yazımında `beforeunload`'ın
+"ayrılınsın mı?" sordurması; soru 1,5 s sonra cevaplansa da kırmızı, çünkü Chromium soru
+açıkken sayfayı durduruyor. Tarayıcı yarısı düzelmez, test yerinde, yorumu bunu söylüyor.
+
+**Önce kırmızı, exe'de** (Linux ikilisi, sahte HOME `scratch/tb7-sekme-kapanis/ev`, betik
+`exe-olcum.mjs`, kilit altında). WebDriver'ın pencere kapatmasıyla 9 Ekim ikilisi 0/3, 3 s
+bekleyen denetim 2/2. WebDriver'ın kapatması Tauri'nin kapanma isteğinden geçmiyor
+(düzeltmeyle de 0/5); gerçek kapatma için `GDK_BACKEND=x11` ve pencereye ctypes ile
+WM_DELETE_WINDOW (`x11-kapat.py`, başlık çubuğundaki X'in yolu): eski ikili 0/3.
+
+**Çare.** `lib.rs` `CloseRequested`'i tutup sayfaya `kapaniyor` diyor, 5 s sonra yine kapatıyor;
+`App.tsx` `park()` ve `useFolder`'ın yeni `flush`'ını bekleyip `kapanabilir` diyor
+(`desktop.ts`'in `onDesktopClose`'u). Düzeltilmiş ikili 5/5 ve 3/3 (pencere 0,17–0,26 s),
+incelemeden sonra 3/3 (0,16–0,72 s). Windows'ta (WebView2) ölçülmedi.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: hiç sıfırlanmayan kapanış bayrağı (kapanmayan
+pencerenin tek yolu), hiç düşmeyen `emit` dalı, `useStore` ve `App`'in iki bayat yorumu,
+CHANGELOG'un Windows'ta ölçülmemiş "saniyenin bir kesri"si, TESTFINDINGS'in TB7 kaydı.
+Reddedilen: kapanış sırasında ikinci açılış (tek kopya ilkini öne getirir, sonra pencere
+kapanır; veri kaybı yok); açık bir `alert` varken 5 s'lik düşüş (bu dalın öncesiyle aynı);
+Rust yarısının otomatik testi (cargo testinde Tauri penceresi yok, WebDriver bu yoldan
+geçmiyor; TESTPLAN'da yazılı); kapanışta `park`'ın koşulsuz yazması (tek kopya, `writesClosed`
+ve `mayWritePlan` kapıları tutuyor, inceleyici eski bir hâlin yenisinin üstüne yazıldığı bir
+senaryo bulmadı); güncelleme yolunun klasörü de beklemesi (sonraki açılış yazar).
+
+**Tıklama testi.** Değişen akış exe'de: yukarıdaki gerçek kapatma ölçümü. Tarayıcıda komşu
+akış (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul,
+`scratch/tb7-sekme-kapanis/tiklama/`): Okul → Derslikler → "Kapanış" ekle → yenile → listede;
+Ayarlar → Planlar ve yedek'in klasör paneli `file://`'de "yalnızca bu bilgisayarın
+tarayıcısında". Konsol hatası yok.
+
+**Koşulan.** `hizli` (1344 geçti), `desktop.test.ts` (9), `docs`, `tsc`, `eslint`, `sinir`,
+`npm run exe:test` (Rust 28 geçti), `npm run exe:linux` iki kez, exe ölçümleri, site E2E'nin
+TB7 testi (deneme), tıklama testi. **Koşulmayan.** Tam E2E yerelde, gerçek exe süiti
+(`exe:e2e`), Windows.
+
 ---
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
