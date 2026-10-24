@@ -353,6 +353,7 @@ export default function App() {
     plans,
     park,
     saveTrouble,
+    brokenPlans,
   } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -1043,6 +1044,19 @@ export default function App() {
               <div className="save-warning">
                 ⚠{' '}
                 <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın." />
+              </div>
+            )}
+
+            {/* A PLAN WHOSE TEXT CANNOT BE READ IS SET ASIDE (TB1): not opened,
+            not written over, still in Ayarlar → Planlar ve yedek. One line,
+            for the whole session, because a toast would be gone before a
+            reader who has trouble seeing has found it. */}
+            {brokenPlans.length > 0 && (
+              <div className="save-warning" role="status">
+                ⚠{' '}
+                {t('Okunamayan plan açılmadı: {adlar}.', {
+                  adlar: brokenPlans.join(', '),
+                })}
               </div>
             )}
 

@@ -18,9 +18,8 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../pure/undo';
-import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
+import { loadPlanAtStart, openable, rotateBackups, savePlan, setAside } from './planStore';
 import { usePlans } from './usePlans';
-import { emptyState } from '../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
 import { parseState } from '../pure/parseState';
 import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
@@ -40,19 +39,25 @@ export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
 
 // -------------------------------------------------------------------- hook
 
-function initialBox(): Box {
+function startup(): { box: Box; broken: string[] } {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
   // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
   // timetable is already sitting in. Adoption therefore copies NOTHING.
   const library = readLibrary();
   writeLibrary(library);
-  rotateBackups(planKey(library.activeId));
-  return {
-    present: loadPlanAtStart(library.activeId) ?? emptyState(),
-    past: [],
-    future: [],
-    planId: library.activeId,
+  // The session backup is of the plan that OPENS (DATA, "oturum yedekleri"),
+  // so it is rotated once that is known.
+  const box = (planId: Id, present: State): Box => {
+    rotateBackups(planKey(planId));
+    return { present, past: [], future: [], planId };
   };
+  const read = loadPlanAtStart(library.activeId);
+  if (!('broken' in read)) return { box: box(library.activeId, openable(read)), broken: [] };
+  // The open plan's text cannot be read (TODO TB1): it used to crash the page
+  // here, or open empty and be written over by the first edit. It is set
+  // aside instead, and another plan is opened.
+  const aside = setAside(library, library.activeId);
+  return { box: box(aside.id, aside.state), broken: aside.broken };
 }
 
 /** Input types that hold no typed text, so they have no undo of their own. */
@@ -81,7 +86,14 @@ export function isTextInput(target: EventTarget | null): boolean {
 }
 
 export function useStore() {
-  const [box, dispatch] = useReducer(reduce, undefined, initialBox);
+  const [start] = useState(startup);
+  const [box, dispatch] = useReducer(reduce, start.box);
+  // The plans set aside because their text cannot be read, by name: at
+  // startup, or when one is picked later (TODO TB1). The screen says it once.
+  const [brokenPlans, setBrokenPlans] = useState<string[]>(start.broken);
+  const onBroken = useCallback((names: string[]) => {
+    setBrokenPlans((list) => [...new Set([...list, ...names])]);
+  }, []);
 
   const change = useCallback((apply: (d: State) => State) => {
     dispatch({ type: 'change', apply });
@@ -148,7 +160,7 @@ export function useStore() {
     dispatch({ type: 'switch', id, state });
   }, []);
 
-  const plans = usePlans({ planId: box.planId, park, openPlan });
+  const plans = usePlans({ planId: box.planId, park, openPlan, onBroken });
 
   // Another window changed our data: this one stops writing, and says so.
   // What this window holds is read through a ref, so the listener is set once.
@@ -162,8 +174,15 @@ export function useStore() {
         (key, value) => {
           const now = held.current;
           if (key === planKey(now.box.planId)) {
-            const read = (text: string | null) =>
-              JSON.stringify(text === null ? null : parseState(text));
+            // Text another window wrote can be text that makes parseState
+            // throw; that is a change too, never an exception here (TB1).
+            const read = (text: string | null) => {
+              try {
+                return JSON.stringify(text === null ? null : parseState(text));
+              } catch {
+                return text;
+              }
+            };
             return read(value) === read(JSON.stringify(now.box.present));
           }
           if (key === LIBRARY_KEY) {
@@ -218,6 +237,8 @@ export function useStore() {
     park,
     /** Null while saves land; otherwise why they do not (the strip at the top). */
     saveTrouble: trouble,
+    /** Plans not opened because their stored text cannot be read (TB1). */
+    brokenPlans,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
     plans,

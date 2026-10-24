@@ -32,9 +32,9 @@ import {
   uniquePlanName,
 } from '../pure/library';
 import { sanitize } from '../pure/constraints';
-import { emptyState, newId } from '../pure/entities';
+import { newId } from '../pure/entities';
 import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
-import { loadPlan, savePlan } from './planStore';
+import { openable, savePlan, setAside, storedPlan } from './planStore';
 import type { Id, State } from '../leaf/types';
 
 /** What the plan controls need from whoever owns the box and the autosave. */
@@ -45,9 +45,11 @@ export interface PlanSeam {
   park: () => void;
   /** Puts a state in the box and makes that plan the open one. */
   openPlan: (id: Id, state: State) => void;
+  /** Plans that were not opened because their text cannot be read (TB1). */
+  onBroken: (names: string[]) => void;
 }
 
-export function usePlans({ planId, park, openPlan }: PlanSeam) {
+export function usePlans({ planId, park, openPlan, onBroken }: PlanSeam) {
   const [library, setLibrary] = useState<Library>(readLibrary);
 
   const commit = useCallback((next: Library) => {
@@ -58,11 +60,18 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
   const switchPlan = useCallback(
     (id: Id) => {
       if (id === planId || findPlan(library, id) === undefined) return;
+      const read = storedPlan(id);
+      // Text that cannot be read is not opened: an empty plan in its place
+      // would be written over it by the first edit (TODO TB1).
+      if ('broken' in read) {
+        onBroken([findPlan(library, id)?.name ?? id]);
+        return;
+      }
       park();
-      openPlan(id, loadPlan(id) ?? emptyState());
+      openPlan(id, openable(read));
       commit(setActive(library, id));
     },
-    [planId, park, commit, library, openPlan],
+    [planId, park, commit, library, openPlan, onBroken],
   );
 
   /**
@@ -97,10 +106,18 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
       commit(next);
       dropPlanText(id);
       if (id === planId) {
-        openPlan(next.activeId, loadPlan(next.activeId) ?? emptyState());
+        const read = storedPlan(next.activeId);
+        if ('broken' in read) {
+          const aside = setAside(next, next.activeId);
+          commit(aside.lib);
+          openPlan(aside.id, aside.state);
+          onBroken(aside.broken);
+        } else {
+          openPlan(next.activeId, openable(read));
+        }
       }
     },
-    [library, commit, park, planId, openPlan],
+    [library, commit, park, planId, openPlan, onBroken],
   );
 
   const renamePlan = useCallback(
@@ -155,7 +172,14 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
       const missed = new Set(
         [...unreadable, ...parsed.map((x) => x.id)].filter((id) => !written.has(id)),
       );
-      const stays = new Map(library.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]));
+      // A plan here whose own text cannot be read stays too (TB1): it is in no
+      // bundle (it has no state), so a bundle written here and opened again
+      // would otherwise drop the one copy a later repair could work from.
+      const stays = new Map(
+        library.plans
+          .filter((p) => missed.has(p.id) || (!written.has(p.id) && 'broken' in storedPlan(p.id)))
+          .map((p) => [p.id, p]),
+      );
       for (const plan of library.plans) {
         if (!written.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
