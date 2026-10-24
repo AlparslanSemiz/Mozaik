@@ -160,7 +160,15 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/storage/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
 | `platform/storage/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
-| `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
+| `platform/prefs/theme.ts` | tema, açık ya da koyu; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/density.ts` | ızgaranın ve arayüzün yoğunluğu, iki ayrı karar; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/availClock.ts` | Müsaitlik ders numarasının altına başlangıç saatini yazar mı; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/stored.ts` | iki yönlü tercihlerin yazılışı (`onOff`) |
 | `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `platform/prefs/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
@@ -288,7 +296,7 @@ Bir bilginin State'te durup durmayacağına tek soru karar veriyor: bu bilgi bir
 yedek dosyasıyla başka bir makineye taşınmalı mı? Şunlar taşınmamalı ve State'in
 dışında duruyor:
 
-- makine tercihleri (`theme.ts`, `printOptions.ts`, `programColor.ts`, dil), çünkü koyu temalı bir makinede alınan yedek babanın temasını çevirmemeli ve kozmetik bir ayar için şema göçü yazılmamalı
+- makine tercihleri (`platform/prefs/`, dil), çünkü koyu temalı bir makinede alınan yedek babanın temasını çevirmemeli ve kozmetik bir ayar için şema göçü yazılmamalı
 - bir oturumdaki pozisyon (`toolState.ts`), çünkü "şu an neye bakıyorum" yarın açılışta hatırlanması gereken bir şey değil
 - geçici görünüm (`programMask.ts`), aynı sebeple
 - plan kimliği ve kitaplık (`library.ts`), çünkü bir yedek dosyası tek bir plan

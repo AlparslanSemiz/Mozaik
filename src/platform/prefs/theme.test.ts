@@ -19,7 +19,7 @@ import {
   SCALE_MIN,
   SCALE_DEFAULT,
   SCALE_STEP,
-} from './theme';
+} from './index';
 
 describe('normalizeTheme', () => {
   it('kayıtlı geçerli tercih olduğu gibi kullanılır', () => {
@@ -49,7 +49,7 @@ describe('normalizeScale', () => {
     }
   });
 
-  // The floor and the default are two questions (the note in theme.ts says so)
+  // The floor and the default are two questions (the note in scale.ts says so)
   // and since 2026-08-30 they are two ANSWERS. This is the assertion that keeps
   // them apart: nobody's screen shrinks by arriving. It names neither number —
   // if the floor moves again, what has to stay true is the gap.

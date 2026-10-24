@@ -7,7 +7,7 @@
 // about the school changes, and that is rare.
 //
 // Görünüm is the one section that describes the MACHINE rather than the school
-// (`theme.ts`). It is here and not in the top bar for the same reason Sıfırla
+// (`platform/prefs/`). It is here and not in the top bar for the same reason Sıfırla
 // is: the top bar is the row where no single click can cost an afternoon.
 //
 // SIX sections since 2026-08-28. "Veri" was seven panels and about nine

@@ -1,7 +1,7 @@
 // Machine preferences: one way to read, normalize, store and paint them.
 //
 // Fifteen settings live outside `State` because they belong to the computer
-// and not to the timetable (theme.ts says why). Each one carried its own copy
+// and not to the timetable (platform/prefs says why). Each one carried its own copy
 // of the same moves, a key, a normalizer, a guarded read and a guarded write,
 // and the copies did not agree on whether a value is normalized before it is
 // stored or on what a passed boolean means. This is that shape written once,

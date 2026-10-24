@@ -23,7 +23,7 @@
 // is browser plumbing an E2E has to judge.
 //
 // WHY INDEXEDDB. Everything else the machine remembers lives in localStorage
-// (theme.ts, nine keys). A directory handle cannot: it is not a string and it
+// (platform/prefs, nine keys). A directory handle cannot: it is not a string and it
 // does not survive JSON. IndexedDB stores it by structured clone, which is
 // the only place in the browser that can hold one. It is still a MACHINE
 // preference and it is still not in `State` — a backup taken here must not

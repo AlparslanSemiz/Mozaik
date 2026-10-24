@@ -270,7 +270,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       B4.4'ün "düzenleme yeri önizlemenin kendisi" deseni örnek alınabilir.
       **Netleşmesi gereken üç soru, kod yazılmadan önce:** (a) hangi
       bölümler/hangi alanlar kapsamda — beşinin de mi, yoksa hangileri; (b)
-      tercih `State`'e mi girecek yoksa `theme.ts`'in dokuz bağımsız
+      tercih `State`'e mi girecek yoksa `platform/prefs/`'in dokuz bağımsız
       skaleri gibi bir MAKİNE tercihi mi (kapatılan bir alan başka bir
       bilgisayarda da kapalı mı kalmalı); (c) kapatılan bir alanın
       altındaki kural/veri hâlâ uygulanıyor mu, yoksa görünmeyen bir kural

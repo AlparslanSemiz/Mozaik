@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { dockHeightForRoom, maxDockHeight } from './poolSplit';
-import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from '../prefs/theme';
+import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from '../prefs';
 
 // jsdom resolves the root font size to 16px, so a rem is 16 CSS pixels here.
 const REM = 16;

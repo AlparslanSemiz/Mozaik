@@ -201,7 +201,7 @@ clone. State'e konmuyor: bu bilgisayarda alınmış bir yedek başka bir makiney
 klasör yolu taşımamalı.
 
 Kâğıt seçenekleri `theme.ts`'te değil `printOptions.ts`'te ve tek bir JSON
-kaydında. `theme.ts`'teki tercihler ilk boyamadan önce `<html>`'e öznitelik olarak
+kaydında. `platform/prefs/`'teki tercihler ilk boyamadan önce `<html>`'e öznitelik olarak
 yazılan düzen değerleri. Kâğıt seçenekleri ise çizim anında bir React prop'u olan
 tek bir karar ("kâğıtta ne var"), ve her seçeneğe ayrı bir anahtar, tek bir soru
 için ayrı ayrı okuma ve düzeltme demekti.
@@ -209,7 +209,7 @@ için ayrı ayrı okuma ve düzeltme demekti.
 Havuz boyu piksel değil rem, çünkü `--ui-scale` %150'ye çıkınca sabit piksellik
 bir çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı bir anahtarda
 duruyor, çünkü `ders-programi-havuz`'un anlamı "`kapali` değilse açık" ve içine bir
-sayı katmak ayrıştırıcısına ikinci bir dal sokardı. `theme.ts` bağımsız tercihleri
+sayı katmak ayrıştırıcısına ikinci bir dal sokardı. `platform/prefs/` bağımsız tercihleri
 bağımsız anahtarlarda tutuyor.
 
 Her tercih `preference.ts`'teki fabrikayla kurulur ve üç sözü tutar. `apply` değeri
@@ -218,7 +218,7 @@ depo okunamıyorsa yedek sorulur, okuma anında ve `normalize`'dan geçmeden, am
 kayıtlı `"0"` ya da `""` yokluk sayılmaz. `normalize` denetimin verdiği tipi de
 depodaki dizeyi de kabul eder ve `write` değeri ondan geçirerek saklar. Yedeğin
 makineye bakıp bakmaması tercihin kendi kararı: hareket ve dil bakar, tema bakmaz
-ve kayıt yoksa açıktır (`theme.ts`'teki gerekçe). Sözleşme `src/leaf/preference/preference.test.ts`'te,
+ve kayıt yoksa açıktır (`platform/prefs/`'teki gerekçe). Sözleşme `src/leaf/preference/preference.test.ts`'te,
 her tercihin davranışı `src/preferences.test.ts`'te.
 
 Hareket tercihi bir makine tercihi ve makinenin kendi tercihinin gerisine geçmez:

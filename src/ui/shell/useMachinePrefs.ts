@@ -27,7 +27,7 @@ import {
 
 export function useMachinePrefs() {
   // Whether the strip is allowed to slide away on its own while you read down.
-  // A gesture rather than a preference, so it gets its own key (theme.ts); App
+  // A gesture rather than a preference, so it gets its own key (ribbon.ts); App
   // reads it before the effect that attaches the slide (useMainScroll).
   const [ribbonAuto, setRibbonAuto] = useState<boolean>(readRibbonAuto);
   const [theme, setTheme] = useState<Theme>(readTheme);
@@ -41,7 +41,7 @@ export function useMachinePrefs() {
     setProgramColorRaw(next);
   }, []);
   // Its twin, and a separate one since 2026-08-27: the grid's step and the
-  // interface's step are two decisions (see theme.ts). Only Ayarlar → Görünüm
+  // interface's step are two decisions (see density.ts). Only Ayarlar → Görünüm
   // sets this one — the Program strip still speaks for the grid alone.
   const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
   // Applied to the document by main.tsx before the first paint; this copy

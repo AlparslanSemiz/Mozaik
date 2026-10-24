@@ -5,7 +5,7 @@
 // the machine and the eyes in front of it — a backup taken here must not
 // resize my father's screen, and a comfort setting must not cost a schema
 // migration. It lives in localStorage next to the theme and the rail
-// (`theme.ts`), which is where every other machine preference already is.
+// (`platform/prefs/`), which is where every other machine preference already is.
 //
 // BUTTONS, NOT A SLIDER. The scale has FIFTEEN legal values (0.80 to 1.50 in
 // steps of 0.05, `STEPS` below — it said six here while the ceiling was 1.25,
