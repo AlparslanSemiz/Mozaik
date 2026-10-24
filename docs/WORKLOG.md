@@ -114,8 +114,8 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 12. Kayıt kuralı (2026-10-24, aşağıdaki girdi): CLAUDE.md, PRINCIPLES ve DECISIONS bugünkü
    kuralı taşır, yerine yenisi gelen kural silinir, geçmiş satırı bırakılmaz; WORKLOG'un
    tarihli girdileri ve TODO arşivi geriye dönük düzeltilmez (CONVENTIONS). PRINCIPLES'ın
-   emekli iki ilkesi silindi. DECISIONS'ın eski kayıtlarındaki "Eski hâli" blokları ve
-   yerine yenisi gelmiş kayıtlar taranmadı.
+   emekli iki ilkesi silindi. DECISIONS'ta "Eski hâli" blokları ve yerine yenisi gelmiş
+   kayıtlar da silindi (`ozellik/belge-temizlik`), denenip bırakılanlar duruyor.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -162,7 +162,7 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 164 932 bayt, brotli 280,59 kB (2026-10-24, `ozellik/belge-temizlik`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -172,6 +172,36 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · DECISIONS'ın temizliği ve index.html'in biçimi (`ozellik/belge-temizlik`)
+
+Alp'in cevabı (önceki raporun 4. sorusu, "a"): DECISIONS'ın eski kayıtları yeni kayıt
+kuralına göre, ayrı dalda.
+
+**DECISIONS.** 52 "Eski hâli" bloğu silindi, "Şimdi" etiketleri "Ne" oldu. Bir blok kaydın
+tek "neden"iyse (ölçülmüş bir sorun) o cümle bugünkü dille kaydın "Neden"ine geçti.
+Yerine yenisi gelmiş sekiz kayıt silindi: 2026-10-09 test programı (2026-10-23'te dondu) ve
+Linux'un yalnız yerel kalması (geçerli gerekçesi 2026-10-10 Linux kaydına), 2026-10-08 v0
+bitmedi, 2026-08-30 çerçeve ve ikon eşiği, 2026-08-27 ikon eşiği, 2026-08-26 görsel
+regresyonun kaldırılması, 2026-08-25 statik yayın. Ötekilerde kaldırılmış ilkelere dayanan
+gerekçe, "o günkü kayıt şunu diyordu" cümleleri ve biten 2.2.0 notu çıktı; 2026-10-09
+çalışma düzeni kaydı "Şu an"ı birleşen dalın yazması kuralına indi. Denenip bırakılanlar,
+tartılan seçenekler ve ölçümler kaldı; `reseed` "Denendi, kaldırıldı" oldu. 114 kayıttan
+106'sı kaldı, dosya 2263 satırdan 1964'e indi. Dosyanın tanım cümlesi "neyden"
+demiyor, CLAUDE.md'deki satırı aynı commit'te; TODO §1'in silinen 2026-08-30 kaydına atfı
+2026-10-08'e döndü. Linux kaydındaki `~/GitHub/Mozaik` yolu `~/GitHub/Mozaikler/Mozaik` oldu.
+
+**index.html.** `prettier --check`'ten geçmiyordu: uzun `<link rel="icon">` tek satırda ve
+`</body>` yanlış girintide, ikisi de `favicon.mjs`'in şablonundan. Şablon düzeldi, dosya
+yeniden üretildi. `.prettierignore` yerine bu seçildi, ve `index.html` `bicim`'e ve
+`ci.yml`'in biçim denetimine girdi: şablon bozulursa CI yakalıyor. `temel.spec.ts`'in
+`<link>` regex'i satır sonunu da kapsıyor. Bütün depoda `prettier --check .` hâlâ 24
+dosyada uyarı veriyor (fikstürler, `styles.css`, JSON), onlar denetimin kapsamında değil.
+
+**Koşulan.** `npm run hizli` (her commit'ten önce, 1339 geçti, 1 atlandı), `eslint
+scripts/favicon.mjs`, `ci.yml`'in `prettier --check` komutu `index.html`'le, `npm run build`,
+`boyut` (`dist/index.html` 1 164 932 bayt, brotli 280,59 kB), `temel.spec.ts` 72 ve 77 `agir.sh` altında 4/4. **Koşulmayan.**
+`kontrol`, bütün E2E.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 
