@@ -26,6 +26,16 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `npx stryker run --mutate <relax ve sat>`, `npm run hizli`'nin test kümesiyle, bu makine · `src/pure/relax/relax.test.ts:89`
+Bulgu: relax'ın dokuz dosyası (3160 mutant) mutasyona sokulunca ilk koşu düştü: "derslik
+darboğazı: derslik hiçbir yolda açılmıyor, saat azaltmak kalıyor" enstrümante kodda kendi
+30 s'lik tavanını (`}, 30_000)`, testin kendisinde) aştı. Vitest'in `testTimeout`'u 300 s'ye
+çıkınca da aynı: testin kendi tavanı yapılandırmayı geçiyor. İki koşuda tekrarlandı.
+Tür: test kusuru değil, ölçüm engeli: relax'ın mutasyonu bu testin tavanı ve süresiyle
+pratikte koşamıyor, çünkü onu kapsayan her mutant testi yeniden koşturur.
+Ne yapıldı: bırakıldı; TODO RF3'ün (relax ve `sat.ts` ne mutasyon ne kapsam listesinde) ön
+şartı olarak orada. Aynı gün kısıt motoru, fizibilite ve varlıklar aynı test kümesiyle
+ölçüldü (WORKLOG, 2026-10-24 akşam).
 ### 2026-10-24 · `exe-windows.yml` 40095284383 → 40101538104 (`tp7-windows-exe`) · Windows'ta gerçek exe
 Bulgu: (1) `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` bu exe'de portu açmıyor (release de
 debug de): wry 0.57 tarayıcı argümanlarını her zaman kendisi veriyor

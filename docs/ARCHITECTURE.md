@@ -7,29 +7,29 @@ Kodun katmanları, her dosyanın görevi ve katmanlar arasındaki sınırlar.
 Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 
 ```
-src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
-                   names · subjects · blocks · version · dateStamp · storage
+src/leaf/          model/* · i18n/* · lang/* · preference/* · app/*
    |
-src/pure/          constraints · rules · feasibility · bell · import · entities · solver
-                   relax · sat · program/* · programView · paper/* · listview · library · bundle
-                   sample · parseState · undo
+src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
+                   grid/* · program/* · paper/* · io/* · listview/* · lists/* · forms/* · undo/*
    |
-src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
-                   desktop · update · download
-                   drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useStore · usePlans · useFolder · search/* · otherWindow
+src/platform/      storage/* · prefs/* · search/* · dom/* · exe/* · changelog · update
    |
-src/ui/            main · Root · App · ve bütün bileşenler
+src/ui/            main · shell/* · common/* · ve ekranların alanları
 ```
 
 Klasör adları katmanların kendisi, yeni bir taksonomi değil: bir katman ihlali
-bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kökünde yalnız
-üç şey kalıyor: test dosyaları, `styles.css` ve `worlds.ts`. Testlerin kökte
-kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
-bir alt klasöre inseler taradıkları şey sessizce daralırdı.
+bir klasör sınırını geçen import olarak görünsün diye. Birim testi test ettiği
+modülün yanında durur, birden çok paketi saran test ana konusunun paketinde
+(2026-10-24). Ağacı `import.meta.glob` ile tarayan iki test (`leaf/lang/i18n.test.ts`,
+`pure/io/library.test.ts`) taşınırken globlarının kökü `src/`'de tutuldu, yani
+taradıkları küme değişmedi. `src/`'nin kökünde kalanlar: `styles.css`, ve konusu
+`src/`'nin dışında olan yedi test (belgeler, betikler, sürüm akışı ve `index.html`'i
+de okuyan `preferences.test.ts`).
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `platform/prefs/`,
-`platform/search/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+Her kaynak dosya bir katmanın altındaki bir klasörde, yani bir pakette durur (2026-10-24);
+en derin `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda.
+Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/forms/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -46,12 +46,13 @@ köprüsü, doğrudan DOM'a yazan etkileşimler, ve saf modülleri React'ten sü
 kancalar.
 
 **Bileşenler** çizer ve olay yakalar. Bir `.tsx` dosyasında çakışma hesabı
-görülüyorsa yanlış yerdedir ve `constraints.ts`'e taşınır.
+görülüyorsa yanlış yerdedir ve `pure/constraints/`'e taşınır.
 
 ## Dosya haritası
 
 Yollar `src/`'ye göre. Test dosyaları (`*.test.ts`), dört çeviri sözlüğü,
-kısaltma tablosu ve ikisinin giriş noktası (`lang/*.ts`) listede yok.
+kısaltma tablosu ve ikisinin giriş noktası (`lang/*.ts`) listede yok. Tek dosyalık bir
+alanın `index.ts`'i yalnız o dosyayı açar ve ayrıca yazılmaz.
 
 ### Yapraklar
 
@@ -65,79 +66,129 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `leaf/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
-| `leaf/keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
-| `leaf/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
-| `leaf/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
-| `leaf/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
-| `leaf/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
-| `leaf/subjects.ts` | bir şeyin hangi branştan olduğu |
-| `leaf/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
-| `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
-| `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
-| `leaf/dateStamp.ts` | dosya adındaki tarih, yerel saatle (`dayStamp`, `minuteStamp`) |
-| `leaf/storage.ts` | localStorage'ın etrafındaki tek koruma (`safely`): okunamayan okuma yokluk, yazılamayan yazma düşer |
+| `leaf/model/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
+| `leaf/model/keys.ts` | sözlük anahtarları, motorun dosyaları ile `rules.ts` birbirini import etmesin diye |
+| `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
+| `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
+| `leaf/preference/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
+| `leaf/lang/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
+| `leaf/model/subjects.ts` | bir şeyin hangi branştan olduğu |
+| `leaf/model/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
+| `leaf/app/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
+| `leaf/preference/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
+| `leaf/app/dateStamp.ts` | dosya adındaki tarih, yerel saatle (`dayStamp`, `minuteStamp`) |
+| `leaf/preference/storage.ts` | localStorage'ın etrafındaki tek koruma (`safely`): okunamayan okuma yokluk, yazılamayan yazma düşer |
 | `leaf/raw.d.ts` | Vite'ın `?raw` importunun tip bildirimi |
 
 ### Saf mantık
 
 | Dosya | Görevi |
 |---|---|
-| `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
-| `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
-| `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
-| `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
-| `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
-| `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |
-| `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
-| `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
-| `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
-| `pure/program/index.ts` | program paketinin giriş noktası: aşağıdaki ikisini dışa açar |
-| `pure/program/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
+| `pure/constraints/index.ts` | kısıt paketinin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve kuralların hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
+| `pure/constraints/occupancy.ts` | kim nerede meşgul: indeks (`buildIndex`, `Index`) ve çözücünün yerinde çalışan `occupy` ile `vacate`'i |
+| `pure/constraints/engine.ts` | motorun hükmü: `blocker`, `blockerDetail` ve üstüne yumuşak kurallar (`check`) |
+| `pure/constraints/blocks.ts` | ızgaradan blok okumak: `placedBlocks`, `blockSpans`, `pendingBlocks` |
+| `pure/constraints/placing.ts` | bir bloğu koymak ve kaldırmak: `place`, `blockAt`, sabitleme, `liftBlock` ve sabite saygılı `removeBlock` |
+| `pure/constraints/drop.ts` | bırakmanın ne yaptığı: `dropMap` (sürükleme başına bir kez), takas ve havuza düşürme, cümleleri, `applyDrop` |
+| `pure/constraints/closed.ts` | yerleştikten sonra kapanan saatler (`closedConflicts`, tuzak 16) |
+| `pure/constraints/sanitize.ts` | `sanitize`, her yüklemede ve her ayar değişikliğinde (tuzak 4, 5, 6) |
+| `pure/constraints/pins.ts` | bir kapsamı topluca sabitlemek (`pinScopeCells`, `togglePinScope`) |
+| `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
+| `pure/feasibility/index.ts` | programın neden dizilemediği: bölünmeden önceki tek dosyanın dışa açtığı her şey |
+| `pure/feasibility/levels.ts` | kapasite basamağı (`capacityLevel`, `loadStatus`) ve raporun şekilleri |
+| `pure/feasibility/naming.ts` | bir dersin adı (`lessonName`) ve bloklarının çoğunun boyu (`commonestBlock`) |
+| `pure/feasibility/hole.ts` | takılan dersin sebebi, deliği adıyla (`holeReason`) |
+| `pure/feasibility/capacity.ts` | öğretmen, sınıf ve dersliğin açık saati ile istenen saati (`buildCapacity`) |
+| `pure/feasibility/advice.ts` | Danışman (`buildAdvice`) |
+| `pure/feasibility/report.ts` | Kontrol'ün bütün raporu (`buildReport`) |
+| `pure/feasibility/health.ts` | her sekmedeki durum satırı (`health`) |
+| `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
+| `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
+| `pure/entities/identity.ts` | adlandırma: `newId` (`Math.random`'ın tek yeri), iki harfli kısa ad, cinsiyetin üç okunuşu |
+| `pure/entities/defaults.ts` | yeni bir okulun başlangıcı: zil, günler, sınırlar ve kurallar, saat adları, `emptyState` |
+| `pure/entities/subjects.ts` | branşlar: kısa adları, seçicinin seçenekleri, öğretmen sırası, ekleme, ad değiştirme ve silme |
+| `pure/entities/roster.ts` | derslikler, öğretmenler ve sınıflar: ekleme, güncelleme, silme, derslik aramaları ve listelerin elle sırası (`reorderList`) |
+| `pure/entities/lessons.ts` | dersler: ekleme, güncelleme, başka öğretmene ya da sınıfa taşıma (`transferLesson`, `moveLessonToClass`), silme |
+| `pure/entities/settings.ts` | okul ayarları ve `remapDays` (gün listesi değişince program kaymasın, tuzak 11), `settingsLoss` |
+| `pure/entities/availability.ts` | kapalı saatler, bütün hafta ve açık kalan saatler (`openHours`) |
+| `pure/entities/rows.ts` | Excel'den yapıştırılan satırlar öğretmen, sınıf ve derse |
+| `pure/entities/counting.ts` | sayımlar: haftalık yük, saat etiketleri, kısa ad çakışmaları, planın özeti |
+| `pure/entities/deleting.ts` | bir silmenin neyi götüreceği, sormadan önce (`deletionQuestion`, tuzak 4) |
+| `pure/entities/inspect.ts` | tek bir öğretmen, sınıf ya da dersliğin haftası ve bilgileri (`entityWeek`, `entityFacts`) |
+| `pure/entities/answers.ts` | öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`, `dropAnswer`) |
+| `pure/entities/relations.ts` | aynı gün olmasın ilişkileri |
+| `pure/solver/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
+| `pure/relax/index.ts` | öneri aramasının giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey; `sat.ts` ve dosyaların paylaştığı yardımcılar paketin içinde kalır |
+| `pure/relax/options.ts` | aramaya ne sorulur ve ne döner: aileler ve neyi ucuz saydıkları, seçenekler, bütçeler (`FAMILY_CONFLICTS`), öneri, ilerleme ve sonuç |
+| `pure/relax/verify.ts` | öneriyi veriye uygulamak ve denetlemek (`applyRelaxations`, `applySuggestion`, `verifySuggestion`) |
+| `pure/relax/reading.ts` | bulunan haftayı değişikliğe geri okumak: açılan saatler, yükseltilen sınırlar, iki önerinin aynı olması (`sameChanges`, `outdone`) |
+| `pure/relax/model.ts` | haftanın SAT formülü: başlangıç değişkenleri, saat başına "en fazla bir", günlük sınır sayaçları, ailenin izin verdiği değişikliklerin sayılan değişmezleri |
+| `pure/relax/search.ts` | arama: `createRelaxer` dilimler, sayıyı "bundan azı yok"a kadar iter, en iyi haftanın yakınında daha ucuzunu arar; `suggest` sonuna kadar koşar |
+| `pure/relax/sentences.ts` | babanın cümlesiyle öneri (`suggestionParts`, `suggestionLines`, `suggestionSentence`) ve reddedilen değişikliğin sebebi (`refusalText`) |
+| `pure/relax/questions.ts` | öğretmene sorulacak sorular (`suggestionQuestions`), cevapların parçaları, önerinin dayandığı cevaplar (`suggestionUses`) |
+| `pure/relax/diff.ts` | önizlemenin farkı (`suggestionDiff`) |
+| `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
+| `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
+| `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
+| `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `program/`'u |
+| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), sağ tık menülerinin okuduğu (`describeMenu`, `poolMenuFacts`), bırakmanın cümlesi (`dropNotice`) ve kenara ayrılan günün reddi (`blockMaskedDays`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
-| `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
-| `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
-| `pure/sample.ts` | babanın ölçeğine yakın örnek okul |
-| `pure/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
-| `pure/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
+| `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
+| `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün Kontrol'le paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
+| `pure/forms/lessonForm.ts` | ders ekleme formunun kuralları: hangi branşlar ve öğretmenler sunulur, birini seçmek ötekine ne yapar (`lessonChoices`, `chooseTeacher`, `chooseSubject`), eklemeden sonra ne kalır (`afterAdd`); taslak ekranın kendi durumunda |
+| `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
+| `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
+| `pure/io/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
+| `pure/io/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
+| `pure/io/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
+| `pure/io/sample.ts` | babanın ölçeğine yakın örnek okul |
+| `pure/undo/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
 
 ### Durum, tercih ve depolama
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), kenara konan planlar (`brokenPlans`), `park`, geri al kısayolu, `isTextInput` |
-| `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
-| `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, `storedPlan` (durum, yok ya da okunamıyor), açılıştaki okuma (`loadPlanAtStart`), okunamayan planın kenara konması (`setAside`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
-| `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
-| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
-| `platform/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
-| `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
+| `platform/storage/index.ts` | depolama paketinin giriş noktası: kutuyu süren kanca, plan deposunun okunan yarısı, diske inen dosyalar, klasör ve "Veriler nerede"; ham localStorage tarafı (`libraryStore`), öteki pencerenin bekçisi (`otherWindow`) ve plan işlemleri (`usePlans`) paketin içinde kalır |
+| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), açılışta okunamayıp kenara konan planlar (`setAside`), `park`, geri al kısayolu, `isTextInput` |
+| `platform/storage/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
+| `platform/storage/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
+| `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
+| `platform/storage/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
+| `platform/storage/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
+| `platform/storage/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
-| `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
+| `platform/prefs/theme.ts` | tema, açık ya da koyu; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/density.ts` | ızgaranın ve arayüzün yoğunluğu, iki ayrı karar; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/availClock.ts` | Müsaitlik ders numarasının altına başlangıç saatini yazar mı; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/stored.ts` | iki yönlü tercihlerin yazılışı (`onOff`) |
 | `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `platform/prefs/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
-| `platform/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
-| `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
+| `platform/storage/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
+| `platform/exe/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
 | `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
 ### Doğrudan DOM'a yazan modüller
 
 | Dosya | Görevi |
 |---|---|
-| `platform/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
-| `platform/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
-| `platform/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
-| `platform/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
-| `platform/rowDrag.ts` | liste satırını sürükleyerek sıralama |
-| `platform/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
-| `platform/ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
+| `platform/dom/index.ts` | doğrudan DOM'a yazan etkileşimler paketinin giriş noktası: yedisinin dışarıda kullanılan adları |
+| `platform/dom/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
+| `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
+| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
+| `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
+| `platform/dom/rowDrag.ts` | liste satırını sürükleyerek sıralama |
+| `platform/dom/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
+| `platform/dom/ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
 
 ### React köprüleri ve kabuk
 
@@ -148,58 +199,71 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/search/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
 | `platform/search/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
 | `platform/search/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
-| `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
+| `platform/storage/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
-| `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
-| `ui/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
+| `ui/shell/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
+| `ui/shell/App.tsx` | kabuk: neyin ne kadar yaşadığına karar verir (sekme değişince ekranlar sökülür, tuzak 18) ve parçaları bağlar |
+| `ui/shell/tabs.tsx` | yedi sekme ve çizimleri; üst çubuk ve palet aynı listeyi okur |
+| `ui/shell/icons.tsx` | üst çubuğun dört simgesi ve marka |
+| `ui/shell/Topbar.tsx` | üst çubuk: sekmeler, durum satırı, plan seçici, geri al, dosya, palet, şerit ve tema düğmeleri |
+| `ui/shell/Notices.tsx` | açık sekmenin üstündeki şeritler: kayıt çalışmıyor, depo dolu, başka pencere, okunamayan plan, yeni sürüm, klasör |
+| `ui/shell/useMachinePrefs.ts` | App'in tuttuğu makine tercihi kopyaları ve üç geçiş (şerit, hareket, tema) |
+| `ui/shell/useMainScroll.ts` | şeridin altındaki kaydırılan kutunun iki etkisi: sündürme ve şeridin çekilmesi |
+| `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
+| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
+| `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
+| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır |
 
 ### Bileşenler
 
 | Dosya | Görevi |
 |---|---|
-| `ui/Ribbon.tsx` | sekmeye göre araç şeridi, iş mantığı yok |
-| `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
-| `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
-| `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
-| `ui/Palette.tsx` | Ctrl+K kutusu |
-| `ui/Commands.tsx` | paletin komut listesi |
-| `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
-| `ui/T.tsx` | `useT()` ve `<T>` |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `loadStatusFacet` |
-| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `Paste` (yapıştırarak ekleme), `Summary` (Özet) |
+| `ui/ribbon/index.tsx` | sekmeye göre araç şeridi: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
+| `ui/ribbon/parts.tsx` | şeritlerin ortak parçaları (`Group`, `Sep`, `Spacer`, `ICON`) ve şerit fonksiyonlarının aldığı `StripContext`. Şeritler bileşen değil fonksiyon: sekme değişince React aynı `.ribbon` öğesini yeniden kullanır |
+| `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `SetupStrip`, `LessonsStrip`, `AvailabilityStrip`, `ProgramStrip`, `CheckStrip`, `PrintStrip`, `SettingsStrip` |
+| `ui/common/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
+| `ui/common/Toasts.tsx` | olan biteni söyleyen kısa satır |
+| `ui/program/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
+| `ui/shell/Palette.tsx` | Ctrl+K kutusu |
+| `ui/shell/Commands.tsx` | paletin komut listesi |
+| `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
+| `ui/common/T.tsx` | `useT()` ve `<T>` |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes` |
+| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/index.tsx` | Dersler |
-| `ui/Availability.tsx` | Müsaitlik |
+| `ui/availability/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menüsünü bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/usePreview.ts` | önerinin önizlemesi: hangi yol, haftası hâlâ bu planın mı, farkı, "Önerilen"de hafta; Escape kapatır |
+| `ui/program/PreviewBar.tsx` | önizlenirken ızgaranın üstündeki çubuk |
 | `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
+| `ui/program/AnswerBook.tsx` | önerinin cevap defteri: öğretmen öğretmen sorular, "Olur" ve "Olmaz"ın güçleri, sorulacakların sayfası |
 | `ui/program/Grid.tsx` | ana ızgara, satır başına memo |
+| `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
-| `ui/program/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
+| `ui/program/Inspector.tsx` | varlık panelini açan yol: bağlam, `useInspect()` ve paneli çizen provider |
+| `ui/program/InspectorSheet.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası, bilgileri ve düzenlenmesi |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
-| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
-| `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
-| `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
-| `ui/CapacityRows.tsx` | kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor |
-| `ui/ColorPick.tsx` | renk seçme diyaloğu |
-| `ui/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
-| `ui/Field.tsx` | etiketli kontrol |
-| `ui/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
-| `ui/ListTools.tsx` | listelerin üstündeki ara, sırala ve süz şeridi |
-| `ui/useRowOrder.tsx` | listelerin ortak elle sıralama kancası |
-| `ui/useSample.ts` | örnek okulu yükleme sorusu |
-| `ui/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
+| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
+| `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
+| `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
+| `ui/plans/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
+| `ui/common/Field.tsx` | etiketli kontrol |
+| `ui/common/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
+| `ui/plans/useSample.ts` | örnek okulu yükleme sorusu |
+| `ui/common/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
 
 ### Yalnız testler için
 
 | Dosya | Görevi |
 |---|---|
-| `worlds.ts` | dünya üreteci (`makeWorld`, `WORLDS`) ve dizilmiş programı denetleyen `illegalBlocks` |
+| `pure/worlds/worlds.ts` | dünya üreteci (`makeWorld`, `WORLDS`) ve dizilmiş programı denetleyen `illegalBlocks` |
 
-`worlds.ts` `src/` altında, çünkü `tsconfig.json` yalnız `src`'yi kapsıyor ve
+`pure/worlds/` `src/` altında, çünkü `tsconfig.json` yalnız `src`'yi kapsıyor ve
 başka yerde duran bir dünya `tsc`'den hiç geçmezdi. Uygulama onu import etmediği
 için Vite budar, `dist/index.html`'e girmez.
 
@@ -208,18 +272,18 @@ için Vite budar, `dist/index.html`'e girmez.
 ### İş mantığı bileşende durmaz
 
 Çakışma, sınır, kapasite ya da blok hesabı saf mantık katmanında yazılır.
-`Ribbon.tsx`'teki "Otomatik diz (N)"in N'i `entities.ts`'teki saf bir fonksiyondan,
-Kontrol'ün sayıları `feasibility.ts`'ten gelir. Program'ın satırları, havuzu ve
+Program şeridindeki "Otomatik diz (N)"in N'i ve iki yıkıcı sorunun saydığı saatler `programView.ts`'teki `describeStrip`'ten,
+Kontrol'ün sayıları `pure/feasibility/`'ten gelir. Program'ın satırları, havuzu ve
 araç çubuğunun altındaki satır `programView.ts`'te hesaplanır; ne zaman
 hesaplanacakları `Program.tsx`'te kalır, çünkü `Grid`'in memo sınırı `rows`'un
 kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 
 ### Hangi dosyaların testi var
 
-`constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
+`pure/constraints/`, `pure/feasibility/`, `import.ts`, `rules.ts`, `bell.ts`,
+`palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
-`parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
+`parseState` ve `pure/entities/`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
 şey (tuzak 11).
 
@@ -233,7 +297,7 @@ Bir bilginin State'te durup durmayacağına tek soru karar veriyor: bu bilgi bir
 yedek dosyasıyla başka bir makineye taşınmalı mı? Şunlar taşınmamalı ve State'in
 dışında duruyor:
 
-- makine tercihleri (`theme.ts`, `printOptions.ts`, `programColor.ts`, dil), çünkü koyu temalı bir makinede alınan yedek babanın temasını çevirmemeli ve kozmetik bir ayar için şema göçü yazılmamalı
+- makine tercihleri (`platform/prefs/`, dil), çünkü koyu temalı bir makinede alınan yedek babanın temasını çevirmemeli ve kozmetik bir ayar için şema göçü yazılmamalı
 - bir oturumdaki pozisyon (`toolState.ts`), çünkü "şu an neye bakıyorum" yarın açılışta hatırlanması gereken bir şey değil
 - geçici görünüm (`programMask.ts`), aynı sebeple
 - plan kimliği ve kitaplık (`library.ts`), çünkü bir yedek dosyası tek bir plan
@@ -247,18 +311,24 @@ anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve ter
 ### Sınırı ne ölçüyor
 
 Katman sınırı, paket girişi ve döngü yasağı `.dependency-cruiser.cjs`'te yazılı ve
-`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Altı kural var: yaprak yalnız
+`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Kurallar: yaprak yalnız
 yaprak import eder, saf mantık yaprakların dışına çıkmaz, tesisat bir bileşen
-çağırmaz, `worlds.ts` üründen import edilmez, ve bir paketin içine dışarıdan yalnız
-`index`'i üstünden girilir. Sonuncusu iki kural: `paket-ici-alan` başka bir paketten
-gelen importu, `paket-ici-kok` bir katmanın ya da `src/`'nin kökündeki bir dosyadan
-geleni ölçüyor. Grafik `npm run grafik` ile mermaid olarak yazdırılabilir.
+çağırmaz, `pure/worlds/` üründen import edilmez, bir paketin içine dışarıdan yalnız
+`index`'i üstünden girilir, ve bir katmanın kökünde dosya durmaz. Paket kuralı iki
+tane: `paket-ici-alan` başka bir paketten gelen importu, `paket-ici-kok` bir katmanın
+ya da `src/`'nin kökündeki bir dosyadan geleni ölçüyor. Kök kuralı da iki tane, çünkü
+bir import'u ölçüyor: `katman-koku-hedef` kökteki bir dosyayı çağıranı,
+`katman-koku-kaynak` kökteki bir dosyanın çağırdığını yakalıyor. Kökte bilerek kalan üç
+dosya adıyla muaf: `ui/main.tsx` (`index.html` ve `scripts/favicon.mjs` onu yoluyla
+anıyor), `platform/changelog.ts` (yayın betikleri ve `surum.yml` yolunu okuyor) ve
+`platform/update.ts` (`SITE_ADRESI`). `leaf/raw.d.ts` bir tip bildirimi, grafikte yok;
+`docs.test.ts` onu yoluyla arıyor. Grafik `npm run grafik` ile mermaid olarak yazdırılabilir.
 
 Import grafiğinin göremediği üç kural `eslint.config.js`'te ve `npm run lint` ile koşuyor:
 saf mantık React'i ve bir bileşen kitaplığını import etmez, `document`, `window`,
 `navigator` ve depoya dokunmaz; tarayıcı deposuna yalnız sahipleri (`preference.ts`,
 `libraryStore.ts`, `planStore.ts`, `storageReport.ts`, `folder.ts`) dokunur; ve
-`Math.random` yalnız `entities.ts`'in `newId()`'sinde çağrılır. "Yalnız tip alınır"
+`Math.random` yalnız `pure/entities/identity.ts`'in `newId()`'sinde çağrılır. "Yalnız tip alınır"
 deseni ayrı bir kural istemiyor: o iki `import type` düz importa dönerse döngü
 yasağı kırmızıya dönüyor.
 
@@ -273,8 +343,8 @@ bir import grafiğinde görünmez, onları kendi testleri ölçüyor.
 ölçülüyor: `sinir` yalnız çalışma zamanı grafiğine bakıyor, yani bir `import
 type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya döner.
 
-- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
-- **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
+- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki motorun dosyaları ile `rules.ts` birbirini çağırmasın, paketin index'i onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `pure/entities/` zaten `pure/constraints/`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
+- **Yalnız tip alınır.** `rules.ts` `occupancy.ts`'ten yalnız `Index` tipini, `pure/entities/rows.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `pure/entities/`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
 - **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `parseState.ts` yapar ve depo tarafını `planStore.ts` sürer. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
 - **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `storageReport.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 
@@ -331,7 +401,7 @@ göre sayılır, `placedHours`'tan türetilmez, çünkü bir dersin kalemleri te
 sayıyı paylaşamaz.
 
 `place()` her çağrıda sözlüğü kopyaladığı için aramanın iç döngüsüne pahalı. Onun
-yerine `constraints.ts`'teki `occupy` ve `vacate` kullanılır, `place()` ile
+yerine `pure/constraints/`'teki `occupy` ve `vacate` kullanılır, `place()` ile
 `buildIndex()` ikilisinin yerinde çalışan hâli. İkisinin sapmadığı
 `constraints.test.ts`'te sabitleniyor.
 
@@ -342,7 +412,7 @@ aşağıda.
 
 ### Öneri araması kısıtları ikinci kez yazar, ama son söz yine `blocker()`'da
 
-Yukarıdaki kuralın tek bilinçli istisnası `relax.ts`. Kurulamayan bir haftada neyin
+Yukarıdaki kuralın tek bilinçli istisnası `pure/relax/`. Kurulamayan bir haftada neyin
 en az değişmesi gerektiği sorusu bir yerel aramayla cevaplanamadı (babanın verisinde
 12 saat buldu, en küçüğü 4), bu yüzden hafta bir SAT formülü olarak yeniden
 yazılıyor (`sat.ts`): blok başına başlangıç değişkenleri, sınıf, öğretmen ve
@@ -379,10 +449,10 @@ beklemezler.
 ### Exe bir adaptör takar
 
 Exe hiçbir şeyi yeniden yazmaz. `folder.ts` dosya adlarının, günlük yedeğin ve
-budamanın tek evi, `desktop.ts` üç Tauri komutunu bir `FileSystemDirectoryHandle`
+budamanın tek evi, `desktop.ts` beş Tauri komutunu bir `FileSystemDirectoryHandle`
 kılığına sokar ve `saveInto()` exe'de olduğu gibi koşar. Rust'ta yalnız tarayıcıda
 karşılığı olmayan şey var: hangi klasör, ve bir adın gerçekten bir ad olduğunu
-doğrulayan kapı (`safe_name`). `src/desktop.test.ts` gerçek `saveInto()`'yu
+doğrulayan kapı (`safe_name`). `src/platform/exe/desktop.test.ts` gerçek `saveInto()`'yu
 adaptörün üstünde koşturur.
 
 Kapanış da Rust'ta tutulur (TODO TB7, 2026-10-24): pencere kapatılmak istenince

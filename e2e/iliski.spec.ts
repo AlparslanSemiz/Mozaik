@@ -5,7 +5,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 import { hover, loadWorld } from './helpers';
 
 /** 510 · MÇ Matematik on Salı 1; 511 · AV Fizik waiting in the tray. */

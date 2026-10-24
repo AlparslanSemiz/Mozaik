@@ -80,6 +80,7 @@ const PAGE_TYPE: Record<string, string> = {
   '()': 'void',
   String: 'string',
   'Vec<String>': 'string[]',
+  'Option<String>': 'string | null',
   bool: 'boolean',
   u64: 'number',
   Cevap: 'UpdateCevap',
@@ -191,6 +192,14 @@ function returnType(e: ts.Expression | undefined, file: ts.SourceFile): string {
     return 'boolean';
   }
   if (ts.isArrayLiteralExpression(e)) return 'string[]';
+  // A fake's `map.get(name) ?? null`: a stored text or nothing, `Option<String>`.
+  if (
+    ts.isBinaryExpression(e) &&
+    e.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken &&
+    e.right.kind === ts.SyntaxKind.NullKeyword
+  ) {
+    return 'string | null';
+  }
   if (ts.isObjectLiteralExpression(e)) {
     return `{${e.properties
       .map((p) => p.name?.getText(file) ?? '?')

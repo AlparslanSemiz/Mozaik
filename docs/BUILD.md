@@ -108,6 +108,12 @@ yaklaşık yirmi beş yeni cümle: kaybı sayan sorular, durdurulan arama, eksik
 Kontrol'ün kapalı saat hükmü, takasın gerekçesi), yeni kısaltma tablosu 2,8 kB, kalanı kod.
 Ham eşik on iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 171 000. Brotli hâli
 280,2 kB ile eşiğin altında kaldığı için brotli eşiği yerinde (WORKLOG 2026-09-27).
+`fix/okunamayan-plan` (2026-10-24, TODO B7.37) ham boyu 5 946 bayt büyüttü (1 164 918'den
+1 170 864'e; yaklaşık 3,2 kB'ı dört dile giren dört yeni cümle, kalanı kod), yani eşiğin 136
+bayt altına. Ondan önce birleşecek `tb7-sekme-kapanis` (`tb8-eksik-plan` içinde) kendisi
+3 175 bayt getiriyor, ve üçü birlikte 1 174 043 bayt, eşiğin 3 kB üstü. Ham eşik birleşik boyun
+on iki buçuk kilobayt kadar üstüne çekildi, 1 186 500; brotli hâli birlikte 282,4 kB, eşiği
+yerinde (WORKLOG 2026-10-24).
 2026-10-24'ün yedi dallık zinciri (VK ve TB düzeltmeleri, dosya okumanın üç deliği, Ayarlar'ın
 not boyu) ham boyu on iki buçuk kilobayt büyüttü (1 158 660'tan 1 171 212 bayta): dört dile
 giren yeni cümleler (paketin eksik ve yeni planları, depo dolu notu), exe'nin kapanışı
@@ -115,6 +121,8 @@ beklemesi, okuyucuların kimlik ve paket kuralları. Her dal tek başına eşiğ
 zincir `dosya-okuma-b7`'de 145 baytla aştı. Ham eşik yine on iki buçuk kilobayt kadar pay
 bırakacak yere çekildi, 1 184 000; brotli hâli 281,8 kB ile eşiğin altında, yerinde (WORKLOG
 2026-10-24 akşam, dosya okuma).
+Zincir `main`'e bağlanınca (2026-10-24 gece) iki eşikten büyüğü, `main`'in 1 186 500'ü kaldı;
+`dosya-okuma-b7`'de birleşik ham boy 1 180 216 bayt.
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
@@ -391,7 +399,7 @@ Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
 numara okumuyor. `package-lock.json`'ın kökündeki iki numarayı da o yazar
 (`scripts/kilit-surumu.mjs`, TODO B7.32), yoksa sonraki `npm install` onları değiştirip
 ağacı kirletir. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
-basar ve `src/leaf/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
+basar ve `src/leaf/app/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
 ve Vitest modül yüklenirken çöker). Aynı damga `dist-site/sw.js`'in önbellek
 adına girer. Ayarlar → Hakkında hangi sürüm olduğunu gösterir. Bu bir derleme
 bayrağı değil, dört teslim yoluna basılan aynı damga.

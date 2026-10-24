@@ -41,7 +41,7 @@ Tuzaklar işe başlarken okunur: [docs/TRAPS.md](docs/TRAPS.md)'nin başındaki 
 
 ## Çalışma düzeni
 
-- Tek kalıcı checkout, `~/GitHub/Mozaikler/Mozaik`, sürekli worktree yok. Her iş `main`'den açılan kısa ömürlü bir dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar; paralel çalışan her oturum ya da ajan geçici bir worktree alır (`git worktree add ~/GitHub/Mozaikler/Mozaik-<iş> -b <dal> main`), dalı birleşince worktree kaldırılır (`git worktree remove`). Yeni refactor turu açılmıyor (DECISIONS 2026-10-23).
+- Tek kalıcı checkout, `~/GitHub/Mozaikler/Mozaik`, sürekli worktree yok. Her iş `main`'den açılan kısa ömürlü bir dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar; paralel çalışan her oturum ya da ajan geçici bir worktree alır (`git worktree add ~/GitHub/Mozaikler/Mozaik-<iş> -b <dal> main`), dalı birleşince worktree kaldırılır (`git worktree remove`).
 - Bir TODO maddesine başlamadan önce `git worktree list`'e ve dal adlarına (`git branch -a`) bakılır; o madde için bir dal varsa madde alınmıştır: başlanmaz, raporda söylenir.
 - Commit'ten önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yok. Taşıma, içerik ve biçim değişikliği ayrı commit'lerde.
 - Push SSH ile ve yalnız kendi dalı: `git push origin <dal>`. Zorla push, etiket ve `main`'e push yok. CI'ın sonucu beklenmez, `gh run view` ile okunur, dalın CI'ı kırmızıysa önce o düzeltilir.

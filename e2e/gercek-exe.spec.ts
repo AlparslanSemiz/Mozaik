@@ -14,7 +14,7 @@
 // platforms answer differently the test says which answer it expects and why.
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test as base } from '@playwright/test';
 import {
@@ -137,13 +137,20 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     expect(yer).toBe(exe.klasor);
   });
 
-  test('hiç sorulmadan diske yazıyor, ve değişiklik de diske düşüyor', async ({ exe }) => {
-    // The same promise e2e/exe.spec.ts checks against a Map, here against a
-    // real folder the Rust side created.
-    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toBe('');
+  // A fresh sandbox HOME is an empty start, and since A2 (the audit of
+  // 2026-10-24) an empty start writes nothing to Documents: that write is what
+  // emptied a full folder on a wiped profile. The first change does.
+  test('boş açılış diske yazmıyor, ilk değişiklik hiç sorulmadan yazıyor', async ({ exe }) => {
+    await new Promise((r) => setTimeout(r, 3_000)); // past 0.4 s and 2 s
+    expect(tumu(exe.klasor)).toBe('');
+
+    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.bekle('[role="dialog"]');
+    await exe.oturum.tikla('metin:Yükle');
+
+    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).toContain('Örnek Kurs');
     // Polled, not read once: the day's copy is a second write that lands a few
-    // milliseconds after the bundle, and a single read after the first raced it
-    // (it failed one run in three once the suite grew, 2026-09-24).
+    // milliseconds after the bundle (it raced once, 2026-09-24).
     await expect
       .poll(
         () =>
@@ -151,12 +158,65 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         { timeout: 5_000 },
       )
       .toHaveLength(1);
+  });
 
+  // The other half of A2, through Rust's own `read_file`: reopened over a plan
+  // that was read, the program writes on its own, and the prune that follows
+  // keeps the ten newest backups that HOLD WORK. An empty backup is not one of
+  // the ten; the old prune counted it.
+  test('okunmuş planla açılış yazıyor, budama yalnız dolu günlükleri sayıyor', async ({ exe }) => {
     await exe.oturum.tikla('metin:Örnek veriyle doldur');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
-
     await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).toContain('Örnek Kurs');
+    const dolu = tumu(exe.klasor);
+    const bos = JSON.stringify({
+      bundleVersion: 1,
+      activeId: '1',
+      plans: [
+        {
+          id: '1',
+          name: '1. plan',
+          draft: false,
+          state: { teachers: [], classes: [], lessons: [], rooms: [] },
+        },
+      ],
+    });
+    // Twelve full days in 2020 and the two newest days before today empty.
+    const ad = (y: number, a: number, g: number) =>
+      `ders-programi-${y}-${String(a).padStart(2, '0')}-${String(g).padStart(2, '0')}.json`;
+    for (let g = 1; g <= 12; g++) writeFileSync(join(exe.klasor, ad(2020, 1, g)), dolu);
+    writeFileSync(join(exe.klasor, ad(2020, 2, 1)), bos);
+    writeFileSync(join(exe.klasor, ad(2020, 2, 2)), bos);
+    // Today's own file goes, so the reopened program's write is the day's first.
+    for (const n of readdirSync(exe.klasor)) {
+      if (!n.startsWith('ders-programi-2020-') && n !== 'ders-programi-tumu.json')
+        rmSync(join(exe.klasor, n));
+    }
+
+    await exe.oturum.kapat().catch(() => undefined);
+    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
+    try {
+      await yeni.bekle('h1', 20_000);
+      // Today + twelve full = thirteen full: the three oldest full ones go,
+      // the two empty ones (newer than the cut) stay.
+      await expect
+        .poll(
+          () =>
+            readdirSync(exe.klasor).filter((n) => n.startsWith('ders-programi-2020-01-')).length,
+          {
+            timeout: 15_000,
+          },
+        )
+        .toBe(9);
+      const kalan = readdirSync(exe.klasor);
+      expect(kalan).not.toContain(ad(2020, 1, 3));
+      expect(kalan).toContain(ad(2020, 1, 4));
+      expect(kalan).toContain(ad(2020, 2, 1));
+      expect(kalan).toContain(ad(2020, 2, 2));
+    } finally {
+      await yeni.kapat().catch(() => undefined);
+    }
   });
 
   test('örnek okulu otomatik diziyor', async ({ exe }) => {
@@ -501,7 +561,9 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   test('depo doluyken kurtarma kopyası yazılıyor ve sonraki açılış onu ezmiyor (VK2)', async ({
     exe,
   }) => {
-    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toBe('');
+    // A fresh profile writes nothing on its own any more (A2); the first save
+    // below is the sample's. This waits for the store's own first save only.
+    await new Promise((r) => setTimeout(r, 1_500));
     const dolgu = await exe.oturum.js(`
       let n = 0;
       for (const boy of [512 * 1024, 64 * 1024, 4 * 1024, 256]) {
@@ -531,9 +593,12 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili(), bekleMs: ACILIS_MS });
     try {
       await yeni.bekle('h1', ACILIS_MS);
-      // The live file is rewritten from the old state: the very case the
-      // rescue copy is for. Then the rescue copy is untouched.
-      await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toContain('Örnek Kurs');
+      // The storage holds the empty plan from before the sample. It used to
+      // be written over the live file here, the very case the rescue copy was
+      // for; since A2 an empty plan never goes over a file that holds work,
+      // so the live file keeps the sample too. The rescue copy is untouched.
+      await new Promise((r) => setTimeout(r, 3_000)); // past 0.4 s and 2 s
+      expect(tumu(exe.klasor)).toContain('Örnek Kurs');
       expect(readFileSync(yol, 'utf8')).toContain('Örnek Kurs');
       expect(kurtarma()).toEqual([ad]);
     } finally {

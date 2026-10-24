@@ -81,20 +81,31 @@ function disk(page: Page): Promise<Record<string, string>> {
   }, KLASOR);
 }
 
-async function seed(page: Page, names: string[]) {
+async function seed(page: Page, names: string[], text = 'eski') {
   await page.evaluate(
-    async ([folder, list]) => {
+    async ([folder, list, body]) => {
       const root = await navigator.storage.getDirectory();
       const dir = await root.getDirectoryHandle(folder as string, { create: true });
       for (const name of list as string[]) {
         const out = await (await dir.getFileHandle(name, { create: true })).createWritable();
-        await out.write('eski');
+        await out.write(body as string);
         await out.close();
       }
     },
-    [KLASOR, names] as const,
+    [KLASOR, names, text] as const,
   );
 }
+
+/**
+ * A bundle with work in it. Since A2 (the audit of 2026-10-24) the prune counts
+ * only backups that hold work and runs only after a write that does, so a
+ * prune test seeds real backups and opens a plan that is not empty.
+ */
+const DOLU_PAKET = JSON.stringify({
+  bundleVersion: 1,
+  activeId: '1',
+  plans: [{ id: '1', name: '1. plan', draft: false, state: { rooms: [{ id: 'r', name: 'A' }] } }],
+});
 
 async function openData(page: Page) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
@@ -153,6 +164,10 @@ test.describe('74. Nereye kaydedilsin', () => {
   test('ONBİRİNCİ gün en eskisini siliyor, YABANCI dosyalara dokunmuyor', async ({ page }) => {
     await fakePicker(page);
     await page.goto('/');
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page.locator('.step', { hasText: 'Derslikler' }).click();
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('Zk1');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
     // Ten days of ours plus four of my father's own files — which is what
     // Belgelerim actually looks like, and the reason prunable() matches on a
     // name pattern instead of counting.
@@ -166,7 +181,8 @@ test.describe('74. Nereye kaydedilsin', () => {
       'ders-programi.json',
       'notlar.txt',
     ];
-    await seed(page, [...bizim, ...yabanci]);
+    await seed(page, bizim, DOLU_PAKET);
+    await seed(page, yabanci);
 
     await openData(page);
     await page.getByRole('button', { name: 'Klasör seç…' }).click();
