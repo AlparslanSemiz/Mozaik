@@ -155,6 +155,44 @@ testi (TODO §8l). Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor` 2026-10
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 
+
+---
+
+## 2026-10-24 · TB8'in bitti kontrolü (`tb8-eksik-plan`)
+
+**`main` alındı** (bfa6099, `surec-sadelestirme`): çatışma TODO §8l'de (dondurulan bölümde
+`main`'in hâli kaldı, TP-B'ye "paket yolu fuzz'u geldi" işlendi) ve "Şu an"da.
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`, düzeltmedi). Düzelen, önce
+kırmızı testle (`src/storeContract.test.ts`, üç test): `state`'i nesne olmayan girdi
+okunamayan sayılmıyordu ve buradaki aynı kimlikli plan siliniyordu (`parseBundle`'ın
+`skipped`'i); depo doluyken hiçbir plan yazılamazsa dosyada olmayan yerel planlar yine
+siliniyor, not "hiçbir şey değişmedi" diyordu (TB8'den eski, veri kaybı sınıfı); yazılamayan
+yeni plan dizinde verisiz satır kalıyordu. CHANGELOG'un "aynı adlı plan" cümlesi "aynı
+kimlik"e, `bundle.ts`'in `store.ts`'e işaret eden yorumları, TESTFINDINGS'in TB8 girdisi.
+Reddedilen: depo dolu ve okunamayan plan birlikteyken notun yalnız depoyu söylemesi (ikisi
+birden nadir, depo cümlesi zaten "dosyayı saklayın" diyor); dosyanın açık planı buradaki
+kalan plansa açılışın ilk okunan plana geçmesi (veri kaybı yok); karışık paketin onay sayısına
+birim testi (arayüz metni, tıklama testinde görüldü); `readBundlePlans`'ın iki kez koşması
+(`replaceLibrary` kendi güvenlik gerekçesini çağırana bırakmamalı, maliyeti yok); onay
+başlığının "bütün planlar" demesi (gövde sayıları doğru söylüyor). Daha yeni planın cümlesi
+B7.33'e.
+
+**Tıklama testi** (`dist/index.html`, `file://`, Playwright Chromium, 1920×1080, `tr-TR`, boş
+profil, örnek okul; betik ve görüntüler `scratch/tb8-eksik-plan/tiklama/`'da). Örnek okul →
+Ayarlar → Planlar ve yedek → Boş plan → Tümünü dosyaya kaydet → (A) geçerli paket: "Buradaki
+2 plan silinip dosyadaki 2 plan açılacak", "2 plan açıldı."; (B) öğretmen listesi silinmiş
+paket: onay "Dosyadaki 1 plan eksik ya da bozuk, açılmayacak.", sonra "1 plan açıldı, 1 plan
+eksik ya da bozuk olduğu için açılmadı.", "1. plan" 25 öğretmeniyle yerinde; (C) bütün planları
+bozuk paket: soru yok, "Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi."; kesik JSON:
+"bütün planları içeren bir dosya değil" (B7.34). Komşu akış: üst çubuğun plan seçicisiyle iki
+plan arasında, Okul → Öğretmenler (25 ve 0), Program. Konsol hatası yok. Onay gövdesi 15 px,
+kontrast 17,5; Ayarlar'daki durum notu 13 px (B7.35). Düzeltmeden sonra yeniden koşuldu, aynı.
+
+**Koşulan.** `hizli` (1346 geçti), `storeContract`, `bundle`, `fuzz`, `docs` testleri, `tsc`,
+`eslint`, `prettier`, `npm run build`, tıklama testi iki kez (`agir.sh`). **Koşulmayan.** E2E
+yerelde (CI'da), mutasyon.
+
 ---
 
 ## 2026-10-23 gece · TB8: "Tümünü dosyadan aç" eksik planı açmıyor (`tb8-eksik-plan`)

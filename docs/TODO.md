@@ -849,6 +849,21 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
+- [ ] **B7.33 Paketteki daha yeni sürümün planı "eksik ya da bozuk" deniyor (2026-10-24, TB8'in
+      incelemesi).** `readBundlePlans` `readPlanFile`'ın `yeni` cevabını okunamayanla bir sayıyor;
+      tek dosya yolu aynı planda "programı güncelleyin" diyor (DENETIM DK10). Veri kaybı değil,
+      plan açılmıyor ve buradaki kalıyor. Çare adayı: `readBundlePlans` yeniyi ayrı döndürür, not
+      güncellemeyi söyler.
+- [ ] **B7.34 Kesik paket dosyası tek plan dosyası sanılıyor (2026-10-24, TB8'in tıklama testi).**
+      JSON'u yarım kalmış bir paket "Tümünü dosyadan aç"a verilince not "Bu dosya bütün planları
+      içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz." diyor:
+      `parseBundle` okunamayan metinle tek plan dosyasını ayırmıyor. Hiçbir şey değişmiyor, ama
+      kullanıcı yanlış düğmeye yollanıyor. Çare adayı: `bundleVersionOf` null ve metin JSON
+      değilse "dosya okunamadı" cümlesi.
+- [ ] **B7.35 Ayarlar'daki durum notları 13 px (2026-10-24, TB8'in tıklama testi).** Planlar
+      ve yedek'teki `.hint[role="status"]` notu 13 px, kontrastı 7,28 (açık tema, `getComputedStyle`).
+      Kontrast yeterli, boy az gören bir kullanıcı için küçük; bütün `.hint`'lerin boyu, yani
+      DESIGN'ın tipografi kararı, sade ekran turuyla birlikte.
 
 ---
 
@@ -1642,7 +1657,9 @@ testi o commit'te sıradan bir teste döner.
       ve buradaki aynı kimlikli plan kalıyor; hiçbir plan okunamıyorsa soru sorulmuyor ve
       hiçbir şey değişmiyor; onay sorusu açılmayacak planları sayıyor. Testleri
       `src/storeContract.test.ts` ve `e2e/planlar.spec.ts` (ikisi de önce kırmızı) ile
-      `src/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi.
+      `src/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
+      delik daha buldu ve aynı dalda kapandı: `state`'i nesne olmayan girdi okunamayan sayılıyor,
+      depo doluyken hiçbir plan yazılamazsa buradaki planlar silinmiyor; B7.33–B7.35 açık.
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.
