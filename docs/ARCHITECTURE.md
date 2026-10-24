@@ -242,7 +242,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
-| `ui/program/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
+| `ui/program/Inspector.tsx` | varlık panelini açan yol: bağlam, `useInspect()` ve paneli çizen provider |
+| `ui/program/InspectorSheet.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası, bilgileri ve düzenlenmesi |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
