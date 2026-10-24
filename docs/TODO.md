@@ -1088,7 +1088,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
       özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
-      dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
+      dersin ikinci branş bayrağını hiç okumuyor, `pure/constraints/`'in sınıf dolu cümlesi ve
       `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
 - [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
@@ -1222,7 +1222,7 @@ ertelendi.
       desenle ayrıldı (erişilemeyen savunma, kullanılmayan yedek, `sanitize` sonrası ölü
       kapı) ve 86'sı `StringLiteral`. Geri kalan 558 okunmadı. Her biri ya ölçülmeyen bir
       davranış, ya silinebilecek bir kod dalı, ya da anlamsız bir mutant, ve ayrılmadan
-      liste bir iş listesi değil. En yoğun yer `constraints.ts` (179) ve o gün store.ts adını taşıyan dosya (161, bugün bölündü).
+      liste bir iş listesi değil. En yoğun yer `pure/constraints/` (179) ve o gün store.ts adını taşıyan dosya (161, bugün bölündü).
       Sınıflandırmanın okuyarak yapılamayacağı ölçülerek görüldü. `constraints.ts:820`
       (`i < block.size` yerine `i <= block.size`) okuyunca bariz bir gerçek boşluk gibi
       duruyor: `dropMap`'in doluluk haritasına bloğun bittiği hücrenin bir sonrasını da
@@ -1299,7 +1299,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
 | RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/entities.ts` |
-| RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
+| RF6 | `pure/constraints/` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
 | RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
 | RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
 | RF9 | öğretmen ve sınıf kâğıdı `Print()`'in içinde, ayrı üretilemiyor | `src/ui/Print.tsx` |
@@ -1437,7 +1437,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
       öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `relax.ts`'in
       modüllere taşınması. Adım 1 ve 2'ye bağlı.
-- [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `constraints.ts`'in yalnız
+- [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `pure/constraints/`'in yalnız
       taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
       Mutasyon listesinin yolları aynı commit'te.
 - [ ] **Park: RF4, RF7, RF13, RF14, RF19.** Gerekçeleri DECISIONS 2026-10-08.

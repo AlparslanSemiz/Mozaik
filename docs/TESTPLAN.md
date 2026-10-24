@@ -39,7 +39,7 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Birim ve duman | `npm test` | CI'da her push'ta. Yerelde `hizli`'nin dışarıda bıraktığı dört dosyadan biri yalnız dokunulan test dosyasıysa |
 | E2E | `npm run test:e2e` | CI'da her push'ta, ve sürüm çıkarmadan önce. Yerelde yalnız dokunulan spec |
 | Site, sunucu, klasör | `npm run test:site` | CI'da her push'ta. Teslim yolları: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
-| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`constraints.ts`, `rules.ts`) ve çözücüyü ölçer |
+| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`pure/constraints/`, `rules.ts`) ve çözücüyü ölçer |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
@@ -144,7 +144,7 @@ Haftanın bloklara bölünüşü ve ızgaradan geri okunuşu. Sürüm numarası,
 exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adresleri
 (`surum.test.ts`).
 
-`constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
 fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
 çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
@@ -295,7 +295,7 @@ Ayrım ölçüldü ve iki yapılandırma yan yana koşturuldu: aradaki fark tam 
 bir dosya, ne bir test eksik ne bir test fazla. Sayılar WORKLOG'un o günkü
 girdisinde.
 
-Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints/constraints.ts`, `pure/constraints/rules.ts`,
+Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints/`, `pure/constraints/rules.ts`,
 `leaf/model/blocks.ts`, `pure/io/parseState.ts`, `pure/undo/undo.ts`, `pure/io/library.ts`,
 `pure/feasibility/feasibility.ts`, `pure/entities/entities.ts`, `pure/solver/solver.ts`): bütün depoyu ölçmek
 pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.

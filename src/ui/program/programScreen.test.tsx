@@ -22,7 +22,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { ReactNode } from 'react';
-import { closedKey, placementKey } from '../../pure/constraints/constraints';
+import { closedKey, placementKey } from '../../pure/constraints';
 import { EMPTY_PROGRAM_MASK, type ProgramMask } from '../../pure/program/programMask';
 import { activePlacements, replaceActiveGrid } from '../../pure/grid/programs';
 import { makeWorld } from '../../pure/worlds';

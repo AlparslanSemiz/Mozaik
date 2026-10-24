@@ -46,7 +46,7 @@ köprüsü, doğrudan DOM'a yazan etkileşimler, ve saf modülleri React'ten sü
 kancalar.
 
 **Bileşenler** çizer ve olay yakalar. Bir `.tsx` dosyasında çakışma hesabı
-görülüyorsa yanlış yerdedir ve `constraints.ts`'e taşınır.
+görülüyorsa yanlış yerdedir ve `pure/constraints/`'e taşınır.
 
 ## Dosya haritası
 
@@ -67,7 +67,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | Dosya | Görevi |
 |---|---|
 | `leaf/model/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
-| `leaf/model/keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
+| `leaf/model/keys.ts` | sözlük anahtarları, motorun dosyaları ile `rules.ts` birbirini import etmesin diye |
 | `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
 | `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
 | `leaf/preference/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
@@ -84,8 +84,15 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `pure/constraints/index.ts` | kısıt paketinin giriş noktası: motorun ve kuralların bütün dışa aktarımları |
-| `pure/constraints/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
+| `pure/constraints/index.ts` | kısıt paketinin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve kuralların hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
+| `pure/constraints/occupancy.ts` | kim nerede meşgul: indeks (`buildIndex`, `Index`) ve çözücünün yerinde çalışan `occupy` ile `vacate`'i |
+| `pure/constraints/engine.ts` | motorun hükmü: `blocker`, `blockerDetail` ve üstüne yumuşak kurallar (`check`) |
+| `pure/constraints/blocks.ts` | ızgaradan blok okumak: `placedBlocks`, `blockSpans`, `pendingBlocks` |
+| `pure/constraints/placing.ts` | bir bloğu koymak ve kaldırmak: `place`, `blockAt`, sabitleme, `liftBlock` ve sabite saygılı `removeBlock` |
+| `pure/constraints/drop.ts` | bırakmanın ne yaptığı: `dropMap` (sürükleme başına bir kez), takas ve havuza düşürme, cümleleri, `applyDrop` |
+| `pure/constraints/closed.ts` | yerleştikten sonra kapanan saatler (`closedConflicts`, tuzak 16) |
+| `pure/constraints/sanitize.ts` | `sanitize`, her yüklemede ve her ayar değişikliğinde (tuzak 4, 5, 6) |
+| `pure/constraints/pins.ts` | bir kapsamı topluca sabitlemek (`pinScopeCells`, `togglePinScope`) |
 | `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
@@ -99,7 +106,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `constraints.ts` ile `entities.ts` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
+| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `entities.ts` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
@@ -222,7 +229,7 @@ kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 
 ### Hangi dosyaların testi var
 
-`constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
@@ -285,8 +292,8 @@ bir import grafiğinde görünmez, onları kendi testleri ölçüyor.
 ölçülüyor: `sinir` yalnız çalışma zamanı grafiğine bakıyor, yani bir `import
 type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya döner.
 
-- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
-- **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
+- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki motorun dosyaları ile `rules.ts` birbirini çağırmasın, paketin index'i onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `pure/constraints/`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
+- **Yalnız tip alınır.** `rules.ts` `occupancy.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
 - **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `parseState.ts` yapar ve depo tarafını `planStore.ts` sürer. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
 - **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `storageReport.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 
@@ -343,7 +350,7 @@ göre sayılır, `placedHours`'tan türetilmez, çünkü bir dersin kalemleri te
 sayıyı paylaşamaz.
 
 `place()` her çağrıda sözlüğü kopyaladığı için aramanın iç döngüsüne pahalı. Onun
-yerine `constraints.ts`'teki `occupy` ve `vacate` kullanılır, `place()` ile
+yerine `pure/constraints/`'teki `occupy` ve `vacate` kullanılır, `place()` ile
 `buildIndex()` ikilisinin yerinde çalışan hâli. İkisinin sapmadığı
 `constraints.test.ts`'te sabitleniyor.
 

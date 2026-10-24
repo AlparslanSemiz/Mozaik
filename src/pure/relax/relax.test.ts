@@ -13,7 +13,7 @@ import {
 import type { RelaxFamily, RelaxOptions, Suggestion } from './relax';
 import { solve } from '../solver/solver';
 import { activePlacements, replaceActiveGrid } from '../grid/programs';
-import { buildIndex } from '../constraints/constraints';
+import { buildIndex } from '../constraints';
 import { findViolations } from '../constraints/rules';
 import { parseKey } from '../../leaf/model/keys';
 import { WORLDS, closeHours, closeWeek, illegalBlocks, makeWorld } from '../worlds';

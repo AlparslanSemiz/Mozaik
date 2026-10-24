@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place, setBlockPinned } from '../constraints/constraints';
+import { buildIndex, placementKey, place, setBlockPinned } from '../constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,

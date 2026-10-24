@@ -22,8 +22,8 @@ import {
   removeBlock,
   sanitize,
   setBlockPinned,
-} from './constraints';
-import type { BlockRef } from './constraints';
+} from './index';
+import type { BlockRef } from './index';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,

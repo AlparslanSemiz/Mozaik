@@ -28,7 +28,7 @@ import {
   type State,
   type Teacher,
 } from '../../leaf/model';
-import type { Index } from './constraints';
+import type { Index } from './occupancy';
 import { activePlacements } from '../grid';
 
 export interface Violation {

@@ -21,7 +21,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { blocker, buildIndex, place } from '../../pure/constraints/constraints';
+import { blocker, buildIndex, place } from '../../pure/constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,

@@ -9,7 +9,7 @@ import {
   holeReason,
   loadStatus,
 } from './feasibility';
-import { place } from '../constraints/constraints';
+import { place } from '../constraints';
 import {
   addClass,
   addLesson,
@@ -19,8 +19,8 @@ import {
   setAvailability,
   setWholeWeek,
 } from '../entities/entities';
-import { buildIndex } from '../constraints/constraints';
-import { closedKey } from '../constraints/constraints';
+import { buildIndex } from '../constraints';
+import { closedKey } from '../constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,

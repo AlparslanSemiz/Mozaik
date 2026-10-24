@@ -1,7 +1,7 @@
 // The limit boxes. Every export of rules.ts is covered here (docs/ARCHITECTURE.md rule:
 // no feature lands in a pure module without a test).
 
-import { buildIndex, place } from './constraints';
+import { buildIndex, place } from './index';
 import { blankProgram } from '../grid/programs';
 import {
   DEFAULT_BELL,

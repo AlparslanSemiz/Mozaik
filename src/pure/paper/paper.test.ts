@@ -4,7 +4,7 @@
 // own, the header's day groups, and a single teacher's sheet made alone, which
 // is what sending a teacher their timetable needs (B3.8).
 
-import { blockSpans, buildIndex, placementKey } from '../constraints/constraints';
+import { blockSpans, buildIndex, placementKey } from '../constraints';
 import { classSheet, sheetHead, teacherSheet, type SheetOptions } from './';
 import { translate } from '../../leaf/i18n/i18n';
 import type { State } from '../../leaf/model/types';

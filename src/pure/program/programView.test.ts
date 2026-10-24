@@ -6,13 +6,7 @@
 // is both opened and moved,
 // and the small answers the menu and the head of the tray lean on.
 
-import {
-  buildIndex,
-  closedKey,
-  place,
-  placementKey,
-  setBlockPinned,
-} from '../constraints/constraints';
+import { buildIndex, closedKey, place, placementKey, setBlockPinned } from '../constraints';
 import { EMPTY_PROGRAM_MASK, setDayMask, setRowMask } from './';
 import { replaceActiveGrid } from '../grid';
 import {
