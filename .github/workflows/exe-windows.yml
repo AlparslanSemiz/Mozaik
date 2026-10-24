@@ -1,6 +1,8 @@
 # Gerçek exe, Windows'ta (TP7): babanın programının kendisi. Mozaik.exe derlenir,
 # WebView2'de açılır ve e2e/gercek-exe.spec.ts ona karşı koşar (Linux'ta aynı süit
-# WebKitGTK'ye karşı, `npm run exe:e2e`). windows.yml tarayıcıda ana süiti koşar;
+# WebKitGTK'ye karşı, `npm run exe:e2e`). Tek fark, test exe'sinin WebView2'ye bir
+# hata ayıklama portu açtırması: msedgedriver programa oradan bağlanıyor
+# (scripts/webdriver.mjs, başı). Yayınlanan exe surum.yml'de portsuz derleniyor. windows.yml tarayıcıda ana süiti koşar;
 # bu dosya köprüyü, Rust komutlarını, gerçek Belgeler'i ve WebView2'nin kendisini.
 #
 # YAVAŞ SÜİT: push'u ve birleştirmeyi beklemez (CLAUDE.md). Haftada bir koşar, ve
@@ -32,6 +34,7 @@ on:
       - 'src/platform/**/update.ts'
       - 'e2e/gercek-exe.spec.ts'
       - 'scripts/webdriver.mjs'
+      - 'scripts/pencere-kapat.mjs'
       - 'playwright.gercek-exe.config.ts'
       - '.github/workflows/exe-windows.yml'
 
@@ -56,14 +59,16 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
-          # tauri-driver, cargo install'la geliyor; her koşuda derlenmesin.
-          cache-bin: true
 
       - run: npm ci
       - run: npm run build
-      # surum.yml'in derlediği gibi. CLI sabit, exe:rpm'deki sürüm.
-      - run: npx --yes @tauri-apps/cli@2.12.1 build --no-bundle
-      - run: cargo install tauri-driver@2.0.6 --locked
+      # surum.yml'in derlediği gibi, CLI sabit (exe:rpm'deki sürüm); yalnız pencereye
+      # hata ayıklama portu eklenir (`windowsTestAyari`).
+      - name: Test exe'si
+        shell: bash
+        run: |
+          node --input-type=module -e "import { windowsTestAyari } from './scripts/webdriver.mjs'; import { writeFileSync } from 'node:fs'; writeFileSync(process.env.RUNNER_TEMP + '/test-exe.conf.json', JSON.stringify(windowsTestAyari()));"
+          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
 
       # WebView2 Runtime'ın sürümü, ve ona eşleşen msedgedriver: Microsoft ikisinin
       # aynı sürüm olmasını istiyor. Runtime runner imajının listesinde yazmıyor;
@@ -94,62 +99,7 @@ jobs:
           Invoke-WebRequest "https://msedgedriver.microsoft.com/$pv/edgedriver_win64.zip" -OutFile "$d.zip"
           Expand-Archive "$d.zip" $d -Force
           & "$d\msedgedriver.exe" --version
-          # Ayrıntılı günlükle sarılı: tauri-driver sürücüye argüman geçiremiyor,
-          # ve bir oturum açılmadığında sebebi yalnız bu günlükte yazıyor.
-          # RUNNER_TEMP'te: Playwright koşu başında test-results/'u boşaltıyor.
-          $gunluk = Join-Path $env:RUNNER_TEMP 'msedgedriver.log'
-          Set-Content "$d\surucu.cmd" "@`"$d\msedgedriver.exe`" --verbose --log-path=`"$gunluk`" %*" -Encoding ascii
-          "MOZAIK_NATIVE_DRIVER=$d\surucu.cmd" >> $env:GITHUB_ENV
-
-      # Program sürücüsüz açılıyor mu: WebDriver'dan önce, ayrı bir soru.
-      - name: Program sürücüsüz açılıyor mu
-        shell: pwsh
-        run: |
-          $exe = @('src-tauri/target/release/Mozaik.exe', 'src-tauri/target/release/ders-programi.exe') |
-            Where-Object { Test-Path $_ } | Select-Object -First 1
-          $p = Start-Process $exe -PassThru
-          Start-Sleep -Seconds 15
-          Get-Process | Where-Object { $_.ProcessName -match 'Mozaik|ders-programi|msedgewebview2' } |
-            Format-Table ProcessName, Id, StartTime -AutoSize | Out-String | Write-Host
-          if ($p.HasExited) { Write-Host "program kapandı, çıkış kodu $($p.ExitCode)" } else { Write-Host 'program açık' }
-          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force
-          Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
-
-      # TEŞHİS 2 (TP7, 2026-10-24, geçici). İlk teşhis: WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
-      # bu exe'de (release de debug de) portu açmıyor. Burada: (A) portu derleme anında
-      # additionalBrowserArgs ile veren bir exe portu açıyor mu, (B) msedgedriver ona
-      # debuggerAddress ile bağlanıp sayfayı okuyabiliyor mu (Microsoft'un belgelediği yol).
-      - name: 'Teşhis 2: additionalBrowserArgs ve debuggerAddress'
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          node -e "const c=require('./src-tauri/tauri.conf.json'); const w={...c.app.windows[0], additionalBrowserArgs:'--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port=9222'}; require('fs').writeFileSync(process.env.RUNNER_TEMP+'/port.conf.json', JSON.stringify({app:{windows:[w]}}))"
-          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle --config "$env:RUNNER_TEMP\port.conf.json" 2>&1 | Select-Object -Last 2
-          $exe = @('src-tauri/target/release/Mozaik.exe', 'src-tauri/target/release/ders-programi.exe') | Where-Object { Test-Path $_ } | Select-Object -First 1
-          Get-Process msedgewebview2, Mozaik, ders-programi -ErrorAction SilentlyContinue | Stop-Process -Force
-          Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
-          $p = Start-Process $exe -PassThru
-          Start-Sleep -Seconds 15
-          try { $v = Invoke-RestMethod 'http://127.0.0.1:9222/json/version' -TimeoutSec 5; Write-Host "A -> PORT AÇIK: $($v.Browser)" }
-          catch { Write-Host "A -> PORT KAPALI: $($_.Exception.Message)" }
-          Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -match 'embedded-browser-webview' } | Select-Object -First 1 |
-            ForEach-Object { Write-Host "  ana süreç: $($_.CommandLine)" }
-          $drv = Start-Process "$env:RUNNER_TEMP\edgedriver\msedgedriver.exe" -ArgumentList '--port=9515' -PassThru
-          Start-Sleep -Seconds 3
-          $body = '{"capabilities":{"alwaysMatch":{"browserName":"webview2","ms:edgeOptions":{"debuggerAddress":"127.0.0.1:9222"}}}}'
-          try {
-            $s = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:9515/session' -Body $body -ContentType 'application/json' -TimeoutSec 60
-            $sid = $s.value.sessionId
-            $t = Invoke-RestMethod -Uri "http://127.0.0.1:9515/session/$sid/title" -TimeoutSec 20
-            $u = Invoke-RestMethod -Uri "http://127.0.0.1:9515/session/$sid/url" -TimeoutSec 20
-            Write-Host "B -> OTURUM AÇILDI: başlık '$($t.value)', adres $($u.value)"
-          } catch { Write-Host "B -> OTURUM AÇILMADI: $($_.Exception.Message) $($_.ErrorDetails.Message)" }
-          Stop-Process -Id $drv.Id -Force -ErrorAction SilentlyContinue
-          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-          Get-Process msedgewebview2, Mozaik, ders-programi -ErrorAction SilentlyContinue | Stop-Process -Force
-          # Süit asıl exe'yi beklediği için portsuz derleme geri yazılır.
-          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle 2>&1 | Select-Object -Last 1
+          "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
 
       - name: Gerçek exe süiti
         shell: bash
@@ -159,7 +109,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: gercek-exe-windows
-          path: |
-            test-results/
-            ${{ runner.temp }}/msedgedriver.log
+          path: test-results/
           retention-days: 7

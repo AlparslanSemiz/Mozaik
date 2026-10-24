@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // The REAL exe, not the browser build with a fake `__TAURI__` (that is
 // e2e/exe.spec.ts). Playwright is only the runner here: no browser is opened,
-// every test drives the program through tauri-driver and WebDriver
+// every test drives the program over WebDriver (tauri-driver on Linux)
 // (scripts/webdriver.mjs says why): the Linux binary here, Mozaik.exe on a
 // Windows runner (.github/workflows/exe-windows.yml). One worker, because
 // every test starts its own program and the driver port is one port.

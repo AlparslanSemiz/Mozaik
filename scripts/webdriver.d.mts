@@ -3,6 +3,8 @@
 // type-checked.
 
 export const WINDOWS: boolean;
+export const WINDOWS_PORTU: number;
+export function windowsTestAyari(): { app: { windows: Record<string, unknown>[] } };
 export function varsayilanIkili(): string;
 export interface WindowsYerleri {
   klasor: string;
@@ -25,6 +27,7 @@ export function suruculuBaslat(secenek: {
 export class Oturum {
   port: number;
   id: string;
+  program: number | undefined;
   static ac(secenek: { port?: number; ikili: string; bekleMs?: number }): Promise<Oturum>;
   bul(secici: string): Promise<string>;
   tikla(secici: string): Promise<void>;

@@ -19,17 +19,56 @@
 // keeps its profile under %LOCALAPPDATA%. So the suite uses the real folders
 // and empties them before every test, and for that reason it refuses to run
 // anywhere but a GitHub-hosted runner, a throwaway machine (`windowsYerleri`).
-// The driver behind tauri-driver is msedgedriver, whose version has to match
-// the installed WebView2 Runtime; the workflow fetches it and names it in
-// MOZAIK_NATIVE_DRIVER.
+//
+// AND NO tauri-driver ON WINDOWS. It hands msedgedriver the exe to start, and
+// msedgedriver then asks WebView2 for its debugging port through
+// WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS -- which wry overrides: it always
+// passes its own browser arguments, and those win over the variable. Every
+// session died with "DevToolsActivePort file doesn't exist" (2026-10-10 to
+// 2026-10-24, TESTFINDINGS). What works (measured 2026-10-24): the TEST exe is
+// built with the port in `additionalBrowserArgs` (`windowsTestAyari`, the
+// workflow passes it to `tauri build --config`; the release exe never has it),
+// the suite starts the exe itself, and msedgedriver attaches to the running
+// WebView2 with `ms:edgeOptions.debuggerAddress`, the attach Microsoft
+// documents. msedgedriver's version has to match the installed WebView2
+// Runtime; the workflow fetches it and names it in MOZAIK_NATIVE_DRIVER.
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const KOK = resolve(import.meta.dirname, '..');
 
 export const WINDOWS = process.platform === 'win32';
+
+/** WebView2's debugging port in the Windows test exe, and nowhere else. */
+export const WINDOWS_PORTU = 9222;
+
+/**
+ * The `tauri build --config` for the Windows test exe: the window as
+ * tauri.conf.json has it, plus the debugging port. The config is merged as a
+ * JSON patch, so the whole window goes in (an array is replaced, not merged),
+ * and the first three switches are wry's own default, which setting the field
+ * replaces.
+ */
+export function windowsTestAyari() {
+  const ayar = JSON.parse(readFileSync(join(KOK, 'src-tauri', 'tauri.conf.json'), 'utf8'));
+  const pencere = {
+    ...ayar.app.windows[0],
+    additionalBrowserArgs:
+      '--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection ' +
+      `--remote-debugging-port=${WINDOWS_PORTU}`,
+  };
+  return { app: { windows: [pencere] } };
+}
 
 /**
  * The binary to drive: MOZAIK_IKILI if set, else what `npm run exe:linux`
@@ -172,15 +211,10 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
 }
 
 /**
- * The same on Windows. No xvfb (a runner has a desktop session) and no
- * sandbox HOME (see the top of the file). The language is not set here:
- * WebView2 does not read LANG, and its own environment variable is the one
- * msedgedriver uses to open the debugging port, so setting it here left the
- * driver with no page to attach to ("DevToolsActivePort file doesn't exist",
- * the first Windows run, 2026-10-10). Nor does it go through
- * `tauri:options.args`: msedgedriver puts those on the PROGRAM's command line,
- * not WebView2's (its log, the third run). On Windows the language is still
- * unpinned, and the runner's Windows is English (TODO TP7).
+ * On Windows only msedgedriver: the exe is started by `Oturum.ac` (the top of
+ * the file says why). No xvfb (a runner has a desktop session) and no sandbox
+ * HOME. The language is not pinned: WebView2 does not read LANG, and the
+ * runner's Windows is English (TODO TP7).
  */
 function windowsSurucu({ port, ev, gunluk }) {
   const surucu = process.env.MOZAIK_NATIVE_DRIVER;
@@ -189,27 +223,49 @@ function windowsSurucu({ port, ev, gunluk }) {
   }
   mkdirSync(ev, { recursive: true });
   const cikti = gunluk === undefined ? 'ignore' : openSync(gunluk, 'a');
-  const surec = spawn(
-    'tauri-driver',
-    ['--port', String(port), '--native-port', String(port + 1), '--native-driver', surucu],
-    {
-      cwd: ev,
-      stdio: ['ignore', cikti, cikti],
-      windowsHide: true,
-    },
-  );
+  const surec = spawn(surucu, [`--port=${port}`, '--verbose'], {
+    cwd: ev,
+    stdio: ['ignore', cikti, cikti],
+    windowsHide: true,
+  });
   surec.unref();
   return { pid: surec.pid, basiz: false };
 }
 
+/** Does WebView2 answer on the test exe's debugging port? */
+async function portAcik() {
+  try {
+    const cevap = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/version`, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    return cevap.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Waits until the port answers (`acik`) or stops answering; false at the deadline. */
+async function portBekle(acik, son) {
+  while (Date.now() < son) {
+    if ((await portAcik()) === acik) return true;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return false;
+}
+
+/** The exe and every WebView2 process under it. Gone already is fine. */
+function agaciOldur(pid) {
+  spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+}
+
 /**
  * Tears the driver down with everything it started: on Linux the process
- * group, on Windows the process tree (tauri-driver, msedgedriver, the exe and
- * its WebView2 processes). Gone already is fine.
+ * group, on Windows msedgedriver's process tree (the exe is the session's,
+ * `kapat`). Gone already is fine.
  */
 export function surucuyuKapat(pid) {
   if (WINDOWS) {
-    spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+    agaciOldur(pid);
     return;
   }
   try {
@@ -221,12 +277,20 @@ export function surucuyuKapat(pid) {
 
 /** One WebDriver session. Everything is a method so a test reads like a script. */
 export class Oturum {
-  constructor(port, id) {
+  /** `program`: on Windows the exe this session started, killed by `kapat`. */
+  constructor(port, id, program) {
     this.port = port;
     this.id = id;
+    this.program = program;
   }
 
   static async ac({ port = 4444, ikili, bekleMs = 20_000 }) {
+    return WINDOWS
+      ? Oturum.windowsAc({ port, ikili, bekleMs })
+      : Oturum.linuxAc({ port, ikili, bekleMs });
+  }
+
+  static async linuxAc({ port, ikili, bekleMs }) {
     const son = Date.now() + bekleMs;
     let hata;
     // The driver needs a moment to listen, and the first session a moment
@@ -244,6 +308,41 @@ export class Oturum {
         await new Promise((r) => setTimeout(r, 300));
       }
     }
+    throw new Error(`Oturum açılamadı: ${hata?.message ?? hata}`);
+  }
+
+  /**
+   * Starts the exe, waits for its WebView2 to answer on the debugging port,
+   * and attaches msedgedriver to it. The last program has to be gone first:
+   * a second exe on the same profile would hand its page to the old WebView2.
+   */
+  static async windowsAc({ port, ikili, bekleMs }) {
+    const son = Date.now() + bekleMs;
+    if (!(await portBekle(false, son))) throw new Error("Önceki programın WebView2'si kapanmadı");
+    const program = spawn(ikili, [], { stdio: 'ignore' });
+    let hata;
+    try {
+      if (!(await portBekle(true, son))) throw new Error('WebView2 hata ayıklama portunu açmadı');
+      while (Date.now() < son) {
+        try {
+          const cevap = await istek(port, 'POST', '/session', {
+            capabilities: {
+              alwaysMatch: {
+                browserName: 'webview2',
+                'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
+              },
+            },
+          });
+          return new Oturum(port, cevap.sessionId, program.pid);
+        } catch (e) {
+          hata = e;
+          await new Promise((r) => setTimeout(r, 300));
+        }
+      }
+    } catch (e) {
+      hata = e;
+    }
+    agaciOldur(program.pid);
     throw new Error(`Oturum açılamadı: ${hata?.message ?? hata}`);
   }
 
@@ -443,11 +542,20 @@ export class Oturum {
     return this.js(AGAC);
   }
 
+  /**
+   * Ends the session and the program with it. On Linux tauri-driver closes
+   * the program; on Windows an attached session leaves it running, so the exe
+   * is killed here and its port waited out, ready for the next `ac`.
+   */
   async kapat() {
     try {
       await this.komut('DELETE', '');
     } catch {
       // Already gone: the window was closed by hand, or the program exited.
+    }
+    if (this.program !== undefined) {
+      agaciOldur(this.program);
+      await portBekle(false, Date.now() + 15_000);
     }
   }
 }
