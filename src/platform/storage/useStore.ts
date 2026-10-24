@@ -2,7 +2,7 @@
 // and two effects are the whole of it.
 //
 // What used to be one file is now six, and this one owns the parts that only
-// make sense inside a component: the reducer's box (`pure/undo.ts`), the
+// make sense inside a component: the reducer's box (`pure/undo/undo.ts`), the
 // debounced autosave and the timer behind it, and Ctrl+Z. The plan library
 // operations are next door in `usePlans.ts` and are handed the two things they
 // need from the timer's owner — see the comments around `park` below.

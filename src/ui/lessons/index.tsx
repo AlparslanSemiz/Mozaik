@@ -20,8 +20,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { blockPlan, clampBlocks, patternLabel } from '../../leaf/blocks';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
+import {
+  applyList,
+  byNumberThen,
+  compareTr,
+  EMPTY_QUERY,
+  type ListConfig,
+  type ListQuery,
+} from '../../pure/listview';
 import type { Id, Lesson, State } from '../../leaf/types';
 import type { LessonMode } from '../../platform/prefs';
 import { useDialogs } from '../Dialogs';

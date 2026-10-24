@@ -14,7 +14,7 @@ import {
   verifySuggestion,
 } from './pure/relax/relax';
 import type { RelaxFamily, Suggestion } from './pure/relax/relax';
-import { solve } from './pure/solver';
+import { solve } from './pure/solver/solver';
 import { parseState } from './pure/io/parseState';
 import { activePlacements } from './pure/grid/programs';
 import { buildIndex } from './pure/constraints/constraints';

@@ -9,7 +9,7 @@ import { addNotSameDay } from './pure/entities/entities';
 import { activePlacements } from './pure/grid/programs';
 import { suggest, verifySuggestion } from './pure/relax/relax';
 import { findViolations } from './pure/constraints/rules';
-import { solve } from './pure/solver';
+import { solve } from './pure/solver/solver';
 import { closeHours, illegalBlocks, makeWorld } from './worlds';
 import type { State } from './leaf/types';
 

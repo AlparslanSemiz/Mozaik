@@ -4,7 +4,7 @@
 // timetable cannot be built. It comes before a solver because it is far
 // cheaper and far more useful.
 
-import { t } from '../leaf/i18n';
+import { t } from '../../leaf/i18n';
 import {
   blockerDetail,
   buildIndex,
@@ -15,12 +15,12 @@ import {
   type Index,
   findViolations,
   type Violation,
-} from './constraints';
-import { activePlacements } from './grid';
-import { parseKey, placementKey } from '../leaf/keys';
-import { blockPlan } from '../leaf/blocks';
-import { dayLabel } from '../leaf/names';
-import type { State, Id } from '../leaf/types';
+} from '../constraints';
+import { activePlacements } from '../grid';
+import { parseKey, placementKey } from '../../leaf/keys';
+import { blockPlan } from '../../leaf/blocks';
+import { dayLabel } from '../../leaf/names';
+import type { State, Id } from '../../leaf/types';
 
 /** Above this ratio of load the "this will be hard" warning is raised. */
 const TIGHT_RATIO = 0.85;

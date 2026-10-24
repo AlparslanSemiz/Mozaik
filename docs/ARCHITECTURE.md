@@ -10,8 +10,8 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
                    names · subjects · blocks · version · dateStamp · storage
    |
-src/pure/          constraints/* · entities/* · relax/* · feasibility · solver
-                   grid/* · program/* · paper/* · io/* · listview · undo
+src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
+                   grid/* · program/* · paper/* · io/* · listview/* · undo/*
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
    |
@@ -24,7 +24,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -47,7 +47,8 @@ görülüyorsa yanlış yerdedir ve `constraints.ts`'e taşınır.
 ## Dosya haritası
 
 Yollar `src/`'ye göre. Test dosyaları (`*.test.ts`), dört çeviri sözlüğü,
-kısaltma tablosu ve ikisinin giriş noktası (`lang/*.ts`) listede yok.
+kısaltma tablosu ve ikisinin giriş noktası (`lang/*.ts`) listede yok. Tek dosyalık bir
+alanın `index.ts`'i yalnız o dosyayı açar ve ayrıca yazılmaz.
 
 ### Yapraklar
 
@@ -82,11 +83,11 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/constraints/index.ts` | kısıt paketinin giriş noktası: motorun ve kuralların bütün dışa aktarımları |
 | `pure/constraints/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
 | `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
-| `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
+| `pure/feasibility/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: `entities.ts` ile `bell.ts`'in bütün dışa aktarımları |
 | `pure/entities/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |
-| `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
+| `pure/solver/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/relax/index.ts` | öneri aramasının giriş noktası: `relax.ts`'in bütün dışa aktarımları; `sat.ts` paketin içinde kalır |
 | `pure/relax/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
 | `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
@@ -98,14 +99,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
-| `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
+| `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
 | `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
 | `pure/io/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `pure/io/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
 | `pure/io/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
 | `pure/io/sample.ts` | babanın ölçeğine yakın örnek okul |
-| `pure/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
+| `pure/undo/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
 
 ### Durum, tercih ve depolama
 

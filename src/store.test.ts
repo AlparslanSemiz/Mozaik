@@ -891,7 +891,7 @@ describe('parseState — v10 → v11 göçü', () => {
 import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/io/library';
 import { collectStates } from './platform/storage/download';
 import { loadPlan, savePlan } from './platform/storage/planStore';
-import { reduce } from './pure/undo';
+import { reduce } from './pure/undo/undo';
 import { emptyState } from './pure/entities/entities';
 import type { State } from './leaf/types';
 

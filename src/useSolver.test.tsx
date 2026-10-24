@@ -20,15 +20,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Answers, State } from './leaf/types';
 import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/relax/relax';
-import type { Solver, SolverProgress, SolverResult } from './pure/solver';
+import type { Solver, SolverProgress, SolverResult } from './pure/solver/solver';
 import { activePlacements } from './pure/grid/programs';
 import { sampleState } from './pure/io/sample';
 import { startRelax } from './platform/search/relaxPool';
-import { createSolver } from './pure/solver';
+import { createSolver } from './pure/solver/solver';
 import { samePlan, useSolver, type SolverRun } from './platform/search/useSolver';
 
 vi.mock('./platform/search/relaxPool', () => ({ startRelax: vi.fn() }));
-vi.mock('./pure/solver', () => ({ createSolver: vi.fn() }));
+vi.mock('./pure/solver/solver', () => ({ createSolver: vi.fn() }));
 vi.mock('./pure/relax/relax', () => ({
   applySuggestion: (d: State) => ({ ...d, settings: { ...d.settings } }),
   suggestionUses: (_d: State, s: Suggestion, r: unknown) =>

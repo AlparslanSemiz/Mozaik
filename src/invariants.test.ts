@@ -25,7 +25,7 @@ import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints/con
 import { addNotSameDay, remapDays } from './pure/entities/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
 import { activeProgram, replaceActiveGrid } from './pure/grid/programs';
-import { solve } from './pure/solver';
+import { solve } from './pure/solver/solver';
 import { parseState } from './pure/io/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
 import {

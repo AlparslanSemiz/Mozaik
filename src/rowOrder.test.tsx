@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import './leaf/lang/en';
 import { applyDil, setAktifDil, type Dil } from './leaf/i18n';
-import { EMPTY_QUERY } from './pure/listview';
+import { EMPTY_QUERY } from './pure/listview/listview';
 import { LangProvider, useLang } from './ui/T';
 import { useRowOrder } from './ui/lists/useRowOrder';
 

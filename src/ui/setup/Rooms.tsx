@@ -2,8 +2,14 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useMemo, useState } from 'react';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
+import {
+  applyList,
+  byNumberThen,
+  compareTr,
+  EMPTY_QUERY,
+  type ListConfig,
+  type ListQuery,
+} from '../../pure/listview';
 import {
   roomClasses,
   weeklyLoad,

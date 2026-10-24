@@ -2,8 +2,14 @@
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
 import { useMemo, useState } from 'react';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
+import {
+  applyList,
+  byNumberThen,
+  compareTr,
+  EMPTY_QUERY,
+  type ListConfig,
+  type ListQuery,
+} from '../../pure/listview';
 import {
   openHours,
   addSubject,

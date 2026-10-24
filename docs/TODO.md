@@ -743,7 +743,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
       düşük. **Kullanıcının kararı (2026-10-09):** şimdilik düzeltme yok, `test:webkit`
       ne `kontrol`'e ne `haftalik.yml`'e giriyor.
-- [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
+- [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver/solver.ts:975`
       `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
       gibi `weight[index] = weight[index]! + 1`. **Düzeldi (`290f55d`)** ve arkasındaki iki
       engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
@@ -1297,7 +1297,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
 | RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/invariants.test.ts`, `src/relax.test.ts` |
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
-| RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver.ts` |
+| RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
 | RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/entities.ts` |
 | RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
 | RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
@@ -1312,7 +1312,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
 | RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
-| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/entities.ts`, `src/pure/listview.ts` |
+| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/entities.ts`, `src/pure/listview/listview.ts` |
 | RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/prefs/theme.ts` |
 
 **Hedef ağaç.** 2026-10-09 sabahki plan oturumunun önerisi, Alp onayladı; oturumun

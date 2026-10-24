@@ -15,7 +15,7 @@ import {
 import { parseState } from './pure/io/parseState';
 import { findViolations } from './pure/constraints/rules';
 import { sampleState } from './pure/io/sample';
-import { createSolver, solve } from './pure/solver';
+import { createSolver, solve } from './pure/solver/solver';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';

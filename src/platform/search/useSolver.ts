@@ -12,8 +12,13 @@
 // would throw away work with no explanation.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createSolver } from '../../pure/solver';
-import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../../pure/solver';
+import {
+  createSolver,
+  type Solver,
+  type SolverOptions,
+  type SolverProgress,
+  type SolverResult,
+} from '../../pure/solver';
 import {
   applySuggestion,
   suggestionUses,

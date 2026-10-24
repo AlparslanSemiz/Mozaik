@@ -26,13 +26,13 @@ import {
   limitFor,
   ruleActive,
   ruleLevel,
-} from './constraints';
-import { t } from '../leaf/i18n';
-import { closedKey, parseKey, placementKey } from '../leaf/keys';
-import { commonestBlock, holeReason, lessonName } from './feasibility';
-import { lessonExcluded, type SolverExclusions } from './program';
-import { activePinned, activePlacements, replaceActiveGrid } from './grid';
-import type { Id, Lesson, State } from '../leaf/types';
+} from '../constraints';
+import { t } from '../../leaf/i18n';
+import { closedKey, parseKey, placementKey } from '../../leaf/keys';
+import { commonestBlock, holeReason, lessonName } from '../feasibility';
+import { lessonExcluded, type SolverExclusions } from '../program';
+import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
+import type { Id, Lesson, State } from '../../leaf/types';
 
 export interface SolverOptions {
   /** Keep what is already on the grid and fill in around it (default true). */

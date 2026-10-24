@@ -1,5 +1,4 @@
-import type { ReportRow, LoadStatus } from '../../pure/feasibility';
-import { loadStatus } from '../../pure/feasibility';
+import { type ReportRow, type LoadStatus, loadStatus } from '../../pure/feasibility';
 import type { Facet } from '../../pure/listview';
 import type { Id } from '../../leaf/types';
 import type { Translate } from '../T';

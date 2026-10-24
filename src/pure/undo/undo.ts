@@ -10,8 +10,8 @@
 // keeping the plan id in the same value is a safety rule rather than tidiness
 // (the comment on the field says why).
 
-import { sanitize } from './constraints';
-import type { Id, State } from '../leaf/types';
+import { sanitize } from '../constraints';
+import type { Id, State } from '../../leaf/types';
 
 const HISTORY_LIMIT = 30;
 

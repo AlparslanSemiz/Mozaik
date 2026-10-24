@@ -2,8 +2,14 @@
 // clash with each other — only through a shared room.
 
 import { useMemo, useState } from 'react';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
+import {
+  applyList,
+  byNumberThen,
+  compareTr,
+  EMPTY_QUERY,
+  type ListConfig,
+  type ListQuery,
+} from '../../pure/listview';
 import {
   roomName,
   addClass,

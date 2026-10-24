@@ -6,7 +6,7 @@
 //      on my father's slow machine?
 
 import { blocker, buildIndex, dropMap, sanitize, place } from './pure/constraints/constraints';
-import { buildReport } from './pure/feasibility';
+import { buildReport } from './pure/feasibility/feasibility';
 import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/io/sample';
 import type { State } from './leaf/types';
