@@ -259,7 +259,11 @@ describe('package-lock.json — kökün sürümü package.json ile aynı', () =>
   });
 
   it('yayinla kilit dosyasını yazıyor ve sürüm commit’ine katıyor', () => {
-    expect(yayinlaMjs).toMatch(/kilitSurumunuYaz/);
+    // Worked out before the first write, so a refusal leaves the tree clean.
+    const hesap = yayinlaMjs.indexOf('kilitSurumunuYaz(kilitEski');
+    expect(hesap).toBeGreaterThan(-1);
+    expect(hesap).toBeLessThan(yayinlaMjs.indexOf('if (onceki === surum) {'));
+    expect(yayinlaMjs.match(/yazDegistiyse\(kilitYol/g)).toHaveLength(2);
     const adds = [...yayinlaMjs.matchAll(/git\('add', ([^)]*)\)/g)].map((m) => m[1] ?? '');
     expect(adds.length).toBeGreaterThan(0);
     for (const add of adds) expect(add, add).toContain("'package-lock.json'");

@@ -843,12 +843,18 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
       Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
       "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
-- [ ] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
+- [x] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
       `package.json` ile `Cargo.toml` yazıldı, kilit dosyasının kökü 2.1.1'de kaldı; ilk
       `npm install` onu değiştirip ağacı kirletiyor ve `yayinla`'nın temiz ağaç kapısını
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
+      **Yapıldı (2026-10-24, `b7-32-kilit`):** `npm install` değil, `scripts/kilit-surumu.mjs`
+      iki kök sürümü JSON'dan geçirerek yazıyor (ağ yok, yalnız iki satır; npm'in biçiminde
+      olmayan dosyada durur), `yayinla` bütün yeni metinleri ilk yazımdan önce hesaplıyor ve
+      kilidi sürüm commit'ine katıyor. Testi `src/surum.test.ts`. Doğrulama yalnız
+      `npm run yayinla -- --kuru` ile, worktree'de: yer kapısında durdu (çıkış 1), sürüm yazma
+      yolu koşmadı; ana klasördeki kuru koşu birleşmeden sonra.
 
 ---
 
