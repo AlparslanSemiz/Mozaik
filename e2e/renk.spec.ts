@@ -787,9 +787,8 @@ test.describe('80. Bölüm şeridi', () => {
 //
 // The reader asked for it in his own words: rows in a list one after another
 // on slightly different grounds, the same in every list, without losing any
-// contrast. One token paints every second row of every list (`table.list`,
-// `table.stat` and, since 2026-10-24, the entity lists, the entity sheet's
-// lessons and the paste preview), and three things can quietly undo it, which is what this
+// contrast. One rule paints every second row of `table.list` and `table.stat`
+// with one token, and three things can quietly undo it, which is what this
 // measures rather than claims: the rule being gone, the hover rule losing to
 // it (both are (0,2,3), so only their ORDER decides), and the token pointing
 // at the wrong colour. Read off the painted rows, not off the stylesheet.
@@ -896,91 +895,6 @@ test.describe('93. Listelerde zebra', () => {
       expect(contrast(p.ink, p.background), 'dağılım düğmesinin yazısı').toBeGreaterThanOrEqual(
         4.5,
       );
-    });
-
-    // 2026-10-24: the zebra in every list, not only table.list and table.stat,
-    // and the two places its order went wrong. The muted ink holds 7 on the
-    // zebra now (it was 6.65 in the light theme), the small print's floor for
-    // a low-vision reader.
-    test(`${theme} temada zebra her listede ve sırası doğru`, async ({ page }) => {
-      await openWithSample(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      const t = await tokens(page, ['--zebra', '--muted', '--paper']);
-      expect(contrast(t['--muted']!, t['--zebra']!), 'soluk yazı zebrada').toBeGreaterThanOrEqual(
-        7,
-      );
-      expect(contrast(t['--muted']!, t['--paper']!), 'soluk yazı kâğıtta').toBeGreaterThanOrEqual(
-        7,
-      );
-
-      /** Rows that carry no state alternate: odd positions bare, even ones zebra. */
-      const alternates = async (rows: import('@playwright/test').Locator, n = 6) => {
-        const got = await rows.evaluateAll(
-          (els, k) =>
-            els.slice(0, k).map((el) => ({
-              current: el.getAttribute('aria-current') === 'true',
-              bg: getComputedStyle(el).backgroundColor,
-            })),
-          n,
-        );
-        expect(got.length).toBeGreaterThanOrEqual(3);
-        got.forEach((r, i) => {
-          if (r.current) return;
-          expect(r.bg, `satır ${i + 1}`).toBe(i % 2 === 1 ? t['--zebra'] : 'rgba(0, 0, 0, 0)');
-        });
-      };
-
-      // Müsaitlik's entity list.
-      await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-      await alternates(page.locator('.entity-list > .entity'));
-
-      // Dersler's entity list.
-      await openLessons(page, 'class');
-      await alternates(page.locator('.entity-list > .entity'));
-
-      // The entity sheet's lessons.
-      await openSetup(page, 'Öğretmenler');
-      await mainList(page)
-        .locator('tbody tr')
-        .first()
-        .getByRole('button', { name: /bilgileri$/ })
-        .click();
-      await alternates(page.locator('.sheet .sheet-lessons tbody tr'), 3);
-      await page.keyboard.press('Escape');
-
-      // The paste preview.
-      await openSetup(page, 'Derslikler');
-      await page
-        .getByRole('button', { name: /Excel'den yapıştır/ })
-        .first()
-        .click();
-      await page.getByPlaceholder('Buraya yapıştırın...').fill('Z1\nZ2\nZ3\nZ4');
-      await page.getByRole('button', { name: 'Önizle', exact: true }).click();
-      await alternates(page.locator('ul.paste-preview > li'), 4);
-
-      // The bell preview: the lunch row is not counted, the lessons after it
-      // go on alternating (it used to leave three lessons in a row on paper).
-      await openSettings(page, 'Zil ve günler');
-      const lessons = await page
-        .locator('table.bell-preview tbody tr')
-        .evaluateAll((els) =>
-          els
-            .filter((el) => !el.classList.contains('break-row'))
-            .map((el) => getComputedStyle(el).backgroundColor),
-        );
-      expect(lessons.length).toBeGreaterThanOrEqual(8);
-      lessons.forEach((bg, i) =>
-        expect(bg, `ders satırı ${i + 1}`).toBe(i % 2 === 1 ? t['--zebra'] : 'rgba(0, 0, 0, 0)'),
-      );
-      // ...and the row under the pointer still wins there, on a zebra row.
-      const t2 = await tokens(page, ['--bg']);
-      const bell = page.locator('table.bell-preview tbody tr:not(.break-row)').nth(1);
-      await bell.hover();
-      await expect
-        .poll(() => bell.evaluate((el) => getComputedStyle(el).backgroundColor))
-        .toBe(t2['--bg']);
-      await page.mouse.move(0, 0);
     });
   }
 });

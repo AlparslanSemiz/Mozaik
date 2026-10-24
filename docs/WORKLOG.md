@@ -175,34 +175,24 @@ birleşirken kendi numarasını kaydırır.
 
 ---
 
-## 2026-10-24 akşam · Okunabilirlik: B7.36 ve zebra her listede (`okunabilirlik`)
+## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda (`okunabilirlik`, `okunabilirlik-zebra`)
 
-Dal `tb1-dosyadan-ac`'in ucundan (TODO'nun B7.36'sı TB8'in dalında doğdu). Zebra analizi
-mozaik-ed'in `zebra-liste` worktree'sinden (`scratch/zebra-analiz.md`, yalnız okundu; ölçüm
-betikleri bu dalın `scratch/zebra-olc/`'üne kopyalandı). Oturum o worktree'yi ve zebrayı
-kimin tuttuğunu dört oturuma sorarak buldu, uygulamayı ben aldım, onlar yazmadı.
+Dal `tb1-dosyadan-ac`'in ucundan (TODO'nun B7.36'sı TB8'in dalında doğdu).
 
-**B7.36.** Ayarlar'ın çıktısı `.settings-pane`'de, notlar 15 px (gövde). Beş bölümde ölçüldü
-(`scratch/okunabilirlik/tiklama/ayarlar-sonra/`), yatay kaydırma yok.
+**B7.36.** Ayarlar'ın çıktısı `.settings-pane`'de (düz blok), notlar 15 px (gövde). Beş bölümde
+ölçüldü (`scratch/okunabilirlik/tiklama/ayarlar-sonra/`), yatay kaydırma yok. İnceleme
+`display: contents`'in kaydırma solmasını kör ettiğini buldu, düz bloğa döndü.
 
-**Zebra.** Aynı token dört listeye daha, `:where()` altında; zil önizlemesinin ve Branşlar'ın
-sırası; `--muted` açıkta #464d58, koyuda #b3bbc6. Önce/sonra (23 ekran × 2 tema,
-`scratch/zebra-olc/karsilastirma.md`): soluk yazı hiçbir listede düşmedi; yeni şeritli
-yapıştırma önizlemesinde düz metin zebrada 17,47 → 15,96 (açık) ve 14,99 → 13,75 (koyu), her
-`table.list` zebra satırıyla aynı değer, `--text` değişmeden önlenemez.
+**Zebra ayrı dalda, karar Alp'te.** Zebra işi (her listeye yayılma, zil önizlemesinin ve
+Branşlar'ın sırası, `--muted` iki temada bir adım; analizi mozaik-ed'in `zebra-liste`'sinden,
+inceleme bulguları düzeltilmiş, `renk`/`erisim`/`panel` 51/51, önce/sonra ölçüm
+`scratch/zebra-olc/karsilastirma.md`) cc039a6'da yazıldı. Ardından mozaik-ed, Alp'in kendi
+oturumunda zebrayı ona verdiğini ve bu dalın zebraya dokunmayacağını söylediğini aktardı; iki dal
+aynı bloğa ve `--muted`'a yazıyordu. Bu dal zebrayı geri aldı (yalnız B7.36 kalıyor), zebra
+işi kaybolmasın diye `okunabilirlik-zebra` dalında (95cecfd) duruyor ve birleştirmeye sunulmuyor.
 
-**İnceleme** (taze bağlamlı alt ajan). Düzelen: varlık sayfasının seçicisi zebra satırında
-kutusunu kaybediyordu; zil önizlemesi üstüne gelmeyi kaybetmişti; `display: contents` kaydırma
-solmasını kör ediyordu; Branşlar'ın çizgisi boş gövdenin altında; yapıştırma önizlemesinin madde
-işaretleri; bayat yorumlar ve DESIGN cümleleri. Reddedilen: Ayarlar tablolarındaki notların
-hücre yazısıyla aynı boy olması (istek bu), diyaloglardaki `.hint`'in 13 px kalması (Ayarlar'ın
-içi değil, sade ekran turu).
-
-**Koşulan.** `hizli` (1347 geçti), `renk.spec.ts`'in yeni testi düzeltmesiz derlemede kırmızı
-(açıkta soluk yazı zebrada 6,65; koyuda varlık listesinin 2. satırı zebrasız; zil önizlemesinde
-üstüne gelme), sonra `renk`, `erisim`, `panel` 51/51; önce/sonra ölçümü iki kez; Ayarlar betiği.
-**Koşulmayan.** Tam E2E yerelde (CI'da); görsel regresyon (haftalık; açık ve koyu temanın bütün
-görüntüleri `--muted` yüzünden değişti).
+**Koşulan.** `hizli` (1347 geçti), Ayarlar betiği, zebra için yukarıdakiler. **Koşulmayan.** Tam
+E2E yerelde (CI'da).
 
 ---
 

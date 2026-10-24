@@ -80,8 +80,8 @@
    renk.spec.ts:
      paper luminance      1.000 light / 0.017 dark   (contract: >0.9 / <0.1)
      text on paper        17.47  / 13.26
-     muted on paper        8.53  /  9.09
-     muted on closed       5.97  /  6.31
+     muted on paper        7.28  /  7.28
+     muted on closed       5.09  /  4.69
      accent on accent-bg   6.59  /  6.47
      on-accent on accent   7.70  /  9.48
      section min AA        5.63  /  4.89
@@ -120,12 +120,7 @@
   --day-edge:    #5b6572;
 
   --text:        #131a25;
-  /* One step darker on 2026-10-24 (#505763), when the zebra reached every
-     list: on a zebra row the old muted fell to 6.65, under the 7 this tool
-     holds its small print to for a low-vision reader. Now 8.53 on paper, 7.79
-     on --zebra, 5.97 on --closed, 5.93 on a hovered row: every ground it sits
-     on gained, none lost (scratch zebra analysis, TODO B7.36's branch). */
-  --muted:       #464d58;
+  --muted:       #505763;
 
   /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
      ink blue on the grounds that 36 identity colours plus three functional
@@ -550,10 +545,7 @@
   --day-edge: #a3adbb;
 
   --text: #e8edf5;
-  /* One step lighter on 2026-10-24 (#aab2bd), with the light theme's step:
-     8.23 on paper had fallen to 7.55 on the zebra rows the lists gained. Now
-     9.09 on paper, 8.34 on --zebra, 6.31 on --closed: no ground lost. */
-  --muted: #b3bbc6;
+  --muted: #aab2bd;
 
   /* The same hue, as saturated as sRGB has at this lightness: hue 268 runs the
      blue channel to 255, so the conversion clips there by a hair and the hex
@@ -3603,17 +3595,6 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   font-size: var(--fs-sm);
 }
 
-/* Rows, not bullets (2026-10-24): each line is a record the zebra stripes
-   from edge to edge, so the markers and their indent go. */
-.paste-preview {
-  list-style: none;
-  padding-left: 0;
-}
-
-.paste-preview > li {
-  padding: 2px var(--space-2);
-}
-
 /* The strip above the grid: same furniture as the top bar, no second border. */
 .topbar.subbar {
   border-bottom: none;
@@ -4058,37 +4039,6 @@ table.stat tbody tr:nth-child(even) {
   background: var(--zebra);
 }
 
-/* The lists that are not table.list or table.stat, same token (2026-10-24):
-   Müsaitlik's and Dersler's entity lists, the entity sheet's lessons and the
-   paste preview. Under :where(), so every state written for them (selected
-   entity, hover) still wins without restating its specificity (tuzak 40). */
-:where(.entity-list) > .entity:nth-child(even),
-:where(table.sheet-lessons) > tbody > tr:nth-child(even),
-:where(ul.paste-preview) > li:nth-child(even) {
-  background: var(--zebra);
-}
-
-/* The bell preview's lunch row is not a lesson and is not counted: the
-   lessons after it go on alternating from where they were. `:where()` keeps
-   both at the table rule's (0,2,3), so the hover rule below still wins. A
-   browser without `of S` drops the second rule and the preview loses its
-   stripe, not its order. */
-table:where(.bell-preview) tbody tr:nth-child(even):not(.break-row) {
-  background: none;
-}
-
-table:where(.bell-preview) tbody tr:nth-child(even of :not(.break-row)) {
-  background: var(--zebra);
-}
-
-/* Branşlar's second body (subjects no class or teacher uses) is a group of
-   its own: a heavier line on top, and its stripe starts again under it. Not
-   under an empty first body: then there is no group above it. */
-table.list > tbody:not(:empty) + tbody > tr:first-child > td,
-table.list > tbody:not(:empty) + tbody > tr:first-child > th {
-  border-top: 2px solid var(--line-dark);
-}
-
 table.list tbody tr:hover,
 table.stat tbody tr:hover {
   background: var(--bg);
@@ -4103,7 +4053,6 @@ table.stat tbody tr:hover {
 table.list td input[type='text'],
 table.list td input[type='number'],
 table.list td select,
-table.sheet-lessons td select,
 table.list td .split-pick,
 table.stat td input[type='text'],
 table.stat td input[type='number'],

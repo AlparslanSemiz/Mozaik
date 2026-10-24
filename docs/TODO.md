@@ -34,10 +34,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
    listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
    bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`): DESIGN.md Renk'te kural,
-   `e2e/renk.spec.ts` 93. → Her listeye yayıldı (2026-10-24, `okunabilirlik`, analizi
-   `zebra-liste`'den): Müsaitlik ve Dersler'in varlık listesi, varlık sayfasının dersleri,
-   yapıştırma önizlemesi; zil önizlemesi ve Branşlar'ın sırası; soluk yazı iki temada bir adım,
-   zebrada da kâğıttaki eski değerinden düşük değil.
+   `e2e/renk.spec.ts` 93.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
