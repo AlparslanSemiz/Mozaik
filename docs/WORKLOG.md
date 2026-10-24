@@ -153,14 +153,14 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Gerçek exe süiti | 13 test, hepsi geçti, 1,1 dk (2026-10-24, `refactor/moduller`) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preference/preferenceKeys.ts`'te, tablo `platform/storage/storageReport.ts`'te |
-| Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
-| `npm run hizli` | 51 dosya, 1334 test, 7,4–9,8 s, temiz koşulda (2026-10-23 gece, `surec-sadelestirme`) | `npm run hizli` |
+| Birim testleri | 58 dosyada 1470 test (2026-10-24, `refactor/moduller`); CI'da 1470 geçti, bu makinede 1'i atlanıyor (`shellcheck` yok) | `npm test` |
+| `npm run hizli` | 54 dosya, 1357 test (1356 geçti, 1 atlandı), 10,2 s, kirli koşulda (2026-10-24, `refactor/moduller`); `npm test`'in 1470'inden dört yavaş dosyanın 113 testi eksik | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, 6 dk 52 sn, en uzun iş `e2e (2)` 409 s, Playwright kurulumu her işte 8–14 s (2026-10-23 gece, `--with-deps` kalktıktan sonra); öncesi `main` 4a2901c'de 14 dk 28 sn, kurulum bir işte 597 s | `gh run view 40025191968`, `40019600457` |
-| Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
-| Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
+| Ana E2E, Windows | 642/642 (639 ana süit 17,7 dk, öneri araması 3 test 6,3 dk), iş 25,3 dk (2026-10-24, `refactor/moduller` 6e395ca, elle tetiklendi) | `windows.yml` 40096520521 |
+| Ana E2E, WebKit | 614 geçti, 17 kırmızı, 11 atlandı, 15,0 dk; aynı gün `main` c41223c'de 613, 18, 11 ve dalın kırmızıları main'inkilerin alt kümesi (2026-10-24, `refactor/moduller`) | Playwright'ın kabında, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
@@ -174,6 +174,86 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 akşam · `refactor/moduller`'in birleşmeye hazırlık doğrulaması
+
+Dalın HEAD'i 6e395ca, taban `main` c41223c (dalın içinde, ilerlemedi). Karşılaştırma için iki
+geçici ayrık worktree: `Mozaik-refactor-taban` (main) ve `Mozaik-refactor-mut` (6e395ca,
+mutasyon koşarken asıl ağaç serbest kalsın diye), ikisi de `node_modules`'u bağla paylaşıyor.
+
+**Koşulanlar (dalda, bu makinede, `scripts/agir.sh` altında).**
+
+```
+ci.yml 40095546438 (6e395ca)       yeşil: denetim (58 dosya, 1470 birim), e2e 3 parça, e2e-arama 3 parça
+windows.yml 40096520521 (elle)     642/642 (639 + öneri araması 3), iş 25,3 dk
+çözücü stresi (npm run cozucu)     7/7 dalda ve main'de; yerleşen blok, yerleşemeyen ders, delik
+                                   sayıları birebir; deterministik iki dünyanın düğümü aynı (253,
+                                   2840), 15 s'lik bütçeyi dolduran iki dünyada 90 694 / 92 645 ve
+                                   99 995 / 100 407 (dal / main, makine yükü)
+WebKit, Playwright'ın kabında      dal 614 geçti, 17 kırmızı, 11 atlandı; main 613, 18, 11; dalın 17
+                                   kırmızısı main'in 18'inin alt kümesi (fazlası hareket.spec.ts'in
+                                   süreye bağlı "AZ süreleri kısaltıyor"u)
+site süiti (npm run test:site)     24/24
+gerçek exe (npm run exe:e2e)       13/13, sahte evde: açılış, örnek okulun dizilmesi, diske yedek,
+                                   "Dosyadan aç" ile geri yükleme, VK1, VK2
+npm run hizli                      54 dosya, 1357 test (1356 geçti, 1 atlandı)
+```
+
+İlk WebKit denemesi kapsız koştu ve 635 test tarayıcı açılamadan düştü (`libicu74` yok,
+TESTPLAN "WebKit"); sonuç sayılmadı.
+
+**Veri güvenliği, main ve dal.** İki `dist/index.html` acorn ile ayrıştırıldı ve bütün dize,
+şablon ve sayı literallerinin çoklu kümesi karşılaştırıldı: 8 197 ayrı literal iki tarafta
+aynı. Fark yalnız gömülü commit kimliği ve bir JSX metninin bölünüşü: kabuğun bildirimi
+main'de `⚠{' '}` (iki metin düğümü), dalda `⚠ ` (biri); ekrandaki metin aynı. Yani
+`ders-programi*` anahtarlarının hepsi, `ders-programi-klasor` IndexedDB'si (sürüm 1), yedek
+adları (`ders-programi-${…}.json`, `ders-programi-kurtarma-${…}-${…}.json`,
+`ders-programi-tumu.json`), "Ders Programı" ve `schemaVersion` 16 aynı. `src-tauri/`'de hiç
+fark yok (`identifier` `com.dersprogrami.arac`, `FOLDER` "Ders Programı"). Eski sürüm
+yedeğini açan testler: birimde `src/pure/io/fixtures.test.ts` (v1–v16, "Dosyadan aç
+kapısından geçiyor" dahil, 296 test), E2E'de `e2e/temel.spec.ts:87` (v1), 138, 174 ve 250
+(v2–v4); dördü ve dosya CI'da 6e395ca'da yeşil.
+
+**Mutasyon.** Stryker, dalda (6e395ca) ve main'de (c41223c) aynı yapılandırmayla: dört işçi,
+`npm run hizli`'nin test kümesi (dört yavaş dosya hariç; tam küme kısıt motorunun
+mutantlarında dakikada bir mutanta düştü), mutasyona giren dosyalar kısıt motoru (`rules.ts`
+dahil), fizibilite, varlıklar ve `bell.ts`: main'de beş dosya, dalda otuz.
+
+```
+                 mutant  öldü  zaman aşımı  hayatta  kapsamsız  skor   kapsanan skor
+main c41223c      3761   2696      49         736       280     72,99   78,86
+dal  6e395ca      3761   2695      53         733       280     73,07   78,94
+```
+
+Mutantlar (mutatör, özgün metin, yerine geçen) anahtarıyla eşlendi: 3761'in hepsi iki
+tarafta var, dalda daha az yakalanan anahtar yok, üçü dalda fazladan yakalanıyor
+(`teacherSubjects(...).some` → `every` ve iki `capacity > 0`). Koşular 40 ve 42 dk, makine
+yüklüyken (yük ortalaması 11–13, başka işler); zaman aşımları bu yüzden oynayabilir. Relax ve
+`sat.ts` ölçülemedi: `relax.test.ts:89` enstrümante kodda kendi 30 s tavanını aşıyor
+(TESTFINDINGS, aynı gün; TODO RF3).
+
+**Test sayıları.** `npm test` 58 dosyada 1470; `npm run hizli` dört yavaş dosyayı dışarıda
+bırakıyor (`relaxFullCourse` 2, `relaxLaidOut` 2, `invariants` 16, `solver.test` 93, toplam
+113), 1470 − 113 = 1357. Kayıtlardaki 1457, efe1247'de taşımalar sırasında ölçülen `npm
+test`'in toplamı (56 dosya), bölmelerin 13 yeni testinden önce.
+
+**Çakışma tahmini (`git merge-tree --write-tree`, salt okunur).** Dalın içinde olmayan
+commit'i olan her yerel dal çakışıyor; kod çakışması taşınan dosyalarda (rename algılandı,
+çakışan yollar dalın yeni yolları). En geniş `tb1-acilis` (14 dosya), sonra `tp7-windows-exe`
+(10), `b7-32-kilit`, `dosya-okuma-b7` ve `okunabilirlik` (9), `tb7-sekme-kapanis` (8),
+`test/gercek-ortam` (7), `tb1-dosyadan-ac` ve `tb8-eksik-plan` (6), `ruflo/kurulum` (4,
+yalnız belgeler), `zebra-liste` (2), `bitti-kontrolu`, `dal-temizlik` ve
+`ozellik/belge-temizlik` (1, WORKLOG). Ortak kod yolları `pure/io/parseState.ts`,
+`platform/storage/usePlans.ts`, `storeContract.test.ts`, `fuzz.test.ts`, `ui/App.tsx`,
+`ui/settings/Data.tsx`. Ana checkout'taki `fix/okunamayan-plan`'ın commit'lenmemiş 23
+dosyası (çoğu bu dalın taşıdığı yollarda) tahmine girmedi.
+
+**Belgeler.** Refactor dondurması (2026-10-23) CLAUDE.md, DECISIONS, TODO, bu dosyanın "Şu
+an"ı ve `paket-turu` becerisinden çıktı, yerine bugünkü kural (DECISIONS 2026-10-24). TODO
+§8k'ye RF24–RF26.
+
+**Koşulmayan.** Relax ve `sat.ts`'in mutasyonu, ve yavaş dört test dosyasıyla tam mutasyon;
+Windows'ta gerçek exe ve güncelleme yolu (Windows makinesi gerekiyor, TP7).
 
 ## 2026-10-24 · Modül modül yapısal refactor (`refactor/moduller`)
 

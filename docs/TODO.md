@@ -1296,6 +1296,9 @@ her kaynak dosya bir alanda (`pure/grid`, `pure/constraints`, `pure/entities`, `
 Açık kalan: RF11, RF12, RF20 (adım 5'in kalanı), RF2'nin kalanı, RF3 ve adım 3 (RF18); RF4 park.
 Teachers, Dersler'in formu ve Program'ın sağ tık menülerinin bileşenlere bölünmesi bayt
 bütçesi yüzünden yapılmadı: `size-limit` 1 171 000, dal sonunda `dist/index.html` 1 168 018.
+Birleşmeden önceki doğrulama (WORKLOG, 2026-10-24 akşam): Windows, WebKit, site, çözücü
+stresi ve gerçek exe süitleri, iki `dist`'in literal karşılaştırması ve kısıt, fizibilite ve
+varlıkların mutasyonu main'le aynı ya da daha iyi.
 
 Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
 altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
@@ -1309,7 +1312,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 |---|---|---|
 | RF1 | `pure/relax/` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
 | RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/pure/relax/invariants.test.ts`, `src/pure/relax/relax.test.ts` |
-| RF3 | `pure/relax/` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
+| RF3 | `pure/relax/` ve `sat.ts` ne mutasyon ne kapsam listesinde; ön şartı `relax.test.ts:89`'un enstrümante kodda aştığı kendi 30 s tavanı (TESTFINDINGS 2026-10-24) | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
 | RF5 | `pure/entities/` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/` |
 | RF6 | `pure/constraints/` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
