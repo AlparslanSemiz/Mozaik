@@ -338,13 +338,17 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     return [...block.matchAll(/teslim\/(\S+)/g)].map((m) => m[1]!);
   }
 
-  it('Manifest dört alan okuyor, surum.yml dördünü yazıyor', () => {
-    expect(MANIFEST.length).toBe(4);
+  it('Manifest beş alan okuyor, surum.yml beşini yazıyor', () => {
+    expect(MANIFEST.length).toBe(5);
     expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
   });
 
-  it('kayıtlı surum.json tam Manifest’in alanlarını, Rust’ın tipleriyle taşıyor', () => {
-    expect(Object.keys(manifest).sort()).toEqual([...MANIFEST].sort());
+  // v2.2.0's file predates the digest (2026-10-24); update.rs reads it as
+  // `Option`, so every manifest already published still tells a copy it is
+  // up to date. Only `sha256` may be missing.
+  it('kayıtlı surum.json Manifest’in alanlarını, Rust’ın tipleriyle taşıyor (özet öncesi)', () => {
+    expect(Object.keys(manifest).sort()).toEqual(MANIFEST.filter((k) => k !== 'sha256').sort());
+    expect(updateRs).toMatch(/#\[serde\(default\)\]\s*pub sha256: Option<String>/);
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(manifest.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(typeof manifest.exe).toBe('string');
@@ -356,11 +360,13 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     expect(surumYml).toContain("}, null, 2) + '\\n');");
   });
 
-  it('surum.yml boyutu adresin gösterdiği dosyadan ölçüyor', () => {
+  it('surum.yml boyutu ve özeti adresin gösterdiği dosyadan ölçüyor', () => {
     const measured = /boyut=\$\(stat -c%s teslim\/(\S+)\)/.exec(surumYml)?.[1];
+    const hashed = /ozet=\$\(sha256sum teslim\/(\S+) /.exec(surumYml)?.[1];
     const address = /^\s*adres="[^"]*\/([^/"]+)"/m.exec(surumYml)?.[1];
     expect(measured).toBeDefined();
     expect(measured).toBe(address);
+    expect(hashed).toBe(address);
   });
 
   it('sürüm etiketin numarası, boyut Release’teki exe’nin boyutu', () => {
@@ -398,6 +404,43 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
 // port (scripts/webdriver.mjs, `windowsTestAyari`): anyone on the machine could
 // read and drive the page, the plans included. That port must never reach my
 // father's exe, which surum.yml builds from tauri.conf.json alone.
+// The upgrade gate builds its OLD copy with MOZAIK_TEST_GUNCELLEME_KOKU, a
+// local server in place of the release (update.rs, `TEST_KOKU`). A released
+// exe built with it would fetch its next version from wherever the variable
+// pointed. So surum.yml must never name it, in any env block or on the build
+// line, and update.rs keeps exactly the two real roots. The check is shown red
+// against a tampered surum.yml, so a green here is not a check that cannot fail.
+describe('yayınlanan exe — güncelleme yalnız gerçek Release köklerinden', () => {
+  const ADI = 'MOZAIK_TEST_GUNCELLEME_KOKU';
+  const sizanlar = (yml: string) => yml.split('\n').filter((satir) => satir.includes(ADI));
+
+  it('update.rs iki gerçek kökü taşıyor, test kökü yalnız derleme anında verilirse', () => {
+    const kokler = /const RELEASE_KOKLERI: \[&str; (\d+)\] = \[([^\]]*)\]/.exec(updateRs);
+    expect(kokler?.[1]).toBe('2');
+    expect([...(kokler?.[2] ?? '').matchAll(/"([^"]+)"/g)].map((m) => m[1])).toEqual([
+      'https://github.com/AlparslanSemiz/Mozaik/releases/',
+      'https://github.com/AlparslanSemiz/ders-programi/releases/',
+    ]);
+    expect(updateRs).toContain(`option_env!("${ADI}")`);
+  });
+
+  it('surum.yml exe’yi test kökü olmadan derliyor', () => {
+    expect(sizanlar(surumYml)).toEqual([]);
+  });
+
+  it('kontrol kırmızıya dönebiliyor: test kökü eklenmiş bir surum.yml yakalanıyor', () => {
+    const satirda = surumYml.replace(
+      /(npx --yes @tauri-apps\/cli\S* build)/,
+      `${ADI}=http://127.0.0.1:8765/ $1`,
+    );
+    const blokta = surumYml.replace(/^jobs:/m, `env:\n  ${ADI}: http://127.0.0.1:8765/\njobs:`);
+    expect(satirda).not.toBe(surumYml);
+    expect(blokta).not.toBe(surumYml);
+    expect(sizanlar(satirda).length).toBeGreaterThan(0);
+    expect(sizanlar(blokta).length).toBeGreaterThan(0);
+  });
+});
+
 describe('yayınlanan exe — WebView2 hata ayıklama portu yok', () => {
   it('tauri.conf.json tarayıcıya argüman vermiyor, surum.yml başka ayar katmıyor', () => {
     expect(tauriConf).not.toMatch(/remote-debugging|additionalBrowserArgs/);

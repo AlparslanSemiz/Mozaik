@@ -29,6 +29,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- The program now checks that a downloaded update is exactly the published file (its SHA-256 digest), not only that it is a whole Windows program of the right size. A published version without a digest is not downloaded; the program says where to get it by hand.
 - When the plan open last time can no longer be read, the first plan that can be read opens instead of an empty one; the unreadable plan is kept exactly as it was, and one line says which plan it was.
 - "Open from file" no longer opens a plan in which two lessons, or a teacher, class or room and another one, share an id, or one has none; such a file is refused as unreadable. "Open all from file" leaves such a plan out and counts it with the broken ones.
 - "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".

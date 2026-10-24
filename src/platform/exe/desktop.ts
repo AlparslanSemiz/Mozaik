@@ -176,6 +176,8 @@ export interface UpdateCevap {
       copy's updater. */
   exe: string;
   boyut: number;
+  /** The exe's SHA-256 as published; update.rs refuses a download without it. */
+  sha256: string | null;
 }
 
 function bridge(): Invoke {
@@ -190,8 +192,8 @@ export function desktopCheck(current: string): Promise<UpdateCevap> {
 }
 
 /** Downloads it NEXT TO the running program and stops there. */
-export function desktopDownload(url: string, boyut: number): Promise<number> {
-  return bridge()<number>('download_update', { url, boyut });
+export function desktopDownload(url: string, boyut: number, sha256: string): Promise<number> {
+  return bridge()<number>('download_update', { url, boyut, sha256 });
 }
 
 /**
