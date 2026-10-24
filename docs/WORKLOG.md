@@ -180,6 +180,41 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 
 
+
+---
+
+## 2026-10-24 gece · TB1'in açılış yarısı (`tb1-acilis`)
+
+Dal zincirin ucundan (`okunabilirlik`), çünkü TB1'in öbür yarısı ve TB8'in okuyucuları orada.
+
+**Önce kırmızı** (`src/storeContract.test.ts`, dört test): açık planın metninde `parseState`'in
+düştüğü bir satır varken bağlama `TypeError` ile çöktü; JSON olmayan metin boş plan olarak açıldı
+ve ilk değişiklik onu ezdi; okunamayan plana geçildi; `loadPlan` istisna attı.
+
+**Çare.** `planStore`'da `storedPlan` (durum, yok, okunamıyor) ve `setAside`: okunabilen ilk plan,
+yoksa yeni boş bir plan açılıyor; okunamayan plan dizinde ve anahtarında kalıyor, seçilemiyor,
+silinen açık planın yerine de açılmıyor. Ekranda kalıcı tek satır (adıyla), dört sözlükte.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen, üçü önce kırmızı testle: açılıştaki yedek
+döndürme bozuk metni yedek zincirine kopyalıyordu ve `listBackups` onu korumasız okuyup Ayarlar →
+Planlar ve yedek'i düşürüyordu (tıklama testi de bu ekranda takılmıştı); "Tümünü dosyadan aç"
+okunamayan yerel planı siliyordu; başka pencere bekçisi `parseState`'in istisnasında düşebiliyordu;
+Planlar listesi ve taslak düğmesi okunamayan planı "verisi yok"/"anahtarı boş" diye söylüyordu;
+şeridin cümlesi silmeden sonra yanlış kalıyordu; üç yerde aynı seçim tek yardımcıya (`openable`).
+Reddedilen: "Tümünü dosyaya kaydet"in notunun okunamayan planı "verisi bulunamayan" sayması (plan
+pakete giremiyor, ayrı bir cümle için yeni metin gerekmez; DATA'da yazılı).
+
+**Tıklama testi** (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul;
+`scratch/tb1-acilis/tiklama/`). Örnek okul → Ayarlar → Planlar ve yedek → Boş plan → 1. plana geç;
+kurulum adımında 1. planın metnine bozuk bir satır (yalnız bu adım depoya doğrudan yazıyor) →
+yenile: şerit "Okunamayan plan açılmadı: 1. plan.", Boş plan açık; Planlar listesinde "· okunamadı";
+ona geçilemiyor, metni bayt bayt aynı. Komşu: Okul → Derslikler → "Yeni" ekle → yenile → listede,
+bozuk metin hâlâ aynı. Konsol hatası yok.
+
+**Koşulan.** `hizli` (1366 geçti), `storeContract` (42), `tsc`, `eslint`, `sinir`, `prettier`,
+tıklama testi iki kez (ilki incelemenin bulduğu çökmeye takıldı). **Koşulmayan.** Tam E2E yerelde
+(CI'da).
+
 ---
 
 ## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
