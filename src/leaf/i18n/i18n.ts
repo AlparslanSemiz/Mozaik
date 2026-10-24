@@ -53,8 +53,8 @@
  * category is asked for properly; only the alternatives are two.
  */
 
-import { preference } from './preference';
-import { LANG_KEY } from './preferenceKeys';
+import { preference } from '../preference';
+import { LANG_KEY } from '../preferenceKeys';
 
 export { LANG_KEY };
 

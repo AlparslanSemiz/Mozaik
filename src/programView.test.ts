@@ -28,7 +28,7 @@ import {
   type BarRun,
   type ColorOf,
 } from './pure/program/programView';
-import { translate } from './leaf/i18n';
+import { translate } from './leaf/i18n/i18n';
 import type { PoolSort, State } from './leaf/types';
 import { makeWorld } from './worlds';
 

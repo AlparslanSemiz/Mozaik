@@ -28,7 +28,7 @@ import {
   systemDil,
   t,
   translate,
-} from './leaf/i18n';
+} from './leaf/i18n/i18n';
 import {
   DEFAULT_SUBJECT_SHORTS,
   WEEK,

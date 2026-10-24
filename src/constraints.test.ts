@@ -34,7 +34,7 @@ import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 import { makeWorld } from './worlds';
 import type { WorldSpec } from './worlds';
-import { aktifDil, setAktifDil } from './leaf/i18n';
+import { aktifDil, setAktifDil } from './leaf/i18n/i18n';
 import './leaf/lang/en';
 import './leaf/lang/de';
 import './leaf/lang/es';

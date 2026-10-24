@@ -13,7 +13,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Preference } from './leaf/preference';
 import * as changelog from './platform/changelog';
-import * as i18n from './leaf/i18n';
+import * as i18n from './leaf/i18n/i18n';
 import * as print from './platform/prefs/printOptions';
 import * as color from './platform/prefs/programColor';
 import * as theme from './platform/prefs/theme';
