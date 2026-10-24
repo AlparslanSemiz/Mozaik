@@ -101,6 +101,18 @@ jobs:
           & "$d\msedgedriver.exe" --version
           "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
 
+      # Runner'ın ekranı 1024×768; büyütülmüş pencere 1280 px'in altında kalınca sekmelerin
+      # yazısı gizleniyor (styles.css) ve süit sekmeyi adıyla bulamıyor (2026-10-24).
+      # Tıklama testlerinin ölçüsü 1920×1080.
+      - name: Ekran 1920×1080
+        shell: pwsh
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force
+          Add-Type -AssemblyName System.Windows.Forms
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          Write-Host "ekran $($b.Width)x$($b.Height)"
+          if ($b.Width -lt 1920) { throw 'çözünürlük değişmedi' }
+
       - name: Gerçek exe süiti
         shell: bash
         run: npx playwright test --config playwright.gercek-exe.config.ts --reporter=list
