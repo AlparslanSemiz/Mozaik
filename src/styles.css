@@ -4265,7 +4265,7 @@ table.sheet-lessons select.transfer-pick {
   gap: var(--space-4);
   min-width: 8.5rem;
   max-width: 100%;
-  color: var(--ink);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   white-space: nowrap;
@@ -4282,7 +4282,7 @@ table.sheet-lessons select.transfer-pick {
   border: 1px solid var(--line-dark);
   border-radius: var(--r-lg);
   background: var(--paper);
-  color: var(--ink);
+  color: var(--text);
   box-shadow: 0 12px 32px var(--shadow-shell);
 }
 
@@ -4311,7 +4311,7 @@ table.sheet-lessons select.transfer-pick {
   border: 0;
   border-radius: var(--r-md);
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   text-align: left;
   font: inherit;
   cursor: pointer;
@@ -6477,7 +6477,7 @@ table.list td.row-no {
 }
 
 .row-grip:hover:not(:disabled) {
-  color: var(--ink);
+  color: var(--text);
   background: var(--paper-sunk);
   border-color: var(--hairline);
 }
