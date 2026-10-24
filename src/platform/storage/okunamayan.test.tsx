@@ -346,8 +346,9 @@ describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
       expect(get().state.teachers.length).toBe(JSON.parse(FULL).teachers.length);
       expect(get().unreadable).toBeNull();
       expect(get().setAside).toEqual(['1. plan']);
+      // Not saved: the directory still points at the unreadable plan.
       const lib = JSON.parse(localStorage.getItem(LIBRARY_KEY)!);
-      expect(lib.activeId).toBe('zz');
+      expect(lib.activeId).toBe('1');
       expect(lib.plans.map((p: { id: string }) => p.id)).toEqual(['1', 'zz']);
       act(() => get().change((d) => ({ ...d, settings: { ...d.settings, schoolName: 'Yeni' } })));
       settle();
@@ -356,10 +357,10 @@ describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
     });
   }
 
-  it('açılan plan yedek zincirine giriyor, okunamayanın metni değil', async () => {
+  it('geri dönülen açılış zinciri döndürmüyor: ne açılan plan ne okunamayanın metni', async () => {
     brokenFirst(CUT);
     await mount();
-    expect(localStorage.getItem(backupKey(0))).toBe(FULL);
+    expect(localStorage.getItem(backupKey(0))).toBeNull();
   });
 
   it('okunabilen plan yoksa boş yerine-geçen açılıyor, şerit söylüyor, kenara konan yok', async () => {
@@ -397,5 +398,39 @@ describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
     expect(unreadablePlan('zz')).toBe('okunamadi');
     expect(loadPlan('1')).not.toBeNull();
     expect(unreadablePlan('1')).toBeNull();
+  });
+
+  // The review's finding (2026-10-24): the switch used to be saved, so every
+  // later session rotated the readable plan into the session chain, and the
+  // unreadable plan's last good copy (yedek-0 from before it broke) was gone
+  // by the third start, with no line saying anything after the first. Not
+  // saved, the directory keeps pointing at the unreadable plan: every start
+  // falls back again, says so again, and leaves the chain alone.
+  it('dört oturum boyunca okunamayan planın sağlam yedeği zincirde kalıyor, satır her açılışta', async () => {
+    const IYI = JSON.stringify({
+      ...JSON.parse(FULL),
+      settings: { ...JSON.parse(FULL).settings, schoolName: 'İyi' },
+    });
+    brokenFirst(CUT);
+    localStorage.setItem(backupKey(0), IYI);
+    for (let oturum = 0; oturum < 4; oturum++) {
+      vi.resetModules();
+      const { get, act, settle } = await mount();
+      expect(get().plans.planId).toBe('zz');
+      expect(get().setAside).toEqual(['1. plan']);
+      act(() =>
+        get().change((d) => ({
+          ...d,
+          settings: { ...d.settings, schoolName: `Oturum ${oturum}` },
+        })),
+      );
+      settle();
+      unmount();
+      unmount = () => undefined;
+    }
+    expect(localStorage.getItem(backupKey(0))).toBe(IYI);
+    expect(JSON.parse(localStorage.getItem(LIBRARY_KEY)!).activeId).toBe('1');
+    expect(localStorage.getItem(BASE_KEY)).toBe(CUT);
+    expect(JSON.parse(localStorage.getItem(planKey('zz'))!).settings.schoolName).toBe('Oturum 3');
   });
 });

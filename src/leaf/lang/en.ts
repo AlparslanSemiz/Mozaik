@@ -89,6 +89,7 @@ const EN: Sozluk = {
     "Its saved text could not be read; it is not opened and was not deleted.",
   "Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.":
     "Its saved text could not be read; deleting the plan deletes that text too. This cannot be undone.",
+  "Bu taslak okunamadı": "This draft could not be read",
   "Bu dosya okunamadı": "This file could not be read",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     'It replaces every plan on this computer, not a single one. Use the "Open all from file" button in Settings → Plans and backup.',
