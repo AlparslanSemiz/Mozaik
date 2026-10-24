@@ -12,6 +12,7 @@ import { expect, type Page } from '@playwright/test';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import type { State } from '../src/leaf/types';
+import { makeWorld, type WorldSpec } from '../src/worlds';
 
 export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 
@@ -426,6 +427,76 @@ export async function savedState(page: Page, previous: string): Promise<State> {
     })
     .not.toBe(previous);
   return JSON.parse(await savedText(page)) as State;
+}
+
+/**
+ * A school in which every list of Kontrol and Ayarlar → Kurallar has rows.
+ *
+ * The sample school is a good school, so it never draws the tables that exist
+ * to say something is wrong: closed-hour lessons, rule breaches, lessons with
+ * nowhere to go, the advisor, and the two "own limit" lists. A test that
+ * measures every list (zebra, contrast) needs all of them on screen, each with
+ * enough rows to alternate. Two days x four hours:
+ *
+ * - AA..EE each hold two hours in a row on Tuesday against a school limit of
+ *   one: five breaches of "art arda", and each has an own daily limit.
+ * - FF holds a four-hour lesson in Tuesday's four hours, all of them closed
+ *   for FF: four lessons on a closed hour.
+ * - GG is closed all week and owes 501..505 an hour each: five lessons with
+ *   nowhere to go.
+ * - 506 is owed three single hours by AA..DD in a two-day week: the advisor.
+ * - 501..505 carry an own same-lesson limit.
+ */
+export function listWorld(): State {
+  const short = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG'];
+  const teachers = short.map((s, i) => ({
+    id: `o${s}`,
+    short: s,
+    ...(i < 5 ? { limits: { maxConsecutive: null, maxPerDay: 3, minPerDay: null } } : {}),
+  }));
+  const classes = [1, 2, 3, 4, 5, 6].map((n) => ({
+    id: `s50${n}`,
+    name: `50${n}`,
+    roomId: n <= 2 ? 'dA' : n <= 4 ? 'dB' : 'dC',
+  }));
+  const lessons: NonNullable<WorldSpec['lessons']> = [];
+  const placements: Record<string, string> = {};
+  const unavailable: Record<string, 1> = {};
+  for (let i = 0; i < 5; i++) {
+    const id = `ard${i}`;
+    lessons.push({ id, classId: `s50${i + 1}`, teacherId: `o${short[i]}`, weeklyHours: 2 });
+    placements[`s50${i + 1}|0|0`] = id;
+    placements[`s50${i + 1}|0|1`] = id;
+    lessons.push({ id: `yok${i}`, classId: `s50${i + 1}`, teacherId: 'oGG', weeklyHours: 1 });
+  }
+  lessons.push({ id: 'kapali', classId: 's506', teacherId: 'oFF', weeklyHours: 4 });
+  for (let s = 0; s < 4; s++) {
+    placements[`s506|0|${s}`] = 'kapali';
+    unavailable[`oFF|0|${s}`] = 1;
+  }
+  for (let g = 0; g < 2; g++) for (let s = 0; s < 4; s++) unavailable[`oGG|${g}|${s}`] = 1;
+  for (let i = 0; i < 4; i++) {
+    lessons.push({ id: `gun${i}`, classId: 's506', teacherId: `o${short[i]}`, weeklyHours: 3 });
+  }
+  const world = makeWorld({
+    days: 2,
+    hours: 4,
+    rooms: [
+      { id: 'dA', name: 'A' },
+      { id: 'dB', name: 'B' },
+      { id: 'dC', name: 'C' },
+    ],
+    teachers,
+    classes,
+    lessons,
+    placements,
+    unavailable,
+    limits: { maxConsecutive: 1 },
+  });
+  return {
+    ...world,
+    classes: world.classes.map((c, i) => (i < 5 ? { ...c, maxSameLessonPerDay: 2 } : c)),
+  };
 }
 
 export async function openFixture(page: Page) {
