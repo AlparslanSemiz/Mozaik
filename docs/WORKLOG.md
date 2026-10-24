@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (`tp7-windows-exe`, zincirden sonra).
+Son güncelleme: 2026-10-24 (`tp7-windows-exe`, dokuz dallık zincirin ucu).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -49,18 +49,19 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
 Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
 TP-B birikim maddesi. 2026-10-24'te yedi dal zincir olarak birleşti (aşağıdaki girdiler):
-TB8 düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in üst çubuk yarısı düzeldi, açılış yarısı
-açık (`tb1-acilis`); TB7'nin exe yarısı düzeldi (Linux'ta ve Windows'ta gerçek exe süitinde yeşil),
+TB8 düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in iki yarısı da düzeldi (açılış yarısı
+`tb1-acilis`'te); TB7'nin exe yarısı düzeldi (Linux'ta ve Windows'ta gerçek exe süitinde yeşil),
 tarayıcı yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor; dosya
 okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kapandı.
 
 **Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
-`tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik`) birleşince ana
-klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). Zebra mozaik-ed'in `zebra-liste`
-dalında (kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi
-(`scratch/zebra-devir.md`). Zincirden sonra iki dal: `tp7-windows-exe` (Windows'ta gerçek exe süiti
-yeşil, kapanış senaryosu içinde, `yayinla` etiketten önce onu bekliyor) ve `tb1-acilis`
-(açılışta bozuk plan). Kodu
+`tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik` → `tb1-acilis` →
+`tp7-windows-exe`) tek doğrusal zincir, sırayla `--ff-only` ile alınır (CLAUDE.md); birleşince
+ana klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). `tb1-acilis` açılışta bozuk
+planı kenara koyuyor; `tp7-windows-exe` Windows'ta gerçek exe süitini yeşil koşuyor, kapanış
+senaryosu içinde, `yayinla` etiketten önce onu bekliyor. Zincirin ucundan açılan sıradaki dal:
+`ogretmene-eposta` (öğretmen başına `mailto:`). Zebra mozaik-ed'in `zebra-liste` dalında
+(kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi (`scratch/zebra-devir.md`). Kodu
 değiştiren her dal "bitti"den önce bitti kontrolünü yapar; bir TODO maddesine başlamadan önce
 worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum`
 (Alp'in deny testi); onun B7.33'ü `main`'de maskable ikonun, birleşirken numarasını kaydırır.
@@ -170,7 +171,7 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 171 212 bayt, brotli 281,77 kB (2026-10-24, zincirin ucu `okunabilirlik`); eşikler 1 184 000 (aynı gün çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 174 099 bayt, brotli 282,28 kB (2026-10-24, zincirin ucu `tp7-windows-exe`); eşikler 1 184 000 (aynı gün çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -252,6 +253,11 @@ Koşulanlar: Linux'ta gerçek exe süiti tb7'nin ikilisine karşı, sürücünü
 iki kez 14 geçti, 1 atlandı; `npm run hizli` her commit'ten önce yeşil; `kontrat.test.ts`'in
 yeni testi porta açılan `tauri.conf.json`'a karşı kırmızı. Koşulmayan: Windows'ta düzeltmesiz ikiliye karşı
 kapanış testi (mutasyon), ve süitin babanınki gibi Türkçe bir Windows'ta koşusu.
+
+**Zincire katıldı (kullanıcının kararı).** `git merge tb1-acilis` çakışmasız; ucun CI'ı ve
+`exe-windows.yml`'i (40103570404, 13 geçti) yeşil, bunun için geçici dal tetiği bir commit
+boyunca geri geldi. `dist/index.html` 1 174 099 bayt, brotli 282,28 kB, iki eşiğin altında.
+CLAUDE.md'ye kural: hazır dallar birleşme sırasıyla tek doğrusal zincir.
 
 ## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
 
