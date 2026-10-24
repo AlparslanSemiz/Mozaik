@@ -247,6 +247,9 @@ her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden ge�
 çubuğun kuralıyla okunur (`readBundlePlans`, 2026-10-23, TODO TB8): liste alanı eksik,
 bozuk ya da daha yeni bir plan açılmaz ve buradaki aynı kimlikli plan kalır. Açılmayacak
 planları onay sorusu sayar. Hiçbir plan okunamıyorsa soru sorulmaz ve hiçbir şey değişmez.
+`state`'i nesne olmayan bir girdi de okunamayan plan sayılır (`skipped`). Depo dolduğu için
+yazılamayan plan da açılmamış sayılır: buradaki aynı kimlikli plan kalır, yoksa dizine verisiz
+satır girmez; hiçbir plan yazılamazsa hiçbir şey silinmez ve not depolamayı söyler.
 `bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil.
 Zarfta isteğe bağlı bir `olcum` alanı da olabilir. O, bu makinedeki öneri
 aramalarının ölçümü (`ders-programi-oneri-olcum`), ve babanın gönderdiği dosyanın

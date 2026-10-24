@@ -596,7 +596,8 @@ export function readPlanFile(text: string): PlanFile {
  * opened as an empty one and took the plan this computer had with it (TODO
  * TB8). A plan that is missing a list, unreadable or newer is not opened; the
  * readable ones are, every part of them, in the file's order. A plan that makes
- * the reader throw (TB1) is an unreadable plan here, not a dead button.
+ * the reader throw (TB1) is an unreadable plan here, not a dead button, and so
+ * is an entry parseBundle skipped because its state was not an object.
  */
 export function readBundlePlans(bundle: Bundle): {
   plans: Array<{ id: Id; state: State }>;
@@ -615,6 +616,7 @@ export function readBundlePlans(bundle: Bundle): {
     if (read !== null && 'state' in read) plans.push({ id: plan.id, state: read.state });
     else unreadable.push(plan.id);
   }
+  for (const id of bundle.skipped ?? []) if (!unreadable.includes(id)) unreadable.push(id);
   return { plans, unreadable };
 }
 

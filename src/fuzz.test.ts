@@ -313,7 +313,7 @@ describe('fuzz · "Tümünü dosyadan aç" (readBundlePlans, TB8)', () => {
       fc.assert(
         fc.property(broken(root), (x) => {
           // An entry whose state is not an object never reaches the reader:
-          // parseBundle drops it, and the bundle is then the intact plan alone.
+          // parseBundle drops it and names it in `skipped`, an unreadable plan.
           const { plans, unreadable } = readBundlePlans(bundleOf(x));
           expect(plans.map((p) => p.id)).toContain('b');
           for (const p of plans) expect(wholeness(p.state), p.id).toBeNull();

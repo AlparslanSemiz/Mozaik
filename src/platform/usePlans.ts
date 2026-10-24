@@ -138,7 +138,11 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
    *     changes: a half-finished import is two truths. A plan the file could
    *     not read does not take away the one here with its id: the file meant
    *     to replace it and has nothing to replace it with.
-   *  3. write the data, counting what did not fit (quota).
+   *  3. write the data, counting what did not fit (quota). If not one plan
+   *     was written, stop here: nothing has changed yet, and dropping the
+   *     plans here would make the import a loss. A plan that did not fit is
+   *     treated like an unreadable one: the plan here with its id stays, and
+   *     with no plan here it gets no directory row.
    *  4. drop the keys of plans the incoming library does not have.
    *  5. write the directory LAST, once its data is really in place — the same
    *     rule createPlan already follows.
@@ -150,35 +154,37 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
       const { plans: parsed, unreadable } = readBundlePlans(bundle);
       if (parsed.length === 0) return { ok: 0, failed: 0, unreadable: unreadable.length };
 
-      const kept = new Set(parsed.map((x) => x.id));
-      const stays = new Map(
-        library.plans.filter((p) => unreadable.includes(p.id)).map((p) => [p.id, p]),
-      );
+      const written = new Set<Id>();
       let failed = 0;
-      let ok = 0;
       for (const { id, state } of parsed) {
-        if (savePlan(id, state)) ok++;
+        if (savePlan(id, state)) written.add(id);
         else failed++;
       }
+      if (written.size === 0) return { ok: 0, failed, unreadable: unreadable.length };
 
+      // Every plan the file names but could not deliver: unreadable or did not fit.
+      const missed = new Set(
+        [...unreadable, ...parsed.map((x) => x.id)].filter((id) => !written.has(id)),
+      );
+      const stays = new Map(library.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]));
       for (const plan of library.plans) {
-        if (!kept.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
+        if (!written.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
 
+      const fromFile = bundle.library.plans.flatMap((p) => {
+        if (written.has(p.id)) return [p];
+        const here = stays.get(p.id);
+        return here === undefined ? [] : [here];
+      });
       const next: Library = {
-        plans: bundle.library.plans.flatMap((p) => {
-          if (kept.has(p.id)) return [p];
-          const here = stays.get(p.id);
-          return here === undefined ? [] : [here];
-        }),
-        activeId: kept.has(bundle.library.activeId) ? bundle.library.activeId : parsed[0]!.id,
+        plans: [...fromFile, ...[...stays.values()].filter((p) => !fromFile.includes(p))],
+        activeId: written.has(bundle.library.activeId)
+          ? bundle.library.activeId
+          : parsed.find((x) => written.has(x.id))!.id,
       };
       commit(next);
-      openPlan(
-        next.activeId,
-        parsed.find((x) => x.id === next.activeId)?.state ?? parsed[0]!.state,
-      );
-      return { ok, failed, unreadable: unreadable.length };
+      openPlan(next.activeId, parsed.find((x) => x.id === next.activeId)!.state);
+      return { ok: written.size, failed, unreadable: unreadable.length };
     },
     [library, commit, discardPendingSave, openPlan],
   );

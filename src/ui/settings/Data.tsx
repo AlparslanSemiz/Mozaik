@@ -598,7 +598,9 @@ export default function Data({
     }
 
     const { ok, failed, unreadable } = plans.replaceLibrary(bundle);
-    if (ok === 0) {
+    // With storage full and not one plan written, nothing changed either, but
+    // the reason is the storage, and the note below says so.
+    if (ok === 0 && failed === 0) {
       setNote({
         bad: true,
         text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),

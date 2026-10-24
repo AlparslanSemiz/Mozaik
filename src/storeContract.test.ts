@@ -28,6 +28,7 @@ import { createElement } from 'react';
 import { isTextInput, useStore } from './platform/useStore';
 import { collectStates, downloadBackup, downloadBundle } from './platform/download';
 import { listBackups, loadPlan, savePlan, storageWorks } from './platform/planStore';
+import { BUNDLE_VERSION, parseBundle } from './pure/bundle';
 import { parseState } from './pure/parseState';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
@@ -557,6 +558,81 @@ describe('sözleşme · React kancası', () => {
     expect(tam?.teachers).toHaveLength(2);
     expect(tam?.lessons).toHaveLength(3);
     expect(Object.keys(tam?.programs[0]?.placements ?? {})).toHaveLength(6);
+  });
+
+  // TB8's review. An entry whose `state` is not even an object is dropped by
+  // parseBundle before anyone counts it; it is just as unreadable as a plan
+  // with a list missing, and the plan here with its id must stay the same way.
+  it('TB8: state’i nesne olmayan girdinin buradaki karşılığı da kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const bundle = parseBundle(
+      JSON.stringify({
+        bundleVersion: BUNDLE_VERSION,
+        activeId: 'y',
+        plans: [
+          { id: '1', name: 'Bozuk', draft: false, state: null },
+          { id: 'y', name: 'Tam', draft: false, state: school() },
+        ],
+      }),
+    )!;
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary(bundle);
+    });
+    expect(result).toEqual({ ok: 1, failed: 0, unreadable: 1 });
+    // The file's directory never had a row for it, so it comes after the file's plans.
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y', '1']);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+  });
+
+  // TB8's review, and older than TB8: with storage full, not one incoming plan
+  // was written, yet every plan here that the file does not carry was already
+  // dropped, while the note said nothing had changed.
+  it('depo dolu ve hiçbir plan yazılamadıysa buradaki planlar kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const before = store.plans.library;
+    localStorage.setItem = () => {
+      throw new Error('quota');
+    };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: { plans: [{ id: 'y', name: 'Gelen', draft: false }], activeId: 'y' },
+        states: { y: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 0, failed: 1, unreadable: 0 });
+    expect(store.plans.library).toBe(before);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+  });
+
+  it('yazılamayan yeni plan dizinde verisiz bir satır olarak kalmıyor', () => {
+    mount();
+    settle();
+    const real = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = (k: string, v: string) => {
+      if (k === planKey('z')) throw new Error('quota');
+      real(k, v);
+    };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: 'y', name: 'Yazılan', draft: false },
+            { id: 'z', name: 'Sığmayan', draft: false },
+          ],
+          activeId: 'y',
+        },
+        states: { y: school(), z: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 1, failed: 1, unreadable: 0 });
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y']);
   });
 
   it('Ctrl+Z geri alıyor, metin kutusundayken almıyor', () => {
