@@ -1,0 +1,162 @@
+/**
+ * Putting a list into an order of your own — the part all four lists share.
+ *
+ * The order IS the array (see `reorderList`), so everything downstream follows
+ * for free: the Program grid maps `state.teachers` to build its rows, the
+ * printer maps it to build its pages, and the Müsaitlik picker maps it to build
+ * its list. Dragging a row here is the only place any of them is decided.
+ *
+ * Two ways in, both required. The pointer is the one that will be used; the
+ * keyboard is the one that makes the feature exist for someone who cannot use
+ * a pointer, and it is also the precise one — Home/End beat dragging a row
+ * past twenty others.
+ */
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { GripVertical } from 'lucide-react';
+import type { ReactElement } from 'react';
+import { reorderList, type ListKind } from '../../pure/entities';
+import { canReorder, type ListQuery } from '../../pure/listview';
+import { attachRowDrag, clampIndex } from '../../platform/dom';
+import type { State } from '../../leaf/model';
+import { useT } from '../common';
+
+interface Options {
+  kind: ListKind;
+  /** How many rows there are in total — a one-row list cannot be reordered. */
+  count: number;
+  /** The list itself, so a sentence about a move can tell when the list moved on. */
+  items: readonly unknown[];
+  /** The strip's current question. A sort or a filter locks the handles. */
+  query: ListQuery;
+  change: (apply: (d: State) => State) => void;
+}
+
+export interface RowOrder {
+  /** Goes on the <tbody> holding the draggable rows. */
+  bodyRef: (node: HTMLTableSectionElement | null) => void;
+  /** For ListTools, so a keyboard move is spoken rather than only seen. */
+  notice: string;
+  /**
+   * The two leading <th>s, so the head and the body cannot drift apart. Every
+   * list that draws `grip()` draws this, and neither is written out by hand in
+   * four files any more.
+   */
+  head: ReactElement;
+  /** The number cell and the handle cell. `name` is what the row is called out loud. */
+  grip: (index: number, name: string) => ReactElement;
+}
+
+export function useRowOrder({ kind, count, items, query, change }: Options): RowOrder {
+  const t = useT();
+  // The sentence and the list it is about. The list is recorded on the render
+  // after the move, which is the first one that holds it. When the list
+  // changes again — Ctrl+Z, another edit — the sentence is about a list that is
+  // no longer on screen and goes quiet (DENETIM O7).
+  const [said, setSaid] = useState<{ text: string; items: readonly unknown[] | null }>({
+    text: '',
+    items: null,
+  });
+  if (said.text !== '' && said.items === null) setSaid({ text: said.text, items });
+  const notice = said.items === null || said.items === items ? said.text : '';
+  const locked = !canReorder(query) || count < 2;
+
+  // Read inside the gesture's callback rather than captured by it: the listeners
+  // are attached once, and a stale `change` would write into an old State.
+  // `t` rides along in the ref for the same reason the other three do: `move`
+  // is attached to a DOM listener once, and a callback that changed identity
+  // with the language would detach and reattach the drag on every switch.
+  const latest = useRef({ kind, count, change, t });
+  latest.current = { kind, count, change, t };
+
+  const move = useCallback((from: number, to: number, name: string) => {
+    const { kind: k, count: n, change: apply, t: say } = latest.current;
+    const target = clampIndex(to, n);
+    if (target === from) return;
+    apply((d) => reorderList(d, k, from, target));
+    setSaid({ text: say('{ad} {n}. sıraya taşındı.', { ad: name, n: target + 1 }), items: null });
+  }, []);
+
+  const detach = useRef<(() => void) | null>(null);
+  const bodyRef = useCallback(
+    (node: HTMLTableSectionElement | null) => {
+      detach.current?.();
+      detach.current = null;
+      if (node === null) return;
+      detach.current = attachRowDrag({
+        body: node,
+        commit: (from, to) => {
+          const row = node.children[from];
+          const name = row?.getAttribute('data-row-name') ?? latest.current.t('Satır');
+          move(from, to, name);
+        },
+      });
+    },
+    [move],
+  );
+
+  // The tbody can go away with the tab (pitfall 18) without the ref callback
+  // being told, so the teardown also lives here.
+  useEffect(() => () => detach.current?.(), []);
+
+  const head = (
+    <>
+      {/* "Liste görünümünde de en solda sıralamaya göre sıra sıra sayılar
+          olsun." Its heading is a bare # rather than "Sıra": the column is
+          three characters wide and a word in it would set its floor. */}
+      <th className="row-no-col" title={t('Sıra')}>
+        #
+      </th>
+      {/* The handle gets a column of its own: squeezed in beside something
+          else, half of it belongs to the neighbour (pitfall 47). */}
+      <th className="grip-col" />
+    </>
+  );
+
+  const grip = useCallback(
+    (index: number, name: string) => (
+      <>
+        {/* The number the reader SEES, not the index in the array: under a sort
+          or a filter the third row on screen is the third row on screen, and a
+          column quietly counting something else would be worse than no column.
+          It is also why this is not `aria-label`ed as a position — the handle
+          beside it already says the row's real place in the list. */}
+        <td className="row-no">{index + 1}</td>
+        <td className="grip-col">
+          <button
+            type="button"
+            className="row-grip"
+            disabled={locked}
+            // The position is IN the name: a handle that says only "taşı" gives
+            // no way to tell whether the last keypress did anything.
+            aria-label={t('{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok', {
+              ad: name,
+              n: index + 1,
+            })}
+            // The arrow keys were only ever in the accessible name, so a reader
+            // who can see the handle was never told about them.
+            title={
+              locked
+                ? t('Elle sıralama için süzmeyi ve sıralamayı kaldırın')
+                : t('Sürükleyerek ya da ok tuşlarıyla sırala')
+            }
+            onKeyDown={(e) => {
+              let next: number | null = null;
+              if (e.key === 'ArrowUp') next = index - 1;
+              else if (e.key === 'ArrowDown') next = index + 1;
+              else if (e.key === 'Home') next = 0;
+              else if (e.key === 'End') next = latest.current.count - 1;
+              if (next === null) return;
+              e.preventDefault();
+              move(index, next, name);
+            }}
+          >
+            <GripVertical size={16} aria-hidden="true" focusable="false" />
+          </button>
+        </td>
+      </>
+    ),
+    [locked, move, t],
+  );
+
+  return { bodyRef, notice, head, grip };
+}

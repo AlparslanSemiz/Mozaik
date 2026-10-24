@@ -16,44 +16,38 @@ import {
   closedKey,
   applyDrop,
   dropMap,
-  evictionNotice,
   removeBlock,
   placementKey,
-  swapDoneNotice,
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
+  type BlockRef,
+  type PinScope,
 } from '../../pure/constraints';
-import type { BlockRef, PinScope } from '../../pure/constraints';
-import { cellKey, parseCellKey } from '../../leaf/keys';
-import { useToast } from '../Toasts';
+import { cellKey, type State, type Id } from '../../leaf/model';
+import { useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
-import { useLessonEdit } from '../LessonEdit';
-import { dayLabel, lessonSubject, subjectShort } from '../../pure/entities';
+import { useLessonEdit } from './LessonEdit';
+import { lessonSubject, subjectShort } from '../../pure/entities';
 import {
+  blockMaskedDays,
   buildPool,
   buildRows,
   classOfCell,
   describeBar,
+  describeMenu,
+  dropNotice,
+  poolMenuFacts,
   markPreview,
   roomLetter,
   visibleDays,
   waitingSubjects,
   type ColorOf,
-} from '../../pure/programView';
-import { useDrag } from '../../platform/drag';
-import type { DragData } from '../../platform/drag';
-import { samePlan, type SolverRun } from '../../platform/search';
-import { applySuggestion, suggestionDiff } from '../../pure/relax';
-import type { State, Id } from '../../leaf/types';
-import {
-  activePinned,
-  activePlacements,
-  rowMask,
-  setDayMask,
-  setRowMask,
-  type ProgramMask,
 } from '../../pure/program';
+import { useDrag, type DragData } from '../../platform/dom';
+import { samePlan, type SolverRun } from '../../platform/search';
+import { setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
+import { activePinned, activePlacements } from '../../pure/grid';
 import {
   programColorIndex,
   type PoolSort,
@@ -64,9 +58,9 @@ import { KIND_ICON } from './steps';
 import Grid from './Grid';
 import type { GridMenuTarget } from './Grid';
 import LessonPool from './LessonPool';
-import Suggestions, { wayName } from './Suggestions';
-import type { Preview } from './Suggestions';
-import { T, useT } from '../T';
+import Suggestions from './Suggestions';
+import PreviewBar from './PreviewBar';
+import { usePreview } from './usePreview';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -135,18 +129,7 @@ function Program({
       // late, and reading a ref or a closure variable inside one is how the
       // solver's whole result once went missing (pitfall 20).
       const verdict = data.map.get(cellKey(day, hour));
-      const pushedOut = verdict?.evicts ?? [];
-      const lesson = ix.lessonById.get(data.lessonId);
-      const told =
-        verdict?.action.kind === 'swap' && data.source !== null
-          ? swapDoneNotice(ix, data.source, verdict.action.targets)
-          : pushedOut.length === 0 || lesson === undefined
-            ? ''
-            : evictionNotice(
-                ix,
-                pushedOut.map((id) => ix.lessonById.get(id)).filter((x) => x !== undefined),
-                true,
-              );
+      const told = dropNotice(ix, data.lessonId, data.source, verdict);
 
       change((d) => {
         if (verdict === undefined) return d;
@@ -170,27 +153,8 @@ function Program({
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
-  // THE PREVIEW (TODO B5.11): a way's week drawn on the grid, marked, before
-  // anything is applied. Nothing in it can be dragged or removed.
-  const [preview, setPreview] = useState<Preview | null>(null);
   const advice = solver.advice;
-  const stale = advice !== null && !samePlan(state, advice.forState);
-  const previewed =
-    preview === null || advice === null
-      ? null
-      : (advice.suggestions.find((s) => s.family === preview.family) ?? null);
-  useEffect(() => {
-    if (preview !== null && (previewed === null || stale)) setPreview(null);
-  }, [preview, previewed, stale]);
-  const diff = useMemo(
-    () => (previewed === null ? null : suggestionDiff(state, previewed)),
-    [state, previewed],
-  );
-  const shown = useMemo(
-    () =>
-      previewed !== null && preview?.show === 'after' ? applySuggestion(state, previewed) : null,
-    [state, previewed, preview?.show],
-  );
+  const { preview, setPreview, stale, previewed, diff, shown } = usePreview(state, advice);
   const colorOf = useCallback<ColorOf>(
     (d, lesson) => programColorIndex(d, lesson, colorMode),
     [colorMode],
@@ -207,27 +171,6 @@ function Program({
         : buildRows(state, ix, view, mask, colorOf, t),
     [shown, diff, state, ix, view, mask, colorOf, t],
   );
-  // The first opened hour into view: on the father's week they sit on
-  // Saturday, off the right edge of a 1920 px screen, and the preview is for
-  // seeing exactly those.
-  useEffect(() => {
-    if (shown === null) return;
-    const frame = requestAnimationFrame(() =>
-      document
-        .querySelector('.program-body .card.mark-opened')
-        ?.scrollIntoView({ block: 'nearest', inline: 'center' }),
-    );
-    return () => cancelAnimationFrame(frame);
-  }, [shown]);
-  useEffect(() => {
-    if (preview === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPreview(null);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [preview]);
-
   // The plan's answers are the search's: an answer, or an undo that takes one
   // back, runs it again (useSolver checks whether anything changed).
   const { reconsider } = solver;
@@ -315,32 +258,17 @@ function Program({
     },
     [],
   );
-  const menuAt = menuTarget?.kind === 'card' ? menuTarget : null;
-  const menuRowId =
-    menuTarget?.kind === 'row' || menuTarget?.kind === 'card' ? menuTarget.rowId : null;
-  const menuDay =
-    menuTarget?.kind === 'day' || menuTarget?.kind === 'column' || menuTarget?.kind === 'card'
-      ? menuTarget.day
-      : null;
-
-  const menuClass = menuAt === null ? null : classAt(state, menuAt.rowId, menuAt.day, menuAt.hour);
-  const menuPinned =
-    menuAt !== null && menuClass !== null && blockPinned(state, menuClass, menuAt.day, menuAt.hour);
-  const menuLessonId =
-    menuAt === null || menuClass === null
-      ? undefined
-      : activePlacements(state)[
-          placementKey(
-            menuClass,
-            menuAt.day,
-            blockAt(state, menuClass, menuAt.day, menuAt.hour)?.hour ?? menuAt.hour,
-          )
-        ];
-  const menuLesson = menuLessonId === undefined ? undefined : ix.lessonById.get(menuLessonId);
-  const menuCellMasked =
-    menuLesson !== undefined &&
-    (mask.teachers[menuLesson.teacherId] !== undefined ||
-      mask.classes[menuLesson.classId] !== undefined);
+  const {
+    at: menuAt,
+    rowId: menuRowId,
+    day: menuDay,
+    pinned: menuPinned,
+    lessonId: menuLessonId,
+    lesson: menuLesson,
+    cellMasked: menuCellMasked,
+    rowMode: menuRowMode,
+    dayMode: menuDayMode,
+  } = describeMenu(state, ix, view, mask, menuTarget);
 
   /**
    * Lock or unlock ONE block, wherever the ask came from.
@@ -401,19 +329,11 @@ function Program({
     },
     [menuDay, solver.running, setMask, state.settings.days],
   );
-  const menuRowMode = menuRowId === null ? undefined : rowMask(mask, view, menuRowId);
-  const menuDayName = menuDay === null ? undefined : state.settings.days[menuDay]?.name;
-  const menuDayMode = menuDayName === undefined ? undefined : mask.days[menuDayName];
-
-  const poolMenuLesson =
-    poolMenuLessonId === null ? undefined : ix.lessonById.get(poolMenuLessonId);
-  const poolMenuRowId =
-    poolMenuLesson === undefined
-      ? null
-      : view === 'teacher'
-        ? poolMenuLesson.teacherId
-        : poolMenuLesson.classId;
-  const poolMenuRowMode = poolMenuRowId === null ? undefined : rowMask(mask, view, poolMenuRowId);
+  const {
+    lesson: poolMenuLesson,
+    rowId: poolMenuRowId,
+    rowMode: poolMenuRowMode,
+  } = poolMenuFacts(ix, view, mask, poolMenuLessonId);
   const setPoolMenuRowMode = useCallback(
     (mode?: 'ghost' | 'hidden') => {
       if (poolMenuRowId === null || solver.running) return;
@@ -511,20 +431,7 @@ function Program({
       // the constraint engine answering 72 questions, and one of the answers
       // ("occupied by this class's own lesson") now costs an eviction to say.
       const map = dropMap(state, ix, lessonId, size, sourceRef);
-      for (const [key, verdict] of map) {
-        const { day } = parseCellKey(key);
-        const dayName = state.settings.days[day]?.name;
-        if (dayName !== undefined && mask.days[dayName] !== undefined) {
-          map.set(key, {
-            ...verdict,
-            blocked: t('{gun} geçici olarak kapsam dışında', {
-              gun: dayLabel(dayName),
-            }),
-            warning: null,
-            evicts: [],
-          });
-        }
-      }
+      blockMaskedDays(map, state, mask.days, t);
 
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
@@ -647,37 +554,14 @@ function Program({
       )}
 
       {previewed !== null && preview !== null && diff !== null && (
-        <div className="preview-bar" role="region" aria-label={t('Önizleme')}>
-          <b>{t('Önizleme: {yol}', { yol: wayName(t, previewed.family) })}</b>
-          <span className="segmented" role="group" aria-label={t('Hangi hafta')}>
-            <button
-              className="btn"
-              aria-pressed={preview.show === 'before'}
-              onClick={() => setPreview({ ...preview, show: 'before' })}
-            >
-              {t('Şu anki')}
-            </button>
-            <button
-              className="btn"
-              aria-pressed={preview.show === 'after'}
-              onClick={() => setPreview({ ...preview, show: 'after' })}
-            >
-              {t('Önerilen')}
-            </button>
-          </span>
-          <span className="preview-legend">
-            <span className="mark-key mark-opened" aria-hidden="true" />
-            {t('{n} öğretmen saati açılıyor', { n: diff.opened.size })}
-            <span className="mark-key mark-moved" aria-hidden="true" />
-            {t('{n} ders yer değiştiriyor', { n: diff.movedBlocks })}
-          </span>
-          <button className="btn primary" disabled={stale} onClick={() => solver.apply(previewed)}>
-            {previewed.relaid ? t('Uygula, baştan diz') : t('Uygula')}
-          </button>
-          <button className="btn" onClick={() => setPreview(null)}>
-            {t('Önizlemeyi kapat')}
-          </button>
-        </div>
+        <PreviewBar
+          previewed={previewed}
+          preview={preview}
+          setPreview={setPreview}
+          diff={diff}
+          stale={stale}
+          apply={solver.apply}
+        />
       )}
 
       {/* The instrument, and the pool under it in a drawer. The pool spent a

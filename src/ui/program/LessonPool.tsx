@@ -23,8 +23,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import type { Id } from '../../leaf/types';
-import { paletteColor } from '../../leaf/palette';
+import { type Id, paletteColor } from '../../leaf/model';
 import {
   DOCK_H_MIN,
   readDock,
@@ -33,10 +32,14 @@ import {
   writeDockHeight,
   type PoolSort,
 } from '../../platform/prefs';
-import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../../platform/poolSplit';
-import { attachScrollFade } from '../../platform/scrollFade';
-import type { PoolCard } from '../../pure/programView';
-import { useT } from '../T';
+import {
+  attachSplitter,
+  dockHeightForRoom,
+  maxDockHeight,
+  attachScrollFade,
+} from '../../platform/dom';
+import type { PoolCard } from '../../pure/program';
+import { useT } from '../common';
 
 interface Props {
   cards: PoolCard[];

@@ -1440,7 +1440,7 @@ slot".
   işaretlenince dersler dönmüyor, havuzda 57 blok bekliyor. Üst çubuktaki Geri al
   düğmesi hepsini geri getiriyor. Günlük ders sayısını 12'den 10'a indirmek aynısını
   yapıyor: 33 saat, 6'sı sabitli. Ctrl+Z'nin çalışmama sebebi kaynakta görülüyor:
-  `isTextInput()` (`src/platform/useStore.ts`) etiketi INPUT olan her şeyi, onay kutusu
+  `isTextInput()` (`src/platform/storage/useStore.ts`) etiketi INPUT olan her şeyi, onay kutusu
   ve sayı kutusu dahil, yazı kutusu sayıyor ve odak değiştirilen kutuda kalıyor. DATA.md
   "Sabitlenmiş bir blok yalnız sabitleme kaldırılınca iner … Bilinen tek istisna, bir
   dersi başka bir öğretmene ya da sınıfa aktarmak" diyor, bu iki yol o listede yok.
@@ -1541,7 +1541,7 @@ paket indirildi (`scratch/denetim/veri/paket.json`). Görüntüler:
   "kaydet" olan bir düğmenin kullanıcıyı başka bir yere götürmesi beklenmiyor, ve
   "taslak"ın burada "ızgarasız okul" demek olduğu hiçbir yerde yazmıyor.
 - Üst çubuktaki plan seçici uzun adları kesiyor ("1. plan kopyas").
-- Plan seçicideki "(taslak)" eki çevrilmiyor (keşifte bulundu, `src/ui/App.tsx`).
+- Plan seçicideki "(taslak)" eki çevrilmiyor (keşifte bulundu, `src/ui/shell/App.tsx`).
 
 **Kusur.** Yok.
 
@@ -1591,7 +1591,7 @@ açık planın gideceğini söylüyor. Boş bir plana dosya açarken de aynı uy
   ile aç. Beklenen: "Bu dosya daha yeni bir sürümle yazılmış. Programı güncelleyin."
   Olan: "Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası
   seçin." Dosya zaten programın indirdiği bir dosya. "Daha yeni sürüm" dalı kaynakta
-  var (`src/ui/App.tsx`) ama yalnız paket dosyasının sürümüne bakıyor. Senaryo: exe
+  var (`src/ui/shell/App.tsx`) ama yalnız paket dosyasının sürümüne bakıyor. Senaryo: exe
   kendini güncelledi, baba aynı yedeği başka bir makinedeki eski kopyada açıyor ve
   dosyanın bozuk olduğunu sanıyor. `e2e/temel.spec.ts` bu cümleyi bekliyor.
   **Düzeldi (2026-09-27, 36cf42f).**
@@ -1800,7 +1800,7 @@ diz, tema, şerit, animasyon, kısayollar), öğretmenler, sınıflar, derslikle
 
 **Kötü olan.** Çalışan beş tuş listede yok: Ctrl+Shift+Z, kartta Space ve Backspace, havuz
 kenarında ↑ ↓ Shift Home End, sürüklerken Esc. Liste elle yazılmış (keşif,
-`src/ui/ShortcutsHelp.tsx`).
+`src/ui/shell/ShortcutsHelp.tsx`).
 
 **Kusur.** Yok.
 
