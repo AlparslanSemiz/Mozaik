@@ -42,6 +42,13 @@ doğrulama CI'da, mutasyon haftalık. Belge kapısı yalnız yapıyı ölçüyor
 olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de koşar. Ağır
 komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
+**Dallar ve `stabil` (2026-10-24).** Biten dal ve worktree'ler `npm run dal-temizle` ile
+gider (önce kuru koşu, `-- --uygula`; yalnız `origin/main`'e birleşmiş olanı, bundle,
+`arsiv/` etiketi ve `scratch/`'i `~/GitHub/Mozaikler/_arsiv/`'e aldıktan sonra). İlk
+uygulamada 11 yerel ve 13 uzak birleşmiş dal silindi, 19 birleşmemiş dal duruyor (TODO
+B7.34). `stabil` babanın koştuğu sürümün dalı, bugün yalnız yerelde ve `v2.2.0`'da; onu
+yalnız `yayinla` ileri alır ve iter.
+
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 turları ve test programı 2026-10-23'te donduruldu. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
 paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi,
@@ -172,6 +179,36 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · Dal temizliği ve `stabil` (`dal-temizlik`)
+
+**Envanter** (salt okunur, ayrıntısı `scratch/dal-temizlik/`'te). 25 yerel ve 30 uzak dal,
+14 worktree. Tetikleyiciler: `ci.yml` her dalın push'unda (`'**'`), site işi ve Pages yalnız
+`main`; `windows.yml` yalnız `main`; `surum.yml` `v*` etiketinde derler ve Release yayınlar,
+exe en son Release'in `surum.json`'ına bakar (`update.rs`). Başka adlı etiket ve dal silmek
+hiçbir şey tetiklemiyor. Yeni bir dal itmek bir CI koşusu başlatıyor, deploy ya da sürüm
+başlatmıyor (tuzak 154). Son sürüm: `v2.2.0` → `cbe6526`; Release "Latest" ve yayınlanmış
+`surum.json` da 2.2.0.
+
+**Yapılan.** `scripts/dal-temizle.mjs` (girdiler ve uygulama) ile `scripts/dal-plan.mjs`
+(saf kurallar, `src/dalPlan.test.ts` 13 test). Korunan: `main`, `stabil`, `gh-pages`,
+workflow'da adı geçen dal, açık PR'ı olan dal, kirli worktree'deki dal; ayrıca plandan
+fazla iki koruma: içinde bir sürecin durduğu worktree (`/proc/*/cwd`, açık oturum) ve
+komutun koştuğu worktree. Ayrık HEAD'li worktree yalnız listeleniyor. `yayinla` etiketten
+sonra `stabil`'i fast-forward edip itiyor (`stabiliIlerlet`, `src/gitKomut.test.ts`'te
+çıplak bir uzakla dört test: ilk açılış, ileri, geri gitmiyor, uzak ayrıştıysa zorlamıyor).
+`yayinla` koşulmadı.
+
+**Uygulama.** İlk `--uygula` 12:36'da bundle'ı yazıp doğruladı
+(`_arsiv/dallar-2026-10-24.bundle`, 24 uç, 75 MB), 16 `arsiv/` etiketi attı, 11 yerel dalı
+ve 8 uzak dalı sildi, ve oturum kesilince yarıda kaldı. İkinci koşu kalan beş uzak dalı
+kendi bundle'ıyla (`dallar-2026-10-24-2.bundle`) sildi. İkisi de `git bundle verify`'dan
+geçiyor, uzakta `arsiv/` etiketi yok, prunable worktree yok. Hiçbir worktree kaldırılmadı:
+birleşmiş dalı olan tek worktree (`zebra`) kirliydi. Yarıda kalan bir koşunun yeniden
+verilince planı baştan kurup kalanı bitirdiği böylece görüldü.
+
+**Koşulan.** `npm run hizli` (bir kez docs kapısı kırmızı, düzeltildi), `src/dalPlan.test.ts`,
+`src/gitKomut.test.ts`, `src/docs.test.ts`, `tsc --noEmit`, eslint, knip, prettier.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

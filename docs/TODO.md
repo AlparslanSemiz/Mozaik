@@ -856,6 +856,14 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
+- [ ] **B7.34 `stabil` uzağa itilmedi, ve 19 birleşmemiş dal bekliyor (2026-10-24).**
+      `npm run dal-temizle` ve `stabil` (DECISIONS 2026-10-24) `dal-temizlik` dalında.
+      `stabil` yerelde `v2.2.0`'da (`cbe6526`); itilmedi çünkü yeni bir dal `ci.yml`'i
+      tetikliyor (tuzak 154). Karar bekleyen: (a) şimdi itilsin mi, yoksa ilk `yayinla` mı
+      itsin; (b) `ci.yml`'e `'!stabil'` eklensin mi. Birleşmemiş dalların listesi
+      `npm run dal-temizle`'nin kuru koşusunda; hangisinin gideceği kullanıcının kararı
+      (`origin/klasorleme` 2026-09-05, `test/gercek-ortam` 2026-10-17 ve `ruflo/kurulum`
+      2026-10-23 dışındakiler bugün açılmış, çalışan oturumların dalları).
 
 ---
 
