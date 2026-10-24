@@ -299,10 +299,13 @@ yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve buda
 uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
 değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
 şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Açılışta açık plan okunamıyorsa
-(dondurulur, yukarıda) okunabilen ilk plan açılır ve dizinde etkin plan o olur; okunamayan
-anahtarında bayt bayt ve dizinde kalır, ekranda oturum boyunca tek satır adını söyler
-(`useStore`'un `setAside`'ı, 2026-10-24, TODO TB1). Okunabilen plan yoksa boş yerine-geçen
-açılır ve şerit söyler. Oturum yedeği açılan planın.
+(dondurulur, yukarıda) okunabilen ilk plan açılır; okunamayan anahtarında bayt bayt ve dizinde
+kalır, ekranda tek satır adını söyler (`useStore`'un `setAside`'ı, 2026-10-24, TODO TB1). Geçiş
+dizine yazılmaz: dizinde etkin plan okunamayan kalır, her açılış yeniden geri döner ve yeniden
+söyler, ve geri dönülen oturum yedek zincirini döndürmez, okunamayan planın zincirdeki son sağlam
+kopyası yerinde kalsın diye. Okunabilen plan yoksa boş yerine-geçen açılır ve şerit söyler. Planlar
+listesi okunamayan planı "okunamadı" diye ve sayısız gösterir, silme sorusu metninin de gideceğini
+söyler; taslaklarda "Bu taslak okunamadı".
 
 ## Neden böyle
 

@@ -89,6 +89,7 @@ const FR: Sozluk = {
     "Son texte enregistré n’a pas pu être lu ; il n’est pas ouvert et n’a pas été supprimé.",
   "Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.":
     "Le texte enregistré de ce plan n’a pas pu être lu ; le supprimer supprime aussi ce texte. Cette action est irréversible.",
+  "Bu taslak okunamadı": "Ce brouillon n’a pas pu être lu",
   "Bu dosya okunamadı": "Ce fichier n’a pas pu être lu",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     "Il remplace tous les plans de cet ordinateur, pas un seul. Utilisez « Tout ouvrir depuis un fichier » dans Réglages → Plans et sauvegarde.",

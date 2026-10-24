@@ -18,10 +18,10 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../../pure/undo';
-import { loadPlan, loadPlanAtStart, rotateBackups, savePlan } from './planStore';
+import { loadFallbackAtStart, loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../../pure/entities';
-import { findPlan, LIBRARY_KEY, parseLibrary, planKey, parseState, setActive } from '../../pure/io';
+import { findPlan, LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
 import {
   explicitly,
   frozenPlan,
@@ -56,22 +56,28 @@ function initialBox(): Box {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
   // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
   // timetable is already sitting in. Adoption therefore copies NOTHING.
-  let library = readLibrary();
+  const library = readLibrary();
   writeLibrary(library);
-  let present = loadPlanAtStart(library.activeId);
+  let planId = library.activeId;
+  let present = loadPlanAtStart(planId);
   setAsideAtStart = [];
   // The plan open last time cannot be read (frozen, A1): the first plan that
   // can opens instead of an empty stand-in, and the unreadable one stays
   // frozen in its key and in the directory (TB1, the user's decision,
   // 2026-10-24). With none readable, A1's stand-in and its strip.
-  if (present === null && frozenPlan(library.activeId) !== null) {
-    const unreadable = [findPlan(library, library.activeId)?.name ?? library.activeId];
+  //
+  // The switch is NOT saved, and the session chain is not rotated: the
+  // directory keeps pointing at the unreadable plan, so every start falls
+  // back again and says so again, and its last good copy in the chain is not
+  // pushed out by the plan opened in its place (review, 2026-10-24: saved,
+  // that copy was gone by the third start, without a word after the first).
+  if (present === null && frozenPlan(planId) !== null) {
+    const unreadable = [findPlan(library, planId)?.name ?? planId];
     for (const plan of library.plans) {
       if (plan.id === library.activeId) continue;
-      const other = loadPlan(plan.id);
+      const other = loadFallbackAtStart(plan.id);
       if (other !== null) {
-        library = setActive(library, plan.id);
-        writeLibrary(library);
+        planId = plan.id;
         present = other;
         setAsideAtStart = unreadable;
         break;
@@ -79,13 +85,12 @@ function initialBox(): Box {
       if (frozenPlan(plan.id) !== null) unreadable.push(plan.name);
     }
   }
-  // The chain keeps the plan that opened, not text nobody can read.
-  rotateBackups(planKey(library.activeId));
+  if (planId === library.activeId) rotateBackups(planKey(planId));
   return {
     present: present ?? emptyState(),
     past: [],
     future: [],
-    planId: library.activeId,
+    planId,
   };
 }
 
