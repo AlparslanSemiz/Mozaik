@@ -864,8 +864,8 @@ const ES: Sozluk = {
   "İkinci branş": "Segunda asignatura",
   "İkinci branş yok": "Sin segunda asignatura",
   "Öğretmenleri yapıştır": "Pegar profesores",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Nombre y apellidos · Abreviatura · Asignatura · Sexo · Segunda asignatura",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Nombre y apellidos · Abreviatura · Asignatura · Sexo · Segunda asignatura · Correo",
   "Bu aramaya uyan öğretmen yok.":
     "Ningún profesor coincide con esta búsqueda.",
   "2. branş": "2.ª asignatura",

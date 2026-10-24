@@ -857,8 +857,8 @@ const EN: Sozluk = {
   "İkinci branş": "Second subject",
   "İkinci branş yok": "No second subject",
   "Öğretmenleri yapıştır": "Paste teachers",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Full name · Short form · Subject · Gender · Second subject",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Full name · Short form · Subject · Gender · Second subject · E-mail",
   "Bu aramaya uyan öğretmen yok.": "No teacher matches this search.",
   "2. branş": "2nd subject",
   "Art arda en fazla kaç saat": "At most how many hours in a row",

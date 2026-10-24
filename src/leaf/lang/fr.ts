@@ -872,8 +872,8 @@ const FR: Sozluk = {
   "İkinci branş": "Deuxième matière",
   "İkinci branş yok": "Pas de deuxième matière",
   "Öğretmenleri yapıştır": "Coller des enseignants",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Nom et prénom · Abréviation · Matière · Genre · Deuxième matière",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Nom et prénom · Abréviation · Matière · Genre · Deuxième matière · E-mail",
   "Bu aramaya uyan öğretmen yok.":
     "Aucun enseignant ne correspond à cette recherche.",
   "2. branş": "2e matière",

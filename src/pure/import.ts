@@ -10,6 +10,7 @@
 // existing tests do not have to care where it moved.
 export { makeShort } from './entities';
 import { MAX_BLOCK } from '../leaf/blocks';
+import { cleanEmail, looksLikeEmail } from '../leaf/email';
 import { t } from '../leaf/i18n';
 import { makeShort, parseGender } from './entities';
 import type { Gender } from '../leaf/types';
@@ -77,19 +78,29 @@ export interface TeacherRow {
   gender: Gender;
   /** The teacher's other subject, or '' — see `Teacher.subject2`. */
   subject2: string;
+  /** Where Çıktı sends the week, or '' — see `Teacher.email`. */
+  email: string;
 }
 
 /**
- * Columns: Ad · Kısaltma · Branş · Cinsiyet · İkinci branş
+ * Columns: Ad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta
  *
- * Columns four and five each arrived after the ones before them and each stays
- * OPTIONAL: a list pasted in the old three- or four-column shape reads
- * `undefined` there, which becomes "not stated" and "no second subject".
+ * Columns four to six each arrived after the ones before them and each stays
+ * OPTIONAL: a list pasted in an older, shorter shape reads `undefined` there,
+ * which becomes "not stated", "no second subject" and "no address".
  * Nobody has to re-paste anything.
  *
  * The second subject is APPENDED rather than slotted in beside the first,
  * which would read better and would silently turn every existing four-column
  * paste into a list of teachers whose second subject is "Erkek".
+ *
+ * The address (schema v17) is the sixth column by the same rule, and it is
+ * also found by its SHAPE wherever it sits after the name: a school's own
+ * sheet puts it where it likes, and a cell holding one address is never a
+ * short form, a subject or a gender. That cell is then read as empty in its
+ * own column, so "ali@okul.com" in column four is not a gender and in column
+ * five is not a second subject. A sixth cell that is not an address is kept
+ * as typed, the way the table keeps it, and Çıktı does not offer to send.
  */
 export function parseTeachers(text: string): ParseResult<TeacherRow> {
   const accepted: TeacherRow[] = [];
@@ -100,17 +111,21 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
     const name = cells[0] ?? '';
     if (name === '') continue;
 
-    const subject = cells[2] ?? '';
+    const at = cells.findIndex((c, k) => k > 0 && looksLikeEmail(cleanEmail(c)));
+    const cell = (k: number) => (k === at ? '' : (cells[k] ?? ''));
+
+    const subject = cell(2);
     if (subject === '')
       errors.push(t('{n}. satır: "{ad}" için branş boş.', { n: i + 1, ad: name }));
 
     accepted.push({
       name,
       // If the short form is left empty, derive it: "Mehmet Çelik" -> "MÇ"
-      short: (cells[1] ?? '') || makeShort(name),
+      short: cell(1) || makeShort(name),
       subject,
-      gender: parseGender(cells[3] ?? ''),
-      subject2: cells[4] ?? '',
+      gender: parseGender(cell(3)),
+      subject2: cell(4),
+      email: cleanEmail(at > 0 ? cells[at] : cells[5]),
     });
   }
   return { accepted, errors };

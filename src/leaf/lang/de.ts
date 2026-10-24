@@ -867,8 +867,8 @@ const DE: Sozluk = {
   "İkinci branş": "Zweites Fach",
   "İkinci branş yok": "Kein zweites Fach",
   "Öğretmenleri yapıştır": "Lehrkräfte einfügen",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Vor- und Nachname · Kürzel · Fach · Geschlecht · Zweites Fach",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Vor- und Nachname · Kürzel · Fach · Geschlecht · Zweites Fach · E-Mail",
   "Bu aramaya uyan öğretmen yok.": "Keine Lehrkraft passt zu dieser Suche.",
   "2. branş": "2. Fach",
   "Art arda en fazla kaç saat": "Höchstens wie viele Stunden am Stück",

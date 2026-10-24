@@ -29,7 +29,14 @@ describe('parseTeachers', () => {
   it('ad, kısaltma ve branşı okur, başlık satırını atlar', () => {
     const { accepted } = parseTeachers('Ad\tKısaltma\tBranş\nMehmet Çelik\tMÇ\tMatematik');
     expect(accepted).toEqual([
-      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', subject2: '' },
+      {
+        name: 'Mehmet Çelik',
+        short: 'MÇ',
+        subject: 'Matematik',
+        gender: '',
+        subject2: '',
+        email: '',
+      },
     ]);
   });
 
@@ -62,6 +69,37 @@ describe('parseTeachers', () => {
     expect(accepted).toHaveLength(1);
     expect(accepted[0]!.gender).toBe('');
     expect(errors).toEqual([]);
+  });
+
+  // Schema v17. The sixth column, and an address wherever a school's own
+  // sheet put it: a cell holding one address is never a gender or a subject.
+  it('altıncı sütun e-postayı okuyor, beş sütunlu eski yapıştırmada adres boş', () => {
+    const { accepted, errors } = parseTeachers(
+      'Ayşe Varol\tAV\tFizik\tK\tKimya\tayse.varol@okul.com.tr\nMurat Bilge\tMB\tKimya\tE\tFizik',
+    );
+    expect(errors).toEqual([]);
+    expect(accepted.map((x) => [x.subject2, x.email])).toEqual([
+      ['Kimya', 'ayse.varol@okul.com.tr'],
+      ['Fizik', ''],
+    ]);
+  });
+
+  it('başka sütundaki adres de e-posta, o sütunun değeri sayılmıyor', () => {
+    const { accepted } = parseTeachers(
+      'Ayşe Varol\tAV\tFizik\tayse@okul.com\nMurat Bilge\tMB\tKimya\tE\tmurat@okul.com',
+    );
+    expect(accepted.map((x) => [x.gender, x.subject2, x.email])).toEqual([
+      ['', '', 'ayse@okul.com'],
+      ['e', '', 'murat@okul.com'],
+    ]);
+  });
+
+  it('adres olmayan altıncı hücre yazıldığı gibi kalıyor, kontrol karakteri atılıyor', () => {
+    const { accepted, errors } = parseTeachers(
+      'Ayşe Varol\tAV\tFizik\t\t\tayse@\nMurat Bilge\tMB\tKimya\t\t\t murat@okul.com\u0007 ',
+    );
+    expect(errors).toEqual([]);
+    expect(accepted.map((x) => x.email)).toEqual(['ayse@', 'murat@okul.com']);
   });
 });
 

@@ -4082,8 +4082,10 @@ table.stat td select:hover:not(:disabled) {
 /* A box whose text is not what it is for (a teacher's address that is not one
    address): the edge says so where it is fixed. --bad, the colour the rest of
    the program already reads as "this blocks something". After the list rules
-   above, and as specific, or their --line would win. */
+   above, and as specific, or their --line would win; the add form's box
+   under the mouse too. */
 input[aria-invalid='true'],
+input[aria-invalid='true']:hover:not(:disabled),
 table.list td input[aria-invalid='true'],
 table.list td input[aria-invalid='true']:hover:not(:disabled) {
   border-color: var(--bad);
@@ -6745,4 +6747,61 @@ body.row-dragging {
    its panel (kurulum.spec.ts 65). An address scrolls inside its box. */
 .table-scroll table.list td > input[type='text'][inputmode='email']:not(.num):not(.text-sm) {
   min-width: 6ch;
+}
+
+/* ...and while it is being typed in, the box is as wide as the address. The
+   column cannot grow for it (the 125 % rule above), so the focused box lifts
+   out of the row and over its neighbours instead: absolute, so the column
+   keeps the width every other row's box gives it and nothing beside it moves.
+   An address read six letters at a time is an address nobody checks, and the
+   reader who needs this most is the one with low vision (2026-10-24).
+   `field-sizing` (Chromium, which is the exe and the browser it ships for)
+   fits the box to the text; elsewhere 34ch holds the usual address and a
+   longer one scrolls, as before. Body size, never the table's smaller one. */
+.table-scroll table.list td.email-cell {
+  position: relative;
+}
+
+.table-scroll table.list td.email-cell > input:focus {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  width: 34ch;
+  min-width: calc(100% - 12px);
+  max-width: 60ch;
+  font-size: var(--fs-base);
+  background: var(--paper);
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 4px 14px var(--shadow-shell);
+}
+
+@supports (field-sizing: content) {
+  /* Half a ch past the text: content-sized to the pixel, the box rounded
+     one pixel short of its last letter and the caret, measured. */
+  .table-scroll table.list td.email-cell > input:focus {
+    field-sizing: content;
+    width: auto;
+    min-width: max(calc(100% - 12px), 24ch);
+    padding-inline-end: calc(var(--space-3) + 0.5ch);
+  }
+}
+
+/* The add form's address box: wide enough for a whole address from the
+   first letter, growing with it where the browser can. */
+.form-row > input.email-box {
+  width: 30ch;
+  max-width: 100%;
+}
+
+@supports (field-sizing: content) {
+  .form-row > input.email-box {
+    field-sizing: content;
+    width: auto;
+    min-width: 30ch;
+    max-width: 60ch;
+    padding-inline-end: calc(var(--space-3) + 0.5ch);
+  }
 }
