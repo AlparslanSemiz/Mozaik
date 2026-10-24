@@ -83,6 +83,16 @@ type StoredPlanProblem = Extract<StoredPlan, { problem: unknown }>['problem'];
 let start: 'okundu' | StoredPlanProblem = 'yok';
 
 /**
+ * `loadPlan` for the plan opened at startup INSTEAD of an unreadable one
+ * (TB1): read, it counts as the opening read for the folder's first write.
+ */
+export function loadFallbackAtStart(id: Id): State | null {
+  const state = loadPlan(id);
+  if (state !== null) start = 'okundu';
+  return state;
+}
+
+/**
  * Why a plan's key could not be read, once `loadPlan` (or the opening read)
  * has looked at it; null when it read, or has not been looked at. For the
  * Planlar list, which must not call an unreadable plan empty (TB1).
