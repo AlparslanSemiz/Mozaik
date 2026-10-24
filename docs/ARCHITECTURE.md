@@ -13,8 +13,7 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
 src/pure/          constraints · rules · feasibility · bell · entities · solver
                    relax · sat · program/* · programView · paper/* · io/* · listview · undo
    |
-src/platform/      storage/* · prefs/* · search/* · changelog · desktop · update
-                   drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
+src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -26,7 +25,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -130,13 +129,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
-| `platform/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
-| `platform/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
-| `platform/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
-| `platform/rowDrag.ts` | liste satırını sürükleyerek sıralama |
-| `platform/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
-| `platform/ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
+| `platform/dom/index.ts` | doğrudan DOM'a yazan etkileşimler paketinin giriş noktası: yedisinin dışarıda kullanılan adları |
+| `platform/dom/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
+| `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
+| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
+| `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
+| `platform/dom/rowDrag.ts` | liste satırını sürükleyerek sıralama |
+| `platform/dom/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
+| `platform/dom/ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
 
 ### React köprüleri ve kabuk
 

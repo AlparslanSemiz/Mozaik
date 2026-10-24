@@ -18,7 +18,7 @@ import { reorderList } from '../pure/entities';
 import type { ListKind } from '../pure/entities';
 import { canReorder } from '../pure/listview';
 import type { ListQuery } from '../pure/listview';
-import { attachRowDrag, clampIndex } from '../platform/rowDrag';
+import { attachRowDrag, clampIndex } from '../platform/dom';
 import type { State } from '../leaf/types';
 import { useT } from './T';
 

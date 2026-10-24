@@ -7,7 +7,7 @@
 // stood 75.6px taller than its own table with nothing drawn in the strip.
 
 import { describe, expect, it } from 'vitest';
-import { dockHeightForRoom, maxDockHeight } from './platform/poolSplit';
+import { dockHeightForRoom, maxDockHeight } from './platform/dom/poolSplit';
 import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from './platform/prefs/theme';
 
 // jsdom resolves the root font size to 16px, so a rem is 16 CSS pixels here.

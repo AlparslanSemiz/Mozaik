@@ -549,7 +549,7 @@ kapsayıcı her yerleştiğinde bütün hücreler için yeniden çözülüyor. A
 olarak sabitlemek bir taramanın yerleşimini 2554 ms'den 185 ms'ye indirdi.
 `container-type`'ı kaldırmak yalnız yarısını indirdi, tabloyu px yapmak ve üç noktayı
 kaldırmak hiçbir şey değiştirmedi. Çare kutunun genişliğini bir `ResizeObserver` ile
-custom property'ye yazmak (`--wrap-w`, `platform/gridFit.ts`).
+custom property'ye yazmak (`--wrap-w`, `platform/dom/gridFit.ts`).
 
 2026-09-12'nin ölçümü bunu göremezdi: örnek okulda ve Rahat'ta alınmıştı (tuzak 119).
 Aynı turun WebKitGTK yarısı ayrı bir sebep çıkardı. Orada kasma iki yoğunlukta da
@@ -697,7 +697,7 @@ değiştiği için yeniden boyutlanmamalı. Havuzun tetiği ızgaranın şekli o
 yazmak sessizce birini eziyor.
 
 ### 140 · `clientWidth` yuvarlar, ve üç nokta kesirli kutuya bakar
-Sığdır'da sığmayan kart satırı küçülüyor (`platform/gridFit.ts`). Onu yazan kod da,
+Sığdır'da sığmayan kart satırı küçülüyor (`platform/dom/gridFit.ts`). Onu yazan kod da,
 ölçen test de "kırpık mı" sorusunu `scrollWidth > clientWidth` ile soruyordu. İkisi de
 tam sayı, ve `clientWidth` aşağı değil EN YAKINA yuvarlıyor: 24,53 px'lik bir kutu 25
 sayılıyor. Bu makinede glif ilerlemeleri tam piksele oturuyor, "411A" 10 px'te 25 px.
@@ -1097,7 +1097,7 @@ toplam boyudur.
 `docs.test.ts`'in yol kapısı diskteki dosyaları bu glob'la çıkarıyor ve
 CLAUDE.md'nin `src/docs.test.ts` diyen satırını bayat saydı: Vite glob'a çağıran
 dosyanın kendisini koymuyor, yani kapı kendi adına kördü ve o satırı sonsuza
-kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/platform/drag.ts` ve
+kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/platform/dom/drag.ts` ve
 `src/surum.test.ts` geliyor, `src/docs.test.ts` gelmiyor. Çare listeye kendi
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.

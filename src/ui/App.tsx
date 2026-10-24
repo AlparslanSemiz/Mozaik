@@ -42,8 +42,7 @@ import {
   type PrintOptions,
   type ProgramColorMode,
 } from '../platform/prefs';
-import { attachScrollFade } from '../platform/scrollFade';
-import { attachRibbonScroll } from '../platform/ribbonScroll';
+import { attachScrollFade, attachRibbonScroll } from '../platform/dom';
 import { useSolver } from '../platform/search';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';

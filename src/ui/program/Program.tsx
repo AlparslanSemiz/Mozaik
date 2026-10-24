@@ -41,8 +41,7 @@ import {
   waitingSubjects,
   type ColorOf,
 } from '../../pure/programView';
-import { useDrag } from '../../platform/drag';
-import type { DragData } from '../../platform/drag';
+import { useDrag, type DragData } from '../../platform/dom';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { applySuggestion, suggestionDiff } from '../../pure/relax';
 import type { State, Id } from '../../leaf/types';

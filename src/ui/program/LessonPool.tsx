@@ -33,8 +33,12 @@ import {
   writeDockHeight,
   type PoolSort,
 } from '../../platform/prefs';
-import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../../platform/poolSplit';
-import { attachScrollFade } from '../../platform/scrollFade';
+import {
+  attachSplitter,
+  dockHeightForRoom,
+  maxDockHeight,
+  attachScrollFade,
+} from '../../platform/dom';
 import type { PoolCard } from '../../pure/programView';
 import { useT } from '../T';
 
