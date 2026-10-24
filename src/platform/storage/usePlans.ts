@@ -44,7 +44,7 @@ import { sanitize } from '../../pure/constraints';
 import { emptyState, newId } from '../../pure/entities';
 import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
 import { loadPlan, savePlan } from './planStore';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 /** What the plan controls need from whoever owns the box and the autosave. */
 export interface PlanSeam {

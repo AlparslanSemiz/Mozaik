@@ -27,8 +27,8 @@ import {
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
 } from './pure/entities/entities';
-import type { State } from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
+import type { State } from './leaf/model/types';
+import { SCHEMA_VERSION } from './leaf/model/types';
 
 // 1 day x 4 hours = 4 slots. Small numbers keep the arithmetic verifiable by hand.
 function build(): State {

@@ -14,7 +14,7 @@
 import { parseState, BACKUP_COUNT, backupKey, BASE_KEY } from '../../pure/io';
 import { readPlanText, readPlanTextAtStart, writePlanText } from './libraryStore';
 import { safely } from '../../leaf/storage';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 // The storage key lives in library.ts now: it is the key of plan "1", and which
 // key belongs to which plan is that module's job. It is still USER DATA and

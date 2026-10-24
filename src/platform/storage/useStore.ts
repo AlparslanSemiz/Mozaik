@@ -24,7 +24,7 @@ import { emptyState } from '../../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
 import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
 

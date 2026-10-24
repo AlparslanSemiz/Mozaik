@@ -19,7 +19,7 @@ import { closedKey, placementKey, type Index } from '../constraints';
 import { activePlacements } from '../grid';
 import { cellSpan } from './cut';
 import type { Vars } from '../../leaf/i18n';
-import type { ClassGroup, State, Teacher } from '../../leaf/types';
+import type { ClassGroup, State, Teacher } from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds the sheet. */
 type Translate = (key: string, vars?: Vars) => string;

@@ -12,7 +12,7 @@ import {
   placementKey,
   setBlockPinned,
 } from './pure/constraints/constraints';
-import { lessonSubject } from './leaf/subjects';
+import { lessonSubject } from './leaf/model/subjects';
 import {
   addClass,
   addSubject,
@@ -73,8 +73,8 @@ import {
   notSameDayOf,
   removeRelation,
 } from './pure/entities/entities';
-import type { Day, State } from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
+import type { Day, State } from './leaf/model/types';
+import { SCHEMA_VERSION } from './leaf/model/types';
 
 function build(): State {
   return {

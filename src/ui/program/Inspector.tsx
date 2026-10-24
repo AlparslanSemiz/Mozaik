@@ -48,9 +48,8 @@ import LimitBox from '../LimitBox';
 import { placedBlocks } from '../../pure/constraints';
 import { useDialogs } from '../Dialogs';
 import { useToast } from '../Toasts';
-import { paletteColor } from '../../leaf/palette';
+import { paletteColor, type Gender, type State } from '../../leaf/model';
 import { KIND_ICON } from './steps';
-import type { Gender, State } from '../../leaf/types';
 import { T, useT } from '../T';
 
 interface Target {

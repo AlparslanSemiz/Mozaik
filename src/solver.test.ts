@@ -16,8 +16,8 @@ import { parseState } from './pure/io/parseState';
 import { findViolations } from './pure/constraints/rules';
 import { sampleState } from './pure/io/sample';
 import { createSolver, solve } from './pure/solver/solver';
-import type { RuleLevel, State } from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
+import type { RuleLevel, State } from './leaf/model/types';
+import { SCHEMA_VERSION } from './leaf/model/types';
 import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';
 
 // 2 days x 4 hours = 8 cells per class.

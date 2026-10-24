@@ -1,4 +1,4 @@
-import type { Day } from './leaf/types';
+import type { Day } from './leaf/model/types';
 import { describe, expect, it } from 'vitest';
 import {
   clockParts,

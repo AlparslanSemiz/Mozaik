@@ -24,8 +24,8 @@ import {
   teacherDayCount,
   teacherDayGaps,
 } from './pure/constraints/rules';
-import type { State } from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
+import type { State } from './leaf/model/types';
+import { SCHEMA_VERSION } from './leaf/model/types';
 
 // 2 days x 6 hours. MÇ teaches both 510 and 511, so a long run is easy to build.
 function build(): State {

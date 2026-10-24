@@ -1,5 +1,5 @@
 import type { Bundle, Library } from '../pure/io';
-import type { Id, State } from '../leaf/types';
+import type { Id, State } from '../leaf/model';
 
 /**
  * Every setup step and every settings section gets the same two things and

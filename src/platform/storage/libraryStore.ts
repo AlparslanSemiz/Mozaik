@@ -26,7 +26,7 @@
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../../pure/io';
 import { safely } from '../../leaf/storage';
-import { type Id } from '../../leaf/types';
+import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
 
 export function readLibrary(): Library {

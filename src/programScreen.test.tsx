@@ -29,7 +29,7 @@ import { makeWorld } from './worlds';
 import type { Advice, SolverRun } from './platform/search';
 import type { Suggestion } from './pure/relax/relax';
 import { PRINT_DEFAULTS, type PoolSort, type ProgramColorMode } from './platform/prefs';
-import type { State, View } from './leaf/types';
+import type { State, View } from './leaf/model/types';
 import Program from './ui/program/Program';
 import Print, { NOTHING_EXCLUDED } from './ui/print/Print';
 import { LangProvider } from './ui/T';

@@ -28,7 +28,7 @@ import {
   type Relaxer,
   type Suggestion,
 } from '../../pure/relax';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */

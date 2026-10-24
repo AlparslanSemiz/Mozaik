@@ -29,7 +29,7 @@ import { writesClosed } from './otherWindow';
 import { mayWritePlan } from './libraryStore';
 import { collectStates } from './download';
 import { searchLog } from '../search';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 /**
  * Two seconds, not the store's 400 ms.

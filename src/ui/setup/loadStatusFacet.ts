@@ -1,6 +1,6 @@
 import { type ReportRow, type LoadStatus, loadStatus } from '../../pure/feasibility';
 import type { Facet } from '../../pure/listview';
-import type { Id } from '../../leaf/types';
+import type { Id } from '../../leaf/model';
 import type { Translate } from '../T';
 
 const STATUS_KEYS: Record<LoadStatus, string> = {

@@ -3,7 +3,7 @@
 import type React from 'react';
 import { List } from 'lucide-react';
 import type { LessonMode } from '../../platform/prefs';
-import { paletteColor } from '../../leaf/palette';
+import { paletteColor } from '../../leaf/model';
 import { KIND_ICON } from '../program';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
 

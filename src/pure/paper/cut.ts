@@ -9,7 +9,7 @@
 
 import { placementKey } from '../constraints';
 import { activePlacements } from '../grid';
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 
 /**
  * How many hours the ONE printed cell starting at this hour stands for.

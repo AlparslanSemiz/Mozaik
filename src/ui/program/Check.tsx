@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { CapacityRows } from '../lists';
 import { buildIndex, closedConflicts, placementKey } from '../../pure/constraints';
 import { buildReport, type ReportRow } from '../../pure/feasibility';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import type { CheckView } from '../../platform/prefs';
 import { T, useT } from '../T';

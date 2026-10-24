@@ -29,7 +29,7 @@ import {
   type ColorOf,
 } from './pure/program/programView';
 import { translate } from './leaf/i18n/i18n';
-import type { PoolSort, State } from './leaf/types';
+import type { PoolSort, State } from './leaf/model/types';
 import { makeWorld } from './worlds';
 
 const t = (key: string, vars?: Record<string, string | number>) => translate('tr', key, vars);

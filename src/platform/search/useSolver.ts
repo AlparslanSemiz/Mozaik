@@ -29,7 +29,7 @@ import {
 } from '../../pure/relax';
 import { activePlacements } from '../../pure/grid';
 import { startRelax } from './relaxPool';
-import type { Answers, Id, State } from '../../leaf/types';
+import type { Answers, Id, State } from '../../leaf/model';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:

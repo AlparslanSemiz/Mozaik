@@ -26,7 +26,7 @@ import {
   type BlockRef,
   type PinScope,
 } from '../../pure/constraints';
-import { cellKey, parseCellKey } from '../../leaf/keys';
+import { cellKey, parseCellKey, type State, type Id } from '../../leaf/model';
 import { useToast } from '../Toasts';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from '../LessonEdit';
@@ -45,7 +45,6 @@ import {
 import { useDrag, type DragData } from '../../platform/dom';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { applySuggestion, suggestionDiff } from '../../pure/relax';
-import type { State, Id } from '../../leaf/types';
 import { rowMask, setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
 import { activePinned, activePlacements } from '../../pure/grid';
 import {

@@ -14,7 +14,7 @@
 // never held a user backup and none could be recovered from git history
 // (`git log --all --diff-filter=A` over every .json in the tree, 2026-09-12).
 // So each file is written to the shape that version's reader and writer
-// agreed on, read from the migration notes in src/leaf/types.ts and from the
+// agreed on, read from the migration notes in src/leaf/model/types.ts and from the
 // reader in src/pure/io/parseState.ts. That is weaker than a real file for the byte
 // details and exactly as strong for the question being asked: does today's
 // parseState still open what that version wrote.

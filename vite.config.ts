@@ -92,7 +92,7 @@ export default defineConfig({
       include: [
         'src/pure/constraints/constraints.ts',
         'src/pure/constraints/rules.ts',
-        'src/leaf/blocks.ts',
+        'src/leaf/model/blocks.ts',
         'src/pure/io/parseState.ts',
         'src/pure/undo/undo.ts',
         'src/pure/io/library.ts',

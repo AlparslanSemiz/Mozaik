@@ -29,7 +29,7 @@ import {
   listBackups,
   type FolderRun,
 } from '../../platform/storage';
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import type { PlanControls } from '../props';
 import type { UpdateRun } from '../../platform/update';

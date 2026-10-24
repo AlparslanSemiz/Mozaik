@@ -32,7 +32,7 @@ import {
   updateTeacher,
   weeklyLoad,
 } from '../../pure/entities';
-import type { Gender, Id, Teacher } from '../../leaf/types';
+import type { Gender, Id, Teacher } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';

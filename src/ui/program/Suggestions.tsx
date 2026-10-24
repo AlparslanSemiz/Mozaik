@@ -33,7 +33,7 @@ import {
   type RelaxFamily,
   type Suggestion,
 } from '../../pure/relax';
-import type { Relaxation, State } from '../../leaf/types';
+import type { Relaxation, State } from '../../leaf/model';
 import { useT } from '../T';
 import type { Translate } from '../T';
 import { useToast } from '../Toasts';

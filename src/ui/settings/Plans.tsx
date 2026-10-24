@@ -14,7 +14,7 @@ import { useDialogs } from '../Dialogs';
 import { emptyState, planSummary } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/io';
 import { loadPlan } from '../../platform/storage';
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';

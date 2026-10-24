@@ -13,7 +13,7 @@ import { useT } from './T';
 import { useToast } from './Toasts';
 import { markIntroSeen } from '../platform/prefs';
 import { sampleState } from '../pure/io';
-import type { State } from '../leaf/types';
+import type { State } from '../leaf/model';
 
 export type LoadSample = (
   state: State,

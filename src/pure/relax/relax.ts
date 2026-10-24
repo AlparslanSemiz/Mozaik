@@ -50,12 +50,23 @@ import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
 import { fixedCells } from '../solver';
 import { Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
 import type { Lit } from './sat';
-import { blockPlan } from '../../leaf/blocks';
+import {
+  blockPlan,
+  closedKey,
+  parseKey,
+  placementKey,
+  lessonSubject,
+  subjectKey,
+  teacherSubjects,
+  type Answers,
+  type Id,
+  type Lesson,
+  type Refusal,
+  type Relaxation,
+  type State,
+} from '../../leaf/model';
 import { t } from '../../leaf/i18n';
-import { closedKey, parseKey, placementKey } from '../../leaf/keys';
 import { dayLabel } from '../../leaf/lang';
-import { lessonSubject, subjectKey, teacherSubjects } from '../../leaf/subjects';
-import type { Answers, Id, Lesson, Refusal, Relaxation, State } from '../../leaf/types';
 
 /**
  * One way of changing the data, and what it calls cheap. The first three open
@@ -106,8 +117,8 @@ export const FAMILY_ORDER: readonly RelaxFamily[] = [
 const HAND_CAP = 3;
 
 // The changes and the refusals are the plan's data too (State.answers, schema
-// v15), so their types live in leaf/types.ts; they are named here as before.
-export type { Refusal, Relaxation } from '../../leaf/types';
+// v15), so their types live in leaf/model/types.ts; they are named here as before.
+export type { Refusal, Relaxation } from '../../leaf/model/types';
 
 export interface Suggestion {
   family: RelaxFamily;

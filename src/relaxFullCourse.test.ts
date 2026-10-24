@@ -19,9 +19,9 @@ import { parseState } from './pure/io/parseState';
 import { activePlacements } from './pure/grid/programs';
 import { buildIndex } from './pure/constraints/constraints';
 import { findViolations } from './pure/constraints/rules';
-import { parseKey } from './leaf/keys';
+import { parseKey } from './leaf/model/keys';
 import { illegalBlocks } from './worlds';
-import type { State } from './leaf/types';
+import type { State } from './leaf/model/types';
 
 function kurs(): State {
   const raw = readFileSync(join(import.meta.dirname, 'fixtures', 'tam-dolu-kurs.json'), 'utf8');

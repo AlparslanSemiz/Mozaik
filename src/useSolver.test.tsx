@@ -18,7 +18,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Answers, State } from './leaf/types';
+import type { Answers, State } from './leaf/model/types';
 import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/relax/relax';
 import type { Solver, SolverProgress, SolverResult } from './pure/solver/solver';
 import { activePlacements } from './pure/grid/programs';

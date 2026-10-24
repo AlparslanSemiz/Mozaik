@@ -15,7 +15,7 @@
 import { buildBundle, backupFileName, bundleFileName, type Library } from '../../pure/io';
 import { loadPlan } from './planStore';
 import { searchLog } from '../search';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 /** Hands the browser a file to save. Both file kinds go through here. */
 function download(name: string, text: string): void {

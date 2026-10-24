@@ -10,7 +10,7 @@ import { createRelaxer, verifySuggestion } from './pure/relax/relax';
 import type { RelaxOptions, Suggestion } from './pure/relax/relax';
 import { parseState } from './pure/io/parseState';
 import { activePlacements } from './pure/grid/programs';
-import type { State } from './leaf/types';
+import type { State } from './leaf/model/types';
 
 // The father's own file, anonymised the same way and with his 330 hours laid
 // out (`tam-dolu-kurs-dizili.json`): the week a keeping run cannot finish, so

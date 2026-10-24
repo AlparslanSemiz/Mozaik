@@ -12,7 +12,7 @@
 
 import { t } from '../../leaf/i18n';
 import { minuteStamp } from '../../leaf/dateStamp';
-import type { Id } from '../../leaf/types';
+import type { Id } from '../../leaf/model';
 
 /**
  * The storage key and the backup file name are USER DATA, not identifiers:

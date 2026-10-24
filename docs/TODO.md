@@ -1307,7 +1307,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/App.tsx` |
 | RF12 | liste ekranlarının ortak iskeleti kopya | `src/ui/setup/`, `src/ui/lessons/` |
 | RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada (birim testi 2026-10-09'dan beri var, `useSolver.test.tsx`) | `src/platform/search/useSolver.ts` |
-| RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/types.ts` |
+| RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/model/types.ts` |
 | RF15 | `t()`'den geçmeyen dizeler (özellik işi, §8d) | `src/ui/` |
 | RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
 | RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |

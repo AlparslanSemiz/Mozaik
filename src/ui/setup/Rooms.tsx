@@ -18,7 +18,7 @@ import {
   deleteRoom,
   updateRoom,
 } from '../../pure/entities';
-import type { Room } from '../../leaf/types';
+import type { Room } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';

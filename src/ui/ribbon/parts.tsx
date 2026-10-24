@@ -9,7 +9,7 @@
 // and hands the results down.
 
 import type React from 'react';
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
 import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
 import type { ProgramMask } from '../../pure/program';

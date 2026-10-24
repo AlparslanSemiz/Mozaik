@@ -19,7 +19,7 @@ import {
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
-import type { ClassGroup } from '../../leaf/types';
+import type { ClassGroup } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';

@@ -19,8 +19,7 @@ import {
   updateSettings,
   type SettingsLoss,
 } from '../../pure/entities';
-import type { Day } from '../../leaf/types';
-import type { State } from '../../leaf/types';
+import type { Day, State } from '../../leaf/model';
 import { useDialogs } from '../Dialogs';
 import Field from '../Field';
 import type { PanelProps } from '../props';

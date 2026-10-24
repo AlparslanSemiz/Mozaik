@@ -34,7 +34,7 @@ import { join } from 'node:path';
 import { defaultSubjects, emptyState } from './pure/entities/entities';
 import { parseState, readPlanFile } from './pure/io/parseState';
 import { activeProgram } from './pure/grid/programs';
-import { SCHEMA_VERSION, type State } from './leaf/types';
+import { SCHEMA_VERSION, type State } from './leaf/model/types';
 
 const DIR = join(import.meta.dirname, 'fixtures');
 

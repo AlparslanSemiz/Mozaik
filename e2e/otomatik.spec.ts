@@ -18,7 +18,7 @@ import {
   savedState,
   settledText,
 } from './helpers';
-import type { State } from '../src/leaf/types';
+import type { State } from '../src/leaf/model/types';
 import { SMALL_WORLDS } from '../src/worlds';
 
 /** Runs it and waits for the verdict line. */

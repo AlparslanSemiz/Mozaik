@@ -42,7 +42,7 @@ import {
 } from '../../pure/entities';
 import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
-import type { Settings } from '../../leaf/types';
+import type { Settings } from '../../leaf/model';
 import { T, useT } from '../T';
 
 interface RowProps extends PanelProps {

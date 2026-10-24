@@ -19,8 +19,7 @@ import type { Command } from './Palette';
 import { useInspect } from './program';
 import { useT } from './T';
 import { subjectLabel } from '../pure/entities';
-import { paletteColor } from '../leaf/palette';
-import type { State } from '../leaf/types';
+import { paletteColor, type State } from '../leaf/model';
 import type { Tab, ToolState } from '../platform/prefs';
 
 interface Section {

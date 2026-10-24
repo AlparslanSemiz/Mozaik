@@ -33,11 +33,10 @@ import type { StepId } from '../../platform/prefs';
  * exactly the one the fallback branch answers ("does each class's week fit").
  */
 export type SummaryView = StepId | 'lessons';
-import type { Gender } from '../../leaf/types';
+import type { Gender, State } from '../../leaf/model';
 
 /** The three values, in the order the teacher list offers them. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
-import type { State } from '../../leaf/types';
 import { T, useT } from '../T';
 
 /**

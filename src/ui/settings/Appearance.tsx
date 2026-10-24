@@ -38,8 +38,7 @@ import {
 } from '../../platform/prefs';
 import { DILLER, DIL_ADI } from '../../leaf/i18n';
 import { T, useLang } from '../T';
-import type { State } from '../../leaf/types';
-import { paletteColor } from '../../leaf/palette';
+import { type State, paletteColor } from '../../leaf/model';
 
 interface Props {
   /** The real school, so the preview shows the reader's own names. */

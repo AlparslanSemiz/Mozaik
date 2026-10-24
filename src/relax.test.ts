@@ -15,10 +15,10 @@ import { solve } from './pure/solver/solver';
 import { activePlacements, replaceActiveGrid } from './pure/grid/programs';
 import { buildIndex } from './pure/constraints/constraints';
 import { findViolations } from './pure/constraints/rules';
-import { parseKey } from './leaf/keys';
+import { parseKey } from './leaf/model/keys';
 import { WORLDS, closeHours, closeWeek, illegalBlocks, makeWorld } from './worlds';
 import { forbids } from './pure/entities/entities';
-import type { State } from './leaf/types';
+import type { State } from './leaf/model/types';
 
 // TODO B5.9: when a week cannot be built, what would have to change. The rules
 // every suggestion keeps, whatever the data:

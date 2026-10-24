@@ -33,7 +33,7 @@ import { storageReport } from './platform/storage/storageReport';
 import AppRoot from './ui/Root';
 import { buildReport } from './pure/feasibility/feasibility';
 import { sampleState } from './pure/io/sample';
-import { SCHEMA_VERSION, type State } from './leaf/types';
+import { SCHEMA_VERSION, type State } from './leaf/model/types';
 
 // jsdom has no ResizeObserver and `scrollFade.ts` uses one. Stubbed exactly as
 // App.test.tsx stubs it, and for the same reason: the absence is a jsdom

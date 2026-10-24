@@ -21,7 +21,19 @@ import {
   teacherDayCount,
   teacherDayGaps,
 } from './pure/constraints';
-import { parseKey } from './leaf/keys';
+import {
+  parseKey,
+  type ClassGroup,
+  type Day,
+  type Id,
+  type Lesson,
+  type Limits,
+  type Room,
+  type Rules,
+  type State,
+  type Teacher,
+  SCHEMA_VERSION,
+} from './leaf/model';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
@@ -30,18 +42,6 @@ import {
   hourNames,
 } from './pure/entities';
 import { sampleState } from './pure/io';
-import type {
-  ClassGroup,
-  Day,
-  Id,
-  Lesson,
-  Limits,
-  Room,
-  Rules,
-  State,
-  Teacher,
-} from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
 import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './pure/grid';
 
 // ---------------------------------------------------------------- the builder

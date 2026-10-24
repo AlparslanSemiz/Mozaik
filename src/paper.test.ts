@@ -7,7 +7,7 @@
 import { blockSpans, buildIndex, placementKey } from './pure/constraints/constraints';
 import { classSheet, sheetHead, teacherSheet, type SheetOptions } from './pure/paper';
 import { translate } from './leaf/i18n/i18n';
-import type { State } from './leaf/types';
+import type { State } from './leaf/model/types';
 import { makeWorld } from './worlds';
 
 const t = (key: string, vars?: Record<string, string | number>) => translate('tr', key, vars);

@@ -23,8 +23,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import type { Id } from '../../leaf/types';
-import { paletteColor } from '../../leaf/palette';
+import { type Id, paletteColor } from '../../leaf/model';
 import {
   DOCK_H_MIN,
   readDock,

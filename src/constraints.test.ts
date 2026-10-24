@@ -30,8 +30,8 @@ import {
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
 } from './pure/entities/entities';
-import type { RuleLevel, State } from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
+import type { RuleLevel, State } from './leaf/model/types';
+import { SCHEMA_VERSION } from './leaf/model/types';
 import { makeWorld } from './worlds';
 import type { WorldSpec } from './worlds';
 import { aktifDil, setAktifDil } from './leaf/i18n/i18n';

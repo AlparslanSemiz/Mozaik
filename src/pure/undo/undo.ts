@@ -11,7 +11,7 @@
 // (the comment on the field says why).
 
 import { sanitize } from '../constraints';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 
 const HISTORY_LIMIT = 30;
 

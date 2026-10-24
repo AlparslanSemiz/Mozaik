@@ -20,9 +20,7 @@
 
 import { useMemo } from 'react';
 import { blockSpans, buildIndex } from '../../pure/constraints';
-import { parseKey } from '../../leaf/keys';
-import { paletteColor } from '../../leaf/palette';
-import type { State } from '../../leaf/types';
+import { parseKey, paletteColor, type State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
 import {

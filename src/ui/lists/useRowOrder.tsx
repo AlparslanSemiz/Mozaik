@@ -17,7 +17,7 @@ import type { ReactElement } from 'react';
 import { reorderList, type ListKind } from '../../pure/entities';
 import { canReorder, type ListQuery } from '../../pure/listview';
 import { attachRowDrag, clampIndex } from '../../platform/dom';
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import { useT } from '../T';
 
 interface Options {

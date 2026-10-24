@@ -17,7 +17,7 @@
 // holds both because the bundle is written by the same handlers that read the
 // library, and splitting the file would have split those in two.
 
-import type { State } from '../../leaf/types';
+import type { State } from '../../leaf/model';
 import School from './School';
 import Rules from './Rules';
 import Appearance from './Appearance';

@@ -21,11 +21,9 @@ import {
   teacherSubjects,
   weeklyLoad,
 } from '../pure/entities';
-import { paletteColor } from '../leaf/palette';
+import { paletteColor, cellKey, parseCellKey, type Id, type State } from '../leaf/model';
 import { KIND_ICON } from './program';
 import { buildIndex, closedConflicts, closedKey } from '../pure/constraints';
-import { cellKey, parseCellKey } from '../leaf/keys';
-import type { Id, State } from '../leaf/types';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../leaf/i18n';

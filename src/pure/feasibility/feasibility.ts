@@ -17,10 +17,8 @@ import {
   type Violation,
 } from '../constraints';
 import { activePlacements } from '../grid';
-import { parseKey, placementKey } from '../../leaf/keys';
-import { blockPlan } from '../../leaf/blocks';
+import { parseKey, placementKey, blockPlan, type State, type Id } from '../../leaf/model';
 import { dayLabel } from '../../leaf/lang';
-import type { State, Id } from '../../leaf/types';
 
 /** Above this ratio of load the "this will be hard" warning is raised. */
 const TIGHT_RATIO = 0.85;

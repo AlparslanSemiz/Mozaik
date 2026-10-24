@@ -19,7 +19,15 @@
 // for by name: pick the total first, then how it falls apart.
 
 import { useEffect, useMemo, useState } from 'react';
-import { blockPlan, clampBlocks, patternLabel } from '../../leaf/blocks';
+import {
+  blockPlan,
+  clampBlocks,
+  patternLabel,
+  type Id,
+  type Lesson,
+  type State,
+  paletteColor,
+} from '../../leaf/model';
 import {
   applyList,
   byNumberThen,
@@ -28,11 +36,9 @@ import {
   type ListConfig,
   type ListQuery,
 } from '../../pure/listview';
-import type { Id, Lesson, State } from '../../leaf/types';
 import type { LessonMode } from '../../platform/prefs';
 import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../pure/io';
-import { paletteColor } from '../../leaf/palette';
 import {
   addLesson,
   addLessonsFromRows,

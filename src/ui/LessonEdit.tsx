@@ -31,7 +31,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import BlockCounts, { blockCeiling } from './BlockCounts';
 import LimitBox from './LimitBox';
-import { paletteColor } from '../leaf/palette';
+import { paletteColor, type Id, type State } from '../leaf/model';
 import {
   addNotSameDay,
   hasTwoSubjects,
@@ -46,7 +46,6 @@ import {
 } from '../pure/entities';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
-import type { Id, State } from '../leaf/types';
 import { T, useT } from './T';
 
 type Open = (lessonId: Id) => void;

@@ -2,9 +2,9 @@
 // hand-built one.
 
 import { describe, expect, it } from 'vitest';
-import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './leaf/subjects';
+import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './leaf/model/subjects';
 import { emptyState } from './pure/entities/entities';
-import type { Lesson, State, Teacher } from './leaf/types';
+import type { Lesson, State, Teacher } from './leaf/model/types';
 
 const teacher = (subject: string, subject2: string): Teacher => ({
   id: 'oMC',

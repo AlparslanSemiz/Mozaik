@@ -20,10 +20,10 @@
 // is not a counterexample, it is a performance test.
 
 import fc from 'fast-check';
-import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
+import { MAX_BLOCK, clampBlocks } from './leaf/model/blocks';
 import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints/constraints';
 import { addNotSameDay, remapDays } from './pure/entities/entities';
-import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
+import { PALETTE_SIZE, firstFreeColor } from './leaf/model/palette';
 import { activeProgram, replaceActiveGrid } from './pure/grid/programs';
 import { solve } from './pure/solver/solver';
 import { parseState } from './pure/io/parseState';
@@ -35,8 +35,8 @@ import {
   type RelaxOptions,
 } from './pure/relax/relax';
 import { activePlacements } from './pure/grid/programs';
-import { closedKey } from './leaf/keys';
-import type { Day, Id, State } from './leaf/types';
+import { closedKey } from './leaf/model/keys';
+import type { Day, Id, State } from './leaf/model/types';
 
 // Every property here runs the solver on each generated world, and the default
 // 5 s per test is a speed claim about the machine. Measured 2026-10-08 with the

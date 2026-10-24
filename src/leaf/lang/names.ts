@@ -18,7 +18,7 @@
  */
 import { aktifDil, t } from '../i18n';
 import { KISALTMALAR } from './kisaltmalar';
-import { subjectKey } from '../subjects';
+import { subjectKey } from '../model';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */
 export const WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];

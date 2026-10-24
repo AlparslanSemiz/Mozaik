@@ -38,7 +38,7 @@ import {
   subjectShort,
 } from './pure/entities/entities';
 import { KISALTMALAR } from './leaf/lang/kisaltmalar';
-import type { Settings } from './leaf/types';
+import type { Settings } from './leaf/model/types';
 import './leaf/lang/en';
 import './leaf/lang/de';
 import './leaf/lang/es';

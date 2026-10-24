@@ -11,7 +11,7 @@ import { suggest, verifySuggestion } from './pure/relax/relax';
 import { findViolations } from './pure/constraints/rules';
 import { solve } from './pure/solver/solver';
 import { closeHours, illegalBlocks, makeWorld } from './worlds';
-import type { State } from './leaf/types';
+import type { State } from './leaf/model/types';
 
 /**
  * Two days of three hours, two classes in two rooms, two teachers: `a` (510,

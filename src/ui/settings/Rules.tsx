@@ -1,11 +1,10 @@
 // Step: the school-wide rule limits and what each one does when breached.
 
 import { useMemo } from 'react';
-import type { RuleLevel, RuleName } from '../../leaf/types';
+import { type RuleLevel, type RuleName, paletteColor } from '../../leaf/model';
 import { buildIndex, findViolations, type Violation } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
 import type { PanelProps } from '../props';
-import { paletteColor } from '../../leaf/palette';
 import { T, useT } from '../T';
 
 /** The four limit boxes, in the order they are shown. */

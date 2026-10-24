@@ -20,9 +20,7 @@ import { t } from '../../leaf/i18n';
 import { useCallback, useEffect, useRef } from 'react';
 import type React from 'react';
 import type { DropVerdict, BlockRef } from '../../pure/constraints';
-import { cellKey } from '../../leaf/keys';
-import { paletteColor } from '../../leaf/palette';
-import type { Id } from '../../leaf/types';
+import { cellKey, paletteColor, type Id } from '../../leaf/model';
 
 export interface DragData {
   lessonId: Id;

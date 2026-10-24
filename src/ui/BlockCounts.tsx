@@ -6,9 +6,15 @@
 import { useMemo, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Check, ChevronDown, LockKeyhole } from 'lucide-react';
-import { blockPlan, patternLabel, patternOptions } from '../leaf/blocks';
+import {
+  blockPlan,
+  patternLabel,
+  patternOptions,
+  type ClassGroup,
+  type Lesson,
+  type State,
+} from '../leaf/model';
 import { lessonLimit, ruleLevel } from '../pure/constraints';
-import type { ClassGroup, Lesson, State } from '../leaf/types';
 import { useT } from './T';
 
 /**

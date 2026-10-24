@@ -4,8 +4,7 @@
 // different computer must not change how that computer likes to read cards.
 
 import { lessonSubject, subjectKey } from '../../pure/entities';
-import { PALETTE_SIZE } from '../../leaf/palette';
-import type { Lesson, State } from '../../leaf/types';
+import { PALETTE_SIZE, type Lesson, type State } from '../../leaf/model';
 import { preference } from '../../leaf/preference';
 import { PROGRAM_COLOR_KEY } from '../../leaf/preferenceKeys';
 

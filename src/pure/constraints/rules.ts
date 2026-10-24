@@ -16,11 +16,20 @@
 
 import { t } from '../../leaf/i18n';
 import { dayLabel, subjectLabel } from '../../leaf/lang';
-import { lessonSubject } from '../../leaf/subjects';
+import {
+  lessonSubject,
+  closedKey,
+  placementKey,
+  type ClassGroup,
+  type Id,
+  type Lesson,
+  type RuleLevel,
+  type RuleName,
+  type State,
+  type Teacher,
+} from '../../leaf/model';
 import type { Index } from './constraints';
-import { closedKey, placementKey } from '../../leaf/keys';
 import { activePlacements } from '../grid';
-import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../../leaf/types';
 
 export interface Violation {
   key: string; // stable-ish key for React lists

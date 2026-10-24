@@ -42,7 +42,7 @@ import { activePinned, activePlacements } from '../grid';
 import type { SuggestionDiff } from '../relax';
 import type { SolverProgress, SolverResult } from '../solver';
 import type { Vars } from '../../leaf/i18n';
-import type { Id, Lesson, PoolSort, State, View } from '../../leaf/types';
+import type { Id, Lesson, PoolSort, State, View } from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds what it reads. */
 type Translate = (key: string, vars?: Vars) => string;
