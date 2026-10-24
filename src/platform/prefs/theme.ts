@@ -15,8 +15,8 @@
 // green = droppable / yellow = warning / red = blocked. Taking control is less
 // mess than leaving it to the browser.
 
-import { preference } from '../../leaf/preference';
 import {
+  preference,
   AVAIL_CLOCK_KEY,
   DENSITY_KEY,
   DOCK_H_KEY,
@@ -28,7 +28,7 @@ import {
   SCALE_KEY,
   THEME_KEY,
   UI_DENSITY_KEY,
-} from '../../leaf/preferenceKeys';
+} from '../../leaf/preference';
 
 export type Theme = 'light' | 'dark';
 

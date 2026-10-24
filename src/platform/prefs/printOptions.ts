@@ -11,8 +11,7 @@
 // decision about one printer on one afternoon. A backup taken in a term where
 // the clock times were hidden must not hide them in the next term's school.
 
-import { preference } from '../../leaf/preference';
-import { PRINT_OPTIONS_KEY } from '../../leaf/preferenceKeys';
+import { preference, PRINT_OPTIONS_KEY } from '../../leaf/preference';
 
 /** How many timetables share one sheet of A4. */
 export type PerSheet = 1 | 2 | 4;

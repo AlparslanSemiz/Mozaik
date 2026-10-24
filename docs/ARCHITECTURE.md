@@ -7,8 +7,7 @@ Kodun katmanları, her dosyanın görevi ve katmanlar arasındaki sınırlar.
 Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 
 ```
-src/leaf/          model/* · i18n/* · lang/* · preference · preferenceKeys
-                   version · dateStamp · storage
+src/leaf/          model/* · i18n/* · lang/* · preference/* · version · dateStamp
    |
 src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
                    grid/* · program/* · paper/* · io/* · listview/* · undo/*
@@ -24,7 +23,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -66,14 +65,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `leaf/model/keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
 | `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
 | `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
-| `leaf/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
+| `leaf/preference/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
 | `leaf/lang/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
 | `leaf/model/subjects.ts` | bir şeyin hangi branştan olduğu |
 | `leaf/model/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
 | `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
-| `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
+| `leaf/preference/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
 | `leaf/dateStamp.ts` | dosya adındaki tarih, yerel saatle (`dayStamp`, `minuteStamp`) |
-| `leaf/storage.ts` | localStorage'ın etrafındaki tek koruma (`safely`): okunamayan okuma yokluk, yazılamayan yazma düşer |
+| `leaf/preference/storage.ts` | localStorage'ın etrafındaki tek koruma (`safely`): okunamayan okuma yokluk, yazılamayan yazma düşer |
 | `leaf/raw.d.ts` | Vite'ın `?raw` importunun tip bildirimi |
 
 ### Saf mantık

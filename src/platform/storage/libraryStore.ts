@@ -25,7 +25,7 @@
 // never saw, and nothing is written over it.
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../../pure/io';
-import { safely } from '../../leaf/storage';
+import { safely } from '../../leaf/preference';
 import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
 

@@ -5,8 +5,7 @@
 
 import { lessonSubject, subjectKey } from '../../pure/entities';
 import { PALETTE_SIZE, type Lesson, type State } from '../../leaf/model';
-import { preference } from '../../leaf/preference';
-import { PROGRAM_COLOR_KEY } from '../../leaf/preferenceKeys';
+import { preference, PROGRAM_COLOR_KEY } from '../../leaf/preference';
 
 export { PROGRAM_COLOR_KEY };
 

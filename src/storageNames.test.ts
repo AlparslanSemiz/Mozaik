@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import tauriConf from '../src-tauri/tauri.conf.json';
-import { PREFERENCE_ROWS } from './leaf/preferenceKeys';
+import { PREFERENCE_ROWS } from './leaf/preference/preferenceKeys';
 import { SCHEMA_VERSION } from './leaf/model/types';
 import { DB_NAME, MAIN_NAME, dailyName, prunable, rescueName } from './platform/storage/folder';
 import { EXE_FOLDER } from './platform/desktop';

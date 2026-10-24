@@ -51,7 +51,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 /** Browser storage, which only its owners may touch (the overrides below). */
 const STORAGE = ['localStorage', 'sessionStorage', 'indexedDB'];
 const STORAGE_MESSAGE =
-  'Storage is read and written by its owners only: leaf/preference.ts, the stores in platform/.';
+  'Storage is read and written by its owners only: leaf/preference/preference.ts, the stores in platform/.';
 
 export default defineConfig([
   {
@@ -146,7 +146,7 @@ export default defineConfig([
   },
   {
     files: [
-      'src/leaf/preference.ts',
+      'src/leaf/preference/preference.ts',
       'src/platform/storage/folder.ts',
       'src/platform/storage/libraryStore.ts',
       'src/platform/storage/planStore.ts',

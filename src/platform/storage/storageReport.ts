@@ -22,8 +22,7 @@
 import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from '../../pure/io';
 import { isDesktop } from '../desktop';
 import { t } from '../../leaf/i18n';
-import { PREFERENCE_ROWS } from '../../leaf/preferenceKeys';
-import { safely } from '../../leaf/storage';
+import { PREFERENCE_ROWS, safely } from '../../leaf/preference';
 
 export type StorageKind = 'file' | 'site' | 'exe';
 
