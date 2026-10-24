@@ -499,11 +499,15 @@ sürer: yayınlanan exe'de hata ayıklama portu yok ve dışarıdan verilemiyor 
 İngilizce konuşuyor). Örnek okul yüklenir, hafta otomatik dizilir, Belgeler'deki paket
 durulunca X ile kapanır ve o paket saklanır. İkincisi (`e2e/guncelleme-exe.spec.ts`,
 kendi config'iyle, çünkü gerçek exe süiti her testten önce klasörü ve profili siliyor)
-portlu test exe'sini `update.rs`'in takasıyla aynı dosyanın yerine koyar, açar, ve eski
-paketteki her değeri yeni sürümün depoda ve Belgeler'de tuttuğu planda arar: kaybolan
-değer, boyu değişen liste ya da silinen günlük kopya kırmızıdır; şema bu commit'inki
-olmalı. Eski sürümün kendi `update.rs`'i tetiklenmiyor (yalnız bu deponun Release'inden
-indiriyor), takası test yapıyor.
+yayınlanan exe'nin dosyasına bu commit'in 0.0.1 numaralı, güncelleme kökü yerel sunucuda
+portlu test kopyasını (A) koyar; yayınlanan exe'nin kendi `update.rs`'i yalnız GitHub'dan
+indirdiği için bu ilk adım bir dosya takası. Sonra yerel sunucuda bu commit'in portlu exe'sini
+(B) bir Release gibi yayınlar ve A'yı sürer: Güncellemeleri denetle, Yeni sürümü indir, Şimdi
+yeniden başlat. A manifesti ve dosyayı ister, boyutu ve özeti doğrular, takası yapar ve B'yi
+başlatır; test B'ye bağlanır (eski sayfa işaretlenir, `Oturum.windowsBaglan`). B'de kurulu
+dosyanın B olduğu, `.eski`'nin silindiği, Hakkında'daki numara, ve eski paketteki her değerin
+depoda ve Belgeler'de durduğu sorulur: kaybolan değer, boyu değişen liste ya da silinen günlük
+kopya kırmızıdır; şema bu commit'inki olmalı.
 
 ### Rust
 

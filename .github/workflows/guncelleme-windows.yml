@@ -2,10 +2,13 @@
 # Son Release'in Mozaik.exe'si indirilir (özeti SHA256SUMS.txt'le), bir klasöre
 # "kurulur" ve kendi elleriyle veri üretir: örnek okul ve otomatik dizilmiş hafta,
 # Windows UI Automation ile (yayınlanan exe'de hata ayıklama portu yok,
-# scripts/uia.mjs). X ile kapanır. Sonra bu commit'in exe'si update.rs'in yaptığı
-# gibi aynı dosyanın yerine konur, açılır, ve eski sürümün yazdığı her şeyin
-# depoda ve Belgeler'de, bu commit'in şemasında durduğuna bakılır
-# (scripts/guncelleme-eski.mjs, e2e/guncelleme-exe.spec.ts).
+# scripts/uia.mjs). X ile kapanır (scripts/guncelleme-eski.mjs). Sonra yerine bu
+# commit'in 0.0.1 numaralı, güncelleme kökü yerel sunucuda bir test kopyası (A)
+# konur; A Ayarlar → Hakkında'nın üç düğmesiyle yerel sunucudaki yeni sürümü (B)
+# bulur, indirir, boyutunu ve özetini doğrular, kendini değiştirir ve B'yi
+# başlatır, update.rs'in kendisiyle. B'de eski sürümün yazdığı her şeyin depoda
+# ve Belgeler'de, bu commit'in şemasında durduğuna bakılır
+# (e2e/guncelleme-exe.spec.ts).
 #
 # `npm run yayinla` her sürümde etiketten önce bunun yeşilini bekler, koşu yoksa
 # başlatır (kullanıcının kararı, 2026-10-24). Exe'ye, şemaya ve depolama koduna
@@ -122,19 +125,40 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
-      - run: npm run build
-      # exe-windows.yml'deki test exe'si: aynı CLI, pencereye hata ayıklama portu.
-      - name: Test exe'si
+      # B, the NEW exe: this commit, its own version, the debugging port the
+      # suite attaches through (exe-windows.yml's test exe). Published by the
+      # spec's loopback server as a release would be.
+      - name: Yeni exe (B)
         shell: bash
         run: |
           node --input-type=module -e "import { windowsTestAyari } from './scripts/webdriver.mjs'; import { writeFileSync } from 'node:fs'; writeFileSync(process.env.RUNNER_TEMP + '/test-exe.conf.json', JSON.stringify(windowsTestAyari()));"
           npx --yes @tauri-apps/cli@^2 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
+          mkdir -p "$RUNNER_TEMP/yeni"
+          node --input-type=module -e "import { varsayilanIkili } from './scripts/webdriver.mjs'; import { copyFileSync } from 'node:fs'; copyFileSync(varsayilanIkili(), process.env.RUNNER_TEMP + '/yeni/Mozaik.exe');"
+          echo "MOZAIK_YENI_SURUM=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
 
-      - name: Yeni exe eski verinin yerine geçer
+      # A, the OLD test exe: the same source as 0.0.1, so B is newer, with
+      # update.rs's roots on the loopback server (`TEST_KOKU`, compile time
+      # only; kontrat.test.ts keeps it out of surum.yml). It is the copy that
+      # finds, downloads, checks and swaps in B through its own buttons.
+      - name: Eski test exe (A)
+        shell: bash
+        env:
+          MOZAIK_TEST_GUNCELLEME_KOKU: http://127.0.0.1:8765/
+        run: |
+          npm pkg set version=0.0.1
+          npx --yes @tauri-apps/cli@^2 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
+          mkdir -p "$RUNNER_TEMP/eski-test"
+          node --input-type=module -e "import { varsayilanIkili } from './scripts/webdriver.mjs'; import { copyFileSync } from 'node:fs'; copyFileSync(varsayilanIkili(), process.env.RUNNER_TEMP + '/eski-test/Mozaik.exe');"
+          git checkout -- package.json
+
+      - name: Eski kopya güncelleniyor, veri yerinde
         shell: bash
         env:
           MOZAIK_GUNCELLEME_ANLIK: ${{ runner.temp }}/eski-veri.json
           MOZAIK_KURULU: ${{ runner.temp }}/kurulu/Mozaik.exe
+          MOZAIK_ESKI_TEST_EXE: ${{ runner.temp }}/eski-test/Mozaik.exe
+          MOZAIK_YENI_EXE: ${{ runner.temp }}/yeni/Mozaik.exe
         run: npx playwright test --config playwright.guncelleme-exe.config.ts --reporter=list
 
       - if: ${{ always() }}

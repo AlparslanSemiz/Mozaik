@@ -381,7 +381,7 @@ README'nin indirme bağlantıları bunlar.
 | `Mozaik-Windows-kurulum.zip` | `Kur.cmd` ve yerel sunucu |
 | `Mozaik.exe` | kendi penceresi olan program |
 | `SHA256SUMS.txt` | üç dosyanın özeti |
-| `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu tek satırlık manifest |
+| `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu manifest: sürüm, tarih, exe'nin adresi, boyutu ve SHA-256 özeti |
 
 Varlık adları yalnız ASCII, çünkü URL'de kodlanıyorlar. Release sayfasının
 gövdesini `surum.yml` etiket anında `scripts/surum-notu.mjs` ile kuruyor, üç
@@ -446,11 +446,16 @@ commit'in exe'sine geçişin kendisi: son Release'in `Mozaik.exe`'si indirilir v
 `SHA256SUMS.txt`'le karşılaştırılır, bir klasöre kurulur ve kendi elleriyle veri üretir
 (örnek okul ve otomatik dizilmiş hafta; yayınlanan exe'de hata ayıklama portu olmadığı için
 Windows UI Automation ile, `scripts/uia.mjs`), X ile kapanır
-(`scripts/guncelleme-eski.mjs`). Sonra bu commit'in exe'si `update.rs`'in takasıyla aynı
-dosyanın yerine konur (`.yeni`, `.eski`), açılır, ve eski sürümün yazdığı her değerin
-depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hiçbir listenin boyunun
-değişmediği ve eski sürümün günlük kopyalarının silinmediği sorulur
-(`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
+(`scripts/guncelleme-eski.mjs`). Yayınlanan exe yalnız GitHub'dan güncellenebildiği için
+yerine dosya takasıyla bu commit'in bir test kopyası konur: 0.0.1 numaralı, `update.rs`'in
+kökleri derleme anında yerel bir sunucuya verilmiş (`MOZAIK_TEST_GUNCELLEME_KOKU`; yayınlanan
+exe'de yok, `kontrat.test.ts` surum.yml'in onu hiç anmadığını ve iki gerçek kökü soruyor).
+Test, o sunucuda bu commit'in exe'sini bir Release gibi yayınlar (`surum.json`: sürüm, adres,
+boyut, özet), ve eski kopya Ayarlar → Hakkında'nın üç düğmesiyle onu bulur, indirir,
+doğrular, kendi dosyasını değiştirir ve yeni sürümü başlatır. Yeni sürümde kurulu dosyanın
+yayınlanan dosya olduğu, `.eski`'nin silindiği, ekrandaki numara, ve eski sürümün yazdığı her
+değerin depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hiçbir listenin
+boyunun değişmediği ve günlük kopyaların silinmediği sorulur (`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
 push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
 bekler (kullanıcının kararı, 2026-10-24).
 
@@ -508,8 +513,10 @@ yeni sürümü internetten alır, internet yoksa yanındaki paketi kurar.
 `Şimdi yeniden başlat`, çünkü üçü üç ayrı karar. Ağa yalnız tıklanınca çıkılır:
 açılışta, arka planda ya da bir zamanlayıcıyla değil. İnternet yoksa sonuç bir
 cümle olur ve program çalışmaya devam eder. `src-tauri/src/update.rs` indirilen
-dosyanın `MZ` ile başladığını ve boyutunun tuttuğunu doğrular, adresin yalnız bu
-deponun Release öneklerinden gelmesine izin verir, takası çalışan programın kendi
+dosyanın `MZ` ile başladığını, boyutunun ve SHA-256 özetinin manifesttekiyle tuttuğunu
+doğrular (özet 2026-10-24'ten beri; özeti olmayan bir manifestteki yeni sürüm indirilmez,
+elle indirme adresi söylenir), adresin yalnız bu deponun Release öneklerinden gelmesine izin
+verir, takası çalışan programın kendi
 dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
 yarıda kalırsa eski programı yerine geri koyar. İndirme ve takas yalnız
 Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya
