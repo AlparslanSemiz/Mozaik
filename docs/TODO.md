@@ -856,27 +856,38 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
-- [ ] **B7.34 Paketteki daha yeni sürümün planı "eksik ya da bozuk" deniyor (2026-10-24, TB8'in
+- [x] **B7.34 Paketteki daha yeni sürümün planı "eksik ya da bozuk" deniyor (2026-10-24, TB8'in
       incelemesi).** `readBundlePlans` `readPlanFile`'ın `yeni` cevabını okunamayanla bir sayıyor;
       tek dosya yolu aynı planda "programı güncelleyin" diyor (DENETIM DK10). Veri kaybı değil,
       plan açılmıyor ve buradaki kalıyor. Çare adayı: `readBundlePlans` yeniyi ayrı döndürür, not
       güncellemeyi söyler.
-- [ ] **B7.35 Kesik paket dosyası tek plan dosyası sanılıyor (2026-10-24, TB8'in tıklama testi).**
+      **Yapıldı (2026-10-24, `dosya-okuma-b7`):** `readBundlePlans` `newer`'ı döndürüyor; onay ve
+      not o planlar için "programın daha yeni bir sürümüyle yazılmış… Programı güncelleyin" diyor,
+      hiçbiri okunamıyorsa da. Testleri `bundle.test.ts` ve `planlar.spec.ts` (önce kırmızı).
+- [x] **B7.35 Kesik paket dosyası tek plan dosyası sanılıyor (2026-10-24, TB8'in tıklama testi).**
       JSON'u yarım kalmış bir paket "Tümünü dosyadan aç"a verilince not "Bu dosya bütün planları
       içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz." diyor:
       `parseBundle` okunamayan metinle tek plan dosyasını ayırmıyor. Hiçbir şey değişmiyor, ama
       kullanıcı yanlış düğmeye yollanıyor. Çare adayı: `bundleVersionOf` null ve metin JSON
       değilse "dosya okunamadı" cümlesi.
+      **Yapıldı (2026-10-24, `dosya-okuma-b7`):** paket olmayan dosya üst çubuğa yalnız
+      `readPlanFile` onu bir plan sayıyorsa yollanıyor; yarım ya da JSON olmayan dosyada "Bu dosya
+      okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin." Testi
+      `planlar.spec.ts` (önce kırmızı).
 - [ ] **B7.36 Ayarlar'daki durum notları 13 px (2026-10-24, TB8'in tıklama testi).** Planlar
       ve yedek'teki `.hint[role="status"]` notu 13 px, kontrastı 7,28 (açık tema, `getComputedStyle`).
       Kontrast yeterli, boy az gören bir kullanıcı için küçük; bütün `.hint`'lerin boyu, yani
       DESIGN'ın tipografi kararı, sade ekran turuyla birlikte.
-- [ ] **B7.37 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
+- [x] **B7.37 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
       inceleyicinin yoklamasından: `lessons[0].id = null` olan dosya kimliği `''` olan bir dersle,
       aynı kimliği taşıyan iki ders (`l2`, `l2`) olduğu gibi açılıyor, yani yerleşimler hangi derse
       ait belirsiz kalıyor; onaydan sonra açık planın yerine geçiyor. `fuzz.test.ts`'in
       `wholeness`'ı kimliklerin dolu ve tek olduğunu sormuyor, fuzz bu yüzden görmüyor. TB6 ve TB9
       ile aynı aile (`sanitize`'in süzgeci). Arayüzde koşulmadı.
+      **Yapıldı (2026-10-24, `dosya-okuma-b7`):** `readPlanFile` dört listeden birinde boş ya da
+      tekrarlanan kimlik taşıyan dosyayı "okunamadı" diye reddediyor, paket yolu da aynı kuralla.
+      `fuzz.test.ts`'in `wholeness`'ı kimlikleri soruyor (fuzz boş kimliği kendiliğinden buldu)
+      ve dört elle yazılmış durum; `fixtures.test.ts`'in fikstürleri hâlâ açılıyor.
 
 ---
 

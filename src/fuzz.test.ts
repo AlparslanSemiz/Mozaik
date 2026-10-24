@@ -111,6 +111,7 @@ function broken(root: Json) {
 
 /** What "a plan that is whole" means, short of the hour count (TB6). */
 function wholeness(state: {
+  rooms: Array<{ id: string }>;
   teachers: Array<{ id: string }>;
   classes: Array<{ id: string }>;
   lessons: Array<{ id: string; classId: string; teacherId: string }>;
@@ -118,6 +119,18 @@ function wholeness(state: {
   activeProgramId: string;
   settings: { days: unknown[]; hours: unknown[] };
 }): string | null {
+  // B7.37: an id that is empty or taken twice leaves a placement pointing at
+  // nobody knows which row.
+  for (const [ad, liste] of [
+    ['derslik', state.rooms],
+    ['öğretmen', state.teachers],
+    ['sınıf', state.classes],
+    ['ders', state.lessons],
+  ] as const) {
+    const ids = liste.map((x) => x.id);
+    if (ids.some((id) => typeof id !== 'string' || id === '')) return `${ad}: boş kimlik`;
+    if (new Set(ids).size !== ids.length) return `${ad}: aynı kimlik iki kez`;
+  }
   const classes = new Set(state.classes.map((c) => c.id));
   const teachers = new Set(state.teachers.map((t) => t.id));
   const lessons = new Set(state.lessons.map((l) => l.id));
@@ -194,6 +207,27 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
     const x = load('src/fixtures/v16.json') as { lessons: unknown[] };
     x.lessons[0] = null;
     expect(readPlanFile(JSON.stringify(x))).toEqual({ problem: 'okunamadi' });
+  });
+
+  // B7.37 (2026-10-24, TB1's review). A lesson with no id opened as a lesson
+  // with id '', and two lessons sharing an id opened as they were, so a
+  // placement pointed at whichever came first. Such a file is refused.
+  it('B7.37: kimliği boş ya da aynı kimliği taşıyan satırı olan dosya reddediliyor', () => {
+    const bozuk = (degistir: (x: Record<string, Array<Record<string, unknown>>>) => void) => {
+      const x = load('src/fixtures/v16.json') as Record<string, Array<Record<string, unknown>>>;
+      degistir(x);
+      return readPlanFile(JSON.stringify(x));
+    };
+    expect(bozuk((x) => (x['lessons']![0]!['id'] = null))).toEqual({ problem: 'okunamadi' });
+    expect(bozuk((x) => (x['lessons']![0]!['id'] = ''))).toEqual({ problem: 'okunamadi' });
+    expect(bozuk((x) => (x['lessons']![1]!['id'] = x['lessons']![0]!['id']))).toEqual({
+      problem: 'okunamadi',
+    });
+    expect(bozuk((x) => (x['teachers']![1]!['id'] = x['teachers']![0]!['id']))).toEqual({
+      problem: 'okunamadi',
+    });
+    // ...and the file as it is still opens.
+    expect('state' in bozuk(() => undefined)).toBe(true);
   });
 
   it('BİLİNEN KUSUR (TB6): haftalık saati eksi olan ders olduğu gibi açılıyor', () => {

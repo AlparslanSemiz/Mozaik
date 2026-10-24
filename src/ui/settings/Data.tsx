@@ -18,7 +18,7 @@ import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
 import { emptyState } from '../../pure/entities';
-import { readBundlePlans } from '../../pure/parseState';
+import { readBundlePlans, readPlanFile } from '../../pure/parseState';
 import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
 import {
   routeName,
@@ -557,14 +557,21 @@ export default function Data({
     const bundle = parseBundle(text);
     if (bundle === null) {
       const version = bundleVersionOf(text);
+      // Only a file the top bar can take is sent there. A bundle cut short is
+      // not a single plan, and "use Dosyadan aç" sent the reader the wrong way
+      // (TODO B7.35).
+      const single = readPlanFile(text);
+      const isPlan = !('problem' in single) || single.problem !== 'okunamadi';
       setNote({
         bad: true,
         text:
           version !== null && version !== BUNDLE_VERSION
             ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
-            : t(
-                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
-              ),
+            : isPlan
+              ? t(
+                  'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+                )
+              : `${t('Bu dosya okunamadı')}. ${t('Program tarafından indirilmiş bir .json yedek dosyası seçin.')}`,
       });
       return;
     }
@@ -572,11 +579,20 @@ export default function Data({
     // Read before asking (TB8): the question counts what will really happen,
     // and a file with not one readable plan is never offered as a replacement.
     const read = readBundlePlans(bundle);
+    // A plan a newer program wrote needs the program updated, not a better
+    // file: it is counted apart and never called incomplete (TODO B7.34).
+    const yeni = read.newer.length;
     if (read.plans.length === 0) {
-      setNote({ bad: true, text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.') });
+      setNote({
+        bad: true,
+        text:
+          yeni > 0
+            ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
+            : t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
+      });
       return;
     }
-    const eksik = read.unreadable.length;
+    const eksik = read.unreadable.length - yeni;
     // A plan here whose counterpart in the file is unreadable stays.
     const stays = plans.library.plans.filter((p) => read.unreadable.includes(p.id)).length;
     const replaced = t(
@@ -586,10 +602,18 @@ export default function Data({
     if (
       !(await confirm({
         title: t('Bu bilgisayardaki bütün planların yerine geçecek'),
-        body:
-          eksik > 0
-            ? `${replaced} ${t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik })}`
-            : replaced,
+        body: [
+          replaced,
+          eksik > 0 ? t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik }) : '',
+          yeni > 0
+            ? t(
+                'Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.',
+                { yeni },
+              )
+            : '',
+        ]
+          .filter((x) => x !== '')
+          .join(' '),
         confirmLabel: t('Hepsini değiştir'),
         danger: true,
       }))
@@ -607,20 +631,25 @@ export default function Data({
       });
       return;
     }
+    const eksikAcilmadi = unreadable - yeni;
+    const opened =
+      failed > 0
+        ? t(
+            '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
+            { acilan: ok, yazilamayan: failed },
+          )
+        : eksikAcilmadi > 0
+          ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
+              acilan: ok,
+              eksik: eksikAcilmadi,
+            })
+          : t('{acilan} plan açıldı.', { acilan: ok });
     setNote({
       bad: failed > 0 || unreadable > 0,
       text:
-        failed > 0
-          ? t(
-              '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
-              { acilan: ok, yazilamayan: failed },
-            )
-          : unreadable > 0
-            ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
-                acilan: ok,
-                eksik: unreadable,
-              })
-            : t('{acilan} plan açıldı.', { acilan: ok }),
+        yeni > 0
+          ? `${opened} ${t('{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.', { yeni })}`
+          : opened,
     });
   }
 

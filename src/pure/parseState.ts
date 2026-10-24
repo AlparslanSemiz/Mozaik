@@ -584,6 +584,10 @@ const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
  * not catch (TODO TB1): nothing changed, and nobody was told. Such a file is
  * an unreadable one. `parseState` itself is not changed here: it also reads
  * this computer's storage at startup, and that half of TB1 is still open.
+ *
+ * Nor does it open a file whose rooms, teachers, classes or lessons carry an
+ * empty id or one id twice (TODO B7.37): a placement points at a lesson by id,
+ * and with two lessons under one id nobody can say which one sits in the cell.
  */
 export function readPlanFile(text: string): PlanFile {
   let state: State | null;
@@ -599,7 +603,18 @@ export function readPlanFile(text: string): PlanFile {
   const raw = JSON.parse(text) as Record<string, unknown>;
   const lists = (raw.schemaVersion ?? raw.semaSurumu) === 1 ? LISTS_V1 : LISTS;
   if (lists.some((field) => !Array.isArray(raw[field]))) return { problem: 'eksik' };
+  if (!idsWhole(state)) return { problem: 'okunamadi' };
   return { state };
+}
+
+/** Every row of the four lists has an id of its own: not empty, not shared. */
+function idsWhole(state: State): boolean {
+  return [state.rooms, state.teachers, state.classes, state.lessons].every((list) => {
+    const ids = list.map((row) => row.id);
+    return (
+      ids.every((id) => typeof id === 'string' && id !== '') && new Set(ids).size === ids.length
+    );
+  });
 }
 
 /**
@@ -611,22 +626,26 @@ export function readPlanFile(text: string): PlanFile {
  * readable ones are, every part of them, in the file's order. A plan the reader
  * refuses for any reason, a row that used to make it throw included (TB1), is
  * an unreadable plan here, and so is an entry parseBundle skipped because its
- * state was not an object.
+ * state was not an object. `newer` names the unreadable ones that a newer
+ * program wrote (TODO B7.34): those need the program updated, not a better file.
  */
 export function readBundlePlans(bundle: Bundle): {
   plans: Array<{ id: Id; state: State }>;
   unreadable: Id[];
+  newer: Id[];
 } {
   const plans: Array<{ id: Id; state: State }> = [];
   const unreadable: Id[] = [];
+  const newer: Id[] = [];
   for (const plan of bundle.library.plans) {
     const raw = bundle.states[plan.id];
     const read = raw === undefined ? null : readPlanFile(JSON.stringify(raw));
     if (read !== null && 'state' in read) plans.push({ id: plan.id, state: read.state });
     else unreadable.push(plan.id);
+    if (read !== null && 'problem' in read && read.problem === 'yeni') newer.push(plan.id);
   }
   for (const id of bundle.skipped ?? []) if (!unreadable.includes(id)) unreadable.push(id);
-  return { plans, unreadable };
+  return { plans, unreadable, newer };
 }
 
 function newerVersion(text: string): boolean {

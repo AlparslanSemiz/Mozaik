@@ -238,7 +238,9 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 
 Üst çubuk tek planı yazar ve okur. Okurken `parseState`'ten sıkı olan `readPlanFile()`'dan
 geçer: öğretmen, sınıf, ders ya da derslik listesinin alanı hiç yoksa (v1'de Türkçe adlarıyla)
-dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. `parseState` localStorage'ı ve
+dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. Bu dört listeden birinde kimliği
+boş ya da iki satırda aynı olan bir dosya "okunamadı" diye reddedilir (2026-10-24, TODO B7.37),
+çünkü yerleşim derse kimliğiyle bağlı. `parseState` localStorage'ı ve
 oturum yedeklerini de okuduğu için hoşgörülü kalır. Yükleme sorusu dosyayı açık planla yan
 yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). `schemaVersion`'ı bu programınkinden büyük bir dosya bozuk sayılmaz, "daha yeni bir sürümle yazılmış" diye reddedilir ve programın güncellenmesi söylenir. Paket Ayarlar → Planlar ve yedek'te duruyor,
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
@@ -246,7 +248,11 @@ Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, 
 her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer, ama üst
 çubuğun kuralıyla okunur (`readBundlePlans`, 2026-10-23, TODO TB8): liste alanı eksik,
 bozuk ya da daha yeni bir plan açılmaz ve buradaki aynı kimlikli plan kalır. Açılmayacak
-planları onay sorusu sayar. Hiçbir plan okunamıyorsa soru sorulmaz ve hiçbir şey değişmez.
+planları onay sorusu sayar; daha yeni bir programın yazdığı planları ayrı sayar ve onlar için
+programın güncellenmesini söyler, "eksik ya da bozuk" demez (`newer`, TODO B7.34). Hiçbir plan
+okunamıyorsa soru sorulmaz ve hiçbir şey değişmez. Paket olmayan bir dosya "Tümünü dosyadan
+aç"a verilince üst çubuğa yalnız okunabilen tek bir plansa yollanır; yarım kalmış ya da JSON
+olmayan dosya için "okunamadı" denir (TODO B7.35).
 `state`'i nesne olmayan bir girdi de okunamayan plan sayılır (`skipped`). Depo dolduğu için
 yazılamayan plan da açılmamış sayılır: buradaki aynı kimlikli plan kalır, yoksa dizine verisiz
 satır girmez; hiçbir plan yazılamazsa hiçbir şey silinmez ve not depolamayı söyler.

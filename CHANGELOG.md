@@ -28,6 +28,9 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- "Open from file" and "Open all from file" no longer open a plan in which two lessons, teachers, classes or rooms share an id, or one has none; such a file is refused as unreadable.
+- "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".
+- "Open all from file" now says that a plan written by a newer version of the program needs the program updated, instead of calling it incomplete or broken.
 - "Open all from file" no longer opens a plan whose teacher, class, lesson or room list is missing as an empty plan, and no longer deletes the plan on this computer to make room for it. Such a plan is left out, the question before replacing says how many are left out, and the plan on this computer that it would have replaced stays. A file in which no plan can be read changes nothing and asks nothing.
 - "Open all from file" with the browser's storage full no longer deletes the plans on this computer when not one plan from the file could be saved, and no longer says that nothing changed. The plans here stay and the note says that storage may be full.
 - "Open from file" in the top bar no longer does nothing, silently, with a file that has a broken row in it. It says the file cannot be read, and the open plan stays as it was.
