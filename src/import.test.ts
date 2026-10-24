@@ -94,6 +94,15 @@ describe('parseTeachers', () => {
     ]);
   });
 
+  it('iki adres hücresi: ilki e-posta, ikincisi de branş olmuyor; "Ad Soyad" başlığı atlanıyor', () => {
+    const { accepted } = parseTeachers(
+      'Ad Soyad\tKısaltma\tBranş\tCinsiyet\tİkinci branş\tE-posta\nAyşe Varol\tAV\tFizik\ta@x.com\tb@y.com',
+    );
+    expect(accepted.map((x) => [x.name, x.gender, x.subject2, x.email])).toEqual([
+      ['Ayşe Varol', '', '', 'a@x.com'],
+    ]);
+  });
+
   it('adres olmayan altıncı hücre yazıldığı gibi kalıyor, kontrol karakteri atılıyor', () => {
     const { accepted, errors } = parseTeachers(
       'Ayşe Varol\tAV\tFizik\t\t\tayse@\nMurat Bilge\tMB\tKimya\t\t\t murat@okul.com\u0007 ',
