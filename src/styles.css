@@ -80,8 +80,8 @@
    renk.spec.ts:
      paper luminance      1.000 light / 0.017 dark   (contract: >0.9 / <0.1)
      text on paper        17.47  / 13.26
-     muted on paper        8.53  /  7.28
-     muted on closed       5.97  /  4.69
+     muted on paper        8.53  /  9.39
+     muted on closed       5.97  /  6.52
      accent on accent-bg   6.59  /  6.47
      on-accent on accent   7.70  /  9.48
      section min AA        5.63  /  4.89
@@ -543,7 +543,7 @@
   --band: #1a1e23;
   /* Not --paper-sunk: in this theme the recess is darker than the paper.
      The zebra row is one step LIGHTER than it instead, by the light theme's
-     ΔL* (+5.43 against -5.34): the same load in both. --muted on it 7.28. */
+     ΔL* (+5.43 against -5.34): the same load in both. --muted on it 8.30. */
   --zebra: #20242b;
 
   --hairline: #242930;
@@ -554,7 +554,11 @@
   --day-edge: #a3adbb;
 
   --text: #e8edf5;
-  --muted: #aab2bd;
+  /* A step lighter since the zebra, for the light theme's reason: on the
+     lighter --zebra the old #aab2bd measured 7.28, below its 8.23 on paper,
+     and the reader asked for the stripe without losing contrast. Now 9.39 on
+     --paper, 8.30 on --zebra, 6.52 on --closed; --text is 14.99. */
+  --muted: #b6bec9;
 
   /* The same hue, as saturated as sRGB has at this lightness: hue 268 runs the
      blue channel to 255, so the conversion clips there by a hair and the hex
@@ -3602,6 +3606,14 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   max-height: 160px;
   overflow: auto;
   font-size: var(--fs-sm);
+  /* Rows, not bullets: with the browser's marker and 40 px indent the
+     zebra began after the bullet and left both on bare paper. */
+  list-style: none;
+  padding-left: 0;
+}
+
+.paste-preview > li {
+  padding: 2px var(--space-2);
 }
 
 /* The strip above the grid: same furniture as the top bar, no second border. */
@@ -4076,8 +4088,10 @@ table.list td > .form-row {
 /* Branşlar's second <tbody>, the subjects teachers hold that are not on the
    list, is a group of its own and :nth-child starts again inside it. Two rows
    on one ground where the groups meet was the result; a rule over the first
-   row says a new group starts, which is what the restart then means. */
-table.list > tbody + tbody > tr:first-child > td {
+   row says a new group starts, which is what the restart then means. Not
+   under an empty first group: there the rule would sit under the heading
+   with no group above it. */
+table.list > tbody:not(:empty) + tbody > tr:first-child > td {
   border-top: 2px solid var(--line-dark);
 }
 

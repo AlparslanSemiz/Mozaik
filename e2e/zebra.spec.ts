@@ -609,4 +609,37 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     expect(box.bg, 'aktarma seçicisi kâğıt zeminli').toBe(t['--paper']);
     expect(box.edge, 'aktarma seçicisinin kenarı').toBe(t['--line']);
   });
+
+  test('Branşlar: liste boşken yabancı branşların üstünde grup çizgisi yok', async ({ page }) => {
+    // Every subject off the list while teachers still hold them: the first
+    // <tbody> is empty, and a group-start rule there would sit right under the
+    // heading with no group above it (found by mozaik-70's review). A file
+    // with an empty list falls back to the defaults on load, so the state is
+    // reached the way a reader reaches it: one unused subject on the list,
+    // and then that one removed.
+    await openWithSample(page);
+    const state = JSON.parse(await savedText(page)) as { settings: { subjects: string[] } };
+    state.settings.subjects = ['Hiç kimsenin'];
+    await loadWorld(page, state, 'Okul');
+    await openSetup(page, 'Branşlar');
+    const bodies = page.locator('.cols > div table.list > tbody');
+    await bodies
+      .nth(0)
+      .locator('tr')
+      .first()
+      .getByRole('button', { name: 'Sil', exact: true })
+      .click();
+    await answerDialog(page);
+    await park(page);
+    await expect(bodies).toHaveCount(2);
+    await expect(bodies.nth(0).locator('tr')).toHaveCount(0);
+    const style = await bodies
+      .nth(1)
+      .locator('tr')
+      .first()
+      .locator('td')
+      .first()
+      .evaluate((td) => getComputedStyle(td).borderTopWidth);
+    expect(parseFloat(style), 'boş grubun altında çizgi').toBeLessThan(2);
+  });
 });
