@@ -1,4 +1,4 @@
-// The suggestion search (pure/relax.ts) on as many cores as the machine has,
+// The suggestion search (pure/relax/) on as many cores as the machine has,
 // and on the main thread when it cannot (TODO B5.10).
 //
 // Why workers after all: the search is several independent ways, each tens of
@@ -19,16 +19,16 @@
 // no Worker, or no answer from one within READY_MS, and the same relaxer runs
 // here in slices. WebView2 on Windows could not be measured from this machine.
 
-import { createRelaxer } from '../../pure/relax';
-import type {
-  RelaxFamily,
-  RelaxOptions,
-  RelaxProgress,
-  RelaxResult,
-  Relaxer,
-  Suggestion,
+import {
+  createRelaxer,
+  type RelaxFamily,
+  type RelaxOptions,
+  type RelaxProgress,
+  type RelaxResult,
+  type Relaxer,
+  type Suggestion,
 } from '../../pure/relax';
-import type { Id, State } from '../../leaf/types';
+import type { Id, State } from '../../leaf/model';
 import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */
@@ -49,7 +49,7 @@ export interface Track {
   families: RelaxFamily[];
   /**
    * The hand-over ways start from the fewest-hours week (see `seed` in
-   * relax.ts). On a line of their own they wait for it: the worker gets its
+   * pure/relax/search.ts). On a line of their own they wait for it: the worker gets its
    * job when the line with that way sends its first week of it.
    */
   after?: RelaxFamily;
@@ -249,7 +249,7 @@ function startOn(
    * waiting line when a week of the way it waits for has come from any line,
    * or when every line searching that way is over without one. After an
    * answer a waiting line starts at once if its first way has a week of its
-   * own from the search before, since that week comes first (relax.ts).
+   * own from the search before, since that week comes first (pure/relax/search.ts).
    */
   const release = () => {
     plan.forEach((line, i) => {

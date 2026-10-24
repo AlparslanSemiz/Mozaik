@@ -184,7 +184,7 @@ Kovalar:
 | **Kısıt motoru genişlesin** | *"gerekli constraintler olsun programda"*. Liste aşağıda | `u57` (97 konu) |
 | **Paylaşma: e-posta · WhatsApp** | Baba istedi. **PDF ya da görsel**, hocalara **tek tıkla**. Bizim sunucumuz yok. R3 (u338): aSc'nin 12 paylaşma konusunun 12'si de EduPage hesabına bağlı (kiosk modu, takvim senkronu dahil) — hesapsız bir alternatif fikir bulunamadı, kendi yaklaşımımız zaten en ucuz yol | bizde yeni |
 | **Kurulum** | İlke 1'in yasağı kalktı; yarısı zaten var | `u56` |
-| **Kontrol'e "Danışman" uyarıları** | Beşi de "neden dizilemedi"ye cevap: gün sayısından çok ders · kapasitesi aşılmış varlık · çok kapalı günü olan öğretmen · farklı boyda bloklar · özel derslik tanımsız. **YAPILDI (B5.4)** — `feasibility.ts`'teki `buildAdvice()`. R3 (u60): iki **altıncı/yedinci** madde daha var ama **gruplar/bölünmeler** (kova 2) bekliyor — "bölünmüş kartlar çok fazla pozisyona yayılmış" ve "gruplar arası farklı ders sayısı"; gruplar geldiğinde eklenecek | `u60` |
+| **Kontrol'e "Danışman" uyarıları** | Beşi de "neden dizilemedi"ye cevap: gün sayısından çok ders · kapasitesi aşılmış varlık · çok kapalı günü olan öğretmen · farklı boyda bloklar · özel derslik tanımsız. **YAPILDI (B5.4)** — `pure/feasibility/`'teki `buildAdvice()`. R3 (u60): iki **altıncı/yedinci** madde daha var ama **gruplar/bölünmeler** (kova 2) bekliyor — "bölünmüş kartlar çok fazla pozisyona yayılmış" ve "gruplar arası farklı ders sayısı"; gruplar geldiğinde eklenecek | `u60` |
 | **Özet çarşaf liste** | Bütün öğretmenler (ya da sınıflar) **tek sayfada**. Babanın duvara asacağı şey muhtemelen bu | `u61` |
 
 #### 1a · Tuval davranışı — istenen şey ne

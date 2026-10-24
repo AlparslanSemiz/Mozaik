@@ -2089,7 +2089,7 @@ table.list tbody tr {
   /* So the "Sığdır" density below can size a cell from the box the grid is
      actually in. `100vw` would have to guess the rail, the padding and the
      vertical scrollbar; the box's own width is the number itself. It is read
-     as --wrap-w (written by platform/gridFit.ts), with `100cqw` only until
+     as --wrap-w (written by platform/dom/gridFit.ts), with `100cqw` only until
      that first write: a width resolved against a container made every page
      layout re-lay the whole table (see Sığdır's --cell-w). */
   container-type: inline-size;
@@ -2257,7 +2257,7 @@ table.grid thead tr:nth-child(2) th {
    text plus the head do not fit in 1536px, and no width rule makes them.
 
    What does, since 2026-09-26, is the line giving way instead of being cut.
-   `--fit` is a ratio written by platform/gridFit.ts on a line that does not
+   `--fit` is a ratio written by platform/dom/gridFit.ts on a line that does not
    fit, never below 9px at the default scale (the user's choice, Sığdır
    only, measured in gridFit.ts). The size is multiplied, the LINE HEIGHT is not: it stays at the
    unshrunk size, so a row full of shrunk cards is exactly as tall as it was.

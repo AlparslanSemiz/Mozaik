@@ -5,15 +5,21 @@
 // Moved out of `ui/Print.tsx`'s `map` without a change to what the sheet says
 // (TODO §8k, RF9). It exists so a sheet can be produced for one teacher on its
 // own, which sending a teacher their timetable needs (B3.8); `Sheet.tsx`
-// draws it, and `src/programScreen.test.tsx` pins the drawing.
+// draws it, and `src/ui/program/programScreen.test.tsx` pins the drawing.
 
-import { periodGroups } from '../bell';
+import {
+  periodGroups,
+  dayLabel,
+  lessonSubject,
+  shortDay,
+  subjectShort,
+  teacherSubjects,
+} from '../entities';
 import { closedKey, placementKey, type Index } from '../constraints';
-import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
-import { activePlacements } from '../program';
+import { activePlacements } from '../grid';
 import { cellSpan } from './cut';
 import type { Vars } from '../../leaf/i18n';
-import type { ClassGroup, State, Teacher } from '../../leaf/types';
+import type { ClassGroup, State, Teacher } from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds the sheet. */
 type Translate = (key: string, vars?: Vars) => string;

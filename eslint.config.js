@@ -51,7 +51,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 /** Browser storage, which only its owners may touch (the overrides below). */
 const STORAGE = ['localStorage', 'sessionStorage', 'indexedDB'];
 const STORAGE_MESSAGE =
-  'Storage is read and written by its owners only: leaf/preference.ts, the stores in platform/.';
+  'Storage is read and written by its owners only: leaf/preference/preference.ts, the stores in platform/.';
 
 export default defineConfig([
   {
@@ -127,7 +127,7 @@ export default defineConfig([
           object: 'Math',
           property: 'random',
           message:
-            'Only newId() in pure/entities.ts draws from Math.random; use a seeded generator.',
+            'Only newId() in pure/entities/identity.ts draws from Math.random; use a seeded generator.',
         },
       ],
       // Storage has owners (ARCHITECTURE, "Durum, tercih ve depolama"): the
@@ -141,16 +141,16 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/pure/entities.ts'],
+    files: ['src/pure/entities/identity.ts'],
     rules: { 'no-restricted-properties': 'off' },
   },
   {
     files: [
-      'src/leaf/preference.ts',
-      'src/platform/folder.ts',
-      'src/platform/libraryStore.ts',
-      'src/platform/planStore.ts',
-      'src/platform/storageReport.ts',
+      'src/leaf/preference/preference.ts',
+      'src/platform/storage/folder.ts',
+      'src/platform/storage/libraryStore.ts',
+      'src/platform/storage/planStore.ts',
+      'src/platform/storage/storageReport.ts',
       'src/**/*.test.{ts,tsx}',
     ],
     rules: { 'no-restricted-globals': 'off' },
@@ -160,7 +160,10 @@ export default defineConfig([
     // "Saf mantık"). dependency-cruiser cannot say it: its parser invents a
     // React import out of a generic arrow function (.dependency-cruiser.cjs).
     // A global is only a global here: `relax.ts`'s local `window` is not one.
+    // Its tests live beside it since 2026-10-24 and stay out, as they were when
+    // they lived in src/'s root: a test may build a DOM and a store to judge one.
     files: ['src/pure/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.test.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

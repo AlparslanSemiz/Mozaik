@@ -11,7 +11,7 @@
 
 import { expect, test } from './kapan';
 import { openWithSample, openSetup, chooseEntity, mainList, loadWorld } from './helpers';
-import { closeWeek, makeWorld } from '../src/worlds';
+import { closeWeek, makeWorld } from '../src/pure/worlds';
 
 test.describe('48. Varlık paneli', () => {
   test('ızgarada satır başına tıklamak o öğretmenin haftasını açıyor', async ({ page }) => {

@@ -11,3 +11,4 @@ import './es';
 import './fr';
 
 export { KISALTMALAR } from './kisaltmalar';
+export * from './names';

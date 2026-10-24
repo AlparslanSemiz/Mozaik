@@ -19,7 +19,7 @@ import {
   onScreen,
   reopen,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 
 test.describe('2. Sürükle-bırak', () => {
   // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
@@ -2405,7 +2405,7 @@ test.describe('92. Program sekmesi gizlenince sökülmüyor', () => {
   // would survive an unmount just as well.
   //
   // Measured red: `<Activity …>` replaced by `{tab === 'program' && …}` in
-  // src/ui/App.tsx.
+  // src/ui/shell/App.tsx.
   test('başka sekmeye gidip dönünce ızgara aynı DOM düğümü', async ({ page }) => {
     await openWithSample(page);
     const remembered = await page.evaluate(() => {
