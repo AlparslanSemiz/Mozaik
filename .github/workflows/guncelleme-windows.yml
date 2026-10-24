@@ -22,6 +22,7 @@ on:
     paths:
       - 'src/leaf/types.ts'
       - 'src/pure/parseState.ts'
+      - 'src/pure/constraints.ts'
       - 'src/pure/library.ts'
       - 'src/pure/bundle.ts'
       - 'src-tauri/tauri.conf.json'

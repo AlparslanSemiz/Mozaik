@@ -158,13 +158,21 @@ async function kosuVarMi(is, sha) {
 }
 
 // Whether this release migrates plans: the schema at the last release tag
-// against HEAD's. With no tag to compare against, it waits (the safe answer).
+// against HEAD's. Asked before anything is written or pushed. With no tag to
+// compare against, it waits (the safe answer). Local tags only, no fetch, so
+// `--kuru` still touches nothing: a tag missing here can only make it compare
+// against an older release, which at worst waits once more than needed.
 function semaDegistiMi() {
-  git('fetch', '--quiet', '--tags', 'origin');
   const etiket = sonEtiket(git('tag', '--merged', 'HEAD'));
-  const yeni = semaSurumu(git('show', 'HEAD:src/leaf/types.ts'));
-  if (etiket === null) return true;
-  const eski = semaSurumu(git('show', `${etiket}:src/leaf/types.ts`));
+  let eski;
+  let yeni;
+  try {
+    yeni = semaSurumu(git('show', 'HEAD:src/leaf/types.ts'));
+    if (etiket === null) return true;
+    eski = semaSurumu(git('show', `${etiket}:src/leaf/types.ts`));
+  } catch (e) {
+    dur(e.message);
+  }
   console.log(
     eski === yeni
       ? `\n  Şema ${yeni}, ${etiket}'teki gibi: güncelleme kapısı beklenmiyor.\n`
@@ -175,16 +183,15 @@ function semaDegistiMi() {
 
 // The runs a tag waits for. ci.yml first: it is the shortest, and the
 // Windows runs are started by the same push, so they are already under way.
-// The upgrade gate last, and only when this release changes the schema.
-async function ciYesilMi(sha, kirmizidaNe) {
+// The upgrade gate only when this release changes the schema (`semaDegisti`),
+// started together with the exe run so the two Rust builds overlap.
+async function ciYesilMi(sha, kirmizidaNe, semaDegisti) {
+  await kosuVarMi('exe-windows.yml', sha);
+  if (semaDegisti) await kosuVarMi('guncelleme-windows.yml', sha);
   await kosuYesilMi('ci.yml', sha, kirmizidaNe);
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
-  await kosuVarMi('exe-windows.yml', sha);
   await kosuYesilMi('exe-windows.yml', sha, kirmizidaNe);
-  if (semaDegistiMi()) {
-    await kosuVarMi('guncelleme-windows.yml', sha);
-    await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
-  }
+  if (semaDegisti) await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
 }
 
 // The first gate, before the arguments are even read: a release run from a
@@ -224,7 +231,7 @@ if (kuru) {
       'git status -sb',
     );
   }
-  await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.']);
+  await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.'], semaDegistiMi());
   const ad = surum === undefined ? 'etiket' : `v${surum} etiketi`;
   console.log(`  Kuru koşu: gerçek koşu burada ${ad} atar ve iterdi. Hiçbir şey atılmadı.\n`);
   process.exit(0);
@@ -246,6 +253,8 @@ if (git('status', '--porcelain') !== '') {
 }
 
 ghHazir();
+
+const semaDegisti = semaDegistiMi();
 
 const etiketler = git('tag', '--list', etiket);
 if (etiketler !== '') {
@@ -411,11 +420,15 @@ try {
 }
 
 const sha = git('rev-parse', 'HEAD');
-await ciYesilMi(sha, [
-  `${etiket} etiketi ATILMADI. Site ci.yml yeşilse güncellendi, exe güncellenmedi.`,
-  'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
-  'olduğu için yalnız etiket atılır.',
-]);
+await ciYesilMi(
+  sha,
+  [
+    `${etiket} etiketi ATILMADI. Site ci.yml yeşilse güncellendi, exe güncellenmedi.`,
+    'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
+    'olduğu için yalnız etiket atılır.',
+  ],
+  semaDegisti,
+);
 
 // ANNOTATED, and that is not a style preference — it is a bug this script
 // already had once. `--follow-tags` pushed annotated tags only; a lightweight
