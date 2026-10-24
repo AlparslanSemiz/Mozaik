@@ -7,10 +7,11 @@ denendi mi" sorusu için var. Bir duruşun değişmesi de, bir şeyi yapmamaya k
 vermek de bir karardır: çürütülmüş bir teori kaydı olmazsa aylar sonra yeniden
 üretilir ve bir iş planına dönüşür.
 
-Kayıtlar en yeni üstte. Her kayıt ne değiştiğini, eski hâlini ve gerekçesini
-söyler. Denenip bırakılan bir yol **denendi** diye işaretlidir. Kayıtlar geriye
-dönük düzeltilmez: o günkü kuralı aktaran bir alıntı o günün diliyle kalır, bir
-ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
+Kayıtlar en yeni üstte. Her kayıt ne değiştiğini ve gerekçesini söyler. Bir kuralın
+yerine yenisi gelince eski kuralın kaydı silinir ve yeni kayıt onu anan bir geçmiş
+satırı taşımaz: dosyada bir kuralın yalnız bugünkü hâli durur, eskisi git geçmişinde.
+Denenip bırakılan bir yol **denendi** diye işaretlidir ve kalır, çünkü yeniden
+denenmesini önleyen kayıt odur.
 
 ## Eski ilke numaraları
 
@@ -21,8 +22,8 @@ ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
 | Numara | 2026-08-24 ile 2026-08-29 arası | 2026-08-30 ile 2026-09-10 arası | Bugünkü adı |
 |---|---|---|---|
 | 1 | Kurulum yok | Çift tıkla çalışır | Çift tıkla çalışır |
-| 2 | Sunucu yok | Sunucu yok | Sunucusuz |
-| 3 | İnternet gerekmez | İnternet gerekmez | Çevrimdışı |
+| 2 | Sunucu yok | Sunucu yok | kaldırıldı (2026-10-08) |
+| 3 | İnternet gerekmez | İnternet gerekmez | kaldırıldı (2026-10-08) |
 | 4 | Türkçe, tek dil | Türkçe kaynak dildir | Türkçe kaynak dil |
 | 5 | Bir dönem kullanılmadan özellik eklenmez | Veri kaybı kabul edilemez | 5 eskiden: kaldırıldı · 5 yeniden: Veri kaybı olmaz |
 | 6 | Veri kaybı kabul edilemez | Kolay kullanılabilir ve yenilikçi | Veri kaybı olmaz · Kullanılabilirlik |
@@ -525,8 +526,8 @@ ve onaylandı:
 
 - **Babanın bir tercihine dayanan, artık geçerli değil:** Sunucusuz, Çevrimdışı, ve
   "Şu an yapılmıyor" listesinden kullanıcı hesapları, veriyi bir servise yükleyen
-  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilkenin metni
-  PRINCIPLES'ın sonunda "Artık geçerli olmayanlar" altında o günkü hâliyle duruyor.
+  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilke PRINCIPLES'tan
+  silindi, bugünkü duruş orada "Ağ ve servisler" altında.
 - **Bir gerçeği koruyan, kalıyor:** Çift tıkla çalışır (eski makine, bilinmeyen
   Windows sürümü), Veri kaybı olmaz, Kullanılabilirlik (babanın zor görmesi), Hedef
   makine (4 GB RAM, çok eski işlemci).

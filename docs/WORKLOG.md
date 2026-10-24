@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-23.
+Son güncelleme: 2026-10-24.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -105,7 +105,14 @@ kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor`
 11. Yeni işaret `main`'de (2026-10-23, `ozellik/asil-ikon`): kullanıcının seçtiği resimden
    elle çizilen takvim sayfası; `.ico`'da 16, 20 ve 24 sade, 32 ve üstü ayrıntılı. Exe
    simgesi Windows görev çubuğunda yazıldı, doğrulanmadı (yayın kapısında, madde 0).
-   Maskable ikonun kendi dosyası TODO B7.33, ayrı dalda.
+   Sade çizimin dersleri mor, mercan ve `#3f9fe3` mavisi, beyaza karşı 2,88 ile 2,95:1
+   arası (2026-10-24); büyük çizimin mavisi `#65b6ec`. Maskable ikonun kendi dosyası
+   TODO B7.33, ayrı dalda.
+12. Kayıt kuralı (2026-10-24, aşağıdaki girdi): CLAUDE.md, PRINCIPLES ve DECISIONS bugünkü
+   kuralı taşır, yerine yenisi gelen kural silinir, geçmiş satırı bırakılmaz; WORKLOG'un
+   tarihli girdileri ve TODO arşivi geriye dönük düzeltilmez (CONVENTIONS). PRINCIPLES'ın
+   emekli iki ilkesi silindi. DECISIONS'ın eski kayıtlarındaki "Eski hâli" blokları ve
+   yerine yenisi gelmiş kayıtlar taranmadı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -152,7 +159,7 @@ kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor`
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 164 918 bayt, brotli 280,5 kB (2026-10-23, `ozellik/asil-ikon`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -162,6 +169,48 @@ kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor`
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
+
+**Mavi.** Kullanıcının kararı: yalnız `site/icon-small.svg`'de mavi `#65b6ec` → `#3f9fe3`,
+beyaza karşı 2,22:1 → 2,88:1 (WCAG göreli parlaklığıyla hesaplandı: 2,8847), yani mor
+(2,89:1) ve mercanla (2,95:1) aynı düzeyde. Büyük çizim `#65b6ec`'de kaldı. Ondan
+üretilenler yeniden: `index.html`'in favicon URI'si (`favicon.mjs`), `kurulum/icon.ico`'nun
+16, 20 ve 24'ü (`ikon.mjs`, 13 010 → 13 028 bayt), `App.tsx`'teki üst çubuk işareti.
+DECISIONS'ın 2026-10-23 işaret kaydı ve svg'nin yorumu aynı commit'te.
+
+**Bakılan.** `scratch/ikon-onizleme.png` (.ico'nun kendi girdileri, açık ve koyu şerit),
+`scratch/ikon-boylar.png`, `scratch/ikon-ustcubuk-1920.png` ile `-3x.png` ve `-tam.png`
+(1920×1080, işaret 22,75 px, beş dikdörtgen, mavisi `#3f9fe3`), sekme
+`scratch/ikon-sekme-1920.png` ile `ikon-sekme-yakin.png` (gerçek Chrome penceresi
+1920×1080, Xwayland'de `import -window`; sekme simgesinin piksellerinde `#3F9FE3` var).
+
+**Kayıt kuralı.** DECISIONS'ın başı "kayıtlar geriye dönük düzeltilmez" diyordu, projenin
+kuralıyla çelişiyordu. Yeni hâli: yerine yenisi gelen kuralın kaydı silinir, yeni kayıt onu
+anan bir geçmiş satırı taşımaz, denenip bırakılan yollar kalır. CONVENTIONS'ın aynı maddesi
+DECISIONS'ı da sayıyordu, ikiye ayrıldı: günlükler (WORKLOG girdileri, TODO arşivi)
+düzeltilmez, kurallar (CLAUDE.md, PRINCIPLES, DECISIONS) düzeltilir. PRINCIPLES'ta aynı
+çelişki vardı: emekli iki ilke (sunucusuz, çevrimdışı) "eski kayıtlarda okunabilsin diye"
+o günkü hâliyle duruyordu ve "Şu an yapılmıyor" listesinin altında hangi maddenin hangi
+gün çıktığı yazıyordu. İkisi silindi, bugün geçerli olan kısmı (ağa çıkan özellik tasarım
+ve KVKK sorusu, açılış ağa bağlı değil) "Ağ ve servisler" altında. Onlara işaret eden
+CLAUDE.md'nin giriş cümlesi, DECISIONS'ın 2026-10-08 kaydındaki cümle ve eski ilke
+numaraları tablosunun iki satırı aynı commit'te. CLAUDE.md'de bu kuralla çelişen bir
+cümle yoktu.
+
+**`main` alındı.** `surec-sadelestirme`'nin on iki commit'i. Çatışmalar DECISIONS, TODO ve
+WORKLOG'da, iki taraf da kaldı. `main` B7.32'yi `yayinla`'nın kilit dosyasına verdiği için
+bu dalın maskable ikon maddesi B7.33 oldu.
+
+**Ölçülen.** `dist/index.html` 1 164 918 bayt, brotli 280,63 kB (`npm run boyut`, sınır
+289 kB; `main` alınmadan önce 280,56 kB), `dist-site/` 1 184 501 bayt.
+
+**Koşulan.** `npm run hizli` (merge'den önce ve sonra, 52 dosya, 1339 geçti, 1 atlandı),
+`eslint src/ui/App.tsx`, `prettier --check src/ui/App.tsx site/icon-small.svg`, `npm run
+build`, `build:site`, `boyut`, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `agir.sh`
+altında 7/7. `index.html` `prettier --check`'te uyarı veriyor, `main`'de de, `favicon.mjs`
+üretiyor ve `bicim`'in kapsamında değil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta
+görev çubuğu ve exe.
 
 ## 2026-10-23 gece · Süreç sadeleşti (`surec-sadelestirme`)
 
