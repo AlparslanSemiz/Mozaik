@@ -30,6 +30,11 @@ okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyo
 sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
 siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
 
+**`refactor/moduller` `main`'de (2026-10-24)**, `fix/okunamayan-plan`'dan sonra. Açık her dal
+birleşmeden önce `git merge main` yapar; eski yol → yeni yol tablosu ve her dalın çakışan
+dosyaları `~/GitHub/Mozaikler/Mozaik-refactor/scratch/refactor/` altında, `yol-haritasi.md` ve
+`merge-tree.txt` (o worktree o dallar birleşene kadar kalır).
+
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
 program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
@@ -48,7 +53,7 @@ olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de ko�
 komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-turları açık (DECISIONS 2026-10-24). `refactor/moduller` (2026-10-24, aşağıdaki girdi) her
+turları açık (DECISIONS 2026-10-24). `refactor/moduller` (2026-10-24, aşağıdaki girdiler) her
 kaynak dosyayı `src/<katman>/<alan>/`'a koydu; RF1, RF5, RF6, RF8, RF9 ve RF10 bitti, açık
 kalanlar RF11, RF12, RF20, RF2'nin kalanı, RF3 ve RF18, RF4 park ([TODO.md](TODO.md) §8k).
 Sıradaki üç bileşen bölmesi (Teachers, Dersler'in formu, Program'ın sağ tık menüleri) her
@@ -179,6 +184,34 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
+
+**Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
+`main`'in üstündeydi; son commit'i "Şu an"ı birleşmiş hâline çevirdi, `npm run hizli` 54/54
+dosya, dalın CI'ı 40115539939 yeşil, `main`'e `--ff-only` (d8426d6), `main`'in `ci`'ı
+40116068594 ve `windows`'u 40116068668 yeşil. Refactor ajanı önceki sohbetin alt ajanıydı,
+erişilemedi; `git merge main`'i bu oturum yaptı.
+
+**Çakışmalar.** Beş dosya, hepsi davranışsız. `planStore`, `useStore`, `useFolder` ve
+`folder.test`'te yalnız import satırları (main'in yeni adları, refactor'un paket yollarıyla;
+`readStoredPlan` ve `Library` `pure/io`'nun girişinden). `src/ui/App.tsx` refactor'da silinmiş,
+main'de okunamayan plan şeridini almıştı: şerit aynı metin ve aynı sırayla (boş açılış
+şeridinin altı) `ui/shell/Notices.tsx`'e, `unreadable` `App`'ten prop olarak; tipi
+`ReturnType<typeof useStore>['unreadable']`, `platform/storage`'ın girişini genişletmemek için.
+Main'in köke koyduğu iki birim testi (`okunamayan`, `useFolder`) öteki testler gibi
+`src/platform/storage/`'a; TODO, TRAPS ve bu dosyadaki yolları, `lib.rs`'teki bir yorumun yolu
+ona göre. Boyut eşiği main'in 1 186 500'ü (fix dalının kararı), refactor yükseltmedi.
+
+**Doğrulama (birleşik kopya, 272f671).** `npm run kontrol` (`agir.sh`) çıkış 0: vitest 60/60
+dosya, 1506 test; Playwright 651; site 24; çözücü stresi 7. `dist/index.html` 1 173 991 bayt,
+`main`'in 1 170 864'ünün 3 127 bayt (%0,27) üstü, refactor'un birleşmeden önceki farkıyla aynı.
+Ölçülmeyen: ekran görüntüsü farkı, WebKit, gerçek Windows exe (önceki girdideki gibi).
+
+**Bırakılan.** `yol-haritasi.md` (113 taşıma, 6 bölünen dosya, adı kalıp parçası ayrılan 5)
+ve `merge-tree.txt` (14 açık dalın 272f671'e karşı çakışan dosyaları) refactor worktree'sinin
+`scratch/refactor/`'unda. Çoğu dalın çakışması refactor'dan değil, `fix/okunamayan-plan`'ın
+dokunduğu `parseState`, `usePlans`, `storeContract.test` ve `fuzz.test`'ten.
 
 ## 2026-10-24 akşam · `refactor/moduller`'in birleşmeye hazırlık doğrulaması
 

@@ -742,7 +742,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
       düşük. **Kullanıcının kararı (2026-10-09):** şimdilik düzeltme yok, `test:webkit`
-      ne `kontrol`'e ne `haftalik.yml`'e giriyor.
+      ne `kontrol`'e ne `haftalik.yml`'e giriyor. **2026-10-24 sayımı:** `main` c41223c 18 kırmızı,
+      `refactor/moduller` 17, dalınkiler main'inkilerin alt kümesi (WORKLOG 2026-10-24 akşam).
 - [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver/solver.ts:975`
       `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
       gibi `weight[index] = weight[index]! + 1`. **Düzeldi (`290f55d`)** ve arkasındaki iki
