@@ -114,7 +114,11 @@ giren yeni cümleler (paketin eksik ve yeni planları, depo dolu notu), exe'nin 
 beklemesi, okuyucuların kimlik ve paket kuralları. Her dal tek başına eşiğin altındaydı,
 zincir `dosya-okuma-b7`'de 145 baytla aştı. Ham eşik yine on iki buçuk kilobayt kadar pay
 bırakacak yere çekildi, 1 184 000; brotli hâli 281,8 kB ile eşiğin altında, yerinde (WORKLOG
-2026-10-24 akşam, dosya okuma).
+2026-10-24 akşam, dosya okuma). Aynı gece öğretmene e-posta (şema v17, Çıktı'nın paneli, haftanın
+metnini kuran modül, on altı cümlenin dört çevirisi) ham boyu 9,7 kB büyüttü (1 174 099'dan
+1 183 782 bayta) ve eşiğe 218 bayt kaldı: aşılmadı, ama bir sonraki dal aşardı. Ham eşik yine on
+iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 196 000; brotli hâli 284,9 kB ile 289 kB'ın
+altında, yerinde (WORKLOG 2026-10-24 gece, öğretmene e-posta).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
