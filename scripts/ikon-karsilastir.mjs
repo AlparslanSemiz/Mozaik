@@ -3,9 +3,9 @@
 // Not a test: a picture to LOOK at, and the recipe for a decision. `ikon.mjs`
 // has a threshold in it (`SADE_ALTINDA`) and that number is not arguable from
 // the code — it is arguable from the pixels. This renders both drawings at
-// every size Windows actually asks for on a taskbar (32 at 100 %, 40 at 125 %,
-// 48 at 150 %, 24 for small buttons) on a light and a dark strip, at true size
-// and blown up.
+// every size Windows actually asks for on a taskbar (24 at 100 %, then 32, 40
+// and 48 for the larger scalings, 16 and 20 for lists) on a light and a dark
+// strip, at true size and blown up.
 //
 // It lives in scripts/ rather than scratch/ for pitfall 69's reason: the .ico
 // is committed, so what decides its contents has to be committed too, or the

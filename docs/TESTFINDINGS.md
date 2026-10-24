@@ -35,7 +35,7 @@ kırmızıydı. Tıklama testi (`dist/index.html`, Chromium, 1920×1080, örnek 
 dosyası tek plan dosyası sanılıyor, Ayarlar'daki durum notu 13 px.
 Tür: ürün kusuru, (1) ve (2) veri kaybı sınıfı.
 Ne yapıldı: (1) ve (2) aynı dalda düzeltildi, testleri `src/storeContract.test.ts`'te. Kesik
-dosya ve 13 px TODO B7.34 ve B7.35, daha yeni planın cümlesi B7.33.
+dosya ve 13 px TODO B7.35 ve B7.36, daha yeni planın cümlesi B7.34.
 Kalıcı kural: yok.
 
 ### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
