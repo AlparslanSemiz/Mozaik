@@ -447,6 +447,52 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     expect(await page.locator('table.list tbody tr').count()).toBeGreaterThan(0);
   });
 
+  // B7.35 (2026-10-24, TB8's click test). A bundle cut short is not a single
+  // plan file, and sending the reader to the top bar's "Dosyadan aç" was wrong.
+  test('yarım kalmış paket okunamadı diyor, Dosyadan aç’a yollamıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openPlans(page);
+    const { text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+    await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
+      name: 'ders-programi-tumu-yarim.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(text.slice(0, Math.floor(text.length / 2))),
+    });
+    const note = page
+      .locator('.panel', { hasText: 'Bütün planlar tek dosyada' })
+      .locator('.hint.bad[role="status"]');
+    await expect(note).toContainText('okunamadı');
+    await expect(note).not.toContainText('Dosyadan aç');
+    await expect(picker(page).locator('option')).toHaveCount(1);
+  });
+
+  // B7.34: a plan from a newer program asks for the program to be updated; it
+  // is not called incomplete or broken.
+  test('daha yeni sürümün paketi programı güncellemeyi söylüyor, bozuk demiyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openPlans(page);
+    const { text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+    const bundle = JSON.parse(text) as { plans: Array<{ state: Record<string, unknown> }> };
+    bundle.plans[0]!.state['schemaVersion'] = 99;
+    await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
+      name: 'ders-programi-tumu-yeni.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(bundle)),
+    });
+    const note = page
+      .locator('.panel', { hasText: 'Bütün planlar tek dosyada' })
+      .locator('.hint.bad[role="status"]');
+    await expect(note).toContainText('güncelleyin');
+    await expect(note).not.toContainText('bozuk');
+    await expect(page.locator('.dlg')).toHaveCount(0);
+  });
+
   test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
     await openWithSample(page);
     const single = await grab(page, () =>

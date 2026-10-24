@@ -607,6 +607,10 @@ const FR: Sozluk = {
     "Aucun plan du fichier n’a pu être lu ; rien n’a changé.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:plan ouvert|plans ouverts}, {yazilamayan} n’ont pas pu être écrits. Le stockage est peut-être plein. Conservez le fichier.",
+  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
+    "{yeni} {yeni:plan du fichier a été écrit|plans du fichier ont été écrits} avec une version plus récente du programme et ne {yeni:sera pas ouvert|seront pas ouverts}. Mettez le programme à jour.",
+  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
+    "{yeni} {yeni:plan a été écrit|plans ont été écrits} avec une version plus récente du programme et n’{yeni:a|ont} pas été {yeni:ouvert|ouverts}. Mettez le programme à jour.",
   "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
     "{eksik} {eksik:plan du fichier est incomplet ou endommagé et ne sera pas ouvert|plans du fichier sont incomplets ou endommagés et ne seront pas ouverts}.",
   "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":

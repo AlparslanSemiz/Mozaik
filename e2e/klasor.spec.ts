@@ -260,22 +260,23 @@ test.describe('74. Nereye kaydedilsin', () => {
     await expect(line).toContainText('Klasöre yazma izni geri alınmış');
   });
 
-  // BİLİNEN KUSUR (TODO §8l, TB7; test programı TP3). The folder writes two
-  // seconds after the last change, and a tab that closes inside those two
-  // seconds is meant to be covered by `useFolder.ts`'s `beforeunload` flush.
-  // It is not: the flush STARTS an asynchronous write through the file handle
-  // and the page is gone before the write lands. Measured five times out of
-  // five (2026-10-09), read from a page of the same origin that does not run
-  // the program, because the program's own next opening writes the folder
-  // again and would hide the loss. The change is not lost: the store kept it
-  // (asserted below), and the next opening carries it to the folder. What is
-  // lost is the folder being up to date when the tab closed, which is the one
-  // promise the folder makes.
+  // TB7 (TODO §8l; test programı TP3). The folder writes two seconds after the
+  // last change; a tab that closes inside those two seconds leaves the folder
+  // one change behind, because the `beforeunload` flush only STARTS an
+  // asynchronous write and a closing tab does not wait for it (measured five
+  // times out of five, 2026-10-09). Nor does asking "leave this page?" help:
+  // Chromium stops the page while the question is open (2026-10-24).
   //
-  // The clock is paused so the two-second write cannot fire first; the test
-  // asserts that the write was still pending. When the flush is fixed, the
-  // `not.toContain` below goes red by name: turn it around and drop this label.
-  test('BİLİNEN KUSUR: 2 s dolmadan kapanan sekmenin değişikliği klasöre inmiyor', async ({
+  // But nothing is lost, and that is what this pins (2026-10-24, the user's
+  // question): the change is in the store when the tab is gone, and the next
+  // opening writes it to the folder. The folder lags; it does not lose. The
+  // exe's window waits for the write (`src-tauri/src/lib.rs`), so there it
+  // does not even lag.
+  //
+  // Read from a page of the same origin that does not run the program, so the
+  // program's own next opening is the only thing that writes the folder. The
+  // clock is paused so the two-second write cannot fire before the close.
+  test('2 s dolmadan kapanan sekmenin değişikliği depoda kalıyor, sonraki açılış klasöre yazıyor (TB7)', async ({
     page,
   }) => {
     await fakePicker(page);
@@ -310,7 +311,16 @@ test.describe('74. Nereye kaydedilsin', () => {
     expect(await reader.evaluate(() => localStorage.getItem('ders-programi') ?? '')).toContain(
       'Kapanış2',
     );
+    // The lag: the folder still holds the state before the change.
     expect((await disk(reader))['ders-programi-tumu.json'] ?? '').not.toContain('Kapanış2');
+
+    // The next opening carries the change to the folder.
+    const next = await context.newPage();
+    await fakePicker(next);
+    await next.goto('/');
+    await expect
+      .poll(async () => (await disk(reader))['ders-programi-tumu.json'] ?? '', { timeout: 10_000 })
+      .toContain('Kapanış2');
   });
 });
 

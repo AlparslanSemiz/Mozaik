@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
+import { kilitSurumunuYaz } from './kilit-surumu.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -247,12 +248,22 @@ function changelogKapat() {
 }
 
 // ------------------------------------------------------------------ yaz
+// Every new text is worked out BEFORE the first file is written. A stop half
+// way (a line not found, a lock file in a shape this will not reformat) used
+// to leave package.json written and the rest not, and the clean-tree gate
+// above then refused the next run (TODO B7.32's review).
 const yol = resolve(KOK, 'package.json');
 const metin = readFileSync(yol, 'utf8');
 const pkg = JSON.parse(metin);
 const onceki = pkg.version;
+// Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
+// reformat a file nobody asked to reformat, and the diff of a release
+// should be one line.
+const pkgYeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
+if (onceki !== surum && pkgYeni === metin)
+  dur('package.json içindeki "version" satırı bulunamadı.');
 
-// The SECOND copy of the number, and the only one left.
+// The SECOND copy of the number.
 //
 // tauri.conf.json used to hold a third; it now reads `../package.json`, which
 // Tauri resolves itself. Cargo.toml cannot do that — cargo will not read a
@@ -260,25 +271,39 @@ const onceki = pkg.version;
 // to drift. Drifting mattered the day the exe learned to update itself: the
 // number it compares against a release is the number it was built with, and a
 // stale one means the program either never offers an update or offers one
-// forever. `surum.test.ts` fails if the two ever disagree.
+// forever. `surum.test.ts` fails if package.json, Cargo.toml and the lock file
+// ever disagree.
 const cargoYol = resolve(KOK, 'src-tauri', 'Cargo.toml');
+const cargoEski = readFileSync(cargoYol, 'utf8');
+// Anchored to the line: `Cargo.toml` also carries `rust-version` and a
+// `version` under every `[dependencies]` entry, and a loose replace would
+// pick whichever came first.
+const cargoSatiri = /^version = "\d+\.\d+\.\d+"$/m;
+// "The line is missing" and "the line already says this" are DIFFERENT
+// answers, and collapsing them into one `yeni === eski` stopped a release
+// dead on the very path this branch exists to serve: package.json bumped by
+// hand, so Cargo.toml is usually already in step, so the replace changes
+// nothing — which is CORRECT, not a missing line.
+if (!cargoSatiri.test(cargoEski)) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
+const cargoYeni = cargoEski.replace(cargoSatiri, `version = "${surum}"`);
 
-function cargoSurumuYaz(hedef) {
-  const eski = readFileSync(cargoYol, 'utf8');
-  // Anchored to the line: `Cargo.toml` also carries `rust-version` and a
-  // `version` under every `[dependencies]` entry, and a loose replace would
-  // pick whichever came first.
-  const satir = /^version = "\d+\.\d+\.\d+"$/m;
-  // "The line is missing" and "the line already says this" are DIFFERENT
-  // answers, and collapsing them into one `yeni === eski` stopped a release
-  // dead on the very path this branch exists to serve: package.json bumped by
-  // hand, so Cargo.toml is usually already in step, so the replace changes
-  // nothing — which is CORRECT, not a missing line.
-  if (!satir.test(eski)) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
-  const yeni = eski.replace(satir, `version = "${hedef}"`);
-  // Written only when something changed: a no-op write dirties the tree, and
-  // the gate at the top of this file refuses a dirty tree.
-  if (yeni !== eski) writeFileSync(cargoYol, yeni, 'utf8');
+// The THIRD copy, and not one anybody reads: package-lock.json's root. It is
+// written for the tree's sake (TODO B7.32): left behind, the next
+// `npm install` rewrites it and the clean-tree gate above stops the release
+// after this one.
+const kilitYol = resolve(KOK, 'package-lock.json');
+const kilitEski = readFileSync(kilitYol, 'utf8');
+let kilitYeni = kilitEski;
+try {
+  kilitYeni = kilitSurumunuYaz(kilitEski, surum);
+} catch (e) {
+  dur(e.message, 'npm install', 'git add package-lock.json && git commit');
+}
+
+// Written only when something changed: a no-op write dirties the tree, and
+// the gate at the top of this file refuses a dirty tree.
+function yazDegistiyse(dosya, eski, yeni) {
+  if (yeni !== eski) writeFileSync(dosya, yeni, 'utf8');
 }
 
 // package.json ALREADY at this version is not an error, and refusing was
@@ -287,27 +312,26 @@ function cargoSurumuYaz(hedef) {
 // step it exists to stop anybody forgetting.
 if (onceki === surum) {
   console.log(`\n  package.json zaten ${surum}; yalnız etiket atılıyor.\n`);
-  // ...but Cargo.toml may still be behind, because bumping package.json by
-  // hand is exactly the path that leaves it behind.
-  cargoSurumuYaz(surum);
+  // ...but Cargo.toml and the lock file may still be behind, because bumping
+  // package.json by hand is exactly the path that leaves them behind.
+  yazDegistiyse(cargoYol, cargoEski, cargoYeni);
+  yazDegistiyse(kilitYol, kilitEski, kilitYeni);
   changelogKapat();
   if (git('status', '--porcelain') !== '') {
-    console.log('  src-tauri/Cargo.toml ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n');
-    git('add', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+    console.log(
+      '  src-tauri/Cargo.toml, package-lock.json ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n',
+    );
+    git('add', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
     git('commit', '-m', `Sürüm ${etiket}`);
   }
 } else {
-  // Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
-  // reformat a file nobody asked to reformat, and the diff of a release
-  // should be one line.
-  const yeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
-  if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
-  writeFileSync(yol, yeni, 'utf8');
-  cargoSurumuYaz(surum);
+  writeFileSync(yol, pkgYeni, 'utf8');
+  yazDegistiyse(cargoYol, cargoEski, cargoYeni);
+  yazDegistiyse(kilitYol, kilitEski, kilitYeni);
   changelogKapat();
 
   console.log(`\n  ${onceki} → ${surum}\n`);
-  git('add', 'package.json', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+  git('add', 'package.json', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 

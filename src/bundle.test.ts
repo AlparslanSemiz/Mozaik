@@ -149,3 +149,33 @@ describe('parseBundle — bozuk dosya asla çökmüyor', () => {
     expect(bundle.states['abcd']).toEqual(fakeState('ilk'));
   });
 });
+
+// B7.34 (2026-10-24, TB8's review). A plan written by a newer program is not a
+// broken one; the bundle reader says which ones they are, so the screen can
+// say "update the program" instead of "incomplete or broken".
+describe('readBundlePlans — daha yeni sürümün planı ayrı sayılıyor', () => {
+  it('schemaVersion’ı bugünkünden büyük plan "yeni" listesinde, açılmıyor', async () => {
+    const { readBundlePlans } = await import('./pure/parseState');
+    const { readFileSync } = await import('node:fs');
+    const okul = JSON.parse(readFileSync('src/fixtures/v16.json', 'utf8')) as Record<
+      string,
+      unknown
+    >;
+    const bundle = parseBundle(
+      buildBundle(
+        {
+          activeId: 'a',
+          plans: [
+            { id: 'a', name: 'Yeni', draft: false },
+            { id: 'b', name: 'Bugünkü', draft: false },
+          ],
+        },
+        { a: { ...okul, schemaVersion: 99 }, b: okul },
+      ),
+    )!;
+    const read = readBundlePlans(bundle);
+    expect(read.plans.map((p) => p.id)).toEqual(['b']);
+    expect(read.unreadable).toEqual(['a']);
+    expect(read.newer).toEqual(['a']);
+  });
+});

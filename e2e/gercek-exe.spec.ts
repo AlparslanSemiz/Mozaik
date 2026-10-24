@@ -12,12 +12,20 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test as base } from '@playwright/test';
 import { Oturum, evHazirla, suruculuBaslat, varsayilanIkili } from '../scripts/webdriver.mjs';
+import { pencereyiKapat } from '../scripts/pencere-kapat.mjs';
 
 const KOK = resolve(import.meta.dirname, '..');
 
 // The program sets this itself on Linux (tuzak 130). Taken out of what the
 // driver inherits, so a test measures the binary and not the shell it ran in.
 delete process.env.WEBKIT_DISABLE_DMABUF_RENDERER;
+
+// The close test sends the window manager's close message over X11
+// (scripts/pencere-kapat.mjs). On a Wayland desktop the program is put on
+// XWayland for the whole file, the display server xvfb-run gives it headless.
+if (process.platform === 'linux' && process.env.WAYLAND_DISPLAY) {
+  process.env.GDK_BACKEND ??= 'x11';
+}
 
 interface Exe {
   oturum: Oturum;
@@ -463,6 +471,49 @@ test.describe('Gerçek exe (Linux)', () => {
       await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toContain('Örnek Kurs');
       expect(readFileSync(yol, 'utf8')).toContain('Örnek Kurs');
       expect(kurtarma()).toEqual([ad]);
+    } finally {
+      await yeni.kapat().catch(() => undefined);
+    }
+  });
+
+  // TB7, and a release gate (BUILD, "Sürüm"): the window closed with its X
+  // inside the folder's two seconds used to take the last edit out of the
+  // Documents copy (0 of 3 on Linux, 2026-10-24). Now the window waits for the
+  // page. Closed the way a person closes it, not with WebDriver's "close
+  // window", which never reaches the wait.
+  test('X ile hemen kapanan pencere son değişikliği Belgeler’e yazıyor, yeniden açılışta yerinde (TB7)', async ({
+    exe,
+  }) => {
+    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toBe('');
+    const ad = `Kapanış-${Date.now() % 100_000}`;
+    await exe.oturum.tikla('metin:Okul');
+    await exe.oturum.tikla('metin:Derslikler');
+    await exe.oturum.yaz('input[placeholder^="Derslik adı"]', ad);
+    await exe.oturum.tikla('metin:Ekle');
+    // Inside the two seconds: what is on disk is still the state before.
+    expect(tumu(exe.klasor), 'klasör yazımı bekliyor olmalı').not.toContain(ad);
+
+    expect(pencereyiKapat(), 'kapatılacak pencere bulunamadı').toBeGreaterThan(0);
+    // The page answers while the window is there; then the session is gone.
+    const acik = () =>
+      exe.oturum
+        .js('return true;')
+        .then(() => true)
+        .catch(() => false);
+    await expect.poll(acik, { timeout: 10_000 }).toBe(false);
+    expect(tumu(exe.klasor)).toContain(ad);
+
+    // Opened again: the edit is the program's, not only the folder's.
+    await exe.oturum.kapat().catch(() => undefined);
+    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
+    try {
+      await yeni.bekle('h1', 20_000);
+      await yeni.tikla('metin:Okul');
+      await yeni.tikla('metin:Derslikler');
+      const adlar = await yeni.js<string[]>(
+        'return [...document.querySelectorAll("table.list input")].map((e) => e.value);',
+      );
+      expect(adlar).toContain(ad);
     } finally {
       await yeni.kapat().catch(() => undefined);
     }

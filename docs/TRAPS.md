@@ -166,8 +166,9 @@ olduğunu söyledi, numara ise üç dosyadaydı ve `yayinla.mjs` yalnız birinci
 yazıyordu. Exe kendini güncellemeyi öğrenince bu kozmetik olmaktan çıktı:
 geride kalmış bir numara ya güncellemeyi hiç önermez ya kurulduktan sonra da
 önermeye devam eder. Çare: `tauri.conf.json` `"../package.json"` yolunu
-gösterir, `yayinla.mjs` `Cargo.toml`'u da yazar, `src/surum.test.ts` ikisinin
-aynı şeyi söylediğini her koşuda ölçer.
+gösterir, `yayinla.mjs` `Cargo.toml`'u ve `package-lock.json`'ın kökünü de yazar
+(ikincisi 2026-10-24, TODO B7.32), `src/surum.test.ts` üçünün aynı şeyi söylediğini her
+koşuda ölçer.
 
 ### 78 · Bir `.ico`'da olmayan boy sessizce ölçeklenir
 Görev çubuğu işareti "eksik pikselli" göründü ve kodda yanlış yoktu: dosyada 16,

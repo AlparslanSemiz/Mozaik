@@ -6,8 +6,11 @@
 // two of them disagreeing about a file name. So the thing under test is
 // `saveInto`, and the adapter is merely what it is handed.
 
-import { describe, expect, it } from 'vitest';
-import { desktopFolder } from './platform/desktop';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { desktopFolder, onDesktopClose } from './platform/desktop';
 import { MAIN_NAME, dailyName, rescueName, saveInto } from './platform/folder';
 
 /** An in-memory stand-in for src-tauri/src/lib.rs. */
@@ -109,5 +112,80 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     // A fifth command appearing here means lib.rs grew an API the page did
     // not need, or folder.ts started reaching past the seam.
     expect([...new Set(disk.calls)].sort()).toEqual(['list_files', 'remove_file', 'write_file']);
+  });
+});
+
+// TB7. The window is held when it is asked to close, and the page is told; the
+// page writes, then says the window may go (src-tauri/src/lib.rs). What can
+// break on this side: the answer not sent, sent before the write, or never
+// sent because the write failed.
+describe('exe penceresi kapanırken sayfayı bekliyor (TB7)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function fakeTauri() {
+    const calls: string[] = [];
+    let handler: (() => void) | undefined;
+    let unlistened = 0;
+    vi.stubGlobal('window', {
+      __TAURI__: {
+        core: {
+          invoke: async (cmd: string) => {
+            calls.push(cmd);
+          },
+        },
+        event: {
+          listen: async (name: string, h: () => void) => {
+            calls.push(`listen ${name}`);
+            handler = h;
+            return () => {
+              unlistened++;
+            };
+          },
+        },
+      },
+    });
+    return { calls, fire: () => handler?.(), unlistened: () => unlistened };
+  }
+
+  it('önce yazıyor, sonra pencereye kapanabileceğini söylüyor', async () => {
+    const tauri = fakeTauri();
+    onDesktopClose(async () => {
+      await new Promise((r) => setTimeout(r, 20));
+      tauri.calls.push('yazıldı');
+    });
+    await vi.waitFor(() => expect(tauri.calls).toContain('listen kapaniyor'));
+    expect(tauri.calls).not.toContain('kapanabilir');
+    tauri.fire();
+    await vi.waitFor(() => expect(tauri.calls).toContain('kapanabilir'));
+    expect(tauri.calls).toEqual(['listen kapaniyor', 'yazıldı', 'kapanabilir']);
+  });
+
+  it('yazım hata verse de pencere kapanabiliyor', async () => {
+    const tauri = fakeTauri();
+    onDesktopClose(() => Promise.reject(new Error('disk dolu')));
+    await vi.waitFor(() => expect(tauri.calls).toContain('listen kapaniyor'));
+    tauri.fire();
+    await vi.waitFor(() => expect(tauri.calls).toContain('kapanabilir'));
+  });
+
+  it('abonelik, dinleyici geç kurulsa bile kalkıyor', async () => {
+    const tauri = fakeTauri();
+    const off = onDesktopClose(() => Promise.resolve());
+    off(); // before `listen` has answered
+    await vi.waitFor(() => expect(tauri.unlistened()).toBe(1));
+  });
+
+  it('exe dışında hiçbir şey yapmıyor', () => {
+    vi.stubGlobal('window', {});
+    expect(() => onDesktopClose(() => Promise.resolve())()).not.toThrow();
+  });
+
+  it('olayın ve komutun adı Rust tarafıyla aynı', () => {
+    const rust = readFileSync(
+      join(import.meta.dirname, '..', 'src-tauri', 'src', 'lib.rs'),
+      'utf8',
+    );
+    expect(rust).toContain('const KAPANIYOR: &str = "kapaniyor";');
+    expect(rust).toMatch(/generate_handler!\[\s*kapanabilir,/);
   });
 });
