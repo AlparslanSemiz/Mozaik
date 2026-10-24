@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GELISTIRME, SURUM, surumEtiketi, tarihYazisi } from './leaf/version';
+import { GELISTIRME, SURUM, surumEtiketi, tarihYazisi } from './leaf/app/version';
 
 describe('tarihYazisi', () => {
   it('ISO tarihi Türkçe yazar', () => {

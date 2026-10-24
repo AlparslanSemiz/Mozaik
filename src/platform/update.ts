@@ -35,7 +35,7 @@ import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';
-import { SURUM, tarihYazisi } from '../leaf/version';
+import { SURUM, tarihYazisi } from '../leaf/app';
 
 /**
  * Where the newest build always is. Written down ONCE, because it appears on

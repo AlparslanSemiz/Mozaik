@@ -11,7 +11,7 @@
 // cycle, the same arrangement `keys.ts` has for constraints <-> rules.
 
 import { t } from '../../leaf/i18n';
-import { minuteStamp } from '../../leaf/dateStamp';
+import { minuteStamp } from '../../leaf/app';
 import type { Id } from '../../leaf/model';
 
 /**

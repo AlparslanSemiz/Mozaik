@@ -45,7 +45,7 @@ import {
 import { attachScrollFade, attachRibbonScroll } from '../platform/dom';
 import { useSolver } from '../platform/search';
 import { useUpdate } from '../platform/update';
-import { APP_NAME, surumEtiketi } from '../leaf/version';
+import { APP_NAME, surumEtiketi } from '../leaf/app';
 import Setup from './setup';
 import Lessons from './lessons';
 import Availability from './Availability';

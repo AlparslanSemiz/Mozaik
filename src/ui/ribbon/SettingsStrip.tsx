@@ -3,7 +3,7 @@
 import type React from 'react';
 import { Bell, Eye, Info, Library, Moon, Scale, Sun } from 'lucide-react';
 import { applyTheme, type SectionId, type Theme } from '../../platform/prefs';
-import { surumEtiketi } from '../../leaf/version';
+import { surumEtiketi } from '../../leaf/app';
 import { Group, ICON, Spacer, type StripContext } from './parts';
 
 const SECTIONS: Array<{ id: SectionId; label: string; icon: React.ReactElement }> = [

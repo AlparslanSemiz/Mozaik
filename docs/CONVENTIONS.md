@@ -191,7 +191,7 @@ indirirken gördüğü sayfa. `kurulum/OKU.txt` baştan sona Türkçe.
 ## Programın adı
 
 Program Mozaik. Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik · Mosaico ·
-Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/leaf/version.ts`'teki
+Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/leaf/app/version.ts`'teki
 `APP_NAME`, çünkü ad dört yerden ekrana çıkıyor: pencere başlığı, belge başlığı,
 okul adı girilmemişken `<h1>` ve manifest. Veriyi taşıyan adlar eski adla kaldı,
 listesi [DATA.md](DATA.md)'de.

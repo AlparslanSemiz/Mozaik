@@ -8,7 +8,7 @@
 // A machine preference, not the plan's data: it is about this computer.
 
 import { preference, RELAX_LOG_KEY, safely } from '../../leaf/preference';
-import { SURUM } from '../../leaf/version';
+import { SURUM } from '../../leaf/app';
 import type { Relaxer } from '../../pure/relax';
 import { isDesktop } from '../desktop';
 
