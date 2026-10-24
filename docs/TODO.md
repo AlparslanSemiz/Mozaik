@@ -498,7 +498,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
 - [ ] **B4.10 "Programı boşalt" zaten kırmızı, görünen ağırlığı ölçülmedi.**
       Senin satırın: *"Program kısmında sağ üstteki işlemlerde programı boşalt
       kırmızı olmalı ya da işte önemli bir işlem."* Ölçüldü ve renk yerinde:
-      `ribbon/index.tsx`'te Izgara grubundaki İşlemler menüsünün son maddesi
+      `ribbon/ProgramStrip.tsx`'te Izgara grubundaki İşlemler menüsünün son maddesi
       `menu-item danger` sınıfını taşıyor, o sınıf `styles.css`'te dinlenirken
       bile `--bad` mürekkebi veriyor, ve üstünde bir ayraç duruyor. İki şey
       görünmesini engelleyebiliyor: ızgara boşken madde `disabled` ve `--muted`
@@ -515,7 +515,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
 - [ ] **B4.11 Kartların renk ölçütü var ama bulunamıyor.**
       Senin satırın: *"Program kısmında renkleri ayarlama olmalı sınıfa göre
       öğretmene göre ona göre buna göre."* Özellik zaten var ve istenen dördü de
-      var: `ribbon/index.tsx`'in Renk grubunda bir menü, `Öğretmene göre`,
+      var: `ribbon/ProgramStrip.tsx`'in Renk grubunda bir menü, `Öğretmene göre`,
       `Sınıfa göre`, `Dersliğe göre` ve `Branşa göre`, seçili olan düğmenin
       üstünde yazıyor ve tercih `programColor.ts` ile makineye kaydediliyor. Yani
       bu bir özellik isteği değil bir bulunabilirlik bulgusu, ve iki ölçülmemiş
@@ -1071,7 +1071,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       (`program.spec.ts`, iki yeni test kırmızıydı). Kalanlar: Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
       çağrısında ayrışması, `updateClass`'ın derslik değişince çakışmayı yargılamaması,
       `teacher.subject`'in üç yerde `lessonSubject()` yerine okunması, JSX'te `t()`'den
-      geçmeyen yaklaşık 25 dize (`Print.tsx`, `ribbon/index.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,
+      geçmeyen yaklaşık 25 dize (`Print.tsx`, `ui/ribbon/`, `Dialogs.tsx`, `ColorPick.tsx`,
       `Plans.tsx`, silme onaylarının `"Sil"`'i), `initialBox`'ın StrictMode altında yedek
       zincirini iki kez döndürmesi.
       2026-09-26 denetiminde `t()` maddesinin üç örneği üretildi: Dersler şeridinin
@@ -1083,7 +1083,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       listesinin bugünkü hâli, bir AST taramasıyla: görünür yaklaşık 24 yer, yalnız
       erişilebilir adda 8 yer ve elle yazılmış iki `'tr-TR'` (`Print.tsx:107`, `Data.tsx`).
       Görünür olanlar `App.tsx:835` (taslak eki), `Dialogs.tsx:196` ve `:214` (varsayılan
-      düğme adları), `Ribbon.tsx:481`, `Print.tsx:452`, `:463`, `:545` ve `:683`,
+      düğme adları), `ribbon/AvailabilityStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
       `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,

@@ -25,7 +25,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -88,9 +88,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
 | `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/program/index.ts` | program paketinin giriş noktası: aşağıdaki ikisini dışa açar |
-| `pure/program/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
+| `pure/program/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `program/`'u |
+| `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `program/`'u |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
@@ -156,7 +156,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `ui/ribbon/index.tsx` | sekmeye göre araç şeridi |
+| `ui/ribbon/index.tsx` | sekmeye göre araç şeridi: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
+| `ui/ribbon/parts.tsx` | şeritlerin ortak parçaları (`Group`, `Sep`, `Spacer`, `ICON`) ve şerit fonksiyonlarının aldığı `StripContext`. Şeritler bileşen değil fonksiyon: sekme değişince React aynı `.ribbon` öğesini yeniden kullanır |
+| `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `SetupStrip`, `LessonsStrip`, `AvailabilityStrip`, `ProgramStrip`, `CheckStrip`, `PrintStrip`, `SettingsStrip` |
 | `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
 | `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
 | `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
@@ -203,7 +205,7 @@ için Vite budar, `dist/index.html`'e girmez.
 ### İş mantığı bileşende durmaz
 
 Çakışma, sınır, kapasite ya da blok hesabı saf mantık katmanında yazılır.
-`ribbon/index.tsx`'teki "Otomatik diz (N)"in N'i `entities.ts`'teki saf bir fonksiyondan,
+Program şeridindeki "Otomatik diz (N)"in N'i ve iki yıkıcı sorunun saydığı saatler `programView.ts`'teki `describeStrip`'ten,
 Kontrol'ün sayıları `feasibility.ts`'ten gelir. Program'ın satırları, havuzu ve
 araç çubuğunun altındaki satır `programView.ts`'te hesaplanır; ne zaman
 hesaplanacakları `Program.tsx`'te kalır, çünkü `Grid`'in memo sınırı `rows`'un

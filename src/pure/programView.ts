@@ -17,13 +17,22 @@ import {
   closedConflicts,
   closedKey,
   pendingBlocks,
+  pinScopeCells,
   placedBlocks,
   placementKey,
 } from './constraints';
 import type { Index } from './constraints';
 import { lessonSubject, subjectKey, subjectLabel, subjectShort, teacherSubjects } from './entities';
 import { compareTr } from './listview';
-import { activePinned, activePlacements, type MaskMode, type ProgramMask } from './program';
+import {
+  activePinned,
+  activePlacements,
+  maskCount,
+  solverExclusions,
+  type MaskMode,
+  type ProgramMask,
+  type SolverExclusions,
+} from './program';
 import type { SuggestionDiff } from './relax';
 import type { SolverProgress, SolverResult } from './solver';
 import type { Vars } from '../leaf/i18n';
@@ -470,6 +479,55 @@ export function classOfCell(
   const fresh = buildIndex(d);
   const lessonId = fresh.teacherBusy.get(closedKey(rowId, day, hour));
   return lessonId === undefined ? null : (fresh.lessonById.get(lessonId)?.classId ?? null);
+}
+
+// ------------------------------------------------------------------ the tool strip
+
+/** What the Program strip's buttons count and whether they are enabled. */
+export interface StripCounts {
+  /** What the automatic run leaves out because rows are set aside. */
+  exclusions: SolverExclusions;
+  /** "Otomatik diz (N)": blocks still in the tray, rows set aside excluded. */
+  pending: number;
+  /** Placed hours that are NOT pinned: what "Baştan diz" and "Programı boşalt" take away. */
+  placed: number;
+  pinnedHours: number;
+  /** The active grid holds no placement at all. */
+  gridEmpty: boolean;
+  /** Rows and days set aside in the temporary view. */
+  masked: number;
+  /** Every placed cell is pinned, so the pin item offers to unpin them all. */
+  allPinned: boolean;
+}
+
+export function describeStrip(state: State, mask: ProgramMask): StripCounts {
+  const exclusions = solverExclusions(mask);
+  const excludedTeachers = new Set(exclusions.teacherIds);
+  const excludedClasses = new Set(exclusions.classIds);
+  const pending = state.lessons
+    .filter(
+      (lesson) => !excludedTeachers.has(lesson.teacherId) && !excludedClasses.has(lesson.classId),
+    )
+    .reduce((sum, lesson) => sum + pendingBlocks(state, lesson).length, 0);
+  // What the two destructive buttons are ABOUT: the hours that would go.
+  // Pinned hours are not among them — nothing takes a pinned block down but
+  // unpinning it — so counting them would make both questions overstate what
+  // they ask for, and the count is the whole reason they are asked.
+  const placements = activePlacements(state);
+  const pinned = activePinned(state);
+  const pinnedHours = Object.keys(pinned).length;
+  const placed = Object.keys(placements).length - pinnedHours;
+  const allPinCells = pinScopeCells(state, { kind: 'all' });
+  const allPinned = allPinCells.length > 0 && allPinCells.every((key) => pinned[key] !== undefined);
+  return {
+    exclusions,
+    pending,
+    placed,
+    pinnedHours,
+    gridEmpty: Object.keys(placements).length === 0,
+    masked: maskCount(mask),
+    allPinned,
+  };
 }
 
 // ------------------------------------------------------------------ the line under the toolbar

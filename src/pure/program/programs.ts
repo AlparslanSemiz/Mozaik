@@ -39,6 +39,22 @@ export function replaceActiveGrid(
   return updateActiveProgram(d, (program) => ({ ...program, ...fields }));
 }
 
+/**
+ * "Programı boşalt": the active grid goes back to the tray except its pinned
+ * cells, which stay with their pins. One rule with no exceptions: nothing
+ * takes a pinned block down but unpinning it.
+ */
+export function keepPinnedOnly(d: State): State {
+  const currentPlacements = activePlacements(d);
+  return replaceActiveGrid(d, {
+    placements: Object.fromEntries(
+      Object.keys(activePinned(d))
+        .filter((k) => currentPlacements[k] !== undefined)
+        .map((k) => [k, currentPlacements[k]!]),
+    ),
+  });
+}
+
 export function mapProgramGrids(
   d: State,
   update: (program: ProgramVariant) => ProgramVariant,

@@ -6,13 +6,14 @@
 // is both opened and moved,
 // and the small answers the menu and the head of the tray lean on.
 
-import { buildIndex, closedKey, placementKey } from './pure/constraints';
-import { EMPTY_PROGRAM_MASK, replaceActiveGrid } from './pure/program';
+import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './pure/constraints';
+import { EMPTY_PROGRAM_MASK, replaceActiveGrid, setDayMask, setRowMask } from './pure/program';
 import {
   buildPool,
   buildRows,
   classOfCell,
   describeBar,
+  describeStrip,
   markPreview,
   roomLetter,
   visibleDays,
@@ -212,5 +213,50 @@ describe('araç çubuğunun altındaki satır', () => {
     expect(describeBar(said, 'class', t, { applied: true, result: true }).text).toMatch(
       /^Öneri uygulandı/,
     );
+  });
+});
+
+// The Program strip's counts. They were worked out inside the strip until RF10
+// (TODO §8k) moved them here unchanged; these pin what the two destructive
+// questions and "Otomatik diz (N)" read.
+describe('şeridin sayıları', () => {
+  it('boş ızgarada bütün bloklar bekliyor, silinecek saat yok', () => {
+    expect(describeStrip(world(), EMPTY_PROGRAM_MASK)).toEqual({
+      exclusions: { teacherIds: [], classIds: [], dayNames: [] },
+      pending: 5,
+      placed: 0,
+      pinnedHours: 0,
+      gridEmpty: true,
+      masked: 0,
+      allPinned: false,
+    });
+  });
+
+  it('sabitlenen saat silinecekler arasında sayılmaz, hepsi sabitse kaldırma önerilir', () => {
+    const placed = place(world(), 'L1', 0, 0, 2);
+    const loose = describeStrip(placed, EMPTY_PROGRAM_MASK);
+    expect([
+      loose.pending,
+      loose.placed,
+      loose.pinnedHours,
+      loose.gridEmpty,
+      loose.allPinned,
+    ]).toEqual([4, 2, 0, false, false]);
+
+    const pinned = describeStrip(setBlockPinned(placed, 's510', 0, 0, true), EMPTY_PROGRAM_MASK);
+    expect([pinned.pending, pinned.placed, pinned.pinnedHours, pinned.allPinned]).toEqual([
+      4,
+      0,
+      2,
+      true,
+    ]);
+  });
+
+  it('bir kenara ayrılan öğretmenin dersleri beklemede sayılmaz, gün yalnız sayaçta', () => {
+    const mask = setDayMask(setRowMask(EMPTY_PROGRAM_MASK, 'teacher', 'oMC', 'ghost'), 'Pazartesi');
+    const counts = describeStrip(world(), mask);
+    expect(counts.pending).toBe(2);
+    expect(counts.masked).toBe(1);
+    expect(counts.exclusions.teacherIds).toEqual(['oMC']);
   });
 });

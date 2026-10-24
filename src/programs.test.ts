@@ -6,6 +6,7 @@ import {
   activeProgram,
   addProgram,
   blankProgram,
+  keepPinnedOnly,
   nextProgramName,
   removeProgram,
   renameProgram,
@@ -108,5 +109,19 @@ describe('toplu sabitleme kapsamları', () => {
     expect(Object.keys(activeProgram(d).pinned)).toHaveLength(2);
     d = togglePinScope(d, { kind: 'all' });
     expect(Object.keys(activeProgram(d).pinned)).toHaveLength(3);
+  });
+});
+
+describe('programı boşalt', () => {
+  it('yalnız sabitlenen hücreler kalır, sabitlemeleriyle; öteki programlar değişmez', () => {
+    let d = place(place(world(), 'x1', 0, 0), 'x2', 1, 0);
+    d = setBlockPinned(d, 's1', 0, 0, true);
+    const other = addProgram(d, { id: 'p2', name: 'İki', placements: { k: 'x2' }, pinned: {} });
+    const back = switchProgram(other, d.activeProgramId);
+
+    const out = keepPinnedOnly(back);
+    expect(activeProgram(out).placements).toEqual({ 's1|0|0': 'x1', 's1|0|1': 'x1' });
+    expect(activeProgram(out).pinned).toEqual(activeProgram(d).pinned);
+    expect(out.programs.find((p) => p.id === 'p2')?.placements).toEqual({ k: 'x2' });
   });
 });
