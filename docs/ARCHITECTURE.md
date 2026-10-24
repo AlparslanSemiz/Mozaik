@@ -220,7 +220,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/usePreview.ts` | önerinin önizlemesi: hangi yol, haftası hâlâ bu planın mı, farkı, "Önerilen"de hafta; Escape kapatır |
 | `ui/program/PreviewBar.tsx` | önizlenirken ızgaranın üstündeki çubuk |
 | `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
+| `ui/program/AnswerBook.tsx` | önerinin cevap defteri: öğretmen öğretmen sorular, "Olur" ve "Olmaz"ın güçleri, sorulacakların sayfası |
 | `ui/program/Grid.tsx` | ana ızgara, satır başına memo |
+| `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
 | `ui/program/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
