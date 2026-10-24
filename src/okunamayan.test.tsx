@@ -256,6 +256,22 @@ describe('okunamayan plan · kullanıcının açık eylemi', () => {
   });
 });
 
+describe('okunamayan plan · deponun kendi kapısı', () => {
+  // Under the hook's own refusal: whatever reaches libraryStore with a frozen
+  // key is refused there too, unless it runs as the user's decision.
+  it('dondurulmuş anahtar yazılmıyor, silinmiyor; açık eylem çözüp yazıyor', async () => {
+    localStorage.setItem(BASE_KEY, NEWER);
+    const depo = await import('./platform/libraryStore');
+    depo.freezePlan('1', 'yeni');
+    expect(depo.writePlanText('1', '{}')).toBe(false);
+    depo.dropPlanText('1');
+    expect(localStorage.getItem(BASE_KEY)).toBe(NEWER);
+    expect(depo.explicitly(() => depo.writePlanText('1', '{"a":1}'))).toBe(true);
+    expect(depo.frozenPlan('1')).toBeNull();
+    expect(localStorage.getItem(BASE_KEY)).toBe('{"a":1}');
+  });
+});
+
 describe('oturum yedekleri (madde 7)', () => {
   it('içerik değişmediyse açılış zinciri kaydırmıyor', async () => {
     // T2's measurement: a bad session, then three reloads, and all three

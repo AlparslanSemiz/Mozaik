@@ -83,6 +83,26 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     expect(disk.files.has('ders-programi-2026-08-26-1430.json')).toBe(true);
   });
 
+  it('iş taşımayan paket budamıyor ve dolu dosyaların üstüne yazmıyor (A2)', async () => {
+    // saveInto's own rule, under useFolder's: whoever hands it an empty bundle
+    // with a prune, the full backups stay and so does the full live file.
+    const older = Array.from(
+      { length: 12 },
+      (_, i) => `ders-programi-2026-08-${String(i + 1).padStart(2, '0')}.json`,
+    );
+    const disk = fakeDisk([MAIN_NAME, ...older]);
+    const empty = FULL.replace('[{ "id": "t" }]', '[]').replace('[{"id":"t"}]', '[]');
+    const result = await saveInto(
+      desktopFolder(disk.invoke, 'X'),
+      empty,
+      new Date(2026, 7, 27),
+      true,
+    );
+    expect(result.pruned).toEqual([]);
+    expect(result.written).toEqual(['ders-programi-2026-08-27.json']);
+    expect(disk.files.get(MAIN_NAME)).toBe(FULL);
+  });
+
   it('kurtarma kopyası yazılıyor, sonraki oturum ve budama ona dokunmuyor (VK2)', async () => {
     // Session one: the browser's storage refuses the save, so the folder is
     // the only place the work is. Session two starts from the older storage
