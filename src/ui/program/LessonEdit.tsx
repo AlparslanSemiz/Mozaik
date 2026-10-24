@@ -37,8 +37,8 @@ import {
   useToast,
   T,
   useT,
-} from './common';
-import { paletteColor, type Id, type State } from '../leaf/model';
+} from '../common';
+import { paletteColor, type Id, type State } from '../../leaf/model';
 import {
   addNotSameDay,
   hasTwoSubjects,
@@ -50,7 +50,7 @@ import {
   teacherSubjects,
   transferLesson,
   updateLesson,
-} from '../pure/entities';
+} from '../../pure/entities';
 
 type Open = (lessonId: Id) => void;
 

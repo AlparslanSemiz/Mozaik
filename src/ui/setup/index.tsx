@@ -16,7 +16,7 @@
 import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
 import { useToast, type PanelProps, type PlanControls, T, useT } from '../common';
-import { useLoadSample } from '../useSample';
+import { useLoadSample, DraftStart } from '../plans';
 import { markIntroSeen, readIntroSeen, type StepId } from '../../platform/prefs';
 
 import Rooms from './Rooms';
@@ -26,7 +26,6 @@ import Subjects from './Subjects';
 import { Summary } from '../lists';
 import { drafts as draftsOf } from '../../pure/io';
 import { STEPS } from '../program';
-import DraftStart from '../DraftStart';
 
 /**
  * The three lists' label, count and symbol live in `components/steps.tsx` — one

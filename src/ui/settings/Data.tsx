@@ -14,7 +14,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useDialogs, type PlanControls, T, useT, type Translate } from '../common';
-import { useLoadSample } from '../useSample';
+import { useLoadSample } from '../plans';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
 import { emptyState } from '../../pure/entities';

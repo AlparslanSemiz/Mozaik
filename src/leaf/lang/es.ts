@@ -162,7 +162,7 @@ const ES: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**No se puede escribir** en la carpeta **{klasor}**. {sebep} Ahora mismo su trabajo solo está en este navegador.",
 
-  // src/ui/Availability.tsx
+  // src/ui/availability/Availability.tsx
   "{ad} sınıfı": "clase {ad}",
   "{ad} dersliği": "aula {ad}",
   "Müsait olmayan saatler": "Horas no disponibles",
@@ -250,7 +250,7 @@ const ES: Sozluk = {
   "derslik yok": "sin aula",
   "{n} sınıf": "{n} {n:clase|clases}",
 
-  // src/ui/DraftStart.tsx
+  // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı":
     "No se han encontrado los datos de este borrador",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
@@ -281,7 +281,7 @@ const ES: Sozluk = {
   "Ders sabitlendi.": "Clase fijada.",
   "Sabitleme kaldırıldı.": "Clase soltada.",
 
-  // src/ui/LessonEdit.tsx
+  // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Máximo por día",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Si cambia el reparto, esta clase sale del horario, también los bloques fijados",
@@ -893,7 +893,7 @@ const ES: Sozluk = {
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "Para ordenar a mano, quite el filtro y la ordenación",
 
-  // src/ui/useSample.ts
+  // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "Se {ogretmen:borrará|borrarán} {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:clase|clases} y {ders} {ders:asignatura|asignaturas}.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":

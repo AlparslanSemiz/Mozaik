@@ -20,15 +20,15 @@ import {
   subjectShort,
   teacherSubjects,
   weeklyLoad,
-} from '../pure/entities';
-import { paletteColor, cellKey, parseCellKey, type Id, type State } from '../leaf/model';
-import { KIND_ICON } from './program';
-import { buildIndex, closedConflicts, closedKey } from '../pure/constraints';
+} from '../../pure/entities';
+import { paletteColor, cellKey, parseCellKey, type Id, type State } from '../../leaf/model';
+import { KIND_ICON } from '../program';
+import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
-import { t } from '../leaf/i18n';
-import type { Kind } from '../platform/prefs';
-import { T } from './common';
+import { t } from '../../leaf/i18n';
+import type { Kind } from '../../platform/prefs';
+import { T } from '../common';
 
 interface Props {
   state: State;

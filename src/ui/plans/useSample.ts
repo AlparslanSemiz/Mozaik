@@ -8,10 +8,10 @@
 // to count what would be lost rather than assume there is nothing.
 
 import { useCallback } from 'react';
-import { useDialogs, useT, useToast } from './common';
-import { markIntroSeen } from '../platform/prefs';
-import { sampleState } from '../pure/io';
-import type { State } from '../leaf/model';
+import { useDialogs, useT, useToast } from '../common';
+import { markIntroSeen } from '../../platform/prefs';
+import { sampleState } from '../../pure/io';
+import type { State } from '../../leaf/model';
 
 export type LoadSample = (
   state: State,

@@ -16,7 +16,7 @@ import { drafts as draftsOf } from '../../pure/io';
 import { loadPlan } from '../../platform/storage';
 import type { State } from '../../leaf/model';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
-import DraftStart from '../DraftStart';
+import { DraftStart } from '../plans';
 
 interface Props {
   state: State;

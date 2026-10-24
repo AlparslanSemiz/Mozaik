@@ -29,7 +29,7 @@ import {
 import { cellKey, parseCellKey, type State, type Id } from '../../leaf/model';
 import { useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
-import { useLessonEdit } from '../LessonEdit';
+import { useLessonEdit } from './LessonEdit';
 import { dayLabel, lessonSubject, subjectShort } from '../../pure/entities';
 import {
   buildPool,

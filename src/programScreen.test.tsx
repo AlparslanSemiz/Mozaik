@@ -36,7 +36,7 @@ import { LangProvider } from './ui/common/T';
 import { DialogProvider } from './ui/common/Dialogs';
 import { ToastProvider } from './ui/common/Toasts';
 import { InspectorProvider } from './ui/program/Inspector';
-import { LessonEditProvider } from './ui/LessonEdit';
+import { LessonEditProvider } from './ui/program/LessonEdit';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseState } from './pure/io/parseState';

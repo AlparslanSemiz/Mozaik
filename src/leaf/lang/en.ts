@@ -162,7 +162,7 @@ const EN: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**Cannot write** to the **{klasor}** folder. {sebep} Right now your work is only in this browser.",
 
-  // src/ui/Availability.tsx
+  // src/ui/availability/Availability.tsx
   "{ad} sınıfı": "class {ad}",
   "{ad} dersliği": "room {ad}",
   "Müsait olmayan saatler": "Unavailable hours",
@@ -250,7 +250,7 @@ const EN: Sozluk = {
   "derslik yok": "no room",
   "{n} sınıf": "{n} {n:class|classes}",
 
-  // src/ui/DraftStart.tsx
+  // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı": "This draft's data could not be found",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
     'It is in the plan list but its own key is empty. The "Where the data is" table in Settings → About shows how many bytes each key holds.',
@@ -280,7 +280,7 @@ const EN: Sozluk = {
   "Ders sabitlendi.": "Lesson pinned.",
   "Sabitleme kaldırıldı.": "Lesson unpinned.",
 
-  // src/ui/LessonEdit.tsx
+  // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Most per day",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Changing the split clears this lesson from the timetable, pinned blocks included",
@@ -884,7 +884,7 @@ const EN: Sozluk = {
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "To reorder by hand, clear the filter and the sort",
 
-  // src/ui/useSample.ts
+  // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes} and {ders} {ders:lesson|lessons} will be deleted.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":
