@@ -33,8 +33,11 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    [ROBODERS.md](ROBODERS.md)'de açık soru.
 3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
    listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
-   bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`): DESIGN.md Renk'te kural,
-   `e2e/renk.spec.ts` 93.
+   bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`), 2026-10-24'te yeniden açıldı ve
+   `zebra-liste`'de bitti: açık temada soluk yazı zebrada 6,65'e düşmüştü, dört liste
+   zebrasızdı, iki yerde şerit sırası bozuktu. Şimdi her listede, iki temada aynı yükte,
+   satırda yazı her zeminde ve durumda 7:1 (DESIGN Renk ve Erişilebilirlik,
+   `e2e/zebra.spec.ts` 94). İki istisna E1'de (§8e). Windows ve WebView2'de görülmedi.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  

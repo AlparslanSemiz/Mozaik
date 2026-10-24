@@ -89,10 +89,11 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
 6. Mutasyon haftalık (`haftalik.yml`), sürümü beklemez (DECISIONS 2026-10-23).
-7. Zebra (babanın 3 numaralı isteği) bitti, `ozellik/zebra`: `table.list` ve `table.stat`'ın
-   çift satırı `--zebra`'da, listedeki girdiler kâğıtta (DESIGN Renk, `renk.spec.ts` 93).
-   Form satırındaki ve varlık panelindeki dağılım düğmesi tarayıcının grisinde kaldı,
-   koyu temada 4,53 (WORKLOG 2026-10-10 gece, zebra).
+7. Zebra (babanın 3 numaralı isteği) 2026-10-24'te yeniden açıldı ve `zebra-liste`'de bitti,
+   birleşmeyi bekliyor: her listede (dört liste eklendi), iki temada aynı yükte, satırda yazı
+   her zeminde ve durumda 7:1, üstüne gelme bir halka, iki sıra hatası kapalı (aşağıdaki
+   girdi; DESIGN Renk ve Erişilebilirlik, `e2e/zebra.spec.ts` 94). Açık temada rozetler ve
+   "Sil" 7'nin altında, TODO E1. Windows ve WebView2'de görülmedi.
 8. Test programı donduruldu (TODO §8l, TP-B): bir madde ancak test politikasının şart
    koştuğu bir yolu koruyorsa alınır, önce TP7, TP8 ve TP10 (güncelleme yolu). `yayinla`
    Windows E2E'yi bekliyor (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu
@@ -146,15 +147,15 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
+| Ana E2E süiti | 657 geçti, 8,5 dk (2026-10-24, `zebra-liste`) | `npx playwright test` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 43 (2026-10-24, `zebra-liste`) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
+| Birim testleri | 57 dosyada 1454 test, 1453 geçti, 1'i bu makinede atlandı (`shellcheck` yok) (2026-10-24, `zebra-liste`) | `npx vitest run` |
 | `npm run hizli` | 51 dosya, 1334 test, 7,4–9,8 s, temiz koşulda (2026-10-23 gece, `surec-sadelestirme`) | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, 6 dk 52 sn, en uzun iş `e2e (2)` 409 s, Playwright kurulumu her işte 8–14 s (2026-10-23 gece, `--with-deps` kalktıktan sonra); öncesi `main` 4a2901c'de 14 dk 28 sn, kurulum bir işte 597 s | `gh run view 40025191968`, `40019600457` |
 | Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
@@ -162,7 +163,7 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 165 829 bayt, brotli 280,49 kB (2026-10-24, `zebra-liste`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -172,6 +173,57 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · Zebra yeniden: her listede, 7:1, halka (`zebra-liste`)
+
+**Başlangıç.** `main` c41223c, worktree `~/GitHub/Mozaikler/zebra` (`node_modules` ana
+klasöre symlink, `.git/info/exclude`'da). Önce yalnız analiz (kod yok): zebra 2026-10-10'dan
+beri `main`'deydi ama açık temada soluk yazıyı zebrada 6,65'e düşürmüştü, dört liste
+zebrasızdı, iki yerde sıra bozuktu. Kullanıcı kararları: uygulama bu dalda, `--muted` açıkta
+koyulaşsın (A), Branşlar'ın ikinci gövdesine grup çizgisi (B), kısayollar penceresine zebra
+yok (C), rozetler ve Sil ayrı TODO (D), liste satırında 7:1. `okunabilirlik` dalı (mozaik-70
+oturumu) zebrayı bir ara kendi de uyguladı, sonra geri aldı ve farkını devretti
+(`scratch/zebra-devir.md`, ana klasörde); üç maddesi alındı.
+
+**Ne yapıldı** (commit konularıyla):
+- "Stil: tanımsız --ink yerine --text": dört kural tanımsız bir değişkeni okuyordu;
+  `src/styles.test.ts` fallback'siz okunan her değişkenin bir sahibi olduğunu ölçüyor.
+- "TODO: E1": açık temada rozetler 4,84 / 4,89 / 5,33, Sil 6,84, dağılım gerekçesi 5,54.
+- "Renk: zebra iki temada aynı yükte": `--zebra` #ecf0f6 / #20242b (kâğıda ΔL\* −5,34 /
+  +5,43, ΔE 6,31 / 5,58, oran 1,14), açıkta `--muted` #464d58.
+- "Zebra: her listede, en düşük özgüllükte": `:where()`, artı `table.sheet-lessons`,
+  `.entity-list`, `ul.paste-preview`.
+- Üç düzeltme, her biri gerileme testiyle ve testi önce kırmızı görülerek: zil önizlemesinin
+  ara satırı (`nth-child(even of :not(.break-row))`, ayrı kuralda), Branşlar'ın ikinci
+  gövdesi (grup çizgisi), aktarma seçicisinin kutusu (mozaik-70'in bulgusu).
+- "Zebra: üstüne gelme bir halka": 2 px `--muted` outline, satırın içinde; seçili varlık ve
+  ara satırı `--text`; tutamak, renk seçici, dağılım seçicisi ve `.entity` ortak odak
+  halkasında; açık planın satırında accent kenar.
+- "Test: zebra her listede, görünen sırayla ve satırda 7:1": `e2e/zebra.spec.ts` 94,
+  `listWorld` (Kontrol'ün ve Kurallar'ın sekiz sorun listesi). DESIGN'da 7:1 kuralı AA
+  satırının yerine.
+- "Zebra: koyu temada --muted bir adım açık…": devirden üç madde, koyu `--muted` #b6bec9
+  (zebrada 7,28 → 8,30), yapıştırma önizlemesi madde işaretsiz, boş ilk gövdeye çizgi yok.
+
+**Ölçülenler.** Önce/sonra, boyanan renkten, 1920×1080, iki tema (`scratch/zebra-olc/
+karsilastirma.md`, 104 liste satırı). Soluk yazının en düşüğü açıkta 6,65 → 7,46, koyuda
+7,55 → 8,30; seçili varlık 6,28 / 6,70 → 14,68 / 12,01; zil önizlemesinin ara satırı 5,06 →
+12,14. Düşen tek şey `--text`'in biraz koyulaşan zebradaki değeri: 15,96 → 15,27 ve
+13,75 → 13,25. `--muted` ile `--text` farkı korunuyor: kâğıtta 8,53 ile 17,47 (açık), 9,39
+ile 14,99 (koyu). Forced-colors emülasyonunda şerit Canvas oluyor, üstüne gelme halkası
+(2 px), odak halkası ve satır çizgileri kalıyor. Mutasyon kanıtı (`scripts/mutasyon-kaniti.sh
+--liste`): 11 mutasyonun 9'u kırmızı ve tutuyor (zebra tonu, açık `--muted`, zil `of S`,
+`.entity` şeridi, hover'a zemin, seçili accent, ara satırı muted, tutamağın odağı, boş gövde
+koruması); koyu `--muted` ve madde işaretleri beklendiği gibi yeşil (eski koyu değer de 7'nin
+üstünde; düzen için test yazılmıyor). `dist/index.html` 1 165 829 bayt (+911).
+
+**Koşulan testler.** `npm run hizli` (53 dosya, 1340 geçti), tam kontrol tek betikle
+(biçim, `tipler`, `sinir`, lint, knip, birim 1453 geçti, derleme, `size-limit`, ana E2E
+657/657, 8,5 dk), her commit'ten önce dokunulan spec dosyaları.
+
+**Koşulmayan testler.** `test:site`, çözücü stresi, WebKit, Windows, gerçek exe, süre
+ölçümü (yeni paket yok). Gerçek Windows 10 ve WebView2'de görünüm, yüksek kontrast teması
+ve `nth-child(… of S)`: yazıldı, doğrulanmadı.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

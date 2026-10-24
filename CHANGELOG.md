@@ -24,10 +24,13 @@ release is incomplete, the entry says so.
 ### Changed
 
 - A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
-- Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
+- Every list now shades every second row, the same way in every list and a little more visibly in both themes, so a row is easier to follow across the screen: the setup lists and summary tables, the picking list beside Availability and Lessons, the lessons in a teacher's or class's panel, and the preview when pasting from Excel. Grey secondary text is darker in the light theme and lighter in the dark theme, so it reads at least as well on a shaded row as it did before. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, and the split button in Lessons now looks like the boxes beside it.
+- The row under the mouse is outlined instead of changing colour, so its text never gets harder to read; the selected name in the picking list is written in the normal text colour on its highlight, and the open plan is marked on its row in Plans. The row handle, the colour box and the split button show the same keyboard focus ring as the other controls.
 
 ### Fixed
 
+- In the bell preview, the lunch rows no longer break the shading of the lesson rows around them, and in Subjects the subjects that are not on the list start a new group below a line instead of continuing the shading out of step.
+- A teacher's or class's panel no longer loses the box of its transfer drop-down on a shaded row.
 - A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
 - When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.
