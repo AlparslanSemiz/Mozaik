@@ -196,7 +196,8 @@ türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapış
 Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
 kuralı: bir dosya ya reddedilir ya bütün bir plan olarak açılır, asla yarım plan.
 
-Ölçtükleri: açılan her planda her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
+Ölçtükleri: açılan her planda her satırın kimliği dolu ve tek (derslik, öğretmen ve sınıf
+birlikte, dersler ayrı), her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
 var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa dosya açılmıyor;
 kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
 tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,

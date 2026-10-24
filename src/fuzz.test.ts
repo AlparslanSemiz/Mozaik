@@ -122,9 +122,7 @@ function wholeness(state: {
   // B7.37: an id that is empty or taken twice leaves a placement pointing at
   // nobody knows which row.
   for (const [ad, liste] of [
-    ['derslik', state.rooms],
-    ['öğretmen', state.teachers],
-    ['sınıf', state.classes],
+    ['derslik, öğretmen ve sınıf', [...state.rooms, ...state.teachers, ...state.classes]],
     ['ders', state.lessons],
   ] as const) {
     const ids = liste.map((x) => x.id);
@@ -224,6 +222,11 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
       problem: 'okunamadi',
     });
     expect(bozuk((x) => (x['teachers']![1]!['id'] = x['teachers']![0]!['id']))).toEqual({
+      problem: 'okunamadi',
+    });
+    // A teacher and a class under one id: closed hours are keyed by that id
+    // alone, so the teacher's closed hour would close the class as well.
+    expect(bozuk((x) => (x['classes']![0]!['id'] = x['teachers']![0]!['id']))).toEqual({
       problem: 'okunamadi',
     });
     // ...and the file as it is still opens.

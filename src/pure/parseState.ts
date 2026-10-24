@@ -607,9 +607,14 @@ export function readPlanFile(text: string): PlanFile {
   return { state };
 }
 
-/** Every row of the four lists has an id of its own: not empty, not shared. */
+/**
+ * Every row has an id of its own: not empty, not shared. Rooms, teachers and
+ * classes count as ONE list here, because a closed hour is keyed by the id
+ * alone (`closedKey`): a teacher and a class under one id would close each
+ * other's hours. Lessons are their own list.
+ */
 function idsWhole(state: State): boolean {
-  return [state.rooms, state.teachers, state.classes, state.lessons].every((list) => {
+  return [[...state.rooms, ...state.teachers, ...state.classes], state.lessons].every((list) => {
     const ids = list.map((row) => row.id);
     return (
       ids.every((id) => typeof id === 'string' && id !== '') && new Set(ids).size === ids.length

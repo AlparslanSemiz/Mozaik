@@ -557,11 +557,12 @@ export default function Data({
     const bundle = parseBundle(text);
     if (bundle === null) {
       const version = bundleVersionOf(text);
-      // Only a file the top bar can take is sent there. A bundle cut short is
-      // not a single plan, and "use Dosyadan aç" sent the reader the wrong way
+      // Only a single plan is sent to the top bar, even one it will refuse with
+      // a reason of its own (incomplete, newer). A bundle cut short is not a
+      // single plan, and "use Dosyadan aç" sent the reader the wrong way
       // (TODO B7.35).
       const single = readPlanFile(text);
-      const isPlan = !('problem' in single) || single.problem !== 'okunamadi';
+      const isPlan = 'state' in single || single.problem !== 'okunamadi';
       setNote({
         bad: true,
         text:
@@ -631,17 +632,16 @@ export default function Data({
       });
       return;
     }
-    const eksikAcilmadi = unreadable - yeni;
     const opened =
       failed > 0
         ? t(
             '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
             { acilan: ok, yazilamayan: failed },
           )
-        : eksikAcilmadi > 0
+        : eksik > 0
           ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
               acilan: ok,
-              eksik: eksikAcilmadi,
+              eksik,
             })
           : t('{acilan} plan açıldı.', { acilan: ok });
     setNote({
