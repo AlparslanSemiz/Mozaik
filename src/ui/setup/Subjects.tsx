@@ -26,8 +26,8 @@
 // on this screen" answers (`e2e/helpers.ts` mainList()).
 
 import { useState } from 'react';
-import { useDialogs } from '../Dialogs';
-import { useRowOrder } from '../useRowOrder';
+import { AddPanel, useRowOrder } from '../lists';
+import { useDialogs, type PanelProps, T, useT } from '../common';
 import { EMPTY_QUERY } from '../../pure/listview';
 import {
   addSubject,
@@ -41,10 +41,7 @@ import {
   subjectTeachers,
 } from '../../pure/entities';
 import type { ReactElement } from 'react';
-import type { PanelProps } from '../props';
-import type { Settings } from '../../leaf/types';
-import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
+import type { Settings } from '../../leaf/model';
 
 interface RowProps extends PanelProps {
   subject: string;

@@ -12,34 +12,26 @@
 // "it is saved in the browser" does not tell anyone that clearing browsing
 // data destroys it.
 
-import { useEffect, useRef, useState } from 'react';
-import { useDialogs } from '../Dialogs';
-import { useLoadSample } from '../useSample';
-import type React from 'react';
-import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
-import { emptyState } from '../../pure/entities';
-import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
+import type { State } from '../../leaf/model';
+import { EXE_FOLDER } from '../../platform/exe';
 import {
-  routeName,
+  type FolderRun,
+  downloadBundle,
+  listBackups,
   storageAddress,
   storageKind,
   storageReport,
-} from '../../platform/storageReport';
-import { downloadBundle } from '../../platform/download';
-import { listBackups } from '../../platform/planStore';
-import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
-import type { PlanControls } from '../props';
-import type { FolderRun } from '../../platform/useFolder';
+} from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';
-import { SITE_ADRESI } from '../../platform/update';
-import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/desktop';
-import { surumEtiketi, tarihYazisi } from '../../leaf/version';
-import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
+import { emptyState } from '../../pure/entities';
+import { activePlacements } from '../../pure/grid';
+import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
+import { type PlanControls, T, useDialogs, useT } from '../common';
+import { useLoadSample } from '../plans';
+import { useRef, useState } from 'react';
+import { Build, Changelog } from './About';
+import { Folder } from './Folder';
 import Plans from './Plans';
-import { T, useT } from '../T';
-import type { Translate } from '../T';
-import { searchLog } from '../../platform/search';
 
 interface Props {
   state: State;
@@ -60,7 +52,9 @@ interface Props {
    * splitting it, because the bundle is written by the same machinery that
    * reads the library: `saveAll`/`openAll` belong beside `Plans`, and
    * `storageReport` belongs beside the folder. One file, one set of handlers,
-   * two doors.
+   * two doors. The panels that need none of those handlers (the folder, the
+   * build line, the release notes) are their own files beside it since
+   * 2026-10-24: `Folder.tsx` and `About.tsx`.
    */
   part: 'plans' | 'about';
 }
@@ -73,416 +67,6 @@ function size(chars: number): string {
   if (chars === 0) return '–';
   const bytes = chars * 2;
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
-}
-
-/**
- * "Nereye kaydedilsin" (task B4).
- *
- * The panel above this one asks my father to remember something; this one
- * asks him once and then never again. It is first for that reason.
- *
- * When the API is not there it says WHY instead of hiding: a feature that
- * silently is not there is a feature nobody trusts anywhere.
- *
- * MEASURED, and it corrected me: Chromium DOES expose showDirectoryPicker
- * under file://, and file:// IS a secure context there. So this branch is
- * about the BROWSER (Firefox, Safari), not about how the app was opened —
- * an earlier version of this text said the opposite and was wrong.
- */
-function Folder({ folder }: { folder: FolderRun }) {
-  const t = useT();
-  const s = folder.status;
-
-  return (
-    <div className="panel">
-      <h2>{t('Nereye kaydedilsin')}</h2>
-
-      {s.kind === 'yok' ? (
-        <>
-          <p className="hint">
-            <T k="**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor." />
-          </p>
-          {/* The one-habit sentence is NOT repeated here: it already sits in
-              "Veriler nerede" two panels down, and saying it twice on one
-              screen makes both copies read like boilerplate (and made a test
-              ambiguous — pitfall 49). */}
-          <p className="hint">
-            <T k="O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare." />
-          </p>
-        </>
-      ) : (
-        <>
-          {/* Two sentences for two routes, because the difference is real and
-              it is the ONE thing the exe adds. In a browser this is an offer
-              that costs a click and a permission; in the exe it has already
-              happened, and a "Klasör seç…" button there would be three
-              controls that cannot mean anything. */}
-          <p className="hint">
-            {folder.fixed ? (
-              <T
-                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            ) : (
-              <T
-                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            )}
-          </p>
-
-          {!folder.fixed && (
-            <div className="form-row">
-              <button className="btn primary" onClick={() => void folder.choose()}>
-                {s.kind === 'secilmedi' ? t('Klasör seç…') : t('Başka klasör seç…')}
-              </button>
-              {s.kind === 'izin-gerek' && (
-                <button className="btn primary" onClick={() => void folder.allow()}>
-                  {t('İzin ver')}
-                </button>
-              )}
-              {s.kind !== 'secilmedi' && (
-                <button className="btn" onClick={() => void folder.forget()}>
-                  {t('Vazgeç')}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* THE ROUND TRIP, named. The folder is not only a backup — it is
-              how work moves to the next machine and into the next version,
-              and until this sentence existed nothing anywhere said which of
-              the files in there was the one to open, or with which button.
-              Both halves are already built; what was missing was saying so. */}
-          {s.kind !== 'secilmedi' && (
-            <p className="hint">
-              <T
-                k="{dosya} **bütün planlarınızdır**; yanındakiler onun gün gün duran hâlleri."
-                vars={{ dosya: MAIN_NAME }}
-              />
-            </p>
-          )}
-
-          {/* One line, and it is the only place this feature can be seen
-              working. `role="status"` because it changes without anyone
-              looking at it — pitfall 7 says a save that stopped working has
-              to be visible, not quiet.
-
-              'secilmedi' reads RED on the routes where the offer actually
-              works well (an origin the browser can keep the permission for).
-              It is not an error, but it is the one state in which a term's
-              work has exactly one copy and a cleared browser takes it. */}
-          <p
-            className={
-              s.kind === 'hata' || (s.kind === 'secilmedi' && storageKind() === 'site')
-                ? 'hint bad'
-                : 'hint'
-            }
-            role="status"
-          >
-            {s.kind === 'secilmedi' &&
-              t('Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.')}
-            {s.kind === 'izin-gerek' && (
-              <T
-                k="**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin."
-                vars={{ klasor: s.name }}
-              />
-            )}
-            {s.kind === 'bekliyor' && <T k="**{klasor}** · yazılıyor…" vars={{ klasor: s.name }} />}
-            {s.kind === 'yazildi' && (
-              <>
-                <b>{s.name}</b> klasörüne yazıldı, saat{' '}
-                {s.at.toLocaleTimeString('tr-TR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-                .{' '}
-                {s.files.map((name, i) => (
-                  <span key={name}>
-                    {i > 0 && ' · '}
-                    <code>{name}</code>
-                  </span>
-                ))}
-              </>
-            )}
-            {s.kind === 'hata' && (
-              <>
-                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar işiniz yalnız
-                tarayıcıda duruyor.
-              </>
-            )}
-          </p>
-        </>
-      )}
-    </div>
-  );
-}
-
-/**
- * "Bu program" (2026-08-27).
- *
- * Two questions that had no answer anywhere in the app, and both of them are
- * the first thing anybody needs when a fix is reported: WHICH build is this,
- * and WHICH copy am I looking at. Without the first, "düzelttim, dener misin"
- * has nothing to check against. Without the second, two routes with separate
- * stores look identical on screen and the work silently splits in two.
- *
- * The update half only exists where it can: the site (and the local install)
- * are already served over http, so asking their own origin costs nothing new.
- * The double-clicked file and the .exe say where the newest one is and go
- * nowhere — the offline principle is checked with grep there, and a version check that
- * reached the network would be the first byte this program ever fetched.
- *
- * THE HEADING IS NOT "Bu program", and that is pitfall 49 again. `hasText`
- * and `getByRole(name:)` both match on SUBSTRING and case-insensitively, and
- * the panel one column over already said "Tarayıcının bu program için ayırdığı
- * yer" — so a locator aimed here landed there instead, and the test failed
- * with the wrong panel's contents printed at it. It also shares no words with
- * "Veriler nerede", "Nereye kaydedilsin" or "Bütün planlar tek dosyada": those
- * three are the locators four E2E specs hang on.
- */
-/**
- * The newest suggestion search on this machine, in a line the father can
- * photograph (TODO B5.11): whether the workers opened, and how long it took.
- * The whole log goes into every bundle file (relaxLog.ts).
- */
-function searchLine(t: Translate): string {
-  const log = searchLog();
-  const last = log[log.length - 1];
-  if (last === undefined) return t('Bu bilgisayarda henüz aranmadı');
-  const sure = Math.round(last.doneMs / 1000);
-  const ilk = last.firstMs === null ? '—' : String(Math.round(last.firstMs / 1000));
-  return last.workers > 0
-    ? t('{n} iş parçacığında · ilk öneri {ilk} sn · arama {sure} sn', {
-        n: last.workers,
-        ilk,
-        sure,
-      })
-    : t('Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn', { ilk, sure });
-}
-
-function Build({ update }: { update: UpdateRun }) {
-  const t = useT();
-  const adres = storageAddress();
-
-  return (
-    <div className="panel">
-      <h2>{t('Sürüm ve güncelleme')}</h2>
-      <table className="stat">
-        <tbody>
-          <tr>
-            <td>{t('Sürüm')}</td>
-            <td>
-              <b>{surumEtiketi()}</b>
-            </td>
-          </tr>
-          <tr>
-            <td>{t('Nasıl açıldı')}</td>
-            <td>{routeName()}</td>
-          </tr>
-          <tr>
-            <td>{t('Öneri araması')}</td>
-            <td>{searchLine(t)}</td>
-          </tr>
-          {adres !== '' && (
-            <tr>
-              <td>{t('Adres')}</td>
-              <td>
-                <code>{adres}</code>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {update.kind === 'sw' && <SiteUpdate update={update} />}
-      {update.kind === 'exe' && <ExeUpdate update={update} />}
-      {update.kind === 'yok' && (
-        <p className="hint">
-          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{' '}
-          <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
-            <code>{SITE_ADRESI}</code>
-          </a>
-        </p>
-      )}
-    </div>
-  );
-}
-
-/**
- * "Yenilikler" (2026-08-31, TODO §2 B2.9).
- *
- * A SIBLING of `Build`, not a section inside it: `Build`'s own heading
- * ('Sürüm ve güncelleme') is scoped by four E2E specs and its doc comment
- * above already spells out pitfall 49/74 — folding new content into that
- * function risks a new heading landing inside `buildPanel()`'s locator, or
- * colliding with one three pixels over. A panel of its own keeps both clean.
- *
- * The current release is open; older ones sit in a closed `<details>` —
- * "arşiv de olabilir" was the reader's own line, and the newest entry is
- * what somebody actually came here to read, not a list they scroll past.
- *
- * Marks itself seen on mount, not on click: opening Hakkında and reading
- * this far down the panel already answers "what changed", and gating the
- * dot behind a second click would leave it lit under an unread tab.
- */
-function Changelog({ onSeen }: { onSeen: () => void }) {
-  const t = useT();
-  const [entry, ...older] = SURUM_NOTLARI;
-
-  useEffect(() => {
-    if (entry !== undefined) markChangelogSeen(entry.version);
-    onSeen();
-    // Only at mount: `onSeen` is a stable setter from App, and re-running
-    // this on every render would fight a dot that a DIFFERENT tab just lit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (entry === undefined) return null;
-
-  return (
-    <div className="panel">
-      <h2>{t('Yenilikler')}</h2>
-      <p className="hint">
-        <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
-      </p>
-      <ul>
-        {entry.items.map((line) => (
-          <li key={line}>{t(line)}</li>
-        ))}
-      </ul>
-
-      {older.length > 0 && (
-        <details>
-          <summary>{t('Eski sürümler')}</summary>
-          {older.map((old) => (
-            <div key={old.version}>
-              <p className="hint">
-                <b>
-                  v{old.version} · {tarihYazisi(old.date)}
-                </b>
-              </p>
-              <ul>
-                {old.items.map((line) => (
-                  <li key={line}>{t(line)}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </details>
-      )}
-    </div>
-  );
-}
-
-/** The site and the local install: a service worker does the work. */
-function SiteUpdate({ update }: { update: UpdateRun }) {
-  const t = useT();
-  return (
-    <>
-      <p className="hint">
-        <T k="Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez." />
-      </p>
-      <div className="form-row">
-        <button className="btn" onClick={update.check}>
-          {t('Güncellemeleri denetle')}
-        </button>
-      </div>
-      {update.ready && (
-        <p className="hint" role="status">
-          <T k="**Yeni sürüm hazır.** Üstteki **Yenile** düğmesine basın." />
-        </p>
-      )}
-    </>
-  );
-}
-
-/**
- * The .exe: three buttons, and each one is a separate decision.
- *
- * Look, download, restart. Splitting them is not caution for its own sake, it
- * is the double-click principle: nothing about this program may change without being asked
- * for, and "asked for" has to mean the thing that actually happened. A single
- * button that fetched four megabytes and closed the window would be an update
- * wizard with one step.
- *
- * WITH NO INTERNET nothing here goes wrong. `Denetle` comes back with one
- * sentence, the program keeps running, and the rest of the panel is untouched.
- * That is the whole offline story: the network is only ever entered from this
- * button.
- */
-function ExeUpdate({ update }: { update: UpdateRun }) {
-  const t = useT();
-  const d = update.durum;
-  const mesgul = d.ad === 'bakiliyor' || d.ad === 'indiriliyor';
-  // Asked of the program itself: the Linux build says no, and promising it
-  // here would end in a refusal after the download button (tuzak 126).
-  const [kendini, setKendini] = useState(true);
-  useEffect(() => {
-    let canli = true;
-    void desktopSelfUpdates().then((evet) => {
-      if (canli) setKendini(evet);
-    });
-    return () => {
-      canli = false;
-    };
-  }, []);
-
-  return (
-    <>
-      <p className="hint">
-        {kendini ? (
-          <T k="Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
-        ) : (
-          <T k="Bu kopya geliştirme ve test için; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
-        )}
-      </p>
-
-      <div className="form-row">
-        <button className="btn" onClick={update.check} disabled={mesgul}>
-          {t('Güncellemeleri denetle')}
-        </button>
-        {d.ad === 'var' && kendini && (
-          <button className="btn primary" onClick={update.indir}>
-            {t('Yeni sürümü indir')}
-          </button>
-        )}
-        {d.ad === 'hazir' && (
-          <button className="btn primary" onClick={update.uygula}>
-            {t('Şimdi yeniden başlat')}
-          </button>
-        )}
-      </div>
-
-      {/* One line, always in the same place, so the answer is where the eye
-          already is. `role="status"` because it changes without being read
-          again (design contract 2). */}
-      {d.ad !== 'bos' && (
-        <p className={`hint${d.ad === 'hata' ? ' bad' : ''}`} role="status">
-          {d.ad === 'bakiliyor' && t('Bakılıyor…')}
-          {d.ad === 'guncel' && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
-          {d.ad === 'var' && (
-            <T
-              k="**v{surum} çıktı{tarih}.** İndirmek {mb} MB yer kaplar. İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz."
-              vars={{
-                surum: d.surum,
-                tarih: d.tarih === '' ? '' : ` (${d.tarih})`,
-                mb: Math.round(d.boyut / 1024 / 1024),
-              }}
-            />
-          )}
-          {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
-          {d.ad === 'hazir' && (
-            <T
-              k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz."
-              vars={{ surum: d.surum }}
-            />
-          )}
-          {d.ad === 'hata' && d.mesaj}
-        </p>
-      )}
-    </>
-  );
 }
 
 export default function Data({
@@ -788,13 +372,27 @@ export default function Data({
             </tr>
           </thead>
           <tbody>
-            {backups.map(({ index, state: b }) => (
-              <tr key={index}>
-                <td>{index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: index + 1 })}</td>
-                <td className="num">{b.teachers.length}</td>
-                <td className="num">{b.classes.length}</td>
-                <td className="num">{b.lessons.length}</td>
-                <td className="num">{Object.keys(activePlacements(b)).length}</td>
+            {backups.map((b) => (
+              <tr key={b.index}>
+                <td>
+                  {b.index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: b.index + 1 })}
+                </td>
+                {/* One this copy cannot read is still a backup, and after A1
+                    it was the real plan: it is named, not left out. */}
+                {'state' in b ? (
+                  <>
+                    <td className="num">{b.state.teachers.length}</td>
+                    <td className="num">{b.state.classes.length}</td>
+                    <td className="num">{b.state.lessons.length}</td>
+                    <td className="num">{Object.keys(activePlacements(b.state)).length}</td>
+                  </>
+                ) : (
+                  <td colSpan={4}>
+                    {b.problem === 'yeni'
+                      ? t('daha yeni bir sürümle yazılmış, bu sürüm açamıyor')
+                      : t('okunamadı')}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

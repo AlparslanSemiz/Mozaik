@@ -9,7 +9,7 @@
 // instead of a comment.
 
 import { readFileSync } from 'node:fs';
-import type { State } from '../src/leaf/types';
+import type { State } from '../src/leaf/model/types';
 import { expect, test } from './kapan';
 import {
   loadWorld,

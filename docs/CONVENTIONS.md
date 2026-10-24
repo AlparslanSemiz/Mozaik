@@ -5,8 +5,8 @@ Kodun, commit'lerin, yorumların, arayüz metninin ve belgelerin nasıl yazıld�
 ## Kod İngilizce, arayüz Türkçe
 
 Tanımlayıcılar, tipler ve dosya adları İngilizce: `teacher`, `classGroup`,
-`unavailable`, `placements`, `constraints.ts`, `blocker()`,
-`ui/Availability.tsx`. İkisi karışınca bir dosyayı okuyan kişi neyin
+`unavailable`, `placements`, `pure/constraints/`, `blocker()`,
+`ui/availability/Availability.tsx`. İkisi karışınca bir dosyayı okuyan kişi neyin
 kod neyin ekran olduğunu ayırt edemiyor.
 
 Kullanıcıya görünen her metin doğru Türkçe karakterlerle Türkçe yazılır:
@@ -137,7 +137,7 @@ sözlüğü yok, çünkü her girdisi `'X': 'X'` olurdu, yani yüzlerce kez kayn
 sessizce bozma şansı. Eksik bir çeviri doğru Türkçeye düşer: bitmemiş bir
 sözlüğün arıza biçimi "bu satır hâlâ Türkçe"dir, ekranda `setup.teachers.title` gibi bir anahtar adı değil.
 
-**Aktif dili `i18n.ts` tutar** ve çıplak bir `t()` verir, çünkü `constraints.ts`
+**Aktif dili `i18n.ts` tutar** ve çıplak bir `t()` verir, çünkü `pure/constraints/`
 gibi saf modüller de ekrana cümle yazıyor ve `useT()` çağıramıyor. Aktif dili
 yalnız `applyDil()` yazar, ilk boyamadan önce ve her dil değişiminde.
 
@@ -191,7 +191,7 @@ indirirken gördüğü sayfa. `kurulum/OKU.txt` baştan sona Türkçe.
 ## Programın adı
 
 Program Mozaik. Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik · Mosaico ·
-Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/leaf/version.ts`'teki
+Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/leaf/app/version.ts`'teki
 `APP_NAME`, çünkü ad dört yerden ekrana çıkıyor: pencere başlığı, belge başlığı,
 okul adı girilmemişken `<h1>` ve manifest. Veriyi taşıyan adlar eski adla kaldı,
 listesi [DATA.md](DATA.md)'de.

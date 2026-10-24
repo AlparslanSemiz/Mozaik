@@ -50,6 +50,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
             return undefined;
           }
           if (cmd === 'list_files') return [...files.keys()];
+          if (cmd === 'read_file') return files.get(args!.name as string) ?? null;
           if (cmd === 'remove_file') {
             files.delete(args!.name as string);
             return undefined;
@@ -114,9 +115,22 @@ async function openAbout(page: Page) {
 const DAILY = /^ders-programi-\d{4}-\d{2}-\d{2}\.json$/;
 
 test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
-  test('tek bir tıklama olmadan ANA dosya ve GÜNÜN yedeği yazılıyor', async ({ page }) => {
+  // The first write waits for a READ plan (A2, the audit of 2026-10-24). This
+  // test used to open an empty profile and pin that it wrote at once, which
+  // was the bug: a wiped profile put an empty bundle over Belgelerim within a
+  // second. So it opens once, lets the store keep its plan, and reopens: the
+  // write that needs no click now comes from a plan that was really read.
+  test('okunan plan tek bir tıklama olmadan ANA dosyaya ve GÜNÜN yedeğine yazılıyor', async ({
+    page,
+  }) => {
     await fakeExe(page);
     await open(page);
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('ders-programi')))
+      .not.toBeNull();
+    // The disk lives in the page, so the reload starts it empty: whatever is
+    // on it afterwards was written by the reopened page on its own.
+    await page.reload();
 
     // Nothing is clicked. In the browser this same feature needs a button, a
     // native dialog and a permission before a single byte moves.
@@ -142,12 +156,17 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     expect(bundle.bundleVersion).toBe(1);
   });
 
+  test('boş açılış Belgelerim’e kendiliğinden yazmıyor (A2)', async ({ page }) => {
+    await fakeExe(page);
+    await open(page);
+    // Past the store's 400 ms and the folder's two seconds.
+    await page.waitForTimeout(2_500);
+    expect(await calls(page)).not.toContain('write_file');
+  });
+
   test('değişiklik kendiliğinden diske düşüyor', async ({ page }) => {
     await fakeExe(page);
     await open(page);
-    await expect
-      .poll(async () => Object.keys(await disk(page)), { timeout: 10_000 })
-      .toContain('ders-programi-tumu.json');
 
     await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
     await answerDialog(page);

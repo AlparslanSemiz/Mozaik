@@ -108,6 +108,20 @@ bir sayı adlandırdığı için sonsuza kadar yeşil geçerdi. Yazılan test sa
 adlandırmıyor: `raw.schemaVersion = SCHEMA_VERSION - 1` okunabilmeli. Bir
 değişmezin testi bugünkü değeri değil değişmezin kendisini yazar.
 
+### 153 · "Okunamadı" ile "yok" tek cevap olunca okunamayan veri boşla ezilir
+`parseState`'in `null`'u iki şey demekti: anahtarda hiçbir şey yok, ya da var ama bu kopya
+okuyamıyor (daha yeni bir şema, yarıda kesilmiş metin). Açılış, plan geçişi ve silmeden
+sonra açılan plan ikisini de `?? emptyState()` ile karşıladı, ve 400 ms sonra otomatik kayıt
+boş planı okunamayan metnin üstüne yazdı, şeritsiz. Exe'de aynı boş başlangıç Belgelerim'deki
+canlı dosyanın ve günün yedeğinin üstüne boş paketi yazdı; budama "en yeni on günlük"
+sayarken boş günlüğü de saydığı için her yeni gün bir dolu yedek daha düştü (denetim,
+2026-10-24, A1 ve A2; eski v2.1.1 sürümüyle de ölçüldü: 25 öğretmen 0'a indi). Çare: depo
+okuması üç cevap verir (`readStoredPlan`), okunamayan anahtar dondurulur ve yalnız
+kullanıcının açık bir eylemi onu çözer; klasör boş paketi yalnız kaybedecek bir şey olmayan
+yere yazar ve budama yalnız iş taşıyan günlükleri sayar. Bir savunma katmanı "boş" ile
+"yok"u ayırmıyorsa, kendi yedeğini silen katman o olur. `src/platform/storage/okunamayan.test.tsx`,
+`src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts`.
+
 ---
 
 ## Dağıtım kimlikleri, tek kaynak ve sürüm
@@ -322,7 +336,7 @@ dal hemen kesilir. `derin-geri-sarma` 8 362 düğümden 12'ye indi. İkincisi,
 backtracking takılınca bir onarım aşaması devralır: yersiz bir blok en az blok
 iten hücreye konur, itilenler sıraya girer, sık yersiz kalan blok ağırlaşır.
 Roboders'in açık saatleriyle aynı veri 0,5–1,5 saniyede 211/211 (16 tohum),
-önce 206'da takılıyordu. `src/solver.test.ts` → "tam dolu bir kurs".
+önce 206'da takılıyordu. `src/pure/solver/solver.test.ts` → "tam dolu bir kurs".
 
 ---
 
@@ -444,7 +458,7 @@ kökeninde Chromium'da güvenilmez" iddiası ölçülmemişti, 2026-09-25'te öl
 tutmadı: bkz. tuzak 136. Öneri araması bugün worker'da koşuyor.
 
 ### 136 · Tek dosyanın worker'ı sayfanın kendi betiğidir
-Öneri araması (`relax.ts`) worker'a taşınırken ayrı bir parça gömmek dosyayı
+Öneri araması (`pure/relax/`) worker'a taşınırken ayrı bir parça gömmek dosyayı
 büyütürdü (tuzak 19). Ölçülen yol: derlenmiş sayfanın tek satır içi betiğinde
 `import` ya da `export` yok, yani aynı metin `blob:` adresinden klasik bir worker
 olarak da koşar. Chromium'da `file://`'dan 5/5 ve Linux exe'sinin WebKitGTK'sında
@@ -549,7 +563,7 @@ kapsayıcı her yerleştiğinde bütün hücreler için yeniden çözülüyor. A
 olarak sabitlemek bir taramanın yerleşimini 2554 ms'den 185 ms'ye indirdi.
 `container-type`'ı kaldırmak yalnız yarısını indirdi, tabloyu px yapmak ve üç noktayı
 kaldırmak hiçbir şey değiştirmedi. Çare kutunun genişliğini bir `ResizeObserver` ile
-custom property'ye yazmak (`--wrap-w`, `platform/gridFit.ts`).
+custom property'ye yazmak (`--wrap-w`, `platform/dom/gridFit.ts`).
 
 2026-09-12'nin ölçümü bunu göremezdi: örnek okulda ve Rahat'ta alınmıştı (tuzak 119).
 Aynı turun WebKitGTK yarısı ayrı bir sebep çıkardı. Orada kasma iki yoğunlukta da
@@ -697,7 +711,7 @@ değiştiği için yeniden boyutlanmamalı. Havuzun tetiği ızgaranın şekli o
 yazmak sessizce birini eziyor.
 
 ### 140 · `clientWidth` yuvarlar, ve üç nokta kesirli kutuya bakar
-Sığdır'da sığmayan kart satırı küçülüyor (`platform/gridFit.ts`). Onu yazan kod da,
+Sığdır'da sığmayan kart satırı küçülüyor (`platform/dom/gridFit.ts`). Onu yazan kod da,
 ölçen test de "kırpık mı" sorusunu `scrollWidth > clientWidth` ile soruyordu. İkisi de
 tam sayı, ve `clientWidth` aşağı değil EN YAKINA yuvarlıyor: 24,53 px'lik bir kutu 25
 sayılıyor. Bu makinede glif ilerlemeleri tam piksele oturuyor, "411A" 10 px'te 25 px.
@@ -1097,7 +1111,7 @@ toplam boyudur.
 `docs.test.ts`'in yol kapısı diskteki dosyaları bu glob'la çıkarıyor ve
 CLAUDE.md'nin `src/docs.test.ts` diyen satırını bayat saydı: Vite glob'a çağıran
 dosyanın kendisini koymuyor, yani kapı kendi adına kördü ve o satırı sonsuza
-kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/platform/drag.ts` ve
+kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/platform/dom/drag.ts` ve
 `src/surum.test.ts` geliyor, `src/docs.test.ts` gelmiyor. Çare listeye kendi
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.
@@ -1164,7 +1178,7 @@ mutasyon kırmızıya döndü. Ders şu: **bir kuralın testi, o kuralın tek ba
 tuttuğu bir dünyada kurulur.** Sonucu başka bir kısıtın da zorladığı bir dünyada
 test kuralı değil ikisinin birleşimini ölçer. İki yolun ikisini de kapatan
 mutasyon (model ve denetçi birlikte) ilk dünyada da kırmızıydı. Asıl yakalanması
-gereken, yalnız birini kapatan mutasyon. Test `src/relax.test.ts`'te,
+gereken, yalnız birini kapatan mutasyon. Test `src/pure/relax/relax.test.ts`'te,
 "sınıfın kapalı saati en ucuz çare olsa da önerilmiyor".
 
 ### 131 · Playwright her koşuda `test-results/`'u boşaltır, içinde yaşayan bir oturumla birlikte
@@ -1416,7 +1430,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 
 | Grup | Tuzaklar |
 |---|---|
-| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
+| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
@@ -1432,6 +1446,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 152, yeni bir tuzak 153'ten devam eder. Test stratejisi
+büyük kullanılan numara 153, yeni bir tuzak 154'ten devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

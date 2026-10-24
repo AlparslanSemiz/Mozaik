@@ -141,7 +141,7 @@ cevaplandı ve v0.6'da girdi: günde bir uzun ara var, zil ayarından üretiliyo
 yeri güne göre değişiyor (hafta içi 5., hafta sonu 6. dersten sonra) ve üç
 ekranda birden çiziliyor. İkinci yarısı bugün mekanik olarak cevaplı ama
 sorulmadı: kısıt motoru ve çözücü uzun aranın yerini hiç okumuyor
-(`constraints.ts` ve `solver.ts`'te `longBreakAfter` geçmiyor), yani bir blok
+(`pure/constraints/` ve `solver.ts`'te `longBreakAfter` geçmiyor), yani bir blok
 bugün arayı serbestçe geçiyor. Bunun istenen davranış olup olmadığı sorulacak.
 
 **7 · Asıl acı nerede? Dönem başında bir kez mi kuruluyor, dönem içinde sürekli

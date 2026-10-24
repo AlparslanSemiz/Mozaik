@@ -26,6 +26,18 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `npx stryker run --mutate <relax ve sat>`, `npm run hizli`'nin test kümesiyle, bu makine · `src/pure/relax/relax.test.ts:89`
+Bulgu: relax'ın dokuz dosyası (3160 mutant) mutasyona sokulunca ilk koşu düştü: "derslik
+darboğazı: derslik hiçbir yolda açılmıyor, saat azaltmak kalıyor" enstrümante kodda kendi
+30 s'lik tavanını (`}, 30_000)`, testin kendisinde) aştı. Vitest'in `testTimeout`'u 300 s'ye
+çıkınca da aynı: testin kendi tavanı yapılandırmayı geçiyor. İki koşuda tekrarlandı.
+Tür: test kusuru değil, ölçüm engeli: relax'ın mutasyonu bu testin tavanı ve süresiyle
+pratikte koşamıyor, çünkü onu kapsayan her mutant testi yeniden koşturur.
+Ne yapıldı: bırakıldı; TODO RF3'ün (relax ve `sat.ts` ne mutasyon ne kapsam listesinde) ön
+şartı olarak orada. Aynı gün kısıt motoru, fizibilite ve varlıklar aynı test kümesiyle
+ölçüldü (WORKLOG, 2026-10-24 akşam).
+Kalıcı kural: yok.
+
 ### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
 Bulgu: ana E2E 635/637, iki kırmızı. (1) "kayıt çalışmıyorsa kalıcı kırmızı uyarı":
 `.save-warning` iki elemana çözüldü, "otomatik kayıt çalışmıyor" ve VK2'nin "depolama alanı
