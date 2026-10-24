@@ -40,6 +40,7 @@ import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import mailRs from '../src-tauri/src/mail.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
+import gercekExeSpec from '../e2e/gercek-exe.spec.ts?raw';
 import surumYml from '../.github/workflows/surum.yml?raw';
 import { MAILTO_SINIRI } from './pure/paper';
 import tauriConf from '../src-tauri/tauri.conf.json?raw';
@@ -310,6 +311,31 @@ describe.each([
       for (const returned of answer.returns) {
         expect(returned, `taklit ${command} için`).toBe(expected);
       }
+    },
+  );
+});
+
+// The real-exe suite calls the bridge by hand too, `invoke('cmd', { ... })`
+// inside a page script, past desktop.ts. A Rust argument added and not sent
+// there makes Tauri refuse the call before the command runs ("missing
+// required key"), and the test reads that refusal as the wrong answer
+// (review, 2026-10-24: `download_update` gained `sha256`).
+describe('gerçek exe süitinin elle köprü çağrıları sözleşmeden sapmıyor', () => {
+  const calls = [...gercekExeSpec.matchAll(/invoke\('(\w+)'(?:,\s*\{([^}]*)\})?\)/g)].map((m) => ({
+    command: m[1]!,
+    args: [...(m[2] ?? '').matchAll(/(?:^|[{,])\s*(\w+)\s*:/g)].map((a) => a[1]!).sort(),
+  }));
+
+  it('süit köprüyü elle çağırıyor', () => {
+    expect(calls.some((c) => c.command === 'download_update')).toBe(true);
+  });
+
+  it.each(calls.map((c, i) => [`${c.command} #${i}`, c] as const))(
+    '%s: Rust’ın aldığı argümanların tamamını gönderiyor',
+    (_, call) => {
+      const rust = RUST.get(call.command);
+      expect(rust, `${call.command} Rust'ta yok`).toBeDefined();
+      expect(call.args).toEqual([...rust!.args].sort());
     },
   );
 });

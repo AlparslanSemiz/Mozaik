@@ -47,8 +47,14 @@ const ORTAM = {
   yeni: process.env.MOZAIK_YENI_EXE,
   yeniSurum: process.env.MOZAIK_YENI_SURUM,
 };
-/** Where the old test exe looks for its next version (the workflow builds it with this). */
-const SUNUCU_PORTU = 8765;
+/** Where the old test exe looks for its next version: the root the workflow builds it with. */
+const KOK_ADRESI = process.env.MOZAIK_TEST_GUNCELLEME_KOKU ?? 'http://127.0.0.1:8765/';
+const SUNUCU_PORTU = Number(new URL(KOK_ADRESI).port);
+
+/** The program's own version, from its row in Hakkında (About.tsx), not any number on screen. */
+const SURUM_HUCRESI = `const satir = [...document.querySelectorAll('table.stat tr')]
+  .find((tr) => tr.cells[0]?.innerText.trim() === 'Sürüm');
+return satir?.cells[1]?.innerText.trim() ?? '';`;
 
 interface Plan {
   id: string;
@@ -87,7 +93,7 @@ const sha256 = (dosya: string) => createHash('sha256').update(readFileSync(dosya
 /** The release, on loopback: the manifest surum.yml would write, and the file. */
 async function yayinla(exe: string, surum: string) {
   const govde = readFileSync(exe);
-  const kok = `http://127.0.0.1:${SUNUCU_PORTU}/`;
+  const kok = KOK_ADRESI;
   const manifest = JSON.stringify({
     version: surum,
     date: new Date().toISOString().slice(0, 10),
@@ -146,14 +152,24 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       await oturum.bekle('h1', 90_000);
       await oturum.tikla('metin:Ayarlar');
       await oturum.tikla('metin:Hakkında');
-      await oturum.bekle('metin:0.0.1', 15_000);
+      await expect
+        .poll(() => oturum!.js<string>(SURUM_HUCRESI), { timeout: 15_000 })
+        .toMatch(/^0\.0\.1\b/);
       await oturum.tikla('metin:Güncellemeleri denetle');
       await oturum.bekle('metin:Yeni sürümü indir', 30_000);
       await oturum.tikla('metin:Yeni sürümü indir');
       await oturum.bekle('metin:Şimdi yeniden başlat', 120_000);
       expect(existsSync(`${kurulu}.yeni`), 'indirilen dosya programın yanında').toBe(true);
-      await oturum.js(`window.__mozaikEski = true;`);
-      await oturum.tikla('metin:Şimdi yeniden başlat');
+      // Marked, so the new session can tell the old page from the new one; and
+      // the click is queued in a script that returns at once, because the
+      // swap and the exit can end the old page before a slower one answers.
+      await oturum.js(
+        `window.__mozaikEski = true;
+        const dugme = [...document.querySelectorAll('button')]
+          .find((b) => b.innerText.includes('Şimdi yeniden başlat'));
+        setTimeout(() => dugme?.click(), 100);
+        return !!dugme;`,
+      );
       // The old program ends itself; nothing of it is the suite's to kill.
       oturum.program = undefined;
       await oturum.kapat();
@@ -169,13 +185,15 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       await expect.poll(() => existsSync(`${kurulu}.eski`), { timeout: 15_000 }).toBe(false);
       await oturum.tikla('metin:Ayarlar');
       await oturum.tikla('metin:Hakkında');
-      await oturum.bekle(`metin:${ORTAM.yeniSurum!}`, 15_000);
+      const surum = await oturum.js<string>(SURUM_HUCRESI);
+      expect(surum.startsWith(ORTAM.yeniSurum!), `yeni sürümün numarası: ${surum}`).toBe(true);
+      expect(surum).not.toMatch(/^0\.0\.1\b/);
 
       // The interface shows the old school before anything is touched.
       await oturum.tikla('metin:Okul');
       const seritte = await oturum.metin('.ribbon');
       const ogretmen = (eskiAcik.state.teachers as unknown[]).length;
-      expect(seritte.replace(/\s+/g, ' ')).toContain(`Öğretmenler ${ogretmen}`);
+      expect(seritte.replace(/\s+/g, ' ')).toMatch(new RegExp(`Öğretmenler ${ogretmen}(?!\\d)`));
 
       // One change, so the plan is written by the new version: the first
       // room's name, through its box in Okul → Derslikler. The old data with

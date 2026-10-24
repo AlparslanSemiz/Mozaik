@@ -66,6 +66,33 @@ const MANIFEST_URL: &str =
 /// the variable said.
 const TEST_KOKU: Option<&str> = option_env!("MOZAIK_TEST_GUNCELLEME_KOKU");
 
+/// A test root is loopback and a directory, or the build fails: an empty
+/// value would make `safe_url` accept any address, a missing `/` would glue
+/// `surum.json` onto the port. So even a value that leaked into a build could
+/// only ever fetch from this machine.
+const fn yerel_kok_mu(b: &[u8]) -> bool {
+    let on = b"http://127.0.0.1:";
+    if b.len() <= on.len() || b[b.len() - 1] != b'/' {
+        return false;
+    }
+    let mut i = 0;
+    while i < on.len() {
+        if b[i] != on[i] {
+            return false;
+        }
+        i += 1;
+    }
+    b[on.len()].is_ascii_digit()
+}
+
+const _: () = match TEST_KOKU {
+    Some(kok) => assert!(
+        yerel_kok_mu(kok.as_bytes()),
+        "MOZAIK_TEST_GUNCELLEME_KOKU http://127.0.0.1:<port>/ biçiminde olmalı"
+    ),
+    None => {}
+};
+
 /// The prefixes this build fetches from: the two releases, or the gate's
 /// local server and nothing else.
 fn kokler() -> Vec<&'static str> {
@@ -609,6 +636,23 @@ mod tests {
         .unwrap();
         assert!(m.sha256.is_none());
         assert!(!karar(m, "2.2.0").unwrap().yeni_var);
+    }
+
+    #[test]
+    fn a_test_root_is_only_ever_loopback_and_a_directory() {
+        assert!(yerel_kok_mu(b"http://127.0.0.1:8765/"));
+        for kotu in [
+            "",
+            "/",
+            "http://127.0.0.1:8765",
+            "http://127.0.0.1:/x",
+            "http://127.0.0.1:/",
+            "https://github.com/",
+            "http://127.0.0.1.example.com:80/",
+            "http://localhost:8765/",
+        ] {
+            assert!(!yerel_kok_mu(kotu.as_bytes()), "kabul edildi: {kotu}");
+        }
     }
 
     #[test]

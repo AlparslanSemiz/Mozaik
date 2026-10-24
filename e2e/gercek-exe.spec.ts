@@ -142,7 +142,21 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   // emptied a full folder on a wiped profile. The first change does.
   test('boş açılış diske yazmıyor, ilk değişiklik hiç sorulmadan yazıyor', async ({ exe }) => {
     await new Promise((r) => setTimeout(r, 3_000)); // past 0.4 s and 2 s
-    expect(tumu(exe.klasor)).toBe('');
+    // On Windows the session reloads the page once to pin the language
+    // (`turkceYap`), so the program has been opened twice: the first load
+    // stored the empty plan and the second read it, and may then write an
+    // empty bundle into the empty folder. That is the reload, not the empty
+    // start; what A2 forbids is an empty bundle over work, and there is none.
+    const ilk = tumu(exe.klasor);
+    if (WINDOWS && ilk !== '') {
+      expect(
+        JSON.parse(ilk).plans.every(
+          (p: { state: { teachers: unknown[] } }) => p.state.teachers.length === 0,
+        ),
+      ).toBe(true);
+    } else {
+      expect(ilk).toBe('');
+    }
 
     await exe.oturum.tikla('metin:Örnek veriyle doldur');
     await exe.oturum.bekle('[role="dialog"]');
@@ -194,10 +208,25 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         rmSync(join(exe.klasor, n));
     }
 
+    // Closed with the title bar's X, not killed: WebView2 keeps localStorage
+    // in memory for a while, and a program killed with taskkill /F reopened
+    // over an empty store, which is an empty start and prunes nothing
+    // (Windows, 2026-10-24). A person closes the window.
+    expect(pencereyiKapat(), 'kapatılacak pencere bulunamadı').toBeGreaterThan(0);
+    await expect
+      .poll(
+        () =>
+          exe.oturum
+            .js('return true;')
+            .then(() => true)
+            .catch(() => false),
+        { timeout: 10_000 },
+      )
+      .toBe(false);
     await exe.oturum.kapat().catch(() => undefined);
-    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
+    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili(), bekleMs: ACILIS_MS });
     try {
-      await yeni.bekle('h1', 20_000);
+      await yeni.bekle('h1', ACILIS_MS);
       // Today + twelve full = thirteen full: the three oldest full ones go,
       // the two empty ones (newer than the cut) stay.
       await expect
@@ -247,6 +276,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         await window.__TAURI__.core.invoke('download_update', {
           url: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
           boyut: 1,
+          sha256: '0'.repeat(64),
         });
         return 'indirdi';
       } catch (e) {
@@ -267,6 +297,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         await window.__TAURI__.core.invoke('download_update', {
           url: 'https://example.com/releases/latest/download/Mozaik.exe',
           boyut: 1,
+          sha256: '0'.repeat(64),
         });
         return 'indirdi';
       } catch (e) {
