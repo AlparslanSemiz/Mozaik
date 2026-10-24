@@ -190,6 +190,15 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 **Boyut.** Ham eşik 1 186 500'den 1 180 000'e (ölçülen 1 173 991 + ~%0,5): fix dalı ölçülenin üstünde yükseltmişti; bütçe ölçüme göre.
 
+**Taşınan şeridin görüntüsü.** Birleştirmede App.tsx'ten `ui/shell/Notices.tsx`'e taşınan
+okunamayan plan şeridi, d8426d6 (refactor'dan önce) ve a7c8ad8'de 1920×1080'de, iki hâliyle
+(daha yeni şema, yarıda kesilmiş plan), tam ekran ve yalnız şerit: dört görüntünün dördü 0 piksel
+fark (ImageMagick AE, fuzz 0). Taban gürültüsü de 0: d8426d6 iki kez çekildi, aynı. Her commit
+kendi geçici worktree'sinde, commit kimliği gömülmeden derlendi; spec ve betik git dışında.
+
+**Yayın kapısı.** TP7 ve B7.37 TODO'da yayın kapısı: gerçek Windows exe ve güncelleme yolu
+sınanmadan etiket yok.
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
