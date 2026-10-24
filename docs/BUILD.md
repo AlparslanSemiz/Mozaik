@@ -379,14 +379,16 @@ kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
 Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
 `tauri.conf.json` numarayı kopyalamaz, `"../package.json"` yolunu gösterir.
 `Cargo.toml`'daki numarayı `yayinla.mjs` yazar, çünkü cargo başka bir dosyadan
-numara okumuyor. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
+numara okumuyor. `package-lock.json`'ın kökündeki iki numarayı da o yazar
+(`scripts/kilit-surumu.mjs`, TODO B7.32), yoksa sonraki `npm install` onları değiştirip
+ağacı kirletir. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
 basar ve `src/leaf/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
 ve Vitest modül yüklenirken çöker). Aynı damga `dist-site/sw.js`'in önbellek
 adına girer. Ayarlar → Hakkında hangi sürüm olduğunu gösterir. Bu bir derleme
 bayrağı değil, dört teslim yoluna basılan aynı damga.
 
-`src/surum.test.ts` bunları her koşuda ölçer: `package.json` ile `Cargo.toml`'un
-aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
+`src/surum.test.ts` bunları her koşuda ölçer: `package.json`, `Cargo.toml` ve
+`package-lock.json`'ın kökünün aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
 değişmediğini (tuzak 95), exe penceresinin ayarlarını, `surum.yml`'in manifeste
 yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (tuzak 106),
 `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu, ve
@@ -397,8 +399,8 @@ klasörde (bir worktree değil) ve `main`'de, çalışma ağacı temiz, etiket d
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
 Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü aşağıdaki
 bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
-Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
-bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
+Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.md`'deki
+`Unreleased` bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve dördü tek commit olur.
 Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu
 bulunup sonuna kadar beklenir. İkisi de yeşilse etiket annotated atılır, adıyla itilir
 ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi

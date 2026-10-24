@@ -39,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
+import { kilitSurumunuYaz } from './kilit-surumu.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -281,6 +282,24 @@ function cargoSurumuYaz(hedef) {
   if (yeni !== eski) writeFileSync(cargoYol, yeni, 'utf8');
 }
 
+// The THIRD copy, and not one anybody reads: package-lock.json's root. It is
+// written for the tree's sake (TODO B7.32): left behind, the next
+// `npm install` rewrites it and the clean-tree gate above stops the release
+// after this one.
+const kilitYol = resolve(KOK, 'package-lock.json');
+
+function kilitSurumuYaz(hedef) {
+  const eski = readFileSync(kilitYol, 'utf8');
+  let yeni;
+  try {
+    yeni = kilitSurumunuYaz(eski, hedef);
+  } catch (e) {
+    dur(e.message, 'npm install', 'git add package-lock.json && git commit');
+  }
+  // Written only when something changed, for the same reason as Cargo.toml.
+  if (yeni !== eski) writeFileSync(kilitYol, yeni, 'utf8');
+}
+
 // package.json ALREADY at this version is not an error, and refusing was
 // wrong. It is the normal state after a round that bumped it by hand, and
 // refusing then puts the TAG out of this script's reach, which is the one
@@ -290,10 +309,13 @@ if (onceki === surum) {
   // ...but Cargo.toml may still be behind, because bumping package.json by
   // hand is exactly the path that leaves it behind.
   cargoSurumuYaz(surum);
+  kilitSurumuYaz(surum);
   changelogKapat();
   if (git('status', '--porcelain') !== '') {
-    console.log('  src-tauri/Cargo.toml ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n');
-    git('add', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+    console.log(
+      '  src-tauri/Cargo.toml, package-lock.json ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n',
+    );
+    git('add', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
     git('commit', '-m', `Sürüm ${etiket}`);
   }
 } else {
@@ -304,10 +326,11 @@ if (onceki === surum) {
   if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
   writeFileSync(yol, yeni, 'utf8');
   cargoSurumuYaz(surum);
+  kilitSurumuYaz(surum);
   changelogKapat();
 
   console.log(`\n  ${onceki} → ${surum}\n`);
-  git('add', 'package.json', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+  git('add', 'package.json', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 
