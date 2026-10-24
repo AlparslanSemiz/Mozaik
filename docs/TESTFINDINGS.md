@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `exe-windows.yml` 40126622451, `guncelleme-windows.yml` 40126620642 → 40128285002 (`tp7-windows-exe`) · zincir `main`'e bağlandıktan sonra
+Bulgu: (1) `main`'in iki A2 gerçek exe testi Windows'ta ilk kez koştu ve düştü: oturum dil için
+sayfayı bir kez yeniden yüklediğinden boş açılış iki açılış oluyor ve ikincisi boş paketi boş
+klasöre yazıyor; ve `taskkill /F` ile öldürülen exe'nin WebView2'si depoyu diske yazmadan gidiyor,
+yeniden açılış boş depoyla başlıyor, budama haklı olarak çalışmıyor. Linux'ta WebKit yazdığı için
+görünmüyordu. (2) Güncelleme kapısında "Şimdi yeniden başlat" tıklaması, takas ve çıkış betiğin
+cevabından önce bitince oturumu düşürdü. (3) Hakkında'daki sürüm "v0.0.1 · tarih" biçiminde.
+(4) İnceleme: gerçek exe süitinin elle `download_update` çağrıları yeni `sha256` argümanını
+göndermiyordu, Tauri çağrıyı reddediyordu.
+Tür: test kusuru (1, 2, 3, 4); ürün kusuru yok.
+Ne yapıldı: (1) testler Windows'ta pencereyi X ile kapatıyor ve yeniden yüklemenin boş paketini
+kabul ediyor; (2) tıklama beklemeden kuyruğa konuyor; (3) karşılaştırma `v`'yi tanıyor; (4)
+argüman eklendi, kontrat e2e'deki elle çağrıları da soruyor. Kapı ve exe süiti yeşil.
+Kalıcı kural: yok (WebView2'nin zorla öldürülünce depoyu yazmaması TODO RK17'nin yanında not).
+
 ### 2026-10-24 · `npx stryker run --mutate <relax ve sat>`, `npm run hizli`'nin test kümesiyle, bu makine · `src/pure/relax/relax.test.ts:89`
 Bulgu: relax'ın dokuz dosyası (3160 mutant) mutasyona sokulunca ilk koşu düştü: "derslik
 darboğazı: derslik hiçbir yolda açılmıyor, saat azaltmak kalıyor" enstrümante kodda kendi

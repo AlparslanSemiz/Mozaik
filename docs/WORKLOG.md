@@ -19,21 +19,25 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (`tp7-windows-exe`, dokuz dallık zincirin ucu).
+Son güncelleme: 2026-10-24 gece (`tp7-windows-exe`, ilk sürümün son dalı).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
 denetimin on üç kusuru).
 
-**`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
-okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
-sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
-siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
+**Zincir `main`'e bağlandı (2026-10-24 gece).** `main`'e `fix/okunamayan-plan` ve
+`refactor/moduller` girdi; zincirin her dalı bir öncekini (ilki `main`'i) birleştirdi, refactor'un
+taşıdığı dosyalara dalların değişiklikleri yeni yerlerinde. İlk sürüm `bitti-kontrolu` →
+`tb8-eksik-plan` → `tb1-dosyadan-ac` → `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` →
+`okunabilirlik` → `tb1-acilis` → `tp7-windows-exe`; `ogretmene-eposta` (şema v17) ve
+`rk2-bozuk-iliski` sonra. Okunamayan plan için `main`'in dondurması kaldı, `tb1-acilis` üstüne
+yalnız açılışta okunabilen ilk planı açıyor (kullanıcının kararı).
 
-**`refactor/moduller` `main`'de (2026-10-24)**, `fix/okunamayan-plan`'dan sonra. Açık her dal
-birleşmeden önce `git merge main` yapar; eski yol → yeni yol tablosu ve her dalın çakışan
-dosyaları `~/GitHub/Mozaikler/Mozaik-refactor/scratch/refactor/` altında, `yol-haritasi.md` ve
-`merge-tree.txt` (o worktree o dallar birleşene kadar kalır).
+**Güncelleme kapısı her sürümde (2026-10-24, kullanıcının kararı).** `guncelleme-windows.yml`
+`tp7-windows-exe`'de: yayınlanmış son exe veri üretir, bu commit'in 0.0.1 numaralı test kopyası
+`update.rs`'in kendisiyle yerel sunucudaki yeni sürümü bulur, indirir, özetini doğrular, kendini
+değiştirir; veri eksiksiz. `yayinla` onu koşulsuz bekler. `update.rs` artık indirdiği exe'nin
+SHA-256'sını manifesttekiyle karşılaştırıyor (`surum.json`'a `sha256`).
 
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
@@ -58,15 +62,13 @@ kaynak dosyayı `src/<katman>/<alan>/`'a koydu; RF1, RF5, RF6, RF8, RF9 ve RF10 
 kalanlar RF11, RF12, RF20, RF2'nin kalanı, RF3 ve RF18, RF4 park ([TODO.md](TODO.md) §8k).
 Sıradaki üç bileşen bölmesi (Teachers, Dersler'in formu, Program'ın sağ tık menüleri) her
 biri kendi dalında, TODO RF24–RF26. Test programı (2026-10-09, [TODO.md](TODO.md) §8l,
-2026-10-23'te donduruldu): Faz 0 ve Faz 1'in çoğu bitti, kalanı TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir
-dalda gerileme testiyle.
+2026-10-23'te donduruldu): Faz 0 ve Faz 1'in çoğu bitti, kalanı TP-B birikim maddesi. TB7 ve TB8 zincirde düzeldi.
 
-**Sıradaki iş.** TB8 düzeldi (`tb8-eksik-plan`). Sırada TB7 (kapanan sekmenin son değişikliği
-klasöre inmiyor) ve TB1'in kalanı (üst çubuktaki "Dosyadan aç" bozuk dosyada istisna atıyor),
-ikisi de veri kaybı sınıfı, her biri `main`'den açılan kendi dalında, önce kırmızı gerileme
-testi (TODO §8l). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny testi). Onun
-TODO B7.33'ünü `ozellik/asil-ikon` önce birleşerek maskable ikona verdi, `ruflo/kurulum`
-birleşirken kendi numarasını kaydırır.
+**Sıradaki iş.** Zincir sırayla `--ff-only` ile alınır; ilk sürüm `tp7-windows-exe`'ye kadar.
+Birleşince ana klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması; dört Windows/CI
+koşusunu, güncelleme kapısı dahil, bekler). TB1, TB7, TB8 ve dosya okumanın üç deliği zincirde
+düzeldi. Açık: RK17 (bir planın metni JSON bile değilse klasöre yazılmıyor, `main`'den gelen
+davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny testi).
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -186,6 +188,43 @@ birleşirken kendi numarasını kaydırır.
 
 
 
+
+---
+
+## 2026-10-24 gece · Zincir `main`'e bağlandı, (A) ve gerçek güncelleme akışı
+
+**Bağlama.** `main` iki kez ilerledi (`fix/okunamayan-plan`, sonra 44 commit'lik refactor). Her dal
+bir öncekini birleştirdi, yalnız kendi farkını çözerek: çoğu import yolu (refactor), `App.tsx`'in
+bölünen yerlerine TB1'in dosya okuması ve TB7'nin kapanış bekleyişi, boyut eşikleri (iki eşikten
+büyüğü), taşınan testlerin fikstür yolları, belgelerdeki eski dosya yolları (refactor'un yeniden
+adlandırma listesiyle). `tp7`'nin kontrat testi `read_file`'ın `Option<String>`'ini tanıdı.
+
+**(A), `tb1-acilis`.** Çakışan kodda `main`'in dondurması kaldı, `tb1-acilis`'in yinelenen kodu
+bırakıldı. Üstüne, önce kırmızı testle: açılışta açık plan okunamıyorsa okunabilen ilk plan
+açılıyor, okunamayan bayt bayt yerinde, şeritte tek satır. İnceleme veri kaybı buldu: geçiş dizine
+yazılınca sonraki açılışlar açılan planı yedek zincirine döndürüyor, okunamayan planın sağlam
+kopyası üçüncü açılışta düşüyordu. Çare: geçiş yazılmıyor, geri dönülen oturum zinciri
+döndürmüyor (çok oturumlu test önce kırmızı). Planlar listesi okunamayan planı "okunamadı" ve "—"
+diye gösteriyor, silme sorusu metnin gideceğini söylüyor; taslakta da. RK17 TODO'da.
+
+**Güncelleme kapısı `tp7`'de, her sürümde.** `ogretmene-eposta`'daki kapı ilk sürüme taşındı, şema
+koşulu kalktı. Gerçek akış: 0.0.1 numaralı, kökü derleme anında yerel sunucuda test kopyası
+Hakkında'nın üç düğmesiyle yeni sürümü buluyor, indiriyor, doğruluyor, takası yapıp başlatıyor.
+`update.rs` artık özeti doğruluyor (`sha256`, surum.yml yazıyor; özeti olmayan yeni sürüm
+indirilmiyor). Test kökü yalnız `http://127.0.0.1:<port>/` olabilir, yoksa derleme düşer; kontrat
+surum.yml'in onu anmadığını soruyor ve bozulmuş bir surum.yml'de kırmızı. İnceleme bir hata
+buldu: gerçek exe süitinin elle `download_update` çağrılarında `sha256` yoktu; düzeldi ve kontrat
+artık e2e'deki elle köprü çağrılarını da soruyor (kırmızıya döndüğü sınandı).
+
+**Windows koşuları.** `exe-windows` 40127508723 yeşil (14 geçti). İlk koşuda `main`'in iki A2
+testi Windows'ta ilk kez koştu ve düştü: dil adımının yeniden yüklemesi boş klasöre boş paket
+yazdırıyor, zorla öldürülen WebView2 depoyu diske yazmadan gidiyor (testler buna göre). Güncelleme
+kapısı: 40126620642 yeniden başlatma tıklamasının yarışında, 40127506755 sürümün "v" önekinde
+düştü; 40128285002 yeşil (1 geçti).
+
+**Koşulan.** Her uçta `hizli`, `tsc`, `lint`, `sinir`, `knip`, `prettier`, belge kapısı; `cargo test`
+34/34; `tb1-acilis`'in tıklama testi (`scratch/tb1-acilis-a/`) üç kez; `okunamayan.spec.ts` yerelde
+8/8 (`ogretmene-eposta`). **Koşulmayan.** Tam E2E yerelde (CI'da).
 
 ---
 
