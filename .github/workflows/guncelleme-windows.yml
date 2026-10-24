@@ -18,7 +18,7 @@ name: guncelleme-windows
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, ogretmene-eposta] # geçici: dalın koşusu, birleşmeden önce kalkar
     paths:
       - 'src/leaf/types.ts'
       - 'src/pure/parseState.ts'
