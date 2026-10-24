@@ -125,7 +125,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
+| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), sağ tık menülerinin okuduğu (`describeMenu`, `poolMenuFacts`), bırakmanın cümlesi (`dropNotice`) ve kenara ayrılan günün reddi (`blockMaskedDays`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
@@ -217,6 +217,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/availability/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menüsünü bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/usePreview.ts` | önerinin önizlemesi: hangi yol, haftası hâlâ bu planın mı, farkı, "Önerilen"de hafta; Escape kapatır |
+| `ui/program/PreviewBar.tsx` | önizlenirken ızgaranın üstündeki çubuk |
 | `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
 | `ui/program/Grid.tsx` | ana ızgara, satır başına memo |
 | `ui/program/LessonPool.tsx` | havuz |

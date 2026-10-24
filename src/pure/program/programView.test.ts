@@ -6,15 +6,26 @@
 // is both opened and moved,
 // and the small answers the menu and the head of the tray lean on.
 
-import { buildIndex, closedKey, place, placementKey, setBlockPinned } from '../constraints';
-import { EMPTY_PROGRAM_MASK, setDayMask, setRowMask } from './';
+import {
+  buildIndex,
+  closedKey,
+  dropMap,
+  place,
+  placementKey,
+  setBlockPinned,
+} from '../constraints';
+import { EMPTY_PROGRAM_MASK, setDayMask, setRowMask } from './index';
 import { replaceActiveGrid } from '../grid';
 import {
   buildPool,
   buildRows,
   classOfCell,
+  blockMaskedDays,
   describeBar,
+  describeMenu,
   describeStrip,
+  dropNotice,
+  poolMenuFacts,
   markPreview,
   roomLetter,
   visibleDays,
@@ -259,5 +270,80 @@ describe('şeridin sayıları', () => {
     expect(counts.pending).toBe(2);
     expect(counts.masked).toBe(1);
     expect(counts.exclusions.teacherIds).toEqual(['oMC']);
+  });
+});
+
+// The Program screen's menus and drag, moved out of `ui/program/Program.tsx`
+// without a change to what they compute (2026-10-24).
+describe('sağ tık menüsü ve sürükleme', () => {
+  it('bir kartın menüsü bloğu, dersini, sabitliğini ve satırın maskesini okuyor', () => {
+    const d = setBlockPinned(place(world(), 'L1', 0, 1, 2), 's510', 0, 1, true);
+    const mask = setRowMask(EMPTY_PROGRAM_MASK, 'class', 's510', 'ghost');
+    const facts = describeMenu(d, buildIndex(d), 'class', mask, {
+      kind: 'card',
+      rowId: 's510',
+      day: 0,
+      hour: 2,
+    });
+    expect([facts.classId, facts.lessonId, facts.pinned, facts.cellMasked]).toEqual([
+      's510',
+      'L1',
+      true,
+      true,
+    ]);
+    expect([facts.rowId, facts.day, facts.rowMode, facts.dayMode]).toEqual([
+      's510',
+      0,
+      'ghost',
+      undefined,
+    ]);
+  });
+
+  it('bir gün başlığının menüsünde kart yok, gün ve maskesi var', () => {
+    const d = world();
+    const dayName = d.settings.days[1]!.name;
+    const mask = setDayMask(EMPTY_PROGRAM_MASK, dayName, 'hidden');
+    const facts = describeMenu(d, buildIndex(d), 'teacher', mask, { kind: 'day', day: 1 });
+    expect([facts.at, facts.rowId, facts.day, facts.dayName, facts.dayMode]).toEqual([
+      null,
+      null,
+      1,
+      dayName,
+      'hidden',
+    ]);
+    expect(describeMenu(d, buildIndex(d), 'teacher', mask, null).day).toBeNull();
+  });
+
+  it('havuz kartının menüsü açık görünümün satırını okuyor', () => {
+    const d = world();
+    const mask = setRowMask(EMPTY_PROGRAM_MASK, 'teacher', 'oAY', 'hidden');
+    expect(poolMenuFacts(buildIndex(d), 'teacher', mask, 'L2')).toMatchObject({
+      rowId: 'oAY',
+      rowMode: 'hidden',
+    });
+    expect(poolMenuFacts(buildIndex(d), 'class', mask, 'L2').rowId).toBe('s510');
+    expect(poolMenuFacts(buildIndex(d), 'class', mask, null).rowId).toBeNull();
+  });
+
+  it('kenara ayrılan günün hücreleri bırakmayı sebebiyle reddediyor', () => {
+    const d = world();
+    const ix = buildIndex(d);
+    const dayName = d.settings.days[1]!.name;
+    const map = dropMap(d, ix, 'L1', 2, null);
+    const before = map.get('0|0');
+    blockMaskedDays(map, d, { [dayName]: 'ghost' }, t);
+    expect(map.get('0|0')).toEqual(before);
+    expect(map.get('1|0')?.blocked).toContain('geçici olarak kapsam dışında');
+    expect(map.get('1|0')?.evicts).toEqual([]);
+  });
+
+  it('boş hücreye bırakmanın cümlesi yok, birini havuza düşürenin var', () => {
+    const d = place(world(), 'L2', 0, 0, 2);
+    const ix = buildIndex(d);
+    const map = dropMap(d, ix, 'L1', 2, null);
+    expect(dropNotice(ix, 'L1', null, map.get('1|0'))).toBe('');
+    const onTop = map.get('0|0');
+    expect(onTop?.evicts.length ?? 0).toBeGreaterThan(0);
+    expect(dropNotice(ix, 'L1', null, onTop)).not.toBe('');
   });
 });

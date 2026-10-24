@@ -14,16 +14,23 @@
 // lived here. They are `pure/grid/` now, so one index no longer closes a cycle.
 
 import {
+  blockAt,
+  blockPinned,
   buildIndex,
   closedConflicts,
   closedKey,
+  evictionNotice,
   pendingBlocks,
   pinScopeCells,
   placedBlocks,
   placementKey,
+  swapDoneNotice,
+  type BlockRef,
+  type DropVerdict,
   type Index,
 } from '../constraints';
 import {
+  dayLabel,
   lessonSubject,
   subjectKey,
   subjectLabel,
@@ -33,6 +40,7 @@ import {
 import { compareTr } from '../listview';
 import {
   maskCount,
+  rowMask,
   solverExclusions,
   type MaskMode,
   type ProgramMask,
@@ -42,7 +50,14 @@ import { activePinned, activePlacements } from '../grid';
 import type { SuggestionDiff } from '../relax';
 import type { SolverProgress, SolverResult } from '../solver';
 import type { Vars } from '../../leaf/i18n';
-import type { Id, Lesson, PoolSort, State, View } from '../../leaf/model';
+import {
+  parseCellKey,
+  type Id,
+  type Lesson,
+  type PoolSort,
+  type State,
+  type View,
+} from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds what it reads. */
 type Translate = (key: string, vars?: Vars) => string;
@@ -485,6 +500,158 @@ export function classOfCell(
   const fresh = buildIndex(d);
   const lessonId = fresh.teacherBusy.get(closedKey(rowId, day, hour));
   return lessonId === undefined ? null : (fresh.lessonById.get(lessonId)?.classId ?? null);
+}
+
+// ------------------------------------------------------------------ dragging
+
+/**
+ * The sentence a drop leaves behind: the swap it made, or the lessons it sent
+ * back to the pool, or nothing. Asked with the verdict read out of the drop map
+ * BEFORE the change, because React runs a reducer callback late (pitfall 20).
+ */
+export function dropNotice(
+  ix: Index,
+  lessonId: Id,
+  source: BlockRef | null,
+  verdict: DropVerdict | undefined,
+): string {
+  const pushedOut = verdict?.evicts ?? [];
+  const lesson = ix.lessonById.get(lessonId);
+  return verdict?.action.kind === 'swap' && source !== null
+    ? swapDoneNotice(ix, source, verdict.action.targets)
+    : pushedOut.length === 0 || lesson === undefined
+      ? ''
+      : evictionNotice(
+          ix,
+          pushedOut.map((id) => ix.lessonById.get(id)).filter((x) => x !== undefined),
+          true,
+        );
+}
+
+/**
+ * A day set aside in the temporary view takes no drop: its cells in the drop
+ * map are refused with a sentence that says why. Changes `map` in place, the
+ * map is the drag's own.
+ */
+export function blockMaskedDays(
+  map: Map<string, DropVerdict>,
+  state: State,
+  maskedDays: ProgramMask['days'],
+  t: Translate,
+): void {
+  for (const [key, verdict] of map) {
+    const { day } = parseCellKey(key);
+    const dayName = state.settings.days[day]?.name;
+    if (dayName !== undefined && maskedDays[dayName] !== undefined) {
+      map.set(key, {
+        ...verdict,
+        blocked: t('{gun} geçici olarak kapsam dışında', {
+          gun: dayLabel(dayName),
+        }),
+        warning: null,
+        evicts: [],
+      });
+    }
+  }
+}
+
+// ------------------------------------------------------------------ the right-click menus
+
+/** What a right-click on the grid was about: a card, a row or day heading, or a column. */
+export type MenuTarget =
+  | { kind: 'card'; rowId: Id; day: number; hour: number }
+  | { kind: 'row'; rowId: Id }
+  | { kind: 'day'; day: number }
+  | { kind: 'column'; day: number; hour: number };
+
+/**
+ * What the grid's right-click menu reads about its target, from the state it
+ * acts on (the state can move under an open menu: an autosave, an undo, a run).
+ */
+export interface MenuFacts {
+  at: Extract<MenuTarget, { kind: 'card' }> | null;
+  rowId: Id | null;
+  day: number | null;
+  classId: Id | null;
+  pinned: boolean;
+  lessonId: Id | undefined;
+  lesson: Lesson | undefined;
+  /** The card's teacher or class row is set aside in the temporary view. */
+  cellMasked: boolean;
+  rowMode: MaskMode | undefined;
+  dayName: string | undefined;
+  dayMode: MaskMode | undefined;
+}
+
+export function describeMenu(
+  state: State,
+  ix: Index,
+  view: View,
+  mask: ProgramMask,
+  menuTarget: MenuTarget | null,
+): MenuFacts {
+  const menuAt = menuTarget?.kind === 'card' ? menuTarget : null;
+  const menuRowId =
+    menuTarget?.kind === 'row' || menuTarget?.kind === 'card' ? menuTarget.rowId : null;
+  const menuDay =
+    menuTarget?.kind === 'day' || menuTarget?.kind === 'column' || menuTarget?.kind === 'card'
+      ? menuTarget.day
+      : null;
+
+  const menuClass =
+    menuAt === null ? null : classOfCell(state, view, menuAt.rowId, menuAt.day, menuAt.hour);
+  const menuPinned =
+    menuAt !== null && menuClass !== null && blockPinned(state, menuClass, menuAt.day, menuAt.hour);
+  const menuLessonId =
+    menuAt === null || menuClass === null
+      ? undefined
+      : activePlacements(state)[
+          placementKey(
+            menuClass,
+            menuAt.day,
+            blockAt(state, menuClass, menuAt.day, menuAt.hour)?.hour ?? menuAt.hour,
+          )
+        ];
+  const menuLesson = menuLessonId === undefined ? undefined : ix.lessonById.get(menuLessonId);
+  const menuCellMasked =
+    menuLesson !== undefined &&
+    (mask.teachers[menuLesson.teacherId] !== undefined ||
+      mask.classes[menuLesson.classId] !== undefined);
+  const menuRowMode = menuRowId === null ? undefined : rowMask(mask, view, menuRowId);
+  const menuDayName = menuDay === null ? undefined : state.settings.days[menuDay]?.name;
+  const menuDayMode = menuDayName === undefined ? undefined : mask.days[menuDayName];
+  return {
+    at: menuAt,
+    rowId: menuRowId,
+    day: menuDay,
+    classId: menuClass,
+    pinned: menuPinned,
+    lessonId: menuLessonId,
+    lesson: menuLesson,
+    cellMasked: menuCellMasked,
+    rowMode: menuRowMode,
+    dayName: menuDayName,
+    dayMode: menuDayMode,
+  };
+}
+
+/** The tray card's menu: which lesson, which row of the open view, and its mode. */
+export function poolMenuFacts(
+  ix: Index,
+  view: View,
+  mask: ProgramMask,
+  poolMenuLessonId: Id | null,
+): { lesson: Lesson | undefined; rowId: Id | null; rowMode: MaskMode | undefined } {
+  const poolMenuLesson =
+    poolMenuLessonId === null ? undefined : ix.lessonById.get(poolMenuLessonId);
+  const poolMenuRowId =
+    poolMenuLesson === undefined
+      ? null
+      : view === 'teacher'
+        ? poolMenuLesson.teacherId
+        : poolMenuLesson.classId;
+  const poolMenuRowMode = poolMenuRowId === null ? undefined : rowMask(mask, view, poolMenuRowId);
+  return { lesson: poolMenuLesson, rowId: poolMenuRowId, rowMode: poolMenuRowMode };
 }
 
 // ------------------------------------------------------------------ the tool strip

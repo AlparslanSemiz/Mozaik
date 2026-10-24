@@ -12,16 +12,12 @@ import type React from 'react';
 import { dayLabel } from '../../leaf/lang';
 import { dayPeriods } from '../../pure/entities';
 import { attachGridChrome, attachGridFit } from '../../platform/dom';
-import { paletteColor, type Settings, type Id } from '../../leaf/model';
-import type { MaskMode } from '../../pure/program';
-import type { GridRow } from '../../pure/program';
+import { paletteColor, type Settings } from '../../leaf/model';
+import type { GridRow, MaskMode, MenuTarget } from '../../pure/program';
 import { useT } from '../common';
 
-export type GridMenuTarget =
-  | { kind: 'card'; rowId: Id; day: number; hour: number }
-  | { kind: 'row'; rowId: Id }
-  | { kind: 'day'; day: number }
-  | { kind: 'column'; day: number; hour: number };
+/** What a right-click was about; its shape lives with the menu's reading (`describeMenu`). */
+export type GridMenuTarget = MenuTarget;
 
 interface RowProps {
   row: GridRow;
