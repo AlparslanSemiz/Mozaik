@@ -22,7 +22,7 @@
     "boyut": "size-limit",
     "kapsam": "vitest run --coverage",
     "grafik": "depcruise src --output-type mermaid",
-    "bicim": "prettier --write \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" \"scripts/**/*.mjs\" \"*.{ts,js}\"",
+    "bicim": "prettier --write \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" \"scripts/**/*.mjs\" \"*.{ts,js}\" index.html",
     "kontrol": "npm run tipler && npm run sinir && npm run lint && vitest run && vite build && npm run boyut && playwright test && npm run test:site && playwright test --config playwright.cozucu.config.ts",
     "test:e2e": "vite build && playwright test",
     "test:webkit": "vite build && playwright test --config playwright.webkit.config.ts",

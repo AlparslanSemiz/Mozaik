@@ -79,7 +79,7 @@ jobs:
       - name: Ölü kod
         run: npm run knip
       - name: Biçim
-        run: npx prettier --check "src/**/*.{ts,tsx}" "e2e/**/*.ts" "scripts/**/*.mjs" "*.{ts,js}"
+        run: npx prettier --check "src/**/*.{ts,tsx}" "e2e/**/*.ts" "scripts/**/*.mjs" "*.{ts,js}" index.html
       - name: Birim testleri ve belge kapısı
         run: npm test
       - name: Derleme
