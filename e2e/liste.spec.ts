@@ -133,8 +133,10 @@ test.describe('49. Liste araçları', () => {
     // handle went in front of it, a gender box behind it) and each time this
     // line failed with "undefined" rather than with anything about columns.
     // The name box is the one plain text input in the row — the short form
-    // carries `.text-sm` and the limits are number boxes.
-    const names = () => rows(page).locator('td > input[type="text"]:not(.text-sm)').all();
+    // carries `.text-sm`, the limits are number boxes, and the e-mail box
+    // (schema v17) says `inputmode="email"`.
+    const names = () =>
+      rows(page).locator('td > input[type="text"]:not(.text-sm):not([inputmode="email"])').all();
 
     const entered = await Promise.all((await names()).map((i) => i.inputValue()));
     expect(entered[0]).toBe('Mehmet Çelik'); // sample order, not alphabetical

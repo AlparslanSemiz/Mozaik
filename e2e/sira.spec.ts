@@ -28,7 +28,9 @@ const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
 
 /** The name boxes, top to bottom. Column-position free (see liste.spec.ts). */
 async function names(page: Page): Promise<string[]> {
-  const boxes = await rows(page).locator('td > input[type="text"]:not(.text-sm)').all();
+  const boxes = await rows(page)
+    .locator('td > input[type="text"]:not(.text-sm):not([inputmode="email"])')
+    .all();
   return Promise.all(boxes.map((b) => b.inputValue()));
 }
 

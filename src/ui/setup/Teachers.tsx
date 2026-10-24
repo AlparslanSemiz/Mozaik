@@ -410,7 +410,10 @@ export default function Teachers({ state, change }: PanelProps) {
                   <th>{t('Cinsiyet')}</th>
                   {/* Where Çıktı sends the teacher's week (schema v17). Last of
                     the person's own fields, before the rule boxes. */}
-                  <th className="w-col-xl">{t('E-posta')}</th>
+                  {/* --w-col-md, not -xl: at 125 % the wider box pushed the
+                    table 126 px past its panel (kurulum.spec.ts 65). A long
+                    address scrolls inside its box and reads in full there. */}
+                  <th className="w-col-md">{t('E-posta')}</th>
                   <th className="num" title={t('Art arda en fazla kaç saat')}>
                     {t('Art arda')}
                   </th>

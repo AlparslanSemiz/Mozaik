@@ -372,11 +372,17 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     await kutu.fill('  mehmet.celik@example.com ');
     await kutu.press('Tab');
+    // On the address itself: the load already wrote the plan as v17, before
+    // the address was typed, and the store writes 400 ms after a change.
+    const kayit = async () =>
+      JSON.parse((await savedText(page)) || '{}') as {
+        schemaVersion?: number;
+        teachers?: Array<{ email: string }>;
+      };
     await expect
-      .poll(async () => JSON.parse((await savedText(page)) || '{}'))
-      .toMatchObject({ schemaVersion: 17 });
-    const kayit = JSON.parse(await savedText(page)) as { teachers: Array<{ email: string }> };
-    expect(kayit.teachers.map((t) => t.email)).toEqual(['mehmet.celik@example.com', '']);
+      .poll(async () => (await kayit()).teachers?.map((t) => t.email))
+      .toEqual(['mehmet.celik@example.com', '']);
+    expect((await kayit()).schemaVersion).toBe(17);
 
     await reopen(page);
     await openSetup(page, 'Öğretmenler');
