@@ -212,9 +212,10 @@ numaraları `main`'e giren B7.33'ten (maskable ikon) sonra B7.34–B7.36 oldu.
 
 **Koşulan.** `hizli` (1346 geçti), `storeContract`, `bundle`, `fuzz`, `docs` testleri, `tsc`,
 `eslint`, `prettier`, `npm run build`, tıklama testi iki kez (`agir.sh`). **Koşulmayan.** E2E
-yerelde (CI'da), mutasyon.
+yerelde (CI'da), mutasyon. İkinci incelemeden sonra `hizli` 1347 geçti.
 
 ---
+
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 
 **Mavi.** Kullanıcının kararı: yalnız `site/icon-small.svg`'de mavi `#65b6ec` → `#3f9fe3`,
