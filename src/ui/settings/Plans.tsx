@@ -175,14 +175,17 @@ export default function Plans({ state, plans }: Props) {
                   onChange={(e) => plans.markDraft(plan.id, e.target.checked)}
                 />
               </td>
+              {/* An unreadable plan has no numbers to give; zeros would read as empty. */}
               <td className="hint">
-                {t('{ogretmen} öğretmen · {sinif} sınıf · {ders} ders', {
-                  ogretmen: counts.teachers,
-                  sinif: counts.classes,
-                  ders: counts.lessons,
-                })}
+                {unreadable !== null
+                  ? '—'
+                  : t('{ogretmen} öğretmen · {sinif} sınıf · {ders} ders', {
+                      ogretmen: counts.teachers,
+                      sinif: counts.classes,
+                      ders: counts.lessons,
+                    })}
               </td>
-              <td className="num">{counts.placed}</td>
+              <td className="num">{unreadable !== null ? '—' : counts.placed}</td>
               <td>
                 <div className="form-row nowrap">
                   <button
