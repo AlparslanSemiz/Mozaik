@@ -116,34 +116,40 @@ jobs:
           Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force
           Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
 
-      # TEŞHİS (TP7, 2026-10-24, geçici): msedgedriver WebView2'ye hata ayıklama portunu
-      # WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS ile açtırıyor. Bu exe'de o değişken işe
-      # yarıyor mu, sürücüsüz sorulur: önce release, sonra aynı kaynaktan debug derleme.
-      - name: 'Teşhis: ortam değişkeniyle hata ayıklama portu açılıyor mu'
+      # TEŞHİS 2 (TP7, 2026-10-24, geçici). İlk teşhis: WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
+      # bu exe'de (release de debug de) portu açmıyor. Burada: (A) portu derleme anında
+      # additionalBrowserArgs ile veren bir exe portu açıyor mu, (B) msedgedriver ona
+      # debuggerAddress ile bağlanıp sayfayı okuyabiliyor mu (Microsoft'un belgelediği yol).
+      - name: 'Teşhis 2: additionalBrowserArgs ve debuggerAddress'
         shell: pwsh
         continue-on-error: true
         run: |
-          function Yokla($exe, $ad) {
-            Get-Process msedgewebview2, Mozaik, ders-programi -ErrorAction SilentlyContinue | Stop-Process -Force
-            Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
-            $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9222'
-            $p = Start-Process $exe -PassThru
-            Start-Sleep -Seconds 15
-            try { $v = Invoke-RestMethod 'http://127.0.0.1:9222/json/version' -TimeoutSec 5; Write-Host "$ad -> PORT AÇIK: $($v.Browser)" }
-            catch { Write-Host "$ad -> PORT KAPALI: $($_.Exception.Message)" }
-            Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Select-Object -First 3 |
-              ForEach-Object { Write-Host "  argüman: $($_.CommandLine.Substring(0, [Math]::Min(400, $_.CommandLine.Length)))" }
-            Get-ChildItem -Recurse -Filter DevToolsActivePort -Path $env:LOCALAPPDATA, $env:TEMP -ErrorAction SilentlyContinue |
-              ForEach-Object { Write-Host "  DevToolsActivePort: $($_.FullName)" }
-            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
-          }
-          $rel = @('src-tauri/target/release/Mozaik.exe', 'src-tauri/target/release/ders-programi.exe') | Where-Object { Test-Path $_ } | Select-Object -First 1
-          Yokla $rel 'release'
-          npx --yes @tauri-apps/cli@2.12.1 build --debug --no-bundle 2>&1 | Select-Object -Last 3
-          $dbg = @('src-tauri/target/debug/Mozaik.exe', 'src-tauri/target/debug/ders-programi.exe') | Where-Object { Test-Path $_ } | Select-Object -First 1
-          Yokla $dbg 'debug'
+          node -e "const c=require('./src-tauri/tauri.conf.json'); const w={...c.app.windows[0], additionalBrowserArgs:'--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port=9222'}; require('fs').writeFileSync(process.env.RUNNER_TEMP+'/port.conf.json', JSON.stringify({app:{windows:[w]}}))"
+          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle --config "$env:RUNNER_TEMP\port.conf.json" 2>&1 | Select-Object -Last 2
+          $exe = @('src-tauri/target/release/Mozaik.exe', 'src-tauri/target/release/ders-programi.exe') | Where-Object { Test-Path $_ } | Select-Object -First 1
           Get-Process msedgewebview2, Mozaik, ders-programi -ErrorAction SilentlyContinue | Stop-Process -Force
+          Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
+          $p = Start-Process $exe -PassThru
+          Start-Sleep -Seconds 15
+          try { $v = Invoke-RestMethod 'http://127.0.0.1:9222/json/version' -TimeoutSec 5; Write-Host "A -> PORT AÇIK: $($v.Browser)" }
+          catch { Write-Host "A -> PORT KAPALI: $($_.Exception.Message)" }
+          Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -match 'embedded-browser-webview' } | Select-Object -First 1 |
+            ForEach-Object { Write-Host "  ana süreç: $($_.CommandLine)" }
+          $drv = Start-Process "$env:RUNNER_TEMP\edgedriver\msedgedriver.exe" -ArgumentList '--port=9515' -PassThru
+          Start-Sleep -Seconds 3
+          $body = '{"capabilities":{"alwaysMatch":{"browserName":"webview2","ms:edgeOptions":{"debuggerAddress":"127.0.0.1:9222"}}}}'
+          try {
+            $s = Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:9515/session' -Body $body -ContentType 'application/json' -TimeoutSec 60
+            $sid = $s.value.sessionId
+            $t = Invoke-RestMethod -Uri "http://127.0.0.1:9515/session/$sid/title" -TimeoutSec 20
+            $u = Invoke-RestMethod -Uri "http://127.0.0.1:9515/session/$sid/url" -TimeoutSec 20
+            Write-Host "B -> OTURUM AÇILDI: başlık '$($t.value)', adres $($u.value)"
+          } catch { Write-Host "B -> OTURUM AÇILMADI: $($_.Exception.Message) $($_.ErrorDetails.Message)" }
+          Stop-Process -Id $drv.Id -Force -ErrorAction SilentlyContinue
+          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          Get-Process msedgewebview2, Mozaik, ders-programi -ErrorAction SilentlyContinue | Stop-Process -Force
+          # Süit asıl exe'yi beklediği için portsuz derleme geri yazılır.
+          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle 2>&1 | Select-Object -Last 1
 
       - name: Gerçek exe süiti
         shell: bash
