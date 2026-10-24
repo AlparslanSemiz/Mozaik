@@ -95,7 +95,7 @@ Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
 **Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
 (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi)
-`surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si (kullanıcının kararı);
+`surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si `tp7-windows-exe`'de yeşil (2026-10-24);
 `klasorleme` ve Dependabot dalları birleşmedi.
 
 ---
@@ -1626,8 +1626,9 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
       düzeltmesiyle geldi (`src/fuzz.test.ts`, `readBundlePlans`). `test/gercek-ortam`'da
       yazılıp `tp7-windows-exe` ile gelenler (2026-10-10, o günkü tanımları arşivde): TP6 (gerçek
       paket fikstürü, adsız, `src/fixtures/gercek-paket-v1.json`), TP9 ve TP10 (köprü ve
-      güncelleme kontratı, `src/kontrat.test.ts`), TP12 (Brave, `npm run test:brave`); TP7
-      (Windows'ta gerçek exe, `exe-windows.yml`) o dalda sürüyor. Geri kalanlar sırasız:
+      güncelleme kontratı, `src/kontrat.test.ts`), TP12 (Brave, `npm run test:brave`) ve TP7
+      (Windows'ta gerçek exe, `exe-windows.yml`: 2026-10-24'te 13 geçti, 2 platform atlaması;
+      msedgedriver portla derlenen test exe'sine `debuggerAddress` ile bağlanıyor, TESTFINDINGS). Geri kalanlar sırasız:
       TP5 (veri yolunun mutasyonu), TP6 (gerçek paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
       TP13 (uzun süre açık kalma), TP14 (zayıf makine vekili), TP15 (performans), TP16 ve TP17
       (güvenlik), TP18 (metin bütçesi), TP19 (kabul), TP20 (bileşen katmanı), TP21
@@ -1693,20 +1694,20 @@ testi o commit'te sıradan bir teste döner.
       `kapanabilir` diyor, cevap gelmezse pencere 5 s sonra yine kapanıyor (ARCHITECTURE, "Exe
       bir adaptör takar"). Linux ikilisinde, sahte HOME'la, gerçek bir WM_DELETE_WINDOW ile
       ölçüldü: önce 0/3, sonra 5/5 ve 3/3, pencere 0,17–0,26 s'de kapandı; denetim (3 s bekleyip
-      kapatmak) 2/2. Windows'ta (WebView2) ölçülmedi. **Tarayıcı yarısı düzelmez:** kapanan sekme
+      kapatmak) 2/2. Windows'ta (WebView2) gerçek exe süitinde bir koşu yeşil (2026-10-24, aşağıda). **Tarayıcı yarısı düzelmez:** kapanan sekme
       eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
       yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı). Kapanırken 5 s'yi aşan
       bir cevapsızlık ölçülmedi.
       **Etiket kapısı (2026-10-24, kullanıcının kararı):** `gercek-exe.spec.ts`'te "X ile hemen
       kapanan pencere…" testi (son değişiklik, X, yeniden açılış, değişiklik yerinde) Linux'ta
       14/14'le yeşil, düzeltmesiz ikiliye karşı kırmızı; Windows yarısı (`pencere-kapat.mjs`'in
-      WM_CLOSE'u) yazıldı, koşulmadı: Windows'ta gerçek exe süiti TP7. Bir sonraki sürümde
-      etiketten önce Windows'ta yeşil olur (BUILD, "Sürüm").
+      WM_CLOSE'u) `exe-windows.yml`'de yeşil (2026-10-24, `tp7-windows-exe`, 5,4 s), ve `yayinla`
+      etiketten önce o koşuyu bekliyor (BUILD, "Sürüm"). Windows'ta düzeltmesiz ikiliye karşı
+      koşulmadı.
       **Tarayıcı yarısı veri kaybı değil (2026-10-24, kullanıcının sorusu):** beş koşunun beşinde
       değişiklik kapanıştan sonra depoda, klasör bir değişiklik geride, sonraki açılış onu klasöre
       yazıyor (`klasor.spec.ts`, BİLİNEN KUSUR'dan sıradan teste döndü; deponun kapanış flush'ı
-      kalkınca kırmızı). Yeni bir çare denenmedi. Açık kalan: exe yarısının Windows'ta ölçümü,
-      etiketten önceki gerçek exe kapanış senaryosuyla (BUILD, "Sürüm").
+      kalkınca kırmızı). Yeni bir çare denenmedi.
 - [x] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);

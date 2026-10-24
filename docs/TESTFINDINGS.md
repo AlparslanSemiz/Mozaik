@@ -26,6 +26,26 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `exe-windows.yml` 40095284383, 40098144374, 40098679435, 40099384214 (`tp7-windows-exe`) · Windows'ta gerçek exe
+Bulgu: (1) `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` bu exe'de portu açmıyor (release de
+debug de): wry 0.57 tarayıcı argümanlarını her zaman kendisi veriyor
+(`--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection`) ve onlar değişkeni
+geçersiz kılıyor; 2026-10-10'un "DevToolsActivePort file doesn't exist"ının sebebi bu.
+(2) Pencereye `additionalBrowserArgs` ile `--remote-debugging-port=9222` verilerek derlenen
+exe portu açıyor (Edg/155.0.4283.62) ve msedgedriver ona `ms:edgeOptions.debuggerAddress` ile
+bağlanıp sayfayı okuyor (başlık "Mozaik", `http://tauri.localhost/`). (3) Oturum açılınca
+15 testin 10'u kırmızı: arayüz İngilizce (runner'ın Windows'u İngilizce, WebView2 dili
+oradan alıyor; wry'ın `--lang`'i bizimkinden sonra geliyor). (4) Dil sabitlenince 7'si
+kırmızı: runner'ın ekranı 1024×768, büyütülmüş pencere 1280 px'in altında, sekmelerin yazısı
+gizli, süit sekmeyi adıyla bulamıyor. (5) Ekran 1920×1080'e çekilince 13 geçti, 2 platform
+atlaması; X ile kapanış (WM_CLOSE) 5,4 s'de yeşil.
+Tür: test altyapısı.
+Ne yapıldı: Windows'ta `tauri-driver` bırakıldı, exe'yi süit açıyor ve msedgedriver
+`debuggerAddress` ile bağlanıyor (`scripts/webdriver.mjs`); test exe'si portla derleniyor
+(`windowsTestAyari`), yayınlanan exe portsuz; dil kaydı ve yeniden yükleme; iş akışında
+ekran 1920×1080. Windows'ta düzeltmesiz ikiliye karşı mutasyon koşulmadı.
+Kalıcı kural: yok.
+
 ### 2026-10-24 · bitti kontrolü (alt ajan incelemesi ve tıklama testi) · `tb8-eksik-plan`
 Bulgu: (1) `parseBundle` `state`'i nesne olmayan girdiyi sayılmadan atıyordu, buradaki aynı
 kimlikli plan "Hepsini değiştir"den sonra siliniyordu. (2) TB8'den eski: depo doluyken hiçbir

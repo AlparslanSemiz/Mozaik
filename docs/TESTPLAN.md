@@ -473,11 +473,14 @@ WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor (tuzak 127). Yani bu
 süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek programın
 sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
 
-**Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar:
-`tauri-driver` WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver`'ın önünde. **Henüz
-yeşil değil (2026-10-10):** oturum açılmıyor, msedgedriver WebView2'nin hata ayıklama
-portunu bulamıyor ("DevToolsActivePort file doesn't exist"); dil de sabitlenemedi
-(TESTFINDINGS, TODO TP7). Sahte ev yok, çünkü exe Belgeler'i
+**Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar, ilk
+yeşili 2026-10-24 (13 geçti, 2 platform atlaması). `tauri-driver` yok: exe'yi süit açıyor ve
+WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver` ona `ms:edgeOptions.debuggerAddress` ile
+bağlanıyor. Bunun için test exe'si pencereye bir hata ayıklama portu ekleyerek derleniyor
+(`windowsTestAyari`, `tauri build --config`); yayınlanan exe'de port yok. Arayüz Türkçe,
+çünkü oturum açılınca dil kaydı yazılıp sayfa yeniden yükleniyor (runner'ın Windows'u
+İngilizce; babada dil Windows'tan geliyor ve kayıt yok), ve ekran 1920×1080, çünkü
+runner'ın 1024×768'inde sekmelerin yazısı gizleniyor. Sahte ev yok, çünkü exe Belgeler'i
 kabuğa soruyor ve WebView2 profilini `%LOCALAPPDATA%\com.dersprogrami.arac`'ta tutuyor:
 süit runner'ın gerçek klasörlerini her testten önce siliyor, ve bu yüzden GitHub'ın
 runner'ı dışında Windows'ta koşmayı reddediyor (`windowsYerleri`). Platformların

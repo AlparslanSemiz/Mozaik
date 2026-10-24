@@ -304,7 +304,7 @@ kendini güncellemiyor (aşağıda). İşi gerçek pencereyi sürmek: `scripts/e
 onu açar, ekran görüntüsü alır, tıklar, yazar, sürükler ve sayfada betik çalıştırır,
 `e2e/gercek-exe.spec.ts` de aynı yoldan programın kendisini sınar (neyi sınadığı [TESTPLAN.md](TESTPLAN.md)'de). Sürücü `tauri-driver`
 (`cargo install tauri-driver --locked`) ile sistemin `WebKitWebDriver`'ı üstünden
-çalışır. Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
+çalışır (Windows'ta sürücü başka yoldan bağlanıyor, TESTPLAN, "Gerçek exe"). Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
 ile), gerçek klasörlere dokunmaz. Sürücünün oturum kaydı ve sahte evi
 `scratch/exe-surucu/`'da durur, `test-results/`'da değil: her Playwright koşusu o
 klasörü boşaltır (tuzak 131). Linux ikilisi WebKitGTK'nın DMA-BUF çizimini kendisi
@@ -436,10 +436,9 @@ adımında durur. `exe-windows.yml` her push'ta koşmadığı için commit'in ko
 `e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
 gerçek `Mozaik.exe`'ye karşı yeşil olur: son değişiklik, başlık çubuğunun kapatma mesajıyla
 kapanış (WM_CLOSE, `scripts/pencere-kapat.mjs`), Belgeler'deki dosyada değişiklik, yeniden
-açılışta değişiklik yerinde. `yayinla` bunu kendisi beklemiyor: Windows'ta gerçek exe süitini
-koşan iş akışı TP7, `test/gercek-ortam` dalında ve kullanıcının kararını bekliyor (TODO §8l);
-o gelene kadar bu test sürümü çıkaran kişinin elle koştuğu bir adım. Linux'ta
-`npm run exe:e2e` ile her sürümden önce zaten koşuyor.
+açılışta değişiklik yerinde. Test `exe-windows.yml`'in süitinde, ve `yayinla` etiketten önce o
+koşunun yeşilini bekliyor (yukarıda), yani elle bir adım yok. Linux'ta `npm run exe:e2e` ile
+her sürümden önce koşuyor.
 
 ## İşaret ve ikon
 

@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (zincirin son dalı, `okunabilirlik`).
+Son güncelleme: 2026-10-24 (`tp7-windows-exe`, zincirden sonra).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -50,7 +50,7 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
 TP-B birikim maddesi. 2026-10-24'te yedi dal zincir olarak birleşti (aşağıdaki girdiler):
 TB8 düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in üst çubuk yarısı düzeldi, açılış yarısı
-açık (`tb1-acilis`); TB7'nin exe yarısı düzeldi (Linux'ta ölçüldü, Windows'ta etiketten önce),
+açık (`tb1-acilis`); TB7'nin exe yarısı düzeldi (Linux'ta ve Windows'ta gerçek exe süitinde yeşil),
 tarayıcı yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor; dosya
 okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kapandı.
 
@@ -58,8 +58,9 @@ okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kap
 `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik`) birleşince ana
 klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). Zebra mozaik-ed'in `zebra-liste`
 dalında (kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi
-(`scratch/zebra-devir.md`). Açılan dallar: `tp7-windows-exe` (Windows'ta gerçek exe süiti,
-kapanış senaryosu, `yayinla`'nın etiket kapısı) ve `tb1-acilis` (açılışta bozuk plan). Kodu
+(`scratch/zebra-devir.md`). Zincirden sonra iki dal: `tp7-windows-exe` (Windows'ta gerçek exe süiti
+yeşil, kapanış senaryosu içinde, `yayinla` etiketten önce onu bekliyor) ve `tb1-acilis`
+(açılışta bozuk plan). Kodu
 değiştiren her dal "bitti"den önce bitti kontrolünü yapar; bir TODO maddesine başlamadan önce
 worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum`
 (Alp'in deny testi); onun B7.33'ü `main`'de maskable ikonun, birleşirken numarasını kaydırır.
@@ -108,8 +109,8 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
    saatte iki sınıfı) özellik dalının işi.
 10. Birleştirme turunun açık işleri (2026-10-23, aşağıdaki girdi): 2026-10-23 yönünün
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
-   silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7 Windows'ta
-   kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
+   silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7, `tp7-windows-exe`
+   ile geliyor), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
    (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
 11. Yeni işaret `main`'de (2026-10-23, `ozellik/asil-ikon`): kullanıcının seçtiği resimden
@@ -137,9 +138,9 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 - Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
 - Veri kaybı VK1 ve VK2 düzeldi (TODO B7.27): iki sekmede bayat olan yazmayı bırakıyor,
-  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
-  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7: exe'nin penceresi kapanmadan
-  sayfanın son yazımını bekliyor, Windows'ta ölçülmedi; tarayıcı sekmesinde klasör bir
+  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya gerçek exe süitinde yeşil (2026-10-24);
+  boyut, açılış süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7: exe'nin penceresi
+  kapanmadan sayfanın son yazımını bekliyor, Linux'ta ve Windows'ta gerçek exe süitinde yeşil; tarayıcı sekmesinde klasör bir
   değişiklik geride kalabiliyor, depo tutuyor ve sonraki açılış yazıyor (veri kaybı değil).
 - Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
   açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
@@ -181,6 +182,27 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 
 ---
+
+## 2026-10-24 gece · TP7: Windows'ta gerçek exe süiti yeşil (`tp7-windows-exe`)
+
+`test/gercek-ortam`'dan açıldı, zincirin ucu (`okunabilirlik`) alındı; `main` zincir
+birleşmediği için hâlâ c41223c, `git merge main` birleşmeden sonra. Kırmızının sebebi iki
+teşhis koşusuyla bulundu (TESTFINDINGS): wry tarayıcı argümanlarını kendisi veriyor ve
+msedgedriver'ın `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`'ı yok sayılıyor, yani `tauri-driver`
+Windows'ta hiçbir oturum açamıyordu. Çare: test exe'si pencereye
+`--remote-debugging-port=9222` eklenerek derleniyor (`windowsTestAyari`, `tauri build
+--config`; yayınlanan exe `surum.yml`'de portsuz), exe'yi süit açıyor, msedgedriver ona
+`ms:edgeOptions.debuggerAddress` ile bağlanıyor, oturum kapanınca exe süreç ağacıyla
+öldürülüyor ve port kapanana kadar bekleniyor. Sonra iki kırmızı daha: arayüz İngilizce
+(dil kaydı `tr` ve yeniden yükleme) ve runner'ın 1024×768 ekranında sekme yazıları gizli
+(iş akışında `Set-DisplayResolution` 1920×1080). Son koşu (40099384214, f98f20b) 13 geçti, 2
+platform atlaması; X ile kapanış (WM_CLOSE) 5,4 s. `tauri-driver` kurulumu, iki teşhis adımı
+ve dalın geçici push tetiği kalktı. `yayinla` zaten `exe-windows.yml`'i bekliyordu
+(2026-10-10); BUILD'in "etiketten önce elle" adımı silindi.
+
+Koşulanlar: Linux'ta gerçek exe süiti tb7'nin ikilisine karşı 14 geçti, 1 atlandı (sürücünün
+Linux yolu değişmedi); `npm run hizli` yeşil. Koşulmayan: Windows'ta düzeltmesiz ikiliye karşı
+kapanış testi (mutasyon), ve süitin babanınki gibi Türkçe bir Windows'ta koşusu.
 
 ## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
 
