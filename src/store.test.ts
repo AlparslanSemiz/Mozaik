@@ -1030,4 +1030,4 @@ describe('savePlan kota hatasını bildiriyor', () => {
     expect(savePlan('abcd', emptyState())).toBe(false);
   });
 });
-import { activeProgram } from './pure/programs';
+import { activeProgram } from './pure/program/programs';

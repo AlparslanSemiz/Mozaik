@@ -26,6 +26,7 @@ import {
   writeHandle,
 } from './folder';
 import { writesClosed } from './otherWindow';
+import { mayWritePlan } from './libraryStore';
 import type { Library } from '../pure/library';
 import { collectStates } from './download';
 import { searchLog } from './search';
@@ -60,6 +61,9 @@ export interface FolderRun {
   /** From a click: re-asks for a permission the browser dropped on reload. */
   allow: () => Promise<void>;
   forget: () => Promise<void>;
+  /** Writes now instead of in two seconds, and resolves when it has: for the
+      exe's window, which waits for it before it closes (TB7). */
+  flush: () => Promise<void>;
 }
 
 /**
@@ -90,8 +94,10 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
   const write = useCallback(async (handle: FileSystemDirectoryHandle) => {
     // Another window changed the data: its copy is the newer one, and this
     // window's would overwrite the folder with what it read before (VK1).
-    if (writesClosed()) return;
+    // And an open plan that read empty at startup while its key is full now
+    // would put an empty plan in today's file (libraryStore.ts, `mayWritePlan`).
     const { library: lib, planId: id, present: now, rescue: kurtar } = latest.current;
+    if (writesClosed() || !mayWritePlan(id)) return;
     const text = buildBundle(lib, collectStates(lib, id, now), searchLog());
     const when = new Date();
     // Listing the directory is real I/O; only do it when the day turned over,
@@ -173,17 +179,22 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [present, planId, library, rescue, write]);
 
-  // Pitfall 28, in this file's shape: a pending write that is cancelled by the
-  // page going away is the last edit of the session, gone.
-  useEffect(() => {
-    const flush = () => {
-      if (dir.current === null) return;
-      window.clearTimeout(timer.current);
-      void write(dir.current);
-    };
-    window.addEventListener('beforeunload', flush);
-    return () => window.removeEventListener('beforeunload', flush);
+  const flush = useCallback(async () => {
+    if (dir.current === null) return;
+    window.clearTimeout(timer.current);
+    await write(dir.current);
   }, [write]);
+
+  // Pitfall 28, in this file's shape: a pending write that is cancelled by the
+  // page going away is the last edit of the session, gone. In a browser tab
+  // this only STARTS the write, and a closing tab does not wait for it (TB7,
+  // measured: nor does Chromium's "leave this page?" question, which stops the
+  // page while it is open). The exe's window waits for `flush` instead.
+  useEffect(() => {
+    const onUnload = () => void flush();
+    window.addEventListener('beforeunload', onUnload);
+    return () => window.removeEventListener('beforeunload', onUnload);
+  }, [flush]);
 
   const choose = useCallback(async () => {
     if (isDesktop()) return; // nothing to choose — see `fixed`
@@ -219,5 +230,5 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     setStatus({ kind: 'secilmedi' });
   }, []);
 
-  return { status, fixed: isDesktop(), choose, allow, forget };
+  return { status, fixed: isDesktop(), choose, allow, forget, flush };
 }

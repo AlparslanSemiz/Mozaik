@@ -13,7 +13,7 @@
 
 import { parseState } from '../pure/parseState';
 import { BACKUP_COUNT, backupKey, BASE_KEY } from '../pure/library';
-import { readPlanText, writePlanText } from './libraryStore';
+import { readPlanText, readPlanTextAtStart, writePlanText } from './libraryStore';
 import { safely } from '../leaf/storage';
 import type { Id, State } from '../leaf/types';
 
@@ -56,6 +56,12 @@ export function savePlan(id: Id, d: State): boolean {
 
 export function loadPlan(id: Id): State | null {
   const text = readPlanText(id);
+  return text === null ? null : parseState(text);
+}
+
+/** `loadPlan` for the one read at startup: an empty answer is remembered. */
+export function loadPlanAtStart(id: Id): State | null {
+  const text = readPlanTextAtStart(id);
   return text === null ? null : parseState(text);
 }
 

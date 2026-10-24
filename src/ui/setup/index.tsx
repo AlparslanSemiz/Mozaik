@@ -26,7 +26,7 @@ import Subjects from './Subjects';
 import { Summary } from '../lists';
 import { drafts as draftsOf } from '../../pure/library';
 import type { PanelProps, PlanControls } from '../props';
-import { STEPS } from '../steps';
+import { STEPS } from '../program';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';
 

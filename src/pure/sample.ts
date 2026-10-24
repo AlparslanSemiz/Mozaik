@@ -10,7 +10,7 @@ import { closedKey } from './constraints';
 import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from '../leaf/types';
 import { PALETTE_SIZE } from '../leaf/palette';
 import { SCHEMA_VERSION } from '../leaf/types';
-import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from './program';
 import {
   DEFAULT_BELL,
   DEFAULT_RULES,

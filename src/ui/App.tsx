@@ -3,7 +3,7 @@ import { Keyboard, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../pure/feasibility';
-import { InspectorProvider } from './Inspector';
+import { Check, InspectorProvider, Program, lessonIcon } from './program';
 import { LessonEditProvider } from './LessonEdit';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
@@ -43,20 +43,16 @@ import { attachScrollFade } from '../platform/scrollFade';
 import { attachRibbonScroll } from '../platform/ribbonScroll';
 import { useSolver } from '../platform/search';
 import { useFolder } from '../platform/useFolder';
+import { onDesktopClose } from '../platform/desktop';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';
 import Setup from './setup';
 import Lessons from './lessons';
-import { lessonIcon } from './steps';
 import Availability from './Availability';
-import Program from './Program';
 import { T, useLang, useT } from './T';
-import Check from './Check';
 import Ribbon from './Ribbon';
-import Print, { NOTHING_EXCLUDED } from './Print';
-import type { Excluded } from './Print';
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from '../pure/programMask';
-import type { ProgramMask } from '../pure/programMask';
+import { NOTHING_EXCLUDED, Print, type Excluded } from './print';
+import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions, type ProgramMask } from '../pure/program';
 import Settings from './settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../platform/changelog';
@@ -323,7 +319,8 @@ const ICON = {
  * is 24.5 px at 100 % — and the icon comparison this project already ran
  * (`scripts/ikon-karsilastir.mjs`) put 20-32 px in the band where the six
  * columns are "blurry but still separable", i.e. the band where it is a
- * judgement call. The reader made the call.
+ * judgement call. The reader made the call. The calendar mark of 2026-10-23
+ * kept it: at 24 px its hooks are a blur.
  *
  * The SOURCE of truth is site/icon-small.svg; e2e/kabuk.spec.ts checks this
  * draws the same rectangles, the way temel.spec.ts already does for the
@@ -332,11 +329,12 @@ const ICON = {
  */
 function BrandMark() {
   return (
-    <svg viewBox="0 0 512 512" className="brand-mark">
-      <rect width="512" height="512" rx="112" fill="#2e3ba8" />
-      <rect x="96" y="112" width="96" height="192" rx="32" fill="#65b6ec" />
-      <rect x="208" y="208" width="96" height="192" rx="32" fill="#9ff292" />
-      <rect x="320" y="128" width="96" height="160" rx="32" fill="#f3de9b" />
+    <svg viewBox="0 0 1024 1024" className="brand-mark">
+      <rect width="1024" height="1024" rx="180" fill="#2e3ba8" />
+      <rect x="128" y="128" width="768" height="768" rx="64" fill="#fff" />
+      <rect x="256" y="256" width="128" height="256" rx="32" fill="#c576f3" />
+      <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454" />
+      <rect x="640" y="512" width="128" height="256" rx="32" fill="#3f9fe3" />
     </svg>
   );
 }
@@ -496,9 +494,20 @@ export default function App() {
   // exe. The double-clicked .html has neither and says so; it cannot replace
   // itself, and it is the build the offline principle is checked on (temel.spec.ts).
   //
-  // `park` goes in because the exe route ENDS by closing this window: the
-  // pending autosave has to be on disk before it does (pitfall 28).
+  // `park` goes in because the exe route ENDS with `app.exit(0)`, which the
+  // close hold below never sees: the pending autosave has to be on disk
+  // before it (pitfall 28). The folder's pending write is not waited for
+  // there; the next launch writes the folder again.
   const update = useUpdate(park);
+  // The exe's window waits for this before it closes (TB7): the pending
+  // autosave and the folder's two-second write land first. A ref, so the
+  // listener is registered once and still calls today's `park` and `flush`.
+  const beforeClose = useRef<() => Promise<void>>(() => Promise.resolve());
+  beforeClose.current = async () => {
+    park();
+    await folder.flush();
+  };
+  useEffect(() => onDesktopClose(() => beforeClose.current()), []);
   // Dismissed for THIS session only, and in sessionStorage rather than
   // localStorage on purpose: a new ders-programi-* key would owe the
   // "Veriler nerede" table a row (planlar.spec.ts checks every one of them),
@@ -659,7 +668,14 @@ export default function App() {
     // a full 426-placement week — so this is about the shape of the code, not
     // about speed. The thing that actually costs a reader time on this path is
     // the confirmation dialog, and that one is deliberate.)
-    const text = await file.text();
+    // A file deleted, locked or too big between picking and reading rejects
+    // here; it is an unreadable file like any other, not a silent nothing (TB1).
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      text = '';
+    }
     const read = readPlanFile(text);
     if ('problem' in read && read.problem === 'eksik') {
       await alert({
@@ -757,8 +773,8 @@ export default function App() {
           three separate strips would have cost the grid a teacher. */}
       <header className="topbar" data-section={tab}>
         {/* Zone zero: WHAT THIS IS. The simple mark, the same drawing as the
-            tab's favicon: at 1.75rem the detailed one's six columns are a
-            smear too (measured, see Brand below).
+            tab's favicon: at 1.75rem the detailed one's hooks are a blur
+            (measured, see BrandMark above).
 
             Inline rather than <img src>: dist/index.html is ONE file and
             fetches nothing (offline principle, pitfall 32), so an <img> would need
@@ -1047,6 +1063,19 @@ export default function App() {
               <div className="save-warning" role="alert">
                 ⚠{' '}
                 <T k="**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor." />{' '}
+                <button className="btn" onClick={() => window.location.reload()}>
+                  {t('Yenile')}
+                </button>
+              </div>
+            )}
+
+            {/* THE PLAN READ EMPTY AT STARTUP, AND ITS KEY IS FULL. Under file://
+            a reloaded page has once started from an empty storage (TRAPS 108);
+            this window has written nothing over the saved plan, and a reload
+            reads it. */}
+            {saveTrouble === 'okunamadi' && (
+              <div className="save-warning" role="alert">
+                ⚠ <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı." />{' '}
                 <button className="btn" onClick={() => window.location.reload()}>
                   {t('Yenile')}
                 </button>

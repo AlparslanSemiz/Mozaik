@@ -152,6 +152,8 @@ const DE: Sozluk = {
     "**Die letzte Änderung konnte auf diesem Computer nicht gespeichert werden:** der Speicher ist voll. Damit Ihre Arbeit erhalten bleibt, klicken Sie auf **In Datei speichern**.",
   "**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor.":
     "**Dieser Plan wurde in einem anderen Fenster geändert.** Dieses Fenster speichert nicht mehr.",
+  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
+    "**Der gespeicherte Plan konnte beim Start nicht gelesen werden.** Er wurde nicht überschrieben.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Das automatische Speichern funktioniert auf diesem Computer nicht.** Alles geht verloren, wenn das Programm geschlossen wird. Drücken Sie beim Arbeiten häufig **In Datei speichern** und legen Sie vor dem Herunterfahren unbedingt eine Sicherung an.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -194,7 +196,7 @@ const DE: Sozluk = {
   Yük: "Last",
   Durum: "Status",
 
-  // src/ui/Check.tsx
+  // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "Es gibt noch nichts zu prüfen.",
   İmkânsız: "Unmöglich",
   "Programın durumu": "Status des Plans",
@@ -258,7 +260,7 @@ const DE: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     "Aus dem Entwurf „{ad}“ wurde ein neuer Plan geöffnet.",
 
-  // src/ui/Grid.tsx
+  // src/ui/program/Grid.tsx
   "Öğle arası": "Mittagspause",
   "{ust} {alt}, kaldırmak için Delete":
     "{ust} {alt}, zum Entfernen Entf drücken",
@@ -270,7 +272,7 @@ const DE: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Angeheftet. Mit Rechtsklick lösen",
 
-  // src/ui/Program.tsx — the grid's own menu
+  // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Ins Ablagefach",
   sabitlenmiş: "angeheftet",
   "Dersi düzenle": "Stunde bearbeiten",
@@ -293,12 +295,12 @@ const DE: Sozluk = {
     "Die {n} angehefteten Stunden bleiben. Stunden, Lehrkräfte und Sperrzeiten bleiben unberührt. Ctrl+Z macht es rückgängig.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: Angaben und Wochenplan",
 
-  // src/ui/Inspector.tsx
+  // src/ui/program/Inspector.tsx
   Kapat: "Schließen",
   "Haftalık programı": "Wochenplan",
   "Kayıt bulunamadı": "Kein Eintrag gefunden",
 
-  // src/ui/LessonPool.tsx
+  // src/ui/program/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Fächer, die auf Platzierung warten",
   "Havuz yüksekliği": "Höhe des Ablagefachs",
   "Sürükleyerek havuzun boyunu ayarlayın":
@@ -339,7 +341,7 @@ const DE: Sozluk = {
   Sonuçlar: "Ergebnisse",
   "Eşleşen bir şey yok.": "Keine Treffer.",
 
-  // src/ui/Print.tsx
+  // src/ui/print/Print.tsx
   Gün: "Tag",
   "Yazdırılacak program yok.": "Es gibt keinen Plan zum Drucken.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",
@@ -367,7 +369,7 @@ const DE: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** der gewählten Seiten sind völlig leer. Die Pläne dieser Klassen wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
 
-  // src/ui/Program.tsx
+  // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Hier kann abgelegt werden.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Wird automatisch gelegt… {yerlesen}/{toplam} Blöcke · {sure} s",
@@ -604,6 +606,14 @@ const DE: Sozluk = {
     "Kein einziger Plan in der Datei konnte gelesen werden; nichts hat sich geändert.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:Plan|Pläne} geöffnet, {yazilamayan} konnten nicht geschrieben werden. Der Speicher könnte voll sein. Bewahren Sie die Datei auf.",
+  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
+    "{yeni} {yeni:Plan|Pläne} in der Datei {yeni:wurde|wurden} mit einer neueren Version des Programms geschrieben und {yeni:wird|werden} nicht geöffnet. Aktualisieren Sie das Programm.",
+  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
+    "{yeni} {yeni:Plan wurde|Pläne wurden} mit einer neueren Version des Programms geschrieben und nicht geöffnet. Aktualisieren Sie das Programm.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:Plan|Pläne} in der Datei {eksik:ist|sind} unvollständig oder beschädigt und {eksik:wird|werden} nicht geöffnet.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:Plan|Pläne} geöffnet; {eksik} {eksik:war|waren} unvollständig oder beschädigt und {eksik:wurde|wurden} nicht geöffnet.",
   "{acilan} plan açıldı.": "{acilan} {acilan:Plan|Pläne} geöffnet.",
   "Bütün planlar tek dosyada": "Alle Pläne in einer Datei",
   "Tümünü dosyaya kaydet ({n} plan)":

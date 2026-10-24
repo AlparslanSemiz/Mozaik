@@ -18,12 +18,12 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../pure/undo';
-import { loadPlan, rotateBackups, savePlan } from './planStore';
+import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
 import { parseState } from '../pure/parseState';
-import { readLibrary, writeLibrary } from './libraryStore';
+import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../leaf/types';
 
@@ -32,9 +32,11 @@ const SAVE_DELAY = 400; // ms — do not write on every drag frame
 /**
  * Why the last save did not land, for the strip at the top. `dolu`: the write
  * itself failed, which in practice is the storage quota (VK2). `baska`: another
- * window changed this data, and this one has stopped writing (VK1).
+ * window changed this data, and this one has stopped writing (VK1). `okunamadi`:
+ * the plan read empty at startup and its key holds a plan now, so nothing is
+ * written over it (libraryStore.ts, `mayWritePlan`).
  */
-export type SaveTrouble = 'dolu' | 'baska' | null;
+export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
 
 // -------------------------------------------------------------------- hook
 
@@ -46,7 +48,7 @@ function initialBox(): Box {
   writeLibrary(library);
   rotateBackups(planKey(library.activeId));
   return {
-    present: loadPlan(library.activeId) ?? emptyState(),
+    present: loadPlanAtStart(library.activeId) ?? emptyState(),
     past: [],
     future: [],
     planId: library.activeId,
@@ -98,7 +100,7 @@ export function useStore() {
   const write = useCallback((id: Id, d: State) => {
     if (writesClosed()) return;
     const landed = savePlan(id, d);
-    setTrouble(landed ? null : 'dolu');
+    setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');
   }, []);
 
   // Auto-save — debounced, otherwise we write JSON on every drag frame. The
@@ -142,29 +144,11 @@ export function useStore() {
     write(box.planId, box.present);
   }, [box.planId, box.present, write]);
 
-  // Cancels the pending write WITHOUT performing it. The only caller is the
-  // bundle import in `usePlans.ts`, and the two are opposites that look alike:
-  // park writes then cancels (pitfall 28), this one only cancels (pitfall 27
-  // mirrored). The comment at the head of `usePlans.ts` says the same thing
-  // from the other side.
-  //
-  // Measured while splitting the file, because the old comment claimed more
-  // than it could show: taking this call away does NOT resurrect the outgoing
-  // plan, and neither does taking away the effect's cleanup. What actually
-  // cancels the pending write is the FIRST LINE of the autosave effect below —
-  // it clears the previous handle every time the box changes. This call is
-  // what makes the intent survive a rewrite of that effect, not what enforces
-  // it today.
-  const discardPendingSave = useCallback(() => {
-    window.clearTimeout(timer.current);
-    pending.current = false;
-  }, []);
-
   const openPlan = useCallback((id: Id, state: State) => {
     dispatch({ type: 'switch', id, state });
   }, []);
 
-  const plans = usePlans({ planId: box.planId, park, discardPendingSave, openPlan });
+  const plans = usePlans({ planId: box.planId, park, openPlan });
 
   // Another window changed our data: this one stops writing, and says so.
   // What this window holds is read through a ref, so the listener is set once.
@@ -225,8 +209,9 @@ export function useStore() {
     undo,
     redo,
     loadState,
-    // Exposed for the one caller that leaves the page without unloading it:
-    // the exe restarting onto a new version. `beforeunload` covers a closing
+    // Exposed for the two callers that leave the page without unloading it:
+    // the exe restarting onto a new version, and the exe's window closing
+    // (App.tsx, TB7). `beforeunload` covers a closing
     // tab, but a WebView2 window torn down by `app.exit(0)` is not a closing
     // tab, and the 400 ms debounce is exactly long enough to eat the edit
     // somebody made right before pressing the button (pitfall 28).

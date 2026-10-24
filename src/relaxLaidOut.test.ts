@@ -9,7 +9,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createRelaxer, verifySuggestion } from './pure/relax';
 import type { RelaxOptions, Suggestion } from './pure/relax';
 import { parseState } from './pure/parseState';
-import { activePlacements } from './pure/programs';
+import { activePlacements } from './pure/program/programs';
 import type { State } from './leaf/types';
 
 // The father's own file, anonymised the same way and with his 330 hours laid

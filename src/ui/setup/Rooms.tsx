@@ -9,7 +9,7 @@ import type { ListConfig, ListQuery } from '../../pure/listview';
 import { roomClasses, weeklyLoad } from '../../pure/entities';
 import type { Room } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
-import { useInspect } from '../Inspector';
+import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
 import { parseRooms } from '../../pure/import';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';

@@ -67,9 +67,9 @@ npm run exe          # Tauri ikilisi (Rust ister)
 npm run exe:test     # cargo test (Rust ister)
 npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve test)
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
-npm run exe:rpm      # Linux rpm paketi, yalnız yerel (Tauri CLI 2.12.1'i npx ile indirir)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
+scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kurar ya da günceller
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
@@ -80,6 +80,9 @@ Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 farkında dört kural açıldı, bulguları kapatıldı ve komut sıfır hatayla
 koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kırmızı
 başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
+`knip.json`'un `ignoreBinaries`'i testlerin çağırdığı üç sistem aracı: `src/linuxKur.test.ts`'in
+`desktop-file-validate`'i ve `shellcheck`'i (test onlar yoksa o adımı atlıyor) ve
+`src/agir.test.ts`'in `pgrep`'i. Bir paket değiller.
 
 `boyut` da `kontrol`'ün parçası ve derlemeden hemen sonra koşuyor: eşik
 `.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
@@ -113,7 +116,7 @@ olarak o. Kural ile grafiğin yapılandırması `.dependency-cruiser.cjs`'te. Bi
 yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
 atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
-`font`, `exe`, `exe:test`, `exe:linux`, `exe:e2e` ve `exe:rpm` `kontrol`'ün parçası değil,
+`font`, `exe`, `exe:test`, `exe:linux` ve `exe:e2e` `kontrol`'ün parçası değil,
 çünkü bu depoda olmayan bir araç zinciri istiyorlar (Python ile fontTools, Rust,
 WebKitGTK ve `tauri-driver`) ve `kontrol` her makinede koşabilmeli. Yayınlanan
 Windows exe'sini derleyen ve `cargo test`'i her sürümde koşan yer
@@ -145,7 +148,7 @@ Yardımcı kaynaklar:
 site/                        manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/                     Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
 scripts/simge.mjs            icon.svg'den 192 ve 512 PNG (Chromium ile)
-scripts/ikon.mjs             kurulum/icon.ico: 16 px sade, 20 px ve üstü ayrıntılı
+scripts/ikon.mjs             kurulum/icon.ico: 16-24 px sade, 32 px ve üstü ayrıntılı
 scripts/ikon-karsilastir.mjs eşiğin reçetesi: iki çizim, altı boy, iki zemin
 scripts/exe-ikon.mjs         yayınlanmış bir exe'nin içindeki simge boylarını okur
 scripts/favicon.mjs          index.html'in data: URI favicon'u, sade çizimden
@@ -157,6 +160,8 @@ scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
+scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop
+scripts/linux-mozaik.sh      Linux başlatıcısı: Chrome'un app modu, Mozaik'in kendi profili
 ```
 
 ### Tek dosya
@@ -223,9 +228,10 @@ koşar ve `windows.yml`'i çağırır. `surum.yml` bir etiketle üç teslim dosy
 `kanarya.yml` haftada bir `ci.yml`'in denetimini ve ana E2E'nin bir parçasını runner'ın bir
 sonraki imajında koşar ve hiçbir şeyi kilitlemez: `ci.yml`, `site.yml` ve `windows.yml`
 runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` değil, çünkü
-`ubuntu-latest` 2026-10-19'dan itibaren Ubuntu 26.04'e geçiyor. `surum.yml` ve
-`haftalik.yml`'in mutasyon işi hâlâ `-latest`'te; ilki dokunulmaz, ikincisi `ci/mutasyon-parca`
-dalında yeniden yazılıyor.
+`ubuntu-latest` 2026-10-19'dan itibaren Ubuntu 26.04'e geçiyor. `surum.yml`'in ve
+`haftalik.yml`'in Linux işleri de `ubuntu-24.04`'te (2026-10-10, Alp'in kararı); Linux'un
+sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO B7.29).
+`surum.yml`'in Windows işi `windows-latest`'te.
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
@@ -299,14 +305,9 @@ kapatır, bu makinenin Intel sürücüsü onunla çöküyordu (tuzak 130); Windo
 derlenmez. Neden Playwright değil ve girdinin neden sayfanın içinde
 üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
 
-**Linux paketi** (`npm run exe:rpm`) aynı ikilinin rpm'i,
-`src-tauri/target/release/bundle/rpm/` altına. Yalnız kullanıcının kendi Fedora'sı
-için ve yalnız yerel: `surum.yml`'de Linux işi yok, Release'e girmiyor, kendini
-güncellemiyor. Sebebi babanın sürüm yoluna dokunmamak: o yol bugün tek bir Windows
-işi, ve ona eklenen her iş babanın exe'sini bekleten ya da düşüren bir adım daha
-olurdu (DECISIONS 2026-10-09). Paketin boyu, derleme süresi ve bir Fedora kabında
-kurulup açılması A6'da ölçüldü (WORKLOG'un 2026-10-09 girdileri). Tauri CLI bağımlılık
-değil, `npx` ile tam sürümüyle çağrılıyor: `npm ci`'a ve CI'a yük olmasın.
+Linux'ta Tauri'nin bir paketi yok. Kullanıcının günlük kullandığı kopya Chrome'un app
+modu (aşağıda, "Linux uygulaması"); bir rpm'i üreten `exe:rpm` bu yüzden kaldırıldı,
+Linux ikilisi ise yukarıdaki test işi için duruyor ([DECISIONS.md](DECISIONS.md)).
 
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere
 1600 mantıksal piksellik bir kutuda kaldığında sayfa 1920 değil 1600 CSS
@@ -320,6 +321,35 @@ sorusunun cevabı bir özet. VERSIONINFO'yu `tauri-build` zaten gömüyor, bu
 yayınlanmış ikilide ölçüldü (tuzak 101).
 
 Exe'nin dosya sistemi köprüsü bir adaptör, ayrıntısı [ARCHITECTURE.md](ARCHITECTURE.md)'de.
+
+### Linux uygulaması
+
+Kullanıcının Linux'ta her gün açtığı Mozaik, `dist/index.html`'in bir kopyası ve
+Google Chrome'un app modu ([TODO.md](TODO.md) B7.28). Beşinci bir derleme değil:
+açılan dosya babanın çift tıkladığı dosyanın kendisi, ve dört yoldan hiçbiri
+değişmedi.
+
+`scripts/linux-kur.sh` yalnız `~/GitHub/Mozaikler/Mozaik`'ten derler, ve o klasör `main`'de değilse,
+`git status`'u temiz değilse ya da bir worktree ise reddeder: bir worktree'nin `dist/`'i
+o oturumun dalıdır. Derlenen dosyayı `~/.local/share/mozaik/app/` altına kopyalar (bağ
+değil), yanına hangi commit'ten kurulduğunu (`~/.local/share/mozaik/app/kaynak.txt`) ve başlatıcıyı yazar, ve
+`~/.local/share/applications/mozaik.desktop`'u kurar. Güncellemek betiği yeniden
+çalıştırmaktır; açık bir pencere eski sürümle çalışmaya devam eder, sonraki açılış
+yenisini açar.
+
+`scripts/linux-mozaik.sh` (kurulunca `app/mozaik`) Chrome'u
+`--user-data-dir=~/.local/share/mozaik/profil` ve `--app=file://…/index.html` ile açar.
+Planlar o profilin `file://` deposunda durur, Chrome'un geçmişini temizlemek onlara
+dokunmaz. Başlatıcı yalnız `google-chrome`'u kullanır: Chrome yoksa bunu bildirimle
+söyler ve çıkar, başka bir tarayıcıya düşmez, çünkü orada boş bir depo açılır ve boş
+bir program "verim gitti" diye okunur. Profil klasörünü ne kurulum ne başlatıcı kurar
+ya da siler; onu Chrome ilk açılışta kurar. İkisinin testi `src/linuxKur.test.ts`,
+sahte bir ev dizininde.
+
+Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfası veriyor,
+`showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
+ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
+siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 
 ## Release varlıkları
 
@@ -351,14 +381,16 @@ kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
 Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
 `tauri.conf.json` numarayı kopyalamaz, `"../package.json"` yolunu gösterir.
 `Cargo.toml`'daki numarayı `yayinla.mjs` yazar, çünkü cargo başka bir dosyadan
-numara okumuyor. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
+numara okumuyor. `package-lock.json`'ın kökündeki iki numarayı da o yazar
+(`scripts/kilit-surumu.mjs`, TODO B7.32), yoksa sonraki `npm install` onları değiştirip
+ağacı kirletir. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
 basar ve `src/leaf/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
 ve Vitest modül yüklenirken çöker). Aynı damga `dist-site/sw.js`'in önbellek
 adına girer. Ayarlar → Hakkında hangi sürüm olduğunu gösterir. Bu bir derleme
 bayrağı değil, dört teslim yoluna basılan aynı damga.
 
-`src/surum.test.ts` bunları her koşuda ölçer: `package.json` ile `Cargo.toml`'un
-aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
+`src/surum.test.ts` bunları her koşuda ölçer: `package.json`, `Cargo.toml` ve
+`package-lock.json`'ın kökünün aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
 değişmediğini (tuzak 95), exe penceresinin ayarlarını, `surum.yml`'in manifeste
 yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (tuzak 106),
 `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu, ve
@@ -369,8 +401,8 @@ klasörde (bir worktree değil) ve `main`'de, çalışma ağacı temiz, etiket d
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
 Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü aşağıdaki
 bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
-Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
-bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
+Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.md`'deki
+`Unreleased` bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve dördü tek commit olur.
 Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu,
 sonra `exe-windows.yml` koşusu (yoksa `main`'de başlatılarak) bulunup sonuna kadar
 beklenir. Üçü de yeşilse etiket annotated atılır, adıyla itilir
@@ -383,8 +415,8 @@ makinesinin Windows olması (2026-10-09; gerçek exe 2026-10-10'da katıldı). D
 ve `package.json` zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar
 commit ile etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
 
-Yer kapısı 2026-10-09'da geldi, argümanlardan bile önce ve `--kuru`'da da: o günden beri
-her iş kendi dalında ve worktree'sinde, ve başka yerden çıkan bir sürüm sitenin
+Yer kapısı 2026-10-09'da geldi, argümanlardan bile önce ve `--kuru`'da da: iş dallarda ve
+geçici worktree'lerde yürüyor, ve başka yerden çıkan bir sürüm sitenin
 yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor, ama bir
 worktree `main`'in commit'inde ayrık durabilir.
 
@@ -393,24 +425,38 @@ worktree `main`'in commit'inde ayrık durabilir.
 adımında durur. `exe-windows.yml` her push'ta koşmadığı için commit'in koşusu yoksa onu
 `main`'de başlatır (2026-10-10).
 
+**Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
+`e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
+gerçek `Mozaik.exe`'ye karşı yeşil olur: son değişiklik, başlık çubuğunun kapatma mesajıyla
+kapanış (WM_CLOSE, `scripts/pencere-kapat.mjs`), Belgeler'deki dosyada değişiklik, yeniden
+açılışta değişiklik yerinde. `yayinla` bunu kendisi beklemiyor: Windows'ta gerçek exe süitini
+koşan iş akışı TP7, `test/gercek-ortam` dalında ve kullanıcının kararını bekliyor (TODO §8l);
+o gelene kadar bu test sürümü çıkaran kişinin elle koştuğu bir adım. Linux'ta
+`npm run exe:e2e` ile her sürümden önce zaten koşuyor.
+
 ## İşaret ve ikon
 
-İşaretin iki çizimi var. `site/icon.svg` ayrıntılı çizim (sütunlar ve hayalet
-sütunlar), `site/icon-small.svg` küçük boylar için sade çizim. `scripts/ikon.mjs`
-`.ico`'ya 16 px'i sade, 20 px ve üstünü ayrıntılı çizimden yazar
-(`SADE_ALTINDA = 20`). `.ico` Windows'un isteyebileceği dokuz boyu taşır: 16, 20,
-24, 32, 40, 48, 64, 128 ve 256.
+İşaret indigo zemin üstünde iki kancaya asılı bir duvar takvimi sayfası
+(2026-10-23, kullanıcının seçtiği resimden ölçülerek elle çizildi). İki çizimi var.
+`site/icon.svg` ayrıntılı çizim (iki kanca, beş ders sütunu),
+`site/icon-small.svg` küçük boylar için sade çizim (kancasız sayfa, üç ders,
+yalnız dikdörtgen). Sadenin bütün kenarları 16 px'te tam piksele düşüyor;
+ayrıntılının yatay kenarları 32 px'te, sütunları ise sayfada ortalı olduğu için
+orada yarım piksel kayık. `scripts/ikon.mjs` `.ico`'ya 16, 20 ve 24 px'i
+sade, 32 px ve üstünü ayrıntılı çizimden yazar (`SADE_ALTINDA = 32`). `.ico`
+Windows'un isteyebileceği dokuz boyu taşır: 16, 20, 24, 32, 40, 48, 64, 128 ve 256.
 
 | Nerede | Hangi çizim | Niçin |
 |---|---|---|
 | Sekme (favicon, `index.html`) | sade | bir sekme simgesi 16 ile 32 px arasında çizilir |
-| `kurulum/icon.ico` 16 px | sade | 16 px'te ayrıntılı çizimin sütunları bir lekeye dönüyor |
-| `kurulum/icon.ico` 20 px ve üstü | ayrıntılı | 2026-09-01'de kullanıcı isteğiyle, dokuz boyun pikselleri karşılaştırılarak |
+| `kurulum/icon.ico` 16, 20 ve 24 px | sade | 16 px'te ayrıntılı çizimin kancaları ve sütun aralıkları bir lekeye dönüyor, 24 px'te hâlâ bulanık |
+| `kurulum/icon.ico` 32 px ve üstü | ayrıntılı | 32 px'te kancalar ve beş sütun ayrı okunuyor |
 | PWA 192 ve 512 PNG | ayrıntılı | yer var |
 | Üst çubuk (`.brand-mark`) | sade | `1.75rem`, kök 13 px iken 22,75 px |
 
-Eşik dört kez taşındı ve her seferinde bir şikayetten çıktı. Geçmişi
-[DECISIONS.md](DECISIONS.md)'de, dersleri tuzak 78 ve 101'de.
+Windows %100 ölçekte görev çubuğunda 24 px'i gösteriyor, yani orada sade çizim
+görünüyor. Kuralın gerekçesi [DECISIONS.md](DECISIONS.md)'de (2026-10-23), dersleri
+tuzak 78 ve 101'de.
 
 Çizim üç yerde duruyor: svg dosyaları, `index.html`'in `data:` URI'si ve
 `App.tsx`'teki satır içi SVG. Ayrışmaları `temel.spec.ts` 72 (URI ile
@@ -445,7 +491,8 @@ kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 koyar: dosya adı eski kalır, içindeki program yenidir.
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
-sürümün nerede olduğunu (`SITE_ADRESI`) gösterir.
+sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:
+güncellemesi `scripts/linux-kur.sh`'yi yeniden çalıştırmak.
 
 **Adresler.** `update.rs`'in `RELEASE_KOKLERI`'si iki önek tanır, depo
 `ders-programi` ve `Mozaik` adıyla. Liste yalnız uzar, çünkü dağıtılmış bir

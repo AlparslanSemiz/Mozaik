@@ -28,10 +28,14 @@ import { closedKey, parseKey, placementKey } from '../leaf/keys';
 import type { Index } from './constraints';
 import { commonestBlock, holeReason, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
-import { activePinned, activePlacements, replaceActiveGrid } from './programs';
+import {
+  activePinned,
+  activePlacements,
+  lessonExcluded,
+  replaceActiveGrid,
+  type SolverExclusions,
+} from './program';
 import type { Id, Lesson, State } from '../leaf/types';
-import { lessonExcluded } from './programMask';
-import type { SolverExclusions } from './programMask';
 
 export interface SolverOptions {
   /** Keep what is already on the grid and fill in around it (default true). */

@@ -24,7 +24,7 @@
 // Both are transient gestures, not positions.
 
 import { useState } from 'react';
-import type { Id, View } from '../../leaf/types';
+import type { Id, PoolSort, View } from '../../leaf/types';
 
 export type Tab = 'setup' | 'availability' | 'lessons' | 'program' | 'check' | 'print' | 'settings';
 /** Program: which axis the grid rows are. Defined in types.ts, see there. */
@@ -65,21 +65,8 @@ export type Scope = 'classes' | 'teachers' | 'both';
  */
 export type CheckView = 'problems' | 'advisor' | 'teachers' | 'classes' | 'rooms';
 
-/**
- * HOW THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
- * olsun, hatta neye göre filtrelensin sıralansın ayarı bile olabilir."
- *
- * `row` is what the tray has always done and stays the default: the cards run
- * the same way down as the grid rows they are aimed at, so a row's cards stand
- * together under the row you are looking at. The other four answer questions
- * the tray could not be asked before — "what is left of Matematik", "which are
- * the long blocks", "who is furthest from finished".
- *
- * A POSITION and not a preference, so it lives here rather than in `theme.ts`:
- * it says what is being looked at right now. No new localStorage key, and so
- * no new row owed to the "Veriler nerede" table.
- */
-export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
+/** Program: how the tray is arranged. Defined in types.ts, see there. */
+export type { PoolSort };
 export interface ToolState {
   tab: Tab;
   setTab: (next: Tab) => void;

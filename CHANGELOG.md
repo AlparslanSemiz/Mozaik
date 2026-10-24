@@ -17,8 +17,26 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Added
+
+- Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
+
+### Changed
+
+- The notes in Settings are now as large as the body text.
+- A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
+- Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
+
 ### Fixed
 
+- "Open from file" no longer opens a plan in which two lessons, or a teacher, class or room and another one, share an id, or one has none; such a file is refused as unreadable. "Open all from file" leaves such a plan out and counts it with the broken ones.
+- "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".
+- "Open all from file" now says that a plan written by a newer version of the program needs the program updated, instead of calling it incomplete or broken.
+- "Open all from file" no longer opens a plan whose teacher, class, lesson or room list is missing as an empty plan, and no longer deletes the plan on this computer to make room for it. Such a plan is left out, the question before replacing says how many are left out, and the plan on this computer that it would have replaced stays. A file in which no plan can be read changes nothing and asks nothing.
+- "Open all from file" with the browser's storage full no longer deletes the plans on this computer when not one plan from the file could be saved, and no longer says that nothing changed. The plans here stay and the note says that storage may be full.
+- "Open from file" in the top bar no longer does nothing, silently, with a file that has a broken row in it. It says the file cannot be read, and the open plan stays as it was.
+- In the desktop program, closing the window within two seconds of a change no longer leaves the copy in Documents\Ders Programı one change behind. The window now waits until the change is written, and closes on its own after five seconds if the page does not answer.
+- A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
 - When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.
 - In Availability, the heading of the lesson after a lunch break that moves from day to day no longer sits lower than its neighbours. It has no single clock time to show, and without one its number dropped about 7px.

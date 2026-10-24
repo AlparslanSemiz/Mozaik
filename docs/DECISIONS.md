@@ -7,10 +7,11 @@ denendi mi" sorusu için var. Bir duruşun değişmesi de, bir şeyi yapmamaya k
 vermek de bir karardır: çürütülmüş bir teori kaydı olmazsa aylar sonra yeniden
 üretilir ve bir iş planına dönüşür.
 
-Kayıtlar en yeni üstte. Her kayıt ne değiştiğini, eski hâlini ve gerekçesini
-söyler. Denenip bırakılan bir yol **denendi** diye işaretlidir. Kayıtlar geriye
-dönük düzeltilmez: o günkü kuralı aktaran bir alıntı o günün diliyle kalır, bir
-ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
+Kayıtlar en yeni üstte. Her kayıt ne değiştiğini ve gerekçesini söyler. Bir kuralın
+yerine yenisi gelince eski kuralın kaydı silinir ve yeni kayıt onu anan bir geçmiş
+satırı taşımaz: dosyada bir kuralın yalnız bugünkü hâli durur, eskisi git geçmişinde.
+Denenip bırakılan bir yol **denendi** diye işaretlidir ve kalır, çünkü yeniden
+denenmesini önleyen kayıt odur.
 
 ## Eski ilke numaraları
 
@@ -21,8 +22,8 @@ ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
 | Numara | 2026-08-24 ile 2026-08-29 arası | 2026-08-30 ile 2026-09-10 arası | Bugünkü adı |
 |---|---|---|---|
 | 1 | Kurulum yok | Çift tıkla çalışır | Çift tıkla çalışır |
-| 2 | Sunucu yok | Sunucu yok | Sunucusuz |
-| 3 | İnternet gerekmez | İnternet gerekmez | Çevrimdışı |
+| 2 | Sunucu yok | Sunucu yok | kaldırıldı (2026-10-08) |
+| 3 | İnternet gerekmez | İnternet gerekmez | kaldırıldı (2026-10-08) |
 | 4 | Türkçe, tek dil | Türkçe kaynak dildir | Türkçe kaynak dil |
 | 5 | Bir dönem kullanılmadan özellik eklenmez | Veri kaybı kabul edilemez | 5 eskiden: kaldırıldı · 5 yeniden: Veri kaybı olmaz |
 | 6 | Veri kaybı kabul edilemez | Kolay kullanılabilir ve yenilikçi | Veri kaybı olmaz · Kullanılabilirlik |
@@ -32,6 +33,132 @@ ad sonradan değiştiyse yanına bugünkü adı parantez içinde eklenir.
 İkinci dönemde CLAUDE.md'nin "güncelleme" bölümü hedef makineye hâlâ 7 diyordu,
 yani o dönemde "ilke 7" iki şeyi kastedebilir. `DESIGN.md`'nin "İlke 7 artık bir
 varsayım değil" cümlesi hedef makineyi kastediyor.
+
+---
+
+### 2026-10-23 · Süreç sadeleşti: beş durma sebebi, riske göre test, yapısal belge kapısı
+
+**Ne.** Kullanıcının kararı (dal `surec-sadelestirme`): CLAUDE.md fazla kurallıydı ve test
+her işi yavaşlatıyordu, özellik işi hızlanmalı. Kesilenler:
+- CLAUDE.md 147 satırdan 80'e indi. Ayrıntısı BUILD ve TESTPLAN'da olan her kural oradan
+  bağlantıyla anılıyor, eski kurallar tarihçe olarak tutulmadı.
+- Durma sebepleri beşe indi: veri kaybı riski, Roboders'e ya da gerçek veriye yazmak, etiket
+  ya da sürüm, geri alınamaz dış bir eylem, kullanıcının parası ya da hesapları. Kapsam dışı
+  bir değişiklik, planı çürüten bir ölçüm, dışarıdan gelen bir CI kırmızısı ve `dist`'e
+  giren yeni bir paket artık öncelik sırasıyla verilen bir karar, raporda "Aldığım
+  kararlar" altında. Yeni paketin WORKLOG notu (neden, alternatifler, boyut, `file://`
+  açılış süresi) kaldı.
+- Test riske göre (TESTPLAN, "Test politikası"). Arayüzün düzeni ve metni için yeni test
+  yazılmıyor, 1920×1080'de bir ekran görüntüsü yetiyor. Değişiklik başına mutasyon kanıtı
+  kalktı, mutasyon yalnız haftalık (betik duruyor). "BİLİNEN KUSUR" ile ayrı düzeltme dalı
+  kuralı kalktı: bulunan hata aynı dalda, kendi commit'inde, gerileme testiyle düzeltiliyor,
+  refactor dalı onu §8k'ye yazıyor.
+- Belge kapısı (`src/docs.test.ts`) yalnız yapıyı ölçüyor: bağlantı ve çapa, yol, tuzak
+  numarası, yapılandırma yolu, oturumun okuduğu bölümler. Cümle içeriğini sabitleyen
+  kapılar (dosya haritası, katman şeması, tarihsiz sayı, `schemaVersion` ile sürüm tablosu,
+  anahtar tablosu, tuzak dizini, sıradaki tuzak numarası, TESTPLAN'ın mutasyon cümlesi)
+  çıktı.
+- Oturum sonunda şart olan yalnız TODO ile WORKLOG'un "Şu an"ı ve tarihli girdisi.
+  CHANGELOG kullanıcıya görünen bir değişiklikte, TRAPS, DECISIONS ve TESTFINDINGS gerçek
+  bir içerik çıkınca.
+- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Refactor
+  turları da: süren tur yoktu (`refactor/program` `main`'de), yeni tur açılmıyor ve sürekli
+  `Mozaik-refactor` worktree'si kuralı CLAUDE.md'den çıktı.
+- CI: ölçüm, `ci.yml`'in mutasyon, kapsam ya da yavaş süit beklemediğini gösterdi. Kritik yol
+  `playwright install --with-deps`'in apt yarısıydı (main'in koşusunda tek işte 597 sn), o
+  yüzden `ci.yml`'de `--with-deps` kalktı. `kanarya.yml` onu tutuyor.
+
+**Babayı koruyan ve kalan.** Veri kaybı riski her zaman durdurur. Şema, göç, `sanitize`,
+yedeğin açılması, dizme ve güncelleme yolu teste bağlı, şema değişince hem birim hem E2E.
+Etiketi yalnız `npm run yayinla` atıyor ve `ci.yml` ile `windows.yml`'i bekliyor, etiketten
+önce Windows'ta gerçek güncelleme testi yeşil olmalı. Var olan E2E ve birim süitleri her push'ta
+CI'da koşuyor, site yalnız yeşil bir `main` push'unda yayınlanıyor, birleştirme Alp'in.
+
+**Eski hâli.** Yedi durma sebebi, test programının kuralları (2026-10-09), değişiklik başına
+mutasyon kanıtı, belge kapısında cümle içeriğini sabitleyen on bir test, oturum sonunda yedi zorunlu belge,
+sürekli iki worktree (çalışma yeri, aşağıda).
+
+**Gerekçe.** Sürecin maliyeti özellik işinin önüne geçti: bir arayüz değişikliği E2E, mutasyon
+kanıtı ve dört belge güncellemesi istiyordu, bir belge cümlesi değişikliği bir test
+değişikliği oluyordu. Babayı koruyan şey verisinin ve programının güncellemesinin bozulmaması,
+o yollar teste bağlı kaldı. Gerisi CI'a ve haftalık koşuya bırakıldı.
+
+### 2026-10-23 · İşaret takvim sayfası oldu, küçük boylar sade çizimden
+
+**Kural.** `kurulum/icon.ico` 16, 20 ve 24 px'te sade, 32 px ve üstünde ayrıntılı
+çizimden (`scripts/ikon.mjs`, `SADE_ALTINDA = 32`). Windows %100 ölçekte görev
+çubuğunda 24 px'i gösteriyor (Alp), yani babanın her gün gördüğü sade çizim; bu
+Windows'ta henüz görülmedi, bir sonraki etiketten önce %100 ve %125'te bakılacak.
+**Çizim.** Kullanıcının "asıl ikon" diye seçtiği resimden (`asıl_ikon.jpeg`) ölçülerek
+elle çizildi, kopyalanmadı: indigo zemin üstünde iki laciverde kancaya asılı beyaz bir
+sayfa ve beş ders sütunu (sarı, mavi, uzun mercan, mor, nane yeşili), resmin kendi
+renkleriyle; mavisi zaten `palette.ts`'in `#65b6ec`'i. Sade çizimi kancasız sayfa ve
+üç ders: mor `#c576f3` (beyaza karşı 2,89:1), mercan `#fd6454` (2,95:1), mavi
+`#3f9fe3` (2,88:1). Sade çizimde sarının yerine mor, çünkü sarı beyaza karşı 1,6:1, ve
+mavisi büyük çizimin `#65b6ec`'inden koyu, çünkü o beyaza karşı 2,22:1 (Alp).
+**Gerekçe.** Çizim 16, 20, 24, 32, 40 ve 48 px'te açık ve koyu zeminde çizilip
+bakıldı (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizimin kancaları ve beş sütunun
+aralıkları 16 ve 20 px'te leke, 24 px'te bulanık, 32 px'te okunuyor.
+**Denendi, bırakıldı.** Aynı gün önce çizilen dört sütunlu takvim, kullanıcı asıl
+ikonu istediği için bırakıldı ve dalı (`ozellik/ikon`) silindi.
+
+### 2026-10-23 · Tek kalıcı checkout; paralel oturuma ve ajana geçici worktree
+
+**Ne.** Alp'in kararı (2026-10-23, 2026-10-24'te paralel oturumlar için netleşti): yalnız
+ana klasör kalıcı, `~/GitHub/Mozaikler/Mozaik`. Her iş `main`'den açılan kısa ömürlü bir
+dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar;
+paralel çalışan her oturum ya da ajan geçici bir worktree alır
+(`~/GitHub/Mozaikler/Mozaik-<iş>`), dalı birleşince worktree kaldırılır. Sürekli
+`Mozaik-refactor` worktree'si de kalktı. Kural CLAUDE.md'nin "Çalışma düzeni"nde.
+
+**Eski hâli.** Ana klasör yalnız `main`'i tutuyordu ve orada oturum çalışmıyordu; her iş
+alanı kendi worktree'sinde (2026-10-09), 2026-10-23 sabahından beri sürekli iki tane:
+`Mozaik` ve `Mozaik-refactor` (`~/GitHub/Mozaikler/`'e taşınırken tuzak 152).
+
+**Gerekçe.** Kullanıcının kararı. 2026-10-24 sabahı üç oturum aynı anda açıldı, ikisi
+worktree'lerde yazıyordu; ana klasörde aynı anda tek oturum yazabildiği için paralel
+oturumlar geçici worktree'ye çıktı ve "bir worktree'de tek yazar" kuralı böyle tutuyor.
+
+### 2026-10-10 · Linux'ta günlük kopya Chrome'un app modunda, yalnız Chrome; rpm bırakıldı
+
+**Ne.** Kullanıcının Linux'taki Mozaik'i, `scripts/linux-kur.sh`'nin `~/GitHub/Mozaik`'in
+temiz `main`'inden derleyip `~/.local/share/mozaik/app/`'e kopyaladığı `dist/index.html`.
+`scripts/linux-mozaik.sh` onu yalnız `google-chrome` ile, kendi profilinde
+(`~/.local/share/mozaik/profil`) ve `--app=file://…` ile açar; Chrome yoksa bunu bildirimle
+söyler ve çıkar. `npm run exe:rpm` kaldırıldı. Linux ikilisi (`exe:linux`, `exe:e2e`)
+Windows exe'sinin Rust yarısını bu makinede sınayan test aracı olarak kalıyor
+([BUILD.md](BUILD.md), "Linux uygulaması").
+
+**Eski hâli.** Linux paketi Tauri'nin rpm'iydi, yalnız yerel (2026-10-09). Kullanıcı
+pratikte siteyi Chrome'a kurulu bir web uygulaması olarak kullanıyordu.
+
+**Gerekçe.** Tauri'nin Linux penceresi WebKitGTK, ve kasıyor; ana süitin WebKit koşusunda
+19 kırmızı var (TODO B7.21). Babanın motoru Chromium (WebView2). Ölçülenler (TODO B7.28):
+sitenin app modu ağsız ilk açılışta hata sayfası veriyor, `file://` vermiyor;
+`showDirectoryPicker` Chrome'da var, Brave'de yok; VK1 iki `--app` penceresinde doğru.
+Ayrı profil, Chrome'un geçmişini temizlemenin planlara dokunmaması için. Kopya (bağ
+değil), çünkü bir bağ herhangi bir dalın sonraki derlemesini izlerdi.
+
+**Önerilip bırakılan: Chromium ya da Brave'e düşmek.** Başka bir tarayıcı başka bir depo
+açar; boş bir program "verim gitti" diye okunur (kullanıcının kararı). Brave'de klasör de
+yok.
+
+### 2026-10-10 · Linux runner'ı sabit sürümde, `upload-artifact` elle güncellendi
+
+**Ne.** İş akışlarındaki Linux işleri `ubuntu-latest` yerine `ubuntu-24.04`'te;
+`actions/upload-artifact` v4'ten v7'ye elle, Dependabot beklenmeden (Alp'in kararı).
+
+**Eski hâli.** `ubuntu-latest`; `upload-artifact` için "Dependabot beklenecek, elle
+yapılmaz" (TODO B7.20, 2026-10-09).
+
+**Neden.** `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiyor: imaj, bir yayın kapısı
+ve mutasyon parçaları sürerken kendiliğinden değişirse CI'ın kırmızısının kodda mı imajda
+mı olduğu ayrılamaz. Ubuntu 26'ya geçiş ayrı ve ölçümlü bir iş olur. Sabitleme geçici: Ubuntu 26'da
+Playwright/WebKit bağımlılıkları doğrulanınca `ubuntu-latest`'e dönülür (TODO B7.29). `upload-artifact@v4`
+Node 20 uyarısının son kaynağıydı. Bir gün önce test programının K6'sı (aşağıda)
+`ci.yml`, `site.yml` ve `windows.yml`'i sabitlemiş ve `kanarya.yml`'i eklemişti; bu kayıt
+sabitlemeyi `surum.yml` ve `haftalik.yml`'e genişletiyor ve Linux'unkinin geçici olduğunu
+söylüyor. Dönüşün işareti kanaryanın yeşili.
 
 ---
 
@@ -54,6 +181,24 @@ haftada bir ve exe'ye dokunan bir `main` push'unda koşar, push'u beklemez. `yay
 da bekliyor, istisnanın içinde: sürüm commit'i `package.json`'u ve `Cargo.toml`'u
 değiştirdiği için süzgeç onu tetikliyor, tetiklemediği yerde (yalnız etiket, `--kuru`)
 `yayinla` iş akışını elle başlatıyor. `surum.yml`'e dokunulmadı.
+
+### 2026-10-10 · Refactor adım 4: `programView` pure'un kökünde, teneffüs kesmesi birleşmedi
+
+**Ne.** Alp'in kararı: Program ekranının hesabı (`programView.ts`) §8k'nin ağacındaki
+`pure/program/` paketine değil, `pure/`'un köküne tek dosya olarak girdi. `pure/program/`
+yalnız `programs` ile `programMask`'ı taşıyor. Ayrıca ekranın ve kâğıdın teneffüste blok
+kesmesi (iki algoritma) tek fonksiyonda birleşmedi.
+
+**Eski hâli.** Ağaç (2026-10-09 gece): `program/` = programs, programMask, YENİ programView.
+Analiz (2026-10-08, R8): ekran ve kâğıt için tek bir `cellSpans`.
+
+**Gerekçe.** `constraints.ts`, `entities.ts`, `relax.ts` ve `solver.ts` `programs`'ı paketin
+`index`'inden alıyor; `programView` de `constraints` ile `entities`'i çağırıyor. Tek `index`
+`constraints → program/index → programView → constraints` döngüsü olurdu ve `no-circular`
+bir hata. Seçenekler: `programView` kökte (seçilen, tek dosyalık modül kuralıyla da aynı),
+`programs` kökte kalır, ya da `programs` yaprağa iner. Kesme: iki algoritma aynı saatte iki
+sınıfa yazılmış bir öğretmende farklı hücre çiziyor (RK15); birleştirmek birinin davranışını
+değiştirirdi, refactor dalı davranış değiştirmez.
 
 ### 2026-10-09 · Test programı başladı; yavaş süitler hiçbir şeyi beklemez
 
@@ -380,8 +525,8 @@ ve onaylandı:
 
 - **Babanın bir tercihine dayanan, artık geçerli değil:** Sunucusuz, Çevrimdışı, ve
   "Şu an yapılmıyor" listesinden kullanıcı hesapları, veriyi bir servise yükleyen
-  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilkenin metni
-  PRINCIPLES'ın sonunda "Artık geçerli olmayanlar" altında o günkü hâliyle duruyor.
+  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilke PRINCIPLES'tan
+  silindi, bugünkü duruş orada "Ağ ve servisler" altında.
 - **Bir gerçeği koruyan, kalıyor:** Çift tıkla çalışır (eski makine, bilinmeyen
   Windows sürümü), Veri kaybı olmaz, Kullanılabilirlik (babanın zor görmesi), Hedef
   makine (4 GB RAM, çok eski işlemci).
@@ -1609,15 +1754,6 @@ pencereyi o ekrana sığdırılamaz yapıyordu (tuzak 107).
 **Denendi, istenmedi.** Sığdır'da kartın alt satırını kaldırmak satırı kısaltıp
 1920×1080'de 25 satırın 25'ini sığdırıyordu. Dikey düzene dokunulmadı, kullanıcı
 kararı.
-
-### 2026-09-01 · İkon eşiği 32'den 20'ye
-
-**Değişen.** `kurulum/icon.ico` artık yalnız 16 px'te sade, 20 px ve üstünde
-ayrıntılı çizimi taşıyor (`scripts/ikon.mjs`, `SADE_ALTINDA = 20`, commit
-`507fd00`). **Eski hâli.** 2026-08-30'dan beri eşik 32'ydi. **Gerekçe.**
-Kullanıcı isteği ("ayrıntılı simge"), dokuz boyun pikselleri karşılaştırılarak
-doğrulandı. 2026-08-30 kaydındaki 24 px ölçümüyle nasıl bağdaştığı kayıtlı
-değil.
 
 ### 2026-09-01 · Sürükleme durumu React'ten çıktı
 

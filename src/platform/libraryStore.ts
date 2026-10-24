@@ -15,6 +15,14 @@
 //
 // And every WRITE goes through `writesClosed()` first: once another window has
 // changed our data, this one writes nothing more (otherWindow.ts, VK1).
+//
+// A plan read EMPTY at startup is not trusted either. Under file:// Chromium
+// has started a reloaded page from an empty localStorage while the plan sat in
+// its key (once in CI, 38085275289; TRAPS 108), and 400 ms later the autosave
+// wrote the empty plan over it. So the opening read marks the plan, and while
+// it is marked every write reads the key again first: still empty is a first
+// use, the write goes ahead and the mark is dropped; full is a plan this window
+// never saw, and nothing is written over it.
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../pure/library';
 import { safely } from '../leaf/storage';
@@ -34,6 +42,36 @@ export function readPlanText(id: Id): string | null {
   return safely(() => localStorage.getItem(planKey(id))) ?? null;
 }
 
+let emptyAtStart: Id | null = null;
+let refused = false;
+
+/** The opening read of the open plan: an empty answer marks it (above). */
+export function readPlanTextAtStart(id: Id): string | null {
+  const text = readPlanText(id);
+  emptyAtStart = text === null ? id : null;
+  return text;
+}
+
+/**
+ * May this window write plan `id`? Only a plan marked at startup is asked, and
+ * it is asked again on every write: the key is read once more, and a key that
+ * holds something now was not this window's to overwrite.
+ */
+export function mayWritePlan(id: Id): boolean {
+  if (emptyAtStart !== id) return true;
+  if (readPlanText(id) === null) {
+    emptyAtStart = null;
+    return true;
+  }
+  refused = true;
+  return false;
+}
+
+/** True once a write was refused by `mayWritePlan`: the strip says so. */
+export function writeRefused(): boolean {
+  return refused;
+}
+
 /**
  * Returns whether the write actually happened.
  *
@@ -43,7 +81,7 @@ export function readPlanText(id: Id): string | null {
  * plan, and there the panel has to be able to say which one did not fit.
  */
 export function writePlanText(id: Id, text: string): boolean {
-  if (writesClosed()) return false;
+  if (writesClosed() || !mayWritePlan(id)) return false;
   return (
     safely(() => {
       localStorage.setItem(planKey(id), text);
@@ -53,6 +91,6 @@ export function writePlanText(id: Id, text: string): boolean {
 }
 
 export function dropPlanText(id: Id): void {
-  if (writesClosed()) return;
+  if (writesClosed() || !mayWritePlan(id)) return;
   safely(() => localStorage.removeItem(planKey(id)));
 }

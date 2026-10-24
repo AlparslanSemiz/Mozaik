@@ -18,6 +18,7 @@ import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
 import { emptyState } from '../../pure/entities';
+import { readBundlePlans, readPlanFile } from '../../pure/parseState';
 import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
 import {
   routeName,
@@ -28,7 +29,7 @@ import {
 import { downloadBundle } from '../../platform/download';
 import { listBackups } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/programs';
+import { activePlacements } from '../../pure/program';
 import type { PlanControls } from '../props';
 import type { FolderRun } from '../../platform/useFolder';
 import type { UpdateRun } from '../../platform/update';
@@ -556,26 +557,64 @@ export default function Data({
     const bundle = parseBundle(text);
     if (bundle === null) {
       const version = bundleVersionOf(text);
+      // Only a single plan is sent to the top bar, even one it will refuse with
+      // a reason of its own (incomplete, newer). A bundle cut short is not a
+      // single plan, and "use Dosyadan aç" sent the reader the wrong way
+      // (TODO B7.35).
+      const single = readPlanFile(text);
+      const isPlan = 'state' in single || single.problem !== 'okunamadi';
       setNote({
         bad: true,
         text:
           version !== null && version !== BUNDLE_VERSION
             ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
-            : t(
-                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
-              ),
+            : isPlan
+              ? t(
+                  'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+                )
+              : `${t('Bu dosya okunamadı')}. ${t('Program tarafından indirilmiş bir .json yedek dosyası seçin.')}`,
       });
       return;
     }
 
-    const incoming = bundle.library.plans.length;
+    // Read before asking (TB8): the question counts what will really happen,
+    // and a file with not one readable plan is never offered as a replacement.
+    const read = readBundlePlans(bundle);
+    // A plan a newer program wrote needs the program updated, not a better
+    // file: it is counted apart and never called incomplete (TODO B7.34).
+    const yeni = read.newer.length;
+    if (read.plans.length === 0) {
+      setNote({
+        bad: true,
+        text:
+          yeni > 0
+            ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
+            : t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
+      });
+      return;
+    }
+    const eksik = read.unreadable.length - yeni;
+    // A plan here whose counterpart in the file is unreadable stays.
+    const stays = plans.library.plans.filter((p) => read.unreadable.includes(p.id)).length;
+    const replaced = t(
+      'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
+      { buradaki: planCount - stays, gelen: read.plans.length },
+    );
     if (
       !(await confirm({
         title: t('Bu bilgisayardaki bütün planların yerine geçecek'),
-        body: t(
-          'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
-          { buradaki: planCount, gelen: incoming },
-        ),
+        body: [
+          replaced,
+          eksik > 0 ? t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik }) : '',
+          yeni > 0
+            ? t(
+                'Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.',
+                { yeni },
+              )
+            : '',
+        ]
+          .filter((x) => x !== '')
+          .join(' '),
         confirmLabel: t('Hepsini değiştir'),
         danger: true,
       }))
@@ -583,23 +622,34 @@ export default function Data({
       return;
     }
 
-    const { ok, failed } = plans.replaceLibrary(bundle);
-    if (ok === 0) {
+    const { ok, failed, unreadable } = plans.replaceLibrary(bundle);
+    // With storage full and not one plan written, nothing changed either, but
+    // the reason is the storage, and the note below says so.
+    if (ok === 0 && failed === 0) {
       setNote({
         bad: true,
         text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
       });
       return;
     }
+    const opened =
+      failed > 0
+        ? t(
+            '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
+            { acilan: ok, yazilamayan: failed },
+          )
+        : eksik > 0
+          ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
+              acilan: ok,
+              eksik,
+            })
+          : t('{acilan} plan açıldı.', { acilan: ok });
     setNote({
-      bad: failed > 0,
+      bad: failed > 0 || unreadable > 0,
       text:
-        failed > 0
-          ? t(
-              '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
-              { acilan: ok, yazilamayan: failed },
-            )
-          : t('{acilan} plan açıldı.', { acilan: ok }),
+        yeni > 0
+          ? `${opened} ${t('{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.', { yeni })}`
+          : opened,
     });
   }
 

@@ -166,8 +166,9 @@ olduğunu söyledi, numara ise üç dosyadaydı ve `yayinla.mjs` yalnız birinci
 yazıyordu. Exe kendini güncellemeyi öğrenince bu kozmetik olmaktan çıktı:
 geride kalmış bir numara ya güncellemeyi hiç önermez ya kurulduktan sonra da
 önermeye devam eder. Çare: `tauri.conf.json` `"../package.json"` yolunu
-gösterir, `yayinla.mjs` `Cargo.toml`'u da yazar, `src/surum.test.ts` ikisinin
-aynı şeyi söylediğini her koşuda ölçer.
+gösterir, `yayinla.mjs` `Cargo.toml`'u ve `package-lock.json`'ın kökünü de yazar
+(ikincisi 2026-10-24, TODO B7.32), `src/surum.test.ts` üçünün aynı şeyi söylediğini her
+koşuda ölçer.
 
 ### 78 · Bir `.ico`'da olmayan boy sessizce ölçeklenir
 Görev çubuğu işareti "eksik pikselli" göründü ve kodda yanlış yoktu: dosyada 16,
@@ -237,6 +238,19 @@ Linux ikilisi bu değişkeni kendisi koyuyor (`lib.rs`, `linux_renderer`, yalnı
 dokunmuyor. Windows'taki Mozaik.exe WebView2 ile çizer ve bu satır onda yok.
 `e2e/gercek-exe.spec.ts` değişkeni sürücünün ortamından siliyor, yani ölçtüğü şey
 kabuk değil ikilinin kendisi. Düzeltme olmadan kırmızı, düzeltmeyle yeşil.
+
+### 152 · Depo klasörünü taşımak worktree'leri ve sabit yazılmış yolları kırar
+2026-10-23'te ana klasör ve yedi worktree `~/GitHub/`'dan `~/GitHub/Mozaikler/`'e elle
+taşınmıştı. Git'in kayıtları (`.git/worktrees/*/gitdir`) eski yolu gösterdiği için
+`git worktree list` yedisini "prunable" diye işaretledi. Bir `git worktree prune` onların
+kaydını silerdi ve klasörler git'e görünmez olurdu; birinde işlenmemiş değişiklik vardı.
+`scripts/linux-kur.sh` ana klasörü `$HOME/GitHub/Mozaik` diye sabit yazıyordu ve "yok"
+deyip çıkacaktı. Karşı önlem: klasör taşınınca önce ana klasörden
+`git worktree repair <yeni yollar>`, sonra `git worktree list`'te "prunable" kalmadığına
+bakılır, `prune` koşulmaz; sabit yol `git grep 'GitHub/Mozaik'` ile aranır.
+`src/linuxKur.test.ts` betiği sahte bir evde yeni yolla koşuyor, betiği eski yola döndüren
+mutasyon kırmızı.
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1053,6 +1067,11 @@ ayrıştırılırken koşan klasik bir betik depoyu okuduğu hâlde 400 yenileme
 açılış üretmedi, aynı koşuda `addInitScript` ile kurulan tohum 200 yenilemede 9 bayat okuma ve 4
 kalıcı kayıp verdi. Yani ürünün `<head>`'inde depo okumak bu tuzağa girmiyor, belge başına betik
 enjekte etmek giriyor.
+2026-10-10'da init betiği olmadan da bir kez görüldü (CI 38085275289, `kurulum.spec.ts:716`;
+yenileme son yazımdan ~130 ms sonra): tetikleyici yalnız enjekte betik değil. Bu makinede 1 230
+denemede, runner'da 400 denemede yeniden üretilemedi; sıklığı CI'da ~1/76 koşu. Ürün artık
+açılışta boş okunan planı, anahtarı doluysa üstüne yazmıyor (TODO B7.30). Testte hata
+enjeksiyonu yalnız okuma yolunu sarar (`Storage.prototype.getItem`), depoya dokunmaz.
 
 ### 109 · Vitest bir stil sayfasını `?raw` ile de boş dize olarak verir
 Hareket tercihinin tabanı (tuzak 58) `styles.css`'teki sıraya dayanıyor ve bir birim
@@ -1233,8 +1252,8 @@ koşamaması bir bulgudur: bir mutasyon koşusunun "düştü" sonucu "hiç koşm
 TRAPS'ın başına çapalı bir grup listesi kondu ve çapaların bağlantı kapısı A7'de
 denetlendiği varsayıldı. Bir çapayı bozan mutasyon A7'den yeşil geçti: A7 aynı dosyadaki
 `#çapa` bağlantılarını hiç okumuyor (`href.startsWith('#')` atlanıyor). Kapı kendi işinde
-doğruydu, varsayım yanlıştı. Çare listenin kendi iddiası oldu (A10, her satır kendi
-grubunun çapasını gösteriyor), ve üç mutasyonla kırmızı. Kural: **yeni bir şeyi var olan
+doğruydu, varsayım yanlıştı. Çare önce listenin kendi iddiası oldu (A10), 2026-10-23'ten
+beri A7 aynı dosyadaki çapayı da okuyor ve A10 kalktı; bozulan bir çapayla kırmızı. Kural: **yeni bir şeyi var olan
 bir kapıya emanet etmeden önce o kapının onu gerçekten okuduğu bir mutasyonla gösterilir.**
 
 ### 149 · Bir mutasyon kanıtında "kırmızı", testin koştuğu demek değil
@@ -1246,7 +1265,17 @@ dosyayı temiz saymıştı. İkisinde de sıfırdan farklı çıkış kodu "test
 görüyor" diye okundu. Çare `scripts/mutasyon-kaniti.sh`'de: test önce değişmemiş kodda
 koşar ve yeşil olmalıdır, ve 126, 127 ya da sinyal alan bir koşu kırmızı sayılmaz. İkisi
 betiğin kendi koşularıyla gösterildi. Kural: **her mutasyon bu betikle yapılır, kendi
-sarmalayıcısıyla değil** (CLAUDE.md).
+sarmalayıcısıyla değil** (TESTPLAN, "Test politikası").
+
+### 151 · Kısıtlı PATH'le koşan bir kabuk testi, betiğe sızan dış komutu göremez
+Linux başlatıcısının testi PATH'i yalnız sahte programlara kısıyordu, gerçek Chrome
+bulunmasın diye. Başlatıcıya `mkdir -p "$ev/profil"` ekleyen mutasyon yeşil kaldı: `mkdir`
+o PATH'te yok, `set -e`'siz betik "command not found"dan sonra devam etti, profil hiç
+kurulmadı ve "profile dokunmuyor" iddiası bedava geçti. Aynı körlük her `rm` için de
+geçerliydi. Çare `src/linuxKur.test.ts`'te: sahteler önde, `/usr/bin:/bin` arkada, ve
+yalnız bir programın YOKLUĞUNU sınayan test sahtelerle tek başına koşar. Mutasyonla
+gösterildi (TESTFINDINGS 2026-10-10). Kural: **bir kabuk testinin PATH'i, betiğin
+yapmaması gereken şeyi yapabileceği kadar geniştir.**
 
 ## Ölçüm disiplini
 
@@ -1372,6 +1401,16 @@ Bizim veride program hiç yok, CP-SAT 0,1 saniyede kanıtlıyor. Çözücüyü
 suçlamadan önce iki girdinin aynı olduğu ölçülür, yoksa bir veri farkı aylarca
 bir algoritma işi gibi kovalanır.
 
+### 150 · Kilidi tutan betiği öldürmek, kilidin koruduğu komutu öldürmez
+`timeout 600 scripts/agir.sh <komut>` süre dolunca yalnız `agir.sh`'i öldürdü: kilit
+boşaldı, komut yetim olarak koşmaya devam etti ve başka bir oturumun ölçümü onunla
+yan yana koştu (2026-10-09, test oturumunun Linux exe süreçleri ile zebra ölçümü).
+Komutun süreç grubunu öldürmek de yetmezdi, çünkü Playwright her tarayıcıyı `detached`,
+yani kendi grubunun lideri olarak başlatıyor. Çare: süre `agir.sh --sure N` ile verilir,
+dışarıdan `timeout` sarılmaz. Betik komutun bütün ağacını ortamındaki bir işaretle
+buluyor, süre dolunca, bir sinyal gelince ve komut geride bir şey bırakıp çıkınca önce
+ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` ölçüyor.
+
 ---
 
 ## Dizin
@@ -1379,7 +1418,7 @@ bir algoritma işi gibi kovalanır.
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1387,13 +1426,13 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 149, yeni bir tuzak 150'den devam eder. Test stratejisi
+büyük kullanılan numara 152, yeni bir tuzak 153'ten devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

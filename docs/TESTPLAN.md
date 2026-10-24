@@ -2,22 +2,50 @@
 
 Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 
+## Test politikası
+
+2026-10-23'ten beri test riske göre yazılır ([DECISIONS.md](DECISIONS.md), 2026-10-23).
+
+**Test şart olan yerler**, yani babanın verisini ya da programın kendisini bozabilecek yollar:
+
+- şema, göç, `sanitize` ve yedeğin açılması. Şema değişince hem birim hem E2E testi ([DATA.md](DATA.md)).
+- dizme: çözücü, kısıt motoru ve öneri araması.
+- güncelleme ve sürüm yolu (`update.ts`, `update.rs`, `surum.yml`, `yayinla.mjs`). Etiketten önce Windows'ta gerçek güncelleme testi yeşil olur.
+- düzeltilen her hata: düzeltmeden önce kırmızı olan bir gerileme testi, düzeltmeyle aynı commit'te.
+
+**Yeni test yazılmayan yer: arayüzün düzeni ve metni.** Değişiklik 1920×1080'de tek bir
+ekran görüntüsüyle gösterilir (`npm run ekran`, ya da aynı boyda tek bir kare). Var olan E2E
+testleri kalır ve CI'da koşar, davranış bilerek değiştiyse test o commit'te güncellenir.
+
+**Yerelde.** Commit'ten önce yalnız `npm run hizli` ve dokunulan test dosyaları: değişen
+test dosyası ve değişen kaynağın kendi testi. Başka bir şey yerelde koşulmaz, tam doğrulama
+dalın CI'ında.
+
+**Mutasyon** haftalık koşar (`haftalik.yml`), hiçbir şeyi beklemez ve değişiklik başına
+koşulmaz. Elle bir mutasyon kanıtı istenirse `scripts/mutasyon-kaniti.sh` ile yapılır (tuzak 149).
+
+**Bulunan hata** bulunduğu dalda, kendi commit'inde ve gerileme testiyle düzeltilir. Refactor
+dalı davranış değiştirmez, hatayı [TODO.md](TODO.md) §8k'ye yazar. Veri kaybı sınıfında bir
+hata bulunursa durulur ve bildirilir. "BİLİNEN KUSUR" kalıbı yeni bir testte kullanılmaz.
+Depoda kalan örnekleri (`src/fuzz.test.ts`, `src/fixtures.test.ts`)
+kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testine çevrilir.
+
 ## Ne zaman koşar
 
 | Katman | Komut | Ne zaman |
 |---|---|---|
 | Tipler | `npm run tipler` | her değişiklikten sonra |
 | Hızlı | `npm run hizli` | her commit'ten önce, dokunulan test dosyalarıyla birlikte |
-| Birim ve duman | `npm test` | birleşmeden önce, ve `hizli`'nin dışarıda bıraktığı dört dosyaya ya da onların ölçtüğü çözücüye ve öneri aramasına dokunulduysa |
-| E2E | `npm run test:e2e` | arayüzü, düzeni, sürüklemeyi, baskıyı ya da ekrandaki metni değiştiren bir iş yapıldıysa, ve sürüm çıkarmadan önce |
-| Site, sunucu, klasör | `npm run test:site` | teslim yollarına dokunulduysa: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
-| Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
+| Birim ve duman | `npm test` | CI'da her push'ta. Yerelde `hizli`'nin dışarıda bıraktığı dört dosyadan biri yalnız dokunulan test dosyasıysa |
+| E2E | `npm run test:e2e` | CI'da her push'ta, ve sürüm çıkarmadan önce. Yerelde yalnız dokunulan spec |
+| Site, sunucu, klasör | `npm run test:site` | CI'da her push'ta. Teslim yolları: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
+| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`constraints.ts`, `rules.ts`) ve çözücüyü ölçer |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
 | Brave | `npm run test:brave` | elle, yerelde, Brave kurulu bir makinede: ana E2E'nin `temel`, `planlar` ve `erisim` dosyaları Brave'de (`/usr/bin/brave-browser`, başka yerdeyse `BRAVE_YOLU`). Brave yoksa atlanmaz, her test açılışta Playwright'ın "executable doesn't exist" hatasıyla düşer. CI'da yok: runner'larda Brave yok ve kurulumu sürümü sabitlenemeyen üçüncü taraf ikili |
-| Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
-| Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
+| Mutasyon | `npm run mutasyon` | `haftalik.yml` haftada bir koşar, hiçbir şeyi beklemez. Değişiklik başına koşulmaz |
+| Görüntü | `npm run ekran` | arayüzün düzeni ya da metni değişince, 1920×1080'de bakmak için |
 | Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
 | CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde, her biri ayrı bir runner'da), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
@@ -51,17 +79,16 @@ durumda da kırmızı kalır. Kararsız çıkan bir test TESTFINDINGS'e yazılı
 runner'ı UTC'de koşar, yani saat dilimine dayanan bir test oradan kendi dilimini
 kurar (`src/folder.test.ts`).
 
-Görsel bir değişiklikten sonra testin yeşil olması yetmez, ekran görüntüsüne de
-bakılır (`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
+Görsel bir değişiklikten sonra 1920×1080'de bir ekran görüntüsüne bakılır
+(`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
 ekseni ve düğme adı yalnız gerçek tarayıcıda görünür, jsdom bunların hiçbirini
 görmez.
 
 ## Koşulmayan katman yazılır
 
-Bir katman koşulmadıysa [WORKLOG.md](WORKLOG.md)'nin o günkü girdisi bunu sebebiyle
-yazar, sessizce atlanmaz. Koşulmamış bir süit yeşil bir süitle aynı şey değil,
-bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test kusuru)
-[TESTFINDINGS.md](TESTFINDINGS.md)'ye yazılır.
+Raporda ve [WORKLOG.md](WORKLOG.md)'nin o günkü girdisinde koşulan ve koşulmayan komutlar
+yazılır: koşulmamış bir süit yeşil bir süitle aynı şey değil. Bir koşudan gerçek bir bulgu
+çıktıysa (ürün kusuru ya da test kusuru) [TESTFINDINGS.md](TESTFINDINGS.md)'ye yazılır.
 
 ## Katmanlar
 
@@ -76,7 +103,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | E2E | `e2e/*.spec.ts`, ana config, `file://` | davranış, erişilebilirlik, kâğıt, çevrimdışı |
 | Dil | `src/i18n.test.ts` ve `e2e/dil.spec.ts` | sözlüğün kendisi ve dil makinesi |
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
-| Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
+| Site, sunucu, klasör | `e2e/{site,sunucu,klasor,linux-tasima}.spec.ts` | `file://`'da olmayan her şey, http üstünde, ve siteden `file://`'a taşıma |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
 | Kontrat | `src/kontrat.test.ts`, `src/fixtures/release-v2.2.0/` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma; `surum.yml`, Release ve `update.rs` arasındaki sapma |
 | Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin ve Windows'ta `Mozaik.exe`'nin kendisi: pencere, Rust komutları, gerçek disk |
@@ -104,8 +131,8 @@ Görmediği: babanın verisi (önerinin CP-SAT'ın en iyisine ulaşması, dizili
 "Olmaz", çözücünün tam dolu kursu), çözücünün gerçek ölçekteki davranışı, ve fast-check
 değişmezlerinin hepsi (çözücünün yasallığı, `occupy` ile `vacate`, `parseState`'in sabit
 noktası, `remapDays`, `clampBlocks`, `placedBlocks`, palet, kurulamayan haftaya öneri).
-Bu yüzden tam `npm test` birleşmeden önce koşar, ve bu dosyaların ölçtüğü koda dokunan
-bir iş onları commit'ten önce de koşar.
+Bu yüzden tam `npm test` CI'da her push'ta koşar, ve çözücüye ya da öneri aramasına dokunan
+bir iş bu dosyaları dokunulan test dosyası sayıp commit'ten önce de koşar.
 
 ### Birim
 
@@ -172,17 +199,22 @@ türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapış
 Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
 kuralı: bir dosya ya reddedilir ya bütün bir plan olarak açılır, asla yarım plan.
 
-Ölçtükleri: açılan her planda her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
+Ölçtükleri: açılan her planda her satırın kimliği dolu ve tek (derslik, öğretmen ve sınıf
+birlikte, dersler ayrı), her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
 var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa dosya açılmıyor;
 kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
 tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
 yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
-süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
-bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
-yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+süzgeci, boş ad, blok kırpması). `readPlanFile` hiçbir bozulmada istisna atmıyor (TODO TB1,
+2026-10-24'e kadar bozuk bir ders satırında atıyordu). İki cevap "BİLİNEN KUSUR" diye çivili:
+eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırının olmaması (TB9);
+değişmezler tam bu ikisinin etrafından geçer.
 
-Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
-TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+"Tümünü dosyadan aç"ın yolu (`readBundlePlans`) TB8'in düzeltmesiyle geldi (2026-10-23):
+bozuk bir planın yanındaki tam plan hep açılıyor, bozuk olan ya reddediliyor ya bütün, dört
+listeden biri hiç olmayan plan açılmıyor.
+
+Ölçmedikleri: arayüzün reddi göstermesi (`temel.spec.ts` 29'un işi), ve Excel'in `.xlsx`
 dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
 varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 
@@ -346,15 +378,23 @@ ağa çıkılmaması, güncelleme şeridinin davetsiz çıkmaması.
 
 ### Site, sunucu, klasör
 
-`npm run test:site` üç dosyayı http üstünde koşar, çünkü üçü de `file://` altında
-olmayan bir şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistemi Erişimi.
+`npm run test:site` dört dosyayı http üstünde koşar. Üçü `file://` altında olmayan bir
+şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistemi Erişimi. Dördüncüsü
+(`linux-tasima.spec.ts`) Linux uygulamasına geçişi: site kökeninde kurulan planlar
+"Tümünü dosyaya kaydet" ile çıkıp boş depolu yeni bir bağlamda, `file://`'da "Tümünü
+dosyadan aç" ile içerikleriyle aynı geri geliyor, ve yeni kopya ağa çıkmıyor (B7.28).
 Ölçtükleri: manifest ve simgeler, service worker kaydı, bağlantı kesilince açılma,
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
 sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taşıması, ve
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
-değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı bir
-BİLİNEN KUSUR'u sabitliyor (TODO TB7): 2 s'lik yazım dolmadan kapanan sekmenin
-değişikliği klasöre inmiyor, depoya iniyor.
+değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı (TODO TB7):
+2 s'lik yazım dolmadan kapanan sekmenin değişikliği depoda kalıyor, klasör bir değişiklik
+geride kalıyor ve sonraki açılış onu klasöre yazıyor; yani gecikme, kayıp değil. Deponun
+kapanış flush'ı kalkınca test kırmızı (mutasyonla, 2026-10-24). Exe'de pencere sayfayı bekliyor (2026-10-24);
+o yarının sayfa tarafı `src/desktop.test.ts`'te, pencerenin kendisi gerçek exe süitinde
+(`gercek-exe.spec.ts`, pencere yöneticisinin kapatma mesajıyla; WebDriver'ın pencere
+kapatması Tauri'nin kapanma isteğinden geçmiyor). O test etiketten önce Windows'ta da yeşil
+olur (BUILD, "Sürüm"); düzeltmesiz Linux ikilisine karşı kırmızıydı.
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
@@ -412,7 +452,11 @@ kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği,
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
 uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
-sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
+sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
+pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
+WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
+kapanma isteğinden geçmiyor; Wayland masaüstünde süit bunun için XWayland'de koşar).
+Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
 
@@ -476,14 +520,15 @@ perdenin inmiş olması.
 
 ## Planlanan katmanlar
 
-Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Henüz yok: bir
-katman yazıldığı commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne
-girer. "Yavaş" diye işaretli olanlar push'u ve birleştirmeyi beklemez, gece ya da haftalık
-arka planda koşar; tek istisna `yayinla`'nın Windows koşularını beklemesi (CLAUDE.md).
+Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Program
+2026-10-23'te donduruldu: bu tablo sırası olmayan bir birikim, bir katman ancak yukarıdaki
+politikanın şart koştuğu bir yolu koruyorsa alınır. Henüz yok: bir katman yazıldığı
+commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
+haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
-| Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
+| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
 | Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |
@@ -562,6 +607,6 @@ silinir.
 ## Ölçüm yöntemleri
 
 - **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini `getComputedStyle` ile okur, WCAG kontrast oranını ve CIE Lab ΔE farkını hesaplar. ΔE gerekiyor, çünkü WCAG parlaklık oranı farklı tonlardaki iki koyu rengi eşit sayar. Modern renk sözdizimi sayıya çevrilmeden önce sRGB'ye getirilir (tuzak 81).
-- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
+- **Mutasyonla sınama.** Bir testin bir şey ölçtüğünden şüphe edilirse, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Her değişiklikte yapılmaz. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
 - **Derleme çıkış kodu.** Testten önce derleme susturuluyorsa çıkış kodu okunur, yoksa testler bir önceki `dist/`'i ölçer.
 - **Kâğıt.** Yazdırma iddiaları PDF üretilip okunarak doğrulanır (MediaBox, üst ve alt bilgi), ve kâğıdı ölçen test pencereyi de kâğıdın boyuna getirir (tuzak 31 ve 86).

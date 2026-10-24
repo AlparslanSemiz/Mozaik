@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { place } from './pure/constraints';
-import { activeProgram } from './pure/programs';
-import { setDayMask, setRowMask, solverExclusions } from './pure/programMask';
-import { EMPTY_PROGRAM_MASK } from './pure/programMask';
+import { activeProgram } from './pure/program/programs';
+import { setDayMask, setRowMask, solverExclusions } from './pure/program/programMask';
+import { EMPTY_PROGRAM_MASK } from './pure/program/programMask';
 import { solve } from './pure/solver';
 import { makeWorld } from './worlds';
 

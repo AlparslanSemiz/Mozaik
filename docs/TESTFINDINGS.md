@@ -26,6 +26,86 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · bitti kontrolü (alt ajan incelemesi ve tıklama testi) · `tb8-eksik-plan`
+Bulgu: (1) `parseBundle` `state`'i nesne olmayan girdiyi sayılmadan atıyordu, buradaki aynı
+kimlikli plan "Hepsini değiştir"den sonra siliniyordu. (2) TB8'den eski: depo doluyken hiçbir
+plan yazılamazsa dosyada olmayan yerel planlar yine siliniyor, not "hiçbir şey değişmedi"
+diyordu; yazılamayan yeni plan dizinde verisiz satır kalıyordu. Üçü de birim testinde
+kırmızıydı. Tıklama testi (`dist/index.html`, Chromium, 1920×1080, örnek okul): kesik paket
+dosyası tek plan dosyası sanılıyor, Ayarlar'daki durum notu 13 px.
+Tür: ürün kusuru, (1) ve (2) veri kaybı sınıfı.
+Ne yapıldı: (1) ve (2) aynı dalda düzeltildi, testleri `src/storeContract.test.ts`'te. Kesik
+dosya ve 13 px TODO B7.35 ve B7.36, daha yeni planın cümlesi B7.34.
+Kalıcı kural: yok.
+
+### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
+Bulgu: ana E2E 635/637, iki kırmızı. (1) "kayıt çalışmıyorsa kalıcı kırmızı uyarı":
+`.save-warning` iki elemana çözüldü, "otomatik kayıt çalışmıyor" ve VK2'nin "depolama alanı
+dolu" şeridi. Önceki `main` push'unda (38087627073, 45b8103, yalnız belge) aynı hata vardı;
+Linux'ta yerelde ve `ci.yml`'de yeşil. (2) Erişilebilirlik taramasının üç ekranlı testi
+48,8 s'de düştü, TP22'nin bilinen bütçe sorunu.
+Tür: (1) test kusuru (locator dar değil) ve arkasında bir ürün kusuru (depo yokken "dolu"
+demek), veri kaybı değil; (2) test kusuru (bütçe).
+Ne yapıldı: `fix/windows-e2e`: (1) locator kendi cümlesine daraltıldı, `canSave` şeridini
+kaldıran mutasyon kırmızı; ürün kusuru TODO B7.31. (2) test üç teste bölündü (TODO TP22).
+Kalıcı kural: yok.
+
+### 2026-10-10 · `ci.yml` 38085275289 (`bakim/agir-kilit`, a748250; uygulama kodu `main` 60e1b33) · `kurulum.spec.ts:716`, "seçilen cinsiyet YENİLEMEDEN sonra da duruyor"
+Bulgu: yenilemeden sonra öğretmen satırı yok, plan bütünüyle boş ("1. plan", Branşlar 0).
+İzde yenilemeden önce `ders-programi` dolu (27 823 karakter, değişiklik inmiş); yenileme son
+yazımdan ~130 ms sonra. Branşlar 0, anahtarın açılışta hiç okunmadığını söylüyor (okunsaydı
+`parseState` 21 branş koyardı); `addInitScript` yoktu. Yeniden üretilemedi: bu makinede gerçek
+test karışık sırayla main 0/380, 135d097 0/380 (2 çekirdeğe kısılmış 150 dahil), yeniden
+yükleme gecikmeli prob 0/160 ve 0/160; runner'da ubuntu-24.04 0/300, windows-latest 0/100.
+CI geçmişinde 76 koşuda bir; `retries` yok.
+Tür: ürün kusuru adayı (tetikleyici tarayıcıda, sonucu üründe: boş açılışı otomatik kayıt
+kalıcı yapıyor). Korumasız kod hata enjeksiyonuyla planı boşla değiştiriyor (E2E mutasyonu).
+Ne yapıldı: `fix/bos-acilis`, TODO B7.30. D maddesiyle (0/21 branş) aynı şey değil.
+Kalıcı kural: TRAPS.md, tuzak 108'e ek.
+
+### 2026-10-10 · `npm run ekran` (`ozellik/zebra`, zebra commit'inden sonra) · `light-5-suruklerken`
+Bulgu: zebra değişikliğinden sonra sürükleme sahnesinde 9 piksel farklı, hepsi havuzdaki
+sürüklenen kartın 57×58'lik kutusunun kenarında, en çok 17/255 kanal farkı. İki "önce"
+koşusu arasında bu sahne birebir aynıydı, iki "sonra" koşusunda da fark aynı, yani kararlı.
+Değişen kuralların hiçbiri bu öğeye ulaşmıyor.
+Tür: ölçüm notu (kenar yumuşatması, görünür değişiklik değil).
+Ne yapıldı: incelendi, düzeltme yok.
+
+### 2026-10-10 · `mutasyon-kaniti.sh --liste` (`ozellik/linux`) · `src/linuxKur.test.ts`, başlatıcının profili
+Bulgu: başlatıcıya `exec`'ten önce `mkdir -p "$ev/profil"` ekleyen mutasyon yeşil kaldı
+(13 mutasyondan biri). "Chrome var" testi PATH'i yalnız sahte programlara kısıyordu;
+`mkdir` bulunamadı, betik `set -e`'siz olduğu için devam etti, profil hiç kurulmadı.
+Kısıtlı PATH, başlatıcıya sızan her dış komutu (`mkdir`, `rm`) görünmez yapıyordu.
+Tür: test kusuru (bedava yeşil).
+Ne yapıldı: düzeltildi, aynı dalda ("Test: Linux başlatıcısı sistem araçlarıyla koşuyor,
+var olan profil"): Chrome'un bulunması gereken testlerde sahteler önde, `/usr/bin:/bin`
+arkada; Chrome'un yokluğunu sınayan test yalnız sahtelerle, çünkü orada gerçek Chrome
+bulunurdu. Profil önceden varken dokunulmadığı ayrıca sınanıyor. Yeniden koşuda altı
+başlatıcı mutasyonunun altısı kırmızı.
+Kalıcı kural: TRAPS.md, tuzak 151.
+
+### 2026-10-10 · `npx vitest run src/programScreen.test.tsx` (`refactor/program`) · "aynı saatte iki sınıfa yazılmış öğretmende kâğıt bir hücre fazla çiziyor (RK15)"
+Bulgu: ekranın ve kâğıdın teneffüste blok kesmesi el yapımı dünyada ve tam dolu kursun dizili
+haftasında aynı hücreleri çiziyor. MÇ'nin 510'daki iki saatlik bloğunun ikinci saatinde
+511'de de dersi olan dört saatlik bir günde ızgara 3 hücre çiziyor, kâğıt 4 hücre ve 5
+sütun. Kurgulanmış veride, her koşuda aynı.
+Tür: ürün kusuru (uygulamanın kendisi böyle bir hafta kurmuyor; eski yedek ya da içe
+aktarma taşıyabilir).
+Ne yapıldı: TODO §8k RK15; iki algoritma birleşmedi (DECISIONS 2026-10-10), test ikisini de
+olduğu gibi sabitliyor.
+Kalıcı kural: yok.
+
+### 2026-10-10 · `scripts/mutasyon-kaniti.sh --liste` (`refactor/program`) · `src/programView.test.ts`, havuz sırası
+Bulgu: bir dersin aynı boydaki kartlarının havuzda yan yana durduğunu söyleyen iddia hiçbir
+kuyruk bozmasıyla kırmızı olmuyor: kartlar ders ders ekleniyor ve sıralama kararlı, deste
+kartları her anahtarda eşit. Ayrıca iki iddia ilk listede ölçmüyordu (tamamlanan ders,
+öğretmen kâğıdının rengi: dünyada ilgili sayı ya da renk yoktu ya da aynıydı).
+Tür: test kusuru.
+Ne yapıldı: deste iddiası yazılmadı, sebebi testin yorumunda; öbür ikisi dünyası
+düzeltilerek kırmızıya döndü. Kaynaktaki bayat yorum düzeltildi.
+Kalıcı kural: yok (TODO §8k'de tuzak adayı).
+
+
 ### 2026-10-10 · `exe-windows.yml`, ilk dört koşu (`test/gercek-ortam`) · Windows'ta gerçek exe
 Bulgu: derleme, `tauri-driver` 2.0.6, WebView2 Runtime (runner'da yoktu, kuruldu,
 153.0.4234.48) ve aynı sürüm `msedgedriver` tamam; program sürücüsüz açılıyor (15 s sonra
@@ -76,7 +156,8 @@ beş milyonluk dizi. Üçü de her koşuda aynı tohumla tekrarlanıyor. Kesik d
 açılmadı; dört listeden biri eksik dosya hiç açılmadı (DK11 tutuyor).
 Tür: ürün kusuru (üçü), veri kaybı değil.
 Ne yapıldı: TODO §8l TB1, TB6, TB9; testte "BİLİNEN KUSUR" diye çivili, değişmezler
-etraflarından geçiyor. Düzeltme `main`'de.
+etraflarından geçiyor. Düzeltme `main`'de. TB1'in üst çubuk yarısı düzeldi (2026-10-24,
+`tb1-dosyadan-ac`): `readPlanFile` istisnayı "okunamadı" cevabına çeviriyor.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · Vitest yoklaması (`scratch/test-plan/dk11-paket.test.ts`) · "Tümünü dosyadan aç"
@@ -88,7 +169,8 @@ yalnız plan sayısını söylüyor. Arayüzde uçtan uca koşulmadı.
 Tür: ürün kusuru, veri kaybı sınıfı (onaydan sonra).
 Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi. Kullanıcının kararı
 (2026-10-10): düzeltmesi ve testi TB7 ile birlikte, `fix/veri-kaybi` birleşir birleşmez
-`main`'den açılan ikinci düzeltme dalında.
+`main`'den açılan ikinci düzeltme dalında. Düzeltildi (2026-10-23 ve 24, `tb8-eksik-plan`,
+`readBundlePlans`), gerileme testleri `src/storeContract.test.ts` ve `e2e/planlar.spec.ts`'te.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · `scratch/test-plan/b2-klasor.mjs` ve `klasor.spec.ts` · kapanan sekmenin klasör yazımı
@@ -98,7 +180,10 @@ Bulgu: klasör seçiliyken bir derslik eklenip 2 s'lik yazım gecikmesi dolmadan
 açılışta klasörü kendisi yazıyor; ikinci ölçüm programı açmayan aynı kökenli bir sayfadan okudu.
 Tür: ürün kusuru (yedek gecikmesi; depo veriyi tutuyor).
 Ne yapıldı: TODO §8l TB7, `klasor.spec.ts`'te "BİLİNEN KUSUR"; `fix/veri-kaybi` birleştikten
-sonra ayrı bir dalda düzeltilecek.
+sonra ayrı bir dalda düzeltilecek. Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):
+pencere sayfanın yazımını bekliyor; tarayıcı yarısı düzelmez. Tarayıcı yarısı veri kaybı
+değil (2026-10-24, beş koşunun beşi): değişiklik depoda, sonraki açılış klasöre yazıyor; BİLİNEN
+KUSUR testi sıradan bir teste döndü.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · test programının analizi (Playwright kütüphanesi ve Linux exe, sahte ev) · iki kopya ve kota
