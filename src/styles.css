@@ -4056,6 +4056,19 @@ table.list td > .form-row {
   background: var(--zebra);
 }
 
+/* The bell preview's lunch row is not a record. Counted, it put lessons 5, 6
+   and 7 all on paper with two lunch rows between them; skipped, they
+   alternate. Two rules of their own, because `nth-child(… of S)` is the
+   newest selector in the file (Chromium 111): an engine that does not know it
+   drops these two and falls back to the count above, not every list's stripe. */
+:where(table.bell-preview) > tbody > tr:where(:nth-child(even of :not(.break-row))) {
+  background: var(--zebra);
+}
+
+:where(table.bell-preview) > tbody > tr:where(:nth-child(odd of :not(.break-row))) {
+  background: none;
+}
+
 table.list tbody tr:hover,
 table.stat tbody tr:hover {
   background: var(--bg);
