@@ -856,14 +856,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
-- [ ] **B7.34 `stabil` uzağa itilmedi, ve 19 birleşmemiş dal bekliyor (2026-10-24).**
-      `npm run dal-temizle` ve `stabil` (DECISIONS 2026-10-24) `dal-temizlik` dalında.
-      `stabil` yerelde `v2.2.0`'da (`cbe6526`); itilmedi çünkü yeni bir dal `ci.yml`'i
-      tetikliyor (tuzak 154). Karar bekleyen: (a) şimdi itilsin mi, yoksa ilk `yayinla` mı
-      itsin; (b) `ci.yml`'e `'!stabil'` eklensin mi. Birleşmemiş dalların listesi
-      `npm run dal-temizle`'nin kuru koşusunda; hangisinin gideceği kullanıcının kararı
-      (`origin/klasorleme` 2026-09-05, `test/gercek-ortam` 2026-10-17 ve `ruflo/kurulum`
-      2026-10-23 dışındakiler bugün açılmış, çalışan oturumların dalları).
+- [ ] **B7.38 Birleşmemiş iki eski dal: `test/gercek-ortam` ve `origin/klasorleme` (2026-10-24).**
+      `npm run dal-temizle` birleşmiş dalları sildi, birleşmemişlere dokunmadı. Bugün açılan
+      dallar ve `ruflo/kurulum` çalışan oturumların, onlara dokunulmuyor. İki eski dalda
+      `git cherry origin/main <dal>` `+` veriyor, yani main'de aynısı olmayan commit var:
+      `test/gercek-ortam` 14 (TP6, TP7, TP9, TP10, TP12 testleri ve `exe-windows` CI denemeleri),
+      `origin/klasorleme` 29 (2026-09'un klasörleme turu A1-C4 ve B7.16-B7.19 testleri). İkisi
+      de tutuldu; ne olacakları kullanıcının kararı.
 
 ---
 
