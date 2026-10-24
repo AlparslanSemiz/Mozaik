@@ -154,7 +154,7 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       await oturum.tikla('metin:Hakkında');
       await expect
         .poll(() => oturum!.js<string>(SURUM_HUCRESI), { timeout: 15_000 })
-        .toMatch(/^0\.0\.1\b/);
+        .toMatch(/^v?0\.0\.1\b/);
       await oturum.tikla('metin:Güncellemeleri denetle');
       await oturum.bekle('metin:Yeni sürümü indir', 30_000);
       await oturum.tikla('metin:Yeni sürümü indir');
@@ -186,8 +186,11 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       await oturum.tikla('metin:Ayarlar');
       await oturum.tikla('metin:Hakkında');
       const surum = await oturum.js<string>(SURUM_HUCRESI);
-      expect(surum.startsWith(ORTAM.yeniSurum!), `yeni sürümün numarası: ${surum}`).toBe(true);
-      expect(surum).not.toMatch(/^0\.0\.1\b/);
+      expect(
+        surum.replace(/^v/, '').startsWith(ORTAM.yeniSurum!),
+        `yeni sürümün numarası: ${surum}`,
+      ).toBe(true);
+      expect(surum).not.toMatch(/^v?0\.0\.1\b/);
 
       // The interface shows the old school before anything is touched.
       await oturum.tikla('metin:Okul');
