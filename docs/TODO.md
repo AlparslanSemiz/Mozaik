@@ -1635,7 +1635,7 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
 2026-10-23'ten beri bir düzeltme aynı dalda ve gerileme testiyle yapılır, "BİLİNEN KUSUR"
 testi o commit'te sıradan bir teste döner.
 
-- [~] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
+- [x] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
       Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde
       `TypeError` (`reading 'trim'`, `'weeklyHours'`, `'id'`). "Dosyadan aç"ta `App.tsx`'in
       `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
@@ -1646,7 +1646,12 @@ testi o commit'te sıradan bir teste döner.
       atılan istisnayı `{ problem: 'okunamadi' }`'ye çeviriyor, "Dosyadan aç" "Bu dosya
       okunamadı" diyor ve açık plan değişmiyor; testleri `src/fuzz.test.ts` (fuzz artık
       istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29; okunamayan dosya (`file.text()`
-      reddi) da aynı uyarıyı veriyor. **Kalan:** açılıştaki `parseState` (yukarıda), ölçülmedi.
+      reddi) da aynı uyarıyı veriyor.
+      **Açılış yarısı düzeldi (2026-10-24, `tb1-acilis`):** deposundaki metni okunamayan plan
+      açılışta sayfayı düşürmüyor ve boş açılıp ilk değişiklikle ezilmiyor; kenara konuyor
+      (`setAside`): okunabilen ilk plan ya da yeni boş bir plan açılıyor, okunamayan dizinde ve
+      anahtarında kalıyor, listeden seçilemiyor, ekranda tek satır adını söylüyor. Testleri
+      `src/storeContract.test.ts` (dördü önce kırmızı).
       İncelemenin bulduğu, TB1'den eski bir delik B7.37'de.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen

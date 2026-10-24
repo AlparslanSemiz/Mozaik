@@ -353,6 +353,7 @@ export default function App() {
     plans,
     park,
     saveTrouble,
+    brokenPlans,
   } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -1049,6 +1050,19 @@ export default function App() {
             {/* A SAVE THAT FAILED IS SAID WHERE IT FAILED (VK2). The probe above
             runs once at startup with one byte, and the storage can fill up
             later; the autosave's own answer is what this reads. */}
+            {/* A PLAN WHOSE TEXT CANNOT BE READ IS SET ASIDE (TB1): not opened,
+            not written over, still in Ayarlar → Planlar ve yedek. One line,
+            for the whole session, because a toast would be gone before a
+            reader who has trouble seeing has found it. */}
+            {brokenPlans.length > 0 && (
+              <div className="save-warning" role="status">
+                ⚠{' '}
+                {t('Okunamayan plan açılmadı, olduğu gibi duruyor: {adlar}.', {
+                  adlar: brokenPlans.join(', '),
+                })}
+              </div>
+            )}
+
             {saveTrouble === 'dolu' && (
               <div className="save-warning" role="alert">
                 ⚠{' '}

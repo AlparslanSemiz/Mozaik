@@ -29,6 +29,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- A plan whose saved data can no longer be read no longer stops the program from opening, and is no longer emptied by the next change. It is left as it is, another plan opens, and one line says which plan it was.
 - "Open from file" no longer opens a plan in which two lessons, or a teacher, class or room and another one, share an id, or one has none; such a file is refused as unreadable. "Open all from file" leaves such a plan out and counts it with the broken ones.
 - "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".
 - "Open all from file" now says that a plan written by a newer version of the program needs the program updated, instead of calling it incomplete or broken.

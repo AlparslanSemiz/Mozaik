@@ -12,8 +12,18 @@
 // session backups. The third is the file the user downloads (`download.ts`).
 
 import { parseState } from '../pure/parseState';
-import { BACKUP_COUNT, backupKey, BASE_KEY } from '../pure/library';
-import { readPlanText, readPlanTextAtStart, writePlanText } from './libraryStore';
+import { emptyState, newId } from '../pure/entities';
+import {
+  addPlan,
+  BACKUP_COUNT,
+  backupKey,
+  BASE_KEY,
+  findPlan,
+  type Library,
+  setActive,
+  uniquePlanName,
+} from '../pure/library';
+import { readPlanText, readPlanTextAtStart, writeLibrary, writePlanText } from './libraryStore';
 import { safely } from '../leaf/storage';
 import type { Id, State } from '../leaf/types';
 
@@ -54,15 +64,71 @@ export function savePlan(id: Id, d: State): boolean {
   return writePlanText(id, JSON.stringify(d));
 }
 
-export function loadPlan(id: Id): State | null {
-  const text = readPlanText(id);
-  return text === null ? null : parseState(text);
+/**
+ * A stored plan as read: its state, no key at all, or text that cannot be read
+ * (TODO TB1). `parseState` returns null on text that is not a plan and THROWS
+ * on a row it cannot take (a null lesson); both are `broken` here, and nothing
+ * that reads storage throws because of what it found there.
+ */
+export type StoredPlan = { state: State } | { missing: true } | { broken: true };
+
+function readStored(text: string | null): StoredPlan {
+  if (text === null) return { missing: true };
+  try {
+    const state = parseState(text);
+    return state === null ? { broken: true } : { state };
+  } catch {
+    return { broken: true };
+  }
 }
 
-/** `loadPlan` for the one read at startup: an empty answer is remembered. */
-export function loadPlanAtStart(id: Id): State | null {
-  const text = readPlanTextAtStart(id);
-  return text === null ? null : parseState(text);
+export function storedPlan(id: Id): StoredPlan {
+  return readStored(readPlanText(id));
+}
+
+/** The plan's state, or null when there is none to open (missing or broken). */
+export function loadPlan(id: Id): State | null {
+  const read = storedPlan(id);
+  return 'state' in read ? read.state : null;
+}
+
+/** `storedPlan` for the one read at startup: an empty answer is remembered. */
+export function loadPlanAtStart(id: Id): StoredPlan {
+  return readStored(readPlanTextAtStart(id));
+}
+
+/**
+ * Plan `brokenId` cannot be read: open another one instead and leave it where
+ * it is (TODO TB1). Not opened, so nothing is ever written over its text; not
+ * dropped, so it stays in the directory and in its key, for a later fix or a
+ * delete the user chooses. The first plan that reads is opened; with none, a
+ * new empty plan is made, its data written before its directory row (the rule
+ * `createPlan` follows). Every unreadable plan met on the way is named.
+ */
+export function setAside(
+  lib: Library,
+  brokenId: Id,
+): { lib: Library; id: Id; state: State; broken: string[] } {
+  const broken = [findPlan(lib, brokenId)?.name ?? brokenId];
+  for (const plan of lib.plans) {
+    if (plan.id === brokenId) continue;
+    const read = storedPlan(plan.id);
+    if ('state' in read) {
+      const next = setActive(lib, plan.id);
+      writeLibrary(next);
+      return { lib: next, id: plan.id, state: read.state, broken };
+    }
+    if ('broken' in read) broken.push(plan.name);
+  }
+  const id = newId();
+  const state = emptyState();
+  savePlan(id, state);
+  const next = setActive(
+    addPlan(lib, { id, name: uniquePlanName(lib, 'Boş plan'), draft: false }),
+    id,
+  );
+  writeLibrary(next);
+  return { lib: next, id, state, broken };
 }
 
 /**

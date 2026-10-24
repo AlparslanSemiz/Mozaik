@@ -659,6 +659,75 @@ describe('sözleşme · React kancası', () => {
     expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y']);
   });
 
+  // TB1's other half (2026-10-24, tb1-acilis). A plan whose stored text
+  // cannot be read used to crash the page at startup (a row parseState throws
+  // on) or open as an empty plan that the first edit wrote over the text
+  // (text that is not JSON). Now it is set aside: not opened, not written
+  // over, still in the directory, and named in one line (`brokenPlans`).
+  const seed = (active: string, plans: Array<[string, string, string]>) => {
+    localStorage.setItem(
+      LIBRARY_KEY,
+      JSON.stringify({
+        activeId: active,
+        plans: plans.map(([id, name]) => ({ id, name, draft: false })),
+      }),
+    );
+    for (const [id, , text] of plans) localStorage.setItem(planKey(id), text);
+  };
+  const throws = () => {
+    const x = school() as { lessons: unknown[] };
+    x.lessons[0] = null;
+    return JSON.stringify(x);
+  };
+
+  it('TB1: açık planın metni okunamıyorsa sayfa çökmüyor, öteki plan açılıyor, bozuk metin yerinde', () => {
+    seed('1', [
+      ['1', 'Bozuk', throws()],
+      ['y', 'Tam', JSON.stringify(school())],
+    ]);
+    const before = localStorage.getItem(planKey('1'));
+    expect(() => mount()).not.toThrow();
+    expect(store.plans.planId).toBe('y');
+    expect(store.brokenPlans).toEqual(['Bozuk']);
+    act(() => store.change(() => named('Sonra')));
+    settle();
+    expect(localStorage.getItem(planKey('1'))).toBe(before);
+    expect(store.plans.library.plans.map((p) => p.id)).toContain('1');
+  });
+
+  it('TB1: tek plan okunamıyorsa boş bir plan açılıyor, bozuk plan dizinde ve deposunda kalıyor', () => {
+    seed('1', [['1', 'Bozuk', '{"schemaVersion": 16, "teachers": [']]);
+    expect(() => mount()).not.toThrow();
+    expect(store.plans.planId).not.toBe('1');
+    expect(store.brokenPlans).toEqual(['Bozuk']);
+    act(() => store.change(() => named('Yeni iş')));
+    settle();
+    expect(localStorage.getItem(planKey('1'))).toBe('{"schemaVersion": 16, "teachers": [');
+    expect(store.plans.library.plans.map((p) => p.id)).toContain('1');
+    expect(loadPlan(store.plans.planId)?.settings.schoolName).toBe('Yeni iş');
+  });
+
+  it('TB1: okunamayan plana geçilmiyor, metni yerinde kalıyor', () => {
+    seed('1', [
+      ['1', 'Tam', JSON.stringify(school())],
+      ['z', 'Bozuk', throws()],
+    ]);
+    mount();
+    expect(store.brokenPlans).toEqual([]);
+    const before = localStorage.getItem(planKey('z'));
+    act(() => store.plans.switchPlan('z'));
+    settle();
+    expect(store.plans.planId).toBe('1');
+    expect(store.brokenPlans).toEqual(['Bozuk']);
+    expect(localStorage.getItem(planKey('z'))).toBe(before);
+  });
+
+  it('TB1: loadPlan okunamayan metinde istisna atmıyor', () => {
+    localStorage.setItem(planKey('z'), throws());
+    expect(() => loadPlan('z')).not.toThrow();
+    expect(loadPlan('z')).toBeNull();
+  });
+
   it('Ctrl+Z geri alıyor, metin kutusundayken almıyor', () => {
     mount();
     act(() => store.change(() => named('Yazıldı')));

@@ -279,7 +279,11 @@ paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski d
 yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
 uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
 değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
-şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30).
+şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Deposundaki metni okunamayan bir
+plan (JSON değil, ya da `parseState`'in düştüğü bir satır) açılmaz ve üstüne yazılmaz: açılışta
+açık plansa okunabilen ilk plan açılır, hiçbiri yoksa yeni boş bir plan; listeden seçilince
+seçilmez; ekranda tek satır adını söyler; dizinde ve anahtarında kalır (`setAside`,
+2026-10-24, TODO TB1). Pakete ve klasöre girmez, çünkü durumu yok.
 
 ## Neden böyle
 
