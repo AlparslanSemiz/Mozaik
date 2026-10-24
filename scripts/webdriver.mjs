@@ -213,8 +213,8 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
 /**
  * On Windows only msedgedriver: the exe is started by `Oturum.ac` (the top of
  * the file says why). No xvfb (a runner has a desktop session) and no sandbox
- * HOME. The language is not pinned: WebView2 does not read LANG, and the
- * runner's Windows is English (TODO TP7).
+ * HOME. WebView2 does not read LANG; the language is pinned once the session
+ * is open (`turkceYap`).
  */
 function windowsSurucu({ port, ev, gunluk }) {
   const surucu = process.env.MOZAIK_NATIVE_DRIVER;
@@ -333,7 +333,9 @@ export class Oturum {
               },
             },
           });
-          return new Oturum(port, cevap.sessionId, program.pid);
+          const oturum = new Oturum(port, cevap.sessionId, program.pid);
+          await oturum.turkceYap();
+          return oturum;
         } catch (e) {
           hata = e;
           await new Promise((r) => setTimeout(r, 300));
@@ -344,6 +346,29 @@ export class Oturum {
     }
     agaciOldur(program.pid);
     throw new Error(`Oturum açılamadı: ${hata?.message ?? hata}`);
+  }
+
+  /**
+   * The language, pinned the only way WebView2 leaves open. It follows the
+   * user's Windows display language (wry's `--lang` comes after ours and wins),
+   * the runner's is English, and changing it needs a sign-out. So the
+   * interface's own language record (`ders-programi-dil`, preferenceKeys.ts)
+   * says Turkish and the page is loaded again: what my father's machine shows,
+   * except that there the language comes from Windows and no record is stored.
+   */
+  async turkceYap() {
+    await this.js(
+      `localStorage.setItem('ders-programi-dil', 'tr'); setTimeout(() => location.reload(), 0);`,
+    );
+    const son = Date.now() + 30_000;
+    while (Date.now() < son) {
+      await new Promise((r) => setTimeout(r, 300));
+      const hazir = await this.js(
+        `return document.readyState === 'complete' && document.documentElement.lang === 'tr' && !!document.querySelector('h1');`,
+      ).catch(() => false);
+      if (hazir) return;
+    }
+    throw new Error('Sayfa Türkçe açılmadı');
   }
 
   yol(alt) {

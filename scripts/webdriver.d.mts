@@ -29,6 +29,7 @@ export class Oturum {
   id: string;
   program: number | undefined;
   static ac(secenek: { port?: number; ikili: string; bekleMs?: number }): Promise<Oturum>;
+  turkceYap(): Promise<void>;
   bul(secici: string): Promise<string>;
   tikla(secici: string): Promise<void>;
   yaz(secici: string, metin: string): Promise<void>;
