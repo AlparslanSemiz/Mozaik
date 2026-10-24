@@ -94,7 +94,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/constraints/sanitize.ts` | `sanitize`, her yüklemede ve her ayar değişikliğinde (tuzak 4, 5, 6) |
 | `pure/constraints/pins.ts` | bir kapsamı topluca sabitlemek (`pinScopeCells`, `togglePinScope`) |
 | `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
-| `pure/feasibility/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
+| `pure/feasibility/index.ts` | programın neden dizilemediği: bölünmeden önceki tek dosyanın dışa açtığı her şey |
+| `pure/feasibility/levels.ts` | kapasite basamağı (`capacityLevel`, `loadStatus`) ve raporun şekilleri |
+| `pure/feasibility/naming.ts` | bir dersin adı (`lessonName`) ve bloklarının çoğunun boyu (`commonestBlock`) |
+| `pure/feasibility/hole.ts` | takılan dersin sebebi, deliği adıyla (`holeReason`) |
+| `pure/feasibility/capacity.ts` | öğretmen, sınıf ve dersliğin açık saati ile istenen saati (`buildCapacity`) |
+| `pure/feasibility/advice.ts` | Danışman (`buildAdvice`) |
+| `pure/feasibility/report.ts` | Kontrol'ün bütün raporu (`buildReport`) |
+| `pure/feasibility/health.ts` | her sekmedeki durum satırı (`health`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
 | `pure/entities/identity.ts` | adlandırma: `newId` (`Math.random`'ın tek yeri), iki harfli kısa ad, cinsiyetin üç okunuşu |
@@ -257,14 +264,14 @@ için Vite budar, `dist/index.html`'e girmez.
 
 Çakışma, sınır, kapasite ya da blok hesabı saf mantık katmanında yazılır.
 Program şeridindeki "Otomatik diz (N)"in N'i ve iki yıkıcı sorunun saydığı saatler `programView.ts`'teki `describeStrip`'ten,
-Kontrol'ün sayıları `feasibility.ts`'ten gelir. Program'ın satırları, havuzu ve
+Kontrol'ün sayıları `pure/feasibility/`'ten gelir. Program'ın satırları, havuzu ve
 araç çubuğunun altındaki satır `programView.ts`'te hesaplanır; ne zaman
 hesaplanacakları `Program.tsx`'te kalır, çünkü `Grid`'in memo sınırı `rows`'un
 kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 
 ### Hangi dosyaların testi var
 
-`pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`pure/constraints/`, `pure/feasibility/`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `pure/entities/`'teki `remapDays` de test ediliyor: ilkinden her yedek

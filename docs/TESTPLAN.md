@@ -144,7 +144,7 @@ Haftanın bloklara bölünüşü ve ızgaradan geri okunuşu. Sürüm numarası,
 exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adresleri
 (`surum.test.ts`).
 
-`pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`pure/constraints/`, `pure/feasibility/`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
 fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
 çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
@@ -297,7 +297,7 @@ girdisinde.
 
 Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints/`, `pure/constraints/rules.ts`,
 `leaf/model/blocks.ts`, `pure/io/parseState.ts`, `pure/undo/undo.ts`, `pure/io/library.ts`,
-`pure/feasibility/feasibility.ts`, `pure/entities/`, `pure/solver/solver.ts`): bütün depoyu ölçmek
+`pure/feasibility/`, `pure/entities/`, `pure/solver/solver.ts`): bütün depoyu ölçmek
 pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.
 `solver.ts` 2026-09-12'de listeye girdi. Ondan önce yoktu ve sebebi bir tercih
 değil bir arızaydı: aracın enstrümantasyonu `classOnDay[g]!++` biçimini

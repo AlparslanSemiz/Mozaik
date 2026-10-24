@@ -1087,7 +1087,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
-      özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
+      özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `pure/feasibility/`'in `lessonName`'i
       dersin ikinci branş bayrağını hiç okumuyor, `pure/constraints/`'in sınıf dolu cümlesi ve
       `pure/entities/`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
 - [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç

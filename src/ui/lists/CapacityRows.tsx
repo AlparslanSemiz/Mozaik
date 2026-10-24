@@ -7,7 +7,7 @@
 // line can still be read at, and it could not go in a side rail at all.
 //
 // They are one table now. `buildReport` literally returns `buildCapacity`'s
-// rows (feasibility.ts), so this is one drawing of one fact rather than two
+// rows (pure/feasibility/), so this is one drawing of one fact rather than two
 // that can drift.
 //
 // The sentence is not lost: it is the row's `title`, which is where it was in

@@ -8,7 +8,7 @@ import {
   health,
   holeReason,
   loadStatus,
-} from './feasibility';
+} from './index';
 import { place } from '../constraints';
 import {
   addClass,

@@ -7,7 +7,7 @@
 // invisible while you were creating those four classes.
 //
 // Nothing is computed here: `buildCapacity` is the cheap half of the existing
-// report (feasibility.ts), split out precisely so it can run beside a text box
+// report (pure/feasibility/), split out precisely so it can run beside a text box
 // without paying for buildReport's 99 x 72 blocker() calls (pitfall 3).
 
 import { useMemo } from 'react';

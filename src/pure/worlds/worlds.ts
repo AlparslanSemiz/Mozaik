@@ -263,7 +263,7 @@ export function hoursOf(d: State, lessonId: Id): number {
 // rather than a law (pitfall 42). The only thing asserted about a solver change
 // is that it placed no fewer blocks than before.
 //
-// It lives here and not in feasibility.ts on purpose: nothing on screen shows
+// It lives here and not in pure/feasibility/ on purpose: nothing on screen shows
 // it, so it is a test instrument and the application must not import it.
 
 export interface GridQuality {

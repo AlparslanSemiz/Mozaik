@@ -31,7 +31,7 @@ import {
 import { defaultLibrary } from '../../pure/io/library';
 import { storageReport } from '../../platform/storage/storageReport';
 import AppRoot from './Root';
-import { buildReport } from '../../pure/feasibility/feasibility';
+import { buildReport } from '../../pure/feasibility';
 import { sampleState } from '../../pure/io/sample';
 import { SCHEMA_VERSION, type State } from '../../leaf/model/types';
 
