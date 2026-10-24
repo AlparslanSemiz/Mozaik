@@ -25,8 +25,6 @@
 // give the same command again; package.json already at the version means "tag
 // only".
 //
-// After the tag, `stabil` is fast-forwarded to it and pushed (the last step).
-//
 // `--kuru` (dry run) changes nothing: it takes HEAD, which must already be
 // pushed, finds and waits for its ci.yml and windows.yml runs, says the
 // result, and stops where the tag would be cut.
@@ -40,7 +38,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
-import { git as gitKomut, stabiliIlerlet, yayinYeriSorunu } from './git-komut.mjs';
+import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -169,8 +167,7 @@ if (kuru) {
   }
   await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.']);
   const ad = surum === undefined ? 'etiket' : `v${surum} etiketi`;
-  console.log(`  Kuru koşu: gerçek koşu burada ${ad} atar, iter ve stabil'i ona ileri alırdı.`);
-  console.log('  Hiçbir şey atılmadı.\n');
+  console.log(`  Kuru koşu: gerçek koşu burada ${ad} atar ve iterdi. Hiçbir şey atılmadı.\n`);
   process.exit(0);
 }
 
@@ -380,26 +377,3 @@ console.log('');
 console.log('  Bitince üç indirme bağlantısının 200 verdiğini görün:\n');
 console.log('      Mozaik.html · Mozaik-Windows-kurulum.zip · Mozaik.exe');
 console.log('');
-
-// LAST, and on its own: `stabil` follows the release the exe now sees. The
-// release is out by here whatever happens next, so a failure says that and
-// exits non-zero for this step alone. Never forced and never reset; a stabil
-// that is not behind the tag is a question for a person (stabiliIlerlet).
-// Pushing it starts a ci.yml run on `stabil` (it runs on every branch), which
-// deploys nothing and releases nothing: Pages waits for main, a release for a
-// `v*` tag.
-let stabilSorunu;
-try {
-  stabilSorunu = stabiliIlerlet(KOK, etiket);
-} catch (e) {
-  stabilSorunu = e.message;
-}
-if (stabilSorunu !== null) {
-  dur(
-    `${etiket} yayında, ama stabil ileri alınamadı.`,
-    ...stabilSorunu.split('\n'),
-    '',
-    'Sürüm için yapılacak bir şey yok; yalnız stabil geride.',
-  );
-}
-console.log(`  stabil → ${etiket} (yerelde ve uzakta).\n`);

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { git, stabiliIlerlet, yayinYeriSorunu } from '../scripts/git-komut.mjs';
+import { git, yayinYeriSorunu } from '../scripts/git-komut.mjs';
 
 describe('yayınlama betiğinin git komutları', () => {
   // A command that is certain to fail and touches nothing: listing the refs of
@@ -80,61 +80,5 @@ describe('yayınlama betiğinin yeri: ana klasör ve main', () => {
     }
     // The main checkout is still fine with worktrees beside it.
     expect(yayinYeriSorunu(ana)).toBeNull();
-  });
-});
-
-describe('stabil: son sürüm, yalnız ileri', () => {
-  // `npm run yayinla` moves stabil to the tag it has just pushed. Measured
-  // against a throwaway bare remote: the remote's refusal is what keeps a
-  // non-fast-forward from happening, so it has to be a real remote.
-  const kok = realpathSync(mkdtempSync(join(tmpdir(), 'mozaik-stabil-')));
-  const uzak = join(kok, 'uzak.git');
-  const ana = join(kok, 'ana');
-  const kimlik = ['-c', 'user.name=t', '-c', 'user.email=t@t'];
-  git(kok, 'init', '-q', '--bare', uzak);
-  git(kok, 'init', '-q', '-b', 'main', ana);
-  git(ana, 'remote', 'add', 'origin', uzak);
-  const commit = (m: string) => git(ana, ...kimlik, 'commit', '-q', '--allow-empty', '-m', m);
-  const uc = (ref: string) => git(ana, 'rev-parse', ref);
-  const uzaktaki = () => git(ana, 'ls-remote', 'origin', 'refs/heads/stabil').split('\t')[0];
-  afterAll(() => rmSync(kok, { recursive: true, force: true }));
-
-  it('ilk sürümde stabil yerelde ve uzakta etiketin commit’inde açılıyor', () => {
-    commit('1');
-    git(ana, ...kimlik, 'tag', '-a', 'v1.0.0', '-m', 'v1.0.0');
-    expect(stabiliIlerlet(ana, 'v1.0.0')).toBeNull();
-    // The commit, not the annotated tag object.
-    expect(uc('stabil')).toBe(uc('v1.0.0^{commit}'));
-    expect(uzaktaki()).toBe(uc('v1.0.0^{commit}'));
-  });
-
-  it('sonraki sürümde ileri alınıyor', () => {
-    commit('2');
-    git(ana, 'tag', 'v1.1.0');
-    expect(stabiliIlerlet(ana, 'v1.1.0')).toBeNull();
-    expect(uc('stabil')).toBe(uc('v1.1.0'));
-    expect(uzaktaki()).toBe(uc('v1.1.0'));
-  });
-
-  it('geriye gitmiyor ve yerinden oynamıyor', () => {
-    const once = uc('stabil');
-    expect(stabiliIlerlet(ana, 'v1.0.0')).toMatch(/^Yerel stabil v1\.0\.0'in atası değil/);
-    expect(uc('stabil')).toBe(once);
-    expect(uzaktaki()).toBe(once);
-  });
-
-  it('uzaktaki stabil başka yöne gittiyse zorlamıyor', () => {
-    // Somebody moved the remote stabil off the line; the local one is behind.
-    git(ana, 'switch', '-q', '-c', 'yan', 'v1.0.0');
-    commit('yan');
-    git(ana, 'push', '-q', '--force', 'origin', 'HEAD:refs/heads/stabil');
-    const yan = uc('HEAD');
-    git(ana, 'switch', '-q', 'main');
-    git(ana, 'update-ref', 'refs/heads/stabil', uc('v1.0.0^{commit}'));
-    commit('3');
-    git(ana, 'tag', 'v1.2.0');
-    expect(stabiliIlerlet(ana, 'v1.2.0')).toMatch(/^Uzaktaki stabil v1\.2\.0'e ileri alınamadı/);
-    expect(uzaktaki()).toBe(yan);
-    expect(uc('stabil')).toBe(uc('v1.0.0^{commit}'));
   });
 });
