@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { blocker, buildIndex, dropMap, place } from './index';
 import { addNotSameDay } from '../entities';
 import { activePlacements } from '../grid/programs';
-import { suggest, verifySuggestion } from '../relax/relax';
+import { suggest, verifySuggestion } from '../relax';
 import { findViolations } from './rules';
 import { solve } from '../solver/solver';
 import { closeHours, illegalBlocks, makeWorld } from '../worlds';

@@ -3,7 +3,7 @@
 // user can watch and stop.
 //
 // When a run ends stuck, the same hook goes on to the second search
-// (pure/relax/relax.ts, TODO B5.9): what would have to change for the week to be
+// (pure/relax/, TODO B5.9): what would have to change for the week to be
 // built. Its suggestions arrive one family at a time, "Durdur" stops it and
 // keeps what it has, and applying one is a single undo step.
 //

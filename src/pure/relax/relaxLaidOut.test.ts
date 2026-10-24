@@ -6,8 +6,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { createRelaxer, verifySuggestion } from './relax';
-import type { RelaxOptions, Suggestion } from './relax';
+import { createRelaxer, verifySuggestion } from './index';
+import type { RelaxOptions, Suggestion } from './index';
 import { parseState } from '../io/parseState';
 import { activePlacements } from '../grid/programs';
 import type { State } from '../../leaf/model/types';

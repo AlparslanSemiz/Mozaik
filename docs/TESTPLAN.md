@@ -145,7 +145,7 @@ exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adr
 (`surum.test.ts`).
 
 `pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
+`palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
 fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
 çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
 karşılaştırır: ikili ve uzun cümleler, sonradan eklenen cümleler ve varsayımlar.

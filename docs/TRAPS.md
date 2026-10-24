@@ -444,7 +444,7 @@ kökeninde Chromium'da güvenilmez" iddiası ölçülmemişti, 2026-09-25'te öl
 tutmadı: bkz. tuzak 136. Öneri araması bugün worker'da koşuyor.
 
 ### 136 · Tek dosyanın worker'ı sayfanın kendi betiğidir
-Öneri araması (`relax.ts`) worker'a taşınırken ayrı bir parça gömmek dosyayı
+Öneri araması (`pure/relax/`) worker'a taşınırken ayrı bir parça gömmek dosyayı
 büyütürdü (tuzak 19). Ölçülen yol: derlenmiş sayfanın tek satır içi betiğinde
 `import` ya da `export` yok, yani aynı metin `blob:` adresinden klasik bir worker
 olarak da koşar. Chromium'da `file://`'dan 5/5 ve Linux exe'sinin WebKitGTK'sında

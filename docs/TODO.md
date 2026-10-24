@@ -1294,9 +1294,9 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 | RF | Ne | Nerede |
 |---|---|---|
-| RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
+| RF1 | `pure/relax/` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
 | RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/pure/relax/invariants.test.ts`, `src/pure/relax/relax.test.ts` |
-| RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
+| RF3 | `pure/relax/` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
 | RF5 | `pure/entities/` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/` |
 | RF6 | `pure/constraints/` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
@@ -1406,7 +1406,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       2026-10-08, refactor kaydının 2026-10-09 notu): sayı yokken bozuk bir kodlamayı
       denetim eliyor ve taban skoru yanıltıcı olurdu. Bu yarısı bitti (2026-10-09, "Test:
       öneri aramasının reddettiği hafta sayılıyor, değişmez 0 bekliyor"): analizin M1, M2 ve
-      M3'ü yeni iddiayla kırmızı. Sonra `relax.ts` ve `sat.ts`
+      M3'ü yeni iddiayla kırmızı. Sonra `pure/relax/` ve `sat.ts`
       mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
       commit'te (A9 kapısı). Adım 1'e bağlı.
 - [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
@@ -1434,8 +1434,8 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       iki biçimde bırakırdı, yapılmadı.
 - [ ] **Refactor adım 6 · RF2'nin kalan maddesi, sonra RF1.** Taşımadan önce bir içerik
       commit'i: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
-      `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
-      öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `relax.ts`'in
+      `blocker()`'ınkilerle aynı küme. Bugün `pure/relax/`'ten bir dışa aktarım istiyor. RF2'nin
+      öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `pure/relax/`'in
       modüllere taşınması. Adım 1 ve 2'ye bağlı.
 - [ ] **Refactor adım 7 · RF5 ve RF6.** `pure/entities/` ile `pure/constraints/`'in yalnız
       taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
@@ -1447,7 +1447,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - [ ] **RK1 `--ink` hiçbir yerde tanımlı değil.** `src/styles.css`'in dört kuralı
       (4196, 4213, 4242, 6407) `color: var(--ink)` okuyor, değişken ne CSS'te ne kodda
       tanımlı, yani renk kalıtılana düşüyor. Okundu, ekranda görülmedi. Özellik dalı.
-- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `relax.ts` 1100 iki
+- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `pure/relax/model.ts` iki
       ders de yerinde kalıyorsa ilişkinin o gününü atlıyor, `verifySuggestion` ise
       ilişkisi çiğnenmiş haftayı reddediyor. İki ders sabitliyse sonuç 0 öneri, oysa bir
       öğretmen saati açmak haftayı kuruyor (analizin kopyasında ölçüldü). Karar verildi:

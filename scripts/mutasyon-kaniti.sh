@@ -21,7 +21,7 @@
 #
 # One mutation:
 #
-#   scripts/mutasyon-kaniti.sh src/pure/relax/relax.ts \
+#   scripts/mutasyon-kaniti.sh src/pure/relax/model.ts \
 #     's/      if \(run > 0\) \{\n        \/\/ No window/      if (false) {\n        \/\/ No window/' \
 #     -- npx vitest run src/pure/relax/relax.test.ts -t "art arda"
 #

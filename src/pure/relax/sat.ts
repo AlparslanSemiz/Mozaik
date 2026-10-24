@@ -1,6 +1,6 @@
 // A small CDCL SAT solver. A PURE module, tested in sat.test.ts.
 //
-// Why the program carries its own: the suggestion search (relax.ts) has to say
+// Why the program carries its own: the suggestion search (pure/relax/) has to say
 // what the SMALLEST change is that makes a week buildable, and a local search
 // cannot. MEASURED on the father's data (2026-09-24): the repair-based search
 // found 12 closed teacher hours to open, an exact solver 4, and the week with
@@ -73,7 +73,7 @@ export class Sat {
   private lbd: number[] = [];
   private dead: boolean[] = [];
   /**
-   * Two-literal clauses, which are most of an encoding like relax.ts's: per
+   * Two-literal clauses, which are most of an encoding like model.ts's: per
    * literal, (the other literal, clause) pairs to imply when it turns false.
    * No clause memory is touched to propagate them.
    */

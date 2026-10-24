@@ -27,7 +27,7 @@ import { EMPTY_PROGRAM_MASK, type ProgramMask } from '../../pure/program/program
 import { activePlacements, replaceActiveGrid } from '../../pure/grid/programs';
 import { makeWorld } from '../../pure/worlds';
 import type { Advice, SolverRun } from '../../platform/search';
-import type { Suggestion } from '../../pure/relax/relax';
+import type { Suggestion } from '../../pure/relax';
 import { PRINT_DEFAULTS, type PoolSort, type ProgramColorMode } from '../../platform/prefs';
 import type { State, View } from '../../leaf/model/types';
 import Program from './Program';

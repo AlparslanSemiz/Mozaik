@@ -19,7 +19,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Answers, State } from '../../leaf/model/types';
-import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from '../../pure/relax/relax';
+import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from '../../pure/relax';
 import type { Solver, SolverProgress, SolverResult } from '../../pure/solver/solver';
 import { activePlacements } from '../../pure/grid/programs';
 import { sampleState } from '../../pure/io/sample';
@@ -29,7 +29,7 @@ import { samePlan, useSolver, type SolverRun } from './useSolver';
 
 vi.mock('./relaxPool', () => ({ startRelax: vi.fn() }));
 vi.mock('../../pure/solver/solver', () => ({ createSolver: vi.fn() }));
-vi.mock('../../pure/relax/relax', () => ({
+vi.mock('../../pure/relax', () => ({
   applySuggestion: (d: State) => ({ ...d, settings: { ...d.settings } }),
   suggestionUses: (_d: State, s: Suggestion, r: unknown) =>
     (s as unknown as { uses: unknown }).uses === r,

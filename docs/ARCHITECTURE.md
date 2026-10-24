@@ -111,8 +111,15 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/entities/answers.ts` | öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`, `dropAnswer`) |
 | `pure/entities/relations.ts` | aynı gün olmasın ilişkileri |
 | `pure/solver/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
-| `pure/relax/index.ts` | öneri aramasının giriş noktası: `relax.ts`'in bütün dışa aktarımları; `sat.ts` paketin içinde kalır |
-| `pure/relax/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
+| `pure/relax/index.ts` | öneri aramasının giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey; `sat.ts` ve dosyaların paylaştığı yardımcılar paketin içinde kalır |
+| `pure/relax/options.ts` | aramaya ne sorulur ve ne döner: aileler ve neyi ucuz saydıkları, seçenekler, bütçeler (`FAMILY_CONFLICTS`), öneri, ilerleme ve sonuç |
+| `pure/relax/verify.ts` | öneriyi veriye uygulamak ve denetlemek (`applyRelaxations`, `applySuggestion`, `verifySuggestion`) |
+| `pure/relax/reading.ts` | bulunan haftayı değişikliğe geri okumak: açılan saatler, yükseltilen sınırlar, iki önerinin aynı olması (`sameChanges`, `outdone`) |
+| `pure/relax/model.ts` | haftanın SAT formülü: başlangıç değişkenleri, saat başına "en fazla bir", günlük sınır sayaçları, ailenin izin verdiği değişikliklerin sayılan değişmezleri |
+| `pure/relax/search.ts` | arama: `createRelaxer` dilimler, sayıyı "bundan azı yok"a kadar iter, en iyi haftanın yakınında daha ucuzunu arar; `suggest` sonuna kadar koşar |
+| `pure/relax/sentences.ts` | babanın cümlesiyle öneri (`suggestionParts`, `suggestionLines`, `suggestionSentence`) ve reddedilen değişikliğin sebebi (`refusalText`) |
+| `pure/relax/questions.ts` | öğretmene sorulacak sorular (`suggestionQuestions`), cevapların parçaları, önerinin dayandığı cevaplar (`suggestionUses`) |
+| `pure/relax/diff.ts` | önizlemenin farkı (`suggestionDiff`) |
 | `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
@@ -242,7 +249,7 @@ kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 ### Hangi dosyaların testi var
 
 `pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
+`palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `pure/entities/`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
@@ -373,7 +380,7 @@ aşağıda.
 
 ### Öneri araması kısıtları ikinci kez yazar, ama son söz yine `blocker()`'da
 
-Yukarıdaki kuralın tek bilinçli istisnası `relax.ts`. Kurulamayan bir haftada neyin
+Yukarıdaki kuralın tek bilinçli istisnası `pure/relax/`. Kurulamayan bir haftada neyin
 en az değişmesi gerektiği sorusu bir yerel aramayla cevaplanamadı (babanın verisinde
 12 saat buldu, en küçüğü 4), bu yüzden hafta bir SAT formülü olarak yeniden
 yazılıyor (`sat.ts`): blok başına başlangıç değişkenleri, sınıf, öğretmen ve
