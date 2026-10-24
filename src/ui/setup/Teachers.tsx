@@ -8,6 +8,7 @@ import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/list
 import type { ListConfig, ListQuery } from '../../pure/listview';
 import { openHours } from '../../pure/entities';
 import type { Gender, Id, Teacher } from '../../leaf/types';
+import { cleanEmail, looksLikeEmail } from '../../leaf/email';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
@@ -407,6 +408,9 @@ export default function Teachers({ state, change }: PanelProps) {
                     deserves, so the box decides and the column follows it
                     (pitfall 34). --w-col-md was 12 px more than that. */}
                   <th>{t('Cinsiyet')}</th>
+                  {/* Where Çıktı sends the teacher's week (schema v17). Last of
+                    the person's own fields, before the rule boxes. */}
+                  <th className="w-col-xl">{t('E-posta')}</th>
                   <th className="num" title={t('Art arda en fazla kaç saat')}>
                     {t('Art arda')}
                   </th>
@@ -558,6 +562,30 @@ export default function Teachers({ state, change }: PanelProps) {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td>
+                      {/* Kept as typed (only a line break is dropped, sanitize);
+                        a box that does not hold one address says so here,
+                        where it is fixed, and Çıktı does not offer to send. */}
+                      <input
+                        type="text"
+                        inputMode="email"
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-label={t('{kim} e-postası', { kim: teacher.short })}
+                        defaultValue={teacher.email}
+                        aria-invalid={teacher.email !== '' && !looksLikeEmail(teacher.email)}
+                        title={
+                          teacher.email !== '' && !looksLikeEmail(teacher.email)
+                            ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
+                            : undefined
+                        }
+                        onBlur={(e) =>
+                          change((d) =>
+                            updateTeacher(d, teacher.id, { email: cleanEmail(e.target.value) }),
+                          )
+                        }
+                      />
                     </td>
                     <td>
                       <LimitBox

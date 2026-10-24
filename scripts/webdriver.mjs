@@ -159,19 +159,32 @@ export function windowsTemizle({ klasor, profil, indirilenler }) {
  * a file to download, and with no download folder named it wrote the file into
  * the program's working directory -- the repository -- while the page said to
  * look in Downloads (2026-09-24). Every real desktop names one.
+ *
+ * And an `xdg-open` of its own, first on PATH, that writes what it was given
+ * to `$HOME/xdg-open.txt` and opens nothing. "E-postada aç" hands a `mailto:`
+ * to xdg-open (src-tauri/src/mail.rs), and on this machine the real one would
+ * open my mail program, or a browser, with a test's message in it.
  */
 export function evHazirla(ev, { koru = false } = {}) {
   if (!koru) rmSync(ev, { recursive: true, force: true });
   const ayar = join(ev, '.config');
+  const bin = join(ev, 'bin');
   mkdirSync(join(ev, 'Documents'), { recursive: true });
   mkdirSync(join(ev, 'Downloads'), { recursive: true });
   mkdirSync(ayar, { recursive: true });
+  mkdirSync(bin, { recursive: true });
   writeFileSync(
     join(ayar, 'user-dirs.dirs'),
     'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\n',
   );
+  writeFileSync(
+    join(bin, 'xdg-open'),
+    '#!/bin/sh\nprintf \'%s\\n\' "$1" >> "$HOME/xdg-open.txt"\n',
+    { mode: 0o755 },
+  );
   const yerel = join(ev, '.local');
   return {
+    PATH: `${bin}:${process.env.PATH ?? ''}`,
     HOME: ev,
     XDG_CONFIG_HOME: ayar,
     XDG_DATA_HOME: join(yerel, 'share'),

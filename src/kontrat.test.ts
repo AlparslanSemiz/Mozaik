@@ -38,8 +38,10 @@ import { createHash } from 'node:crypto';
 
 import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
+import mailRs from '../src-tauri/src/mail.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
 import surumYml from '../.github/workflows/surum.yml?raw';
+import { MAILTO_SINIRI } from './pure/paper';
 import tauriConf from '../src-tauri/tauri.conf.json?raw';
 import kayitliSurum from './fixtures/release-v2.2.0/surum.json?raw';
 import kayitliToplam from './fixtures/release-v2.2.0/SHA256SUMS.txt?raw';
@@ -91,7 +93,7 @@ function rustCommands(): Map<string, Command> {
   const found = new Map<string, Command>();
   const FN =
     /#\[tauri::command\]\s*(?:pub\s+)?(?:async\s+)?fn\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^{]+?))?\s*\{/g;
-  for (const source of [libRs, updateRs]) {
+  for (const source of [libRs, updateRs, mailRs]) {
     for (const [, name, params, ret] of source.matchAll(FN)) {
       const args = (params ?? '')
         .split(',')
@@ -397,5 +399,15 @@ describe('yayınlanan exe — WebView2 hata ayıklama portu yok', () => {
       .filter((satir) => /tauri-apps\/cli\S* build/.test(satir));
     expect(derlemeler.length).toBeGreaterThan(0);
     for (const satir of derlemeler) expect(satir).not.toMatch(/--config|-c /);
+  });
+});
+
+// The page builds a `mailto:` no longer than MAILTO_SINIRI, and the exe refuses
+// one longer than EN_UZUN. Two numbers for one decision: if they part, either
+// a fitting week is refused by the shell, or the guard stops guarding.
+describe('e-posta sınırı — sayfa ile Rust aynı sayıyı biliyor', () => {
+  it('MAILTO_SINIRI === EN_UZUN', () => {
+    const rust = /pub const EN_UZUN: usize = ([\d_]+);/.exec(mailRs)?.[1]?.replace(/_/g, '');
+    expect(Number(rust)).toBe(MAILTO_SINIRI);
   });
 });

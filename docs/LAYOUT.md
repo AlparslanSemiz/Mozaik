@@ -120,6 +120,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 - **Branşlar da elle sıralanır**, ve Öğretmenler'deki branş seçimi bu sırada gelir. `settings.subjects` bir seviye derinde olduğu için `reorderList`'te kendi dalı var. Branş tablosunda iki gövde var: okulun kendi listesi (tutamaklı) ve yalnız bir öğretmende duran, listede olmayan branşlar (tutamaksız), çünkü satır sürükleme hedefi gövde içindeki indisle buluyor.
 - **Listelerde ara, sırala ve süz** (`ListTools`, `listview.ts`): Türkçe katlama ve Türk alfabesi sırası.
 - **Branş yazılmaz, seçilir**, ve "Yeni branş…" ile oracıkta eklenir. Serbest metin "Matemtik"i sessizce ikinci bir branş yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Kullanılan bir branş silinemez, mesaj kimin kullandığını sayar.
+- **Öğretmenin e-postası Öğretmenler tablosunda bir sütun**, Cinsiyet'ten sonra, kural kutularından önce. Yazıldığı gibi durur; tek bir adrese benzemiyorsa kenarı kırmızı ve üstüne gelince ne yazılacağı söylenir. Ekleme formunda ve Excel'den yapıştırmada yok.
 - **Renk bir sayı olarak değil renk olarak seçilir.** Satır başındaki düğme rengin kendisini gösterir, tıklayınca 36 rengin tamamı 6×6 bir `<dialog>`'da açılır ve seçili renk çerçevelidir.
 - **Başlarken.** Hiç öğretmen ve sınıf yokken bir panel hazır bir okul yüklemeyi teklif eder (`Örnek veriyle doldur`, `Bir daha gösterme`), taslak varsa `Taslaktan başla`. Görüldü işareti ilk çizimde değil bir eylemde yazılır, okunmamış bir teklif bir yenilemeyi atlatsın diye. Örnek verinin kalıcı yeri Ayarlar → Hakkında: orada düğme hep durur, proje doluyken sorusu ne kaybedileceğini sayar ve kırmızıdır.
 
@@ -292,6 +293,7 @@ yokken de bir cevap verir. Kapasite tablosu Okul'un Özet'iyle aynı çizim
 - **Öğle arası** satırdan satıra değiştiği için o satırın hücresine kalın bir kenarlık.
 - **Öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar**, çünkü sayfada değişen ve okuyanın aradığı şey o.
 - **Kapalı saat işareti kâğıda çıkmaz.** Duvara asılan bir kâğıt "saat 10:40'ta neredeyim" sorusuna cevap verir. Bilgi Müsaitlik'te düzenleniyor ve Kontrol'de sayılıyor.
+- **E-postayla gönder**, Yazdır panelinin hemen altında: her öğretmen için kısa adı ve "E-postada aç", ya da neden olmadığı (adres yok, adres hatalı, programı boş, e-postaya sığmıyor). Düğme öğretmenin haftasını düz metin olarak kullanıcının kendi e-posta programında yeni bir ileti hâlinde açar; gönderen kullanıcıdır. E-posta programı yoksa panelin altında tek satır söyler. Onay listeleri bu paneli etkilemez: bir öğretmene haftasını göndermek bir baskı işi değil.
 - **Kâğıt fiziksel.** Açık palet kullanır, `--ui-scale` kâğıda geçmez, sayfa 205 mm'lik sabit yükseklikli bir kutu ve plan onun içinde dikey ortalanır, kenar boşluğu sayfanın kendi dolgusu (tuzak 31).
 
 ## Ayarlar

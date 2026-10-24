@@ -1058,3 +1058,44 @@ test.describe('84. Çıktının sağ rayı', () => {
     });
   }
 });
+
+// B3.4: each teacher's week, handed to the user's own mail program as a
+// `mailto:`. What is tested is what the link CARRIES; opening a mail program
+// is the operating system's, and the real-exe suite asks the exe's half.
+test.describe('Çıktı: öğretmene e-postayla', () => {
+  test('bağlantı öğretmenin adresini ve haftasını taşıyor, adressiz ve boş öğretmen sebebini söylüyor', async ({
+    page,
+  }) => {
+    const world = makeWorld({
+      days: 2,
+      hours: 3,
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV' },
+        { id: 'oKB', short: 'KB' },
+      ],
+      lessons: [
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
+        { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 1 },
+      ],
+      placements: { 's510|0|0': 'x1', 's510|0|1': 'x1', 's510|1|2': 'x2' },
+    });
+    world.teachers[0]!.email = 'mc@example.com';
+    world.teachers[2]!.email = 'kb@example.com';
+    await loadWorld(page, world, 'Çıktı');
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+
+    const panel = page.locator('.mail-panel');
+    const link = panel.getByRole('link', { name: 'MÇ için e-postayı aç' });
+    const href = (await link.getAttribute('href')) ?? '';
+    expect(href.startsWith('mailto:mc@example.com?subject=')).toBe(true);
+    const body = decodeURIComponent(/[?&]body=([^&]*)/.exec(href)?.[1] ?? '');
+    expect(body).toContain('MÇ · Haftalık ders programı');
+    expect(body).toMatch(/1–2\. ders {2}\d\d:\d\d–\d\d:\d\d {2}510/);
+    expect(body).toContain('\r\n');
+
+    const row = (who: string) => panel.locator('.mail-row', { hasText: who });
+    await expect(row('AV')).toContainText('adres yok');
+    await expect(row('KB')).toContainText('programı boş');
+  });
+});

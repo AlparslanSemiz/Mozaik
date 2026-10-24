@@ -19,6 +19,8 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- Each teacher's week can be sent by e-mail from Çıktı: "Open in e-mail" opens a new message in your own mail program with the teacher's address and the week as plain text, and you press Send; Mozaik sends nothing itself. The address is a new column in Okul → Öğretmenler (plan file version 17; older backups open with no addresses). If no mail program is set up, one line says so.
+
 - Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
 
 ### Changed

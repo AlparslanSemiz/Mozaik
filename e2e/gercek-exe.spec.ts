@@ -413,6 +413,59 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).toContain('Öğretmen 18');
   });
 
+  // B3.4: "E-postada aç" hands the teacher's week to the mail program through
+  // the shell (src-tauri/src/mail.rs). On Linux the sandbox's own xdg-open
+  // takes it and writes it down (`evHazirla`); the runner's Windows has no
+  // mail program at all, which is the other half worth asking: the page says
+  // so in one line, and Windows' "how do you want to open this" never opens.
+  test('"E-postada aç" haftayı e-posta programına veriyor, program yoksa tek satır', async ({
+    exe,
+  }) => {
+    const yedek = JSON.parse(
+      readFileSync(join(KOK, 'src', 'fixtures', 'tam-dolu-kurs-dizili.json'), 'utf8'),
+    ) as { teachers: Array<{ short: string; name: string; email?: string }> };
+    yedek.teachers[0]!.email = 'ogretmen@example.com';
+    const { short, name } = yedek.teachers[0]!;
+    await exe.oturum.js(
+      `const f = new File([${JSON.stringify(JSON.stringify(yedek))}], 'yedek.json', { type: 'application/json' });
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      const girdi = document.querySelector('input[type=file]');
+      girdi.files = dt.files;
+      girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
+    );
+    await exe.oturum.bekle('.dlg');
+    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await exe.oturum.tikla('metin:Çıktı');
+    await exe.oturum.tikla(`button[aria-label="${short} için e-postayı aç"]`);
+
+    if (WINDOWS) {
+      await exe.oturum.bekle('.mail-panel .warn-box', 10_000);
+      expect(await exe.oturum.metin('.mail-panel .warn-box')).toContain(
+        'Bu bilgisayarda kayıtlı bir e-posta programı yok.',
+      );
+      const openWith = spawnSync('tasklist', ['/FI', 'IMAGENAME eq OpenWith.exe', '/NH'], {
+        encoding: 'utf8',
+      });
+      expect(openWith.stdout).not.toContain('OpenWith.exe');
+      return;
+    }
+    const kayit = join(exe.ev, 'xdg-open.txt');
+    await expect
+      .poll(() => (existsSync(kayit) ? readFileSync(kayit, 'utf8') : ''), {
+        timeout: 10_000,
+      })
+      .toMatch(/^mailto:ogretmen@example\.com\?subject=/);
+    const adres = readFileSync(kayit, 'utf8').trim();
+    const govde = decodeURIComponent(/[?&]body=([^&]*)/.exec(adres)?.[1] ?? '');
+    expect(govde).toContain(`${name} · Haftalık ders programı`);
+    expect(govde).toMatch(/\d+\. ders {2}\d\d:\d\d–\d\d:\d\d {2}\S+/);
+    expect(adres.length).toBeLessThanOrEqual(2000);
+    expect(
+      await exe.oturum.js('return document.querySelector(".mail-panel .warn-box") === null;'),
+    ).toBe(true);
+  });
+
   // Dragging a card along its row juddered here: 16% of frames dropped in
   // either density, and none without a drag (2026-09-26). Of seven things
   // switched off one at a time only the reason bar's text mattered — a drag

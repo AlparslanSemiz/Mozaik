@@ -1724,6 +1724,38 @@ const DE: Sozluk = {
     "Inhalt: Räume, Lehrkräfte, Klassen, Stunden, gesetzter Plan, Name und Entwurfsmarke jedes Plans. Einstellungen dieses Rechners wie das Design und die Sitzungssicherungen sind nicht dabei.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Was abgewählt ist, kommt nicht aufs Papier.",
+  "E-posta":
+    "E-Mail",
+  "{kim} e-postası":
+    "E-Mail von {kim}",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "Hier steht genau eine E-Mail-Adresse: name@beispiel.de",
+  "E-postayla gönder":
+    "Per E-Mail senden",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "Die Woche der Lehrkraft öffnet sich als neue Nachricht in Ihrem E-Mail-Programm. Auf Senden drücken Sie selbst.",
+  "adres yok":
+    "keine Adresse",
+  "adres hatalı":
+    "Adresse fehlerhaft",
+  "programı boş":
+    "Plan ist leer",
+  "e-postaya sığmıyor":
+    "zu lang für eine E-Mail",
+  "{kim} için e-postayı aç":
+    "E-Mail an {kim} öffnen",
+  "E-postada aç":
+    "In E-Mail öffnen",
+  "Bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "Auf diesem Computer ist kein E-Mail-Programm eingerichtet.",
+  "E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "Wenn sich kein E-Mail-Programm geöffnet hat, ist auf diesem Computer keines eingerichtet.",
+  "E-posta programı açılamadı.":
+    "Das E-Mail-Programm ließ sich nicht öffnen.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Wochenstundenplan",
+  "{n}. ders":
+    "{n}. Stunde",
 };
 
 registerSozluk("de", DE);

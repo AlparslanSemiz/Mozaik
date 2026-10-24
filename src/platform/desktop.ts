@@ -200,3 +200,19 @@ export function desktopSelfUpdates(): Promise<boolean> {
 export function desktopApply(): Promise<void> {
   return bridge()<void>('apply_update');
 }
+
+/**
+ * What became of a `mailto:` handed to the user's mail program: opened, or no
+ * mail program on this machine at all (the page says so in one line), or
+ * refused for another reason. Nothing is sent either way (src-tauri/src/mail.rs).
+ */
+export type EpostaSonucu = 'acildi' | 'istemci-yok' | 'olmadi';
+
+/** Opens the user's own mail program with this message in it. */
+export function desktopMail(adres: string): Promise<EpostaSonucu> {
+  return bridge()<void>('eposta_ac', { adres }).then(
+    () => 'acildi' as const,
+    (e: unknown) => (String(e) === 'istemci-yok' ? ('istemci-yok' as const) : ('olmadi' as const)),
+  );
+}
+

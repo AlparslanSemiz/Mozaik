@@ -351,6 +351,39 @@ test.describe('5. Yedek ve şema göçü', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
   });
+
+  test('v16 biçimli yedek (öğretmen e-postası yokken) açılıyor, yazılan adres v17 olarak duruyor', async ({
+    page,
+  }) => {
+    // The v16 -> v17 migration on the real path: the example file the schema
+    // recipe writes (scripts/sema-ornek.mjs), picked through the file dialog.
+    await open(page);
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-10-24-1900.json',
+      mimeType: 'application/json',
+      buffer: readFileSync(resolve('src/fixtures/v16.json')),
+    });
+    await answerDialog(page);
+
+    await openSetup(page, 'Öğretmenler');
+    const kutu = page.getByRole('textbox', { name: 'MÇ e-postası' });
+    await expect(kutu).toHaveValue('');
+    await expect(page.getByRole('textbox', { name: 'AV e-postası' })).toHaveValue('');
+
+    await kutu.fill('  mehmet.celik@example.com ');
+    await kutu.press('Tab');
+    await expect
+      .poll(async () => JSON.parse((await savedText(page)) || '{}'))
+      .toMatchObject({ schemaVersion: 17 });
+    const kayit = JSON.parse(await savedText(page)) as { teachers: Array<{ email: string }> };
+    expect(kayit.teachers.map((t) => t.email)).toEqual(['mehmet.celik@example.com', '']);
+
+    await reopen(page);
+    await openSetup(page, 'Öğretmenler');
+    await expect(page.getByRole('textbox', { name: 'MÇ e-postası' })).toHaveValue(
+      'mehmet.celik@example.com',
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------

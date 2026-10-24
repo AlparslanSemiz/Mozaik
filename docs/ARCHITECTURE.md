@@ -71,6 +71,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `leaf/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
 | `leaf/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
 | `leaf/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
+| `leaf/email.ts` | öğretmenin adresi (v17): saklananın temizliği (`cleanEmail`), tek adrese benzeyip benzemediği, ve bir iletinin `mailto:`'su |
 | `leaf/subjects.ts` | bir şeyin hangi branştan olduğu |
 | `leaf/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
 | `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
@@ -98,6 +99,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `program/`'u |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
+| `pure/paper/mail.ts` | aynı öğretmen sayfasının düz metin e-postası ve `mailto:`'su: sınıra (`MAILTO_SINIRI`) sığan en dolu biçim, sığmazsa hiç |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
@@ -124,7 +126,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
 | `platform/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
-| `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
+| `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları, e-posta programını açan komut (`desktopMail`) |
 | `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
 ### Doğrudan DOM'a yazan modüller
@@ -180,6 +182,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
+| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına bir düğme ya da neden olmadığı; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
 | `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
 | `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
@@ -391,6 +394,13 @@ bekleyen kaydını (`park`) ve klasörün bekleyen yazımını (`useFolder`'ın 
 `kapanabilir` komutunu çağırır (`desktop.ts`'in `onDesktopClose`'u), pencere ancak o zaman
 gider. Cevap gelmezse 5 s sonra yine gider. Bir tarayıcı sekmesinde bunun karşılığı yok:
 kapanan sekme eşzamansız bir yazımı beklemez.
+
+E-posta da öyle (TODO B3.4): sayfa `mailto:`'yu kurar, `mail.rs`'in `eposta_ac`'ı onu
+kabuğa verir. Windows'ta önce `AssocQueryStringW` e-posta programı kayıtlı mı diye sorulur,
+çünkü kayıtlı program yokken `ShellExecuteW` başarı döner ve Windows'un "nasıl açılsın"
+seçicisini (OpenWith) açar (runner'da ölçüldü, 2026-10-24); seçici de program sayılmaz.
+Komut yalnız `mailto:` ile başlayan, yalnız yazdırılabilir ASCII taşıyan ve sınırdan kısa
+bir adresi kabul eder, yani "herhangi bir dosyayı aç"a dönüşemez. Hiçbir şey gönderilmez.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).

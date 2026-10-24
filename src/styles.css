@@ -4079,6 +4079,16 @@ table.stat td select:hover:not(:disabled) {
   border-color: var(--line-dark);
 }
 
+/* A box whose text is not what it is for (a teacher's address that is not one
+   address): the edge says so where it is fixed. --bad, the colour the rest of
+   the program already reads as "this blocks something". After the list rules
+   above, and as specific, or their --line would win. */
+input[aria-invalid='true'],
+table.list td input[aria-invalid='true'],
+table.list td input[aria-invalid='true']:hover:not(:disabled) {
+  border-color: var(--bad);
+}
+
 /* The identity mark beside a name. It was written three times over — in the
    grid row head, in the print picker, in the availability list — because each
    place grew one; the base is here now and those three keep only what differs.
@@ -5165,6 +5175,32 @@ table.availability td.closed {
   align-items: center;
   gap: var(--space-2);
   white-space: nowrap;
+}
+
+/* Çıktı's "E-postayla gönder": one teacher per line, the short name, then the
+   button or the few words that say why there is none. */
+.mail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mail-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mail-row .mail-who {
+  min-width: 4ch;
+  font-weight: 600;
+}
+
+.mail-row .btn {
+  margin-left: auto;
 }
 
 /* ...except when the rows are STACKED. `.pick-items` lays short names out in a

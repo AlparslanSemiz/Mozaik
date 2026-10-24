@@ -20,6 +20,7 @@
 //! rule that means one thing in the browser and another in the exe is the
 //! thing this project spends most of its comments avoiding.
 
+mod mail;
 mod update;
 
 use std::fs;
@@ -250,6 +251,7 @@ pub fn run() {
             list_files,
             remove_file,
             data_dir_path,
+            mail::eposta_ac,
             update::check_update,
             update::self_update_supported,
             update::download_update,

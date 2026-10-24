@@ -1732,6 +1732,38 @@ const FR: Sozluk = {
     "Contenu : salles, enseignants, classes, cours, emploi du temps placé, nom et marque de brouillon de chaque plan. Les préférences propres à cet ordinateur, comme le thème, et les sauvegardes de session n’y sont pas.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Ce qui est décoché ne va pas sur le papier.",
+  "E-posta":
+    "E-mail",
+  "{kim} e-postası":
+    "E-mail de {kim}",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "Une seule adresse e-mail ici : nom@exemple.fr",
+  "E-postayla gönder":
+    "Envoyer par e-mail",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "La semaine de l'enseignant s'ouvre comme un nouveau message dans votre messagerie. C'est vous qui cliquez sur Envoyer.",
+  "adres yok":
+    "pas d'adresse",
+  "adres hatalı":
+    "adresse erronée",
+  "programı boş":
+    "emploi du temps vide",
+  "e-postaya sığmıyor":
+    "trop long pour un e-mail",
+  "{kim} için e-postayı aç":
+    "Ouvrir l'e-mail pour {kim}",
+  "E-postada aç":
+    "Ouvrir dans la messagerie",
+  "Bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "Aucune messagerie n'est configurée sur cet ordinateur.",
+  "E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "Si aucune messagerie ne s'est ouverte, aucune n'est configurée sur cet ordinateur.",
+  "E-posta programı açılamadı.":
+    "La messagerie n'a pas pu s'ouvrir.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Emploi du temps de la semaine",
+  "{n}. ders":
+    "Cours {n}",
 };
 
 registerSozluk("fr", FR);

@@ -1,0 +1,136 @@
+// Çıktı's "send each teacher their week" (TODO B3.4): one button per teacher,
+// and the user's own mail program does the rest.
+//
+// NOTHING IS SENT FROM HERE. The button opens a new message in the mail
+// program this machine already has, from the account already in it, with the
+// teacher's address and week filled in; the user reads it and presses Send.
+// In the exe the shell is asked (src-tauri/src/mail.rs), which can also say
+// that there is no mail program at all. In a browser it is a plain `mailto:`
+// link, and a page cannot ask: if nothing took the focus away within two
+// seconds, one line says what that usually means.
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Mail } from 'lucide-react';
+import { looksLikeEmail } from '../../leaf/email';
+import { paletteColor } from '../../leaf/palette';
+import type { State } from '../../leaf/types';
+import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/desktop';
+import type { Index } from '../../pure/constraints';
+import { teacherMail } from '../../pure/paper';
+import { useT } from '../T';
+
+interface Props {
+  state: State;
+  ix: Index;
+  spans: Map<string, number>;
+}
+
+/** Why a teacher has no button, in the fewest words that say where to fix it. */
+type Why = 'adres yok' | 'adres hatalı' | 'programı boş' | 'e-postaya sığmıyor';
+
+/** How long a browser gets to hand the link to a mail program. */
+const BEKLEME_MS = 2000;
+
+export default function MailPanel({ state, ix, spans }: Props) {
+  const t = useT();
+  const exe = isDesktop();
+  const [said, setSaid] = useState<EpostaSonucu | 'tarayici-acmadi' | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const rows = useMemo(
+    () =>
+      state.teachers.map((teacher) => {
+        let why: Why | null = null;
+        let url = '';
+        if (teacher.email === '') why = 'adres yok';
+        else if (!looksLikeEmail(teacher.email)) why = 'adres hatalı';
+        else {
+          const mail = teacherMail(state, ix, spans, teacher, t);
+          if (mail === 'empty') why = 'programı boş';
+          else if (mail === 'tooLong') why = 'e-postaya sığmıyor';
+          else url = mail.url;
+        }
+        return { teacher, why, url };
+      }),
+    [state, ix, spans, t],
+  );
+
+  /** A browser: did anything take the focus within the wait? */
+  function watchBrowser() {
+    window.clearTimeout(timer.current);
+    setSaid(null);
+    let left = false;
+    const onBlur = () => {
+      left = true;
+    };
+    window.addEventListener('blur', onBlur, { once: true });
+    timer.current = window.setTimeout(() => {
+      window.removeEventListener('blur', onBlur);
+      setSaid(left || document.visibilityState === 'hidden' ? 'acildi' : 'tarayici-acmadi');
+    }, BEKLEME_MS);
+  }
+
+  async function openInExe(url: string) {
+    setSaid(null);
+    setSaid(await desktopMail(url));
+  }
+
+  return (
+    <div className="panel no-print mail-panel">
+      <h2>{t('E-postayla gönder')}</h2>
+      <p className="hint">
+        {t(
+          'Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
+        )}
+      </p>
+      <ul className="mail-list">
+        {rows.map(({ teacher, why, url }) => (
+          <li key={teacher.id} className="mail-row">
+            <span className="row-dot" style={{ background: paletteColor(teacher.color) }} />
+            <span className="mail-who" title={teacher.name}>
+              {teacher.short}
+            </span>
+            {why !== null ? (
+              <span className="muted-inline">{t(why)}</span>
+            ) : exe ? (
+              <button
+                className="btn"
+                aria-label={t('{kim} için e-postayı aç', { kim: teacher.short })}
+                onClick={() => void openInExe(url)}
+              >
+                <Mail size={16} strokeWidth={2} aria-hidden="true" />
+                {t('E-postada aç')}
+              </button>
+            ) : (
+              <a
+                className="btn"
+                href={url}
+                aria-label={t('{kim} için e-postayı aç', { kim: teacher.short })}
+                onClick={watchBrowser}
+              >
+                <Mail size={16} strokeWidth={2} aria-hidden="true" />
+                {t('E-postada aç')}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+      {said === 'istemci-yok' && (
+        <div className="warn-box" role="status">
+          {t('Bu bilgisayarda kayıtlı bir e-posta programı yok.')}
+        </div>
+      )}
+      {said === 'tarayici-acmadi' && (
+        <div className="warn-box" role="status">
+          {t('E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.')}
+        </div>
+      )}
+      {said === 'olmadi' && (
+        <div className="warn-box" role="status">
+          {t('E-posta programı açılamadı.')}
+        </div>
+      )}
+    </div>
+  );
+}

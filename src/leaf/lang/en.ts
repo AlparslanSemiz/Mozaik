@@ -1707,6 +1707,38 @@ const EN: Sozluk = {
     "What is inside: every plan's rooms, teachers, classes, lessons, placed timetable, name and draft mark. Preferences belonging to this computer, such as the theme, and the session backups are not included.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Anything unticked is left off the paper.",
+  "E-posta":
+    "E-mail",
+  "{kim} e-postası":
+    "{kim}'s e-mail",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "One e-mail address goes here: name@example.com",
+  "E-postayla gönder":
+    "Send by e-mail",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "The teacher's week opens as a new message in your mail program. You press Send.",
+  "adres yok":
+    "no address",
+  "adres hatalı":
+    "address is wrong",
+  "programı boş":
+    "timetable is empty",
+  "e-postaya sığmıyor":
+    "too long for an e-mail",
+  "{kim} için e-postayı aç":
+    "Open the e-mail for {kim}",
+  "E-postada aç":
+    "Open in e-mail",
+  "Bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "No mail program is set up on this computer.",
+  "E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.":
+    "If no mail program opened, none is set up on this computer.",
+  "E-posta programı açılamadı.":
+    "The mail program could not be opened.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Weekly timetable",
+  "{n}. ders":
+    "Lesson {n}",
 };
 
 registerSozluk("en", EN);
