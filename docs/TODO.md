@@ -1729,7 +1729,7 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
       exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
       Windows güncelleme testine en yakın olanlar. TP8'in Windows yarısı, yani yayınlanmış son exe'den
       bu commit'in exe'sine geçiş ve `update.rs`'in kendi güncellemesi, `guncelleme-windows.yml`'de
-      (2026-10-24, `tp7-windows-exe`); tek kopya kilidinin devri onda yok. TP4'ün paket yolu fuzz'u TB8'in
+      (2026-10-24, `tp7-windows-exe`, her sürümde); tek kopya kilidinin devri onda yok. TP4'ün paket yolu fuzz'u TB8'in
       düzeltmesiyle geldi (`src/pure/io/fuzz.test.ts`, `readBundlePlans`). `test/gercek-ortam`'da
       yazılıp `tp7-windows-exe` ile gelenler (2026-10-10, o günkü tanımları arşivde): TP6 (gerçek
       paket fikstürü, adsız, `src/fixtures/gercek-paket-v1.json`), TP9 ve TP10 (köprü ve
