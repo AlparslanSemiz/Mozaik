@@ -66,7 +66,7 @@ import {
   deleteLesson,
   notSameDayOf,
   removeRelation,
-} from './entities';
+} from './index';
 import type { Day, State } from '../../leaf/model/types';
 import { SCHEMA_VERSION } from '../../leaf/model/types';
 

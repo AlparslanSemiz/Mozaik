@@ -1089,7 +1089,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
       özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
       dersin ikinci branş bayrağını hiç okumuyor, `pure/constraints/`'in sınıf dolu cümlesi ve
-      `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
+      `pure/entities/`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
 - [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
       2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
@@ -1298,7 +1298,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/pure/relax/invariants.test.ts`, `src/pure/relax/relax.test.ts` |
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
-| RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/entities.ts` |
+| RF5 | `pure/entities/` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/` |
 | RF6 | `pure/constraints/` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
 | RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
 | RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
@@ -1312,7 +1312,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
 | RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/shell/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
-| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/entities.ts`, `src/pure/listview/listview.ts` |
+| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/`, `src/pure/listview/listview.ts` |
 | RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/prefs/theme.ts` |
 
 **Hedef ağaç.** 2026-10-09 sabahki plan oturumunun önerisi, Alp onayladı; oturumun
@@ -1412,7 +1412,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
       `.suggestion-part`), okunmayan dört token, bayat yorum, ve belgelerin bayat
       cümleleri: ARCHITECTURE'ın Ribbon'a "iş mantığı yok" demesi, "Otomatik diz (N)"in N'ini
-      `entities.ts`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
+      `pure/entities/`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
       lint için "dört uyarı" demesi, DESIGN ile LAYOUT'un ölü sınıfları anlatması.
       `--ink` burada değil, RK1.
 - [x] **Refactor adım 4 · RF8, sonra RF9.** Önce karakterizasyon birim testleri, sonra
@@ -1437,7 +1437,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
       öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `relax.ts`'in
       modüllere taşınması. Adım 1 ve 2'ye bağlı.
-- [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `pure/constraints/`'in yalnız
+- [ ] **Refactor adım 7 · RF5 ve RF6.** `pure/entities/` ile `pure/constraints/`'in yalnız
       taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
       Mutasyon listesinin yolları aynı commit'te.
 - [ ] **Park: RF4, RF7, RF13, RF14, RF19.** Gerekçeleri DECISIONS 2026-10-08.
@@ -1454,7 +1454,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       kendiliğinden çözülmez, panel ve Kontrol tek cümleyle söyler. Özellik dalı.
 - [ ] **RK3 Kapalı saatin iki tanımı. Karar bekliyor.** Program'ın satır başı sınıfın
       ya da dersliğinin kapalı saatini sayıyor (`Program.tsx` 307), `openHours` yalnız
-      varlığın kendi saatini (`entities.ts` 987). Sınıflar listesinin "Ders saati" sütunu
+      varlığın kendi saatini (`pure/entities/availability.ts` 32). Sınıflar listesinin "Ders saati" sütunu
       yükü gün ile saatin çarpımına bölüyor (`Classes.tsx` 270), Müsaitlik ise açık saati
       gösteriyor. Hangisi doğru tanım, karar kullanıcıda. Okundu, ölçülmedi.
 - [ ] **RK4 Öğretmen değiştirme onayı iki yerde iki ayrı sayı söylüyor.** Varlık paneli

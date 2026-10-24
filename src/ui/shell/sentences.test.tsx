@@ -27,7 +27,7 @@ import {
   DEFAULT_LIMITS,
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
-} from '../../pure/entities/entities';
+} from '../../pure/entities';
 import { defaultLibrary } from '../../pure/io/library';
 import { storageReport } from '../../platform/storage/storageReport';
 import AppRoot from './Root';

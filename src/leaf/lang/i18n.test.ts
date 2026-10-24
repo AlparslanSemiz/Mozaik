@@ -36,7 +36,7 @@ import {
   shortDay,
   subjectLabel,
   subjectShort,
-} from '../../pure/entities/entities';
+} from '../../pure/entities';
 import { KISALTMALAR } from './kisaltmalar';
 import type { Settings } from '../model/types';
 import './en';

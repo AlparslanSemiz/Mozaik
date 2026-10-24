@@ -10,8 +10,8 @@ import {
   sharedPeriods,
   periodGroups,
 } from './bell';
-import { DEFAULT_BELL } from './entities';
-import { hourNames } from './entities';
+import { DEFAULT_BELL } from './index';
+import { hourNames } from './index';
 
 const LABELS = hourNames(12);
 

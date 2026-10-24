@@ -5,7 +5,7 @@
 // plain string days). BOTH must still open, and the timetable inside them must
 // come out exactly as it went in.
 
-import { defaultSubjects } from '../../pure/entities/entities';
+import { defaultSubjects } from '../../pure/entities';
 import { parseState } from '../../pure/io/parseState';
 import { blockPlan } from '../../leaf/model/blocks';
 import { sampleState } from '../../pure/io/sample';
@@ -892,7 +892,7 @@ import { BASE_KEY, FIRST_PLAN_ID, planKey } from '../../pure/io/library';
 import { collectStates } from './download';
 import { loadPlan, savePlan } from './planStore';
 import { reduce } from '../../pure/undo/undo';
-import { emptyState } from '../../pure/entities/entities';
+import { emptyState } from '../../pure/entities';
 import type { State } from '../../leaf/model/types';
 
 function memoryStorage(): Storage {

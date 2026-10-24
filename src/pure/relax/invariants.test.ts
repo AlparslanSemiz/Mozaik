@@ -22,7 +22,7 @@
 import fc from 'fast-check';
 import { MAX_BLOCK, clampBlocks } from '../../leaf/model/blocks';
 import { buildIndex, occupy, placedBlocks, vacate } from '../constraints';
-import { addNotSameDay, remapDays } from '../entities/entities';
+import { addNotSameDay, remapDays } from '../entities';
 import { PALETTE_SIZE, firstFreeColor } from '../../leaf/model/palette';
 import { activeProgram, replaceActiveGrid } from '../grid/programs';
 import { solve } from '../solver/solver';

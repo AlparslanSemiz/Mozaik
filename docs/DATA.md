@@ -72,7 +72,7 @@ Alanların anlamı:
 
 ### Varsayılanlar
 
-Yeni bir proje (`entities.ts`) Salı'dan Pazar'a altı günle (Pazartesi yok) ve günde
+Yeni bir proje (`pure/entities/`) Salı'dan Pazar'a altı günle (Pazartesi yok) ve günde
 12 dersle doğar. Zil 09:00'da başlar: 40 dakika ders, 10 dakika teneffüs, 30
 dakika öğle arası. Öğle arası hafta içi 5. dersten, Cumartesi ve Pazar 6. dersten
 sonra, ve iki desende de 12. ders 19:10'da biter. `bell.test.ts` bunu açıkça iddia

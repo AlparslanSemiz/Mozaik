@@ -3,12 +3,7 @@
 
 import { buildIndex, place } from './index';
 import { blankProgram } from '../grid/programs';
-import {
-  DEFAULT_BELL,
-  DEFAULT_LIMITS,
-  DEFAULT_RULES,
-  NO_TEACHER_LIMITS,
-} from '../entities/entities';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../entities';
 import {
   classDayGaps,
   findViolations,

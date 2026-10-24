@@ -27,7 +27,7 @@ import { collectStates, downloadBackup, downloadBundle } from './download';
 import { listBackups, loadPlan, savePlan, storageWorks } from './planStore';
 import { parseState } from '../../pure/io/parseState';
 import { reduce } from '../../pure/undo/undo';
-import { emptyState } from '../../pure/entities/entities';
+import { emptyState } from '../../pure/entities';
 import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from '../../pure/io/library';
 import { SCHEMA_VERSION, type Id, type State } from '../../leaf/model/types';
 

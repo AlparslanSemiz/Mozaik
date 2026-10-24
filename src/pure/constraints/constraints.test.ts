@@ -24,12 +24,7 @@ import {
   setBlockPinned,
 } from './index';
 import type { BlockRef } from './index';
-import {
-  DEFAULT_BELL,
-  DEFAULT_LIMITS,
-  DEFAULT_RULES,
-  NO_TEACHER_LIMITS,
-} from '../entities/entities';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../entities';
 import type { RuleLevel, State } from '../../leaf/model/types';
 import { SCHEMA_VERSION } from '../../leaf/model/types';
 import { makeWorld } from '../worlds';

@@ -4,7 +4,7 @@
 // A wrong answer here does not throw — it opens the wrong plan, or an empty
 // one, and the work of an afternoon looks deleted. So every branch is pinned.
 
-import { newId } from '../entities/entities';
+import { newId } from '../entities';
 import {
   addPlan,
   BACKUP_COUNT,

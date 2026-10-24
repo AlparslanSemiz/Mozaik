@@ -96,8 +96,20 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
-| `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: `entities.ts` ile `bell.ts`'in bütün dışa aktarımları |
-| `pure/entities/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |
+| `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
+| `pure/entities/identity.ts` | adlandırma: `newId` (`Math.random`'ın tek yeri), iki harfli kısa ad, cinsiyetin üç okunuşu |
+| `pure/entities/defaults.ts` | yeni bir okulun başlangıcı: zil, günler, sınırlar ve kurallar, saat adları, `emptyState` |
+| `pure/entities/subjects.ts` | branşlar: kısa adları, seçicinin seçenekleri, öğretmen sırası, ekleme, ad değiştirme ve silme |
+| `pure/entities/roster.ts` | derslikler, öğretmenler ve sınıflar: ekleme, güncelleme, silme, derslik aramaları ve listelerin elle sırası (`reorderList`) |
+| `pure/entities/lessons.ts` | dersler: ekleme, güncelleme, başka öğretmene ya da sınıfa taşıma (`transferLesson`, `moveLessonToClass`), silme |
+| `pure/entities/settings.ts` | okul ayarları ve `remapDays` (gün listesi değişince program kaymasın, tuzak 11), `settingsLoss` |
+| `pure/entities/availability.ts` | kapalı saatler, bütün hafta ve açık kalan saatler (`openHours`) |
+| `pure/entities/rows.ts` | Excel'den yapıştırılan satırlar öğretmen, sınıf ve derse |
+| `pure/entities/counting.ts` | sayımlar: haftalık yük, saat etiketleri, kısa ad çakışmaları, planın özeti |
+| `pure/entities/deleting.ts` | bir silmenin neyi götüreceği, sormadan önce (`deletionQuestion`, tuzak 4) |
+| `pure/entities/inspect.ts` | tek bir öğretmen, sınıf ya da dersliğin haftası ve bilgileri (`entityWeek`, `entityFacts`) |
+| `pure/entities/answers.ts` | öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`, `dropAnswer`) |
+| `pure/entities/relations.ts` | aynı gün olmasın ilişkileri |
 | `pure/solver/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/relax/index.ts` | öneri aramasının giriş noktası: `relax.ts`'in bütün dışa aktarımları; `sat.ts` paketin içinde kalır |
 | `pure/relax/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
@@ -106,7 +118,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `entities.ts` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
+| `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
@@ -232,7 +244,7 @@ kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 `pure/constraints/`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
-`parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
+`parseState` ve `pure/entities/`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
 şey (tuzak 11).
 
@@ -277,7 +289,7 @@ Import grafiğinin göremediği üç kural `eslint.config.js`'te ve `npm run lin
 saf mantık React'i ve bir bileşen kitaplığını import etmez, `document`, `window`,
 `navigator` ve depoya dokunmaz; tarayıcı deposuna yalnız sahipleri (`preference.ts`,
 `libraryStore.ts`, `planStore.ts`, `storageReport.ts`, `folder.ts`) dokunur; ve
-`Math.random` yalnız `entities.ts`'in `newId()`'sinde çağrılır. "Yalnız tip alınır"
+`Math.random` yalnız `pure/entities/identity.ts`'in `newId()`'sinde çağrılır. "Yalnız tip alınır"
 deseni ayrı bir kural istemiyor: o iki `import type` düz importa dönerse döngü
 yasağı kırmızıya dönüyor.
 
@@ -292,8 +304,8 @@ bir import grafiğinde görünmez, onları kendi testleri ölçüyor.
 ölçülüyor: `sinir` yalnız çalışma zamanı grafiğine bakıyor, yani bir `import
 type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya döner.
 
-- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki motorun dosyaları ile `rules.ts` birbirini çağırmasın, paketin index'i onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `pure/constraints/`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
-- **Yalnız tip alınır.** `rules.ts` `occupancy.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
+- **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki motorun dosyaları ile `rules.ts` birbirini çağırmasın, paketin index'i onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `pure/entities/` zaten `pure/constraints/`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
+- **Yalnız tip alınır.** `rules.ts` `occupancy.ts`'ten yalnız `Index` tipini, `pure/entities/rows.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `pure/entities/`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
 - **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `parseState.ts` yapar ve depo tarafını `planStore.ts` sürer. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
 - **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `storageReport.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 

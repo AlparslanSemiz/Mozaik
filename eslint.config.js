@@ -127,7 +127,7 @@ export default defineConfig([
           object: 'Math',
           property: 'random',
           message:
-            'Only newId() in pure/entities/entities.ts draws from Math.random; use a seeded generator.',
+            'Only newId() in pure/entities/identity.ts draws from Math.random; use a seeded generator.',
         },
       ],
       // Storage has owners (ARCHITECTURE, "Durum, tercih ve depolama"): the
@@ -141,7 +141,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/pure/entities/entities.ts'],
+    files: ['src/pure/entities/identity.ts'],
     rules: { 'no-restricted-properties': 'off' },
   },
   {
