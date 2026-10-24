@@ -830,12 +830,33 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ve işaret kalkıyor; doluysa yazılmıyor, silinmiyor, klasöre de yazılmıyor ve kırmızı
       şerit "Kayıtlı plan açılışta okunamadı. Üzerine yazılmadı." diyor. Birim (5), hata
       enjeksiyonlu E2E (2) ve mutasyon kanıtı (birim 6/6, E2E 4/4 kırmızı).
-      **Kalan:** klasör kapısının testi yok (`useFolder`'ın hiç testi yok; bozması yeşil
-      kalıyor, VK1'in klasör kapısı da öyle). Açılıştaki `writeLibrary` aynı boş okumada
+      **Kalan:** klasör kapısının testi `src/useFolder.test.tsx`'te (B7.37, 2026-10-24); VK1'in
+      klasör kapısının testi hâlâ yok. Açılıştaki `writeLibrary` aynı boş okumada
       varsayılan tek planlı listeyi yazar, birden çok planı olan birinin listesi düşer (planların
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
+      Numarası B7.33–B7.36'dan sonra, çünkü o numaralar `tb8-eksik-plan` ve
+      `tb1-dosyadan-ac` dallarında; yeri B7.30'un yanı, çünkü aynı ailenin devamı. Denetimin
+      raporu `~/GitHub/Mozaikler/Mozaik-analiz/scratch/analiz/RAPOR.md` §1 (A1, A2) ve §3
+      madde 7. **Yapılan (`fix/okunamayan-plan`):** depo okuması üç cevap veriyor (yok,
+      okundu, okunamadı; `readStoredPlan`), okunamayan anahtar dondurulup açılışta, plan
+      geçişinde ve silmeden sonra ezilmiyor, kırmızı şerit "daha yeni bir sürümle yazılmış" ya
+      da "okunamadı" diyor; dondurmayı yalnız "Dosyadan aç", "Her şeyi sil", planı silmek ve
+      "Tümünü dosyadan aç" kaldırıyor. Klasör: açılıştaki ilk yazım yalnız okunmuş bir plandan,
+      iş taşımayan paket yalnız kaybedecek bir şey olmayan dosyaya, budama yalnız iş taşıyan
+      günlükleri sayıyor ve yalnız iş taşıyan bir yazımdan sonra koşuyor; exe'ye `read_file`
+      komutu eklendi. Oturum yedeği içerik değişmediyse dönmüyor, okunamayan yedek Ayarlar →
+      Planlar ve yedek'te satır olarak görünüyor. Denetimin tekrar adımları gerileme testi:
+      `src/okunamayan.test.tsx`, `src/useFolder.test.tsx`, `e2e/okunamayan.spec.ts` (94),
+      `main`'de kırmızı, dalda yeşil. `e2e/exe.spec.ts` 76'nın ilk testi yeni kurala göre
+      yeniden yazıldı (tuzak 153).
+      **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
+      `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
+      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
+      değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
+      olsa, dolu ana dosyanın ve günün yedeğinin üstüne yazar (dünkü yedekler kalır).
 - [ ] **B7.31 Depo hiç yazılamıyorken iki şerit, biri yanlış (2026-10-23).** localStorage'ın
       her çağrısı hata atınca "otomatik kayıt çalışmıyor" şeridinin yanında VK2'nin
       "depolama alanı dolu" şeridi de çıkıyor: otomatik kayıt düşen her yazımı "dolu" sayıyor,

@@ -108,6 +108,20 @@ bir sayı adlandırdığı için sonsuza kadar yeşil geçerdi. Yazılan test sa
 adlandırmıyor: `raw.schemaVersion = SCHEMA_VERSION - 1` okunabilmeli. Bir
 değişmezin testi bugünkü değeri değil değişmezin kendisini yazar.
 
+### 153 · "Okunamadı" ile "yok" tek cevap olunca okunamayan veri boşla ezilir
+`parseState`'in `null`'u iki şey demekti: anahtarda hiçbir şey yok, ya da var ama bu kopya
+okuyamıyor (daha yeni bir şema, yarıda kesilmiş metin). Açılış, plan geçişi ve silmeden
+sonra açılan plan ikisini de `?? emptyState()` ile karşıladı, ve 400 ms sonra otomatik kayıt
+boş planı okunamayan metnin üstüne yazdı, şeritsiz. Exe'de aynı boş başlangıç Belgelerim'deki
+canlı dosyanın ve günün yedeğinin üstüne boş paketi yazdı; budama "en yeni on günlük"
+sayarken boş günlüğü de saydığı için her yeni gün bir dolu yedek daha düştü (denetim,
+2026-10-24, A1 ve A2; eski v2.1.1 sürümüyle de ölçüldü: 25 öğretmen 0'a indi). Çare: depo
+okuması üç cevap verir (`readStoredPlan`), okunamayan anahtar dondurulur ve yalnız
+kullanıcının açık bir eylemi onu çözer; klasör boş paketi yalnız kaybedecek bir şey olmayan
+yere yazar ve budama yalnız iş taşıyan günlükleri sayar. Bir savunma katmanı "boş" ile
+"yok"u ayırmıyorsa, kendi yedeğini silen katman o olur. `src/okunamayan.test.tsx`,
+`src/useFolder.test.tsx`, `e2e/okunamayan.spec.ts`.
+
 ---
 
 ## Dağıtım kimlikleri, tek kaynak ve sürüm
@@ -1416,7 +1430,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 
 | Grup | Tuzaklar |
 |---|---|
-| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
+| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
@@ -1432,6 +1446,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 152, yeni bir tuzak 153'ten devam eder. Test stratejisi
+büyük kullanılan numara 153, yeni bir tuzak 154'ten devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

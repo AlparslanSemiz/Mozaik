@@ -120,7 +120,8 @@ geçişinde ve silmeden sonra açılan planda ekrana boş bir yer tutucu gelir, 
 nedenini söyler, ve ne otomatik kayıt ne klasör o anahtarın üstüne yazar. Dondurmayı yalnız
 kullanıcının açık bir eylemi kaldırır: "Dosyadan aç" ya da "Her şeyi sil" ile o planın yerine
 bir şey koymak, planı Planlar'dan silmek, ya da "Tümünü dosyadan aç". 2026-10-24'e kadar
-okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i).
+okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i,
+tuzak 153).
 
 v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünkü
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
@@ -272,7 +273,8 @@ bir dosyaya (`holdsWork()`). Açılıştaki ilk yazım, exe'de de tarayıcıda d
 depodan okunduysa yapılır; yoksa ilk değişikliği bekler. Okunamayan bir plan pakete deposundaki
 hâliyle girer (daha yeni bir sürümünki JSON olduğu için olduğu gibi), JSON bile değilse klasöre
 hiç yazılmaz. 2026-10-24'e kadar exe boş bir depoyla açılınca boş paketi canlı dosyanın ve
-günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si). Klasöre yazamamak sessiz kalmaz:
+günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si, tuzak
+153). Klasöre yazamamak sessiz kalmaz:
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
 
