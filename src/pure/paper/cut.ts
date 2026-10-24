@@ -8,7 +8,7 @@
 // not a shared one.
 
 import { placementKey } from '../constraints';
-import { activePlacements } from '../program';
+import { activePlacements } from '../grid';
 import type { State } from '../../leaf/types';
 
 /**

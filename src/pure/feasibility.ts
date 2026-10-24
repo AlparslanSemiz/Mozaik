@@ -13,7 +13,7 @@ import {
   pendingBlocks,
 } from './constraints';
 import type { BlockCode, Index } from './constraints';
-import { activePlacements } from './program';
+import { activePlacements } from './grid';
 import { parseKey, placementKey } from '../leaf/keys';
 import { findViolations } from './rules';
 import type { Violation } from './rules';

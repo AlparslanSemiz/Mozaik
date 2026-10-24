@@ -23,6 +23,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { applyDensity, type Density, type ProgramColorMode, type View } from '../../platform/prefs';
+import { setDayMask, setRowMask } from '../../pure/program';
 import {
   activeProgram,
   addProgram,
@@ -33,9 +34,7 @@ import {
   renameProgram,
   switchProgram,
   validProgramName,
-  setDayMask,
-  setRowMask,
-} from '../../pure/program';
+} from '../../pure/grid';
 import { togglePinScope } from '../../pure/constraints';
 import { describeStrip } from '../../pure/programView';
 import { newId } from '../../pure/entities';

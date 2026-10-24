@@ -2,7 +2,7 @@
 // no feature lands in a pure module without a test).
 
 import { buildIndex, place } from './pure/constraints';
-import { blankProgram } from './pure/program/programs';
+import { blankProgram } from './pure/grid/programs';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import {
   classDayGaps,

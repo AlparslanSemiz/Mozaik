@@ -643,4 +643,4 @@ describe('health', () => {
     expect(h.warnings).toBeLessThan(10);
   });
 });
-import { activeProgram, blankProgram } from './pure/program/programs';
+import { activeProgram, blankProgram } from './pure/grid/programs';

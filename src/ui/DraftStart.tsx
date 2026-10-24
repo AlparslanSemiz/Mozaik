@@ -13,7 +13,7 @@
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
 import { loadPlan } from '../platform/storage';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/program';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/grid';
 import type { PlanControls } from './props';
 
 interface Props {

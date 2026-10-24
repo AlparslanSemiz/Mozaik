@@ -7,7 +7,7 @@ import { buildIndex, closedConflicts, placementKey } from '../../pure/constraint
 import { buildReport } from '../../pure/feasibility';
 import type { ReportRow } from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
+import { activePlacements } from '../../pure/grid';
 import type { CheckView } from '../../platform/prefs';
 import { T, useT } from '../T';
 

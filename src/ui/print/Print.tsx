@@ -23,7 +23,7 @@ import { blockSpans, buildIndex } from '../../pure/constraints';
 import { parseKey } from '../../leaf/keys';
 import { paletteColor } from '../../leaf/palette';
 import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
+import { activePlacements } from '../../pure/grid';
 import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
 import {
   PER_SHEET_LABELS,

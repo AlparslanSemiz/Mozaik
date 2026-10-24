@@ -15,7 +15,7 @@ import { emptyState, planSummary } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/io';
 import { loadPlan } from '../../platform/storage';
 import type { State } from '../../leaf/types';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/program';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';

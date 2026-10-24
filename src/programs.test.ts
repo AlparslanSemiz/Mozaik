@@ -11,7 +11,7 @@ import {
   removeProgram,
   renameProgram,
   switchProgram,
-} from './pure/program/programs';
+} from './pure/grid/programs';
 import { makeWorld } from './worlds';
 
 function world() {

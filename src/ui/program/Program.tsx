@@ -45,14 +45,8 @@ import { useDrag, type DragData } from '../../platform/dom';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { applySuggestion, suggestionDiff } from '../../pure/relax';
 import type { State, Id } from '../../leaf/types';
-import {
-  activePinned,
-  activePlacements,
-  rowMask,
-  setDayMask,
-  setRowMask,
-  type ProgramMask,
-} from '../../pure/program';
+import { rowMask, setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
+import { activePinned, activePlacements } from '../../pure/grid';
 import {
   programColorIndex,
   type PoolSort,

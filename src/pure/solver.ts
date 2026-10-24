@@ -28,13 +28,8 @@ import { closedKey, parseKey, placementKey } from '../leaf/keys';
 import type { Index } from './constraints';
 import { commonestBlock, holeReason, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
-import {
-  activePinned,
-  activePlacements,
-  lessonExcluded,
-  replaceActiveGrid,
-  type SolverExclusions,
-} from './program';
+import { lessonExcluded, type SolverExclusions } from './program';
+import { activePinned, activePlacements, replaceActiveGrid } from './grid';
 import type { Id, Lesson, State } from '../leaf/types';
 
 export interface SolverOptions {

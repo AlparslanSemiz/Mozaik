@@ -13,7 +13,7 @@ import {
   replaceActiveGrid,
   blankProgram,
   DEFAULT_PROGRAM_ID,
-} from './program';
+} from './grid';
 import {
   blocker,
   buildIndex,

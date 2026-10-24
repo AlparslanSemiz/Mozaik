@@ -7,7 +7,8 @@
 // and the small answers the menu and the head of the tray lean on.
 
 import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './pure/constraints';
-import { EMPTY_PROGRAM_MASK, replaceActiveGrid, setDayMask, setRowMask } from './pure/program';
+import { EMPTY_PROGRAM_MASK, setDayMask, setRowMask } from './pure/program';
+import { replaceActiveGrid } from './pure/grid';
 import {
   buildPool,
   buildRows,

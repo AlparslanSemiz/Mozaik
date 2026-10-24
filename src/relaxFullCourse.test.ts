@@ -11,7 +11,7 @@ import { applySuggestion, createRelaxer, suggestionLines, verifySuggestion } fro
 import type { RelaxFamily, Suggestion } from './pure/relax';
 import { solve } from './pure/solver';
 import { parseState } from './pure/io/parseState';
-import { activePlacements } from './pure/program/programs';
+import { activePlacements } from './pure/grid/programs';
 import { buildIndex } from './pure/constraints';
 import { findViolations } from './pure/rules';
 import { parseKey } from './leaf/keys';

@@ -40,12 +40,7 @@ import type {
   Teacher,
 } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
-import {
-  activePlacements,
-  blankProgram,
-  DEFAULT_PROGRAM_ID,
-  replaceActiveGrid,
-} from './pure/program';
+import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './pure/grid';
 
 // ---------------------------------------------------------------- the builder
 

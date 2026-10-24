@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { place } from './pure/constraints';
-import { activeProgram } from './pure/program/programs';
+import { activeProgram } from './pure/grid/programs';
 import { setDayMask, setRowMask, solverExclusions } from './pure/program/programMask';
 import { EMPTY_PROGRAM_MASK } from './pure/program/programMask';
 import { solve } from './pure/solver';

@@ -30,7 +30,7 @@ import {
   type FolderRun,
 } from '../../platform/storage';
 import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
+import { activePlacements } from '../../pure/grid';
 import type { PlanControls } from '../props';
 import type { UpdateRun } from '../../platform/update';
 import { SITE_ADRESI } from '../../platform/update';

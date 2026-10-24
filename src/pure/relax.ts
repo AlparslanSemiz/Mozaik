@@ -31,13 +31,8 @@ import { blocker, buildIndex, liftBlock, pendingBlocks, placedBlocks } from './c
 import type { Index } from './constraints';
 import { forbids, setAvailability, setTeacherLimit, updateLesson } from './entities';
 import { lessonName } from './feasibility';
-import {
-  activePinned,
-  activePlacements,
-  lessonExcluded,
-  replaceActiveGrid,
-  type SolverExclusions,
-} from './program';
+import { lessonExcluded, type SolverExclusions } from './program';
+import { activePinned, activePlacements, replaceActiveGrid } from './grid';
 import {
   findViolations,
   lessonDayCount,

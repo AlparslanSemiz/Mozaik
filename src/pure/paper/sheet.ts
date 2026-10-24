@@ -10,7 +10,7 @@
 import { periodGroups } from '../bell';
 import { closedKey, placementKey, type Index } from '../constraints';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
-import { activePlacements } from '../program';
+import { activePlacements } from '../grid';
 import { cellSpan } from './cut';
 import type { Vars } from '../../leaf/i18n';
 import type { ClassGroup, State, Teacher } from '../../leaf/types';

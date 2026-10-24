@@ -25,14 +25,13 @@ import type { Index } from './constraints';
 import { lessonSubject, subjectKey, subjectLabel, subjectShort, teacherSubjects } from './entities';
 import { compareTr } from './listview';
 import {
-  activePinned,
-  activePlacements,
   maskCount,
   solverExclusions,
   type MaskMode,
   type ProgramMask,
   type SolverExclusions,
 } from './program';
+import { activePinned, activePlacements } from './grid';
 import type { SuggestionDiff } from './relax';
 import type { SolverProgress, SolverResult } from './solver';
 import type { Vars } from '../leaf/i18n';
