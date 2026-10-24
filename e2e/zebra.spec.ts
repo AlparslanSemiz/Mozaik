@@ -93,4 +93,23 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     expect(edge.width).toBeGreaterThanOrEqual(2);
     expect(edge.color).toBe(t['--line-dark']);
   });
+
+  test('varlık panelinin aktarma seçicisi zebra satırında kutusunu koruyor', async ({ page }) => {
+    // The sheet's lesson rows took the stripe, and the transfer picker kept the
+    // input recess (--paper-sunk) and a hairline edge: on a zebra row, a hair
+    // from that recess, the box vanished. In a list a field is paper with a
+    // --line edge, like its neighbours in table.list (found by mozaik-70's review).
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
+    const pick = page.locator('table.sheet-lessons > tbody > tr:nth-child(2) select.transfer-pick');
+    await expect(pick).toBeVisible();
+    const t = await tokens(page, ['--paper', '--line']);
+    const box = await pick.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { bg: s.backgroundColor, edge: s.borderTopColor };
+    });
+    expect(box.bg, 'aktarma seçicisi kâğıt zeminli').toBe(t['--paper']);
+    expect(box.edge, 'aktarma seçicisinin kenarı').toBe(t['--line']);
+  });
 });

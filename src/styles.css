@@ -4094,7 +4094,8 @@ table.list td select,
 table.list td .split-pick,
 table.stat td input[type='text'],
 table.stat td input[type='number'],
-table.stat td select {
+table.stat td select,
+table.sheet-lessons td select {
   background: var(--paper);
   border: 1px solid var(--line);
 }
@@ -4113,7 +4114,8 @@ table.list td select:hover:not(:disabled),
 table.list td .split-pick:hover,
 table.stat td input[type='text']:hover:not(:disabled),
 table.stat td input[type='number']:hover:not(:disabled),
-table.stat td select:hover:not(:disabled) {
+table.stat td select:hover:not(:disabled),
+table.sheet-lessons td select:hover:not(:disabled) {
   border-color: var(--line-dark);
 }
 
