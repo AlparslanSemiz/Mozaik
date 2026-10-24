@@ -41,7 +41,7 @@ Tuzaklar işe başlarken okunur: [docs/TRAPS.md](docs/TRAPS.md)'nin başındaki 
 
 ## Çalışma düzeni
 
-- `~/GitHub/Mozaikler/Mozaik` yalnız `main`'i tutar, orada oturum çalışmaz. Her iş `main`'den açılan kısa ömürlü bir dalda ve yanındaki kendi worktree'sinde yürür (`~/GitHub/Mozaikler/Mozaik-<iş>`), iş birleşince worktree kaldırılır. Yeni refactor turu açılmıyor (DECISIONS 2026-10-23).
+- Tek kalıcı checkout, `~/GitHub/Mozaikler/Mozaik`, sürekli worktree yok. Her iş `main`'den açılan kısa ömürlü bir dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar; paralel çalışan her oturum ya da ajan geçici bir worktree alır (`git worktree add ~/GitHub/Mozaikler/Mozaik-<iş> -b <dal> main`), dalı birleşince worktree kaldırılır (`git worktree remove`). Yeni refactor turu açılmıyor (DECISIONS 2026-10-23).
 - Commit'ten önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yok. Taşıma, içerik ve biçim değişikliği ayrı commit'lerde.
 - Push SSH ile ve yalnız kendi dalı: `git push origin <dal>`. Zorla push, etiket ve `main`'e push yok. CI'ın sonucu beklenmez, `gh run view` ile okunur, dalın CI'ı kırmızıysa önce o düzeltilir.
 - Birleştirmeyi Alp yapar ya da onaylar, `--ff-only` ile: önce `git merge main`, yerelde `npm run hizli` yeşil, dalın CI'ı yeşil. "Şu an" ve tuzak numarası dalın birleşmeden önceki son commit'inde yazılır, önce birleşen numarayı alır. Belgelere yalnız `main`'deki commit hash'i yazılır.

@@ -28,7 +28,7 @@ export function git(kok, ...args) {
 }
 
 // A release is cut from one place: the main checkout, on `main`. Branches and
-// linked worktrees are where work happens (CLAUDE.md, "Paralel oturumlar"),
+// temporary worktrees are where work happens (CLAUDE.md, "Çalışma düzeni"),
 // and a release run from one of them would tag a commit that is not the
 // `main` the site publishes. Git already refuses to check `main` out twice,
 // but a worktree can still sit on `main`'s commit detached, or be forced.

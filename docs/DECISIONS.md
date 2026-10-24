@@ -76,7 +76,7 @@ CI'da koşuyor, site yalnız yeşil bir `main` push'unda yayınlanıyor, birleş
 
 **Eski hâli.** Yedi durma sebebi, test programının kuralları (2026-10-09), değişiklik başına
 mutasyon kanıtı, belge kapısında cümle içeriğini sabitleyen on bir test, oturum sonunda yedi zorunlu belge,
-sürekli iki worktree (2026-10-23, aşağıda).
+sürekli iki worktree (çalışma yeri, aşağıda).
 
 **Gerekçe.** Sürecin maliyeti özellik işinin önüne geçti: bir arayüz değişikliği E2E, mutasyon
 kanıtı ve dört belge güncellemesi istiyordu, bir belge cümlesi değişikliği bir test
@@ -102,29 +102,22 @@ aralıkları 16 ve 20 px'te leke, 24 px'te bulanık, 32 px'te okunuyor.
 **Denendi, bırakıldı.** Aynı gün önce çizilen dört sütunlu takvim, kullanıcı asıl
 ikonu istediği için bırakıldı ve dalı (`ozellik/ikon`) silindi.
 
-### 2026-10-23 · Worktree'ler toplandı: ana klasör ve tek refactor worktree'si
+### 2026-10-23 · Tek kalıcı checkout; paralel oturuma ve ajana geçici worktree
 
-**Ne.** Kullanıcının kararı: worktree'lerin hepsi `~/GitHub/Mozaikler/` altında, sürekli
-iki tane: `Mozaik` (yalnız `main`, oturum yok) ve `Mozaik-refactor` (refactor turları, her
-tur `main`'den yeni bir dalda). Başka bir iş alanı kendi worktree'sini onların yanında açar,
-iş birleşince kaldırılır. Birleşmeye hazır yedi dal `birlestir/2026-10-23` dalında birer birer
-birleşti, her birinden sonra `npm run kontrol` yeşil, ve `main` ona ileri sarıldı:
-`fix/bos-acilis`, `bakim/agir-kilit`, `test/kapsam`, `ci/runner-sabitle`, `ozellik/zebra`,
-`ozellik/linux`, `refactor/program`. Bu birleştirmeyi kullanıcı bu iş için bıraktı;
-"dal `main`'e Alp'in onayıyla birleşir" kuralı değişmedi.
+**Ne.** Alp'in kararı (2026-10-23, 2026-10-24'te paralel oturumlar için netleşti): yalnız
+ana klasör kalıcı, `~/GitHub/Mozaikler/Mozaik`. Her iş `main`'den açılan kısa ömürlü bir
+dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar;
+paralel çalışan her oturum ya da ajan geçici bir worktree alır
+(`~/GitHub/Mozaikler/Mozaik-<iş>`), dalı birleşince worktree kaldırılır. Sürekli
+`Mozaik-refactor` worktree'si de kalktı. Kural CLAUDE.md'nin "Çalışma düzeni"nde.
 
-**Birleşmeyenler**, hepsi origin'de duruyor: `test/gercek-ortam` (TP7 Windows'ta kırmızı,
-kendi TODO'su "bu hâliyle birleşmemeli" diyor, çünkü `yayinla` kırmızı bir `exe-windows`'u
-bekler; atası `test/kapsam` birleşti), `klasorleme` (2026-09-05, 337 commit geride, bugünkü
-paket turlarının yerine geçen eski bir deneme) ve üç Dependabot dalı.
+**Eski hâli.** Ana klasör yalnız `main`'i tutuyordu ve orada oturum çalışmıyordu; her iş
+alanı kendi worktree'sinde (2026-10-09), 2026-10-23 sabahından beri sürekli iki tane:
+`Mozaik` ve `Mozaik-refactor` (`~/GitHub/Mozaikler/`'e taşınırken tuzak 152).
 
-**Eski hâli.** Dokuz worktree `~/GitHub/`'da, her iş alanı ayrı (2026-10-09). Klasörler
-`~/GitHub/Mozaikler/`'e elle taşınınca yedisinin kaydı kırıldı (tuzak 152).
-
-**Belgeler.** Çatışan günlüklerde (WORKLOG, TESTFINDINGS, DECISIONS, TRAPS, CHANGELOG) iki
-taraf da tutuldu, en yeni üstte; iki dalın aynı numarayı verdiği tuzak 150 önce birleşen
-`bakim/agir-kilit`'te kaldı, `ozellik/linux`'unki 151 oldu. 2026-10-23 yönünün kendi
-kaydı hiçbir dalda yoktu ve sonraki turun işi.
+**Gerekçe.** Kullanıcının kararı. 2026-10-24 sabahı üç oturum aynı anda açıldı, ikisi
+worktree'lerde yazıyordu; ana klasörde aynı anda tek oturum yazabildiği için paralel
+oturumlar geçici worktree'ye çıktı ve "bir worktree'de tek yazar" kuralı böyle tutuyor.
 
 ### 2026-10-10 · Linux'ta günlük kopya Chrome'un app modunda, yalnız Chrome; rpm bırakıldı
 

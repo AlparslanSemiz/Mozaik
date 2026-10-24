@@ -4,8 +4,8 @@
 #   scripts/linux-kur.sh
 #
 # Builds from ~/GitHub/Mozaikler/Mozaik and nowhere else, and takes the launcher and the
-# icon from there too, whichever copy of this script is run: that checkout
-# holds only `main` (CLAUDE.md, "Paralel oturumlar"), and a worktree's dist/ is
+# icon from there too, whichever copy of this script is run: that is the one
+# lasting checkout (CLAUDE.md, "Çalışma düzeni"), and a worktree's dist/ is
 # whatever branch that session is on. It refuses a checkout that is not on
 # main, has anything uncommitted, or is itself a worktree.
 #
