@@ -261,10 +261,18 @@ aramanın onun makinesinde nasıl koştuğunu söylemesi için orada (TODO B5.11
 biçimin birbirine karışmaması için üç önlem birlikte var (tuzak 30).
 
 Seçilen klasöre bütün planlar yazılır ve her gün için ayrı bir yedek bırakılır
-(`ders-programi-YYYY-AA-GG.json`, son 10 gün). Yedekler ad kalıbıyla budanır,
+(`ders-programi-YYYY-AA-GG.json`, iş taşıyan son 10 gün). Yedekler ad kalıbıyla budanır,
 sayılarak değil: klasör Belgelerim ve orada babanın kendi dosyaları duruyor, "en
 yeni ondan gerisini sil" onların da üstünden geçerdi. Kalıba uymayan hiçbir dosyaya
-dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Klasöre yazamamak sessiz kalmaz:
+dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Budama yalnız iş
+taşıyan (bir öğretmeni, sınıfı, dersi ya da dersliği olan) günlükleri sayar, en yeni onunu ve
+onlardan yeni her günlüğü bırakır, ve yalnız o gün iş taşıyan bir yazımdan sonra koşar. İş
+taşımayan bir paket yalnız kaybedecek bir şey olmayan yere yazılır: olmayan ya da onun gibi boş
+bir dosyaya (`holdsWork()`). Açılıştaki ilk yazım, exe'de de tarayıcıda da, yalnız açık plan
+depodan okunduysa yapılır; yoksa ilk değişikliği bekler. Okunamayan bir plan pakete deposundaki
+hâliyle girer (daha yeni bir sürümünki JSON olduğu için olduğu gibi), JSON bile değilse klasöre
+hiç yazılmaz. 2026-10-24'e kadar exe boş bir depoyla açılınca boş paketi canlı dosyanın ve
+günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si). Klasöre yazamamak sessiz kalmaz:
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
 

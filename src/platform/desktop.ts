@@ -10,7 +10,7 @@
 // `FileSystemDirectoryHandle`. Writing a second copy of those rules in Rust
 // would give the tool two answers to "which backups get deleted", and they
 // would drift the first time one of them was edited. So instead of moving the
-// rules, this dresses four Tauri commands up as the handle they already
+// rules, this dresses five Tauri commands up as the handle they already
 // expect, and `saveInto()` runs in the exe UNCHANGED.
 //
 // It is pitfall 67's lesson pointed the other way: there the fix was to
@@ -49,8 +49,9 @@ export function isDesktop(): boolean {
 /**
  * A directory handle backed by `src-tauri/src/lib.rs`.
  *
- * ONLY the four members `folder.ts` actually calls are implemented —
- * `name`, `getFileHandle`, `keys` and `removeEntry`. The cast is honest
+ * ONLY the members `folder.ts` actually calls are implemented — `name`,
+ * `getFileHandle` (and on the file, `createWritable` and `getFile`), `keys`
+ * and `removeEntry`. The cast is honest
  * about that rather than hiding it behind a hand-written interface that
  * claims more: `desktop.test.ts` runs the real `saveInto()` against this
  * object, so the day `folder.ts` starts calling a fifth member, that test
@@ -78,6 +79,16 @@ export function desktopFolder(invoke: Invoke, label: string): FileSystemDirector
               await invoke<void>('write_file', { name, text });
             },
           };
+        },
+        // The folder reads its own files before it writes an empty bundle
+        // or prunes (folder.ts, A2). A file that is not there answers the way
+        // a browser's handle does, so `folder.ts` has one reading for both.
+        async getFile() {
+          const text = await invoke<string | null>('read_file', { name });
+          if (text === null) {
+            throw Object.assign(new Error(`${name} yok`), { name: 'NotFoundError' });
+          }
+          return { text: async () => text };
         },
       };
     },

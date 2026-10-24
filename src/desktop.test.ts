@@ -10,9 +10,20 @@ import { describe, expect, it } from 'vitest';
 import { desktopFolder } from './platform/desktop';
 import { MAIN_NAME, dailyName, rescueName, saveInto } from './platform/folder';
 
+/**
+ * A bundle with work in it. Since A2 (the audit of 2026-10-24) the folder
+ * tells a full bundle from an empty one: only a full write prunes, and only
+ * full backups are counted, so the seeds and the writes below have to be real.
+ */
+const FULL = JSON.stringify({
+  bundleVersion: 1,
+  activeId: '1',
+  plans: [{ id: '1', name: 'x', draft: false, state: { teachers: [{ id: 't' }] } }],
+});
+
 /** An in-memory stand-in for src-tauri/src/lib.rs. */
 function fakeDisk(seed: string[] = []) {
-  const files = new Map<string, string>(seed.map((n) => [n, 'eski']));
+  const files = new Map<string, string>(seed.map((n) => [n, FULL]));
   const calls: string[] = [];
   const invoke = (async (cmd: string, args?: Record<string, unknown>) => {
     calls.push(cmd);
@@ -21,6 +32,7 @@ function fakeDisk(seed: string[] = []) {
       return undefined;
     }
     if (cmd === 'list_files') return [...files.keys()];
+    if (cmd === 'read_file') return files.get(args!.name as string) ?? null;
     if (cmd === 'remove_file') {
       files.delete(args!.name as string);
       return undefined;
@@ -58,7 +70,7 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     const disk = fakeDisk([...older, 'vergi-beyanı.json', 'ders-programi-2026-08-26-1430.json']);
     const dir = desktopFolder(disk.invoke, 'Ders Programı');
 
-    const result = await saveInto(dir, '{}', new Date(2026, 7, 27), true);
+    const result = await saveInto(dir, FULL, new Date(2026, 7, 27), true);
 
     // Twelve seeded plus today's own = thirteen, so the three oldest go.
     expect(result.pruned).toEqual([
@@ -86,16 +98,18 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     const kurtarma = rescueName(ilk);
     expect(kurtarma).toBe('ders-programi-kurtarma-2026-08-27-143005.json');
 
-    const yazilan = await saveInto(dir, 'yeni iş', ilk, false, kurtarma);
+    const yeni = FULL.replace('"x"', '"yeni iş"');
+    const eski = FULL.replace('"x"', '"eski durum"');
+    const yazilan = await saveInto(dir, yeni, ilk, false, kurtarma);
     expect(yazilan.written).toEqual([MAIN_NAME, dailyName(ilk), kurtarma]);
 
     // The next session, an hour later, with the old state and a prune.
-    await saveInto(dir, 'eski durum', new Date(2026, 7, 27, 15, 30), true);
-    expect(disk.files.get(MAIN_NAME)).toBe('eski durum');
-    expect(disk.files.get(kurtarma)).toBe('yeni iş');
+    await saveInto(dir, eski, new Date(2026, 7, 27, 15, 30), true);
+    expect(disk.files.get(MAIN_NAME)).toBe(eski);
+    expect(disk.files.get(kurtarma)).toBe(yeni);
   });
 
-  it('adaptör saveInto’nun çağırdığı DÖRT üyeden fazlasını uydurmuyor', async () => {
+  it('adaptör saveInto’nun çağırdığı üyelerden fazlasını uydurmuyor', async () => {
     // Seeded past the keep limit on purpose: with nothing to prune the
     // delete path never runs and this test would pass while blind to it.
     const disk = fakeDisk(
@@ -104,10 +118,16 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
         (_, i) => `ders-programi-2020-01-${String(i + 1).padStart(2, '0')}.json`,
       ),
     );
-    await saveInto(desktopFolder(disk.invoke, 'X'), '{}', new Date(2026, 7, 27), true);
+    await saveInto(desktopFolder(disk.invoke, 'X'), FULL, new Date(2026, 7, 27), true);
 
     // A fifth command appearing here means lib.rs grew an API the page did
-    // not need, or folder.ts started reaching past the seam.
-    expect([...new Set(disk.calls)].sort()).toEqual(['list_files', 'remove_file', 'write_file']);
+    // not need, or folder.ts started reaching past the seam. The fourth,
+    // `read_file`, came with A2: the prune reads which backups hold work.
+    expect([...new Set(disk.calls)].sort()).toEqual([
+      'list_files',
+      'read_file',
+      'remove_file',
+      'write_file',
+    ]);
   });
 });

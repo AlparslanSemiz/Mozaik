@@ -99,10 +99,65 @@ export function rescueName(now: Date): string {
  * picks is going to be Belgelerim, with his own files in it — a prune that
  * deletes by "everything except the newest ten" would delete his work, and it
  * would do it silently. The name pattern IS the safety.
+ *
+ * And only FULL backups are counted (`full`): the newest `keep` of those stay,
+ * with every daily newer than the last of them, and only what is older goes.
+ * It used to count every daily, and an empty start put an empty backup among
+ * the ten, so a full one went on each new day and none was left after ten
+ * (A2, the audit of 2026-10-24).
  */
-export function prunable(names: string[], keep: number = KEEP_DAILY): string[] {
+export function prunable(
+  names: string[],
+  keep: number = KEEP_DAILY,
+  full: (name: string) => boolean = () => true,
+): string[] {
   const ours = names.filter((name) => DAILY.test(name)).sort(); // ISO-shaped: sorts by date
-  return ours.slice(0, Math.max(0, ours.length - keep));
+  const old: string[] = [];
+  let kept = 0;
+  for (let i = ours.length - 1; i >= 0; i--) {
+    const name = ours[i]!;
+    if (kept >= keep) old.unshift(name);
+    else if (full(name)) kept++;
+  }
+  return old;
+}
+
+/** Every list a plan's work is in, today's names and v1's Turkish ones. */
+const WORK = [
+  'rooms',
+  'teachers',
+  'classes',
+  'lessons',
+  'derslikler',
+  'ogretmenler',
+  'siniflar',
+  'dersler',
+];
+
+/**
+ * Does this bundle's text hold any work: a room, a teacher, a class or a
+ * lesson in any plan? Null when it is not a bundle this can read.
+ *
+ * The folder's one notion of "empty", for the two rules it guards: an empty
+ * bundle is never written over a file that holds work, and the prune counts
+ * only files that do. It looks at the four lists and nothing else, so it can
+ * stay in a file that does not know what a State is.
+ */
+export function holdsWork(text: string): boolean | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  const plans = (raw as { plans?: unknown } | null)?.plans;
+  if (!Array.isArray(plans)) return null;
+  return plans.some((plan: unknown) => {
+    const state = (plan as { state?: Record<string, unknown> } | null)?.state;
+    return WORK.some(
+      (list) => Array.isArray(state?.[list]) && (state[list] as unknown[]).length > 0,
+    );
+  });
 }
 
 // ------------------------------------------------------- is it even here
@@ -220,6 +275,26 @@ export async function pickFolder(): Promise<FileSystemDirectoryHandle | null> {
 
 // ---------------------------------------------------------------- writing
 
+/**
+ * A file's text, or null when it is not there. Any other failure THROWS: a
+ * folder that cannot be read cannot be written either, and the caller's red
+ * line is how that is said (pitfall 7), not a write that quietly did nothing.
+ */
+async function readText(dir: FileSystemDirectoryHandle, name: string): Promise<string | null> {
+  try {
+    return await (await (await dir.getFileHandle(name)).getFile()).text();
+  } catch (err) {
+    if ((err as { name?: unknown } | null)?.name === 'NotFoundError') return null;
+    throw err;
+  }
+}
+
+/** May an empty bundle go into `name`? Only where nothing would be lost. */
+async function emptyMayGo(dir: FileSystemDirectoryHandle, name: string): Promise<boolean> {
+  const text = await readText(dir, name);
+  return text === null || holdsWork(text) === false;
+}
+
 async function writeText(
   dir: FileSystemDirectoryHandle,
   name: string,
@@ -248,6 +323,11 @@ export interface WriteResult {
  *
  * `prune` is passed in rather than decided here: listing a directory on every
  * keystroke is real I/O, and the caller knows when the day turned over.
+ *
+ * A bundle that holds no work (`holdsWork`) is written only where it loses
+ * nothing: a file that is not there, or one as empty. It never prunes, and it
+ * writes no rescue copy. An empty start in the exe used to put an empty bundle
+ * over a full live file and a full backup of today (A2).
  */
 export async function saveInto(
   dir: FileSystemDirectoryHandle,
@@ -257,19 +337,25 @@ export async function saveInto(
   rescue: string | null = null,
 ): Promise<WriteResult> {
   const daily = dailyName(now);
-  await writeText(dir, MAIN_NAME, text);
-  await writeText(dir, daily, text);
-  if (rescue !== null) await writeText(dir, rescue, text);
-
-  const result: WriteResult = {
-    written: rescue === null ? [MAIN_NAME, daily] : [MAIN_NAME, daily, rescue],
-    pruned: [],
-  };
-  if (!prune) return result;
+  const result: WriteResult = { written: [], pruned: [] };
+  const work = holdsWork(text) === true;
+  for (const name of rescue === null || !work ? [MAIN_NAME, daily] : [MAIN_NAME, daily, rescue]) {
+    if (!work && !(await emptyMayGo(dir, name))) continue;
+    await writeText(dir, name, text);
+    result.written.push(name);
+  }
+  if (!prune || !work) return result;
 
   const names: string[] = [];
   for await (const name of dir.keys()) names.push(name);
-  for (const old of prunable(names)) {
+  const full = new Set<string>();
+  for (const name of names.filter((n) => DAILY.test(n))) {
+    // A backup that cannot be read now (open in another program) is not
+    // counted as full; it is kept unless ten full ones are newer.
+    const held = await readText(dir, name).catch(() => null);
+    if (held !== null && holdsWork(held) === true) full.add(name);
+  }
+  for (const old of prunable(names, KEEP_DAILY, (name) => full.has(name))) {
     try {
       await dir.removeEntry(old);
       result.pruned.push(old);
