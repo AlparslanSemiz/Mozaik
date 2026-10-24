@@ -843,12 +843,21 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
       Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
       "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
-- [ ] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
+- [~] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
       `package.json` ile `Cargo.toml` yazıldı, kilit dosyasının kökü 2.1.1'de kaldı; ilk
       `npm install` onu değiştirip ağacı kirletiyor ve `yayinla`'nın temiz ağaç kapısını
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
+      **Yapıldı (2026-10-24, `b7-32-kilit`):** `npm install` değil, `scripts/kilit-surumu.mjs`
+      iki kök sürümü JSON'dan geçirerek yazıyor (ağ yok, yalnız iki satır; npm'in biçiminde
+      olmayan dosyada durur), `yayinla` bütün yeni metinleri ilk yazımdan önce hesaplıyor ve
+      kilidi sürüm commit'ine katıyor. Testi `src/surum.test.ts`. Doğrulama yalnız
+      `npm run yayinla -- --kuru` ile, worktree'de: yer kapısında durdu (çıkış 1), sürüm yazma
+      yolu koşmadı; ana klasördeki kuru koşu birleşmeden sonra. Yazılan iki alan: kökteki
+      `version` ve `packages[""].version`; `surum.test.ts` ikisini de soruyor (iki satır, ikisi de
+      yeni sürüm). **Yazıldı, doğrulanmadı** (kullanıcının kararı, 2026-10-24): zincir `main`'e
+      birleştikten sonra ana klasörde `npm run yayinla -- --kuru` geçene kadar bitti sayılmaz.
 - [ ] **B7.33 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
       `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
       köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
@@ -1660,7 +1669,7 @@ testi o commit'te sıradan bir teste döner.
       (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
       çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
       yapıştırma tarafındaki eşi.
-- [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
+- [~] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
       Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
       kapanışı `useFolder.ts`'in `beforeunload` flush'ı karşılamalı, ama flush eşzamansız bir
       yazımı yalnız başlatıyor ve sayfa yazım inmeden gidiyor. Sitede beş denemenin beşinde
@@ -1672,6 +1681,25 @@ testi o commit'te sıradan bir teste döner.
       ikinci bir düzeltme dalında. O dal `fix/veri-kaybi` `main`'e birleşir birleşmez
       `main`'den açılır, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda dokunmamalı.
       `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da aynı kalmalı.
+      **Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):** pencere kapatılmak istenince
+      Rust kapanışı durdurup sayfaya söylüyor, sayfa deposunu ve klasörünü yazıp
+      `kapanabilir` diyor, cevap gelmezse pencere 5 s sonra yine kapanıyor (ARCHITECTURE, "Exe
+      bir adaptör takar"). Linux ikilisinde, sahte HOME'la, gerçek bir WM_DELETE_WINDOW ile
+      ölçüldü: önce 0/3, sonra 5/5 ve 3/3, pencere 0,17–0,26 s'de kapandı; denetim (3 s bekleyip
+      kapatmak) 2/2. Windows'ta (WebView2) ölçülmedi. **Tarayıcı yarısı düzelmez:** kapanan sekme
+      eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
+      yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı). Kapanırken 5 s'yi aşan
+      bir cevapsızlık ölçülmedi.
+      **Etiket kapısı (2026-10-24, kullanıcının kararı):** `gercek-exe.spec.ts`'te "X ile hemen
+      kapanan pencere…" testi (son değişiklik, X, yeniden açılış, değişiklik yerinde) Linux'ta
+      14/14'le yeşil, düzeltmesiz ikiliye karşı kırmızı; Windows yarısı (`pencere-kapat.mjs`'in
+      WM_CLOSE'u) yazıldı, koşulmadı: Windows'ta gerçek exe süiti TP7. Bir sonraki sürümde
+      etiketten önce Windows'ta yeşil olur (BUILD, "Sürüm").
+      **Tarayıcı yarısı veri kaybı değil (2026-10-24, kullanıcının sorusu):** beş koşunun beşinde
+      değişiklik kapanıştan sonra depoda, klasör bir değişiklik geride, sonraki açılış onu klasöre
+      yazıyor (`klasor.spec.ts`, BİLİNEN KUSUR'dan sıradan teste döndü; deponun kapanış flush'ı
+      kalkınca kırmızı). Yeni bir çare denenmedi. Açık kalan: exe yarısının Windows'ta ölçümü,
+      etiketten önceki gerçek exe kapanış senaryosuyla (BUILD, "Sürüm").
 - [x] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);

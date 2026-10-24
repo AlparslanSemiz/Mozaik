@@ -27,7 +27,7 @@ koşulmaz. Elle bir mutasyon kanıtı istenirse `scripts/mutasyon-kaniti.sh` ile
 **Bulunan hata** bulunduğu dalda, kendi commit'inde ve gerileme testiyle düzeltilir. Refactor
 dalı davranış değiştirmez, hatayı [TODO.md](TODO.md) §8k'ye yazar. Veri kaybı sınıfında bir
 hata bulunursa durulur ve bildirilir. "BİLİNEN KUSUR" kalıbı yeni bir testte kullanılmaz.
-Depoda kalan örnekleri (`src/fuzz.test.ts`, `src/fixtures.test.ts`, `e2e/klasor.spec.ts`)
+Depoda kalan örnekleri (`src/fuzz.test.ts`, `src/fixtures.test.ts`)
 kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testine çevrilir.
 
 ## Ne zaman koşar
@@ -384,9 +384,14 @@ dosyadan aç" ile içerikleriyle aynı geri geliyor, ve yeni kopya ağa çıkmı
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
 sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taşıması, ve
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
-değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı bir
-BİLİNEN KUSUR'u sabitliyor (TODO TB7): 2 s'lik yazım dolmadan kapanan sekmenin
-değişikliği klasöre inmiyor, depoya iniyor.
+değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı (TODO TB7):
+2 s'lik yazım dolmadan kapanan sekmenin değişikliği depoda kalıyor, klasör bir değişiklik
+geride kalıyor ve sonraki açılış onu klasöre yazıyor; yani gecikme, kayıp değil. Deponun
+kapanış flush'ı kalkınca test kırmızı (mutasyonla, 2026-10-24). Exe'de pencere sayfayı bekliyor (2026-10-24);
+o yarının sayfa tarafı `src/desktop.test.ts`'te, pencerenin kendisi gerçek exe süitinde
+(`gercek-exe.spec.ts`, pencere yöneticisinin kapatma mesajıyla; WebDriver'ın pencere
+kapatması Tauri'nin kapanma isteğinden geçmiyor). O test etiketten önce Windows'ta da yeşil
+olur (BUILD, "Sürüm"); düzeltmesiz Linux ikilisine karşı kırmızıydı.
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
@@ -416,7 +421,11 @@ kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği,
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
 uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
-sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
+sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
+pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
+WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
+kapanma isteğinden geçmiyor; Wayland masaüstünde süit bunun için XWayland'de koşar).
+Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
 

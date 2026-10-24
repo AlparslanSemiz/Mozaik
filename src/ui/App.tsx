@@ -43,6 +43,7 @@ import { attachScrollFade } from '../platform/scrollFade';
 import { attachRibbonScroll } from '../platform/ribbonScroll';
 import { useSolver } from '../platform/search';
 import { useFolder } from '../platform/useFolder';
+import { onDesktopClose } from '../platform/desktop';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';
 import Setup from './setup';
@@ -493,9 +494,20 @@ export default function App() {
   // exe. The double-clicked .html has neither and says so; it cannot replace
   // itself, and it is the build the offline principle is checked on (temel.spec.ts).
   //
-  // `park` goes in because the exe route ENDS by closing this window: the
-  // pending autosave has to be on disk before it does (pitfall 28).
+  // `park` goes in because the exe route ENDS with `app.exit(0)`, which the
+  // close hold below never sees: the pending autosave has to be on disk
+  // before it (pitfall 28). The folder's pending write is not waited for
+  // there; the next launch writes the folder again.
   const update = useUpdate(park);
+  // The exe's window waits for this before it closes (TB7): the pending
+  // autosave and the folder's two-second write land first. A ref, so the
+  // listener is registered once and still calls today's `park` and `flush`.
+  const beforeClose = useRef<() => Promise<void>>(() => Promise.resolve());
+  beforeClose.current = async () => {
+    park();
+    await folder.flush();
+  };
+  useEffect(() => onDesktopClose(() => beforeClose.current()), []);
   // Dismissed for THIS session only, and in sessionStorage rather than
   // localStorage on purpose: a new ders-programi-* key would owe the
   // "Veriler nerede" table a row (planlar.spec.ts checks every one of them),
