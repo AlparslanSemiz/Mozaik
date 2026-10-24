@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l), ikisi de 2026-10-23'ten beri donduruldu | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -1280,9 +1280,9 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
 ### 8k · Refactor analizinin bıraktıkları (2026-10-08)
 
-**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Süren tur yoktu
-(`refactor/program` `main`'de), yeni paket turu açılmıyor. RF ve RK maddeleri açık kalır,
-bir RK özellik ya da düzeltme dalında aynı kuralla (gerileme testiyle) düzeltilebilir.
+Refactor turları açık ([DECISIONS.md](DECISIONS.md), 2026-10-24): bir tur davranış
+değiştirmez, kendi dalında yürür ve bulduğu hatayı düzeltmez, buraya yazar. Bir RK özellik
+ya da düzeltme dalında gerileme testiyle düzeltilir.
 
 **2026-10-24 turu (`refactor/moduller`, kullanıcının isteğiyle; [DECISIONS.md](DECISIONS.md)
 aynı gün).** Yapılan: aşağıdaki tablonun 4, 6, 9'un taşıma yarısı, 10 ve 11'i; ek talimatla
@@ -1564,6 +1564,18 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       bir iddiası) katmanlarının kökünde; `katman-koku-*` kuralları ilk üçünü adıyla muaf
       tutuyor. Taşımak kök yapılandırmaya, yayın betiklerine ya da bir test iddiasına dokunmak
       demek; her biri ayrı bir kararla.
+
+**Birleşmeden sonraki bileşen bölmeleri (2026-10-24, kullanıcının kararı).** Her biri
+`main`'den açılan kendi dalında; dal bölmenin `dist/index.html`'e maliyetini ölçer, ve
+`size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
+değişmez, ekran 0 piksel.
+
+- [ ] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
+- [ ] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
+      kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
+- [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
+      `ui/program/Program.tsx`'in içinde; hesapları (`describeMenu`, `poolMenuFacts`) zaten
+      `pure/program/`'da.
 
 **Optimizasyon fırsatları** (refactor turu hiçbirini yapmadı; her biri önce ölçülür, tuzak
 105 ve 117):

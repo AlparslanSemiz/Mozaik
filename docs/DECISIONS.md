@@ -38,9 +38,10 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ### 2026-10-24 · Modül modül yapısal refactor: her kaynak dosya bir alanda (`refactor/moduller`)
 
-**Ne.** Kullanıcının açıkça istediği bir tur (yapıştırılan görev ve aynı günün ek talimatı),
-2026-10-23'te dondurulan refactor turlarının bu sefer için açılması: davranış değişmeden her
-modül tek sorumluluklu ve bir alan paketinde. Kurallar:
+**Ne.** Kullanıcının açıkça istediği bir tur (yapıştırılan görev ve aynı günün ek talimatı):
+davranış değişmeden her modül tek sorumluluklu ve bir alan paketinde. Refactor turları açık:
+bir tur davranış değiştirmez, kendi dalında yürür, bulduğu hatayı düzeltmez ve TODO §8k'ye
+yazar, veri kaybı riskinde durur. Kurallar:
 
 - Her kaynak dosya `src/<katman>/<alan>/`'da, her alanın tek `index.ts`'i; en derin
   `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda. Katmanın
@@ -64,8 +65,8 @@ testin taradığını sessizce değiştirirdi. Teachers, Dersler'in formu ve Pro
 menüsü bileşenlere bölünmedi: bir bileşen bölmesi prop adları kadar demeti büyütüyor (kabuğun
 bölmesi +1 688 bayt), ve `size-limit` kapısı 1 171 000 bayt. RF11, RF12 ve RF20 açık.
 
-**Eski hâli.** 2026-10-23: refactor turları donduruldu, yeni tur açılmıyor; paket ağacı
-TODO §8k'nin hedef ağacıydı ve bazı dosyalar katmanın kökünde kalıyordu.
+**Eski hâli.** Paket ağacı TODO §8k'nin hedef ağacıydı ve bazı dosyalar katmanın kökünde
+kalıyordu.
 
 **Gerekçe.** Kullanıcının kararı. Okunabilirlik ve kolay genişleme; davranış değişmedi.
 Ölçümler WORKLOG'un aynı günkü girdisinde.
@@ -95,8 +96,7 @@ her işi yavaşlatıyordu, özellik işi hızlanmalı. Kesilenler:
 - Oturum sonunda şart olan yalnız TODO ile WORKLOG'un "Şu an"ı ve tarihli girdisi.
   CHANGELOG kullanıcıya görünen bir değişiklikte, TRAPS, DECISIONS ve TESTFINDINGS gerçek
   bir içerik çıkınca.
-- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Refactor
-  turları da: süren tur yoktu (`refactor/program` `main`'de), yeni tur açılmıyor ve sürekli
+- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Sürekli
   `Mozaik-refactor` worktree'si kuralı CLAUDE.md'den çıktı.
 - CI: ölçüm, `ci.yml`'in mutasyon, kapsam ya da yavaş süit beklemediğini gösterdi. Kritik yol
   `playwright install --with-deps`'in apt yarısıydı (main'in koşusunda tek işte 597 sn), o
