@@ -28,7 +28,8 @@ denetimin on üç kusuru).
 **`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
 okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
 sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
-siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
+siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı); o ve TP7 yayın kapısı, ikisi
+yeşil olmadan etiket yok (TODO, İÇİNDEKİLER'in altı).
 
 **`refactor/moduller` `main`'de (2026-10-24)**, `fix/okunamayan-plan`'dan sonra. Açık her dal
 birleşmeden önce `git merge main` yapar; eski yol → yeni yol tablosu ve her dalın çakışan

@@ -93,6 +93,11 @@ Kayıt [DECISIONS.md](DECISIONS.md)'de.
 (önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
 Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
+**Yayın kapısı: TP7 ve B7.37 (2026-10-24, Alp).** Gerçek Windows exe'de B7.37'nin yolları
+(okunamayan plan, boş açılış, klasöre yazım ve budama) ve güncelleme yolu (eski sürümden
+yenisine, TP7) sınanıp yeşil olmadan etiket yok. Bugün ikisi de yalnız sahte Tauri köprüsünde
+ve Linux exe'de koştu.
+
 **Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
 (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi)
 `surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si (kullanıcının kararı);
@@ -853,7 +858,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `src/platform/storage/okunamayan.test.tsx`, `src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts` (94),
       `main`'de kırmızı, dalda yeşil. `e2e/exe.spec.ts` 76'nın ilk testi yeni kurala göre
       yeniden yazıldı (tuzak 153).
-      **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
+      **Yayın kapısı (2026-10-24, Alp; İÇİNDEKİLER'in altı):** bu kalan ve TP7 yeşil olmadan
+      etiket yok. **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
       `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
       açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
       değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
@@ -1674,7 +1680,7 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
 - [ ] **TP-B Test programının kalanı (birikim).** Bir madde ancak test politikasının şart
       koştuğu bir yolu (şema, göç, yedeğin açılması, dizme, güncelleme ve sürüm) koruyorsa
       alınır, ve o zaman `main`'den açılan bir dalda. Öne çıkanlar: TP7 (Windows'ta gerçek
-      exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
+      exe; **yayın kapısı**, B7.37 ile, İÇİNDEKİLER'in altı), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
       Windows güncelleme testine en yakın olanlar. TP4'ün paket yolu fuzz'u TB8'in
       düzeltmesiyle gelir. Geri kalanlar sırasız: TP5 (veri yolunun mutasyonu), TP6 (gerçek
       paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
