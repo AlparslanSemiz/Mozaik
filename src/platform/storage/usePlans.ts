@@ -28,9 +28,9 @@
 
 import { useCallback, useState } from 'react';
 
-import type { Bundle } from '../../pure/bundle';
-import { parseState } from '../../pure/parseState';
 import {
+  type Bundle,
+  parseState,
   addPlan,
   findPlan,
   type Library,
@@ -39,7 +39,7 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from '../../pure/library';
+} from '../../pure/io';
 import { sanitize } from '../../pure/constraints';
 import { emptyState, newId } from '../../pure/entities';
 import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';

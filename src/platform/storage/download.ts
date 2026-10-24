@@ -2,7 +2,7 @@
 //
 // Two kinds go out and both go through the same six lines: the single plan
 // (the ONE habit my father is taught, PRINCIPLES) and the bundle that carries
-// every plan between two computers. Names come from `pure/library.ts`, which
+// every plan between two computers. Names come from `pure/io/library.ts`, which
 // is where a file name is decided; this module only puts the bytes in front of
 // the browser.
 //
@@ -12,8 +12,7 @@
 // `collectStates`, and it is here rather than one layer down because it reads
 // the plans that are not on screen out of storage.
 
-import { buildBundle } from '../../pure/bundle';
-import { backupFileName, bundleFileName, type Library } from '../../pure/library';
+import { buildBundle, backupFileName, bundleFileName, type Library } from '../../pure/io';
 import { loadPlan } from './planStore';
 import { searchLog } from '../search';
 import type { Id, State } from '../../leaf/types';

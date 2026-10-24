@@ -12,7 +12,7 @@
 import { useMemo } from 'react';
 import { useDialogs } from '../Dialogs';
 import { emptyState, planSummary } from '../../pure/entities';
-import { drafts as draftsOf } from '../../pure/library';
+import { drafts as draftsOf } from '../../pure/io';
 import { loadPlan } from '../../platform/storage';
 import type { State } from '../../leaf/types';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/program';

@@ -27,7 +27,7 @@ import {
 import { keyOnDay, parseKey } from '../leaf/keys';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
-import type { ClassRow, LessonRow, TeacherRow } from './import';
+import type { ClassRow, LessonRow, TeacherRow } from './io';
 import type {
   Bell,
   ClassGroup,

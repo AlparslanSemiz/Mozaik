@@ -25,10 +25,10 @@ import { createElement } from 'react';
 import { isTextInput, useStore } from './platform/storage/useStore';
 import { collectStates, downloadBackup, downloadBundle } from './platform/storage/download';
 import { listBackups, loadPlan, savePlan, storageWorks } from './platform/storage/planStore';
-import { parseState } from './pure/parseState';
+import { parseState } from './pure/io/parseState';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
-import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './pure/library';
+import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './pure/io/library';
 import { SCHEMA_VERSION, type Id, type State } from './leaf/types';
 
 declare global {

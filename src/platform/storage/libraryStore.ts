@@ -24,7 +24,7 @@
 // use, the write goes ahead and the mark is dropped; full is a plan this window
 // never saw, and nothing is written over it.
 
-import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../../pure/library';
+import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../../pure/io';
 import { safely } from '../../leaf/storage';
 import { type Id } from '../../leaf/types';
 import { writesClosed } from './otherWindow';

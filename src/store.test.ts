@@ -6,9 +6,9 @@
 // come out exactly as it went in.
 
 import { defaultSubjects } from './pure/entities';
-import { parseState } from './pure/parseState';
+import { parseState } from './pure/io/parseState';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io/sample';
 import { SCHEMA_VERSION } from './leaf/types';
 
 /** A backup downloaded BEFORE the rename: v1 shape with Turkish field names. */
@@ -888,7 +888,7 @@ describe('parseState — v10 → v11 göçü', () => {
 // `reduce` is pure, so the rule that matters most — undo must never carry one
 // plan's move into another plan's file — can be pinned without mounting React.
 
-import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/library';
+import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/io/library';
 import { collectStates } from './platform/storage/download';
 import { loadPlan, savePlan } from './platform/storage/planStore';
 import { reduce } from './pure/undo';

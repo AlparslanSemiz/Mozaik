@@ -24,7 +24,7 @@ import Teachers from './Teachers';
 import Classes from './Classes';
 import Subjects from './Subjects';
 import { Summary } from '../lists';
-import { drafts as draftsOf } from '../../pure/library';
+import { drafts as draftsOf } from '../../pure/io';
 import type { PanelProps, PlanControls } from '../props';
 import { STEPS } from '../program';
 import DraftStart from '../DraftStart';

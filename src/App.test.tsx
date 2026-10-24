@@ -10,7 +10,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import AppRoot from './ui/Root';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io/sample';
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;

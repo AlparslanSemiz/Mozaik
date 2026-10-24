@@ -27,7 +27,7 @@ import type { ListConfig, ListQuery } from '../../pure/listview';
 import type { Id, Lesson, State } from '../../leaf/types';
 import type { LessonMode } from '../../platform/prefs';
 import { useDialogs } from '../Dialogs';
-import { parseLessons } from '../../pure/import';
+import { parseLessons } from '../../pure/io';
 import { paletteColor } from '../../leaf/palette';
 import {
   addLesson,

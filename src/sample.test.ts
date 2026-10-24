@@ -8,7 +8,7 @@
 import { blocker, buildIndex, dropMap, sanitize, place } from './pure/constraints';
 import { buildReport } from './pure/feasibility';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io/sample';
 import type { State } from './leaf/types';
 
 /** Greedy fill: puts every lesson in the first valid slot. NOT a solver, just a test. */

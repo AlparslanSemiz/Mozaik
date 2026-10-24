@@ -8,7 +8,7 @@ import { LessonEditProvider } from './LessonEdit';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type React from 'react';
-import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
+import { bundleVersionOf, BUNDLE_VERSION, readPlanFile } from '../pure/io';
 import {
   useStore,
   isTextInput,
@@ -16,7 +16,6 @@ import {
   storageWorks,
   useFolder,
 } from '../platform/storage';
-import { readPlanFile } from '../pure/parseState';
 import { planSummary } from '../pure/entities';
 import {
   applyMotion,

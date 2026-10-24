@@ -12,11 +12,11 @@
 // real file per version and `storeContract.test.ts` asks the list as a set —
 // both derive the versions from SCHEMA_VERSION rather than naming one.
 
-import { MAX_BLOCK, clampBlocks } from '../leaf/blocks';
-import { sanitize } from '../pure/constraints';
-import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../pure/entities';
-import { firstFreeColor, PALETTE_SIZE } from '../leaf/palette';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/program';
+import { MAX_BLOCK, clampBlocks } from '../../leaf/blocks';
+import { sanitize } from '../constraints';
+import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../entities';
+import { firstFreeColor, PALETTE_SIZE } from '../../leaf/palette';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../program';
 import type {
   ClassGroup,
   Day,
@@ -31,8 +31,8 @@ import type {
   RuleLevel,
   State,
   Teacher,
-} from '../leaf/types';
-import { SCHEMA_VERSION } from '../leaf/types';
+} from '../../leaf/types';
+import { SCHEMA_VERSION } from '../../leaf/types';
 
 /** v1 shape: Turkish field names. Kept only so old backups can still be opened. */
 interface LegacyV1 {

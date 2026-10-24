@@ -26,7 +26,7 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from './pure/library';
+} from './pure/io/library';
 import {
   routeName,
   storageAddress,

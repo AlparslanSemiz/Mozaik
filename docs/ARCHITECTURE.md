@@ -10,9 +10,8 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
                    names · subjects · blocks · version · dateStamp · storage
    |
-src/pure/          constraints · rules · feasibility · bell · import · entities · solver
-                   relax · sat · program/* · programView · paper/* · listview · library · bundle
-                   sample · parseState · undo
+src/pure/          constraints · rules · feasibility · bell · entities · solver
+                   relax · sat · program/* · programView · paper/* · io/* · listview · undo
    |
 src/platform/      storage/* · prefs/* · search/* · changelog · desktop · update
                    drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
@@ -26,7 +25,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -85,7 +84,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
-| `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
 | `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
@@ -98,10 +96,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
-| `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
-| `pure/sample.ts` | babanın ölçeğine yakın örnek okul |
-| `pure/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
+| `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
+| `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
+| `pure/io/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
+| `pure/io/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
+| `pure/io/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
+| `pure/io/sample.ts` | babanın ölçeğine yakın örnek okul |
 | `pure/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
 
 ### Durum, tercih ve depolama

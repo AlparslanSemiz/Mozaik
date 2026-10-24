@@ -7,7 +7,7 @@
 // operations are next door in `usePlans.ts` and are handed the two things they
 // need from the timer's owner — see the comments around `park` below.
 //
-// Where the rest went: `pure/parseState.ts` reads a saved file,
+// Where the rest went: `pure/io/parseState.ts` reads a saved file,
 // `platform/planStore.ts` is where a plan lives in this browser,
 // `platform/download.ts` hands a file to the browser.
 //
@@ -21,8 +21,7 @@ import { type Box, reduce } from '../../pure/undo';
 import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../../pure/entities';
-import { LIBRARY_KEY, parseLibrary, planKey } from '../../pure/library';
-import { parseState } from '../../pure/parseState';
+import { LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
 import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../../leaf/types';

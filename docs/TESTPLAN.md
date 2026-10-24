@@ -296,7 +296,7 @@ bir dosya, ne bir test eksik ne bir test fazla. Sayılar WORKLOG'un o günkü
 girdisinde.
 
 Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints.ts`, `pure/rules.ts`,
-`leaf/blocks.ts`, `pure/parseState.ts`, `pure/undo.ts`, `pure/library.ts`,
+`leaf/blocks.ts`, `pure/io/parseState.ts`, `pure/undo.ts`, `pure/io/library.ts`,
 `pure/feasibility.ts`, `pure/entities.ts`, `pure/solver.ts`): bütün depoyu ölçmek
 pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.
 `solver.ts` 2026-09-12'de listeye girdi. Ondan önce yoktu ve sebebi bir tercih

@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import { watchOtherWindows, writesClosed } from './platform/storage/otherWindow';
 import { dropPlanText, writeLibrary, writePlanText } from './platform/storage/libraryStore';
-import { LIBRARY_KEY, defaultLibrary } from './pure/library';
+import { LIBRARY_KEY, defaultLibrary } from './pure/io/library';
 
 function baskaPencere(key: string | null, newValue: string | null = 'yeni') {
   window.dispatchEvent(new StorageEvent('storage', { key, newValue }));

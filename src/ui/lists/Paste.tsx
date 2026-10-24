@@ -8,7 +8,7 @@
 // which is why `open` is a prop rather than state.
 
 import { useState } from 'react';
-import type { ParseResult } from '../../pure/import';
+import type { ParseResult } from '../../pure/io';
 import { T, useT } from '../T';
 
 /** The Excel paste box: preview, then add. It never adds directly. */

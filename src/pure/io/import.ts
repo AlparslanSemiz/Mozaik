@@ -8,11 +8,11 @@
 
 // makeShort lives in entities.ts (one home); re-exported so callers and the
 // existing tests do not have to care where it moved.
-export { makeShort } from './entities';
-import { MAX_BLOCK } from '../leaf/blocks';
-import { t } from '../leaf/i18n';
-import { makeShort, parseGender } from './entities';
-import type { Gender } from '../leaf/types';
+export { makeShort } from '../entities';
+import { MAX_BLOCK } from '../../leaf/blocks';
+import { t } from '../../leaf/i18n';
+import { makeShort, parseGender } from '../entities';
+import type { Gender } from '../../leaf/types';
 
 export interface ParseResult<T> {
   accepted: T[];

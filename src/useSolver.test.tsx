@@ -22,7 +22,7 @@ import type { Answers, State } from './leaf/types';
 import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/relax';
 import type { Solver, SolverProgress, SolverResult } from './pure/solver';
 import { activePlacements } from './pure/program/programs';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io/sample';
 import { startRelax } from './platform/search/relaxPool';
 import { createSolver } from './pure/solver';
 import { samePlan, useSolver, type SolverRun } from './platform/search/useSolver';

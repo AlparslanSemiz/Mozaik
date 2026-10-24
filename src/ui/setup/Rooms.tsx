@@ -11,7 +11,7 @@ import type { Room } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
-import { parseRooms } from '../../pure/import';
+import { parseRooms } from '../../pure/io';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
 import { Paste } from '../lists';
 import type { PanelProps } from '../props';

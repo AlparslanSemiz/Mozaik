@@ -39,7 +39,7 @@ import { InspectorProvider } from './ui/program/Inspector';
 import { LessonEditProvider } from './ui/LessonEdit';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parseState } from './pure/parseState';
+import { parseState } from './pure/io/parseState';
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;

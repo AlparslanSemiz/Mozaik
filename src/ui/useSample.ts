@@ -12,7 +12,7 @@ import { useDialogs } from './Dialogs';
 import { useT } from './T';
 import { useToast } from './Toasts';
 import { markIntroSeen } from '../platform/prefs';
-import { sampleState } from '../pure/sample';
+import { sampleState } from '../pure/io';
 import type { State } from '../leaf/types';
 
 export type LoadSample = (

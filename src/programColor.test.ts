@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io/sample';
 import {
   PROGRAM_COLOR_KEY,
   normalizeProgramColor,

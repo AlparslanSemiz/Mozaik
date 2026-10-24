@@ -32,8 +32,8 @@ import {
   backupKey,
   bundleFileName,
   planKey,
-} from './pure/library';
-import { parseState } from './pure/parseState';
+} from './pure/io/library';
+import { parseState } from './pure/io/parseState';
 
 const DAY = new Date(2026, 7, 26, 18, 30, 5);
 

@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { applySuggestion, createRelaxer, suggestionLines, verifySuggestion } from './pure/relax';
 import type { RelaxFamily, Suggestion } from './pure/relax';
 import { solve } from './pure/solver';
-import { parseState } from './pure/parseState';
+import { parseState } from './pure/io/parseState';
 import { activePlacements } from './pure/program/programs';
 import { buildIndex } from './pure/constraints';
 import { findViolations } from './pure/rules';

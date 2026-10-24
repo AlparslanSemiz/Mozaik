@@ -26,7 +26,7 @@ import { addNotSameDay, remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
 import { activeProgram, replaceActiveGrid } from './pure/program/programs';
 import { solve } from './pure/solver';
-import { parseState } from './pure/parseState';
+import { parseState } from './pure/io/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
 import { applySuggestion, createRelaxer, verifySuggestion, type RelaxOptions } from './pure/relax';
 import { activePlacements } from './pure/program/programs';

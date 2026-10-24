@@ -24,8 +24,8 @@
 import { readFileSync } from 'node:fs';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { readPlanFile } from './pure/parseState';
-import { parseClasses, parseLessons, parseRooms, parseTeachers, splitGrid } from './pure/import';
+import { readPlanFile } from './pure/io/parseState';
+import { parseClasses, parseLessons, parseRooms, parseTeachers, splitGrid } from './pure/io/import';
 
 const RUNS = Number(process.env['FUZZ_RUNS'] ?? 300);
 // Each run of the full course clones a large tree: measured 1.6–2.0 s per

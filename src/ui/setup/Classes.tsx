@@ -11,7 +11,7 @@ import type { ClassGroup } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
-import { parseClasses } from '../../pure/import';
+import { parseClasses } from '../../pure/io';
 import ColorPick from '../ColorPick';
 import {
   addClass,

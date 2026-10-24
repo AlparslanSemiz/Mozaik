@@ -27,7 +27,7 @@ import {
   hourNames,
 } from './pure/entities';
 import { classDayGaps, teacherDayCount, teacherDayGaps } from './pure/rules';
-import { sampleState } from './pure/sample';
+import { sampleState } from './pure/io';
 import type {
   ClassGroup,
   Day,
