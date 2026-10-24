@@ -27,7 +27,12 @@ import {
   setDraft,
   uniquePlanName,
 } from './pure/library';
-import { routeName, storageAddress, storageKind, storageReport } from './platform/storage/storageReport';
+import {
+  routeName,
+  storageAddress,
+  storageKind,
+  storageReport,
+} from './platform/storage/storageReport';
 import {
   dropPlanText,
   readLibrary,
