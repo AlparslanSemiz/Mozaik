@@ -205,6 +205,28 @@ describe('okunamayan plan · kullanıcının açık eylemi', () => {
     expect(get().plans.library.plans.map((p) => p.id)).toEqual(['1']);
   });
 
+  it('okunamayan plan açıkken BAŞKA bir planı silmek açık planı ezmiyor', async () => {
+    // The delete runs as the user's decision (`explicitly`), and it parks the
+    // open plan first: the stand-in must not ride that decision over the key.
+    localStorage.setItem(BASE_KEY, NEWER);
+    localStorage.setItem(planKey('zz'), FULL);
+    localStorage.setItem(
+      LIBRARY_KEY,
+      JSON.stringify({
+        activeId: '1',
+        plans: [
+          { id: '1', name: '1. plan', draft: false },
+          { id: 'zz', name: 'İkinci', draft: false },
+        ],
+      }),
+    );
+    const { get, act, settle } = await mount();
+    act(() => get().plans.deletePlan('zz'));
+    settle();
+    expect(localStorage.getItem(planKey('zz'))).toBeNull();
+    expect(localStorage.getItem(BASE_KEY)).toBe(NEWER);
+  });
+
   it('"Tümünü dosyadan aç" okunamayan planın yerine dosyadakini yazıyor', async () => {
     localStorage.setItem(BASE_KEY, NEWER);
     const { get, act, settle } = await mount();
