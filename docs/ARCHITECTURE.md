@@ -185,7 +185,17 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/storage/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
 | `ui/shell/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
-| `ui/shell/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
+| `ui/shell/App.tsx` | kabuk: neyin ne kadar yaşadığına karar verir (sekme değişince ekranlar sökülür, tuzak 18) ve parçaları bağlar |
+| `ui/shell/tabs.tsx` | yedi sekme ve çizimleri; üst çubuk ve palet aynı listeyi okur |
+| `ui/shell/icons.tsx` | üst çubuğun dört simgesi ve marka |
+| `ui/shell/Topbar.tsx` | üst çubuk: sekmeler, durum satırı, plan seçici, geri al, dosya, palet, şerit ve tema düğmeleri |
+| `ui/shell/Notices.tsx` | açık sekmenin üstündeki şeritler: kayıt çalışmıyor, depo dolu, başka pencere, okunamayan plan, yeni sürüm, klasör |
+| `ui/shell/useMachinePrefs.ts` | App'in tuttuğu makine tercihi kopyaları ve üç geçiş (şerit, hareket, tema) |
+| `ui/shell/useMainScroll.ts` | şeridin altındaki kaydırılan kutunun iki etkisi: sündürme ve şeridin çekilmesi |
+| `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
+| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
+| `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
+| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır |
 
 ### Bileşenler
 

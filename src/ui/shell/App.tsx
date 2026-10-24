@@ -1,345 +1,40 @@
-import { Activity, useCallback, useRef, useState } from 'react';
-import { Keyboard, Search as SearchIcon } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { Activity, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
-import { Check, InspectorProvider, LessonEditProvider, Program, lessonIcon } from '../program';
-import { useDialogs, useToast, T, useLang, useT } from '../common';
-import type React from 'react';
-import { bundleVersionOf, BUNDLE_VERSION, readPlanFile } from '../../pure/io';
+import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
+import { useDialogs, useToast, useLang, useT } from '../common';
+import { useStore, storageWorks, useFolder } from '../../platform/storage';
 import {
-  useStore,
-  isTextInput,
-  downloadBackup,
-  storageWorks,
-  useFolder,
-} from '../../platform/storage';
-import { planSummary } from '../../pure/entities';
-import {
-  applyMotion,
-  applyRibbon,
-  applyTheme,
-  readDensity,
-  readMotion,
-  readRibbon,
-  readRibbonAuto,
-  applyAvailClock,
-  readAvailClock,
-  readScale,
-  readTheme,
-  readUiDensity,
   useToolState,
   readPrintOptions,
   writePrintOptions,
-  readProgramColor,
-  writeProgramColor,
-  type Density,
-  type Motion,
-  type Theme,
-  type Tab,
   type PrintOptions,
-  type ProgramColorMode,
 } from '../../platform/prefs';
-import { attachScrollFade, attachRibbonScroll } from '../../platform/dom';
 import { useSolver } from '../../platform/search';
 import { useUpdate } from '../../platform/update';
-import { APP_NAME, surumEtiketi } from '../../leaf/app';
 import Setup from '../setup';
 import Lessons from '../lessons';
 import { Availability } from '../availability';
 import Ribbon from '../ribbon';
 import { NOTHING_EXCLUDED, Print, type Excluded } from '../print';
-import {
-  cleanMask,
-  EMPTY_PROGRAM_MASK,
-  solverExclusions,
-  type ProgramMask,
-} from '../../pure/program';
 import Settings from '../settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../../platform/changelog';
+import { TABS } from './tabs';
+import Topbar from './Topbar';
+import Notices from './Notices';
+import { useMachinePrefs } from './useMachinePrefs';
+import { useMainScroll } from './useMainScroll';
+import { useProgramMask } from './useProgramMask';
+import { useShortcuts } from './useShortcuts';
+import { usePaletteActions } from './usePaletteActions';
+import { openPlanFile } from './openPlanFile';
 
-/**
- * The seven sections, along the TOP — on the same row as the document identity
- * and the file buttons.
- *
- * They spent two versions in a left rail, on the argument that a horizontal
- * band costs the timetable a row. That argument was written against a 768px
- * screen and it was measured wrong for this one: the rail cost 92px of WIDTH on
- * every tab, and the tabs that are not Program have no width to spare — that is
- * why the right-hand side of every screen sat empty.
- *
- * The band costs a row only if it is a band of its own. It is not: identity,
- * sections, history and file share one 44px row, and the tab's own tools get a
- * second one. Measured, the whole head is SHORTER than the rail layout's was
- * (139px -> 114px), because the rail's top bar was 59px of mostly air.
- *
- * Icons are inline SVG (no library, works offline) and drawn on currentColor so
- * they are right in both themes. They differ in SILHOUETTE, not in detail: at
- * 22px a difference of details is invisible (learned in v0.8).
- */
-const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
-  {
-    id: 'setup',
-    label: 'Okul',
-    // A clipboard: the four lists you fill in at the start of a term.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <path
-          d="M8 4H6.5A1.5 1.5 0 0 0 5 5.5v14A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-14A1.5 1.5 0 0 0 17.5 4H16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <rect x="8.5" y="2.5" width="7" height="3.4" rx="1" fill="currentColor" />
-        <path d="M8 10h8M8 13.5h8M8 17h5" stroke="currentColor" strokeWidth="1.6" />
-      </svg>
-    ),
-  },
-  {
-    id: 'availability',
-    label: 'Müsaitlik',
-    // A calendar with a cross in it: the hours somebody cannot come.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <rect
-          x="3"
-          y="5"
-          width="18"
-          height="16"
-          rx="2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <path d="M3 9.5h18" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M7 3v3.5M17 3v3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path
-          d="M9.5 13l5 5M14.5 13l-5 5"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: 'lessons',
-    label: 'Dersler',
-    // The open book, and the ONE copy of it: `steps.tsx` owns the drawing
-    // because the three kinds beside it are owned there too, and a symbol that
-    // means the same thing in two rooms has to be one drawing (pitfall 56's
-    // family — two answers to "what does this look like" is two answers).
-    icon: lessonIcon,
-  },
-  {
-    id: 'program',
-    label: 'Program',
-    // The grid itself, with one cell filled: a lesson sitting in its slot.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <rect
-          x="3"
-          y="4"
-          width="18"
-          height="16"
-          rx="1.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <path d="M3 9.5h18M3 15h18M9 4v16M15 4v16" stroke="currentColor" strokeWidth="1.4" />
-        <rect x="9" y="9.5" width="6" height="5.5" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    id: 'check',
-    label: 'Kontrol',
-    // A magnifier over a tick: the tab that says WHY it cannot be built.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <circle cx="10.5" cy="10.5" r="7" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M7.4 10.6l2.4 2.6 4.3-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path d="M15.6 15.6L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    id: 'print',
-    label: 'Çıktı',
-    // A printer with paper coming out.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <path d="M7 3.5h10v4H7z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M4 8.5h16a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1h-2M6 16H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <rect
-          x="6.5"
-          y="13"
-          width="11"
-          height="7.5"
-          rx="1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <circle cx="17.6" cy="11" r="1.1" fill="currentColor" />
-      </svg>
-    ),
-  },
-  // Last, the way a settings menu sits at the end of a toolbar: it is opened
-  // when the school changes, not while a timetable is being laid out.
-  {
-    id: 'settings',
-    label: 'Ayarlar',
-    // Three sliders. A cog reads as a blob at 22px; sliders keep a silhouette.
-    icon: (
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-        <path
-          d="M3 7h18M3 12h18M3 17h18"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <circle cx="8" cy="7" r="2.6" fill="var(--paper)" stroke="currentColor" strokeWidth="1.8" />
-        <circle
-          cx="16"
-          cy="12"
-          r="2.6"
-          fill="var(--paper)"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-        <circle
-          cx="10.5"
-          cy="17"
-          r="2.6"
-          fill="var(--paper)"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
-      </svg>
-    ),
-  },
-];
-
-/**
- * The four glyphs that used to sit in top-bar buttons as TEXT.
- *
- * They had to go for two reasons and either one alone would have been enough.
- * A subset embedded face carries the 225 glyphs this tool draws and no more, so
- * every one of these fell back to a different family — four buttons in four
- * typefaces, at four optical sizes, on one bar. And "Geri al" spelled out cost
- * the row about 120px, which is exactly why the bar wrapped its buttons onto a
- * second line on a 1920px screen.
- *
- * Drawn on currentColor, like the rail's, so both themes are right for free.
- */
-const ICON = {
-  undo: (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-      <path
-        d="M4 9h9.5a5 5 0 0 1 0 10H8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M7.5 5 4 9l3.5 4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  redo: (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-      <path
-        d="M20 9h-9.5a5 5 0 0 0 0 10H16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16.5 5 20 9l-3.5 4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  sun: (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-      <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  moon: (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-      <path
-        d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-};
-
-/**
- * The mark, drawn out. Kept beside App rather than in components/ because it
- * is not a component anybody reuses — there is exactly one place in the
- * program that draws it, and that is three lines below.
- *
- * THE SIMPLE VARIANT, since 2026-08-28 ("sol üstteki logonun küçüğü
- * kullanılsın"). It used to be the detailed one, and the reason it changed is
- * the reason the two drawings exist at all: the mark is `1.75rem` here, which
- * is 24.5 px at 100 % — and the icon comparison this project already ran
- * (`scripts/ikon-karsilastir.mjs`) put 20-32 px in the band where the six
- * columns are "blurry but still separable", i.e. the band where it is a
- * judgement call. The reader made the call. The calendar mark of 2026-10-23
- * kept it: at 24 px its hooks are a blur.
- *
- * The SOURCE of truth is site/icon-small.svg; e2e/kabuk.spec.ts checks this
- * draws the same rectangles, the way temel.spec.ts already does for the
- * favicon — which reads from the same file, so the tab and the top bar now
- * carry one drawing instead of two.
- */
-function BrandMark() {
-  return (
-    <svg viewBox="0 0 1024 1024" className="brand-mark">
-      <rect width="1024" height="1024" rx="180" fill="#2e3ba8" />
-      <rect x="128" y="128" width="768" height="768" rx="64" fill="#fff" />
-      <rect x="256" y="256" width="128" height="256" rx="32" fill="#c576f3" />
-      <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454" />
-      <rect x="640" y="512" width="128" height="256" rx="32" fill="#3f9fe3" />
-    </svg>
-  );
-}
+// The shell: the tabs, the top bar, the long-lived state and the keyboard.
+// What each of those is made of lives beside this file (ARCHITECTURE, "React
+// köprüleri ve kabuk"); this one decides what is alive for how long, because
+// switching tabs unmounts the screens (pitfall 18).
 
 export default function App() {
   const t = useT();
@@ -370,11 +65,28 @@ export default function App() {
   // sideways is a rule nobody finds (see ribbonScroll.ts).
   const appRef = useRef<HTMLDivElement>(null);
 
-  // Whether the strip is allowed to slide away on its own while you read down.
-  // Up here with the refs rather than beside the other preferences because the
-  // effect that reads it is a few lines below — a gesture rather than a
-  // preference, so it gets its own key (theme.ts).
-  const [ribbonAuto, setRibbonAuto] = useState<boolean>(readRibbonAuto);
+  const {
+    ribbonAuto,
+    setRibbonAuto,
+    theme,
+    setTheme,
+    scale,
+    setScale,
+    density,
+    setDensity,
+    programColor,
+    setProgramColor,
+    uiDensity,
+    setUiDensity,
+    availClock,
+    setAvailClock,
+    motion,
+    setMotion,
+    ribbon,
+    toggleRibbon,
+    toggleMotion,
+    toggleTheme,
+  } = useMachinePrefs();
 
   /**
    * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
@@ -398,64 +110,10 @@ export default function App() {
    */
   const goTab = setTab;
 
-  // The fade on the scrolled content, re-attached per tab: React swaps the
-  // whole child of `.main` on a tab change, and scrollFade reads that child
-  // once (see the note there).
-  useEffect(() => {
-    const box = mainRef.current;
-    return box === null ? undefined : attachScrollFade(box);
-  }, [tab]);
-  // The strip gets out of the way while you read down and comes back when you
-  // look up. Same box, same re-attach on tab change, same reason: React swaps
-  // the whole child of `.main`. Program is left out on purpose — see the note
-  // in ribbonScroll.ts; there `.main` does not scroll at all, so attaching
-  // would simply do nothing, but saying so here is cheaper than finding out.
-  //
-  // ...and only if the reader wants it to. `ribbonAuto` is a preference of its
-  // own and not a widening of `ders-programi-serit`: that one says "I do not
-  // want the strip", this one says "do not move it while I read". Off, the
-  // effect is never attached and the attribute the CSS reads is cleared, so
-  // there is no path left that can hide the strip behind the reader's back.
-  useEffect(() => {
-    const box = mainRef.current;
-    const shell = appRef.current;
-    if (shell !== null && !ribbonAuto) shell.removeAttribute('data-ribbon');
-    if (box === null || shell === null || tab === 'program' || !ribbonAuto) return undefined;
-    return attachRibbonScroll(box, shell);
-  }, [tab, ribbonAuto]);
+  useMainScroll(mainRef, appRef, tab, ribbonAuto);
+
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
-  const [theme, setTheme] = useState<Theme>(readTheme);
-  // Already applied to the document by main.tsx before the first paint; this
-  // copy exists only so Ayarlar → Görünüm can show which step is pressed.
-  const [scale, setScale] = useState<number>(readScale);
-  const [density, setDensity] = useState<Density>(readDensity);
-  const [programColor, setProgramColorRaw] = useState<ProgramColorMode>(readProgramColor);
-  const setProgramColor = useCallback((next: ProgramColorMode) => {
-    writeProgramColor(next);
-    setProgramColorRaw(next);
-  }, []);
-  // Its twin, and a separate one since 2026-08-27: the grid's step and the
-  // interface's step are two decisions (see theme.ts). Only Ayarlar → Görünüm
-  // sets this one — the Program strip still speaks for the grid alone.
-  const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
-  // Applied to the document by main.tsx before the first paint; this copy
-  // exists so the button that flips it can show which way the switch is.
-  const [availClock, setAvailClockRaw] = useState<boolean>(readAvailClock);
-  // The <html> attribute goes with the state, wherever the control lives. It
-  // used to be written by the one button in Ayarlar → Görünüm; that button is
-  // in Müsaitlik's own strip now, and a second caller must not have to know to
-  // do this (the toggle would flip and nothing on the table would change).
-  const setAvailClock = useCallback((next: boolean) => {
-    applyAvailClock(next);
-    setAvailClockRaw(next);
-  }, []);
-  // Same again for how much the interface is allowed to move.
-  const [motion, setMotion] = useState<Motion>(readMotion);
-  // Whether the tool strip is drawn. It lives here and not in Ribbon because
-  // the button that folds it is in the top bar — a folded strip has no row to
-  // put its own chevron on, which is the whole point of folding it.
-  const [ribbon, setRibbon] = useState<boolean>(readRibbon);
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
@@ -463,23 +121,8 @@ export default function App() {
   // lists — Print unmounts on every tab change — but unlike them it is
   // remembered between sessions: it is set once a term, not once a printout.
   const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
-  // Temporary row/day visibility is a view of one PLAN, not backup data. It
-  // follows alternative programs because they share the same school entities,
-  // survives tab switches, and disappears with the browser session.
-  const [programMasks, setProgramMasks] = useState<Record<string, ProgramMask>>({});
-  const programMask = useMemo(
-    () => cleanMask(programMasks[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
-    [programMasks, plans.planId, state],
-  );
-  const setProgramMask = useCallback(
-    (apply: (mask: ProgramMask) => ProgramMask) => {
-      setProgramMasks((all) => ({
-        ...all,
-        [plans.planId]: apply(cleanMask(all[plans.planId] ?? EMPTY_PROGRAM_MASK, state)),
-      }));
-    },
-    [plans.planId, state],
-  );
+  const { programMask, setProgramMask } = useProgramMask(plans.planId, state);
+
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
@@ -526,221 +169,25 @@ export default function App() {
     return health(state);
   }, [state, dil]);
 
-  // Ctrl/⌘+K opens the palette; Alt+1..7 go to a section.
-  //
-  // Alt and not a bare digit: a bare "5" while a lesson card has focus would
-  // jump to Yazdır, and every card on the grid is a focusable button. The
-  // modifier is what keeps a shortcut from being a trap.
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setPaletteOpen((open) => !open);
-        return;
-      }
-      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-7]$/.test(e.key)) {
-        const next = TABS[Number(e.key) - 1];
-        if (next !== undefined) {
-          e.preventDefault();
-          goTab(next.id);
-        }
-        return;
-      }
-      // '?' opens the shortcuts help. Guarded the same way Ctrl+Z is
-      // (store.ts's isTextInput): it is a printable character, and without
-      // the guard it would fire while typing a search or a name.
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTextInput(e.target)) {
-        e.preventDefault();
-        openShortcuts();
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [goTab, openShortcuts]);
+  useShortcuts(setPaletteOpen, goTab, openShortcuts);
 
-  // Callbacks rather than plain functions because the palette's command list
-  // is memoized on them: a function redeclared on every render would rebuild
-  // the list every render, and leaving them out of its dependencies needed a
-  // lint suppression (RK12).
-  const toggleRibbon = useCallback(() => {
-    const next = !ribbon;
-    applyRibbon(next);
-    setRibbon(next);
-  }, [ribbon]);
+  const paletteActions = usePaletteActions({
+    state,
+    theme,
+    ribbon,
+    motion,
+    solver,
+    goTab,
+    notify,
+    t,
+    programMask,
+    openShortcuts,
+    toggleTheme,
+    toggleRibbon,
+    toggleMotion,
+  });
 
-  /**
-   * Two positions from the palette, three in Ayarlar. The middle step ('az') is
-   * a considered choice and the palette is a place you pass through, so what
-   * this offers is the switch: off, or back to whatever full means.
-   */
-  const toggleMotion = useCallback(() => {
-    const next: Motion = motion === 'kapali' ? 'tam' : 'kapali';
-    applyMotion(next);
-    setMotion(next);
-  }, [motion]);
-
-  const toggleTheme = useCallback(() => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    setTheme(next);
-  }, [theme]);
-
-  const paletteActions = useMemo(
-    () => [
-      {
-        id: 'save',
-        label: t('Dosyaya kaydet'),
-        hint: t('yedek al'),
-        run: () => {
-          downloadBackup(state);
-          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
-        },
-      },
-      {
-        id: 'auto',
-        label: t('Otomatik diz'),
-        hint: t('Program'),
-        run: () => {
-          goTab('program');
-          solver.start(state, {
-            keepPlaced: true,
-            exclusions: solverExclusions(programMask),
-          });
-        },
-      },
-      {
-        id: 'theme',
-        label: theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç'),
-        run: toggleTheme,
-      },
-      {
-        id: 'ribbon',
-        label: ribbon ? t('Araç şeridini gizle') : t('Araç şeridini göster'),
-        run: toggleRibbon,
-      },
-      {
-        id: 'motion',
-        label: motion === 'kapali' ? t('Animasyonları aç') : t('Animasyonları kapat'),
-        hint: t('Ayarlar → Görünüm'),
-        run: toggleMotion,
-      },
-      {
-        id: 'shortcuts',
-        label: t('Klavye kısayolları'),
-        hint: '?',
-        run: openShortcuts,
-      },
-    ],
-    [
-      state,
-      theme,
-      ribbon,
-      motion,
-      solver,
-      goTab,
-      notify,
-      t,
-      programMask,
-      openShortcuts,
-      toggleTheme,
-      toggleRibbon,
-      toggleMotion,
-    ],
-  );
-
-  async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ''; // so the same file can be picked again
-    if (file === undefined) return;
-
-    // Read ONCE. The failure path used to call `file.text()` a second time and
-    // parse the whole thing again, which made a wrong file the slowest case
-    // rather than the fastest. (Both parses are cheap — MEASURED at 0.65 ms for
-    // a full 426-placement week — so this is about the shape of the code, not
-    // about speed. The thing that actually costs a reader time on this path is
-    // the confirmation dialog, and that one is deliberate.)
-    const text = await file.text();
-    const read = readPlanFile(text);
-    if ('problem' in read && read.problem === 'eksik') {
-      await alert({
-        title: t('Bu dosya eksik'),
-        tone: 'warn',
-        body: t(
-          'Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
-        ),
-      });
-      return;
-    }
-    if ('problem' in read) {
-      // Three different files can land here and each deserves its own sentence.
-      // A BUNDLE is refused rather than opened: it holds every plan, so opening
-      // one means replacing the whole library — and the top bar stays the place
-      // where no click can lose an afternoon.
-      // "Newer" only when it is: a plan past this program's schema, or a
-      // bundle past its envelope. An older or odd bundle version is not a
-      // reason to update (DENETIM DK10, where a newer PLAN said "okunamadı").
-      const version = bundleVersionOf(text);
-      const bundle = version === BUNDLE_VERSION;
-      const newer = read.problem === 'yeni' || (version !== null && version > BUNDLE_VERSION);
-      await alert({
-        title: bundle
-          ? t('Bu dosya bütün planları içeriyor')
-          : newer
-            ? t('Bu dosya daha yeni bir sürümle yazılmış')
-            : t('Bu dosya okunamadı'),
-        tone: 'warn',
-        body: bundle
-          ? t(
-              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
-            )
-          : newer
-            ? t('Programı güncelleyin, sonra tekrar deneyin.')
-            : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
-      });
-      return;
-    }
-    // Both plans counted side by side (DENETIM Ö43): a file that is empty, or
-    // not the one meant, is seen before it replaces anything.
-    const inFile = planSummary(read.state);
-    const now = planSummary(state);
-    const counts = (c: typeof now) => ({
-      ogretmen: c.teachers,
-      sinif: c.classes,
-      ders: c.lessons,
-      saat: c.placed,
-    });
-    if (
-      !(await confirm({
-        title: t('Şu anki programın yerine geçecek'),
-        body: (
-          <>
-            <p>
-              {t(
-                'Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.',
-                counts(inFile),
-              )}
-              <br />
-              {t(
-                'Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.',
-                counts(now),
-              )}
-            </p>
-            <p>
-              {t(
-                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
-              )}
-            </p>
-          </>
-        ),
-        confirmLabel: t('Yedeği yükle'),
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-    loadState(read.state);
-    notify(t('Yedek yüklendi.'));
-  }
+  const fileChosen = openPlanFile({ state, loadState, t, confirm, alert, notify });
 
   return (
     /* `data-section` belongs on the ROOT, not only on the chrome that first
@@ -755,239 +202,27 @@ export default function App() {
       {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
-      <header className="topbar" data-section={tab}>
-        {/* Zone zero: WHAT THIS IS. The simple mark, the same drawing as the
-            tab's favicon: at 1.75rem the detailed one's hooks are a blur
-            (measured, see BrandMark above).
-
-            Inline rather than <img src>: dist/index.html is ONE file and
-            fetches nothing (offline principle, pitfall 32), so an <img> would need
-            a second data: URI of the same drawing and a third copy to keep in
-            step. It is `aria-hidden` and NOT a button: the program's name is
-            already the document title, and a control here would be a seventh
-            thing in a row whose sacrifice order is written down (pitfall 48).
-            It never shrinks and never goes — it is 1.75rem, and what gives way
-            when the bar is tight is named below. */}
-        <span className="brand" aria-hidden="true">
-          <BrandMark />
-        </span>
-
-        {/* Zone one: WHERE YOU ARE. Seven destinations, one lit, and they come
-            FIRST: they are the most-clicked thing on the row and the eye starts
-            at the left edge. The document identity used to stand here, but the
-            name of the school does not change and is not clicked — it was
-            holding the corner the destinations wanted. */}
-        {/* `dest` and not `t`: `t` is the translator now, and the map variable
-            was shadowing it. */}
-        <nav className="tabstrip" aria-label={t('Bölümler')}>
-          {TABS.map((dest) => (
-            <button
-              key={dest.id}
-              className="tab"
-              /* Its OWN section, not the open one. `--sec` is written on the
-                 root (line above), so `.tab:hover` was painting whatever
-                 section you were ALREADY in — hovering Yazdır from Kurulum lit
-                 it blue. `[data-section]` in styles.css sets the variable on
-                 whatever carries the attribute, so this one line gives every
-                 tab its own colour to hover in. The lit tab is unaffected: for
-                 it the root and the button name the same section. */
-              data-section={dest.id}
-              aria-current={tab === dest.id}
-              aria-label={t(dest.label)}
-              title={t(dest.label)}
-              onClick={() => goTab(dest.id)}
-            >
-              {dest.icon}
-              <span className="tab-label">{t(dest.label)}</span>
-              {/* An unread release note. Presence only, no count — "something
-                  changed" is the whole message, the panel says what. Clears
-                  the moment Ayarlar → Hakkında is actually opened
-                  (`Changelog`'s mount effect), not on a bare tab click. */}
-              {dest.id === 'settings' && changelogUnseen && (
-                <span className="tab-dot" aria-hidden="true" />
-              )}
-            </button>
-          ))}
-        </nav>
-
-        {/* Zone one and a half: IS IT ALL RIGHT. Kontrol has always been able
-            to answer this, and that was the problem — it is a destination, so
-            asking cost two navigations and therefore got asked once, at the
-            start. The sentence NAMES the trouble and counts it, because "sorun
-            var" would only send somebody to Kontrol to find out which. */}
-        <button
-          className={`health ${status.level}`}
-          onClick={() => goTab('check')}
-          /* The label carries the sentence even when the bar is too narrow to
-             draw it — and it is an aria-label rather than a title so the
-             accessible name is this and not "Kontrol", which is also the name
-             of a tab three pixels away. */
-          aria-label={t('Programın durumu: {durum}. Ayrıntı için Kontrol.', {
-            durum: status.message,
-          })}
-          title={t('{durum}. Kontrol sekmesini açar', {
-            durum: status.message,
-          })}
-        >
-          <span className="health-dot" aria-hidden="true" />
-          <span className="health-text">{status.message}</span>
-        </button>
-
-        <span className="spacer" />
-
-        {/* Zone two: WHICH DOCUMENT is open. The school and the plan answer
-            one question between them, so they are drawn as one object rather
-            than as a heading that happens to be followed by a dropdown. It
-            sits at the head of the right-hand group — the things you reach for
-            about this document rather than about where you are in it. */}
-        <div className="topbar-doc">
-          <h1 className="app-title">{state.settings.schoolName.trim() || APP_NAME}</h1>
-
-          {/* Which timetable is open. It is shown even when there is only one:
-              "hangi planı düzenliyorum" is the question this answers, and a
-              picker that appears only after you already have two plans cannot
-              be how you find out that plans exist. Everything that CREATES,
-              renames or deletes one is in Ayarlar > Veri — the top bar must
-              stay a place where no click can lose an afternoon. */}
-          <select
-            className="plan-picker"
-            aria-label={t('Plan')}
-            title={t(
-              'Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek',
-            )}
-            value={plans.planId}
-            onChange={(e) => plans.switchPlan(e.target.value)}
-          >
-            {plans.library.plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.draft ? `${p.name} (taslak)` : p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <span className="topbar-sep" />
-
-        {/* Zone three: the HISTORY of this session — two icons, because their
-            labels are the longest words on the bar and the shortcut in the
-            tooltip is what anyone actually reaches for twice. */}
-        <div className="btn-group">
-          <button
-            className="btn icon"
-            onClick={undo}
-            disabled={!canUndo}
-            aria-label={t('Geri al')}
-            title={t('Geri al (Ctrl+Z)')}
-          >
-            {ICON.undo}
-          </button>
-          <button
-            className="btn icon"
-            onClick={redo}
-            disabled={!canRedo}
-            aria-label={t('İleri al')}
-            title={t('İleri al (Ctrl+Y)')}
-          >
-            {ICON.redo}
-          </button>
-        </div>
-
-        <span className="topbar-sep" />
-
-        {/* Zone four: the FILE. The one habit, kept the loudest thing here.
-            The sentence that used to explain it ("saklanıyor... kaydetmek
-            taşımak için") moved to Ayarlar > Veri, next to the report that
-            says where the data actually is: it was 400px of teaching on a row
-            that now has seven destinations to hold. */}
-        <button
-          className="btn primary"
-          onClick={() => {
-            downloadBackup(state);
-            notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
-          }}
-          title={t(
-            'Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.',
-          )}
-        >
-          {t('Dosyaya kaydet')}
-        </button>
-        <button
-          className="btn"
-          onClick={() => fileInput.current?.click()}
-          title={t('Daha önce kaydedilmiş bir .json dosyasını açar')}
-        >
-          {t('Dosyadan aç')}
-        </button>
-        {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
-            aç". It is now in Ayarlar > Veri: the rarest button in the app,
-            and the only one that cannot be undone. */}
-        <input
-          ref={fileInput}
-          type="file"
-          accept=".json,application/json"
-          className="hidden"
-          onChange={fileChosen}
-        />
-
-        <span className="topbar-sep" />
-
-        {/* The theme is a MACHINE setting, not timetable data, and it is the
-            only one that has to be reachable from anywhere: the room gets
-            dark while you work. Scale and density live in Ayarlar. */}
-        {/* Folds the tool strip away. Beside the theme because both are
-            settings of the SCREEN, not of the timetable — and it has to be up
-            here: once folded, the strip has no row to hold its own button. */}
-        <button
-          className="btn icon"
-          aria-label={t('Ara ve git')}
-          title={t('Ara ve git (Ctrl+K)')}
-          onClick={() => setPaletteOpen(true)}
-        >
-          <SearchIcon size={18} strokeWidth={2} />
-        </button>
-
-        <button
-          className="btn icon"
-          aria-label={t('Klavye kısayolları')}
-          title={t('Klavye kısayolları (?)')}
-          onClick={openShortcuts}
-        >
-          <Keyboard size={18} strokeWidth={2} />
-        </button>
-
-        <button
-          className="btn icon"
-          aria-expanded={ribbon}
-          aria-label={t('Araç şeridi')}
-          title={
-            ribbon
-              ? t('Araç şeridini gizle, ızgaraya bir satır daha kalsın')
-              : t('Araç şeridini göster')
-          }
-          onClick={toggleRibbon}
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-            <path
-              d={ribbon ? 'M5 15l7-7 7 7' : 'M5 9l7 7 7-7'}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <button
-          className="btn icon"
-          aria-pressed={theme === 'dark'}
-          aria-label={t('Koyu tema')}
-          title={theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç')}
-          onClick={toggleTheme}
-        >
-          {theme === 'dark' ? ICON.sun : ICON.moon}
-        </button>
-      </header>
+      <Topbar
+        tab={tab}
+        goTab={goTab}
+        changelogUnseen={changelogUnseen}
+        status={status}
+        state={state}
+        plans={plans}
+        undo={undo}
+        redo={redo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        notify={notify}
+        fileInput={fileInput}
+        fileChosen={fileChosen}
+        setPaletteOpen={setPaletteOpen}
+        openShortcuts={openShortcuts}
+        ribbon={ribbon}
+        toggleRibbon={toggleRibbon}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
 
       {/* Row two: the tools of whichever section is open. */}
       <Ribbon
@@ -1023,123 +258,16 @@ export default function App() {
             actions={paletteActions}
           />
           <div className="workspace">
-            {!canSave && (
-              <div className="save-warning">
-                ⚠{' '}
-                <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın." />
-              </div>
-            )}
-
-            {/* A SAVE THAT FAILED IS SAID WHERE IT FAILED (VK2). The probe above
-            runs once at startup with one byte, and the storage can fill up
-            later; the autosave's own answer is what this reads. */}
-            {saveTrouble === 'dolu' && (
-              <div className="save-warning" role="alert">
-                ⚠{' '}
-                <T k="**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın." />
-              </div>
-            )}
-
-            {/* ANOTHER WINDOW CHANGED THIS DATA (VK1). This window has stopped
-            writing, so whatever is done here from now on is not kept; the
-            other window's work is. Reloading reads that work. */}
-            {saveTrouble === 'baska' && (
-              <div className="save-warning" role="alert">
-                ⚠{' '}
-                <T k="**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor." />{' '}
-                <button className="btn" onClick={() => window.location.reload()}>
-                  {t('Yenile')}
-                </button>
-              </div>
-            )}
-
-            {/* THE PLAN READ EMPTY AT STARTUP, AND ITS KEY IS FULL. Under file://
-            a reloaded page has once started from an empty storage (TRAPS 108);
-            this window has written nothing over the saved plan, and a reload
-            reads it. */}
-            {saveTrouble === 'okunamadi' && (
-              <div className="save-warning" role="alert">
-                ⚠ <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı." />{' '}
-                <button className="btn" onClick={() => window.location.reload()}>
-                  {t('Yenile')}
-                </button>
-              </div>
-            )}
-
-            {/* A NEW BUILD IS RUNNING THE SERVICE WORKER, this page is still the
-            old one. Announced rather than applied: the double-click principle's promise is
-            that nothing updates itself out from under him, and a timetable
-            half-dragged is exactly the moment a silent reload would land.
-
-            It is a strip and not a toast because it carries an ACTION, and
-            toasts in this program deliberately do not (see Toasts.tsx). */}
-            {update.ready && !updateHidden && (
-              <div className="update-bar" role="status">
-                <span>
-                  <T
-                    k="**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz."
-                    vars={{ surum: surumEtiketi() }}
-                  />
-                </span>
-                <span className="update-acts">
-                  <button className="btn primary" onClick={update.reload}>
-                    {t('Yenile')}
-                  </button>
-                  <button className="btn" onClick={() => setUpdateHidden(true)}>
-                    {t('Sonra')}
-                  </button>
-                </span>
-              </div>
-            )}
-
-            {/* A SAVE THAT STOPPED WORKING HAS TO BE VISIBLE (pitfall 7). These
-            two states mean my father once picked a folder and it is no longer
-            being written to — the folder moved, the disk filled, or the
-            browser dropped the permission on reload. Silence here is a term's
-            work quietly stopping to be backed up.
-
-            'secilmedi' is deliberately NOT here: never having picked a folder
-            is not a fault, it is the starting state, and a strip that is up on
-            every screen from the first minute is a strip nobody reads. It is
-            said instead in Ayarlar → Veri, in red, on the routes where the
-            offer is a good one. */}
-            {(folder.status.kind === 'izin-gerek' || folder.status.kind === 'hata') && (
-              <div className="save-warning">
-                ⚠{' '}
-                {folder.status.kind === 'izin-gerek' ? (
-                  <>
-                    <T
-                      k="**{klasor}** klasörüne yazılamıyor: tarayıcı izni sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor."
-                      vars={{ klasor: folder.status.name }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <T
-                      k="**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor."
-                      vars={{
-                        klasor: folder.status.name,
-                        sebep: folder.status.text,
-                      }}
-                    />
-                  </>
-                )}{' '}
-                {/* NOT "Ayarlar → Veri" (pitfall 49). getByRole name matching is
-                substring AND case-insensitive, so that label answered to the
-                Ayarlar TAB's own query and broke the folder suite's helper —
-                a button three pixels from a tab must not wear its name, in
-                any case. This one says what it does instead. */}
-                <button
-                  className="btn"
-                  onClick={() => {
-                    goTab('settings');
-                    ui.setSection('plans');
-                  }}
-                >
-                  {t('Klasörü düzelt')}
-                </button>
-              </div>
-            )}
+            <Notices
+              canSave={canSave}
+              saveTrouble={saveTrouble}
+              update={update}
+              updateHidden={updateHidden}
+              setUpdateHidden={setUpdateHidden}
+              folder={folder}
+              goTab={goTab}
+              ui={ui}
+            />
 
             {/* The scroll container lives HERE, not in the seven tab components: they
             all used to render their own `.main` and one of them had to opt out
