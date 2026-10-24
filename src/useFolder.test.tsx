@@ -291,7 +291,7 @@ describe('exe klasörü · B7.30 kapısı', () => {
     const disk = fakeDisk({ 'ders-programi-tumu.json': FULL_BUNDLE });
     // Inside the first 400 ms, before the window's own first save.
     const { box, act, wait } = await launch(disk, () => localStorage.setItem(BASE_KEY, FULL));
-    act(() => box.store!.change((d) => ({ ...d, rooms: [{ id: 'r', name: 'Zk1' } as never] })));
+    act(() => box.store!.change(() => FULL_STATE));
     await wait(3000);
     expect(writes(disk)).toEqual([]);
     expect(localStorage.getItem(BASE_KEY)).toBe(FULL);
