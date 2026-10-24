@@ -77,6 +77,8 @@ Yalnız beş durumda durulur ve sorulur: veri kaybı riski, Roboders'e ya da ger
 
 Gerisinde öncelik sırasıyla (babaya ve verisine risk yok, sağlamlık, basitlik, ileriye dönüklük, hız) karar verilir ve raporda "Aldığım kararlar" altında tek cümleyle yazılır: kapsam dışı bir değişiklik, planı çürüten bir ölçüm, dışarıdan gelen bir CI kırmızısı, `dist`'e giren yeni bir paket. Yeni paket WORKLOG'a not düşer: neden, alternatifler, boyut ve `file://` açılış süresi.
 
+Ham `dist/index.html` 1,2 MB'ı aşarsa boyut eşiği yükseltilmeden önce `file://` açılış süresi 4× yavaşlatılmış işlemcili bir profilde (Chromium, CPU throttling) ölçülür; sayılar WORKLOG'a.
+
 ## Sürüm
 
 Etiketi yalnız `npm run yayinla` atar, ana klasörde ve `main`'de, ve `ci.yml` ile `windows.yml` yeşil olmadan atmaz (`-- --kuru` hiçbir şeyi değiştirmeden bakar). Windows'ta gerçek güncelleme testi (eski sürümden yenisine) yeşil olmadan etiket yok. Ayrıntı [docs/BUILD.md](docs/BUILD.md)'de.
