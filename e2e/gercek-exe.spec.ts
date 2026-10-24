@@ -32,7 +32,7 @@ import { pencereyiKapat } from '../scripts/pencere-kapat.mjs';
 const KOK = resolve(import.meta.dirname, '..');
 
 /** WebView2's first start on a fresh runner is slower than WebKitGTK's here. */
-const ACILIS_MS = WINDOWS ? 60_000 : 20_000;
+const ACILIS_MS = WINDOWS ? 90_000 : 20_000;
 
 // The program sets this itself on Linux (tuzak 130). Taken out of what the
 // driver inherits, so a test measures the binary and not the shell it ran in.

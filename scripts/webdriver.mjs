@@ -256,6 +256,27 @@ async function portAcik() {
   }
 }
 
+/** Does the debugging port list the program's own page yet? */
+async function sayfaVar() {
+  try {
+    const cevap = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/list`, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    const hedefler = await cevap.json();
+    return hedefler.some((h) => h.type === 'page' && h.url.startsWith('http://tauri.localhost'));
+  } catch {
+    return false;
+  }
+}
+
+async function sayfaBekle(son) {
+  while (Date.now() < son) {
+    if (await sayfaVar()) return true;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return false;
+}
+
 /** Waits until the port answers (`acik`) or stops answering; false at the deadline. */
 async function portBekle(acik, son) {
   while (Date.now() < son) {
@@ -324,43 +345,53 @@ export class Oturum {
   }
 
   /**
-   * Starts the exe, waits for its WebView2 to answer on the debugging port,
-   * and attaches msedgedriver to it. The last program has to be gone first:
-   * a second exe on the same profile would hand its page to the old WebView2.
-   * One deadline for all of it, the language included.
+   * Starts the exe, waits until its WebView2 lists the program's page on the
+   * debugging port, and attaches msedgedriver to it. The last program has to
+   * be gone first: a second exe on the same profile would hand its page to
+   * the old WebView2. Once on a runner the port opened and no page came, and
+   * the browser process went away 18 s later (2026-10-24): so a start with no
+   * page in 30 s is killed and made once more. One deadline for all of it,
+   * the language included.
    */
   static async windowsAc({ port, ikili, bekleMs }) {
     const son = Date.now() + bekleMs;
-    if (!(await portBekle(false, son))) throw new Error("Önceki programın WebView2'si kapanmadı");
-    const program = spawn(ikili, [], { stdio: 'ignore' });
-    let oturum;
-    try {
-      if (!(await portBekle(true, son))) throw new Error('WebView2 hata ayıklama portunu açmadı');
-      let hata;
-      while (oturum === undefined) {
-        if (Date.now() > son) throw hata ?? new Error('süre doldu');
-        try {
-          const cevap = await istek(port, 'POST', '/session', {
-            capabilities: {
-              alwaysMatch: {
-                browserName: 'webview2',
-                'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
-              },
-            },
-          });
-          oturum = new Oturum(port, cevap.sessionId, program);
-        } catch (e) {
-          hata = e;
-          await new Promise((r) => setTimeout(r, 300));
-        }
+    let hata = new Error('süre doldu');
+    for (let deneme = 1; deneme <= 2 && Date.now() < son; deneme++) {
+      if (!(await portBekle(false, son))) throw new Error("Önceki programın WebView2'si kapanmadı");
+      const program = spawn(ikili, [], { stdio: 'ignore' });
+      if (!(await sayfaBekle(Math.min(son, Date.now() + 30_000)))) {
+        hata = new Error(`WebView2 programın sayfasını açmadı (deneme ${deneme})`);
+        agaciOldur(program.pid);
+        continue;
       }
-      await oturum.turkceYap(son);
-      return oturum;
-    } catch (e) {
-      if (oturum !== undefined) await oturum.kapat();
-      else agaciOldur(program.pid);
-      throw new Error(`Oturum açılamadı: ${e?.message ?? e}`);
+      let oturum;
+      try {
+        while (oturum === undefined) {
+          if (Date.now() > son) throw hata;
+          try {
+            const cevap = await istek(port, 'POST', '/session', {
+              capabilities: {
+                alwaysMatch: {
+                  browserName: 'webview2',
+                  'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
+                },
+              },
+            });
+            oturum = new Oturum(port, cevap.sessionId, program);
+          } catch (e) {
+            hata = e;
+            await new Promise((r) => setTimeout(r, 300));
+          }
+        }
+        await oturum.turkceYap(son);
+        return oturum;
+      } catch (e) {
+        if (oturum !== undefined) await oturum.kapat();
+        else agaciOldur(program.pid);
+        throw new Error(`Oturum açılamadı: ${e?.message ?? e}`);
+      }
     }
+    throw new Error(`Oturum açılamadı: ${hata.message}`);
   }
 
   /**
@@ -375,6 +406,13 @@ export class Oturum {
    * `lang="tr"` before any script runs).
    */
   async turkceYap(son) {
+    // The attached target can still be the blank document WebView2 starts
+    // with, where localStorage is refused ("Access is denied").
+    const uygulama = `location.origin === 'http://tauri.localhost' && document.readyState === 'complete' && !!document.querySelector('h1')`;
+    while (!(await this.js(`return ${uygulama};`).catch(() => false))) {
+      if (Date.now() > son) throw new Error('Programın sayfası açılmadı');
+      await new Promise((r) => setTimeout(r, 300));
+    }
     const yuklendi = await this.js(`
       if (localStorage.getItem('ders-programi-dil') === 'tr') return false;
       localStorage.setItem('ders-programi-dil', 'tr');
@@ -384,9 +422,7 @@ export class Oturum {
     if (!yuklendi) return;
     while (Date.now() < son) {
       await new Promise((r) => setTimeout(r, 300));
-      const hazir = await this.js(
-        `return !window.__mozaikEski && document.readyState === 'complete' && !!document.querySelector('h1');`,
-      ).catch(() => false);
+      const hazir = await this.js(`return !window.__mozaikEski && ${uygulama};`).catch(() => false);
       if (hazir) return;
     }
     throw new Error('Sayfa Türkçe açılmadı');

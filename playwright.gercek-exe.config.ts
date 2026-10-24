@@ -15,7 +15,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   // Windows: two tests reopen the program, and WebView2's start, attach and
-  // language reload (scripts/webdriver.mjs) can take a minute each.
-  timeout: process.platform === 'win32' ? 180_000 : 90_000,
+  // language reload (scripts/webdriver.mjs) get 90 s each.
+  timeout: process.platform === 'win32' ? 240_000 : 90_000,
   reporter: [['list']],
 });
