@@ -1525,6 +1525,43 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       ikisi aynı hücreleri çiziyor: el yapımı dünyada ve tam dolu kursun dizili haftasında
       ölçüldü (`src/ui/program/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
       algoritma birleşmedi. Düzeltilmedi: dal davranış değiştirmez.
+- [ ] **RK16 `i18n.test.ts`'in ölü anahtar taraması sözlükleri de kaynak sayıyor.** Taramanın
+      süzgeci `./lang/` ile başlayan yolu dışarıda bırakıyor, ama sözlükler `leaf/lang/`'a
+      taşındığından beri hiçbir anahtar o önekle başlamıyor, yani bir anahtar yalnız kendi
+      sözlüğünde geçtiği için "kullanılıyor" sayılabilir ve ölü anahtar yeşil kalır. Okundu,
+      bir mutasyonla ölçülmedi. 2026-10-24'teki test taşıması globun kökünü `src/`'de tuttu ve
+      süzgece dokunmadı, yani durum taşımadan önceki gibi. Düzeltme ayrı bir dalın işi.
+
+**Yapılandırma ve depo düzeni (2026-10-24, `refactor/moduller`).**
+
+- [ ] **RF21 scripts/ alt klasörlere, yayın zinciri ayrı doğrulamayla.** Bugün otuzdan fazla
+      betik düz bir klasörde: yayın zinciri (`yayinla.mjs`, `surum*.mjs`, `exe-*.mjs`), aSc ve
+      Roboders araçları, ölçüm ve kurulum betikleri. Taşınırken `surum.yml`, `windows.yml`,
+      `package.json` ve belgeler yolları okuyor, ve yayın zinciri ancak gerçek bir yayın
+      provasıyla (`npm run yayinla -- --kuru`, `surum.yml` elle) doğrulanır. Refactor turunun
+      kapsamı dışında bırakıldı (kullanıcının ek talimatı).
+- [ ] **RF22 `src/fixtures/` için bir yer kararı.** Şema fikstürleri ve tam dolu kurs testlerin
+      yanına alınmadı: tek dosya demetine gömülen varlıkların ve fikstürlerin yolu riskli, ve
+      beş test onları `join(import.meta.dirname, '../../fixtures')` ile, biri kökten
+      (`src/fixtures/...`) okuyor. Karar: `src/`'nin kökünde mi kalsın, en çok okuyan
+      `pure/io/`'nun yanına mı. Refactor turunun kapsamı dışında.
+- [ ] **RF23 Kökte bilerek kalan dosyalar.** `ui/main.tsx` (`index.html` ve `favicon.mjs`
+      yolunu anıyor), `platform/changelog.ts` (yayın betikleri ve `surum.yml`),
+      `platform/update.ts` (`SITE_ADRESI`, turun sert sınırı) ve `leaf/raw.d.ts` (`docs.test.ts`'in
+      bir iddiası) katmanlarının kökünde; `katman-koku-*` kuralları ilk üçünü adıyla muaf
+      tutuyor. Taşımak kök yapılandırmaya, yayın betiklerine ya da bir test iddiasına dokunmak
+      demek; her biri ayrı bir kararla.
+
+**Optimizasyon fırsatları** (refactor turu hiçbirini yapmadı; her biri önce ölçülür, tuzak
+105 ve 117):
+
+- [ ] **RO1 `health(state)` iki kez hesaplanıyor.** App üst çubuğun durum satırı için, şerit
+      Kontrol'ün sayıları için, her biri kendi `useMemo`'suyla aynı `state` ve `dil` üstünde.
+      Biri hesaplayıp öbürüne verebilir. Kazanç ölçülmedi.
+- [ ] **RO2 Program şeridinin sayıları her çizimde baştan.** `describeStrip` (eskiden şeridin
+      gövdesinde) her ders için `pendingBlocks`'u ve bütün programın `pinScopeCells`'ini
+      memo'suz koşuyor, şerit her `App` çiziminde yeniden çiziliyor. Babanın tam haftasında
+      ölçülür, sonra `useMemo`.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
