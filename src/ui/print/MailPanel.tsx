@@ -5,11 +5,14 @@
 // program this machine already has, from the account already in it, with the
 // teacher's address and week filled in; the user reads it and presses Send.
 // In the exe the shell is asked (src-tauri/src/mail.rs), which can also say
-// that there is no mail program at all. In a browser it is a plain `mailto:`
-// link, and a page cannot ask: if nothing took the focus away within two
-// seconds, one line says what that usually means.
+// that no mail program is chosen at all. In a browser it is a plain `mailto:`
+// link, and a page cannot ask: the browser may first show its own "open the
+// mail program?" question, or Windows its app picker, and neither is visible
+// from here. So after a click one line says what it means if nothing opened,
+// and the page does not guess (a timer did, and was wrong both ways, review
+// 2026-10-24).
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { looksLikeEmail } from '../../leaf/email';
 import { paletteColor } from '../../leaf/palette';
@@ -28,15 +31,10 @@ interface Props {
 /** Why a teacher has no button, in the fewest words that say where to fix it. */
 type Why = 'adres yok' | 'adres hatalı' | 'programı boş' | 'e-postaya sığmıyor';
 
-/** How long a browser gets to hand the link to a mail program. */
-const BEKLEME_MS = 2000;
-
 export default function MailPanel({ state, ix, spans }: Props) {
   const t = useT();
   const exe = isDesktop();
-  const [said, setSaid] = useState<EpostaSonucu | 'tarayici-acmadi' | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const [said, setSaid] = useState<EpostaSonucu | 'tarayici' | null>(null);
 
   const rows = useMemo(
     () =>
@@ -55,21 +53,6 @@ export default function MailPanel({ state, ix, spans }: Props) {
       }),
     [state, ix, spans, t],
   );
-
-  /** A browser: did anything take the focus within the wait? */
-  function watchBrowser() {
-    window.clearTimeout(timer.current);
-    setSaid(null);
-    let left = false;
-    const onBlur = () => {
-      left = true;
-    };
-    window.addEventListener('blur', onBlur, { once: true });
-    timer.current = window.setTimeout(() => {
-      window.removeEventListener('blur', onBlur);
-      setSaid(left || document.visibilityState === 'hidden' ? 'acildi' : 'tarayici-acmadi');
-    }, BEKLEME_MS);
-  }
 
   async function openInExe(url: string) {
     setSaid(null);
@@ -107,7 +90,7 @@ export default function MailPanel({ state, ix, spans }: Props) {
                 className="btn"
                 href={url}
                 aria-label={t('{kim} için e-postayı aç', { kim: teacher.short })}
-                onClick={watchBrowser}
+                onClick={() => setSaid('tarayici')}
               >
                 <Mail size={16} strokeWidth={2} aria-hidden="true" />
                 {t('E-postada aç')}
@@ -118,13 +101,13 @@ export default function MailPanel({ state, ix, spans }: Props) {
       </ul>
       {said === 'istemci-yok' && (
         <div className="warn-box" role="status">
-          {t('Bu bilgisayarda kayıtlı bir e-posta programı yok.')}
+          {t('Bu bilgisayarda seçili bir e-posta programı yok.')}
         </div>
       )}
-      {said === 'tarayici-acmadi' && (
-        <div className="warn-box" role="status">
-          {t('E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.')}
-        </div>
+      {said === 'tarayici' && (
+        <p className="hint" role="status">
+          {t('E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.')}
+        </p>
       )}
       {said === 'olmadi' && (
         <div className="warn-box" role="status">

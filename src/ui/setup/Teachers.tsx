@@ -564,10 +564,14 @@ export default function Teachers({ state, change }: PanelProps) {
                       </select>
                     </td>
                     <td>
-                      {/* Kept as typed (only a line break is dropped, sanitize);
-                        a box that does not hold one address says so here,
-                        where it is fixed, and Çıktı does not offer to send. */}
+                      {/* Kept as typed (trimmed, control characters dropped:
+                        cleanEmail); a box that does not hold one address says
+                        so here, where it is fixed, and Çıktı does not offer to
+                        send. Keyed by its value, so Ctrl+Z or "Dosyadan aç"
+                        redraws it rather than leaving a draft that the next
+                        blur would write back. */}
                       <input
+                        key={`e-${teacher.id}-${teacher.email}`}
                         type="text"
                         inputMode="email"
                         autoComplete="off"
@@ -580,11 +584,12 @@ export default function Teachers({ state, change }: PanelProps) {
                             ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
                             : undefined
                         }
-                        onBlur={(e) =>
-                          change((d) =>
-                            updateTeacher(d, teacher.id, { email: cleanEmail(e.target.value) }),
-                          )
-                        }
+                        onBlur={(e) => {
+                          const email = cleanEmail(e.target.value);
+                          // Tabbing through is not an edit, and not an undo step.
+                          if (email === teacher.email) return;
+                          change((d) => updateTeacher(d, teacher.id, { email }));
+                        }}
                       />
                     </td>
                     <td>

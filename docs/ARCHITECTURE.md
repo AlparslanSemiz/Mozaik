@@ -396,11 +396,13 @@ gider. Cevap gelmezse 5 s sonra yine gider. Bir tarayıcı sekmesinde bunun kar�
 kapanan sekme eşzamansız bir yazımı beklemez.
 
 E-posta da öyle (TODO B3.4): sayfa `mailto:`'yu kurar, `mail.rs`'in `eposta_ac`'ı onu
-kabuğa verir. Windows'ta önce `AssocQueryStringW` e-posta programı kayıtlı mı diye sorulur,
-çünkü kayıtlı program yokken `ShellExecuteW` başarı döner ve Windows'un "nasıl açılsın"
-seçicisini (OpenWith) açar (runner'da ölçüldü, 2026-10-24); seçici de program sayılmaz.
-Komut yalnız `mailto:` ile başlayan, yalnız yazdırılabilir ASCII taşıyan ve sınırdan kısa
-bir adresi kabul eder, yani "herhangi bir dosyayı aç"a dönüşemez. Hiçbir şey gönderilmez.
+kabuğa verir. Windows'ta önce `AssocQueryStringW` varsayılan bir e-posta programı var mı diye
+sorulur, çünkü yokken `ShellExecuteW` başarı döner ve Windows'un "nasıl açılsın" seçicisini
+(OpenWith) açar (runner'da ölçüldü, 2026-10-24); seçici program sayılmaz, komut satırı
+olmayan paketli bir uygulamanın (yeni Outlook, Posta) COM işleyicisi ya da ProgID'si sayılır
+(ölçülmedi). Komut yalnız `mailto:` ile başlayan, yalnız `encodeURIComponent`'in ürettiği
+karakterleri ve `:@?&=` taşıyan ve sınırdan kısa bir adresi kabul eder, yani "herhangi bir
+dosyayı aç"a dönüşemez ve bir `"` programın komut satırına giremez. Hiçbir şey gönderilmez.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).

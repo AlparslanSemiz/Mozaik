@@ -1729,10 +1729,10 @@ const EN: Sozluk = {
     "Open the e-mail for {kim}",
   "E-postada aç":
     "Open in e-mail",
-  "Bu bilgisayarda kayıtlı bir e-posta programı yok.":
-    "No mail program is set up on this computer.",
-  "E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.":
-    "If no mail program opened, none is set up on this computer.",
+  "Bu bilgisayarda seçili bir e-posta programı yok.":
+    "No mail program is chosen on this computer.",
+  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
+    "If no mail program opened, none is chosen on this computer.",
   "E-posta programı açılamadı.":
     "The mail program could not be opened.",
   "{ad} · Haftalık ders programı":

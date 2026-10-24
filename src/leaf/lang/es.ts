@@ -1745,10 +1745,10 @@ const ES: Sozluk = {
     "Abrir el correo para {kim}",
   "E-postada aç":
     "Abrir en el correo",
-  "Bu bilgisayarda kayıtlı bir e-posta programı yok.":
-    "No hay ningún programa de correo configurado en este ordenador.",
-  "E-posta programı açılmadıysa bu bilgisayarda kayıtlı bir e-posta programı yok.":
-    "Si no se abrió ningún programa de correo, no hay ninguno configurado en este ordenador.",
+  "Bu bilgisayarda seçili bir e-posta programı yok.":
+    "No hay ningún programa de correo elegido en este ordenador.",
+  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
+    "Si no se abrió ningún programa de correo, no hay ninguno elegido en este ordenador.",
   "E-posta programı açılamadı.":
     "No se pudo abrir el programa de correo.",
   "{ad} · Haftalık ders programı":

@@ -442,7 +442,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     if (WINDOWS) {
       await exe.oturum.bekle('.mail-panel .warn-box', 10_000);
       expect(await exe.oturum.metin('.mail-panel .warn-box')).toContain(
-        'Bu bilgisayarda kayıtlı bir e-posta programı yok.',
+        'Bu bilgisayarda seçili bir e-posta programı yok.',
       );
       const openWith = spawnSync('tasklist', ['/FI', 'IMAGENAME eq OpenWith.exe', '/NH'], {
         encoding: 'utf8',

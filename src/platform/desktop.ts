@@ -215,4 +215,3 @@ export function desktopMail(adres: string): Promise<EpostaSonucu> {
     (e: unknown) => (String(e) === 'istemci-yok' ? ('istemci-yok' as const) : ('olmadi' as const)),
   );
 }
-

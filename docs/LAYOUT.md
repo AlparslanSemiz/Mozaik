@@ -293,7 +293,7 @@ yokken de bir cevap verir. Kapasite tablosu Okul'un Özet'iyle aynı çizim
 - **Öğle arası** satırdan satıra değiştiği için o satırın hücresine kalın bir kenarlık.
 - **Öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar**, çünkü sayfada değişen ve okuyanın aradığı şey o.
 - **Kapalı saat işareti kâğıda çıkmaz.** Duvara asılan bir kâğıt "saat 10:40'ta neredeyim" sorusuna cevap verir. Bilgi Müsaitlik'te düzenleniyor ve Kontrol'de sayılıyor.
-- **E-postayla gönder**, Yazdır panelinin hemen altında: her öğretmen için kısa adı ve "E-postada aç", ya da neden olmadığı (adres yok, adres hatalı, programı boş, e-postaya sığmıyor). Düğme öğretmenin haftasını düz metin olarak kullanıcının kendi e-posta programında yeni bir ileti hâlinde açar; gönderen kullanıcıdır. E-posta programı yoksa panelin altında tek satır söyler. Onay listeleri bu paneli etkilemez: bir öğretmene haftasını göndermek bir baskı işi değil.
+- **E-postayla gönder**, Yazdır panelinin hemen altında: her öğretmen için kısa adı ve "E-postada aç", ya da neden olmadığı (adres yok, adres hatalı, programı boş, e-postaya sığmıyor). Düğme öğretmenin haftasını düz metin olarak kullanıcının kendi e-posta programında yeni bir ileti hâlinde açar; gönderen kullanıcıdır. Exe'de seçili bir e-posta programı yoksa panelin altında tek satır bunu söyler; tarayıcıda sayfa bunu bilemez, tıklamadan sonra tek satır açılmadıysa ne demek olduğunu söyler. Onay listeleri bu paneli etkilemez: bir öğretmene haftasını göndermek bir baskı işi değil.
 - **Kâğıt fiziksel.** Açık palet kullanır, `--ui-scale` kâğıda geçmez, sayfa 205 mm'lik sabit yükseklikli bir kutu ve plan onun içinde dikey ortalanır, kenar boşluğu sayfanın kendi dolgusu (tuzak 31).
 
 ## Ayarlar
