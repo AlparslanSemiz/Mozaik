@@ -5,7 +5,7 @@
 // Moved out of `ui/Print.tsx`'s `map` without a change to what the sheet says
 // (TODO §8k, RF9). It exists so a sheet can be produced for one teacher on its
 // own, which sending a teacher their timetable needs (B3.8); `Sheet.tsx`
-// draws it, and `src/programScreen.test.tsx` pins the drawing.
+// draws it, and `src/ui/program/programScreen.test.tsx` pins the drawing.
 
 import {
   periodGroups,

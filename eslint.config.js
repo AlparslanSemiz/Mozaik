@@ -160,7 +160,10 @@ export default defineConfig([
     // "Saf mantık"). dependency-cruiser cannot say it: its parser invents a
     // React import out of a generic arrow function (.dependency-cruiser.cjs).
     // A global is only a global here: `relax.ts`'s local `window` is not one.
+    // Its tests live beside it since 2026-10-24 and stay out, as they were when
+    // they lived in src/'s root: a test may build a DOM and a store to judge one.
     files: ['src/pure/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.test.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

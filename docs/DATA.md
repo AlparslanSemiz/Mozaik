@@ -218,7 +218,7 @@ depo okunamıyorsa yedek sorulur, okuma anında ve `normalize`'dan geçmeden, am
 kayıtlı `"0"` ya da `""` yokluk sayılmaz. `normalize` denetimin verdiği tipi de
 depodaki dizeyi de kabul eder ve `write` değeri ondan geçirerek saklar. Yedeğin
 makineye bakıp bakmaması tercihin kendi kararı: hareket ve dil bakar, tema bakmaz
-ve kayıt yoksa açıktır (`theme.ts`'teki gerekçe). Sözleşme `src/preference.test.ts`'te,
+ve kayıt yoksa açıktır (`theme.ts`'teki gerekçe). Sözleşme `src/leaf/preference/preference.test.ts`'te,
 her tercihin davranışı `src/preferences.test.ts`'te.
 
 Hareket tercihi bir makine tercihi ve makinenin kendi tercihinin gerisine geçmez:

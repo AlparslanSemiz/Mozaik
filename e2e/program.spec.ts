@@ -19,7 +19,7 @@ import {
   onScreen,
   reopen,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 
 test.describe('2. Sürükle-bırak', () => {
   // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat

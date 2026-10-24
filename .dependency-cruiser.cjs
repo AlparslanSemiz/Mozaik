@@ -111,12 +111,12 @@ module.exports = {
     {
       name: 'dunya-ureteci-urunde-yok',
       comment:
-        '`worlds.ts` yalnız testler için ve `src/` altında durmasının sebebi `tsconfig`. ' +
+        '`pure/worlds/` yalnız testler için ve `src/` altında durmasının sebebi `tsconfig`. ' +
         'Uygulama onu import etmediği için Vite buduyor ve `dist/index.html`\'e girmiyor ' +
         '(ARCHITECTURE). Bir gün biri onu üründen çağırırsa demet büyür ve kimse görmez.',
       severity: 'error',
-      from: { path: '^src/', pathNot: '\\.test\\.' },
-      to: { path: '^src/worlds\\.ts$' },
+      from: { path: '^src/', pathNot: ['\\.test\\.', '^src/pure/worlds/'] },
+      to: { path: '^src/pure/worlds/' },
     },
     {
       name: 'not-to-unresolvable',

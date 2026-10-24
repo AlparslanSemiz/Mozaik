@@ -1107,7 +1107,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       **Dördü de kapandı (2026-10-09).** `Commands.tsx` ve `App.test.tsx` refactor dalında.
       `bakim/refactor-istekleri` dalında `useRowOrder` ölçüldü: kancayı açık tutan bir
       listede dil İngilizceye geçince tutamağın ipucu Türkçe kaldı
-      (`src/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
+      (`src/ui/lists/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
       hâlâ görünmüyordu, sebep yukarıda. `App.tsx`'in üç `toggle`'ı `useCallback` oldu,
       susturma kalktı.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
@@ -1261,7 +1261,7 @@ ertelendi.
 ### 8g · Şema göçünden çıkan ürün kusurları (2026-09-12)
 
 Örnek dosya testine dersin şekli ve ayarlar iddiası eklenirken çıktılar. İkisi de
-üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/fixtures.test.ts`'te
+üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/pure/io/fixtures.test.ts`'te
 `BİLİNEN KUSUR` adlı vakada çiviliydi. 2026-09-25'te düzeldi, vaka adıyla kırmızıya döndü
 ve yerini doğru davranışı soran bir teste bıraktı.
 
@@ -1295,7 +1295,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF | Ne | Nerede |
 |---|---|---|
 | RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
-| RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/invariants.test.ts`, `src/relax.test.ts` |
+| RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/pure/relax/invariants.test.ts`, `src/pure/relax/relax.test.ts` |
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
 | RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/entities.ts` |
@@ -1523,7 +1523,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       kâğıt onu da çiziyor ve dört saatlik bir gün beş sütun basılıyor. Uygulama böyle bir
       haftayı kendisi kurmuyor; eski bir yedek ya da içe aktarma taşıyabilir. Öbür her durumda
       ikisi aynı hücreleri çiziyor: el yapımı dünyada ve tam dolu kursun dizili haftasında
-      ölçüldü (`src/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
+      ölçüldü (`src/ui/program/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
       algoritma birleşmedi. Düzeltilmedi: dal davranış değiştirmez.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
@@ -1620,7 +1620,7 @@ testi o commit'te sıradan bir teste döner.
       (`Array(saat / blok)`). 100 000 saat kabul ediliyor, 10 milyonda beş milyonluk bir dizi
       (22,7 ms, kirli). Fuzz bunu kendiliğinden buldu: üreteç onaltılık ve üslü yazımlarla
       (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
-      çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
+      çok gün × saat kadar saattir. Test `src/pure/io/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
       yapıştırma tarafındaki eşi.
 - [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
       Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren

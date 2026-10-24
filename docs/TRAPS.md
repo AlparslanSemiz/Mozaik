@@ -322,7 +322,7 @@ dal hemen kesilir. `derin-geri-sarma` 8 362 düğümden 12'ye indi. İkincisi,
 backtracking takılınca bir onarım aşaması devralır: yersiz bir blok en az blok
 iten hücreye konur, itilenler sıraya girer, sık yersiz kalan blok ağırlaşır.
 Roboders'in açık saatleriyle aynı veri 0,5–1,5 saniyede 211/211 (16 tohum),
-önce 206'da takılıyordu. `src/solver.test.ts` → "tam dolu bir kurs".
+önce 206'da takılıyordu. `src/pure/solver/solver.test.ts` → "tam dolu bir kurs".
 
 ---
 
@@ -1164,7 +1164,7 @@ mutasyon kırmızıya döndü. Ders şu: **bir kuralın testi, o kuralın tek ba
 tuttuğu bir dünyada kurulur.** Sonucu başka bir kısıtın da zorladığı bir dünyada
 test kuralı değil ikisinin birleşimini ölçer. İki yolun ikisini de kapatan
 mutasyon (model ve denetçi birlikte) ilk dünyada da kırmızıydı. Asıl yakalanması
-gereken, yalnız birini kapatan mutasyon. Test `src/relax.test.ts`'te,
+gereken, yalnız birini kapatan mutasyon. Test `src/pure/relax/relax.test.ts`'te,
 "sınıfın kapalı saati en ucuz çare olsa da önerilmiyor".
 
 ### 131 · Playwright her koşuda `test-results/`'u boşaltır, içinde yaşayan bir oturumla birlikte

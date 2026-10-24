@@ -18,12 +18,15 @@ src/ui/            main · shell/* · common/* · ve ekranların alanları
 ```
 
 Klasör adları katmanların kendisi, yeni bir taksonomi değil: bir katman ihlali
-bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kökünde yalnız
-üç şey kalıyor: test dosyaları, `styles.css` ve `worlds.ts`. Testlerin kökte
-kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
-bir alt klasöre inseler taradıkları şey sessizce daralırdı.
+bir klasör sınırını geçen import olarak görünsün diye. Birim testi test ettiği
+modülün yanında durur, birden çok paketi saran test ana konusunun paketinde
+(2026-10-24). Ağacı `import.meta.glob` ile tarayan iki test (`leaf/lang/i18n.test.ts`,
+`pure/io/library.test.ts`) taşınırken globlarının kökü `src/`'de tutuldu, yani
+taradıkları küme değişmedi. `src/`'nin kökünde kalanlar: `styles.css`, ve konusu
+`src/`'nin dışında olan yedi test (belgeler, betikler, sürüm akışı ve `index.html`'i
+de okuyan `preferences.test.ts`).
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -198,9 +201,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `worlds.ts` | dünya üreteci (`makeWorld`, `WORLDS`) ve dizilmiş programı denetleyen `illegalBlocks` |
+| `pure/worlds/worlds.ts` | dünya üreteci (`makeWorld`, `WORLDS`) ve dizilmiş programı denetleyen `illegalBlocks` |
 
-`worlds.ts` `src/` altında, çünkü `tsconfig.json` yalnız `src`'yi kapsıyor ve
+`pure/worlds/` `src/` altında, çünkü `tsconfig.json` yalnız `src`'yi kapsıyor ve
 başka yerde duran bir dünya `tsc`'den hiç geçmezdi. Uygulama onu import etmediği
 için Vite budar, `dist/index.html`'e girmez.
 
@@ -383,7 +386,7 @@ Exe hiçbir şeyi yeniden yazmaz. `folder.ts` dosya adlarının, günlük yedeğ
 budamanın tek evi, `desktop.ts` üç Tauri komutunu bir `FileSystemDirectoryHandle`
 kılığına sokar ve `saveInto()` exe'de olduğu gibi koşar. Rust'ta yalnız tarayıcıda
 karşılığı olmayan şey var: hangi klasör, ve bir adın gerçekten bir ad olduğunu
-doğrulayan kapı (`safe_name`). `src/desktop.test.ts` gerçek `saveInto()`'yu
+doğrulayan kapı (`safe_name`). `src/platform/exe/desktop.test.ts` gerçek `saveInto()`'yu
 adaptörün üstünde koşturur.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu

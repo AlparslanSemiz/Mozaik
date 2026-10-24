@@ -3,8 +3,8 @@
 // under the toolbar. Nothing here knows React or the DOM.
 //
 // Moved out of `ui/program/Program.tsx` without a change to what it computes
-// (TODO §8k, RF8); `src/programScreen.test.tsx` pins the drawing it feeds, and
-// `src/programView.test.ts` asks it directly. The component still decides WHEN
+// (TODO §8k, RF8); `src/ui/program/programScreen.test.tsx` pins the drawing it feeds, and
+// `src/pure/program/programView.test.ts` asks it directly. The component still decides WHEN
 // each of these runs: the rows and the tray are memoised there, because the
 // grid's memo boundary is the identity of `rows` (pitfall 10).
 //
