@@ -1,28 +1,20 @@
 # Mozaik
 
-Babamın dershanesinde haftalık ders programını dizmek için yazılan araç. Babam
-bugün Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor. Hedef,
-Roboders'teki ve ikinci kaynak aSc Timetables'taki her iyi özelliğin daha iyisini
-yapmak. Bir özellik babama yeni yazı ya da soru eklemeden iş görüyorsa iyi
-sayılır. Program çift tıklanan tek
-bir HTML dosyası, ve aynı dosya bir sitede, Windows kurulum paketinde ve bir exe'nin
-içinde de teslim ediliyor. Vite, React ve TypeScript ile yazıldı. Bugün sunucusu yok
-ve çalışırken internete ihtiyaç duymuyor. Bunu şart koşan iki ilke 2026-10-08'den
-beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
+Babamın dershanesinde haftalık ders programını dizmek için yazılan araç. Babam bugün
+Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor: Roboders'teki ve ikinci
+kaynak aSc Timetables'taki her iyi özelliğin daha iyisi. Bir özellik babama yeni yazı ya da
+soru eklemeden iş görüyorsa iyi sayılır. Program çift tıklanan tek bir HTML dosyası, aynı
+dosya bir sitede, Windows kurulum paketinde ve bir exe'nin içinde de teslim ediliyor. Vite,
+React ve TypeScript ile yazıldı. Bugün sunucusu yok ve internete ihtiyaç duymuyor, bunu şart
+koşan iki ilke 2026-10-08'den beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
 
-## Yeni bir oturuma başlarken
+## Oturum başında
 
-Önce bunlar okunur:
-
-1. [docs/TODO.md](docs/TODO.md)'nin yalnız §0'ı (not defteri) ve İÇİNDEKİLER'i, sonra
-   yalnız yapılacak işin bölümü. Dosyanın tamamı okunmaz.
+1. [docs/TODO.md](docs/TODO.md)'nin yalnız §0'ı ve İÇİNDEKİLER'i, sonra yalnız yapılacak işin bölümü.
 2. [docs/PRINCIPLES.md](docs/PRINCIPLES.md), bir kararı neyin yönlendirdiği için.
+3. [docs/WORKLOG.md](docs/WORKLOG.md)'nin "Şu an" bloğu, nerede kalındığı için.
 
-Tuzaklar bir işe başlarken okunur, tamamı değil: önce [docs/TRAPS.md](docs/TRAPS.md)'nin
-başındaki grup listesi, sonra yalnız o işin grubu.
-
-Nerede kalındığı [docs/WORKLOG.md](docs/WORKLOG.md)'nin en üstündeki "Şu an"
-bloğunda yazılı.
+Tuzaklar işe başlarken okunur: [docs/TRAPS.md](docs/TRAPS.md)'nin başındaki grup listesi, sonra yalnız o işin grubu.
 
 ## Nereye bakılır
 
@@ -47,101 +39,42 @@ bloğunda yazılı.
 - [CHANGELOG.md](CHANGELOG.md): dışarı bakan, İngilizce sürüm geçmişi.
 - [docs/plan-v0-arsiv.md](docs/plan-v0-arsiv.md): tarihsel, güncellenmiyor. Projenin ilk teknik planı, donmuş bir tarihsel kayıt olarak.
 
-## Paralel oturumlar
+## Çalışma düzeni
 
-Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-10-09, worktree'lerin yeri 2026-10-23):
+- `~/GitHub/Mozaikler/Mozaik` yalnız `main`'i tutar, orada oturum çalışmaz. Her iş `main`'den açılan kısa ömürlü bir dalda ve yanındaki kendi worktree'sinde yürür (`~/GitHub/Mozaikler/Mozaik-<iş>`), iş birleşince worktree kaldırılır. Yeni refactor turu açılmıyor (DECISIONS 2026-10-23).
+- Commit'ten önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yok. Taşıma, içerik ve biçim değişikliği ayrı commit'lerde.
+- Push SSH ile ve yalnız kendi dalı: `git push origin <dal>`. Zorla push, etiket ve `main`'e push yok. CI'ın sonucu beklenmez, `gh run view` ile okunur, dalın CI'ı kırmızıysa önce o düzeltilir.
+- Birleştirmeyi Alp yapar ya da onaylar, `--ff-only` ile: önce `git merge main`, yerelde `npm run hizli` yeşil, dalın CI'ı yeşil. "Şu an" ve tuzak numarası dalın birleşmeden önceki son commit'inde yazılır, önce birleşen numarayı alır. Belgelere yalnız `main`'deki commit hash'i yazılır.
 
-- Sürekli iki worktree var, ikisi de `~/GitHub/Mozaikler/` altında: `Mozaik` yalnız
-  `main`'i tutar, orada oturum çalışmaz; `Mozaik-refactor` refactor turlarının, her tur
-  `main`'den açılan yeni bir dalda. Paralel çalışan başka bir iş alanı (özellik, düzeltme,
-  belge-test-araç ya da başka bir şey) kendi worktree'sini ve dalını onların yanında
-  `~/GitHub/Mozaikler/Mozaik-<iş>` olarak açar, iş birleşince worktree kaldırılır.
-- Dal kısa ömürlü, iş `main`'den açılan bir dalda yürür. Her commit'ten ve her ölçümden
-  önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yapılmaz.
-- Push SSH ile ve açık refspec'le, yalnız kendi dalı: `git push origin <dal>`. Zorla push,
-  etiket ve `main`'e push yok. `ci.yml` her push'ta koşar, sonucu beklenmez, `gh run view`
-  ile okunur. Dalın CI'ı kırmızıysa başka işe geçmeden o düzeltilir.
-- Dal `main`'e Alp'in onayıyla ve `--ff-only` ile birleşir: önce `git merge main`, sonra
-  yerelde `npm run hizli` yeşil, dalın CI'ı yeşil; tam doğrulama CI'da, yerelde `kontrol`
-  şart değil. Site yalnız yeşil bir `main` push'unda yayınlanır, `windows.yml` her `main`
-  push'unda Windows'ta E2E koşar.
-- "Şu an"ı dal, `git merge main`'den sonra ve birleşmeden hemen önce son commit'inde kendi
-  işiyle günceller. `--ff-only` araya başka bir şeyin girmesine izin vermediği için çatışma
-  çıkmaz. Ara durumlar tarihli WORKLOG girdisine yazılır. Tuzak numarası da o commit'te
-  verilir, öncesinde aday girdiye yazılır. Önce birleşen numarayı alır, numara vermiş bir dal
-  birleşirken kendi numaralarını kaydırır.
-- Belgelere yalnız `main`'deki commit hash'i yazılır, dalın commit'leri konusuyla anılır.
-- Taşıma ile içerik değişikliği ayrı commit'lerdedir, biçim düzeltmesi de ayrı commit'tedir.
-- Ağır komutlar sırayla koşar: `scripts/agir.sh <komut>`, yani
-  `flock -w 1800 ~/.mozaik-agir.lock`. Kapsam: stryker, mutasyon, kontrol, kapsam, her
-  Playwright koşusu, exe derlemeleri, podman ve süre ölçümleri. Kilit beklenen sürede
-  alınamazsa söylenir. Not `~/.mozaik-agir.not`'ta, bırakılınca "serbest" yazar. Süre
-  sınırı `scripts/agir.sh --sure <saniye> <komut>` ile verilir, dışarıdan `timeout`
-  sarılmaz (tuzak 150).
-- Uzun komutlar (`kontrol`, E2E, mutasyon, CI'ı izlemek) arka planda koşulur ve bitiş bildirimi beklenir, `sleep` ve `tail` ile yoklanmaz.
-- Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
-  2'nin altında, `scripts/temiz-kosul.sh` bakar. Koşul yoksa "kirli, ölçülmedi" yazılır.
-- Elle ya da toplu her mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır (toplu: `--liste`), kendi betiğini yazmak yok: kontrol koşusu ve koşmayan testin ayrımı orada.
-- Arka planda bir mutasyon sürerken ağaca dokunulmaz, `git stash` dahil.
-- Commit'ten önce `npm run hizli` ve dokunulan test dosyaları. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
-- Uzun testler ve test programının yavaş süitleri (mutasyon, Windows E2E, WebKit, uzun süre
-  açık kalma, görsel regresyon, Windows'ta gerçek exe, sürüm yükseltme) push'u ve
-  birleştirmeyi beklemez, arkada, gece ya da haftalık koşar ve kırmızı sonucu görünür bir
-  yere düşer; tek istisna `npm run yayinla`'nın Windows E2E'yi beklemesi, çünkü etiket
-  babanın exe'sine ulaşıyor ve Windows onun gerçek ortamı. Ayrıntı [docs/TODO.md](docs/TODO.md) §8l.
-- Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
-  (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
+## Ağır komutlar
 
-## Test programı
+Stryker, `kontrol`, kapsam, her Playwright koşusu, exe derlemesi, podman ve süre ölçümü sırayla koşar: `scripts/agir.sh <komut>` (`flock -w 1800 ~/.mozaik-agir.lock`, not `~/.mozaik-agir.not`'ta). Süre sınırı `scripts/agir.sh --sure <saniye> <komut>` ile verilir, dışarıdan `timeout` sarılmaz (tuzak 150). Uzun komutlar arka planda koşar ve bitiş bildirimi beklenir. Süre ölçümü temiz koşul ister (`scripts/temiz-kosul.sh`), yoksa "kirli, ölçülmedi" yazılır. Arka planda mutasyon sürerken ağaca dokunulmaz, `git stash` dahil.
 
-2026-10-09'da başlayan test programının kuralları, gerekçesi [docs/DECISIONS.md](docs/DECISIONS.md)'de,
-planı [docs/TODO.md](docs/TODO.md) §8l'de:
+## Test
 
-- Test dalı bulduğu ürün hatasını düzeltmez. Testi depodaki "BİLİNEN KUSUR" kalıbıyla
-  işaretler (test kusurlu davranışı adıyla sabitler, kusur düzelince adıyla kırmızıya
-  döner; örneği `src/fixtures.test.ts`'te), TODO'ya numaralı madde açar; düzeltme `main`'den
-  açılan ayrı bir dalda yapılır. Veri kaybı sınıfında bir hata bulunursa durulur ve hemen
-  bildirilir.
-- Dosya yollarından bağımsız işler (E2E, exe, CI) önce gelir. `pure/`, `platform/` ya da
-  `ui/` içinde taşınan modüllere dokunan birim ve mutasyon işleri, ilgili refactor paket turu
-  `main`'e birleşene kadar bekler.
-- Her faz bitince dal birleşmeye hazır olur (yukarıdaki kuralla: yerelde `hizli` yeşil, CI
-  yeşil) ve Alp birleştirir; programın sonu beklenmez.
+Riske göre, ayrıntısı [docs/TESTPLAN.md](docs/TESTPLAN.md)'nin "Test politikası"nda.
+
+- Test şart olan yerler: şema, göç, `sanitize` ve yedeğin açılması, dizme (çözücü), güncelleme ve sürüm yolu, ve düzeltilen her hata için bir gerileme testi. Şema değişince hem birim hem E2E testi ([docs/DATA.md](docs/DATA.md)).
+- Arayüzün düzeni ve metni için yeni test yazılmaz, 1920×1080'de tek bir ekran görüntüsüyle bakılır.
+- Commit'ten önce yerelde yalnız `npm run hizli` ve dokunulan test dosyaları. Gerisi CI'da.
+- Mutasyon haftalık koşar (`haftalik.yml`), hiçbir şeyi beklemez, değişiklik başına koşulmaz. Elle bir mutasyon kanıtı yapılırsa `scripts/mutasyon-kaniti.sh` ile (tuzak 149).
+- Bulunan hata aynı dalda, kendi commit'inde, gerileme testiyle düzeltilir. Refactor dalı düzeltmez, TODO §8k'ye yazar. Veri kaybı sınıfında bir hata: durulur ve bildirilir.
+- Belge kapısı (`src/docs.test.ts`) yalnız yapıyı ölçer: bağlantı, yol, tuzak numarası, zorunlu bölüm. Kırmızıysa belge düzeltilir, kapı susturulmaz.
 
 ## Ne zaman durulur
 
-Durulur ve sorulur, yalnız şunlarda:
-- veri riski (bir refactor turunda bulunan veri kaybettiren bir hata dahil),
-- dokunulmaz bir şeye dokunmak gerekiyor,
-- kapsam dışına çıkmak gerekiyor: listede olmayan bir değişiklik, ya da "davranış
-  değişmez" dalında üretim kodunu değiştiren bir test veya düzeltme,
-- bir ölçüm planın varsayımını çürüttü,
-- `dist`'e yeni bir paket girecek,
-- `main`'e birleştirme, `main`'e ya da etikete push, `npm run yayinla`,
-- CI kırmızı ve sebep bu işin kapsamı dışında.
+Yalnız beş durumda durulur ve sorulur: veri kaybı riski, Roboders'e ya da gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış bir eylem, kullanıcının parası ya da hesapları.
 
-Gerisinde yukarıdaki kurala göre devam edilir: commit, `git merge main`, kendi dalını
-itmek, hangi testin koşacağı, hash mi konu mu, kilit, tuzak ve kusur notları, belge
-cümlesini aynı commit'te düzeltmek, scratch'e yazmak. İki makul ve risksiz seçenek
-arasında öncelik sırasıyla (babaya ve verisine risk yok, sağlamlık, basitlik, ileriye
-dönüklük, hız) biri seçilir ve raporda tek cümleyle yazılır. Engellemeyen sorular biriktirilir.
+Gerisinde öncelik sırasıyla (babaya ve verisine risk yok, sağlamlık, basitlik, ileriye dönüklük, hız) karar verilir ve raporda "Aldığım kararlar" altında tek cümleyle yazılır: kapsam dışı bir değişiklik, planı çürüten bir ölçüm, dışarıdan gelen bir CI kırmızısı, `dist`'e giren yeni bir paket. Yeni paket WORKLOG'a not düşer: neden, alternatifler, boyut ve `file://` açılış süresi.
+
+## Sürüm
+
+Etiketi yalnız `npm run yayinla` atar, ana klasörde ve `main`'de, ve `ci.yml` ile `windows.yml` yeşil olmadan atmaz (`-- --kuru` hiçbir şeyi değiştirmeden bakar). Windows'ta gerçek güncelleme testi (eski sürümden yenisine) yeşil olmadan etiket yok. Ayrıntı [docs/BUILD.md](docs/BUILD.md)'de.
 
 ## Rapor
 
-Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları,
-(2) durdum çünkü: yalnız yukarıdaki listeden bir sebep, ya da "durmadım", (3) karar
-gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir,
-(4) not edilenler, (5) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`.
-Uzun tablolar `scratch/`'te bir rapor dosyasına yazılır, mesaj ona işaret eder.
+Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları, (2) durdum çünkü: yukarıdaki beşten biri ya da "durmadım", (3) aldığım kararlar, (4) karar gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir, (5) not edilenler, (6) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`. Uzun tablolar `scratch/`'te bir dosyaya yazılır, mesaj ona işaret eder.
 
 ## Oturum sonu
 
-- TODO.md güncellenir, biten işler işaretlenir, sıradaki iş yazılır.
-- WORKLOG.md'ye tarihli girdi eklenir, hangi testlerin koşulduğu ve koşulmadığı yazılır. "Şu an" birleşmeden önceki son commit'te tazelenir ("Paralel oturumlar").
-- Test koşuldu ve bir şey çıktıysa TESTFINDINGS.md'ye yazılır.
-- Kalıcı bir kural veya tuzak çıktıysa ilgili docs dosyasına yazılır.
-- Bir duruş değiştiyse ya da bir yol denenip bırakıldıysa DECISIONS.md'ye tarihiyle yazılır.
-- Kullanıcıya görünen bir değişiklik olduysa CHANGELOG'un Unreleased bloğuna satır eklenir.
-- Test edilmemiş bir şey bitti işaretlenmez.
-- Bir belge kapısı (`src/docs.test.ts`) kırmızıysa bayatlayan belgedir, kapı değil. Kapı susturulmaz, atlanmaz, gevşetilmez; belgedeki cümle düzeltilir. Kapının kendisi yanlış ölçüyorsa bu iddia edilmez, mutasyonla kanıtlanır: kapıyı geçen bozuk bir belge gösterilir, sonra kapı değişir.
-- Bir kod değişikliği bir belge cümlesini yanlış hâle getiriyorsa o cümle **aynı commit'te** düzeltilir. Sonraki commit'e bırakılan belge düzeltmesi yapılmaz; bölme turunda bulunan on yedi bayat maddenin hepsi "sonra düzeltirim" ile birikti.
+Şart olan iki şey: TODO.md (biten işaretlenir, sıradaki yazılır) ve WORKLOG'un "Şu an"ı ile tarihli girdisi. Doğrulanmamış hiçbir şey bitti işaretlenmez, onun yerine "yazıldı, doğrulanmadı" yazılır. CHANGELOG'un Unreleased bloğu yalnız kullanıcıya görünen bir değişiklikte. TRAPS, DECISIONS ve TESTFINDINGS yalnız gerçek bir içerik çıktıysa. Bir kod değişikliği bir belge cümlesini yanlış yapıyorsa o cümle aynı commit'te düzeltilir.

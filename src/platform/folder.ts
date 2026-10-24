@@ -117,7 +117,7 @@ export function folderSupported(): boolean {
 
 // ------------------------------------------------------- remembering it
 
-const DB_NAME = 'ders-programi-klasor';
+export const DB_NAME = 'ders-programi-klasor';
 const STORE = 'tutamak';
 const KEY = 'secili';
 

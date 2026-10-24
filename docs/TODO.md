@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l), ikisi de 2026-10-23'ten beri donduruldu | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -91,12 +91,12 @@ Kayıt [DECISIONS.md](DECISIONS.md)'de.
 **Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ve zebra
 `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
 (önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
-Mutasyon parçaları (B7.24) test oturumunda.
+Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
 **Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
-(DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi);
-`test/gercek-ortam`'ın TP7'si (kullanıcının kararı); `klasorleme` ve Dependabot dalları
-birleşmedi.
+(DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi)
+`surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si (kullanıcının kararı);
+`klasorleme` ve Dependabot dalları birleşmedi.
 
 ---
 
@@ -843,6 +843,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
       Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
       "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
+- [ ] **B7.32 `yayinla` `package-lock.json`'ı yazmıyor (2026-10-23).** 2.2.0 çıkarken
+      `package.json` ile `Cargo.toml` yazıldı, kilit dosyasının kökü 2.1.1'de kaldı; ilk
+      `npm install` onu değiştirip ağacı kirletiyor ve `yayinla`'nın temiz ağaç kapısını
+      durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
+      yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
+      yolu, yani testiyle; ölçülmedi.
 
 ---
 
@@ -1262,6 +1268,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
 ### 8k · Refactor analizinin bıraktıkları (2026-10-08)
 
+**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Süren tur yoktu
+(`refactor/program` `main`'de), yeni paket turu açılmıyor. RF ve RK maddeleri açık kalır,
+bir RK özellik ya da düzeltme dalında aynı kuralla (gerileme testiyle) düzeltilebilir.
+
 Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
 altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
 Bulgular RF1 ile RF20 arası adını taşıyor (raporda R16, burada RF16), refactor dışı
@@ -1546,126 +1556,28 @@ koşusu, dosya başına tahmin.
 
 Kaynak 2026-10-09'un analizi (`test/kapsam`): rapor `scratch/test-plan/PLAN.md`'de, git
 dışında, ölçümleri ve betikleri yanında; özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü
-girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
-[DECISIONS.md](DECISIONS.md)'de (2026-10-09). Maddeler TP numarasını taşıyor, yolda çıkan
-ürün ve araç bulguları TB numarasını.
+girdisinde. Maddeler TP numarasını taşıyor, yolda çıkan ürün ve araç bulguları TB numarasını.
 
-**Kararlar (kullanıcının, 2026-10-09 akşam).**
+**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Programın kararları (K1–K10) ve
+fazları o günkü hâlleriyle [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Test artık riske göre
+yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek bir birikim maddesi.
 
-| K | Karar |
-|---|---|
-| K1 | Görsel regresyon geri gelir, yalnız kapta ve sıfır eşikle; yerel koşu referans üretmez (DECISIONS) |
-| K2 | Gerçek paketin adsız fikstürü depoya girer, `tam-dolu-kurs.json`'un yöntemiyle (öğretmen baş harfleri; e-posta ve serbest metin yok); commit'ten önce dosyada gerçek ad aranır, komut ve sonuç rapora |
-| K3 | Bileşen katmanı (Vitest browser mode) yalnız girdi bileşenleri için açılır |
-| K4 | Paket turlarının hedef ağacını refactor oturumu yazar; aşağıda "bekler" diyen maddeler ona göre işaretli |
-| K5 | Yavaş süitler (mutasyon, uzun süre, görsel, Windows'ta gerçek exe, sürüm yükseltme) push'u, birleştirmeyi ve sürümü beklemez; gece ya da haftalık, kırmızısı görünür bir yere düşer (CLAUDE.md). Tek istisna (2026-10-10): `yayinla` Windows E2E'yi bekler (DECISIONS) |
-| K6 | Runner'lar ve artefakt aksiyonları sabit, 2026-10-19'dan önce (yapıldı) |
-| K7 | Dependabot alerts ve güvenlik güncellemeleri: ayarı Alp açar |
-| K8 | Mutasyonun iş akışı `ci/mutasyon-parca` dalında; C1 o dal birleşince ölçülür |
-| K9 | VK1 (iki kopya), VK2 (kota) ve `useHttpsScheme`'in sabitlenmesi, düzeltmeleri ve testleriyle `fix/veri-kaybi` dalında; B1 ve B3 o dala geçti |
-| K10 | Yeni WebKit süiti eklenmez (DECISIONS); gerçek exe testleri olduğu gibi |
+- [ ] **TP-B Test programının kalanı (birikim).** Bir madde ancak test politikasının şart
+      koştuğu bir yolu (şema, göç, yedeğin açılması, dizme, güncelleme ve sürüm) koruyorsa
+      alınır, ve o zaman `main`'den açılan bir dalda. Öne çıkanlar: TP7 (Windows'ta gerçek
+      exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
+      Windows güncelleme testine en yakın olanlar. TP4'ün paket yolu fuzz'u TB8'in
+      düzeltmesiyle geldi (`src/fuzz.test.ts`, `readBundlePlans`). Geri kalanlar sırasız:
+      TP5 (veri yolunun mutasyonu), TP6 (gerçek paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
+      TP13 (uzun süre açık kalma), TP14 (zayıf makine vekili), TP15 (performans), TP16 ve TP17
+      (güvenlik), TP18 (metin bütçesi), TP19 (kabul), TP20 (bileşen katmanı), TP21
+      (mutasyon listesi), TP22 (kararsızlık), TP23 (erişilebilirlik tabanı), TP24 (kapsam
+      tabanı), TP25 (yazıcının paketi), TP26 (gerileme kapısı), TP27 (görsel regresyon),
+      TP28 (son kontrol). Her birinin o günkü tanımı arşivde.
 
-**Bekleme işareti** (K4, §8k'nin hedef ağacına ve sıra tablosuna göre, 2026-10-09 gece).
-"Bekler: sıra N" o paket turu `main`'e birleşmeden başlamaz; sıra 4, 5 ve 6 ayrıca
-`fix/veri-kaybi`'yi bekliyor. "—": yollardan bağımsız, hemen. Bir madde turdan önce
-yazıldıysa (TP4 gibi) yollarını o tur taşır.
-
-**Faz 0 · hazırlık**
-- [x] **TP1 Runner'lar ve artefakt aksiyonları sabit, Ubuntu 26.04 kanaryası** (K6). `ci.yml`,
-      `site.yml`, `windows.yml`; `kanarya.yml` yeni. `surum.yml` bu maddede dokunulmadı; Linux işleri ve
-      `upload-artifact@v7` 2026-10-10'da ona da geldi (B7.20, B7.29), `windows-latest` ve
-      `download-artifact@v7` orada kaldı.
-- [x] **TP2 Program kuralları ve kararlar** CLAUDE.md'de ve DECISIONS'ta.
-
-**Faz 1 · veri kaybı**
-- [→] B1 iki kopya, B3 kota: `fix/veri-kaybi` dalında (K9).
-- [x] **TP3 Kapatırken bekleyen kayıt (B2).** 400 ms'lik `SAVE_DELAY` içinde kapanan sekme.
-      Ölçüldü: `beforeunload` koşarsa değişiklik kalıyor, koşmazsa (süreç öldü) kalmıyor; ikincisi
-      sözleşme. `e2e/kapanis.spec.ts` (depo, yeşil) ve `klasor.spec.ts`'te klasör yarısı
-      (BİLİNEN KUSUR, TB7); ikisi de sayfanın saatini durdurup bekleyen yazımı önce doğruluyor,
-      ikisi de mutasyonla kanıtlı. Exe'de pencereyi kapatmanın WebDriver yolu yok
-      (`plugin:window|close not allowed by ACL`): exe'nin yarısı elle.
-- [x] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
-      ya ret ya tutarlı plan, asla istisna. `npm test`'te kısa, gece uzun. Kullanıcı bu fazda
-      istedi, yani pure turundan önce bugünkü yollarla yazılır; tur yolları taşır.
-      **Yapıldı (`src/fuzz.test.ts`):** "Dosyadan aç" üç kaynakta (bozulan dosya ya ret ya
-      bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
-      okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
-      kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). Paket yolu (`readBundlePlans`)
-      TB8'in düzeltmesiyle geldi (2026-10-23, `tb8-eksik-plan`): bozuk planın yanındaki tam
-      plan hep açılıyor, dört listeden biri olmayan plan açılmıyor.
-- [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
-      Stryker listesine. **Bekler: sıra 4** (`platform/storage`: `useStore`, `usePlans`,
-      `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
-
-**Faz 2 · gerçek ortam**
-- [ ] **TP6 Gerçek paket fikstürü, adsız (B6, K2).** En yeni gerçek dosya bir paket (v1,
-      içinde v14 plan, 330 yerleşim); `fixtures.test.ts`'e bir `describe`. —
-- [ ] **TP7 Windows'ta gerçek exe (B7).** `webdriver.mjs`'e Windows (ikili yolu,
-      `--native-driver`, `taskkill`, dil, runner koruması), spec'te platform dalları,
-      yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —
-- [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
-      `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
-- [ ] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
-      **Bekler: sıra 5** (`platform/exe`: `desktop`, `update`).
-- [ ] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
-      kayıtlı Release fikstürü. —
-- [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
-- [ ] **TP12 Brave alt kümesi, yerel config (B10).** Ölçüldü: `file://` açılıyor, depo
-      kalıcı, font gömülü, hata ve ağ isteği yok. —
-
-**Faz 3 · zayıf makine**
-- [ ] **TP13 Uzun süre açık kalma (B11).** 2 000 sürükle + geri al döngüsü, yığın ve DOM
-      eğimi. Yavaş süit, gece. İlk 300 döngüde DOM düz, yığın ~3 kB/döngü (ayrılamadı). —
-- [ ] **TP14 Zayıf makine vekili (B12).** Ölçüm betiği; vekil, babanın cevabı değil.
-      Kirli ilk sayılar: arama sırasında süreç ağacı +0,8–1,1 GB. Temiz koşulda tekrarlanır. —
-- [ ] **TP15 Performans (B13).** İş sayaçlı eşikler ana E2E'de; süre eşikleri ayrı config,
-      yalnız temiz koşulda, eşikler o ölçümden. Bu oturumun süreleri eşik olamaz. —
-
-**Faz 4 · güvenlik, metin, kabul**
-- [ ] **TP16 `npm audit --omit=dev` CI'da (B14a).** Bugün 0 (14 açığın hepsi geliştirme
-      aracında). K7'nin depo tarafı: `.github/dependabot.yml`'in bayat yorumu. —
-- [ ] **TP17 İçe aktarılan adlarda betik ve HTML (B14b).** Bugün `innerHTML` yok, gerileme
-      koruması. —
-- [ ] **TP18 Metin bütçesi (B15).** Ekran başına kelime ve diyalog başına soru, taban;
-      ilk sayılar PLAN'da (ör. boş proje 82, Program 402, babanın Program'ı 562). —
-- [ ] **TP19 Kabul (B16).** Tık ve soru sayacı, taban, K1–K15 senaryoları. —
-- [ ] **TP20 Bileşen katmanı (B17, K3).** `@vitest/browser`, girdi bileşenleri. `LimitBox`,
-      `ColorPick` ve `Field` ağaçta `ui/`'nin kökünde kalıyor (sıra 12 yalnız gerekçesini
-      yazar), `AddPanel` sıra 9'da `ui/lists/`'e gidiyor. **Bekler: sıra 9** (`AddPanel`'in
-      yarısı); köktekiler —.
-
-**Faz 5 · var olanlar**
-- [ ] **TP21 Mutasyon listesi ve sınıflama (C1).** `relax.ts`, `sat.ts`, veri yolu; her
-      hayatta kalan üç sınıfta. **Bekler:** `ci/mutasyon-parca` (K8), sıra 10 (`relax.ts` ve
-      `sat.ts`, "pure/relax" paketi; tur stryker listesini aynı commit'te değiştiriyor), sıra 4 ve 6
-      (veri yolu ve okuyucular).
-- [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
-      axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölündü (2026-10-23,
-      `fix/windows-e2e`: Program, Kontrol, Çıktı ayrı testler, her biri kendi 30 s'siyle). CI'da JSON
-      raporu ve 30 günlük kararsız sayacı. —
-      **Kök neden adayı (2026-10-10, kullanıcının isteği):** `kapanis.spec.ts` ve
-      `klasor.spec.ts`'in saati `now + 1_000`'de durdurması ("Test: saatin durduğu an bir
-      saniye ileride"). Pay ölçülmedi, bir CI düşüşünden seçildi: zamanı okumakla durdurmak
-      arasında bir saniyeden fazla geçen bir runner aynı hatayı (`Cannot fast-forward to the
-      past`) yeniden verir, ve o saniyeye bir gün bir zamanlayıcı düşerse (`SAVE_DELAY`
-      400 ms, klasör 2 s) test sessizce başka bir şeyi ölçer.
-- [ ] **TP23 Erişilebilirlik tabanı (C3).** Düzeltmeler `main`'de; burada yalnız `BILINEN`'in
-      küçülmesi. —
-- [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: sıra 10 ve 11**
-      ("pure/relax", "pure/constraints" ve "pure/entities" paketleri; liste o turlarda değişiyor).
-- [ ] **TP25 Bugünkü yazıcının paketi dondurulmuş (C5).** —
-- [ ] **TP26 Gerileme kapısı (C7).** TESTFINDINGS'te her ürün kusuru bir teste bağlı. —
-
-**Faz 6 · görsel regresyon (K1)**
-- [ ] **TP27 Görsel regresyon, kapta.** Yedi sekme × iki tema, sıfır eşik, fark görüntüsüne
-      bakmadan yenilenemez, haftalık arka planda. —
-
-**Faz 7 · son kontrol**
-- [ ] **TP28 Son kontrol.** Her katman hedefinde ya da DECISIONS'ta tarihli "yapılmıyor";
-      CI tam doğrulama, yerelde yalnız exe ve temiz koşul ölçümleri; rapor.
-
-**Yolda çıkan bulgular.** TB numaralı maddeler aşağıda (ayrı commit).
+**Yolda çıkan bulgular.** TB numaralı maddeler, ürün kusuru oldukları için açık kalıyor.
+2026-10-23'ten beri bir düzeltme aynı dalda ve gerileme testiyle yapılır, "BİLİNEN KUSUR"
+testi o commit'te sıradan bir teste döner.
 
 - [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
       Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde

@@ -1251,8 +1251,8 @@ koşamaması bir bulgudur: bir mutasyon koşusunun "düştü" sonucu "hiç koşm
 TRAPS'ın başına çapalı bir grup listesi kondu ve çapaların bağlantı kapısı A7'de
 denetlendiği varsayıldı. Bir çapayı bozan mutasyon A7'den yeşil geçti: A7 aynı dosyadaki
 `#çapa` bağlantılarını hiç okumuyor (`href.startsWith('#')` atlanıyor). Kapı kendi işinde
-doğruydu, varsayım yanlıştı. Çare listenin kendi iddiası oldu (A10, her satır kendi
-grubunun çapasını gösteriyor), ve üç mutasyonla kırmızı. Kural: **yeni bir şeyi var olan
+doğruydu, varsayım yanlıştı. Çare önce listenin kendi iddiası oldu (A10), 2026-10-23'ten
+beri A7 aynı dosyadaki çapayı da okuyor ve A10 kalktı; bozulan bir çapayla kırmızı. Kural: **yeni bir şeyi var olan
 bir kapıya emanet etmeden önce o kapının onu gerçekten okuduğu bir mutasyonla gösterilir.**
 
 ### 149 · Bir mutasyon kanıtında "kırmızı", testin koştuğu demek değil
@@ -1264,7 +1264,7 @@ dosyayı temiz saymıştı. İkisinde de sıfırdan farklı çıkış kodu "test
 görüyor" diye okundu. Çare `scripts/mutasyon-kaniti.sh`'de: test önce değişmemiş kodda
 koşar ve yeşil olmalıdır, ve 126, 127 ya da sinyal alan bir koşu kırmızı sayılmaz. İkisi
 betiğin kendi koşularıyla gösterildi. Kural: **her mutasyon bu betikle yapılır, kendi
-sarmalayıcısıyla değil** (CLAUDE.md).
+sarmalayıcısıyla değil** (TESTPLAN, "Test politikası").
 
 ### 151 · Kısıtlı PATH'le koşan bir kabuk testi, betiğe sızan dış komutu göremez
 Linux başlatıcısının testi PATH'i yalnız sahte programlara kısıyordu, gerçek Chrome

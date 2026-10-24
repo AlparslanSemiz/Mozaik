@@ -2,21 +2,49 @@
 
 Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 
+## Test politikası
+
+2026-10-23'ten beri test riske göre yazılır ([DECISIONS.md](DECISIONS.md), 2026-10-23).
+
+**Test şart olan yerler**, yani babanın verisini ya da programın kendisini bozabilecek yollar:
+
+- şema, göç, `sanitize` ve yedeğin açılması. Şema değişince hem birim hem E2E testi ([DATA.md](DATA.md)).
+- dizme: çözücü, kısıt motoru ve öneri araması.
+- güncelleme ve sürüm yolu (`update.ts`, `update.rs`, `surum.yml`, `yayinla.mjs`). Etiketten önce Windows'ta gerçek güncelleme testi yeşil olur.
+- düzeltilen her hata: düzeltmeden önce kırmızı olan bir gerileme testi, düzeltmeyle aynı commit'te.
+
+**Yeni test yazılmayan yer: arayüzün düzeni ve metni.** Değişiklik 1920×1080'de tek bir
+ekran görüntüsüyle gösterilir (`npm run ekran`, ya da aynı boyda tek bir kare). Var olan E2E
+testleri kalır ve CI'da koşar, davranış bilerek değiştiyse test o commit'te güncellenir.
+
+**Yerelde.** Commit'ten önce yalnız `npm run hizli` ve dokunulan test dosyaları: değişen
+test dosyası ve değişen kaynağın kendi testi. Başka bir şey yerelde koşulmaz, tam doğrulama
+dalın CI'ında.
+
+**Mutasyon** haftalık koşar (`haftalik.yml`), hiçbir şeyi beklemez ve değişiklik başına
+koşulmaz. Elle bir mutasyon kanıtı istenirse `scripts/mutasyon-kaniti.sh` ile yapılır (tuzak 149).
+
+**Bulunan hata** bulunduğu dalda, kendi commit'inde ve gerileme testiyle düzeltilir. Refactor
+dalı davranış değiştirmez, hatayı [TODO.md](TODO.md) §8k'ye yazar. Veri kaybı sınıfında bir
+hata bulunursa durulur ve bildirilir. "BİLİNEN KUSUR" kalıbı yeni bir testte kullanılmaz.
+Depoda kalan örnekleri (`src/fuzz.test.ts`, `src/fixtures.test.ts`, `e2e/klasor.spec.ts`)
+kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testine çevrilir.
+
 ## Ne zaman koşar
 
 | Katman | Komut | Ne zaman |
 |---|---|---|
 | Tipler | `npm run tipler` | her değişiklikten sonra |
 | Hızlı | `npm run hizli` | her commit'ten önce, dokunulan test dosyalarıyla birlikte |
-| Birim ve duman | `npm test` | birleşmeden önce, ve `hizli`'nin dışarıda bıraktığı dört dosyaya ya da onların ölçtüğü çözücüye ve öneri aramasına dokunulduysa |
-| E2E | `npm run test:e2e` | arayüzü, düzeni, sürüklemeyi, baskıyı ya da ekrandaki metni değiştiren bir iş yapıldıysa, ve sürüm çıkarmadan önce |
-| Site, sunucu, klasör | `npm run test:site` | teslim yollarına dokunulduysa: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
-| Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
+| Birim ve duman | `npm test` | CI'da her push'ta. Yerelde `hizli`'nin dışarıda bıraktığı dört dosyadan biri yalnız dokunulan test dosyasıysa |
+| E2E | `npm run test:e2e` | CI'da her push'ta, ve sürüm çıkarmadan önce. Yerelde yalnız dokunulan spec |
+| Site, sunucu, klasör | `npm run test:site` | CI'da her push'ta. Teslim yolları: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
+| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`constraints.ts`, `rules.ts`) ve çözücüyü ölçer |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
-| Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
-| Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
+| Mutasyon | `npm run mutasyon` | `haftalik.yml` haftada bir koşar, hiçbir şeyi beklemez. Değişiklik başına koşulmaz |
+| Görüntü | `npm run ekran` | arayüzün düzeni ya da metni değişince, 1920×1080'de bakmak için |
 | Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
 | CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde, her biri ayrı bir runner'da), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
@@ -49,17 +77,16 @@ durumda da kırmızı kalır. Kararsız çıkan bir test TESTFINDINGS'e yazılı
 runner'ı UTC'de koşar, yani saat dilimine dayanan bir test oradan kendi dilimini
 kurar (`src/folder.test.ts`).
 
-Görsel bir değişiklikten sonra testin yeşil olması yetmez, ekran görüntüsüne de
-bakılır (`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
+Görsel bir değişiklikten sonra 1920×1080'de bir ekran görüntüsüne bakılır
+(`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
 ekseni ve düğme adı yalnız gerçek tarayıcıda görünür, jsdom bunların hiçbirini
 görmez.
 
 ## Koşulmayan katman yazılır
 
-Bir katman koşulmadıysa [WORKLOG.md](WORKLOG.md)'nin o günkü girdisi bunu sebebiyle
-yazar, sessizce atlanmaz. Koşulmamış bir süit yeşil bir süitle aynı şey değil,
-bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test kusuru)
-[TESTFINDINGS.md](TESTFINDINGS.md)'ye yazılır.
+Raporda ve [WORKLOG.md](WORKLOG.md)'nin o günkü girdisinde koşulan ve koşulmayan komutlar
+yazılır: koşulmamış bir süit yeşil bir süitle aynı şey değil. Bir koşudan gerçek bir bulgu
+çıktıysa (ürün kusuru ya da test kusuru) [TESTFINDINGS.md](TESTFINDINGS.md)'ye yazılır.
 
 ## Katmanlar
 
@@ -101,8 +128,8 @@ Görmediği: babanın verisi (önerinin CP-SAT'ın en iyisine ulaşması, dizili
 "Olmaz", çözücünün tam dolu kursu), çözücünün gerçek ölçekteki davranışı, ve fast-check
 değişmezlerinin hepsi (çözücünün yasallığı, `occupy` ile `vacate`, `parseState`'in sabit
 noktası, `remapDays`, `clampBlocks`, `placedBlocks`, palet, kurulamayan haftaya öneri).
-Bu yüzden tam `npm test` birleşmeden önce koşar, ve bu dosyaların ölçtüğü koda dokunan
-bir iş onları commit'ten önce de koşar.
+Bu yüzden tam `npm test` CI'da her push'ta koşar, ve çözücüye ya da öneri aramasına dokunan
+bir iş bu dosyaları dokunulan test dosyası sayıp commit'ten önce de koşar.
 
 ### Birim
 
@@ -440,9 +467,10 @@ perdenin inmiş olması.
 
 ## Planlanan katmanlar
 
-Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Henüz yok: bir
-katman yazıldığı commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne
-girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
+Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Program
+2026-10-23'te donduruldu: bu tablo sırası olmayan bir birikim, bir katman ancak yukarıdaki
+politikanın şart koştuğu bir yolu koruyorsa alınır. Henüz yok: bir katman yazıldığı
+commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
 haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
@@ -520,6 +548,6 @@ silinir.
 ## Ölçüm yöntemleri
 
 - **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini `getComputedStyle` ile okur, WCAG kontrast oranını ve CIE Lab ΔE farkını hesaplar. ΔE gerekiyor, çünkü WCAG parlaklık oranı farklı tonlardaki iki koyu rengi eşit sayar. Modern renk sözdizimi sayıya çevrilmeden önce sRGB'ye getirilir (tuzak 81).
-- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
+- **Mutasyonla sınama.** Bir testin bir şey ölçtüğünden şüphe edilirse, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Her değişiklikte yapılmaz. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
 - **Derleme çıkış kodu.** Testten önce derleme susturuluyorsa çıkış kodu okunur, yoksa testler bir önceki `dist/`'i ölçer.
 - **Kâğıt.** Yazdırma iddiaları PDF üretilip okunarak doğrulanır (MediaBox, üst ve alt bilgi), ve kâğıdı ölçen test pencereyi de kâğıdın boyuna getirir (tuzak 31 ve 86).

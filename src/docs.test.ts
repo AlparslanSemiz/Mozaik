@@ -1,39 +1,25 @@
-// The documents, read against the repository they describe.
+// The documents, read for their STRUCTURE: every link, path and trap number
+// they cite resolves, and the sections a session is sent to exist.
 //
-// Seventeen stale claims were found BY HAND when CLAUDE.md was split into
-// docs/: the schema said 11 and the code said 14, the icon threshold was
-// wrong, the default language was wrong, the i18n sentence had been wrong for
-// two releases, the tab count was wrong. Every one of them was found by
-// somebody reading, which means the next one will not be.
-//
-// Writing the rule down again does not work, and this project already knows
-// it: "a rule written as a single source is a wish until a test measures it"
-// (pitfall 77). So this file is the same shape as `surum.test.ts` — two
-// sources read against each other, red when they drift — pointed at prose
-// instead of version numbers.
+// Until 2026-10-23 this file also pinned what sentences said (the file map's
+// names, the schema number, the storage key table, bare numbers, the mutation
+// sentence, the trap index). Those were cut (DECISIONS 2026-10-23): a gate on
+// wording made every documentation edit a test edit. What stays is what a
+// reader trusts without reading: that a reference points somewhere.
 //
 // WHAT IS IN SCOPE, and it is a kind of document rather than an owner.
 //
-//   RULE DOCUMENTS say what is true today. All seven gates apply.
+//   RULE DOCUMENTS say what is true today, and every gate applies.
 //   DATED RECORDS say what was true on a day, and CONVENTIONS.md forbids
 //   correcting them afterwards ("Tarihli kayıtlar geriye dönük düzeltilmez").
 //   A path that has since been deleted is the POINT of such an entry, so the
-//   path, identifier, number, schema and key gates skip them. The two that
-//   still apply there are the ones a dated record cannot be right about
-//   retroactively either: a trap number that names nothing, and a link that
-//   does not resolve.
-//
-// There is no exemption list beyond that split, on purpose. A gate with an
-// exemption never sees what collects behind it, and the exemption widens.
+//   path gate skips them. A trap number that names nothing and a link that
+//   does not resolve are checked there too.
 //
 // Read through Vite rather than `node:fs`, for the reason `surum.test.ts`
 // gives at its own head: `src/` compiles without Node's types on purpose.
 
 import { describe, expect, it } from 'vitest';
-
-import { SCHEMA_VERSION } from './leaf/types';
-import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './pure/library';
-import { PREFERENCE_ROWS } from './leaf/preferenceKeys';
 
 // ------------------------------------------------------------------ reading
 
@@ -398,312 +384,6 @@ describe('A1 · belgelerde geçen her yol diskte var', () => {
   });
 });
 
-// ------------------------------------------------------ A2 · the identifier
-
-/**
- * Words a document writes in backticks that are not this project's to export.
- * Measured rather than guessed: the list is what the gate reported the first
- * time it ran, read one by one.
- */
-const NOT_OURS = new Set([
-  'FileSystemDirectoryHandle', // the browser's
-  'requestAnimationFrame',
-  'useState', // React's
-  'React',
-  'Pointer',
-  'Events',
-]);
-
-/** Rows of ARCHITECTURE.md's file map: `| \`path\` | what it does |`. */
-function fileMapRows(): Array<{ line: number; file: string; says: string }> {
-  const out: Array<{ line: number; file: string; says: string }> = [];
-  for (const [line, text] of prose(DOCS['docs/ARCHITECTURE.md'] ?? '')) {
-    const m = /^\|\s*`([^`]+\.tsx?)`\s*\|(.*)\|\s*$/.exec(text);
-    if (m) out.push({ line, file: 'src/' + (m[1] ?? ''), says: m[2] ?? '' });
-  }
-  return out;
-}
-
-/**
- * The layer diagram at the head of ARCHITECTURE.md, row by row. Read from
- * `DOCS` rather than through `prose()` on purpose: the diagram lives in a
- * fenced block and `prose()` throws fences away, which is half of why nothing
- * saw it go stale. The other half is that the names in it carry no extension,
- * so the path gate does not recognise them as paths either. A document can be
- * wrong in a place where two gates are both looking somewhere else.
- */
-function layerRows(): Array<{ folder: string; line: number; names: string[] }> {
-  const out: Array<{ folder: string; line: number; names: string[] }> = [];
-  const split = (text: string) =>
-    text
-      .split('·')
-      .map((name) => name.trim())
-      .filter((name) => name !== '');
-  let open = -1;
-  (DOCS['docs/ARCHITECTURE.md'] ?? '').split('\n').forEach((text, i) => {
-    const head = /^(src\/[a-z]+)\/\s+(\S.*)$/.exec(text);
-    if (head !== null) {
-      out.push({ folder: head[1] ?? '', line: i + 1, names: split(head[2] ?? '') });
-      open = out.length - 1;
-      return;
-    }
-    const row = out[open];
-    const tail = /^\s+(\S.*)$/.exec(text);
-    // `   |` is the arrow between two layers, not a wrapped list of names.
-    if (row !== undefined && tail !== null && (tail[1] ?? '').trim() !== '|') {
-      row.names.push(...split(tail[1] ?? ''));
-      return;
-    }
-    open = -1;
-  });
-  return out;
-}
-
-/** What a layer folder actually holds, in the diagram's own vocabulary. */
-function modulesIn(folder: string): Set<string> {
-  const out = new Set<string>();
-  for (const file of FILES) {
-    if (!file.startsWith(folder + '/')) continue;
-    const rest = file.slice(folder.length + 1);
-    const slash = rest.indexOf('/');
-    // A folder inside a layer is one entry: the diagram writes `lang/*`.
-    if (slash !== -1) {
-      out.add(rest.slice(0, slash) + '/*');
-      continue;
-    }
-    // A declaration file is not a module and a test is not product code.
-    if (!/\.tsx?$/.test(rest) || rest.endsWith('.d.ts') || rest.includes('.test.')) continue;
-    out.add(rest.replace(/\.tsx?$/, ''));
-  }
-  return out;
-}
-
-/**
- * `src/ui` is out of scope and the diagram says why itself: its row ends with
- * "ve bütün bileşenler", so it is a sentence rather than a list. The three
- * below claim to be complete.
- */
-const LISTED_LAYERS = ['src/leaf', 'src/pure', 'src/platform'];
-
-describe('A2 · dosya haritasının adları kaynakta var', () => {
-  // A renamed function turns the map into a lie without touching it, and the
-  // map is the first thing anybody reads to find where something lives.
-  //
-  // The claim is that the name is IN THAT FILE, not that it is exported from
-  // somewhere. The second form was tried first and reported nine names that
-  // are all fine: `poolSort` and `poolFilter` are fields of what a hook
-  // returns, `Grid` is a default export, `placedHours` is a field of the
-  // index. Asking the row's own file is both narrower and the actual claim
-  // the row is making.
-  it('her satırın tanımlayıcıları kendi dosyasında geçiyor', () => {
-    const stale: string[] = [];
-    let checked = 0;
-    for (const { line, file, says } of fileMapRows()) {
-      const text = SOURCE[file];
-      if (text === undefined) {
-        stale.push(`docs/ARCHITECTURE.md:${line}  ${file} diskte yok`);
-        continue;
-      }
-      for (const m of says.matchAll(/`([A-Za-z_$][A-Za-z0-9_$]*)(\(\))?`/g)) {
-        const name = m[1] ?? '';
-        if (NOT_OURS.has(name)) continue;
-        // identifier-shaped: camelCase, a call, or a SHOUTED constant. A lone
-        // capitalised word in Turkish prose is a word.
-        const shaped = m[2] !== undefined || /[a-z][A-Z]/.test(name) || /^[A-Z_]{2,}$/.test(name);
-        if (!shaped) continue;
-        checked++;
-        if (!new RegExp(`\\b${name}\\b`).test(text)) {
-          stale.push(`docs/ARCHITECTURE.md:${line}  \`${name}\` ${file} içinde yok`);
-        }
-      }
-    }
-    expect(fileMapRows().length, 'dosya haritası okunamadı').toBeGreaterThan(40);
-    expect(checked, 'hiç tanımlayıcı taranmadı').toBeGreaterThan(20);
-    expect(stale, `${checked} tanımlayıcı tarandı`).toEqual([]);
-  });
-
-  it('katman şeması üç klasörün içeriğini sayıyor', () => {
-    // Measured escape, not a supposition: at `39404a1` thirteen gates were
-    // green while this diagram still said `store` and listed neither
-    // `parseState` nor `undo` — the split had moved them eighty lines below,
-    // in the file map, and the map was right. Both directions are asked here,
-    // because the drift was in the one a spot check misses: what the folder
-    // holds and the diagram does not mention.
-    const wrong: string[] = [];
-    let checked = 0;
-    const rows = new Map(layerRows().map((row) => [row.folder, row]));
-    for (const folder of LISTED_LAYERS) {
-      const row = rows.get(folder);
-      if (row === undefined) {
-        wrong.push(`docs/ARCHITECTURE.md  ${folder}/ şemada yok`);
-        continue;
-      }
-      const onDisk = modulesIn(folder);
-      for (const name of row.names) {
-        checked++;
-        if (!onDisk.has(name)) {
-          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} diskte yok`);
-        }
-      }
-      for (const name of onDisk) {
-        if (!row.names.includes(name)) {
-          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} şemada yok`);
-        }
-      }
-    }
-    expect(checked, 'katman şeması okunamadı').toBeGreaterThan(40);
-    expect(wrong, `${checked} modül adı tarandı`).toEqual([]);
-  });
-});
-
-// ---------------------------------------------------------- A3 · the number
-
-/**
- * Numbers the repository can COUNT AGAIN today, which is the whole of the
- * rule: two sessions work on this tree at once and a test count, a byte figure
- * or a suite duration written into a rule document is wrong within a day.
- *
- * Measurements of the platform are not in this set and the reason is a
- * definition rather than an exemption: `553 ms` for a view transition, `1ch`
- * resolving to 6,86 px, a 4 ms clamp on nested timeouts are OBSERVATIONS, and
- * they are the content of the trap that carries them. Nothing in this
- * repository recounts them.
- */
-const RECOUNTABLE: ReadonlyArray<{ what: string; re: RegExp }> = [
-  { what: 'test sayısı', re: /\b\d[\d .]*\s*(?:test|testi|testlik|spec dosyası)\b/g },
-  { what: 'bayt', re: /\b\d[\d .,]*\s*(?:bayt|byte|KB|MB)\b/g },
-  { what: 'süit süresi', re: /\b\d[\d .,]*\s*(?:dk|dakikada|sn)\b/g },
-];
-
-/** A seven-character commit id on the same line: the number is dated. */
-const HAS_COMMIT = /\b[0-9a-f]{7}\b/;
-
-/**
- * A heading that carries a date opens a block of RECORD inside a rule
- * document, and DESIGN.md's "Ölçülenler (2026-08-26)" says so in its own
- * words: "Bunlar birer tarih, kural değil". A measurement under such a
- * heading is already doing what CONVENTIONS asks of it.
- */
-const DATED_HEADING = /^#{2,6}\s.*\d{4}-\d{2}-\d{2}/;
-
-/** Every line, with whether the heading above it carries a date. */
-function underDatedHeading(text: string): boolean[] {
-  let dated = false;
-  return text.split('\n').map((line) => {
-    if (/^#{1,6}\s/.test(line)) dated = DATED_HEADING.test(line);
-    return dated;
-  });
-}
-
-describe('A3 · kural belgelerinde tarihsiz mutlak sayı yok', () => {
-  // CONVENTIONS.md already says it: dated measurements live in WORKLOG's
-  // entries, not in the rule documents. This is that sentence with a test
-  // under it. A number either becomes qualitative or carries the commit it
-  // was measured at.
-  it('sayılabilir her sayı ya niteliksel ya commit özetli', () => {
-    const bare: string[] = [];
-    let checked = 0;
-    for (const doc of RULE_DOCS) {
-      const body = DOCS[doc] ?? '';
-      const dated = underDatedHeading(body);
-      // Fenced blocks are read here, unlike the path gate: DESIGN.md keeps its
-      // measurement tables in one, and a stale byte figure does not stop being
-      // stale for sitting between backticks.
-      body.split('\n').forEach((text, i) => {
-        if (dated[i] === true || HAS_COMMIT.test(text)) return;
-        for (const { what, re } of RECOUNTABLE) {
-          for (const m of text.matchAll(re)) {
-            checked++;
-            bare.push(`${doc}:${i + 1}  ${what}: "${m[0].trim()}"`);
-          }
-        }
-      });
-    }
-    expect(bare).toEqual([]);
-    expect(checked).toBe(0);
-  });
-});
-
-// ---------------------------------------------------------- A4 · the schema
-
-describe('A4 · DATA.md ile SCHEMA_VERSION aynı sayıyı söylüyor', () => {
-  // The most expensive stale line of the last round: the document said 11 and
-  // the code said 14. One line each side, and nothing compared them.
-  const data = () => DOCS['docs/DATA.md'] ?? '';
-
-  it('belgedeki her schemaVersion kaynaktaki sabit', () => {
-    const written = [...data().matchAll(/"?schemaVersion"?:\s*(\d+)/g)].map((m) => Number(m[1]));
-    expect(written.length, 'DATA.md içinde schemaVersion yazmıyor').toBeGreaterThan(0);
-    for (const n of written) expect(n).toBe(SCHEMA_VERSION);
-  });
-
-  it('sürüm tablosu v1’den bugüne kesintisiz', () => {
-    // A migration that got a number but no row is a migration nobody can look
-    // up, and the row is where the next reader learns what changed.
-    const rows = [...data().matchAll(/^\|\s*v(\d+)\s*\|/gm)].map((m) => Number(m[1]));
-    expect(rows).toEqual(Array.from({ length: SCHEMA_VERSION }, (_, i) => i + 1));
-  });
-});
-
-// --------------------------------------------------- A5 · the storage keys
-
-/** Every key the program actually owns, DERIVED the way the report derives it. */
-const OWNED_KEYS: ReadonlySet<string> = new Set([
-  BASE_KEY,
-  LIBRARY_KEY,
-  ...Array.from({ length: BACKUP_COUNT }, (_, i) => backupKey(i)),
-  ...PREFERENCE_ROWS.map((row) => row.key),
-]);
-
-/** The keys DATA.md's table names, with its two shorthands expanded. */
-function documentedKeys(): Set<string> {
-  const table = /## Depolama anahtarları([\s\S]*?)\n## /.exec(DOCS['docs/DATA.md'] ?? '');
-  expect(table, 'DATA.md içinde anahtar tablosu yok').not.toBeNull();
-  const out = new Set<string>();
-  for (const [, row] of prose(table?.[1] ?? '').filter(([, t]) => t.startsWith('|'))) {
-    const cell = row.slice(1, row.indexOf('|', 1));
-    let prefix = '';
-    for (const m of cell.matchAll(/`([^`]+)`/g)) {
-      const key = m[1] ?? '';
-      // `ders-programi-yedek-0`, `-1`, `-2`: the short ones continue the one
-      // before them, which is how a person reads the row.
-      if (key.startsWith('-') && prefix !== '') {
-        out.add(prefix.replace(/-\d+$/, '') + key);
-        continue;
-      }
-      prefix = key;
-      out.add(key);
-    }
-  }
-  return out;
-}
-
-describe('A5 · DATA.md’nin anahtar tablosu kodun yazdığı küme', () => {
-  // The table's ONE job is being trusted when somebody asks "is all of it in
-  // here?". `ders-programi-baski` was missing from it for weeks. The code side
-  // is already derived and already measured (`library.test.ts`); this is the
-  // document side, which is typed by hand.
-  it('kodun sahip olduğu her anahtar tabloda var', () => {
-    const documented = documentedKeys();
-    const missing = [...OWNED_KEYS].filter((key) => !documented.has(key));
-    expect(missing, 'DATA.md’nin tablosunda eksik').toEqual([]);
-  });
-
-  it('tabloda kodun sahip olmadığı anahtar yok', () => {
-    // A key a table names and nothing writes is the same defect facing the
-    // other way: it sends somebody looking for data that is not there.
-    // One row stands for every plan but the first, and its shape is asked of
-    // the function that builds it rather than typed here.
-    const planRow = planKey('<id>');
-    const documented = documentedKeys();
-    expect(documented, 'plan satırı tabloda yok').toContain(planRow);
-    const extra = [...documented].filter(
-      (key) => !OWNED_KEYS.has(key) && key !== planRow && key.startsWith(BASE_KEY),
-    );
-    expect(extra, 'kod bu anahtarı yazmıyor').toEqual([]);
-  });
-});
-
 // ----------------------------------------------------- A6 · the trap number
 
 const TRAPS = () => DOCS['docs/TRAPS.md'] ?? '';
@@ -771,19 +451,6 @@ describe('A6 · her tuzak atfı TRAPS.md’de karşılığını buluyor', () => 
     expect(total, 'hiç atıf bulunamadı, tarayıcı bozuk').toBeGreaterThan(500);
     expect(bad, `${total} atıf tarandı`).toEqual([]);
   });
-
-  it('TRAPS.md’nin duyurduğu sıradaki numara henüz kullanılmamış', () => {
-    // The foot of the file tells the next session where to carry on, and that
-    // sentence is the one number in the file nothing else would ever correct.
-    // Numbers are permanent identity here, so a reused one would point an old
-    // record at the wrong trap.
-    const defined = definedTraps();
-    const m = NEXT_FREE.exec(TRAPS());
-    expect(m, 'TRAPS.md sıradaki numarayı söylemiyor').not.toBeNull();
-    const next = Number(m?.[1]);
-    expect(defined.has(next), `tuzak ${next} zaten yazılmış`).toBe(false);
-    expect(next, 'sıradaki numara en büyüğün bir fazlası olmalı').toBe(Math.max(...defined) + 1);
-  });
 });
 
 // ------------------------------------------------------------ A7 · the link
@@ -822,10 +489,11 @@ describe('A7 · her belge bağlantısı çözülüyor', () => {
       text.split('\n').forEach((line, i) => {
         for (const m of line.matchAll(/\[([^\]\n]*)\]\(([^)\s]+)\)/g)) {
           const href = m[2] ?? '';
-          if (/^[a-z][a-z0-9+.-]*:/.test(href) || href.startsWith('#')) continue;
+          if (/^[a-z][a-z0-9+.-]*:/.test(href)) continue;
           checked++;
           const [file, anchor] = href.split('#');
-          const target = resolveFrom(doc, decodeURIComponent(file ?? ''));
+          // `#anchor` alone points into the same document.
+          const target = file === '' ? doc : resolveFrom(doc, decodeURIComponent(file ?? ''));
           const isDir = DIRS.has(target) || DIRS.has(target + '/');
           if (!FILES.has(target) && !isDir) {
             broken.push(`${doc}:${i + 1}  [${m[1]}](${href})  hedef yok`);
@@ -1168,139 +836,49 @@ function mutatedFiles(): Set<string> {
   return list;
 }
 
-/** The names TESTPLAN.md's sentence about the mutation list puts in backticks. */
-function documentedMutants(): { line: number; names: Set<string> } {
-  const body = DOCS['docs/TESTPLAN.md'] ?? '';
-  const lines = body.split('\n');
-  const at = lines.findIndex((l) => l.includes('mutasyona uğruyor'));
-  expect(at, 'TESTPLAN.md mutasyon cümlesi bulunamadı').toBeGreaterThan(0);
-  // The sentence wraps over as many lines as the list needs; it ends at the
-  // closing parenthesis.
-  let text = '';
-  for (let i = at; i < lines.length; i++) {
-    text += (lines[i] ?? '') + '\n';
-    if ((lines[i] ?? '').includes(')')) break;
-  }
-  const names = new Set([...text.matchAll(/`([^`]+\.tsx?)`/g)].map((m) => m[1] ?? ''));
-  return { line: at + 1, names };
-}
-
-describe('A9 · TESTPLAN’in mutasyon listesi stryker’ın listesi', () => {
-  // A1 and A8 both looked straight at this line and said nothing, because what
-  // was wrong with it was not a path: it named `useStore.ts`, which exists on
-  // disk and is not mutated, and left out three files that are. A name can be
-  // real and still be in the wrong sentence, and the only way to see that is to
-  // compare the two lists AS SETS — the same shape as A5, which does it for the
-  // storage keys.
-  it('cümledeki adlar ile yapılandırmanın mutate dizisi aynı küme', () => {
-    const real = mutatedFiles();
-    const { line, names } = documentedMutants();
-    const missing = [...real].filter((f) => !names.has(f));
-    const extra = [...names].filter((f) => !real.has(f));
-    expect(missing, `docs/TESTPLAN.md:${line} mutasyona uğrayıp cümlede olmayan`).toEqual([]);
-    expect(extra, `docs/TESTPLAN.md:${line} cümlede olup mutasyona uğramayan`).toEqual([]);
-  });
-
+describe('A9 · stryker’ın mutasyon listesi diskte', () => {
   it('listedeki her dosya diskte var', () => {
-    // The other half, and the one the test session asked about: a path in the
-    // list that no longer resolves means the file is silently not measured.
-    // A8 covers the same ground through the configuration; this states it in
-    // the mutation list's own words, with its own message.
+    // A path in the list that no longer resolves means the file is silently
+    // not measured. A8 covers the same ground through the configuration; this
+    // states it in the mutation list's own words, with its own message.
     const gone = [...mutatedFiles()].filter((f) => !FILES.has('src/' + f));
     expect(gone, 'stryker.config.json mutasyon listesinde olmayan dosya').toEqual([]);
-  });
-});
-
-// ------------------------------------ A10 · the trap index and the trap itself
-
-/** Every trap, with the `##` group it physically sits under. */
-function trapSections(): Map<number, string> {
-  const out = new Map<number, string>();
-  let group = '';
-  for (const line of TRAPS().split('\n')) {
-    const head = /^## (.+)$/.exec(line);
-    if (head !== null) {
-      group = (head[1] ?? '').trim();
-      continue;
-    }
-    const trap = /^### (\d+) ·/.exec(line);
-    if (trap !== null) out.set(Number(trap[1]), group);
-  }
-  return out;
-}
-
-/** The index table at the foot: `| group | 1, 2, 3 |`. */
-function trapIndex(): Map<number, string> {
-  const out = new Map<number, string>();
-  const table = /## Dizin([\s\S]*)$/.exec(TRAPS());
-  expect(table, 'TRAPS.md’de dizin yok').not.toBeNull();
-  for (const line of (table?.[1] ?? '').split('\n')) {
-    const row = /^\|\s*([^|]+?)\s*\|\s*([\d ,]+)\s*\|$/.exec(line);
-    if (row === null) continue;
-    for (const n of (row[2] ?? '').match(/\d+/g) ?? []) out.set(Number(n), (row[1] ?? '').trim());
-  }
-  return out;
-}
-
-describe('A10 · her tuzak dizinin söylediği grubun altında duruyor', () => {
-  // Found by the other refactor session and true twice over: traps 113 and 114
-  // were written at the END of "Test hijyeni" while the index counted them
-  // under "Ölçüm disiplini". Both readings are used — somebody scanning the
-  // file reads the heading above the trap, somebody looking a theme up reads
-  // the table — and nothing compared them. The index is not decoration: it is
-  // how a trap is found by subject rather than by number.
-  it('fiziksel yerleşim ile dizin satırı aynı grubu söylüyor', () => {
-    const placed = trapSections();
-    const listed = trapIndex();
-    expect(placed.size, 'tuzak başlıkları okunamadı').toBeGreaterThan(80);
-    expect(listed.size, 'dizin okunamadı').toBeGreaterThan(80);
-
-    const wrong: string[] = [];
-    for (const [n, group] of placed) {
-      const row = listed.get(n);
-      if (row === undefined) wrong.push(`tuzak ${n} dizinde yok (yeri: ${group})`);
-      else if (row !== group) wrong.push(`tuzak ${n} ${group} altında, dizin ${row} diyor`);
-    }
-    for (const n of listed.keys()) {
-      if (!placed.has(n)) wrong.push(`tuzak ${n} dizinde var, dosyada yok`);
-    }
-    expect(wrong, 'TRAPS.md dizini ile yerleşimi ayrışıyor').toEqual([]);
-  });
-
-  // The list at the head is what a session reads instead of the whole file
-  // (CLAUDE.md), so a group missing from it is a group nobody reads. A7 skips
-  // a link to `#anchor` in the same file (measured), so the anchor is asked
-  // here too: each line's link lands on its own group's heading.
-  it('baştaki liste her grubu bir kez, dosyadaki sırayla ve kendi çapasıyla gösteriyor', () => {
-    const block = /^## Hangi grup ne zaman okunur\n([\s\S]*?)^## /m.exec(TRAPS());
-    expect(block, 'TRAPS.md’nin başında grup listesi yok').not.toBeNull();
-    const lines = [...(block?.[1] ?? '').matchAll(/^- \[([^\]]+)\]\(#([^)]+)\): \S/gm)];
-    const groups = [...new Set(trapSections().values())];
-    expect(groups.length, 'tuzak grupları okunamadı').toBeGreaterThan(5);
-    expect(lines.map((m) => m[1])).toEqual(groups);
-    expect(lines.map((m) => m[2])).toEqual(groups.map(slug));
   });
 });
 
 // ------------------------------------------- A11 · the second entry point
 
 describe('A11 · AGENTS.md yalnız CLAUDE.md’yi gösteriyor', () => {
-  // Codex reads AGENTS.md, Claude Code reads CLAUDE.md. AGENTS.md used to
-  // describe CLAUDE.md in its own words, and two files that describe the same
-  // project drift apart; a file that only points at the other cannot. So it is
-  // one sentence with a link, in English (CONVENTIONS, "Vitrin İngilizce"),
-  // and long enough for the reading gate above, which wants over a hundred
-  // characters from every document.
-  it('ikinci giriş dosyası CLAUDE.md’ye bağlanan tek bir cümle', () => {
+  // Codex reads AGENTS.md, Claude Code reads CLAUDE.md. Two files that
+  // describe the same project drift apart; a file that only points at the
+  // other cannot.
+  it('ikinci giriş dosyası CLAUDE.md’ye bağlanıyor', () => {
     const agents = DOCS['AGENTS.md'];
     expect(agents, 'AGENTS.md okunmuyor').toBeDefined();
-    const lines = (agents ?? '')
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l !== '');
-    expect(lines, 'AGENTS.md tek satır olmalı').toHaveLength(1);
-    expect(lines[0] ?? '', 'satır CLAUDE.md’ye bağlanmıyor').toMatch(/\]\(\.?\/?CLAUDE\.md\)/);
-    expect((lines[0] ?? '').length).toBeGreaterThan(100);
+    expect(agents ?? '', 'AGENTS.md CLAUDE.md’ye bağlanmıyor').toMatch(/\]\(\.?\/?CLAUDE\.md\)/);
     expect(DOCS['CLAUDE.md']?.length ?? 0, 'CLAUDE.md boş okundu').toBeGreaterThan(1000);
+  });
+});
+
+// ------------------------------------------- A12 · the sections a session reads
+
+/**
+ * Headings that CLAUDE.md sends a session to, and the one the release script
+ * reads. A missing one is a session that starts without its map.
+ */
+const REQUIRED_SECTIONS: ReadonlyArray<[string, RegExp]> = [
+  ['docs/WORKLOG.md', /^## Şu an$/m],
+  ['docs/TODO.md', /^## §0\. /m],
+  ['docs/TODO.md', /^## İÇİNDEKİLER/m],
+  ['docs/TRAPS.md', /^## Hangi grup ne zaman okunur$/m],
+  ['CHANGELOG.md', /^## \[?Unreleased\]?/m],
+];
+
+describe('A12 · oturumun okuduğu bölümler yerinde', () => {
+  it('zorunlu başlıkların her biri kendi dosyasında', () => {
+    const missing = REQUIRED_SECTIONS.filter(([doc, re]) => !re.test(DOCS[doc] ?? '')).map(
+      ([doc, re]) => `${doc}  ${re.source}`,
+    );
+    expect(missing).toEqual([]);
   });
 });
