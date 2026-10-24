@@ -857,9 +857,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
 - [ ] **B7.38 `klasorleme`'nin main'de karşılığı olmayan testlerini taşı (2026-10-24).**
-      Dal silindi, ucu `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`'da ve yerel
-      `arsiv/klasorleme` etiketinde (`d202775`). Testleri o dalda `swap`, `bar`, `rows` ve
-      `pool` test dosyaları (`git ls-tree -r arsiv/klasorleme`); main'de karşılıkları
+      Dal silindi. Kalıcı kaynağı bundle: `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`
+      (`d202775`); yerel `arsiv/klasorleme` etiketi yalnız bu checkout'ta. Geri almak için
+      (bundle dalı uzak izleme adıyla taşıyor):
+      `git fetch ~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle refs/remotes/origin/klasorleme:refs/heads/klasorleme`.
+      Testleri o dalda `swap`, `bar`, `rows` ve `pool` test dosyaları (`git ls-tree -r
+      klasorleme`); main'de karşılıkları
       `src/constraints.test.ts` (takas), `src/programView.test.ts` ve `src/programScreen.test.tsx`.
       Eksik olanlar:
       - takas: kaynak blok sabitliyse takas yok (main yalnız sabit hedefi soruyor);
