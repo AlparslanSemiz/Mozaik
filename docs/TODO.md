@@ -650,7 +650,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       listesi~~ · iki programı karşılaştırma · ders ızgarası toplu giriş.**
       (aSc kova 4; altısı da küçük ve birbirinden bağımsız — bir "boş vakit"
       turu.) **Kısayol listesi bitti (2026-08-31, kırk beşinci oturum):**
-      `src/ui/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
+      `src/ui/shell/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
       paleti, dört dilde çeviri, `e2e/palet.spec.ts` 54. Kalan beşi açık.
 - [ ] **B6.6 Kapanırken kaydedilmemiş değişiklik uyarısı — muhtemelen
       GEREKMİYOR.** Her değişiklik 400 ms gecikmeyle kaydediliyor ve sekme
@@ -1304,13 +1304,13 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
 | RF9 | öğretmen ve sınıf kâğıdı `Print()`'in içinde, ayrı üretilemiyor | `src/ui/Print.tsx` |
 | RF10 | şerit tek fonksiyonda yedi sekme | `src/ui/Ribbon.tsx` |
-| RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/App.tsx` |
+| RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/shell/App.tsx` |
 | RF12 | liste ekranlarının ortak iskeleti kopya | `src/ui/setup/`, `src/ui/lessons/` |
 | RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada (birim testi 2026-10-09'dan beri var, `useSolver.test.tsx`) | `src/platform/search/useSolver.ts` |
 | RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/model/types.ts` |
 | RF15 | `t()`'den geçmeyen dizeler (özellik işi, §8d) | `src/ui/` |
 | RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
-| RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
+| RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/shell/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
 | RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/entities.ts`, `src/pure/listview/listview.ts` |
 | RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/prefs/theme.ts` |

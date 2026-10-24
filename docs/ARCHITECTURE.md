@@ -14,7 +14,7 @@ src/pure/          constraints/* · entities/* · relax/* · feasibility/* · so
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · exe/* · changelog · update
    |
-src/ui/            main · Root · App · ve bütün bileşenler
+src/ui/            main · shell/* · common/* · ve ekranların alanları
 ```
 
 Klasör adları katmanların kendisi, yeni bir taksonomi değil: bir katman ihlali
@@ -24,7 +24,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -153,8 +153,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/search/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
 | `platform/storage/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
-| `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
-| `ui/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
+| `ui/shell/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
+| `ui/shell/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
 
 ### Bileşenler
 
@@ -166,9 +166,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/common/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
 | `ui/common/Toasts.tsx` | olan biteni söyleyen kısa satır |
 | `ui/program/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
-| `ui/Palette.tsx` | Ctrl+K kutusu |
-| `ui/Commands.tsx` | paletin komut listesi |
-| `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
+| `ui/shell/Palette.tsx` | Ctrl+K kutusu |
+| `ui/shell/Commands.tsx` | paletin komut listesi |
+| `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `loadStatusFacet` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |

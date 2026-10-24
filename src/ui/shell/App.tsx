@@ -2,19 +2,19 @@ import { Activity, useCallback, useRef, useState } from 'react';
 import { Keyboard, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import Commands from './Commands';
-import { health } from '../pure/feasibility';
-import { Check, InspectorProvider, LessonEditProvider, Program, lessonIcon } from './program';
-import { useDialogs, useToast, T, useLang, useT } from './common';
+import { health } from '../../pure/feasibility';
+import { Check, InspectorProvider, LessonEditProvider, Program, lessonIcon } from '../program';
+import { useDialogs, useToast, T, useLang, useT } from '../common';
 import type React from 'react';
-import { bundleVersionOf, BUNDLE_VERSION, readPlanFile } from '../pure/io';
+import { bundleVersionOf, BUNDLE_VERSION, readPlanFile } from '../../pure/io';
 import {
   useStore,
   isTextInput,
   downloadBackup,
   storageWorks,
   useFolder,
-} from '../platform/storage';
-import { planSummary } from '../pure/entities';
+} from '../../platform/storage';
+import { planSummary } from '../../pure/entities';
 import {
   applyMotion,
   applyRibbon,
@@ -39,20 +39,25 @@ import {
   type Tab,
   type PrintOptions,
   type ProgramColorMode,
-} from '../platform/prefs';
-import { attachScrollFade, attachRibbonScroll } from '../platform/dom';
-import { useSolver } from '../platform/search';
-import { useUpdate } from '../platform/update';
-import { APP_NAME, surumEtiketi } from '../leaf/app';
-import Setup from './setup';
-import Lessons from './lessons';
-import { Availability } from './availability';
-import Ribbon from './ribbon';
-import { NOTHING_EXCLUDED, Print, type Excluded } from './print';
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions, type ProgramMask } from '../pure/program';
-import Settings from './settings';
+} from '../../platform/prefs';
+import { attachScrollFade, attachRibbonScroll } from '../../platform/dom';
+import { useSolver } from '../../platform/search';
+import { useUpdate } from '../../platform/update';
+import { APP_NAME, surumEtiketi } from '../../leaf/app';
+import Setup from '../setup';
+import Lessons from '../lessons';
+import { Availability } from '../availability';
+import Ribbon from '../ribbon';
+import { NOTHING_EXCLUDED, Print, type Excluded } from '../print';
+import {
+  cleanMask,
+  EMPTY_PROGRAM_MASK,
+  solverExclusions,
+  type ProgramMask,
+} from '../../pure/program';
+import Settings from '../settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
-import { hasUnseenChangelog } from '../platform/changelog';
+import { hasUnseenChangelog } from '../../platform/changelog';
 
 /**
  * The seven sections, along the TOP — on the same row as the document identity

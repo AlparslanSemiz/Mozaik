@@ -244,7 +244,7 @@ const ES: Sozluk = {
   // src/ui/common/ColorPick.tsx
   Vazgeç: "Cancelar",
 
-  // src/ui/Commands.tsx
+  // src/ui/shell/Commands.tsx
   Git: "Ir a",
   Yap: "Hacer",
   "derslik yok": "sin aula",
@@ -330,7 +330,7 @@ const ES: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "Para ordenar las filas a mano, ponga **Ordenar** en «Orden de entrada» y quite el filtro.",
 
-  // src/ui/Palette.tsx
+  // src/ui/shell/Palette.tsx
   "Komut paleti": "Paleta de comandos",
   "Ara veya komut yaz": "Buscar o escribir un comando",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":

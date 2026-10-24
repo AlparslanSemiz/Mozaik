@@ -11,9 +11,9 @@
  * two callers share a definition rather than to teach the test a workaround.
  */
 import App from './App';
-import { DialogProvider, LangProvider, ToastProvider } from './common';
+import { DialogProvider, LangProvider, ToastProvider } from '../common';
 import { ShortcutsHelpProvider } from './ShortcutsHelp';
-import '../leaf/lang';
+import '../../leaf/lang';
 
 export default function Root() {
   // The language is OUTERMOST: every provider below it puts words on the

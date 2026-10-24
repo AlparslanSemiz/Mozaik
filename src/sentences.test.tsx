@@ -30,7 +30,7 @@ import {
 } from './pure/entities/entities';
 import { defaultLibrary } from './pure/io/library';
 import { storageReport } from './platform/storage/storageReport';
-import AppRoot from './ui/Root';
+import AppRoot from './ui/shell/Root';
 import { buildReport } from './pure/feasibility/feasibility';
 import { sampleState } from './pure/io/sample';
 import { SCHEMA_VERSION, type State } from './leaf/model/types';

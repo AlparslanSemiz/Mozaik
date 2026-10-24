@@ -16,11 +16,11 @@ import { useMemo } from 'react';
 import { DoorOpen, Play } from 'lucide-react';
 import Palette from './Palette';
 import type { Command } from './Palette';
-import { useInspect } from './program';
-import { useT } from './common';
-import { subjectLabel } from '../pure/entities';
-import { paletteColor, type State } from '../leaf/model';
-import type { Tab, ToolState } from '../platform/prefs';
+import { useInspect } from '../program';
+import { useT } from '../common';
+import { subjectLabel } from '../../pure/entities';
+import { paletteColor, type State } from '../../leaf/model';
+import type { Tab, ToolState } from '../../platform/prefs';
 
 interface Section {
   id: Tab;
