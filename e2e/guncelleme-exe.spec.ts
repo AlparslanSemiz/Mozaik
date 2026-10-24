@@ -103,12 +103,25 @@ test.describe('Güncelleme: yayınlanmış son exe → bu commit’in exe’si (
       const ogretmen = (eskiAcik.state.teachers as unknown[]).length;
       expect(seritte.replace(/\s+/g, ' ')).toContain(`Öğretmenler ${ogretmen}`);
 
+      // The old data with this test's own edit in it. From the first release
+      // that stores the address (v17), the old teacher already holds an
+      // `email` and the edit changes it; a migration that rewrites any OTHER
+      // value is still a loss here, on purpose, until the test says it is meant.
+      const YAZILAN = 'guncelleme@example.com';
+      const beklenen = (plan: Plan): Record<string, unknown> => {
+        if (plan.id !== eski.activeId) return plan.state;
+        const kopya = structuredClone(plan.state) as { teachers: Record<string, unknown>[] };
+        const ilk = kopya.teachers[0];
+        if (ilk !== undefined && 'email' in ilk) ilk.email = YAZILAN;
+        return kopya as unknown as Record<string, unknown>;
+      };
+
       // One change, so the plan is written by the new version: the v17 field,
       // through the box a person would use.
       await oturum.tikla('metin:Öğretmenler');
       const kutu = 'table.list tbody tr:first-child input[inputmode="email"]';
       await oturum.bekle(kutu, 15_000);
-      await oturum.yaz(kutu, 'guncelleme@example.com');
+      await oturum.yaz(kutu, YAZILAN);
       await oturum.js(`document.activeElement?.blur();`);
 
       const anahtarlar = Object.fromEntries(eski.plans.map((p) => [p.id, planKey(p.id)]));
@@ -124,7 +137,7 @@ test.describe('Güncelleme: yayınlanmış son exe → bu commit’in exe’si (
         );
       await expect
         .poll(async () => (await depo()).planlar[eski.activeId] ?? '', { timeout: 15_000 })
-        .toContain('guncelleme@example.com');
+        .toContain(YAZILAN);
 
       const { kitaplik, planlar } = await depo();
       const lib = JSON.parse(kitaplik ?? 'null') as {
@@ -138,25 +151,25 @@ test.describe('Güncelleme: yayınlanmış son exe → bu commit’in exe’si (
       for (const plan of eski.plans) {
         const yeni = JSON.parse(planlar[plan.id] ?? 'null') as Record<string, unknown> | null;
         expect(yeni, `${plan.name} depoda`).not.toBeNull();
-        expect(kayiplar(plan.state, yeni), `${plan.name}: depoda kaybolan`).toEqual([]);
+        expect(kayiplar(beklenen(plan), yeni), `${plan.name}: depoda kaybolan`).toEqual([]);
       }
       const acikYeni = JSON.parse(planlar[eski.activeId]!) as {
         schemaVersion: number;
         teachers: { email?: unknown }[];
       };
       expect(acikYeni.schemaVersion).toBe(SCHEMA_VERSION);
-      expect(acikYeni.teachers[0]!.email).toBe('guncelleme@example.com');
+      expect(acikYeni.teachers[0]!.email).toBe(YAZILAN);
 
       // And the folder: the new version's own write, every plan in it.
       const dosya = join(yerler.klasor, 'ders-programi-tumu.json');
       await expect
         .poll(() => (existsSync(dosya) ? readFileSync(dosya, 'utf8') : ''), { timeout: 15_000 })
-        .toContain('guncelleme@example.com');
+        .toContain(YAZILAN);
       const klasorde = JSON.parse(readFileSync(dosya, 'utf8')) as { plans: Plan[] };
       expect(klasorde.plans.map((p) => p.id)).toEqual(eski.plans.map((p) => p.id));
       for (const plan of eski.plans) {
         const yeni = klasorde.plans.find((p) => p.id === plan.id)!.state;
-        expect(kayiplar(plan.state, yeni), `${plan.name}: klasörde kaybolan`).toEqual([]);
+        expect(kayiplar(beklenen(plan), yeni), `${plan.name}: klasörde kaybolan`).toEqual([]);
       }
       expect(klasorde.plans.find((p) => p.id === eski.activeId)!.state.schemaVersion).toBe(
         SCHEMA_VERSION,
