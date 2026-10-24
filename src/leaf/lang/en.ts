@@ -599,6 +599,10 @@ const EN: Sozluk = {
     "Not one plan in the file could be read; nothing has changed.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:plan|plans} opened, {yazilamayan} could not be written. Storage may be full. Keep the file.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:plan|plans} in the file {eksik:is|are} incomplete or broken and will not be opened.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:plan|plans} opened; {eksik} {eksik:was|were} incomplete or broken and not opened.",
   "{acilan} plan açıldı.": "{acilan} {acilan:plan|plans} opened.",
   "Bütün planlar tek dosyada": "Every plan in one file",
   "Tümünü dosyaya kaydet ({n} plan)": "Save all to file ({n} {n:plan|plans})",

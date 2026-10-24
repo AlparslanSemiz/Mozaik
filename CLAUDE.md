@@ -61,6 +61,14 @@ Riske göre, ayrıntısı [docs/TESTPLAN.md](docs/TESTPLAN.md)'nin "Test politik
 - Bulunan hata aynı dalda, kendi commit'inde, gerileme testiyle düzeltilir. Refactor dalı düzeltmez, TODO §8k'ye yazar. Veri kaybı sınıfında bir hata: durulur ve bildirilir.
 - Belge kapısı (`src/docs.test.ts`) yalnız yapıyı ölçer: bağlantı, yol, tuzak numarası, zorunlu bölüm. Kırmızıysa belge düzeltilir, kapı susturulmaz.
 
+## Bitti kontrolü
+
+Her kod değişikliğinden sonra, "bitti" demeden önce. Yalnız belge değişen dalda ikisi de yok. Ayrıntı [.claude/skills/paket-turu/SKILL.md](.claude/skills/paket-turu/SKILL.md)'nin "Bitti kontrolü"nde, her dal için geçerli.
+
+- **İnceleme.** Taze bağlamlı bir alt ajan `git diff main...HEAD`'i doğruluk, veri riski (depo adları, şema, yedekler), sadelik ve bayatlayan belge cümlesi için okur, düzeltmez. Geçerli bulgular ayrı commit'lerde düzeltilir, reddedilenler tek cümlelik gerekçeyle raporda.
+- **Tıklama testi**, değişiklik kullanıcıya görünüyorsa: derlenmiş `dist/index.html` `file://` ile Playwright Chromium'da 1920×1080'de, yalnız sahte veriyle (Alp'in Chrome'u, gerçek veri ve Roboders asla). Değişen akış ve komşu bir akış kullanıcı gibi tıklanır, her adımdan sonra ekran görüntüsüne bakılır, az gören biri için yazı boyu ve kontrast. Betik ve görüntüler `scratch/`'te kalır, commit'lenmez, yeni test süiti olmaz.
+- Raporda "İnceleme ve tıklama testi" bölümü: bulgular (düzeldi, ya da düzelmedi ve neden), tıklama yolu, iki üç ekran görüntüsünün yolu.
+
 ## Ne zaman durulur
 
 Yalnız beş durumda durulur ve sorulur: veri kaybı riski, Roboders'e ya da gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış bir eylem, kullanıcının parası ya da hesapları.
@@ -73,7 +81,7 @@ Etiketi yalnız `npm run yayinla` atar, ana klasörde ve `main`'de, ve `ci.yml` 
 
 ## Rapor
 
-Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları, (2) durdum çünkü: yukarıdaki beşten biri ya da "durmadım", (3) aldığım kararlar, (4) karar gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir, (5) not edilenler, (6) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`. Uzun tablolar `scratch/`'te bir dosyaya yazılır, mesaj ona işaret eder.
+Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları, (2) durdum çünkü: yukarıdaki beşten biri ya da "durmadım", (3) aldığım kararlar, (4) karar gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir, (5) not edilenler, (6) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`, (7) kod değiştiyse "İnceleme ve tıklama testi" (yukarıda). Uzun tablolar `scratch/`'te bir dosyaya yazılır, mesaj ona işaret eder.
 
 ## Oturum sonu
 

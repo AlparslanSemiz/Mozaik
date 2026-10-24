@@ -6,30 +6,21 @@
 // Now `park` arrives as an argument, so the rule is in the signature — a
 // caller that does not have a way to flush cannot build these controls at all.
 //
-// The seam is pitfall 28 on one side and pitfall 27 on the other, and the two
-// are opposites that look alike:
+// `park()` writes the outgoing plan, then cancels the timer (pitfall 28).
+// Every switch, create and delete needs it, or the last edit before the move
+// is dropped silently. The bundle import needs it too. It used to CANCEL the
+// timer without writing (`discardPendingSave`, pitfall 27 mirrored: a write
+// landing 400 ms later inside the incoming library), but since TB8 a plan can
+// stay through an import, and then its last edit was gone (TB1's review,
+// 2026-10-24). Writing first and cancelling after covers both: the key is
+// overwritten if the file replaces the plan, and kept if it stays.
 //
-//   `park()`               writes the outgoing plan, then cancels the timer.
-//                          Every switch, create and delete needs it, or the
-//                          last edit before the move is dropped silently.
-//   `discardPendingSave()` cancels the timer WITHOUT writing. Only the bundle
-//                          import wants this: the key it would write to is
-//                          about to be overwritten, and a pending write landing
-//                          400 ms later would put the outgoing plan inside the
-//                          incoming library. Measured during the split: today
-//                          the autosave effect already clears its own handle
-//                          whenever the box changes, so removing this call
-//                          changes no observable behaviour. It is kept as the
-//                          statement of intent, and `useStore.ts` says so at
-//                          the point where the timer is owned.
-//
-// `useStore.ts` owns the timer and hands both of these down; the comment there
-// points back here.
+// `useStore.ts` owns the timer and hands `park` down.
 
 import { useCallback, useState } from 'react';
 
 import type { Bundle } from '../pure/bundle';
-import { parseState } from '../pure/parseState';
+import { readBundlePlans } from '../pure/parseState';
 import {
   addPlan,
   findPlan,
@@ -52,13 +43,11 @@ export interface PlanSeam {
   planId: Id;
   /** Writes the outgoing plan NOW and cancels the pending autosave (pitfall 28). */
   park: () => void;
-  /** Cancels the pending autosave without writing it (pitfall 27, mirrored). */
-  discardPendingSave: () => void;
   /** Puts a state in the box and makes that plan the open one. */
   openPlan: (id: Id, state: State) => void;
 }
 
-export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSeam) {
+export function usePlans({ planId, park, openPlan }: PlanSeam) {
   const [library, setLibrary] = useState<Library>(readLibrary);
 
   const commit = useCallback((next: Library) => {
@@ -129,53 +118,64 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
    *
    * The order of the steps below is the safety argument, not housekeeping:
    *
-   *  1. cancel the pending autosave. `park()` is deliberately NOT used here —
-   *     park WRITES the outgoing plan, and its key is about to be overwritten.
-   *     But leaving the timer alive is pitfall 27 in a mirror: 400 ms later the
-   *     old state would land in the newly imported library's key.
-   *  2. parse everything BEFORE touching storage. If not one plan can be read,
-   *     nothing at all changes: a half-finished import is two truths.
-   *  3. write the data, counting what did not fit (quota).
+   *  1. park the outgoing plan: write it, and cancel the pending autosave.
+   *     Leaving the timer alive is pitfall 27 in a mirror (400 ms later the old
+   *     state would land in the imported library's key), and cancelling without
+   *     writing lost the last edit of a plan that stays (head of this file).
+   *  2. parse everything BEFORE touching storage, with the top bar's rule
+   *     (`readBundlePlans`, TB8). If not one plan can be read, nothing at all
+   *     changes: a half-finished import is two truths. A plan the file could
+   *     not read does not take away the one here with its id: the file meant
+   *     to replace it and has nothing to replace it with.
+   *  3. write the data, counting what did not fit (quota). If not one plan
+   *     was written, stop here: nothing has changed yet, and dropping the
+   *     plans here would make the import a loss. A plan that did not fit is
+   *     treated like an unreadable one: the plan here with its id stays, and
+   *     with no plan here it gets no directory row.
    *  4. drop the keys of plans the incoming library does not have.
    *  5. write the directory LAST, once its data is really in place — the same
    *     rule createPlan already follows.
    */
   const replaceLibrary = useCallback(
-    (bundle: Bundle): { ok: number; failed: number } => {
-      discardPendingSave();
+    (bundle: Bundle): { ok: number; failed: number; unreadable: number } => {
+      park();
 
-      const parsed: Array<{ id: Id; state: State }> = [];
-      for (const plan of bundle.library.plans) {
-        const raw = bundle.states[plan.id];
-        const state = raw === undefined ? null : parseState(JSON.stringify(raw));
-        if (state !== null) parsed.push({ id: plan.id, state });
-      }
-      if (parsed.length === 0) return { ok: 0, failed: bundle.library.plans.length };
+      const { plans: parsed, unreadable } = readBundlePlans(bundle);
+      if (parsed.length === 0) return { ok: 0, failed: 0, unreadable: unreadable.length };
 
-      const kept = new Set(parsed.map((x) => x.id));
-      let failed = bundle.library.plans.length - parsed.length;
-      let ok = 0;
+      const written = new Set<Id>();
+      let failed = 0;
       for (const { id, state } of parsed) {
-        if (savePlan(id, state)) ok++;
+        if (savePlan(id, state)) written.add(id);
         else failed++;
       }
+      if (written.size === 0) return { ok: 0, failed, unreadable: unreadable.length };
 
+      // Every plan the file names but could not deliver: unreadable or did not fit.
+      const missed = new Set(
+        [...unreadable, ...parsed.map((x) => x.id)].filter((id) => !written.has(id)),
+      );
+      const stays = new Map(library.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]));
       for (const plan of library.plans) {
-        if (!kept.has(plan.id)) dropPlanText(plan.id);
+        if (!written.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
 
+      const fromFile = bundle.library.plans.flatMap((p) => {
+        if (written.has(p.id)) return [p];
+        const here = stays.get(p.id);
+        return here === undefined ? [] : [here];
+      });
       const next: Library = {
-        plans: bundle.library.plans.filter((p) => kept.has(p.id)),
-        activeId: kept.has(bundle.library.activeId) ? bundle.library.activeId : parsed[0]!.id,
+        plans: [...fromFile, ...[...stays.values()].filter((p) => !fromFile.includes(p))],
+        activeId: written.has(bundle.library.activeId)
+          ? bundle.library.activeId
+          : parsed.find((x) => written.has(x.id))!.id,
       };
       commit(next);
-      openPlan(
-        next.activeId,
-        parsed.find((x) => x.id === next.activeId)?.state ?? parsed[0]!.state,
-      );
-      return { ok, failed };
+      openPlan(next.activeId, parsed.find((x) => x.id === next.activeId)!.state);
+      return { ok: written.size, failed, unreadable: unreadable.length };
     },
-    [library, commit, discardPendingSave, openPlan],
+    [library, commit, park, openPlan],
   );
 
   return {

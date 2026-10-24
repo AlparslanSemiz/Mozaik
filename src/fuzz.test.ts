@@ -18,14 +18,15 @@
 // and the properties hold it to never throwing.
 //
 // FUZZ_RUNS raises the run count (the nightly run); the default keeps the file
-// to a few seconds. The "Tümünü dosyadan aç" reader (`parseBundle` and the
-// `parseState` behind it) is deliberately not here yet: what it does with a
-// half plan is TB8, a data-loss finding waiting for a decision.
+// to a few seconds. The "Tümünü dosyadan aç" reader (`readBundlePlans`) came
+// with TB8's fix (2026-10-23): one broken plan beside an intact one, and the
+// intact one always opens while the broken one is refused or whole.
 
 import { readFileSync } from 'node:fs';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { readPlanFile } from './pure/parseState';
+import { buildBundle, parseBundle } from './pure/bundle';
+import { readBundlePlans, readPlanFile } from './pure/parseState';
 import { parseClasses, parseLessons, parseRooms, parseTeachers, splitGrid } from './pure/import';
 
 const RUNS = Number(process.env['FUZZ_RUNS'] ?? 300);
@@ -270,5 +271,62 @@ describe('fuzz · Excel’den yapıştırma (import.ts)', () => {
     const read = parseLessons('411\tMÇ\t100000\t2');
     expect(read.accepted[0]?.weeklyHours).toBe(100000);
     expect(read.accepted[0]?.blocks).toHaveLength(50000);
+  });
+});
+
+describe('fuzz · "Tümünü dosyadan aç" (readBundlePlans, TB8)', () => {
+  const root = load('src/fixtures/v16.json');
+  /** Two plans: a broken one first, the intact school second. */
+  const bundleOf = (x: Json) => {
+    const text = buildBundle(
+      {
+        activeId: 'a',
+        plans: [
+          { id: 'a', name: 'Bozuk', draft: false },
+          { id: 'b', name: 'Tam', draft: false },
+        ],
+      },
+      { a: x, b: root },
+    );
+    const bundle = parseBundle(text);
+    if (bundle === null) throw new Error('paket okunamadı');
+    return bundle;
+  };
+
+  it(
+    'bozuk planın yanındaki tam plan hep açılıyor, bozuk olan ya reddediliyor ya bütün',
+    {
+      timeout: TIMEOUT,
+    },
+    () => {
+      fc.assert(
+        fc.property(broken(root), (x) => {
+          // An entry whose state is not an object never reaches the reader:
+          // parseBundle drops it and names it in `skipped`, an unreadable plan.
+          const { plans, unreadable } = readBundlePlans(bundleOf(x));
+          expect(plans.map((p) => p.id)).toContain('b');
+          for (const p of plans) expect(wholeness(p.state), p.id).toBeNull();
+          expect(plans.length + unreadable.length).toBeGreaterThanOrEqual(1);
+        }),
+        { numRuns: RUNS, seed: 20261023 },
+      );
+    },
+  );
+
+  it('dört listeden biri hiç olmayan plan açılmıyor', { timeout: TIMEOUT }, () => {
+    const missing = fc.subarray(LISTS, { minLength: 1 }).chain((gone) =>
+      broken(root).map((x) => {
+        let y = x;
+        for (const field of gone) y = edit(y, [field], undefined, true);
+        return y;
+      }),
+    );
+    fc.assert(
+      fc.property(missing, (x) => {
+        const { plans } = readBundlePlans(bundleOf(x));
+        expect(plans.map((p) => p.id)).toEqual(['b']);
+      }),
+      { numRuns: RUNS, seed: 20261023 },
+    );
   });
 });

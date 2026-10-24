@@ -26,6 +26,18 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · bitti kontrolü (alt ajan incelemesi ve tıklama testi) · `tb8-eksik-plan`
+Bulgu: (1) `parseBundle` `state`'i nesne olmayan girdiyi sayılmadan atıyordu, buradaki aynı
+kimlikli plan "Hepsini değiştir"den sonra siliniyordu. (2) TB8'den eski: depo doluyken hiçbir
+plan yazılamazsa dosyada olmayan yerel planlar yine siliniyor, not "hiçbir şey değişmedi"
+diyordu; yazılamayan yeni plan dizinde verisiz satır kalıyordu. Üçü de birim testinde
+kırmızıydı. Tıklama testi (`dist/index.html`, Chromium, 1920×1080, örnek okul): kesik paket
+dosyası tek plan dosyası sanılıyor, Ayarlar'daki durum notu 13 px.
+Tür: ürün kusuru, (1) ve (2) veri kaybı sınıfı.
+Ne yapıldı: (1) ve (2) aynı dalda düzeltildi, testleri `src/storeContract.test.ts`'te. Kesik
+dosya ve 13 px TODO B7.35 ve B7.36, daha yeni planın cümlesi B7.34.
+Kalıcı kural: yok.
+
 ### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
 Bulgu: ana E2E 635/637, iki kırmızı. (1) "kayıt çalışmıyorsa kalıcı kırmızı uyarı":
 `.save-warning` iki elemana çözüldü, "otomatik kayıt çalışmıyor" ve VK2'nin "depolama alanı
@@ -116,7 +128,8 @@ yalnız plan sayısını söylüyor. Arayüzde uçtan uca koşulmadı.
 Tür: ürün kusuru, veri kaybı sınıfı (onaydan sonra).
 Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi. Kullanıcının kararı
 (2026-10-10): düzeltmesi ve testi TB7 ile birlikte, `fix/veri-kaybi` birleşir birleşmez
-`main`'den açılan ikinci düzeltme dalında.
+`main`'den açılan ikinci düzeltme dalında. Düzeltildi (2026-10-23 ve 24, `tb8-eksik-plan`,
+`readBundlePlans`), gerileme testleri `src/storeContract.test.ts` ve `e2e/planlar.spec.ts`'te.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · `scratch/test-plan/b2-klasor.mjs` ve `klasor.spec.ts` · kapanan sekmenin klasör yazımı

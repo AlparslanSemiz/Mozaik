@@ -18,6 +18,7 @@ import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
 import { emptyState } from '../../pure/entities';
+import { readBundlePlans } from '../../pure/parseState';
 import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
 import {
   routeName,
@@ -568,14 +569,27 @@ export default function Data({
       return;
     }
 
-    const incoming = bundle.library.plans.length;
+    // Read before asking (TB8): the question counts what will really happen,
+    // and a file with not one readable plan is never offered as a replacement.
+    const read = readBundlePlans(bundle);
+    if (read.plans.length === 0) {
+      setNote({ bad: true, text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.') });
+      return;
+    }
+    const eksik = read.unreadable.length;
+    // A plan here whose counterpart in the file is unreadable stays.
+    const stays = plans.library.plans.filter((p) => read.unreadable.includes(p.id)).length;
+    const replaced = t(
+      'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
+      { buradaki: planCount - stays, gelen: read.plans.length },
+    );
     if (
       !(await confirm({
         title: t('Bu bilgisayardaki bütün planların yerine geçecek'),
-        body: t(
-          'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
-          { buradaki: planCount, gelen: incoming },
-        ),
+        body:
+          eksik > 0
+            ? `${replaced} ${t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik })}`
+            : replaced,
         confirmLabel: t('Hepsini değiştir'),
         danger: true,
       }))
@@ -583,8 +597,10 @@ export default function Data({
       return;
     }
 
-    const { ok, failed } = plans.replaceLibrary(bundle);
-    if (ok === 0) {
+    const { ok, failed, unreadable } = plans.replaceLibrary(bundle);
+    // With storage full and not one plan written, nothing changed either, but
+    // the reason is the storage, and the note below says so.
+    if (ok === 0 && failed === 0) {
       setNote({
         bad: true,
         text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
@@ -592,14 +608,19 @@ export default function Data({
       return;
     }
     setNote({
-      bad: failed > 0,
+      bad: failed > 0 || unreadable > 0,
       text:
         failed > 0
           ? t(
               '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
               { acilan: ok, yazilamayan: failed },
             )
-          : t('{acilan} plan açıldı.', { acilan: ok }),
+          : unreadable > 0
+            ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
+                acilan: ok,
+                eksik: unreadable,
+              })
+            : t('{acilan} plan açıldı.', { acilan: ok }),
     });
   }
 

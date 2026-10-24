@@ -413,6 +413,40 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await expect(page.locator('table.list tbody tr')).toHaveCount(2);
   });
 
+  // TB8 (veri kaybı sınıfı). A backup whose plan has lost its teacher list
+  // used to open as an empty plan after "Hepsini değiştir", and the plan this
+  // computer had was gone. If the old path asks, the test says yes, because
+  // that is the answer a person gives to a question about a file they chose.
+  test('TB8: öğretmen listesi eksik paket hiçbir şeyi değiştirmiyor', async ({ page }) => {
+    const before = await openWithOneLesson(page);
+    expect(before).toBeGreaterThan(0);
+    await openPlans(page);
+    const { text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+    const bundle = JSON.parse(text) as { plans: Array<{ state: Record<string, unknown> }> };
+    delete bundle.plans[0]!.state['teachers'];
+
+    await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
+      name: 'ders-programi-tumu-2026-10-23-2300.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(bundle)),
+    });
+    const note = page
+      .locator('.panel', { hasText: 'Bütün planlar tek dosyada' })
+      .locator('.hint[role="status"]');
+    // The save above left its own line there; what counts is the line after it.
+    await expect(
+      page.locator('.dlg').or(note.filter({ hasNotText: 'dosyaya yazıldı' })),
+    ).toBeVisible();
+    if ((await page.locator('.dlg').count()) > 0) await answerDialog(page);
+
+    await expect(note).toContainText('hiçbir şey değişmedi');
+    expect(await placedCards(page)).toBe(before);
+    await openSetup(page, 'Öğretmenler');
+    expect(await page.locator('table.list tbody tr').count()).toBeGreaterThan(0);
+  });
+
   test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
     await openWithSample(page);
     const single = await grab(page, () =>
