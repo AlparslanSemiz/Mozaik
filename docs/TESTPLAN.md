@@ -387,9 +387,10 @@ değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanı�
 2 s'lik yazım dolmadan kapanan sekmenin değişikliği depoda kalıyor, klasör bir değişiklik
 geride kalıyor ve sonraki açılış onu klasöre yazıyor; yani gecikme, kayıp değil. Deponun
 kapanış flush'ı kalkınca test kırmızı (mutasyonla, 2026-10-24). Exe'de pencere sayfayı bekliyor (2026-10-24);
-o yarının sayfa tarafı `src/desktop.test.ts`'te, pencerenin kendisi elle ölçüldü (gerçek
-bir WM_DELETE_WINDOW ile Linux ikilisinde; WebDriver'ın pencere kapatması Tauri'nin
-kapanma isteğinden geçmiyor, o yüzden gerçek exe süitine girmedi).
+o yarının sayfa tarafı `src/desktop.test.ts`'te, pencerenin kendisi gerçek exe süitinde
+(`gercek-exe.spec.ts`, pencere yöneticisinin kapatma mesajıyla; WebDriver'ın pencere
+kapatması Tauri'nin kapanma isteğinden geçmiyor). O test etiketten önce Windows'ta da yeşil
+olur (BUILD, "Sürüm"); düzeltmesiz Linux ikilisine karşı kırmızıydı.
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
@@ -419,7 +420,11 @@ kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği,
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
 uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
-sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
+sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
+pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
+WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
+kapanma isteğinden geçmiyor; Wayland masaüstünde süit bunun için XWayland'de koşar).
+Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
 

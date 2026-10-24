@@ -1670,6 +1670,11 @@ testi o commit'te sıradan bir teste döner.
       eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
       yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı). Kapanırken 5 s'yi aşan
       bir cevapsızlık ölçülmedi.
+      **Etiket kapısı (2026-10-24, kullanıcının kararı):** `gercek-exe.spec.ts`'te "X ile hemen
+      kapanan pencere…" testi (son değişiklik, X, yeniden açılış, değişiklik yerinde) Linux'ta
+      14/14'le yeşil, düzeltmesiz ikiliye karşı kırmızı; Windows yarısı (`pencere-kapat.mjs`'in
+      WM_CLOSE'u) yazıldı, koşulmadı: Windows'ta gerçek exe süiti TP7. Bir sonraki sürümde
+      etiketten önce Windows'ta yeşil olur (BUILD, "Sürüm").
       **Tarayıcı yarısı veri kaybı değil (2026-10-24, kullanıcının sorusu):** beş koşunun beşinde
       değişiklik kapanıştan sonra depoda, klasör bir değişiklik geride, sonraki açılış onu klasöre
       yazıyor (`klasor.spec.ts`, BİLİNEN KUSUR'dan sıradan teste döndü; deponun kapanış flush'ı
