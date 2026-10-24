@@ -41,8 +41,8 @@ describe('yayınlama betiğinin git komutları', () => {
 });
 
 describe('yayınlama betiğinin yeri: ana klasör ve main', () => {
-  // Since 2026-10-09 every piece of work has its own branch and worktree, and
-  // only the main checkout holds `main`. A release from anywhere else tags a
+  // Work happens on branches, in the main checkout or a temporary worktree, and
+  // only the main checkout on `main` may release. A release from anywhere else tags a
   // commit the site does not publish. Measured in a throwaway repository, so
   // the answer does not depend on where this test happens to run.
   const kok = realpathSync(mkdtempSync(join(tmpdir(), 'mozaik-yayin-yeri-')));

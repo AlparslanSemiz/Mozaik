@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-23.
+Son güncelleme: 2026-10-24.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -31,9 +31,10 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Çalışma düzeni (2026-10-23, süreç sadeleşti, DECISIONS).** `~/GitHub/Mozaikler/Mozaik`
-yalnız `main`'i tutar, her iş kendi dalında ve yanındaki kendi worktree'sinde, "Şu an"ı
-birleşen dalın son commit'i yazar. Durma sebepleri beş (veri kaybı riski, Roboders'e ya da
+**Çalışma düzeni (2026-10-23, süreç sadeleşti, DECISIONS).** Tek kalıcı checkout,
+`~/GitHub/Mozaikler/Mozaik`; her iş `main`'den açılan bir dalda, paralel çalışan her oturum
+ya da ajan geçici bir worktree'de, dalı birleşince kaldırılır. "Şu an"ı birleşen dalın son
+commit'i yazar. Durma sebepleri beş (veri kaybı riski, Roboders'e ya da
 gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış eylem, kullanıcının parası ya da
 hesapları), gerisi raporda "Aldığım kararlar". Test riske göre ([TESTPLAN.md](TESTPLAN.md),
 "Test politikası"): commit'ten önce yalnız `npm run hizli` ve dokunulan testler, tam
@@ -53,7 +54,8 @@ TP-B birikim maddesi. TB8 düzeldi (`tb8-eksik-plan`), paket yolunun fuzz'u onun
 **Sıradaki iş.** TB8 düzeldi (`tb8-eksik-plan`). Sırada TB7 (kapanan sekmenin son değişikliği
 klasöre inmiyor) ve TB1'in kalanı (üst çubuktaki "Dosyadan aç" bozuk dosyada istisna atıyor),
 ikisi de veri kaybı sınıfı, her biri `main`'den açılan kendi dalında, önce kırmızı gerileme
-testi (TODO §8l). Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor` 2026-10-23'te kalktı.
+testi (TODO §8l). Birleşmeyi bekleyen öteki iki dal: `ozellik/asil-ikon` (`Mozaik-ikon`) ve
+`ruflo/kurulum` (Alp'in deny testi, o dalın TODO B7.33'ü; önce birleşen numarayı alır).
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -154,8 +156,6 @@ testi (TODO §8l). Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor` 2026-10
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
-
-
 ---
 
 ## 2026-10-24 · TB8'in bitti kontrolü (`tb8-eksik-plan`)
@@ -192,6 +192,33 @@ kontrast 17,5; Ayarlar'daki durum notu 13 px (B7.35). Düzeltmeden sonra yeniden
 **Koşulan.** `hizli` (1346 geçti), `storeContract`, `bundle`, `fuzz`, `docs` testleri, `tsc`,
 `eslint`, `prettier`, `npm run build`, tıklama testi iki kez (`agir.sh`). **Koşulmayan.** E2E
 yerelde (CI'da), mutasyon.
+
+---
+
+## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
+
+**Durum.** Üç worktree açıktı: `Mozaik-ikon`, `Mozaik-surec`, `Mozaik-tb8`. Hiçbirinde cwd'si
+içeride bir süreç yoktu, ama sabah 09:58'de aynı anda üç oturum açıldı. Cwd'leri ana klasördeydi,
+ikisi mutlak yolla worktree'lere yazıyordu: biri `Mozaik-ikon`'da küçük ikonun mavisini
+değiştiriyordu (commit edilmemiş dört dosya onun), öteki `tb8-eksik-plan`'a `main`'i
+birleştirip inceleme ve tıklama testi yapacaktı. İkisine dokunulmadı.
+
+**Birleşen.** `surec-sadelestirme` (bfa6099), `main`'in torunuydu, `main` ona ileri sarıldı
+(`--ff-only`), çatışma yok. Önce `npm run hizli` dalın ucunda yeşil (1339 geçti, 1 atlandı),
+dalın CI'ı yeşildi (40028473202). Worktree'nin `scratch/mutasyon-kaniti/`'si
+`~/GitHub/Mozaikler/arsiv/Mozaik-surec/`'e kopyalandı, worktree kaldırıldı, dal yerelde ve
+origin'de silindi.
+
+**Kural.** Alp'in cevabı: tek kalıcı checkout, paralel çalışan her oturum ya da ajan geçici
+bir worktree'de (DECISIONS 2026-10-23, CLAUDE.md "Çalışma düzeni"). `surec`'in "her iş kendi
+worktree'sinde" cümlesi ve eski 2026-10-23 kaydı bununla değişti; BUILD, `git-komut.mjs`,
+`linux-kur.sh` ve `gitKomut.test.ts`'teki yorumlar da. Bu dal da (`belge/calisma-yeri`) kendi
+geçici worktree'sinde yazıldı.
+
+**Bekleyen.** `ozellik/asil-ikon` ve `tb8-eksik-plan`: canlı oturumları var, onlar ya da Alp
+birleştirir. `ikon`'un TODO numarası B7.32, `main`'deki B7.32 `surec`'in (`yayinla` kilit
+dosyası); `ikon` birleşirken ilk boş numarayı alır. `ruflo/kurulum`: Alp'in deny testini
+bekliyor; birleşirken CLAUDE.md'deki çakışma bu kuralın ve sadeleşen sürecin lehine çözülür.
 
 ---
 
