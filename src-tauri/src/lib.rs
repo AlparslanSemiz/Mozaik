@@ -1,8 +1,8 @@
 //! The .exe shell — task 4g/4h.
 //!
 //! What this is NOT: a backend. The no-server principle is unchanged; there is no server,
-//! no database, no account and no API here. There is one folder and three
-//! calls that put files in it.
+//! no database, no account and no API here. There is one folder and four
+//! calls that write, list, read back and remove the files in it.
 //!
 //! WHY IT EXISTS AT ALL. The tool already reaches my father three other ways
 //! (a double-clicked dist/index.html, a GitHub Pages site, a local server on
@@ -15,7 +15,7 @@
 //!
 //! WHERE THE RULES LIVE. Not here. The file names, the daily-backup name, the
 //! "keep the last ten" prune and the flush order are all in `src/folder.ts`
-//! and stay there — `src/desktop.ts` dresses these three commands up as a
+//! and stay there — `src/desktop.ts` dresses these commands up as a
 //! `FileSystemDirectoryHandle` so `saveInto()` runs UNCHANGED in the exe. A
 //! rule that means one thing in the browser and another in the exe is the
 //! thing this project spends most of its comments avoiding.
@@ -123,6 +123,21 @@ fn list_in(dir: &Path) -> Result<Vec<String>, String> {
     Ok(names)
 }
 
+/// Reads one file back, or `None` when it is not there.
+///
+/// The page reads its own files before two decisions (`src/platform/storage/folder.ts`,
+/// A2 of the 2026-10-24 audit): whether an empty bundle may go over a file,
+/// and which daily backups hold work and count toward the ten that are kept.
+/// The same name gate as writing: it can read exactly one folder.
+fn read_in(dir: &Path, name: &str) -> Result<Option<String>, String> {
+    safe_name(name)?;
+    match fs::read_to_string(dir.join(name)) {
+        Ok(text) => Ok(Some(text)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(format!("Okunamadı: {e}")),
+    }
+}
+
 /// Deletes one daily backup. Missing is not an error: the caller is pruning.
 fn remove_in(dir: &Path, name: &str) -> Result<(), String> {
     safe_name(name)?;
@@ -146,6 +161,11 @@ fn list_files(app: tauri::AppHandle) -> Result<Vec<String>, String> {
 #[tauri::command]
 fn remove_file(app: tauri::AppHandle, name: String) -> Result<(), String> {
     remove_in(&data_dir(&app)?, &name)
+}
+
+#[tauri::command]
+fn read_file(app: tauri::AppHandle, name: String) -> Result<Option<String>, String> {
+    read_in(&data_dir(&app)?, &name)
 }
 
 /// The folder's path, for the "Veriler nerede" table — a person who is told
@@ -249,6 +269,7 @@ pub fn run() {
             write_file,
             list_files,
             remove_file,
+            read_file,
             data_dir_path,
             update::check_update,
             update::self_update_supported,
@@ -280,7 +301,7 @@ mod linux_tests {
 
 #[cfg(test)]
 mod tests {
-    use super::{list_in, remove_in, safe_name, write_in};
+    use super::{list_in, read_in, remove_in, safe_name, write_in};
     use std::fs;
     use std::path::PathBuf;
 
@@ -334,6 +355,7 @@ mod tests {
         let s = Scratch::new("gate");
         assert!(write_in(&s.0, "../kacti.json", "x").is_err());
         assert!(remove_in(&s.0, "../kacti.json").is_err());
+        assert!(read_in(&s.0, "../kacti.json").is_err());
         assert!(!s.0.parent().unwrap().join("kacti.json").exists());
     }
 
@@ -354,6 +376,18 @@ mod tests {
 
         // Pruning something already gone is the normal case, not an error.
         remove_in(&s.0, "ders-programi-2026-08-27.json").unwrap();
+    }
+
+    #[test]
+    fn reads_back_and_answers_none_for_a_missing_file() {
+        let s = Scratch::new("read");
+        write_in(&s.0, "ders-programi-tumu.json", "{\"bundleVersion\":1}").unwrap();
+        assert_eq!(
+            read_in(&s.0, "ders-programi-tumu.json").unwrap().as_deref(),
+            Some("{\"bundleVersion\":1}")
+        );
+        // Not there is an answer, not an error: the page then may write.
+        assert_eq!(read_in(&s.0, "ders-programi-2026-08-27.json").unwrap(), None);
     }
 
     #[test]

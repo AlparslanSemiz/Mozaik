@@ -137,7 +137,7 @@ export class Oturum {
   // script, screenshots and the window. So a click is a pointerdown/up pair
   // plus `click()` dispatched on the element, a key is a KeyboardEvent on the
   // focused element, and a drag is pointer events along a path, which is all
-  // platform/drag.ts listens to. The page cannot tell them from a hand except
+  // platform/dom/drag.ts listens to. The page cannot tell them from a hand except
   // by `isTrusted`, which nothing in src reads.
 
   /**
@@ -225,7 +225,7 @@ export class Oturum {
 
   /**
    * Drags from one element's centre to another's, in `adim` pointer moves one
-   * frame apart -- the drag in platform/drag.ts reads the cell under the
+   * frame apart -- the drag in platform/dom/drag.ts reads the cell under the
    * pointer once a frame, so a jump straight to the end would skip what a hand
    * shows on the way.
    */

@@ -2,17 +2,7 @@
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
 import { useMemo, useState } from 'react';
-import ListTools from '../ListTools';
-import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
-import { openHours } from '../../pure/entities';
-import type { Gender, Id, Teacher } from '../../leaf/types';
-import { PanelRight } from 'lucide-react';
-import { useInspect } from '../program';
-import { useDialogs } from '../Dialogs';
-import { parseTeachers } from '../../pure/import';
-import ColorPick from '../ColorPick';
+import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import {
   addSubject,
   addTeacher,
@@ -28,19 +18,16 @@ import {
   subjectLabel,
   subjectOption,
   subjectOptions,
-  subjectRank,
-  teacherRank,
-  teacherSubjects,
   updateTeacher,
   weeklyLoad,
 } from '../../pure/entities';
-import LimitBox from '../LimitBox';
-import { Paste } from '../lists';
-import type { PanelProps } from '../props';
-import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
-import { buildCapacity } from '../../pure/feasibility';
-import { loadStatusFacet } from './loadStatusFacet';
+import type { Gender, Id } from '../../leaf/model';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../program';
+import { useDialogs, ColorPick, LimitBox, type PanelProps, T, useT } from '../common';
+import { parseTeachers } from '../../pure/io';
+import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
+import { teacherListConfig } from '../../pure/lists';
 
 /** Sentinel option value: picking it opens a box instead of setting a subject. */
 const NEW = '\u0000yeni';
@@ -61,71 +48,7 @@ export default function Teachers({ state, change }: PanelProps) {
   // Twenty-five rows is where reading a column stops working, and the reader
   // asked for both halves of this: "listeleri ... grupça filtreleyebilelim"
   // and "sıralama ... branşa göre, isme göre vesaire".
-  const listCfg = useMemo<ListConfig<Teacher>>(() => {
-    const rank = subjectRank(state);
-    const capacity = buildCapacity(state);
-    return {
-      haystack: (t) =>
-        `${t.name} ${t.short} ${teacherSubjects(t).join(' ')} ${genderLabel(t.gender)}`,
-      facets: [
-        // BOTH subjects: a teacher who holds two belongs under either chip, and
-        // "Edebiyat" that could not find the person teaching it would be a
-        // filter that lies. The chips run in the school's own order, the one
-        // Ayarlar > Branşlar is dragged into — not the alphabet.
-        {
-          id: 'brans',
-          label: t('Branş'),
-          of: (x) => teacherSubjects(x).map(subjectLabel),
-          order: (name) => rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER,
-        },
-        // Blank is a group too, and it is the one worth finding: it is the
-        // list of rows still to be filled in.
-        {
-          id: 'cinsiyet',
-          label: t('Cinsiyet'),
-          of: (x) => genderLabel(x.gender),
-        },
-        loadStatusFacet<Teacher>(capacity.teachers, t),
-      ],
-      sorts: [
-        {
-          id: 'ad',
-          label: t('Ada göre'),
-          cmp: (a, b) => compareTr(a.name, b.name),
-        },
-        // The school's order, not the alphabet — and read from BOTH of a
-        // teacher's subjects, the way the chip above already does.
-        {
-          id: 'brans',
-          label: t('Branşa göre'),
-          cmp: (a, b) => teacherRank(rank, a) - teacherRank(rank, b) || compareTr(a.name, b.name),
-        },
-        {
-          id: 'yuk',
-          label: t('Ders yüküne göre'),
-          cmp: byNumberThen(
-            (x) => weeklyLoad(state, 'teacher', x.id),
-            (x) => x.name,
-          ),
-        },
-        {
-          id: 'acik',
-          label: t('Açık saate göre'),
-          cmp: byNumberThen(
-            (x) => openHours(state, x.id),
-            (x) => x.name,
-            'asc',
-          ),
-        },
-        {
-          id: 'cinsiyet',
-          label: t('Cinsiyete göre'),
-          cmp: (a, b) =>
-            compareTr(genderLabel(a.gender), genderLabel(b.gender)) || compareTr(a.name, b.name),
-        },
-      ],
-    };
-  }, [state, t]);
+  const listCfg = useMemo(() => teacherListConfig(state, t), [state, t]);
   const shown = applyList(state.teachers, query, listCfg);
   const order = useRowOrder({
     kind: 'teachers',

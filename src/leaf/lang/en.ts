@@ -153,6 +153,10 @@ const EN: Sozluk = {
     "**This plan was changed in another window.** This window no longer saves.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**The saved plan could not be read at startup.** Nothing was written over it.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**The saved plan could not be read.** Nothing was written over it; what you do here is not saved. You can open your backup file with **Open from file**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Automatic saving does not work on this computer.** Everything you do is lost when the program closes. Press **Save to file** often while you work, and always take a backup before shutting the computer down.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -162,7 +166,7 @@ const EN: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**Cannot write** to the **{klasor}** folder. {sebep} Right now your work is only in this browser.",
 
-  // src/ui/Availability.tsx
+  // src/ui/availability/Availability.tsx
   "{ad} sınıfı": "class {ad}",
   "{ad} dersliği": "room {ad}",
   "Müsait olmayan saatler": "Unavailable hours",
@@ -241,16 +245,16 @@ const EN: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "The advisor has nothing to say.",
   Öneri: "Note",
 
-  // src/ui/ColorPick.tsx
+  // src/ui/common/ColorPick.tsx
   Vazgeç: "Cancel",
 
-  // src/ui/Commands.tsx
+  // src/ui/shell/Commands.tsx
   Git: "Go to",
   Yap: "Do",
   "derslik yok": "no room",
   "{n} sınıf": "{n} {n:class|classes}",
 
-  // src/ui/DraftStart.tsx
+  // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı": "This draft's data could not be found",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
     'It is in the plan list but its own key is empty. The "Where the data is" table in Settings → About shows how many bytes each key holds.',
@@ -280,7 +284,7 @@ const EN: Sozluk = {
   "Ders sabitlendi.": "Lesson pinned.",
   "Sabitleme kaldırıldı.": "Lesson unpinned.",
 
-  // src/ui/LessonEdit.tsx
+  // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Most per day",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Changing the split clears this lesson from the timetable, pinned blocks included",
@@ -328,7 +332,7 @@ const EN: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "To reorder rows by hand, set **Sort** to «Order entered» and clear the filter.",
 
-  // src/ui/Palette.tsx
+  // src/ui/shell/Palette.tsx
   "Komut paleti": "Command palette",
   "Ara veya komut yaz": "Search or type a command",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":
@@ -632,6 +636,9 @@ const EN: Sozluk = {
   Oturum: "Session",
   "bir önceki": "the previous one",
   "{n} oturum önce": "{n} {n:session|sessions} ago",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "written by a newer version, this version cannot open it",
+  "okunamadı": "could not be read",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "Until then, **Save to file** in the top bar is the only remedy.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":
@@ -892,7 +899,7 @@ const EN: Sozluk = {
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "To reorder by hand, clear the filter and the sort",
 
-  // src/ui/useSample.ts
+  // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes} and {ders} {ders:lesson|lessons} will be deleted.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":
