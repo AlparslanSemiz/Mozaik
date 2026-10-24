@@ -11,13 +11,13 @@
 // unreadable record read as.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Preference } from './leaf/preference';
+import type { Preference } from './leaf/preference/preference';
 import * as changelog from './platform/changelog';
-import * as i18n from './leaf/i18n';
+import * as i18n from './leaf/i18n/i18n';
 import * as print from './platform/prefs/printOptions';
 import * as color from './platform/prefs/programColor';
-import * as theme from './platform/prefs/theme';
-import * as keys from './leaf/preferenceKeys';
+import * as theme from './platform/prefs';
+import * as keys from './leaf/preference/preferenceKeys';
 import styles from './styles.css?raw';
 import indexHtml from '../index.html?raw';
 

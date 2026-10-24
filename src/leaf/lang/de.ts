@@ -82,12 +82,6 @@ const DE: Sozluk = {
   "Bu dosya bütün planları içeriyor": "Diese Datei enthält alle Pläne",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "Diese Datei wurde mit einer neueren Version geschrieben",
-  "Okunamayan plan açılmadı: {adlar}.":
-    "Ein Plan, der nicht gelesen werden konnte, wurde nicht geöffnet: {adlar}.",
-  "· okunamadı": "· nicht lesbar",
-  "Kayıtlı metni okunamadı; açılmıyor, silinmedi.":
-    "Der gespeicherte Text konnte nicht gelesen werden; er wird nicht geöffnet und wurde nicht gelöscht.",
-  "Bu taslak okunamadı": "Dieser Entwurf konnte nicht gelesen werden",
   "Bu dosya okunamadı": "Diese Datei konnte nicht gelesen werden",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     "Sie ersetzt nicht einen einzelnen Plan, sondern alle Pläne auf diesem Computer. Verwenden Sie „Alle aus Datei öffnen“ unter Einstellungen → Pläne und Sicherung.",
@@ -160,6 +154,10 @@ const DE: Sozluk = {
     "**Dieser Plan wurde in einem anderen Fenster geändert.** Dieses Fenster speichert nicht mehr.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**Der gespeicherte Plan konnte beim Start nicht gelesen werden.** Er wurde nicht überschrieben.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**Der gespeicherte Plan wurde von einer neueren Version geschrieben.** Diese Version kann ihn nicht öffnen und überschreibt ihn nicht; was Sie hier tun, wird nicht gespeichert.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**Der gespeicherte Plan konnte nicht gelesen werden.** Er wurde nicht überschrieben; was Sie hier tun, wird nicht gespeichert. Ihre Sicherungsdatei öffnen Sie mit **Aus Datei öffnen**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Das automatische Speichern funktioniert auf diesem Computer nicht.** Alles geht verloren, wenn das Programm geschlossen wird. Drücken Sie beim Arbeiten häufig **In Datei speichern** und legen Sie vor dem Herunterfahren unbedingt eine Sicherung an.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -169,7 +167,7 @@ const DE: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "In den Ordner **{klasor}** kann **nicht geschrieben** werden. {sebep} Ihre Arbeit liegt derzeit nur in diesem Browser.",
 
-  // src/ui/Availability.tsx
+  // src/ui/availability/Availability.tsx
   "{ad} sınıfı": "Klasse {ad}",
   "{ad} dersliği": "Raum {ad}",
   "Müsait olmayan saatler": "Nicht verfügbare Stunden",
@@ -248,16 +246,16 @@ const DE: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "Der Berater hat nichts zu sagen.",
   Öneri: "Hinweis",
 
-  // src/ui/ColorPick.tsx
+  // src/ui/common/ColorPick.tsx
   Vazgeç: "Abbrechen",
 
-  // src/ui/Commands.tsx
+  // src/ui/shell/Commands.tsx
   Git: "Gehe zu",
   Yap: "Aktion",
   "derslik yok": "kein Raum",
   "{n} sınıf": "{n} {n:Klasse|Klassen}",
 
-  // src/ui/DraftStart.tsx
+  // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı":
     "Die Daten dieses Entwurfs wurden nicht gefunden",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
@@ -289,7 +287,7 @@ const DE: Sozluk = {
   "Ders sabitlendi.": "Stunde angeheftet.",
   "Sabitleme kaldırıldı.": "Anheftung gelöst.",
 
-  // src/ui/LessonEdit.tsx
+  // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Höchstens pro Tag",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Wird die Aufteilung geändert, verschwindet diese Stunde aus dem Plan, auch die angehefteten Blöcke",
@@ -338,7 +336,7 @@ const DE: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "Um Zeilen von Hand zu ordnen, stellen Sie **Sortieren** auf «Eingabereihenfolge» und entfernen Sie den Filter.",
 
-  // src/ui/Palette.tsx
+  // src/ui/shell/Palette.tsx
   "Komut paleti": "Befehlspalette",
   "Ara veya komut yaz": "Suchen oder Befehl eingeben",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":
@@ -647,6 +645,9 @@ const DE: Sozluk = {
   Oturum: "Sitzung",
   "bir önceki": "die vorige",
   "{n} oturum önce": "vor {n} {n:Sitzung|Sitzungen}",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "von einer neueren Version geschrieben, diese Version kann sie nicht öffnen",
+  "okunamadı": "nicht lesbar",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "Bis dahin ist **In Datei speichern** in der oberen Leiste das einzige Mittel.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":
@@ -910,7 +911,7 @@ const DE: Sozluk = {
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "Zum Ordnen von Hand Filter und Sortierung entfernen",
 
-  // src/ui/useSample.ts
+  // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:Lehrkraft|Lehrkräfte}, {sinif} {sinif:Klasse|Klassen} und {ders} {ders:Fach|Fächer} werden gelöscht.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":

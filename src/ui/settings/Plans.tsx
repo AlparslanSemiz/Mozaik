@@ -10,15 +10,13 @@
 // twenty classes.
 
 import { useMemo } from 'react';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, type PlanControls, T, useT } from '../common';
 import { emptyState, planSummary } from '../../pure/entities';
-import { drafts as draftsOf } from '../../pure/library';
-import { storedPlan } from '../../platform/planStore';
-import type { State } from '../../leaf/types';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/program';
-import type { PlanControls } from '../props';
-import DraftStart from '../DraftStart';
-import { T, useT } from '../T';
+import { drafts as draftsOf } from '../../pure/io';
+import { loadPlan } from '../../platform/storage';
+import type { State } from '../../leaf/model';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
+import { DraftStart } from '../plans';
 
 interface Props {
   state: State;
@@ -37,15 +35,12 @@ export default function Plans({ state, plans }: Props) {
       library.plans.map((plan) => {
         // The open plan is in memory; the others are parsed out of storage. A
         // plan whose key is gone must read as EMPTY, not borrow the open plan's
-        // numbers — that would invite deleting the wrong row. A plan whose
-        // text cannot be read is said apart (TB1): its key is NOT empty, and
-        // "verisi yok" would invite deleting the only copy.
-        const read = plan.id === planId ? { state } : storedPlan(plan.id);
+        // numbers — that would invite deleting the wrong row.
+        const stored = plan.id === planId ? state : loadPlan(plan.id);
         return {
           plan,
-          counts: planSummary('state' in read ? read.state : emptyState()),
-          missing: 'missing' in read,
-          broken: 'broken' in read,
+          counts: planSummary(stored ?? emptyState()),
+          missing: stored === null,
         };
       }),
     [library, planId, state],
@@ -137,7 +132,7 @@ export default function Plans({ state, plans }: Props) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ plan, counts, missing, broken }) => (
+          {rows.map(({ plan, counts, missing }) => (
             <tr key={plan.id} aria-current={plan.id === planId}>
               <td>
                 <input
@@ -153,14 +148,6 @@ export default function Plans({ state, plans }: Props) {
                 {missing && (
                   <span className="hint" title={t('Bu planın verisi bulunamadı')}>
                     <T k="· verisi yok" />
-                  </span>
-                )}
-                {broken && (
-                  <span
-                    className="hint"
-                    title={t('Kayıtlı metni okunamadı; açılmıyor, silinmedi.')}
-                  >
-                    {t('· okunamadı')}
                   </span>
                 )}
               </td>

@@ -2,7 +2,7 @@
 
 Kaydedilen verinin şekli, şema göçü, depolama anahtarları, dosya biçimleri ve kısıt kuralları.
 
-Tam hâli `src/leaf/types.ts`'te. Değiştirmek pahalı: yerleşim anahtarları, yedek
+Tam hâli `src/leaf/model/types.ts`'te. Değiştirmek pahalı: yerleşim anahtarları, yedek
 dosyaları ve localStorage içeriği bu şekle bağlı, o yüzden değiştirmeden önce
 düşünülür.
 
@@ -72,7 +72,7 @@ Alanların anlamı:
 
 ### Varsayılanlar
 
-Yeni bir proje (`entities.ts`) Salı'dan Pazar'a altı günle (Pazartesi yok) ve günde
+Yeni bir proje (`pure/entities/`) Salı'dan Pazar'a altı günle (Pazartesi yok) ve günde
 12 dersle doğar. Zil 09:00'da başlar: 40 dakika ders, 10 dakika teneffüs, 30
 dakika öğle arası. Öğle arası hafta içi 5. dersten, Cumartesi ve Pazar 6. dersten
 sonra, ve iki desende de 12. ders 19:10'da biter. `bell.test.ts` bunu açıkça iddia
@@ -112,6 +112,16 @@ indeksleri, program alternatifleri, yerleşimler ve sabitlemeler olduğu gibi
 geçer. Yalnız bir koşunun içindeki blok sınırı yeniden okunur, ve hiçbir sert
 kısıt o sınıra bakmaz (tuzak 75). Bilinmeyen, ileriki bir sürüm `null` döner,
 tahmin edilmez. Üst çubuk o dosyaya "okunamadı" değil "daha yeni bir sürümle yazılmış" der (`readPlanFile()`).
+
+Bu bilgisayarın deposundaki bir plan üç cevaptan birini verir: yok, okundu, okunamadı
+(`readStoredPlan()`). Okunamayan daha yeni bir sürümün planı, yarıda kesilmiş bir metin ya da
+`parseState`'i attıran bir gövde olabilir. Okunamayan anahtar dondurulur: açılışta, plan
+geçişinde ve silmeden sonra açılan planda ekrana boş bir yer tutucu gelir, kırmızı şerit
+nedenini söyler, ve ne otomatik kayıt ne klasör o anahtarın üstüne yazar. Dondurmayı yalnız
+kullanıcının açık bir eylemi kaldırır: "Dosyadan aç" ya da "Her şeyi sil" ile o planın yerine
+bir şey koymak, planı Planlar'dan silmek, ya da "Tümünü dosyadan aç". 2026-10-24'e kadar
+okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i,
+tuzak 153).
 
 v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünkü
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
@@ -201,7 +211,7 @@ clone. State'e konmuyor: bu bilgisayarda alınmış bir yedek başka bir makiney
 klasör yolu taşımamalı.
 
 Kâğıt seçenekleri `theme.ts`'te değil `printOptions.ts`'te ve tek bir JSON
-kaydında. `theme.ts`'teki tercihler ilk boyamadan önce `<html>`'e öznitelik olarak
+kaydında. `platform/prefs/`'teki tercihler ilk boyamadan önce `<html>`'e öznitelik olarak
 yazılan düzen değerleri. Kâğıt seçenekleri ise çizim anında bir React prop'u olan
 tek bir karar ("kâğıtta ne var"), ve her seçeneğe ayrı bir anahtar, tek bir soru
 için ayrı ayrı okuma ve düzeltme demekti.
@@ -209,7 +219,7 @@ için ayrı ayrı okuma ve düzeltme demekti.
 Havuz boyu piksel değil rem, çünkü `--ui-scale` %150'ye çıkınca sabit piksellik
 bir çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı bir anahtarda
 duruyor, çünkü `ders-programi-havuz`'un anlamı "`kapali` değilse açık" ve içine bir
-sayı katmak ayrıştırıcısına ikinci bir dal sokardı. `theme.ts` bağımsız tercihleri
+sayı katmak ayrıştırıcısına ikinci bir dal sokardı. `platform/prefs/` bağımsız tercihleri
 bağımsız anahtarlarda tutuyor.
 
 Her tercih `preference.ts`'teki fabrikayla kurulur ve üç sözü tutar. `apply` değeri
@@ -218,7 +228,7 @@ depo okunamıyorsa yedek sorulur, okuma anında ve `normalize`'dan geçmeden, am
 kayıtlı `"0"` ya da `""` yokluk sayılmaz. `normalize` denetimin verdiği tipi de
 depodaki dizeyi de kabul eder ve `write` değeri ondan geçirerek saklar. Yedeğin
 makineye bakıp bakmaması tercihin kendi kararı: hareket ve dil bakar, tema bakmaz
-ve kayıt yoksa açıktır (`theme.ts`'teki gerekçe). Sözleşme `src/preference.test.ts`'te,
+ve kayıt yoksa açıktır (`platform/prefs/`'teki gerekçe). Sözleşme `src/leaf/preference/preference.test.ts`'te,
 her tercihin davranışı `src/preferences.test.ts`'te.
 
 Hareket tercihi bir makine tercihi ve makinenin kendi tercihinin gerisine geçmez:
@@ -266,10 +276,19 @@ aramanın onun makinesinde nasıl koştuğunu söylemesi için orada (TODO B5.11
 biçimin birbirine karışmaması için üç önlem birlikte var (tuzak 30).
 
 Seçilen klasöre bütün planlar yazılır ve her gün için ayrı bir yedek bırakılır
-(`ders-programi-YYYY-AA-GG.json`, son 10 gün). Yedekler ad kalıbıyla budanır,
+(`ders-programi-YYYY-AA-GG.json`, iş taşıyan son 10 gün). Yedekler ad kalıbıyla budanır,
 sayılarak değil: klasör Belgelerim ve orada babanın kendi dosyaları duruyor, "en
 yeni ondan gerisini sil" onların da üstünden geçerdi. Kalıba uymayan hiçbir dosyaya
-dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Klasöre yazamamak sessiz kalmaz:
+dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Budama yalnız iş
+taşıyan (bir öğretmeni, sınıfı, dersi ya da dersliği olan) günlükleri sayar, en yeni onunu ve
+onlardan yeni her günlüğü bırakır, ve yalnız o gün iş taşıyan bir yazımdan sonra koşar. İş
+taşımayan bir paket yalnız kaybedecek bir şey olmayan yere yazılır: olmayan ya da onun gibi boş
+bir dosyaya (`holdsWork()`). Açılıştaki ilk yazım, exe'de de tarayıcıda da, yalnız açık plan
+depodan okunduysa yapılır; yoksa ilk değişikliği bekler. Okunamayan bir plan pakete deposundaki
+hâliyle girer (daha yeni bir sürümünki JSON olduğu için olduğu gibi), JSON bile değilse klasöre
+hiç yazılmaz. 2026-10-24'e kadar exe boş bir depoyla açılınca boş paketi canlı dosyanın ve
+günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si, tuzak
+153). Klasöre yazamamak sessiz kalmaz:
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
 
@@ -293,7 +312,7 @@ kayıt listede atlanır.
 - **Branş öğretmenin alanı, ve iki tane olabilir.** "Türkçe ve Edebiyat" bir hiyerarşiyle anlatılamadığı için alt branş değil çift branş seçildi. Dersin hangi branştan verildiği bir bayrak (`Lesson.second`), branşın adı değil: ad ikinci bir gerçek olur ve öğretmenin branşı düzeltilince sessizce saparak kalırdı. `Teacher.subject` bir kimlik değil bir ad, yeniden adlandırmak ucuz kalsın diye.
 - **Derslik sınıfın sabit alanı.** Yerleştirirken oda seçilmez, ama iki sınıf aynı dersliği paylaşıyorsa çakışma denetlenir.
 - **`placements` düz bir sözlük, dizi değil.** Gün ya da saat sayısı değişince taşan anahtarlar silinir (tuzak 5). Ayarlar'da bu değişiklik önce kaç yerleşmiş ve sabitli saatin kalkacağını sayan bir soru sorar.
-- **Blok ayrı bir varlık değil, ve ızgara blok sınırı saklamaz.** Ardışık anahtarlara aynı `lessonId` yazılır. Bir dersin blokları eşit boylu olmayabildiği için (`2+1`) bir koşu birden çok türlü okunabilir, ve hangisi olduğuna tek bir fonksiyon karar verir: `constraints.ts`'teki `placedBlocks()` gün ve saat sırasıyla gezer, her koşuda önce uzun blokları alır, kalanı tek saat sayar. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur (tuzak 75).
+- **Blok ayrı bir varlık değil, ve ızgara blok sınırı saklamaz.** Ardışık anahtarlara aynı `lessonId` yazılır. Bir dersin blokları eşit boylu olmayabildiği için (`2+1`) bir koşu birden çok türlü okunabilir, ve hangisi olduğuna tek bir fonksiyon karar verir: `pure/constraints/`'teki `placedBlocks()` gün ve saat sırasıyla gezer, her koşuda önce uzun blokları alır, kalanı tek saat sayar. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur (tuzak 75).
 - **Haftalık saatin şekli bir liste.** `blocks` birden uzun blokların boylarını, `weeklyHours` toplamı söyler, ve liste toplamı geçemediği için ikisi çelişemez. Tek sayı olan `pairs` yalnız "şu kadar ikili" diyebiliyordu, ondan önceki `blockSize` ise "her blok bu boyda" diyebiliyordu ve `2+1`'i söyleyemiyordu.
 - **Anahtarlarda isim yok, hep kimlik.** Bir ad değişince yerleşim bozulmasın.
 - **Zil saatleri hesaplanır.** Başlangıç ve üç süre yetiyor, günlerin tek farkı öğle arasının nereye düştüğü. Ders başına satır tutmak aynı bilgiyi on iki kez saklamak olurdu.

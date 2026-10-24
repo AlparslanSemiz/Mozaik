@@ -20,10 +20,8 @@
 
 import { useMemo } from 'react';
 import { blockSpans, buildIndex } from '../../pure/constraints';
-import { parseKey } from '../../leaf/keys';
-import { paletteColor } from '../../leaf/palette';
-import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/program';
+import { parseKey, paletteColor, type State } from '../../leaf/model';
+import { activePlacements } from '../../pure/grid';
 import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
 import {
   PER_SHEET_LABELS,
@@ -33,7 +31,7 @@ import {
   type PrintOptions,
 } from '../../platform/prefs';
 import Sheet from './Sheet';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 interface Props {
   state: State;

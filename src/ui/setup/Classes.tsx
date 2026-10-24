@@ -2,17 +2,7 @@
 // clash with each other — only through a shared room.
 
 import { useMemo, useState } from 'react';
-import ListTools from '../ListTools';
-import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
-import type { ListConfig, ListQuery } from '../../pure/listview';
-import { roomName } from '../../pure/entities';
-import type { ClassGroup } from '../../leaf/types';
-import { PanelRight } from 'lucide-react';
-import { useInspect } from '../program';
-import { useDialogs } from '../Dialogs';
-import { parseClasses } from '../../pure/import';
-import ColorPick from '../ColorPick';
+import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import {
   addClass,
   addClassesFromRows,
@@ -21,13 +11,12 @@ import {
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
-import LimitBox from '../LimitBox';
-import { Paste } from '../lists';
-import type { PanelProps } from '../props';
-import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
-import { buildCapacity } from '../../pure/feasibility';
-import { loadStatusFacet } from './loadStatusFacet';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../program';
+import { useDialogs, ColorPick, LimitBox, type PanelProps, T, useT } from '../common';
+import { parseClasses } from '../../pure/io';
+import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
+import { classListConfig } from '../../pure/lists';
 
 export default function Classes({ state, change }: PanelProps) {
   const t = useT();
@@ -35,45 +24,7 @@ export default function Classes({ state, change }: PanelProps) {
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
-  const listCfg = useMemo<ListConfig<ClassGroup>>(() => {
-    const capacity = buildCapacity(state);
-    return {
-      haystack: (c) => `${c.name} ${roomName(state, c.roomId)}`,
-      // Grouping classes by the room they share is the one grouping this
-      // screen can offer that Kontrol cannot: it is what makes a room's load
-      // legible before it becomes a clash.
-      facets: [
-        {
-          id: 'derslik',
-          label: t('Derslik'),
-          of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)),
-        },
-        loadStatusFacet<ClassGroup>(capacity.classes, t),
-      ],
-      sorts: [
-        {
-          id: 'ad',
-          label: t('Ada göre'),
-          cmp: (a, b) => compareTr(a.name, b.name),
-        },
-        {
-          id: 'derslik',
-          label: t('Dersliğe göre'),
-          cmp: (a, b) =>
-            compareTr(roomName(state, a.roomId), roomName(state, b.roomId)) ||
-            compareTr(a.name, b.name),
-        },
-        {
-          id: 'yuk',
-          label: t('Ders yüküne göre'),
-          cmp: byNumberThen(
-            (c) => weeklyLoad(state, 'class', c.id),
-            (c) => c.name,
-          ),
-        },
-      ],
-    };
-  }, [state, t]);
+  const listCfg = useMemo(() => classListConfig(state, t), [state, t]);
   const shown = applyList(state.classes, query, listCfg);
   const order = useRowOrder({
     kind: 'classes',

@@ -16,7 +16,7 @@ import {
   loadWorld,
   placedHours,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 
 test.describe('6. Gün ve ders saatleri', () => {
   test('varsayılan hafta Pazartesisiz 6 gün ve Salı ile başlıyor', async ({ page }) => {
