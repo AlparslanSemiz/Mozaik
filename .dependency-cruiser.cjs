@@ -99,9 +99,45 @@ module.exports = {
       to: { path: '^src/[^/]+/[^/]+/', pathNot: ['^src/$1/', '/index\\.tsx?$'] },
     },
     {
+      name: 'katman-koku-hedef',
+      comment:
+        'Her kaynak dosya bir alanın içinde (`src/<katman>/<alan>/`), katmanın kökünde yalnız ' +
+        'katmanın index\'i durabilir (2026-10-24). Kökte bilerek kalan üç dosya adıyla muaf: ' +
+        '`ui/main.tsx` (index.html ve scripts/favicon.mjs yolunu anıyor), `platform/changelog.ts` ' +
+        '(yayın betikleri ve surum.yml yolunu okuyor) ve `platform/update.ts` (SITE_ADRESI). ' +
+        'Kural bir import\'u ölçtüğü için iki yarısı var: köke yeni konan bir dosyayı ya onu ' +
+        'çağıran yakalar (bu kural) ya da onun çağırdığı (`katman-koku-kaynak`). Hiçbirini ' +
+        'çağırmayan ve kimsenin çağırmadığı bir dosya ölü koddur, onu knip bildirir.',
+      severity: 'error',
+      from: {},
+      to: {
+        path: '^src/(leaf|pure|platform|ui)/[^/]+$',
+        pathNot: [
+          '^src/(leaf|pure|platform|ui)/index\\.tsx?$',
+          '^src/ui/main\\.tsx$',
+          '^src/platform/(changelog|update)\\.ts$',
+        ],
+      },
+    },
+    {
+      name: 'katman-koku-kaynak',
+      comment:
+        'katman-koku-hedef\'in öteki yarısı: katmanın kökündeki yeni bir dosya bir şey çağırırsa.',
+      severity: 'error',
+      from: {
+        path: '^src/(leaf|pure|platform|ui)/[^/]+$',
+        pathNot: [
+          '^src/(leaf|pure|platform|ui)/index\\.tsx?$',
+          '^src/ui/main\\.tsx$',
+          '^src/platform/(changelog|update)\\.ts$',
+        ],
+      },
+      to: {},
+    },
+    {
       name: 'paket-ici-kok',
       comment:
-        'Bir katmanın kökündeki (`ui/Root.tsx`, `leaf/names.ts`) ya da `src/`\'nin kökündeki ' +
+        'Bir katmanın kökündeki (`ui/main.tsx`, `platform/update.ts`) ya da `src/`\'nin kökündeki ' +
         'bir dosya da bir paketin içine yalnız `index` üstünden girer. `paket-ici-alan`\'dan ' +
         'ayrı, çünkü onun `from`\'u çağıranın paketini yakalıyor ve kökteki dosyanın paketi yok.',
       severity: 'error',

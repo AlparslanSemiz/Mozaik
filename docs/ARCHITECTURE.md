@@ -26,7 +26,9 @@ taradıkları küme değişmedi. `src/`'nin kökünde kalanlar: `styles.css`, ve
 `src/`'nin dışında olan yedi test (belgeler, betikler, sürüm akışı ve `index.html`'i
 de okuyan `preferences.test.ts`).
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
+Her kaynak dosya bir katmanın altındaki bir klasörde, yani bir pakette durur (2026-10-24);
+en derin `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda.
+Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -251,12 +253,18 @@ anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve ter
 ### Sınırı ne ölçüyor
 
 Katman sınırı, paket girişi ve döngü yasağı `.dependency-cruiser.cjs`'te yazılı ve
-`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Altı kural var: yaprak yalnız
+`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Kurallar: yaprak yalnız
 yaprak import eder, saf mantık yaprakların dışına çıkmaz, tesisat bir bileşen
-çağırmaz, `worlds.ts` üründen import edilmez, ve bir paketin içine dışarıdan yalnız
-`index`'i üstünden girilir. Sonuncusu iki kural: `paket-ici-alan` başka bir paketten
-gelen importu, `paket-ici-kok` bir katmanın ya da `src/`'nin kökündeki bir dosyadan
-geleni ölçüyor. Grafik `npm run grafik` ile mermaid olarak yazdırılabilir.
+çağırmaz, `pure/worlds/` üründen import edilmez, bir paketin içine dışarıdan yalnız
+`index`'i üstünden girilir, ve bir katmanın kökünde dosya durmaz. Paket kuralı iki
+tane: `paket-ici-alan` başka bir paketten gelen importu, `paket-ici-kok` bir katmanın
+ya da `src/`'nin kökündeki bir dosyadan geleni ölçüyor. Kök kuralı da iki tane, çünkü
+bir import'u ölçüyor: `katman-koku-hedef` kökteki bir dosyayı çağıranı,
+`katman-koku-kaynak` kökteki bir dosyanın çağırdığını yakalıyor. Kökte bilerek kalan üç
+dosya adıyla muaf: `ui/main.tsx` (`index.html` ve `scripts/favicon.mjs` onu yoluyla
+anıyor), `platform/changelog.ts` (yayın betikleri ve `surum.yml` yolunu okuyor) ve
+`platform/update.ts` (`SITE_ADRESI`). `leaf/raw.d.ts` bir tip bildirimi, grafikte yok;
+`docs.test.ts` onu yoluyla arıyor. Grafik `npm run grafik` ile mermaid olarak yazdırılabilir.
 
 Import grafiğinin göremediği üç kural `eslint.config.js`'te ve `npm run lint` ile koşuyor:
 saf mantık React'i ve bir bileşen kitaplığını import etmez, `document`, `window`,
