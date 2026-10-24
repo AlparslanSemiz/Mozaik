@@ -387,4 +387,15 @@ describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
     expect(loadPlan('zz')).toBeNull();
     expect(localStorage.getItem(planKey('zz'))).toBe(THROWS);
   });
+
+  // The Planlar list asked only `loadPlan`, and an unreadable plan read as
+  // "verisi yok" with 0 lessons: a row that invites deleting real text.
+  it('Planlar listesi okunamayan planı boş değil okunamadı diye tanıyor', async () => {
+    twoPlans(CUT);
+    const { loadPlan, unreadablePlan } = await import('./planStore');
+    expect(loadPlan('zz')).toBeNull();
+    expect(unreadablePlan('zz')).toBe('okunamadi');
+    expect(loadPlan('1')).not.toBeNull();
+    expect(unreadablePlan('1')).toBeNull();
+  });
 });

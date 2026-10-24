@@ -13,7 +13,7 @@ import { useMemo } from 'react';
 import { useDialogs, type PlanControls, T, useT } from '../common';
 import { emptyState, planSummary } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/io';
-import { loadPlan } from '../../platform/storage';
+import { loadPlan, unreadablePlan } from '../../platform/storage';
 import type { State } from '../../leaf/model';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
 import { DraftStart } from '../plans';
@@ -37,10 +37,14 @@ export default function Plans({ state, plans }: Props) {
         // plan whose key is gone must read as EMPTY, not borrow the open plan's
         // numbers — that would invite deleting the wrong row.
         const stored = plan.id === planId ? state : loadPlan(plan.id);
+        // Read but not readable is not empty: its text is there, and a row
+        // saying "verisi yok" with 0 lessons invites deleting it (TB1).
+        const unreadable = unreadablePlan(plan.id);
         return {
           plan,
           counts: planSummary(stored ?? emptyState()),
-          missing: stored === null,
+          missing: stored === null && unreadable === null,
+          unreadable,
         };
       }),
     [library, planId, state],
@@ -53,17 +57,21 @@ export default function Plans({ state, plans }: Props) {
     const found = rows.find((r) => r.plan.id === id);
     const c = found?.counts;
     const what =
-      c === undefined
-        ? t('Bu işlem geri alınamaz.')
-        : t(
-            '{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.',
-            {
-              ogretmen: c.teachers,
-              sinif: c.classes,
-              ders: c.lessons,
-              saat: c.placed,
-            },
-          );
+      found?.unreadable != null
+        ? t(
+            'Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.',
+          )
+        : c === undefined
+          ? t('Bu işlem geri alınamaz.')
+          : t(
+              '{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.',
+              {
+                ogretmen: c.teachers,
+                sinif: c.classes,
+                ders: c.lessons,
+                saat: c.placed,
+              },
+            );
     if (
       !(await confirm({
         title: t('"{ad}" planı silinecek', { ad: name }),
@@ -132,7 +140,7 @@ export default function Plans({ state, plans }: Props) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ plan, counts, missing }) => (
+          {rows.map(({ plan, counts, missing, unreadable }) => (
             <tr key={plan.id} aria-current={plan.id === planId}>
               <td>
                 <input
@@ -148,6 +156,14 @@ export default function Plans({ state, plans }: Props) {
                 {missing && (
                   <span className="hint" title={t('Bu planın verisi bulunamadı')}>
                     <T k="· verisi yok" />
+                  </span>
+                )}
+                {unreadable !== null && (
+                  <span
+                    className="hint"
+                    title={t('Kayıtlı metni okunamadı; açılmıyor, silinmedi.')}
+                  >
+                    {t('· okunamadı')}
                   </span>
                 )}
               </td>

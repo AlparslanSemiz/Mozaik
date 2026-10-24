@@ -14,6 +14,7 @@
 import { readStoredPlan, type StoredPlan, BACKUP_COUNT, backupKey, BASE_KEY } from '../../pure/io';
 import {
   freezePlan,
+  frozenPlan,
   readPlanText,
   readPlanTextAtStart,
   type Unreadable,
@@ -80,6 +81,15 @@ type StoredPlanProblem = Extract<StoredPlan, { problem: unknown }>['problem'];
 
 /** How the open plan's opening read went, for the folder's first write. */
 let start: 'okundu' | StoredPlanProblem = 'yok';
+
+/**
+ * Why a plan's key could not be read, once `loadPlan` (or the opening read)
+ * has looked at it; null when it read, or has not been looked at. For the
+ * Planlar list, which must not call an unreadable plan empty (TB1).
+ */
+export function unreadablePlan(id: Id): Unreadable | null {
+  return frozenPlan(id);
+}
 
 /** `loadPlan` for the one read at startup: an empty answer is remembered. */
 export function loadPlanAtStart(id: Id): State | null {
