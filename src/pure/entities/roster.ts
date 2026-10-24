@@ -1,7 +1,6 @@
 // Rooms, teachers and classes: adding, updating and deleting them, the room
 // lookups, and the manual order of every list.
 
-import { cleanEmail } from '../../leaf/email';
 import {
   type ClassGroup,
   type Gender,
@@ -9,6 +8,7 @@ import {
   type State,
   type Teacher,
   firstFreeColor,
+  cleanEmail,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { NO_TEACHER_LIMITS } from './defaults';

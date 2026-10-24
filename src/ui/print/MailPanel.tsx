@@ -14,8 +14,7 @@
 
 import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
-import { looksLikeEmail } from '../../leaf/email';
-import { paletteColor, type State } from '../../leaf/model';
+import { paletteColor, type State, looksLikeEmail } from '../../leaf/model';
 import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
 import type { Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';

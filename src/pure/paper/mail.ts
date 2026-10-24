@@ -15,9 +15,8 @@
 import type { Index } from '../constraints';
 import { dayPeriods, shortDay } from '../entities';
 import { teacherSheet } from './sheet';
-import { mailtoUrl } from '../../leaf/email';
 import type { Vars } from '../../leaf/i18n';
-import type { State, Teacher } from '../../leaf/model';
+import { type State, type Teacher, mailtoUrl } from '../../leaf/model';
 
 type Translate = (key: string, vars?: Vars) => string;
 

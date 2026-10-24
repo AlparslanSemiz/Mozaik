@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanEmail, looksLikeEmail, mailtoUrl } from './leaf/email';
+import { cleanEmail, looksLikeEmail, mailtoUrl } from './email';
 
 describe('öğretmenin e-postası', () => {
   it('cleanEmail metin olmayanı boşaltıyor, satır sonunu ve denetim karakterini atıyor', () => {

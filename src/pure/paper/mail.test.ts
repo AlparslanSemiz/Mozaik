@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { blockSpans, buildIndex } from './pure/constraints';
-import { MAILTO_SINIRI, teacherMail } from './pure/paper';
-import { t } from './leaf/i18n';
-import type { State } from './leaf/model';
-import { makeWorld } from './pure/worlds';
+import { blockSpans, buildIndex } from '../constraints';
+import { MAILTO_SINIRI, teacherMail } from '.';
+import { t } from '../../leaf/i18n';
+import type { State } from '../../leaf/model';
+import { makeWorld } from '../worlds';
 
 function mailOf(state: State, teacher = 0) {
   return teacherMail(state, buildIndex(state), blockSpans(state), state.teachers[teacher]!, t);

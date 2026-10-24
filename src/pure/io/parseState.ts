@@ -31,11 +31,11 @@ import {
   type State,
   type Teacher,
   SCHEMA_VERSION,
+  cleanEmail,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../entities';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../grid';
-import { cleanEmail } from '../../leaf/email';
 import type { Bundle } from './bundle';
 
 /** v1 shape: Turkish field names. Kept only so old backups can still be opened. */

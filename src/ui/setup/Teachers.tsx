@@ -3,7 +3,6 @@
 
 import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
-import { cleanEmail, looksLikeEmail } from '../../leaf/email';
 import {
   addSubject,
   addTeacher,
@@ -22,7 +21,7 @@ import {
   updateTeacher,
   weeklyLoad,
 } from '../../pure/entities';
-import type { Gender, Id } from '../../leaf/model';
+import { type Gender, type Id, cleanEmail, looksLikeEmail } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs, ColorPick, LimitBox, type PanelProps, T, useT } from '../common';

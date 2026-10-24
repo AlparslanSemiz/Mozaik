@@ -1,7 +1,6 @@
 // `sanitize`: run on every load and every settings change, so an orphan id or
 // an out-of-range placement never reaches the grid (pitfalls 4, 5 and 6).
 
-import { cleanEmail } from '../../leaf/email';
 import {
   type Id,
   type Refusal,
@@ -10,6 +9,7 @@ import {
   clampBlocks,
   hasTwoSubjects,
   parseKey,
+  cleanEmail,
 } from '../../leaf/model';
 import { blankProgram } from '../grid';
 
