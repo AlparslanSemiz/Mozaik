@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu).
+Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -177,8 +177,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 188 680 bayt (2026-10-24 gece, zincirin ucu `rk2-bozuk-iliski`; `ogretmene-eposta`'da 1 185 367, brotli yaklaşık 285,1 kB); eşikler 1 196 000 ve 289 000 | `npx vite build`, `npm run boyut` |
-| Güncelleme kapısı | 1 geçti, iki koşuda; eski sürümün evresi yaklaşık 20 s (2026-10-24, `ogretmene-eposta`) | `guncelleme-windows.yml` 40117527794, 40118278485 |
+| `dist/index.html` | 1 198 108 bayt, brotli 287,3 kB (2026-10-24 gece, zincirin ucu `rk2-bozuk-iliski`, `main`'e bağlandıktan sonra); `tp7-windows-exe`'de yaklaşık 1 183 500; eşikler ucunda 1 200 000 (CLAUDE.md'nin ölçüm çizgisi) ve 289 000 | `npx vite build`, `npm run boyut` |
+| Güncelleme kapısı | gerçek `update.rs` akışıyla 1 geçti (2026-10-24 gece, `tp7-windows-exe`); önceki biçimi (yalnız dosya takası) iki koşuda yeşildi (`ogretmene-eposta`) | `guncelleme-windows.yml` 40128285002; 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
