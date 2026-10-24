@@ -13,7 +13,7 @@
 // refuses to run off a GitHub runner (`windowsYerleri`). Where the two
 // platforms answer differently the test says which answer it expects and why.
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test as base } from '@playwright/test';
@@ -80,13 +80,19 @@ const test = base.extend<{ exe: Exe }>({
         indirilenler: yerler?.indirilenler ?? join(ev, 'Downloads'),
       });
     } finally {
+      // The screenshot is best effort: a dead session cannot take one, and a
+      // throw here would skip the teardown below.
       if (oturum !== undefined && testInfo.status !== testInfo.expectedStatus) {
-        await testInfo.attach('ekran', { body: await oturum.goruntu(), contentType: 'image/png' });
+        const ekran = await oturum.goruntu().catch(() => undefined);
+        if (ekran !== undefined) {
+          await testInfo.attach('ekran', { body: ekran, contentType: 'image/png' });
+        }
       }
       // A page that crashed takes its session with it, and then closing the
-      // session throws. The process group is killed whatever it said, or the
-      // program lives on, holds the port and the binary (ETXTBSY on the next
-      // build), and the next test fails for the wrong reason.
+      // session throws. The driver is killed whatever it said (on Linux its
+      // process group, on Windows its process tree, and the exe by `kapat`),
+      // or the program lives on, holds the port and the binary (ETXTBSY on the
+      // next build), and the next test fails for the wrong reason.
       await oturum?.kapat().catch(() => undefined);
       surucuyuKapat(pid);
     }
@@ -482,7 +488,11 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         tamam(k);
       });
     });
-    if (kod === 'sürüyor') ikinci.kill('SIGKILL');
+    if (kod === 'sürüyor') {
+      // On Windows with its WebView2 processes, or they hold the profile.
+      if (WINDOWS) spawnSync('taskkill', ['/PID', String(ikinci.pid), '/T', '/F']);
+      else ikinci.kill('SIGKILL');
+    }
     expect(kod, 'ikinci kopya kapanmadı: ikinci bir pencere açık').toBe(0);
     // ...and the first one is still the program, answering.
     expect(await exe.oturum.js('return document.querySelectorAll("h1").length > 0;')).toBe(true);

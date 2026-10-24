@@ -27,9 +27,9 @@ export function suruculuBaslat(secenek: {
 export class Oturum {
   port: number;
   id: string;
-  program: number | undefined;
+  program: import('node:child_process').ChildProcess | undefined;
   static ac(secenek: { port?: number; ikili: string; bekleMs?: number }): Promise<Oturum>;
-  turkceYap(): Promise<void>;
+  turkceYap(son: number): Promise<void>;
   bul(secici: string): Promise<string>;
   tikla(secici: string): Promise<void>;
   yaz(secici: string, metin: string): Promise<void>;

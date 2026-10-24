@@ -14,6 +14,8 @@ export default defineConfig({
   testMatch: ['**/gercek-exe.spec.ts'],
   fullyParallel: false,
   workers: 1,
-  timeout: 90_000,
+  // Windows: two tests reopen the program, and WebView2's start, attach and
+  // language reload (scripts/webdriver.mjs) can take a minute each.
+  timeout: process.platform === 'win32' ? 180_000 : 90_000,
   reporter: [['list']],
 });

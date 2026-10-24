@@ -9,8 +9,7 @@
 //            the program has to run on XWayland (`GDK_BACKEND=x11`), which is
 //            what xvfb-run gives it anyway.
 //   Windows  WM_CLOSE to every visible top-level window titled `ad`, through
-//            user32 from PowerShell. Written 2026-10-24, not yet run: the
-//            Windows real-exe suite is TP7 (TODO §8l).
+//            user32 from PowerShell. Green in exe-windows.yml (2026-10-24).
 //
 // Returns how many windows were told; 0 means none was found.
 

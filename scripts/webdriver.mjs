@@ -56,8 +56,8 @@ export const WINDOWS_PORTU = 9222;
  * The `tauri build --config` for the Windows test exe: the window as
  * tauri.conf.json has it, plus the debugging port. The config is merged as a
  * JSON patch, so the whole window goes in (an array is replaced, not merged),
- * and the first three switches are wry's own default, which setting the field
- * replaces.
+ * and the `--disable-features` switch is wry's own default, which setting the
+ * field replaces.
  */
 export function windowsTestAyari() {
   const ayar = JSON.parse(readFileSync(join(KOK, 'src-tauri', 'tauri.conf.json'), 'utf8'));
@@ -125,12 +125,21 @@ export function windowsYerleri() {
 }
 
 /**
- * Empties what the last test left: the folder, the profile (so the next start
- * is a first start, as the sandbox HOME is on Linux), and the program's own
- * files in Downloads. Retried, because WebView2's processes can hold the
- * profile for a moment after the program is killed.
+ * Empties what the last test left: any program, WebView2 or msedgedriver
+ * still running (a test that timed out inside its own `Oturum.ac` leaves an
+ * exe nobody holds), the folder, the profile (so the next start is a first
+ * start, as the sandbox HOME is on Linux), and the program's own files in
+ * Downloads. Asks `windowsYerleri` again so it can never run off a runner.
+ * Retried, because WebView2's processes can hold the profile for a moment
+ * after the program is killed.
  */
 export function windowsTemizle({ klasor, profil, indirilenler }) {
+  windowsYerleri();
+  spawnSync(
+    'taskkill',
+    ['/IM', 'Mozaik.exe', '/IM', 'ders-programi.exe', '/IM', 'msedgedriver.exe', '/T', '/F'],
+    { stdio: 'ignore' },
+  );
   const tekrar = { recursive: true, force: true, maxRetries: 20, retryDelay: 250 };
   rmSync(klasor, tekrar);
   rmSync(profil, tekrar);
@@ -176,8 +185,9 @@ export function basizMumkun() {
 }
 
 /**
- * Starts tauri-driver detached, so it outlives the shell command that started
- * it. Returns its pid; the caller keeps it to tear it down (`surucuyuKapat`).
+ * Starts the driver: on Linux tauri-driver, detached, so it outlives the shell
+ * command that started it; on Windows msedgedriver alone (`windowsSurucu`).
+ * Returns its pid; the caller keeps it to tear it down (`surucuyuKapat`).
  */
 export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil = 'tr_TR' }) {
   if (WINDOWS) return windowsSurucu({ port, ev, gunluk });
@@ -223,6 +233,8 @@ function windowsSurucu({ port, ev, gunluk }) {
   }
   mkdirSync(ev, { recursive: true });
   const cikti = gunluk === undefined ? 'ignore' : openSync(gunluk, 'a');
+  // Verbose into the test's own log: when a session does not open, the reason
+  // is only written there, and the workflow uploads it with a red run.
   const surec = spawn(surucu, [`--port=${port}`, '--verbose'], {
     cwd: ev,
     stdio: ['ignore', cikti, cikti],
@@ -277,7 +289,7 @@ export function surucuyuKapat(pid) {
 
 /** One WebDriver session. Everything is a method so a test reads like a script. */
 export class Oturum {
-  /** `program`: on Windows the exe this session started, killed by `kapat`. */
+  /** `program`: on Windows the exe this session started (a ChildProcess), killed by `kapat`. */
   constructor(port, id, program) {
     this.port = port;
     this.id = id;
@@ -315,15 +327,18 @@ export class Oturum {
    * Starts the exe, waits for its WebView2 to answer on the debugging port,
    * and attaches msedgedriver to it. The last program has to be gone first:
    * a second exe on the same profile would hand its page to the old WebView2.
+   * One deadline for all of it, the language included.
    */
   static async windowsAc({ port, ikili, bekleMs }) {
     const son = Date.now() + bekleMs;
     if (!(await portBekle(false, son))) throw new Error("Önceki programın WebView2'si kapanmadı");
     const program = spawn(ikili, [], { stdio: 'ignore' });
-    let hata;
+    let oturum;
     try {
       if (!(await portBekle(true, son))) throw new Error('WebView2 hata ayıklama portunu açmadı');
-      while (Date.now() < son) {
+      let hata;
+      while (oturum === undefined) {
+        if (Date.now() > son) throw hata ?? new Error('süre doldu');
         try {
           const cevap = await istek(port, 'POST', '/session', {
             capabilities: {
@@ -333,19 +348,19 @@ export class Oturum {
               },
             },
           });
-          const oturum = new Oturum(port, cevap.sessionId, program.pid);
-          await oturum.turkceYap();
-          return oturum;
+          oturum = new Oturum(port, cevap.sessionId, program);
         } catch (e) {
           hata = e;
           await new Promise((r) => setTimeout(r, 300));
         }
       }
+      await oturum.turkceYap(son);
+      return oturum;
     } catch (e) {
-      hata = e;
+      if (oturum !== undefined) await oturum.kapat();
+      else agaciOldur(program.pid);
+      throw new Error(`Oturum açılamadı: ${e?.message ?? e}`);
     }
-    agaciOldur(program.pid);
-    throw new Error(`Oturum açılamadı: ${hata?.message ?? hata}`);
   }
 
   /**
@@ -355,16 +370,22 @@ export class Oturum {
    * interface's own language record (`ders-programi-dil`, preferenceKeys.ts)
    * says Turkish and the page is loaded again: what my father's machine shows,
    * except that there the language comes from Windows and no record is stored.
+   * A reopened program on the same profile has the record and is not reloaded.
+   * The old page is marked, so the wait is for the NEW page (index.html says
+   * `lang="tr"` before any script runs).
    */
-  async turkceYap() {
-    await this.js(
-      `localStorage.setItem('ders-programi-dil', 'tr'); setTimeout(() => location.reload(), 0);`,
-    );
-    const son = Date.now() + 30_000;
+  async turkceYap(son) {
+    const yuklendi = await this.js(`
+      if (localStorage.getItem('ders-programi-dil') === 'tr') return false;
+      localStorage.setItem('ders-programi-dil', 'tr');
+      window.__mozaikEski = true;
+      setTimeout(() => location.reload(), 0);
+      return true;`);
+    if (!yuklendi) return;
     while (Date.now() < son) {
       await new Promise((r) => setTimeout(r, 300));
       const hazir = await this.js(
-        `return document.readyState === 'complete' && document.documentElement.lang === 'tr' && !!document.querySelector('h1');`,
+        `return !window.__mozaikEski && document.readyState === 'complete' && !!document.querySelector('h1');`,
       ).catch(() => false);
       if (hazir) return;
     }
@@ -578,8 +599,13 @@ export class Oturum {
     } catch {
       // Already gone: the window was closed by hand, or the program exited.
     }
+    // Only while it is still running: a pid that has exited can be reused by
+    // Windows, and taskkill /T would take that stranger's tree with it.
     if (this.program !== undefined) {
-      agaciOldur(this.program);
+      if (this.program.exitCode === null && this.program.signalCode === null) {
+        agaciOldur(this.program.pid);
+      }
+      this.program = undefined;
       await portBekle(false, Date.now() + 15_000);
     }
   }

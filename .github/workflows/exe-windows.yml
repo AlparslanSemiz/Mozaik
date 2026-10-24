@@ -33,15 +33,22 @@ on:
       - 'e2e/gercek-exe.spec.ts'
       - 'scripts/webdriver.mjs'
       - 'scripts/pencere-kapat.mjs'
+      - 'src/platform/**/folder.ts'
+      - 'src/platform/**/planStore.ts'
+      - 'src/platform/**/libraryStore.ts'
+      - 'src/platform/**/useStore.ts'
+      - 'src/fixtures/tam-dolu-kurs*.json'
       - 'playwright.gercek-exe.config.ts'
       - '.github/workflows/exe-windows.yml'
 
 permissions:
   contents: read
 
+# Commit başına: haftalık koşu ya da bir sonraki push, `yayinla`'nın beklediği sürüm
+# commit'inin koşusunu iptal etmesin (iptal edilen koşuda yayinla durur).
 concurrency:
-  group: exe-windows-${{ github.ref }}
-  cancel-in-progress: true
+  group: exe-windows-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
   gercek-exe:
@@ -60,13 +67,13 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      # surum.yml'in derlediği gibi, CLI sabit (exe:rpm'deki sürüm); yalnız pencereye
-      # hata ayıklama portu eklenir (`windowsTestAyari`).
+      # surum.yml'in derlediği gibi, aynı CLI ile; yalnız pencereye hata ayıklama portu
+      # eklenir (`windowsTestAyari`). Yayınlanan exe'de port olmadığını kontrat.test.ts soruyor.
       - name: Test exe'si
         shell: bash
         run: |
           node --input-type=module -e "import { windowsTestAyari } from './scripts/webdriver.mjs'; import { writeFileSync } from 'node:fs'; writeFileSync(process.env.RUNNER_TEMP + '/test-exe.conf.json', JSON.stringify(windowsTestAyari()));"
-          npx --yes @tauri-apps/cli@2.12.1 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
+          npx --yes @tauri-apps/cli@^2 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
 
       # WebView2 Runtime'ın sürümü, ve ona eşleşen msedgedriver: Microsoft ikisinin
       # aynı sürüm olmasını istiyor. Runtime runner imajının listesinde yazmıyor;

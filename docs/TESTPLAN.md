@@ -531,7 +531,6 @@ haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
-| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
 | Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |
