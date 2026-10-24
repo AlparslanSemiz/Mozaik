@@ -172,6 +172,43 @@ birleşirken kendi numarasını kaydırır.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 
+
+---
+
+## 2026-10-24 akşam · Dosya okuma: B7.37, B7.35, B7.34 (`dosya-okuma-b7`)
+
+Dal `tb1-dosyadan-ac`'in ucundan açıldı (B7.34 ve B7.35 TB8'in henüz `main`'de olmayan koduna
+dokunuyor); zincir birleşince `git merge main` boş geçer.
+
+**Önce kırmızı.** `fuzz.test.ts`: `wholeness` kimlikleri soruyor (fuzz boş kimliği kendiliğinden
+buldu, beş özellik kırmızı) ve B7.37'nin elle yazılmış durumları; `bundle.test.ts`: daha yeni
+sürümün planı `newer`'da; `planlar.spec.ts`: yarım paket ve daha yeni sürümün paketi, ikisi de
+düzeltmesiz derlemeye karşı kırmızı.
+
+**Çare.** `readPlanFile` boş ya da tekrarlanan kimlik taşıyan dosyayı reddediyor (derslik,
+öğretmen ve sınıf birlikte tek, dersler ayrı); `readBundlePlans` `newer`'ı döndürüyor; "Tümünü
+dosyadan aç" yarım dosyada "okunamadı", yeni sürümün planında "programı güncelleyin" diyor. İki
+yeni cümle dört sözlükte.
+
+**İnceleme** (taze bağlamlı alt ajan; ilki oturum yeniden başlarken yarıda kaldı, yeniden koşuldu).
+Düzelen: kimliklerin kapalı saat anahtarında çakışması (önce kırmızı test), iki gereksiz değişken,
+CHANGELOG, DATA, TESTPLAN ve bir yorum. Reddedilen: eksik ya da yeni tek planın üst çubuğa
+yollanması (üst çubuk kendi gerekçesini söylüyor), eski zarf sürümünün de "güncelleyin" demesi
+ve depo dolu iken bozuk sayısının düşmesi (ikisi de bu daldan eski), yalnız yeni ve bozuk
+planlı pakette notun yalnız güncellemeyi söylemesi (güncelledikten sonra bozuklar kendi notunu
+alır), `ok === 0 && failed === 0` dalı (`replaceLibrary` güvenliğini çağırana bırakmıyor, dal
+koruma olarak kalıyor), karışık paketin E2E'si (arayüz metni, tıklama testinde görüldü).
+
+**Tıklama testi** (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul;
+`scratch/dosya-okuma-b7/tiklama/`): yarım paket → "Bu dosya okunamadı…"; bütün planları yeni
+paket → "…daha yeni bir sürümüyle yazılmış. Programı güncelleyin."; bir planı yeni paket → onay
+ve not güncellemeyi söylüyor, "bozuk" demiyor; üst çubukta aynı kimlikli iki dersli dosya →
+"Bu dosya okunamadı", 25 öğretmen yerinde; komşu: geçerli dosya açılıyor. Konsol hatası yok.
+
+**Koşulan.** `hizli`, `fuzz`, `bundle`, `fixtures`, `storeContract`, `tsc`, `eslint`,
+`planlar.spec.ts` (24/24), iki E2E'nin düzeltmesiz kırmızısı, tıklama testi. **Koşulmayan.** Tam
+E2E yerelde (CI'da).
+
 ---
 
 ## 2026-10-24 · TB1'in üst çubuk yarısı (`tb1-dosyadan-ac`)
