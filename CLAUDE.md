@@ -5,8 +5,8 @@ Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor: Roboders'teki ve
 kaynak aSc Timetables'taki her iyi özelliğin daha iyisi. Bir özellik babama yeni yazı ya da
 soru eklemeden iş görüyorsa iyi sayılır. Program çift tıklanan tek bir HTML dosyası, aynı
 dosya bir sitede, Windows kurulum paketinde ve bir exe'nin içinde de teslim ediliyor. Vite,
-React ve TypeScript ile yazıldı. Bugün sunucusu yok ve internete ihtiyaç duymuyor, bunu şart
-koşan iki ilke 2026-10-08'den beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
+React ve TypeScript ile yazıldı. Bugün sunucusu yok ve internete ihtiyaç duymuyor, ama ikisi de
+bir ilke değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md), "Ağ ve servisler").
 
 ## Oturum başında
 
