@@ -587,7 +587,7 @@ export default function Teachers({ state, change }: PanelProps) {
                         title={
                           teacher.email !== '' && !looksLikeEmail(teacher.email)
                             ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
-                            : undefined
+                            : teacher.email || undefined
                         }
                         onBlur={(e) => {
                           const email = cleanEmail(e.target.value);

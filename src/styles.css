@@ -5199,8 +5199,24 @@ table.availability td.closed {
   font-weight: 600;
 }
 
+.mail-row .mail-to {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
 .mail-row .btn {
   margin-left: auto;
+  flex: none;
+}
+
+/* In a browser the button is a link (a plain mailto:), and it reads as the
+   buttons around it, not as underlined text. */
+.mail-row a.btn {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* ...except when the rows are STACKED. `.pick-items` lays short names out in a

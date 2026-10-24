@@ -67,6 +67,22 @@ export default function MailPanel({ state, ix, spans }: Props) {
           'Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
         )}
       </p>
+      {/* Above the list: the row pressed may be the first of twenty-five. */}
+      {said === 'istemci-yok' && (
+        <div className="warn-box" role="status">
+          {t('Bu bilgisayarda seçili bir e-posta programı yok.')}
+        </div>
+      )}
+      {said === 'tarayici' && (
+        <p className="hint" role="status">
+          {t('E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.')}
+        </p>
+      )}
+      {said === 'olmadi' && (
+        <div className="warn-box" role="status">
+          {t('E-posta programı açılamadı.')}
+        </div>
+      )}
       <ul className="mail-list">
         {rows.map(({ teacher, why, url }) => (
           <li key={teacher.id} className="mail-row">
@@ -74,6 +90,13 @@ export default function MailPanel({ state, ix, spans }: Props) {
             <span className="mail-who" title={teacher.name}>
               {teacher.short}
             </span>
+            {/* Where it goes, before it goes: the address box in Okul is
+                narrow, and this is the line read before pressing. */}
+            {why === null && (
+              <span className="mail-to" title={teacher.email}>
+                {teacher.email}
+              </span>
+            )}
             {why !== null ? (
               <span className="muted-inline">{t(why)}</span>
             ) : exe ? (
@@ -99,21 +122,6 @@ export default function MailPanel({ state, ix, spans }: Props) {
           </li>
         ))}
       </ul>
-      {said === 'istemci-yok' && (
-        <div className="warn-box" role="status">
-          {t('Bu bilgisayarda seçili bir e-posta programı yok.')}
-        </div>
-      )}
-      {said === 'tarayici' && (
-        <p className="hint" role="status">
-          {t('E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.')}
-        </p>
-      )}
-      {said === 'olmadi' && (
-        <div className="warn-box" role="status">
-          {t('E-posta programı açılamadı.')}
-        </div>
-      )}
     </div>
   );
 }
