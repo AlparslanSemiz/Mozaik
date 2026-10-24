@@ -3,7 +3,7 @@
 // user can watch and stop.
 //
 // When a run ends stuck, the same hook goes on to the second search
-// (pure/relax.ts, TODO B5.9): what would have to change for the week to be
+// (pure/relax/relax.ts, TODO B5.9): what would have to change for the week to be
 // built. Its suggestions arrive one family at a time, "Durdur" stops it and
 // keeps what it has, and applying one is a single undo step.
 //
@@ -14,8 +14,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createSolver } from '../../pure/solver';
 import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../../pure/solver';
-import { applySuggestion, suggestionUses } from '../../pure/relax';
-import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../../pure/relax';
+import {
+  applySuggestion,
+  suggestionUses,
+  type RelaxOptions,
+  type RelaxProgress,
+  type Relaxer,
+  type Suggestion,
+} from '../../pure/relax';
 import { activePlacements } from '../../pure/grid';
 import { startRelax } from './relaxPool';
 import type { Answers, Id, State } from '../../leaf/types';

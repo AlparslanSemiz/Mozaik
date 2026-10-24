@@ -10,8 +10,8 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
                    names · subjects · blocks · version · dateStamp · storage
    |
-src/pure/          constraints/* · entities/* · feasibility · solver
-                   relax · sat · grid/* · program/* · paper/* · io/* · listview · undo
+src/pure/          constraints/* · entities/* · relax/* · feasibility · solver
+                   grid/* · program/* · paper/* · io/* · listview · undo
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
    |
@@ -24,7 +24,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/constraints/`, `pure/entities/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -87,8 +87,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: `entities.ts` ile `bell.ts`'in bütün dışa aktarımları |
 | `pure/entities/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
-| `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
-| `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
+| `pure/relax/index.ts` | öneri aramasının giriş noktası: `relax.ts`'in bütün dışa aktarımları; `sat.ts` paketin içinde kalır |
+| `pure/relax/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
+| `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |

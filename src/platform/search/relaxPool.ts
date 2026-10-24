@@ -1,4 +1,4 @@
-// The suggestion search (pure/relax.ts) on as many cores as the machine has,
+// The suggestion search (pure/relax/relax.ts) on as many cores as the machine has,
 // and on the main thread when it cannot (TODO B5.10).
 //
 // Why workers after all: the search is several independent ways, each tens of
@@ -19,14 +19,14 @@
 // no Worker, or no answer from one within READY_MS, and the same relaxer runs
 // here in slices. WebView2 on Windows could not be measured from this machine.
 
-import { createRelaxer } from '../../pure/relax';
-import type {
-  RelaxFamily,
-  RelaxOptions,
-  RelaxProgress,
-  RelaxResult,
-  Relaxer,
-  Suggestion,
+import {
+  createRelaxer,
+  type RelaxFamily,
+  type RelaxOptions,
+  type RelaxProgress,
+  type RelaxResult,
+  type Relaxer,
+  type Suggestion,
 } from '../../pure/relax';
 import type { Id, State } from '../../leaf/types';
 import { recorded } from './relaxLog';

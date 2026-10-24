@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Sat, atMostOne, exactlyOne, neg, not, pos, totalizer } from './pure/sat';
-import type { Lit } from './pure/sat';
+import { Sat, atMostOne, exactlyOne, neg, not, pos, totalizer } from './pure/relax/sat';
+import type { Lit } from './pure/relax/sat';
 
 /** A seeded generator, so a failing formula can be found again. */
 function rng(seed: number): () => number {

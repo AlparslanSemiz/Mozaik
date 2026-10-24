@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { lines } from './platform/search/relaxPool';
-import type { RelaxFamily } from './pure/relax';
+import type { RelaxFamily } from './pure/relax/relax';
 
 /** Every way, in the order of relaxPool's table. */
 const ALL: RelaxFamily[] = [

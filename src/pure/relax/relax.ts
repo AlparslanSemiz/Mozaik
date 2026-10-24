@@ -42,20 +42,20 @@ import {
   ruleActive,
   ruleLevel,
   teacherDayCount,
-} from './constraints';
-import { forbids, setAvailability, setTeacherLimit, updateLesson } from './entities';
-import { lessonName } from './feasibility';
-import { lessonExcluded, type SolverExclusions } from './program';
-import { activePinned, activePlacements, replaceActiveGrid } from './grid';
-import { fixedCells } from './solver';
+} from '../constraints';
+import { forbids, setAvailability, setTeacherLimit, updateLesson } from '../entities';
+import { lessonName } from '../feasibility';
+import { lessonExcluded, type SolverExclusions } from '../program';
+import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
+import { fixedCells } from '../solver';
 import { Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
 import type { Lit } from './sat';
-import { blockPlan } from '../leaf/blocks';
-import { t } from '../leaf/i18n';
-import { closedKey, parseKey, placementKey } from '../leaf/keys';
-import { dayLabel } from '../leaf/names';
-import { lessonSubject, subjectKey, teacherSubjects } from '../leaf/subjects';
-import type { Answers, Id, Lesson, Refusal, Relaxation, State } from '../leaf/types';
+import { blockPlan } from '../../leaf/blocks';
+import { t } from '../../leaf/i18n';
+import { closedKey, parseKey, placementKey } from '../../leaf/keys';
+import { dayLabel } from '../../leaf/names';
+import { lessonSubject, subjectKey, teacherSubjects } from '../../leaf/subjects';
+import type { Answers, Id, Lesson, Refusal, Relaxation, State } from '../../leaf/types';
 
 /**
  * One way of changing the data, and what it calls cheap. The first three open
@@ -107,7 +107,7 @@ const HAND_CAP = 3;
 
 // The changes and the refusals are the plan's data too (State.answers, schema
 // v15), so their types live in leaf/types.ts; they are named here as before.
-export type { Refusal, Relaxation } from '../leaf/types';
+export type { Refusal, Relaxation } from '../../leaf/types';
 
 export interface Suggestion {
   family: RelaxFamily;

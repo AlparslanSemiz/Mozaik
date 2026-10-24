@@ -9,8 +9,8 @@ import {
   suggestionLines,
   suggestionSentence,
   verifySuggestion,
-} from './pure/relax';
-import type { RelaxFamily, RelaxOptions, Suggestion } from './pure/relax';
+} from './pure/relax/relax';
+import type { RelaxFamily, RelaxOptions, Suggestion } from './pure/relax/relax';
 import { solve } from './pure/solver';
 import { activePlacements, replaceActiveGrid } from './pure/grid/programs';
 import { buildIndex } from './pure/constraints/constraints';

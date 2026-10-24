@@ -1294,7 +1294,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 | RF | Ne | Nerede |
 |---|---|---|
-| RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax.ts` |
+| RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
 | RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/invariants.test.ts`, `src/relax.test.ts` |
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver.ts` |

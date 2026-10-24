@@ -29,8 +29,10 @@ import {
   sameChanges,
   suggestionQuestions,
   suggestionSentence,
+  type Question,
+  type RelaxFamily,
+  type Suggestion,
 } from '../../pure/relax';
-import type { Question, RelaxFamily, Suggestion } from '../../pure/relax';
 import type { Relaxation, State } from '../../leaf/types';
 import { useT } from '../T';
 import type { Translate } from '../T';

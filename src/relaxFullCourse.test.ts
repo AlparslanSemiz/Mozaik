@@ -7,8 +7,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { applySuggestion, createRelaxer, suggestionLines, verifySuggestion } from './pure/relax';
-import type { RelaxFamily, Suggestion } from './pure/relax';
+import {
+  applySuggestion,
+  createRelaxer,
+  suggestionLines,
+  verifySuggestion,
+} from './pure/relax/relax';
+import type { RelaxFamily, Suggestion } from './pure/relax/relax';
 import { solve } from './pure/solver';
 import { parseState } from './pure/io/parseState';
 import { activePlacements } from './pure/grid/programs';

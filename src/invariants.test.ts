@@ -28,7 +28,12 @@ import { activeProgram, replaceActiveGrid } from './pure/grid/programs';
 import { solve } from './pure/solver';
 import { parseState } from './pure/io/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
-import { applySuggestion, createRelaxer, verifySuggestion, type RelaxOptions } from './pure/relax';
+import {
+  applySuggestion,
+  createRelaxer,
+  verifySuggestion,
+  type RelaxOptions,
+} from './pure/relax/relax';
 import { activePlacements } from './pure/grid/programs';
 import { closedKey } from './leaf/keys';
 import type { Day, Id, State } from './leaf/types';

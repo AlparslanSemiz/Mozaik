@@ -7,12 +7,12 @@
 // stayed on the first week, and stopping returned that copy.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { RelaxProgress, RelaxResult, Suggestion } from './pure/relax';
+import type { RelaxProgress, RelaxResult, Suggestion } from './pure/relax/relax';
 import type { RelaxMessage } from './platform/search/relaxPool';
 
 const script: Array<RelaxProgress | RelaxResult> = [];
 
-vi.mock('./pure/relax', () => ({
+vi.mock('./pure/relax/relax', () => ({
   createRelaxer: () => {
     let at = 0;
     let now: RelaxProgress | null = null;
