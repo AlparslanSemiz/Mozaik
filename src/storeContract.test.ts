@@ -610,6 +610,30 @@ describe('sözleşme · React kancası', () => {
     expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
   });
 
+  // TB1's review, on TB8's path. The import used to CANCEL the pending
+  // autosave without writing it; when the open plan then stays (the file's
+  // copy unreadable), its last edit, made under 400 ms before, never reached
+  // storage.
+  it('kalan açık planın 400 ms dolmamış değişikliği depoya iniyor', () => {
+    mount();
+    settle();
+    act(() => store.change(() => named('Son değişiklik')));
+    act(() => {
+      store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: '1', name: 'Eksik', draft: false },
+            { id: 'y', name: 'Tam', draft: false },
+          ],
+          activeId: 'y',
+        },
+        states: { '1': without('teachers'), y: school() },
+      });
+    });
+    settle();
+    expect(loadPlan('1')?.settings.schoolName).toBe('Son değişiklik');
+  });
+
   it('yazılamayan yeni plan dizinde verisiz bir satır olarak kalmıyor', () => {
     mount();
     settle();
