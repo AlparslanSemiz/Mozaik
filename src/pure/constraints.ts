@@ -4,6 +4,7 @@
 // Rule: business logic lives here, never inside components.
 
 import { blockPlan, clampBlocks } from '../leaf/blocks';
+import { cleanEmail } from '../leaf/email';
 import { t } from '../leaf/i18n';
 import { cellKey, closedKey, parseKey, placementKey } from '../leaf/keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
@@ -1498,9 +1499,21 @@ export function sanitize(d: State): State {
   });
   if (d.relations === undefined || relations.length !== givenRelations.length) changed = true;
 
+  // An address (schema v17) never keeps a line break or a control character:
+  // it ends up in a `mailto:`, and a break there ends the address and starts
+  // something the user never typed. Whatever else was typed stays as typed.
+  let teachers = d.teachers;
+  if (teachers.some((t) => t.email !== cleanEmail(t.email))) {
+    teachers = teachers.map((t) =>
+      t.email === cleanEmail(t.email) ? t : { ...t, email: cleanEmail(t.email) },
+    );
+    changed = true;
+  }
+
   if (!changed) return d;
   return {
     ...d,
+    teachers,
     classes,
     lessons,
     unavailable,

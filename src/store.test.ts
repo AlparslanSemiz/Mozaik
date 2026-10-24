@@ -59,10 +59,11 @@ describe('parseState — v1 göçü', () => {
         name: 'Mehmet Çelik',
         short: 'MÇ',
         subject: 'Matematik',
-        // A v1 file cannot carry either of these; they arrive "not stated" and
-        // "no second subject", not guessed.
+        // A v1 file cannot carry any of these; they arrive "not stated", "no
+        // second subject" and "no address", not guessed.
         subject2: '',
         gender: '',
+        email: '',
         color: 3,
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
       },

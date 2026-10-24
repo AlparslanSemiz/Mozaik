@@ -47,6 +47,7 @@ function build(): State {
         short: 'MÇ',
         subject: 'Matematik',
         subject2: '',
+        email: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -157,6 +158,7 @@ describe('buildReport — derslik darboğazı', () => {
       gender: '',
       color: 1,
       limits: { ...NO_TEACHER_LIMITS },
+      email: '',
     });
     d.lessons.push({
       id: 'x2',

@@ -118,6 +118,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     gender: '',
     color: i,
     limits: t.limits ?? { ...NO_TEACHER_LIMITS },
+    email: '',
   }));
 
   const classes: ClassGroup[] = (spec.classes ?? [{ id: 's510', name: '510', roomId: 'dA' }]).map(

@@ -13,6 +13,7 @@
 // both derive the versions from SCHEMA_VERSION rather than naming one.
 
 import { MAX_BLOCK, clampBlocks } from '../leaf/blocks';
+import { cleanEmail } from '../leaf/email';
 import { sanitize } from '../pure/constraints';
 import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../pure/entities';
 import { firstFreeColor, PALETTE_SIZE } from '../leaf/palette';
@@ -282,17 +283,19 @@ function migrateV2toV3(raw: LegacyV2): State {
       ),
     },
     rooms: asArray<Room>(raw.rooms, []),
-    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2'>>(raw.teachers, []).map(
-      (x) => ({
-        ...x,
-        // Neither of these can be in a v1/v2 file, and neither is guessed: a
-        // gender is not read off a name, and a second subject nobody wrote down
-        // is a subject nobody teaches.
-        gender: '',
-        subject2: '',
-        limits: { ...NO_TEACHER_LIMITS },
-      }),
-    ),
+    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2' | 'email'>>(
+      raw.teachers,
+      [],
+    ).map((x) => ({
+      ...x,
+      // None of these can be in a v1/v2 file, and none is guessed: a gender
+      // is not read off a name, a second subject nobody wrote down is a
+      // subject nobody teaches, and an address is only ever typed.
+      gender: '',
+      subject2: '',
+      email: '',
+      limits: { ...NO_TEACHER_LIMITS },
+    })),
     // The same two readers the v3+ path runs over this list. A bare `asArray`
     // here once left the class box `undefined` and every class uncoloured
     // (TODO §8g).
@@ -430,6 +433,7 @@ export function parseState(text: string): State | null {
     version === 13 ||
     version === 14 ||
     version === 15 ||
+    version === 16 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -508,6 +512,8 @@ export function parseState(text: string): State | null {
           ...t,
           gender: asGender(t.gender),
           subject2: asText(t.subject2, ''),
+          // v17. Below it there is no address, and '' is what none means.
+          email: cleanEmail(t.email),
           limits: {
             maxConsecutive: asBox(t.limits?.maxConsecutive),
             maxPerDay: asBox(t.limits?.maxPerDay),

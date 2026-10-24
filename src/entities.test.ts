@@ -91,6 +91,7 @@ function build(): State {
         short: 'MÇ',
         subject: 'Matematik',
         subject2: '',
+        email: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -509,6 +510,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: 'mç',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 0,
           limits: NO_TEACHER_LIMITS,
@@ -519,6 +521,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: 'MÇ',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 1,
           limits: NO_TEACHER_LIMITS,
@@ -529,6 +532,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: '',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 2,
           limits: NO_TEACHER_LIMITS,
@@ -539,6 +543,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: '',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 3,
           limits: NO_TEACHER_LIMITS,
@@ -1305,6 +1310,7 @@ describe('subjectRank ve teacherRank', () => {
     gender: '' as const,
     color: 0,
     limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    email: '',
   });
 
   it('sıra AYARLARDAKİ listeden geliyor, alfabeden değil', () => {

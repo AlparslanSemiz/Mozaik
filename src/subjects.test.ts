@@ -15,6 +15,7 @@ const teacher = (subject: string, subject2: string): Teacher => ({
   gender: '',
   color: 0,
   limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+  email: '',
 });
 
 const lesson = (second: boolean, teacherId = 'oMC'): Lesson => ({

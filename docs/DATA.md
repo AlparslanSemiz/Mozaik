@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 16
+  schemaVersion: 17
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -42,7 +42,7 @@ Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }
 Limits     { maxConsecutive, maxPerDay, minPerDay, maxSameLessonPerDay,
              maxGapsTeacher, maxGapsClass }     // 0 = sınır yok, iki boşluk alanı hariç
 Room       { id, name }
-Teacher    { id, name, short, subject, subject2, gender, color, limits }
+Teacher    { id, name, short, subject, subject2, gender, color, limits, email }
              // limits: { maxConsecutive, maxPerDay, minPerDay }, null = okul varsayılanı
 ClassGroup { id, name, roomId, color, maxSameLessonPerDay }
 Lesson     { id, classId, teacherId, weeklyHours, blocks, second, maxPerDay }
@@ -51,6 +51,7 @@ Lesson     { id, classId, teacherId, weeklyHours, blocks, second, maxPerDay }
 Alanların anlamı:
 
 - `Teacher.subject2` öğretmenin ikinci branşı ya da `''`. `''` bir değer, eksik veri değil: listelerin çoğu tek branşlı ve bu da veri.
+- `Teacher.email` öğretmenin haftasının gönderileceği adres ya da `''` (v17, TODO B3.4). Kişisel veri: plan dosyasıyla, her yedekle ve paylaşılan her dosyayla birlikte taşınır (kullanıcının kararı, 2026-10-24: State'te). Yazıldığı gibi saklanır; yalnız satır sonu ve denetim karakteri düşer, okuyucuda da `sanitize()`'da da (`cleanEmail`), çünkü bir `mailto:`'da satır sonu adresi bitirip başka bir şey başlatır. Tek bir adrese benzeyip benzemediği (`looksLikeEmail`) saklamayı değil, Çıktı'daki düğmeyi belirler. Mozaik hiçbir şey göndermez: adres yalnız kullanıcının kendi e-posta programının açtığı bir `mailto:`'ya girer.
 - `Teacher.gender` `''`, `'k'` ya da `'e'`. Listelerde sıralama ve gruplama için, kâğıda çıkmaz. Bir boolean değil, çünkü boolean ikisinden birini varsayılan seçip herkese sessizce atardı.
 - `Teacher.color` ve `ClassGroup.color` paletin indeksi, bir hex değer değil.
 - `ClassGroup.roomId` sınıfın sabit dersliği. `null` ise derslik çakışması denetlenmez.
@@ -103,8 +104,9 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v14 | `Limits.maxGapsTeacher` ve `maxGapsClass`: boşluk kuralı, eksik alan 0 ve `off` |
 | v15 | `answers`: öneriye verilen Olur ve Olmaz cevapları; eksik alan boş, okunamayan tek bir cevap tek başına düşer |
 | v16 | `relations`: iki dersin aynı güne konmaması; eksik alan boş, okunamayan tek bir ilişki tek başına düşer |
+| v17 | `Teacher.email`: öğretmenin adresi; eksik ya da metin olmayan alan `''`, satır sonu ve denetim karakteri düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v16'ya her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v17'ye her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -120,7 +122,7 @@ Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v16 çıkarılırken `version === 15` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v17 çıkarılırken `version === 16` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri
@@ -232,7 +234,7 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 ## Dosya biçimleri
 
 ```
-{ "schemaVersion": 16, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 17, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 

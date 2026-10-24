@@ -456,6 +456,26 @@ describe('şema örnekleri — ilişkiler (v16)', () => {
   });
 });
 
+describe('şema örnekleri — öğretmenin e-postası (v17)', () => {
+  it.each(VERSIONS)('v%i dosyasının adresleri doğru geliyor', (version) => {
+    const emails = parse(version).teachers.map((t) => t.email);
+    // v17 brought them. A file below it has none, and '' is what none means.
+    expect(emails).toEqual(version >= 17 ? ['mehmet.celik@example.com', ''] : ['', '']);
+  });
+
+  it('adresteki satır sonu ve denetim karakteri düşüyor, metin olmayan adres boş', () => {
+    const state = edited<{ teachers: Array<Record<string, unknown>> }>(SCHEMA_VERSION, (raw) => {
+      raw.teachers[0]!['email'] = ' ali@example.com\r\nBcc: zarar@example.com\u0000 ';
+      raw.teachers[1]!['email'] = 42;
+    });
+    expect(state).not.toBeNull();
+    expect(state!.teachers.map((t) => t.email)).toEqual([
+      'ali@example.comBcc: zarar@example.com',
+      '',
+    ]);
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**
