@@ -34,7 +34,10 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
    listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
    bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`): DESIGN.md Renk'te kural,
-   `e2e/renk.spec.ts` 93.
+   `e2e/renk.spec.ts` 93. → Her listeye yayıldı (2026-10-24, `okunabilirlik`, analizi
+   `zebra-liste`'den): Müsaitlik ve Dersler'in varlık listesi, varlık sayfasının dersleri,
+   yapıştırma önizlemesi; zil önizlemesi ve Branşlar'ın sırası; soluk yazı iki temada bir adım,
+   zebrada da kâğıttaki eski değerinden düşük değil.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -867,10 +870,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `parseBundle` okunamayan metinle tek plan dosyasını ayırmıyor. Hiçbir şey değişmiyor, ama
       kullanıcı yanlış düğmeye yollanıyor. Çare adayı: `bundleVersionOf` null ve metin JSON
       değilse "dosya okunamadı" cümlesi.
-- [ ] **B7.36 Ayarlar'daki durum notları 13 px (2026-10-24, TB8'in tıklama testi).** Planlar
+- [x] **B7.36 Ayarlar'daki durum notları 13 px (2026-10-24, TB8'in tıklama testi).** Planlar
       ve yedek'teki `.hint[role="status"]` notu 13 px, kontrastı 7,28 (açık tema, `getComputedStyle`).
       Kontrast yeterli, boy az gören bir kullanıcı için küçük; bütün `.hint`'lerin boyu, yani
       DESIGN'ın tipografi kararı, sade ekran turuyla birlikte.
+      **Yapıldı (2026-10-24, `okunabilirlik`):** Ayarlar'ın beş bölümündeki notlar gövde boyunda
+      (15 px, `.settings-pane .hint`); tıklama testiyle ölçüldü, yatay kaydırma yok. Ayarlar'dan
+      açılan diyaloglardaki ve öteki ekranlardaki `.hint` 13 px'te kaldı (sade ekran turu).
 - [ ] **B7.37 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
       inceleyicinin yoklamasından: `lessons[0].id = null` olan dosya kimliği `''` olan bir dersle,
       aynı kimliği taşıyan iki ders (`l2`, `l2`) olduğu gibi açılıyor, yani yerleşimler hangi derse

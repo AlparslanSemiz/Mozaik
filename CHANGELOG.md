@@ -25,6 +25,8 @@ release is incomplete, the entry says so.
 
 - A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
 - Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
+- The shading now also reaches the lists on the left of Availability and Lessons, the lessons in a teacher's, class's or room's sheet, and the preview of pasted rows. The lunch row in the bell preview no longer breaks the pattern, and the unused subjects under the subject list start their own group. The grey of small text is a step stronger in both themes, so it reads as well on a shaded row as it used to on a plain one.
+- The notes in Settings are now as large as the body text.
 
 ### Fixed
 

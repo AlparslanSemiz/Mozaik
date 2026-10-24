@@ -83,7 +83,7 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.
 - **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor. Listede girdi o gömük yüzeyi bırakır, çünkü zebra satırı açık temada aynı `--paper-sunk`'ta: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli ve `--line` kenarlı, düğme gibi.
 - **Düğme durumları:** birincil, sade, tehlikeli, basılı. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
-- **Listelerde zebra.** `table.list` ve `table.stat`'ın çift satırları `--zebra` zeminli: açık temada `--paper-sunk`, koyu temada kâğıttan bir adım açık kendi tonu. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural üzerine gelme kuralıyla aynı özgüllükte ve ondan önce yazılı, yani üstüne gelinen satır zebrayı ezer. Metin iki zeminde de AA tutar, ve `e2e/renk.spec.ts` bunu, kuralın varlığını, sırasını ve tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
+- **Listelerde zebra.** Her listenin, yani satır satır okunan ve her satırı bir kayıt olan dikey yığının çift satırı `--zebra` zeminli: `table.list`, `table.stat`, Müsaitlik'in ve Dersler'in varlık listesi (`.entity-list`), varlık sayfasının dersleri (`table.sheet-lessons`) ve Excel'den yapıştırmanın önizlemesi (`ul.paste-preview`, son dördü 2026-10-24). Açık temada `--paper-sunk`, koyu temada kâğıttan bir adım açık kendi tonu. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Tablo kuralı üzerine gelme kuralıyla aynı özgüllükte ve ondan önce yazılı; yeni dört liste `:where()` altında, yani seçili ve üstüne gelinen satır zebrayı ezer (tuzak 40). Zil önizlemesinde öğle arası satırı sayılmaz, Branşlar'ın ikinci gövdesi üstündeki kalın çizgiyle yeni bir grup ve şeridi baştan başlar. Soluk yazı (`--muted`) 2026-10-24'te açık temada bir adım koyulaştı, koyu temada bir adım açıldı: zebrada da kâğıttaki eski değerinden düşük değil (açık 8,53 kâğıtta, 7,79 zebrada; koyu 9,09 ve 8,34); `e2e/renk.spec.ts` iki temada tokeni, `table.list` ile `table.stat`'ın kuralını ve üstüne gelmeyi, yeni dört listenin ve zil önizlemesinin sırasını ve soluk yazının eşiğini ölçer; Branşlar'ın çizgisi ve Ayarlar'ın not boyu ekran görüntüsüyle bakılan düzen. Izgara, seçici ve madde işaretli düzyazı liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor, Ctrl+K paletinde ve dağılım seçicisinde klavyenin vurgusu tek durum, Çıktı'nın sayfa seçimi bir çip akışı, Özet'in branş listesi düzyazı; zebra almıyorlar.
 - **Gün bandı** tek indeksli günlere çok hafif bir zemin verir. Bir durum gibi okunmadığı ve iki temada aynı yükte olduğu ölçülür, ve altındaki kapalı saat taramasını ezmemesi gerekir (tuzak 40).
 - **Nötr rampa türetilmiş:** tek bir ton (258), seçilen OKLCH açıklığı ve chroma'sı, çevrimdışı sRGB'ye çevrilmiş. Dosyaya hex yazılıyor, çünkü `getComputedStyle` bir `oklch()` rengini `oklch()` olarak döndürür ve süitteki ölçümler `rgb()` ayrıştırır (tuzak 81).
 
@@ -96,7 +96,9 @@ Kök yazı boyu `calc(13px * var(--ui-scale))`, ekran merdiveni `rem` cinsinden 
 basamak. Kâğıt merdiveni `pt` cinsinden, ekran ölçeğinden etkilenmez, ve kâğıttaki
 yazı ayarının çarpanı merdivenle aynı öğede tanımlıdır (tuzak 63). Sütun
 genişlikleri `ch` cinsinden, ve ölçekler arasında korunan şey piksel değil `ch`
-sayısı (tuzak 39).
+sayısı (tuzak 39). `.hint` her yerde `--fs-sm` (13 px), Ayarlar'da ise gövde boyu
+`--fs-base` (15 px, `.settings-pane`, 2026-10-24, TODO B7.36): oradaki notlar bir
+tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil okunarak bakılıyor.
 
 ---
 
@@ -222,7 +224,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.field` `.field-label` `.form-row` (+`.nowrap`) | etiketli kontrol · bir satırda duranlar |
 | `.num` `.text-sm` `.clock-pick` `.sort-pick` | boyutlanmış girdiler |
 | `.color-pick` + `dialog.color-dialog` `.swatches` `.swatch` | renk seçici ve 36 renklik diyaloğu |
-| `table.list` + `th.num` `td.num` | veri tablosu, çift satırı `--zebra` (`table.stat` da) |
+| `table.list` + `th.num` `td.num` | veri tablosu, çift satırı `--zebra` (`table.stat`, `table.sheet-lessons`, `.entity-list` ve `ul.paste-preview` da) |
 | `.chip` `.chip-count` `.chips` | grup süzgeci, sayısı üstünde yazan |
 | `.search` `.search-box` `.search-clear` | arama kutusu |
 | `.list-tools` `.list-count` | listenin üstündeki şerit |
