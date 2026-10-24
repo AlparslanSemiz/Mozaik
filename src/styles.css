@@ -4037,14 +4037,22 @@ table.list td > .form-row {
   justify-content: flex-end;
 }
 
-/* ZEBRA. Every second row on --zebra, in every list and every stat table.
-   It sits ABOVE the hover rule on purpose: both are (0,2,3), so source order
-   is the whole tie-break, and the row under the pointer has to win on a
-   zebra row as on any other. `renk.spec.ts` 93 hovers an even row for that.
-   A grid is not a list: table.grid and table.availability keep their ground,
-   because there it carries a state. */
-table.list tbody tr:nth-child(even),
-table.stat tbody tr:nth-child(even) {
+/* ZEBRA. Every second row on --zebra, in every list: a stack of records of
+   one shape, read across. The tables (list, stat, the sheet's lessons), the
+   paste preview, and the picking list beside Müsaitlik and Dersler (its rule
+   sits with `.entity`, below, for the reason given there). A grid is not a
+   list: table.grid, table.availability and the sheet's week keep their
+   ground, because there it carries a state. Nor is a menu, the palette or a
+   picker, where the one highlight belongs to the keyboard.
+
+   ZERO SPECIFICITY, through :where(), so that every state wins over the
+   stripe whatever its selector and wherever it is written: the hover, the
+   selected entity, a drop mark. Pitfall 40 closed by construction instead of
+   by source order. The count is the DOM's, i.e. the rows on screen: a search,
+   a sort, a group chip or a delete takes rows out, and the stripe follows
+   what is seen (`e2e/zebra.spec.ts` 94). */
+:where(table.list, table.stat, table.sheet-lessons) > tbody > tr:where(:nth-child(even)),
+:where(ul.paste-preview > li:nth-child(even)) {
   background: var(--zebra);
 }
 
@@ -4768,6 +4776,14 @@ table.sheet-lessons select.transfer-pick {
   cursor: pointer;
   text-align: left;
   font-size: var(--fs-sm);
+}
+
+/* The zebra, here rather than in its block: `.entity` above writes
+   `background: none` at (0,1,0), and a :where() stripe would lose to it. At
+   (0,1,0) and after it, the stripe wins over the button's own reset and
+   loses to the hover and the selected row below (both (0,2,0)). */
+.entity:where(:nth-child(even)) {
+  background: var(--zebra);
 }
 
 .entity:hover {
