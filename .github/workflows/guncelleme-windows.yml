@@ -31,6 +31,9 @@ on:
       - 'src/pure/constraints/**'
       - 'src/platform/storage/**'
       - 'src/platform/update.ts'
+      - 'src/platform/exe/**'
+      - 'src/ui/settings/About.tsx'
+      - 'scripts/surum.mjs'
       - 'e2e/guncelleme-exe.spec.ts'
       - 'scripts/guncelleme-eski.mjs'
       - 'scripts/uia.mjs'
@@ -159,6 +162,7 @@ jobs:
           MOZAIK_KURULU: ${{ runner.temp }}/kurulu/Mozaik.exe
           MOZAIK_ESKI_TEST_EXE: ${{ runner.temp }}/eski-test/Mozaik.exe
           MOZAIK_YENI_EXE: ${{ runner.temp }}/yeni/Mozaik.exe
+          MOZAIK_TEST_GUNCELLEME_KOKU: http://127.0.0.1:8765/
         run: npx playwright test --config playwright.guncelleme-exe.config.ts --reporter=list
 
       - if: ${{ always() }}

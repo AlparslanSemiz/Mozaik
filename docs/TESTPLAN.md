@@ -513,7 +513,10 @@ kopya kırmızıdır; şema bu commit'inki olmalı.
 
 `npm run exe:test` (`cargo test`): `safe_name` kapısı, atomik yazımın geçici dosya
 bırakmaması, listenin yabancı dosyaları da göstermesi. Güncellemede: `is_newer`'ın
-`1.10 > 1.9` bildiği, inen dosyanın `MZ` ile başladığı ve boyutunun tuttuğu,
+`1.10 > 1.9` bildiği, inen dosyanın `MZ` ile başladığı, boyutunun ve SHA-256 özetinin
+tuttuğu, özeti olmayan bir manifestteki yeni sürümün indirilmediği, özetten önceki manifestlerin
+okunmaya devam ettiği, test kökü olmadan derlenen kopyanın yalnız Release'ten indirdiği ve test
+kökünün yalnız `http://127.0.0.1:<port>/` olabildiği,
 adresin yalnız bu deponun Release öneklerinden olabildiği, takas yarıda kalırsa
 eski programın yerine geri konduğu. Rust her makinede kurulu olmadığı için
 `kontrol`'ün parçası değil, `surum.yml`'de koşuyor.

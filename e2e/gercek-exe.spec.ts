@@ -247,6 +247,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         await window.__TAURI__.core.invoke('download_update', {
           url: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
           boyut: 1,
+          sha256: '0'.repeat(64),
         });
         return 'indirdi';
       } catch (e) {
@@ -267,6 +268,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
         await window.__TAURI__.core.invoke('download_update', {
           url: 'https://example.com/releases/latest/download/Mozaik.exe',
           boyut: 1,
+          sha256: '0'.repeat(64),
         });
         return 'indirdi';
       } catch (e) {

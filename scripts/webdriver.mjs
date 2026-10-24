@@ -431,7 +431,12 @@ export class Oturum {
         await oturum?.komut('DELETE', '').catch(() => undefined);
       }
     }
-    throw new Error(`Yeni programa bağlanılamadı: ${hata?.message ?? hata}`);
+    // What the port listed at the end: a WebView2 of the old program that did
+    // not let go (2026-10-24, `windowsAc`) is the likely reason, and this says so.
+    const liste = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/list`)
+      .then((c) => c.text())
+      .catch((e) => `port cevap vermedi: ${e}`);
+    throw new Error(`Yeni programa bağlanılamadı: ${hata?.message ?? hata}\n/json/list: ${liste}`);
   }
 
   /**
