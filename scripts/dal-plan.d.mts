@@ -50,4 +50,10 @@ export function planKur(girdi: {
   workflow: Set<string>;
 }): Plan;
 export function arsivEtiketleri(plan: Plan): { ad: string; sha: string }[];
+/** One `git fetch <bundle> <ref>:refs/heads/<branch>` per deleted tip, with the ref the bundle holds. */
+export function geriAlmaKomutlari(
+  bundle: string,
+  yerel: { ad: string; sha: string }[],
+  uzak: { ad: string; sha: string }[],
+): string[];
 export function bundleAdi(tarih: string, varMi: (ad: string) => boolean): string;

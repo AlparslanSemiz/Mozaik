@@ -36,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 import {
   arsivEtiketleri,
   bundleAdi,
+  geriAlmaKomutlari,
   onbellekMi,
   planKur,
   workflowDallari,
@@ -267,6 +268,8 @@ console.log(`  ${etiketler.length} yerel arsiv/ etiketi (itilmez).`);
 // --------------------------------------------------------------- worktree'ler
 
 const silinen = [];
+const silinenYerel = [];
+const silinenUzak = [];
 const kalan = [];
 const kaldirilamayanDal = new Set();
 
@@ -319,6 +322,7 @@ for (const d of plan.silinecekYerel) {
       stdio: 'ignore',
     });
     silinen.push(`yerel ${d.ad}`);
+    silinenYerel.push(d);
   } catch (e) {
     kalan.push(`yerel ${d.ad}: silinemedi (${e.message.split('\n')[0]})`);
   }
@@ -335,6 +339,7 @@ for (const d of plan.silinecekUzak) {
   try {
     gitKomut(KOK, 'push', 'origin', '--delete', d.ad);
     silinen.push(`uzak origin/${d.ad}`);
+    silinenUzak.push(d);
   } catch (e) {
     kalan.push(`origin/${d.ad}: silinemedi (${e.message.split('\n')[0]})`);
   }
@@ -353,5 +358,8 @@ yaz('Kalanlar ve sebebi', [
 ]);
 console.log(`\n  Bundle: ${bundle}`);
 console.log('  Bir dalı geri almak için: git branch <dal> arsiv/<dal>');
-console.log(`  ya da bundle'dan: git bundle list-heads ${bundle}\n`);
+console.log(`  ya da bundle'dan (ref adları: git bundle list-heads ${bundle}):`);
+for (const satir of geriAlmaKomutlari(bundle, silinenYerel, silinenUzak))
+  console.log(`      ${satir}`);
+console.log('');
 if (kalan.length > 0) process.exit(1);

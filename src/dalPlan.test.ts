@@ -2,11 +2,16 @@
 // why. Measured on made-up git output, so the answer does not depend on which
 // branches this repository happens to have today.
 
-import { describe, expect, it } from 'vitest';
+import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterAll, describe, expect, it } from 'vitest';
 
 import {
   arsivEtiketleri,
   bundleAdi,
+  geriAlmaKomutlari,
   onbellekMi,
   planKur,
   workflowDallari,
@@ -14,6 +19,7 @@ import {
   type Dal,
   type WorktreeDurumu,
 } from '../scripts/dal-plan.mjs';
+import { git } from '../scripts/git-komut.mjs';
 
 const dal = (ad: string, birlesti: boolean, ileri = birlesti ? 0 : 3): Dal => ({
   ad,
@@ -217,5 +223,60 @@ describe('arşiv', () => {
     expect(onbellekMi('dist-site/')).toBe(true);
     expect(onbellekMi('distler/')).toBe(false);
     expect(onbellekMi('tsconfig.tsbuildinfo')).toBe(true);
+  });
+});
+
+describe('özetin geri alma satırları', () => {
+  // 2026-10-24: a restore line for a remote-only branch named `refs/heads/...`,
+  // and the bundle held it as `refs/remotes/origin/...`: "couldn't find remote
+  // ref". Each line now names the ref the bundle was written from.
+  it('her silinen uç için gerçek bundle yolu ve gerçek ref adı', () => {
+    const satirlar = geriAlmaKomutlari(
+      '/arsiv/dallar-2026-10-24.bundle',
+      [
+        { ad: 'eski', sha: 'e1' },
+        { ad: 'iki', sha: 'i1' },
+      ],
+      [
+        { ad: 'eski', sha: 'e1' },
+        { ad: 'iki', sha: 'i2' },
+        { ad: 'klasorleme', sha: 'k1' },
+      ],
+    );
+    expect(satirlar).toEqual([
+      'git fetch /arsiv/dallar-2026-10-24.bundle refs/heads/eski:refs/heads/eski',
+      'git fetch /arsiv/dallar-2026-10-24.bundle refs/heads/iki:refs/heads/iki',
+      'git fetch /arsiv/dallar-2026-10-24.bundle refs/remotes/origin/iki:refs/heads/iki-origin',
+      'git fetch /arsiv/dallar-2026-10-24.bundle refs/remotes/origin/klasorleme:refs/heads/klasorleme',
+    ]);
+  });
+
+  describe('satırlar gerçek bir bundle’da çalışıyor', () => {
+    const kok = realpathSync(mkdtempSync(join(tmpdir(), 'mozaik-geri-al-')));
+    const kimlik = ['-c', 'user.name=t', '-c', 'user.email=t@t'];
+    afterAll(() => rmSync(kok, { recursive: true, force: true }));
+
+    it('yerel ve yalnız uzakta olan dal boş bir depoya geri geliyor', () => {
+      const ana = join(kok, 'ana');
+      git(kok, 'init', '-q', '-b', 'main', ana);
+      git(ana, ...kimlik, 'commit', '-q', '--allow-empty', '-m', 'ilk');
+      git(ana, 'branch', 'eski');
+      git(ana, 'update-ref', 'refs/remotes/origin/klasorleme', 'HEAD');
+      const bundle = join(kok, 'dallar.bundle');
+      git(ana, 'bundle', 'create', bundle, 'refs/heads/eski', 'refs/remotes/origin/klasorleme');
+      const sha = git(ana, 'rev-parse', 'HEAD');
+
+      const bos = join(kok, 'bos');
+      git(kok, 'init', '-q', bos);
+      const satirlar = geriAlmaKomutlari(
+        bundle,
+        [{ ad: 'eski', sha }],
+        [{ ad: 'klasorleme', sha }],
+      );
+      for (const satir of satirlar) git(bos, ...satir.split(' ').slice(1));
+      expect(git(bos, 'rev-parse', 'refs/heads/eski', 'refs/heads/klasorleme')).toBe(
+        `${sha}\n${sha}`,
+      );
+    });
   });
 });

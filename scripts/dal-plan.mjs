@@ -203,6 +203,26 @@ export function arsivEtiketleri(plan) {
   return etiketler;
 }
 
+/**
+ * One exact restore command per deleted tip, for the summary. The bundle keeps
+ * each tip under the ref it was bundled from, `refs/heads/<branch>` or
+ * `refs/remotes/origin/<branch>`, and a `fetch` naming the other one finds
+ * nothing. Same pairing as arsivEtiketleri: a remote tip equal to a deleted
+ * local one needs no second line, and one that differs comes back as
+ * `<branch>-origin` (`origin/<branch>` would be ambiguous with the remote's).
+ */
+export function geriAlmaKomutlari(bundle, yerel, uzak) {
+  const komut = (kaynak, hedef) => `git fetch ${bundle} ${kaynak}:refs/heads/${hedef}`;
+  const yerelSha = new Map(yerel.map((d) => [d.ad, d.sha]));
+  const satirlar = yerel.map((d) => komut(`refs/heads/${d.ad}`, d.ad));
+  for (const d of uzak) {
+    const y = yerelSha.get(d.ad);
+    if (y === d.sha) continue;
+    satirlar.push(komut(`refs/remotes/origin/${d.ad}`, y === undefined ? d.ad : `${d.ad}-origin`));
+  }
+  return satirlar;
+}
+
 /** `dallar-2026-10-24.bundle`, or `-2`, `-3`... when that one is taken. */
 export function bundleAdi(tarih, varMi) {
   for (let i = 1; ; i++) {
