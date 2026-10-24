@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import Root from './Root';
+import { Root } from './shell';
 import { applyDil, readDil } from '../leaf/i18n';
 import {
   applyAvailClock,

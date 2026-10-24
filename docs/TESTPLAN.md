@@ -27,7 +27,7 @@ koşulmaz. Elle bir mutasyon kanıtı istenirse `scripts/mutasyon-kaniti.sh` ile
 **Bulunan hata** bulunduğu dalda, kendi commit'inde ve gerileme testiyle düzeltilir. Refactor
 dalı davranış değiştirmez, hatayı [TODO.md](TODO.md) §8k'ye yazar. Veri kaybı sınıfında bir
 hata bulunursa durulur ve bildirilir. "BİLİNEN KUSUR" kalıbı yeni bir testte kullanılmaz.
-Depoda kalan örnekleri (`src/fuzz.test.ts`, `src/fixtures.test.ts`, `e2e/klasor.spec.ts`)
+Depoda kalan örnekleri (`src/pure/io/fuzz.test.ts`, `src/pure/io/fixtures.test.ts`, `e2e/klasor.spec.ts`)
 kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testine çevrilir.
 
 ## Ne zaman koşar
@@ -39,7 +39,7 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Birim ve duman | `npm test` | CI'da her push'ta. Yerelde `hizli`'nin dışarıda bıraktığı dört dosyadan biri yalnız dokunulan test dosyasıysa |
 | E2E | `npm run test:e2e` | CI'da her push'ta, ve sürüm çıkarmadan önce. Yerelde yalnız dokunulan spec |
 | Site, sunucu, klasör | `npm run test:site` | CI'da her push'ta. Teslim yolları: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
-| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`constraints.ts`, `rules.ts`) ve çözücüyü ölçer |
+| Çözücü stresi | `npm run cozucu` | CI'da her push'ta. Kısıt motorunu (`pure/constraints/`, `rules.ts`) ve çözücüyü ölçer |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
@@ -75,7 +75,7 @@ işi düşen testleri bir kez daha koşar (`scripts/kararsiz.mjs`) ve tekrarda g
 "kararsız", yine düşenleri "kırmızı" diye yalnız iş özetine yazar; iş her iki
 durumda da kırmızı kalır. Kararsız çıkan bir test TESTFINDINGS'e yazılır. CI'ın
 runner'ı UTC'de koşar, yani saat dilimine dayanan bir test oradan kendi dilimini
-kurar (`src/folder.test.ts`).
+kurar (`src/platform/storage/folder.test.ts`).
 
 Görsel bir değişiklikten sonra 1920×1080'de bir ekran görüntüsüne bakılır
 (`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
@@ -93,13 +93,13 @@ yazılır: koşulmamış bir süit yeşil bir süitle aynı şey değil. Bir ko�
 | Katman | Nerede | Kısaca ne yakalar |
 |---|---|---|
 | Birim | `src/*.test.ts` | saf mantığın doğruluğu |
-| Değişmez | `src/invariants.test.ts` | her girdide doğru kalması gereken cümleler, girdileri kütüphane üretir |
-| Fuzz | `src/fuzz.test.ts` | bozuk dosyada ve yapıştırmada yarım plan ya da istisna |
-| Şema örnekleri | `src/fixtures.test.ts`, `src/fixtures/` | her şema sürümünden bir dosyanın hâlâ açılması |
-| Cümle ve iskelet | `src/sentences.test.tsx` | bir listenin tamamı: depo tablosu, ret cümleleri, kâğıdın kutuları |
-| Duman | `src/App.test.tsx` (jsdom) | bileşenler çiziliyor mu, sekmeler çöküyor mu |
+| Değişmez | `src/pure/relax/invariants.test.ts` | her girdide doğru kalması gereken cümleler, girdileri kütüphane üretir |
+| Fuzz | `src/pure/io/fuzz.test.ts` | bozuk dosyada ve yapıştırmada yarım plan ya da istisna |
+| Şema örnekleri | `src/pure/io/fixtures.test.ts`, `src/fixtures/` | her şema sürümünden bir dosyanın hâlâ açılması |
+| Cümle ve iskelet | `src/ui/shell/sentences.test.tsx` | bir listenin tamamı: depo tablosu, ret cümleleri, kâğıdın kutuları |
+| Duman | `src/ui/shell/App.test.tsx` (jsdom) | bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | E2E | `e2e/*.spec.ts`, ana config, `file://` | davranış, erişilebilirlik, kâğıt, çevrimdışı |
-| Dil | `src/i18n.test.ts` ve `e2e/dil.spec.ts` | sözlüğün kendisi ve dil makinesi |
+| Dil | `src/leaf/lang/i18n.test.ts` ve `e2e/dil.spec.ts` | sözlüğün kendisi ve dil makinesi |
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor,linux-tasima}.spec.ts` | `file://`'da olmayan her şey, http üstünde, ve siteden `file://`'a taşıma |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
@@ -144,15 +144,15 @@ Haftanın bloklara bölünüşü ve ızgaradan geri okunuşu. Sürüm numarası,
 exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adresleri
 (`surum.test.ts`).
 
-`constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
+`pure/constraints/`, `pure/feasibility/`, `import.ts`, `rules.ts`, `bell.ts`,
+`palette.ts`, `solver.ts`, `pure/relax/`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
 fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
 çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
 karşılaştırır: ikili ve uzun cümleler, sonradan eklenen cümleler ve varsayımlar.
 
 ### Değişmez (özellik bazlı)
 
-`src/invariants.test.ts`, fast-check ile. Örnek bazlı bir test "bu girdi bu
+`src/pure/relax/invariants.test.ts`, fast-check ile. Örnek bazlı bir test "bu girdi bu
 çıktıyı verir" der ve bir gerekçesi olan kural için doğru biçimdir. Bir değişmez
 "girdi ne olursa olsun bu doğru kalır" der ve örneklerin arasından geçen kusur
 için doğru biçimdir. Bu depodaki en pahalı iki kusur ikinci türdendi (tuzak 11 ve
@@ -190,7 +190,7 @@ boşaltan ya da iki sınırı sıfırlayan mutasyon eski üreteçte yeşil, geni
 
 ### Fuzz
 
-`src/fuzz.test.ts`, fast-check ile. Dışarıdan gelen metni okuyanlara kimsenin bilerek
+`src/pure/io/fuzz.test.ts`, fast-check ile. Dışarıdan gelen metni okuyanlara kimsenin bilerek
 yazmadığı dosyalar: şema örnekleri ve adsız dizili fikstür, alanları silinerek ya da her
 türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapıştırma tarafına
 Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
@@ -216,7 +216,7 @@ varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte
 
 ### Şema örnekleri
 
-`src/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v14.json` arası. Tuzak
+`src/pure/io/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v14.json` arası. Tuzak
 97'nin mekanik yarısı. `store.test.ts` zaten sürüm başına bir `describe` tutuyor,
 ama o liste elle uzatılıyor: yeni bir sürüm bloğu yazılmadan çıkarılabilir ve süit
 yeşil kalır, ki `version === 8` tam olarak böyle unutuldu ve yayınlanmış v2.0.0'ın
@@ -240,7 +240,7 @@ okuyucu aynı cevabı verir ve o alanı ölçen iddia bedava yeşildir.
 
 ### Cümle ve iskelet (satır içi anlık görüntü)
 
-`src/sentences.test.tsx`, `toMatchInlineSnapshot` ile. Görsel regresyon bilerek
+`src/ui/shell/sentences.test.tsx`, `toMatchInlineSnapshot` ile. Görsel regresyon bilerek
 silinmişti ve geri gelmedi: silinen şey bir resimdi, bu metin. Bir resim farkı
 kimsenin okuyamadığı 24 PNG ve her şeyi sessizce kabul eden bir yeniden
 temellendirme demek, bir metin farkı bakıp evet ya da hayır denilen bir cümle.
@@ -299,9 +299,9 @@ Ayrım ölçüldü ve iki yapılandırma yan yana koşturuldu: aradaki fark tam 
 bir dosya, ne bir test eksik ne bir test fazla. Sayılar WORKLOG'un o günkü
 girdisinde.
 
-Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints.ts`, `pure/rules.ts`,
-`leaf/blocks.ts`, `pure/parseState.ts`, `pure/undo.ts`, `pure/library.ts`,
-`pure/feasibility.ts`, `pure/entities.ts`, `pure/solver.ts`): bütün depoyu ölçmek
+Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints/`, `pure/constraints/rules.ts`,
+`leaf/model/blocks.ts`, `pure/io/parseState.ts`, `pure/undo/undo.ts`, `pure/io/library.ts`,
+`pure/feasibility/`, `pure/entities/`, `pure/solver/solver.ts`): bütün depoyu ölçmek
 pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.
 `solver.ts` 2026-09-12'de listeye girdi. Ondan önce yoktu ve sebebi bir tercih
 değil bir arızaydı: aracın enstrümantasyonu `classOnDay[g]!++` biçimini
@@ -354,7 +354,7 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 
 ### Dil
 
-`src/i18n.test.ts` sözlüğün kendisini dört sözlükte birden ölçer: ölü anahtar, yuva
+`src/leaf/lang/i18n.test.ts` sözlüğün kendisini dört sözlükte birden ölçer: ölü anahtar, yuva
 kümesi, dengeli `**`, çoğulun iki biçimi ve uzun çizgi. Beşi de mutasyonla sınandı.
 Artı makine: `applyDil()`'in aktif dili kurduğu (yoksa saf modüller Türkçe kalır),
 çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, veri metinlerinin depoda Türkçe
@@ -520,7 +520,7 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 
 ## Sahte veri
 
-Sahte veri tek yerde: `src/worlds.ts`. `makeWorld()` küçük bir okul kurar,
+Sahte veri tek yerde: `src/pure/worlds/worlds.ts`. `makeWorld()` küçük bir okul kurar,
 `illegalBlocks()` dizilmiş bir programı denetler, `WORLDS` hazır senaryoları tutar.
 `solver.test.ts`, `kontrol.spec.ts` ve `otomatik-dunyalar.spec.ts` aynı üreteci
 kullanır. Denetçinin kendisi `worlds.test.ts`'te bilerek bozuk ızgaralarla sınanır,

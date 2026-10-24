@@ -704,7 +704,7 @@ test.describe('44. Panel simetrisi', () => {
 //
 // Asked for in one line: "Öğretmende cinsiyet". Stored as `gender: '' | 'k' |
 // 'e'` and bumped the schema to 6 — the migration itself is unit-tested in
-// `src/store.test.ts`, so what belongs here is the round trip through a real
+// `src/platform/storage/store.test.ts`, so what belongs here is the round trip through a real
 // control and the two places the reader was promised it would be useful:
 // the sort menu and the chip row.
 //

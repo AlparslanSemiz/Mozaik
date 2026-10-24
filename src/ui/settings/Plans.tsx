@@ -10,15 +10,13 @@
 // twenty classes.
 
 import { useMemo } from 'react';
-import { useDialogs } from '../Dialogs';
+import { useDialogs, type PlanControls, T, useT } from '../common';
 import { emptyState, planSummary } from '../../pure/entities';
-import { drafts as draftsOf } from '../../pure/library';
-import { loadPlan } from '../../platform/planStore';
-import type { State } from '../../leaf/types';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/program';
-import type { PlanControls } from '../props';
-import DraftStart from '../DraftStart';
-import { T, useT } from '../T';
+import { drafts as draftsOf } from '../../pure/io';
+import { loadPlan } from '../../platform/storage';
+import type { State } from '../../leaf/model';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
+import { DraftStart } from '../plans';
 
 interface Props {
   state: State;
