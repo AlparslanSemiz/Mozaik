@@ -1744,11 +1744,11 @@ testi o commit'te sıradan bir teste döner.
       okunamadı" diyor ve açık plan değişmiyor; testleri `src/pure/io/fuzz.test.ts` (fuzz artık
       istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29; okunamayan dosya (`file.text()`
       reddi) da aynı uyarıyı veriyor.
-      **Açılış yarısı düzeldi (2026-10-24, `tb1-acilis`):** deposundaki metni okunamayan plan
-      açılışta sayfayı düşürmüyor ve boş açılıp ilk değişiklikle ezilmiyor; kenara konuyor
-      (`setAside`): okunabilen ilk plan ya da yeni boş bir plan açılıyor, okunamayan dizinde ve
-      anahtarında kalıyor, listeden seçilemiyor, ekranda tek satır adını söylüyor. Testleri
-      `src/platform/storage/storeContract.test.ts` (dördü önce kırmızı).
+      **Açılış yarısı düzeldi (2026-10-24):** `main`'in dondurması (A1, `fix/okunamayan-plan`)
+      okunamayan planı açılışta ezilmekten ve sayfayı düşürmekten koruyor; `tb1-acilis` onun
+      üstüne açılışta okunabilen ilk planı açıyor (boş yerine-geçen yerine), okunamayan anahtarında
+      bayt bayt kalıyor, şeritte tek satır adını söylüyor (kullanıcının kararı). Testleri
+      `src/platform/storage/okunamayan.test.tsx` (beşi önce kırmızı).
       İncelemenin bulduğu, TB1'den eski bir delik B7.37'de.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen

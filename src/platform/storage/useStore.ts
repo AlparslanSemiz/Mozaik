@@ -18,10 +18,10 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../../pure/undo';
-import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
+import { loadPlan, loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../../pure/entities';
-import { LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
+import { findPlan, LIBRARY_KEY, parseLibrary, planKey, parseState, setActive } from '../../pure/io';
 import {
   explicitly,
   frozenPlan,
@@ -46,15 +46,43 @@ export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
 
 // -------------------------------------------------------------------- hook
 
+/**
+ * The plans the opening read found unreadable and did not open, by name, for
+ * the session's one line (TB1). Set once, by `initialBox`.
+ */
+let setAsideAtStart: string[] = [];
+
 function initialBox(): Box {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
   // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
   // timetable is already sitting in. Adoption therefore copies NOTHING.
-  const library = readLibrary();
+  let library = readLibrary();
   writeLibrary(library);
+  let present = loadPlanAtStart(library.activeId);
+  setAsideAtStart = [];
+  // The plan open last time cannot be read (frozen, A1): the first plan that
+  // can opens instead of an empty stand-in, and the unreadable one stays
+  // frozen in its key and in the directory (TB1, the user's decision,
+  // 2026-10-24). With none readable, A1's stand-in and its strip.
+  if (present === null && frozenPlan(library.activeId) !== null) {
+    const unreadable = [findPlan(library, library.activeId)?.name ?? library.activeId];
+    for (const plan of library.plans) {
+      if (plan.id === library.activeId) continue;
+      const other = loadPlan(plan.id);
+      if (other !== null) {
+        library = setActive(library, plan.id);
+        writeLibrary(library);
+        present = other;
+        setAsideAtStart = unreadable;
+        break;
+      }
+      if (frozenPlan(plan.id) !== null) unreadable.push(plan.name);
+    }
+  }
+  // The chain keeps the plan that opened, not text nobody can read.
   rotateBackups(planKey(library.activeId));
   return {
-    present: loadPlanAtStart(library.activeId) ?? emptyState(),
+    present: present ?? emptyState(),
     past: [],
     future: [],
     planId: library.activeId,
@@ -232,6 +260,8 @@ export function useStore() {
   return {
     /** The open plan's key holds text this copy cannot read, and why: the strip. */
     unreadable: frozenPlan(box.planId),
+    /** The plans the opening read could not read and did not open, by name (TB1). */
+    setAside: setAsideAtStart,
     state: box.present,
     change,
     manageProgram,

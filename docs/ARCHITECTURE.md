@@ -152,7 +152,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | Dosya | Görevi |
 |---|---|
 | `platform/storage/index.ts` | depolama paketinin giriş noktası: kutuyu süren kanca, plan deposunun okunan yarısı, diske inen dosyalar, klasör ve "Veriler nerede"; ham localStorage tarafı (`libraryStore`), öteki pencerenin bekçisi (`otherWindow`) ve plan işlemleri (`usePlans`) paketin içinde kalır |
-| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
+| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), açılışta okunamayıp kenara konan planlar (`setAside`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/storage/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/storage/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |

@@ -52,6 +52,7 @@ export default function App() {
     park,
     saveTrouble,
     unreadable,
+    setAside,
   } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -275,6 +276,7 @@ export default function App() {
               canSave={canSave}
               saveTrouble={saveTrouble}
               unreadable={unreadable}
+              setAside={setAside}
               update={update}
               updateHidden={updateHidden}
               setUpdateHidden={setUpdateHidden}

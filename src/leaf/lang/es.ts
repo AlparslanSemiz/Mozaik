@@ -82,6 +82,8 @@ const ES: Sozluk = {
   "Bu dosya bütün planları içeriyor": "Este archivo contiene todos los planes",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "Este archivo se escribió con una versión más reciente",
+  "Okunamayan plan açılmadı: {adlar}.":
+    "Un plan que no se pudo leer no se abrió: {adlar}.",
   "Bu dosya okunamadı": "No se pudo leer este archivo",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     'Sustituye todos los planes de este ordenador, no uno solo. Use el botón "Abrir todos desde archivo" en Ajustes → Planes y copia.',

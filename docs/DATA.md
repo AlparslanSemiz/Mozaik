@@ -298,14 +298,11 @@ paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski d
 yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
 uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
 değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
-şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Deposundaki metni okunamayan bir
-plan (JSON değil, ya da `parseState`'in düştüğü bir satır) açılmaz ve üstüne yazılmaz: açılışta
-açık plansa okunabilen ilk plan açılır, hiçbiri yoksa yeni boş bir plan; listeden seçilince
-seçilmez; ekranda tek satır adını söyler; Planlar listesinde "okunamadı" diye görünür; dizinde
-ve anahtarında kalır (`setAside`, 2026-10-24, TODO TB1). Pakete ve klasöre girmez, çünkü durumu
-yok ("Tümünü dosyaya kaydet"in notu onu verisi bulunamayan plan sayar), ama "Tümünü dosyadan
-aç" onu silmez. Oturum yedeği açılan planın, kenara konanın değil; zincirdeki okunamayan bir
-kayıt listede atlanır.
+şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Açılışta açık plan okunamıyorsa
+(dondurulur, yukarıda) okunabilen ilk plan açılır ve dizinde etkin plan o olur; okunamayan
+anahtarında bayt bayt ve dizinde kalır, ekranda oturum boyunca tek satır adını söyler
+(`useStore`'un `setAside`'ı, 2026-10-24, TODO TB1). Okunabilen plan yoksa boş yerine-geçen
+açılır ve şerit söyler. Oturum yedeği açılan planın.
 
 ## Neden böyle
 
