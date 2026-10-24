@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24.
+Son güncelleme: 2026-10-24 (zincirin son dalı, `b7-32-kilit`).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -48,15 +48,19 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
 Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
-TP-B birikim maddesi. TB8 düzeldi (`tb8-eksik-plan`), paket yolunun fuzz'u onunla geldi. TB7
-(veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir dalda gerileme testiyle.
+TP-B birikim maddesi. 2026-10-24'te beş dal zincir olarak birleşti (aşağıdaki girdi): TB8
+düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in üst çubuk yarısı düzeldi, açılış yarısı
+açık; TB7'nin exe yarısı düzeldi (Linux'ta ölçüldü, Windows'ta etiketten önce), tarayıcı
+yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor.
 
-**Sıradaki iş.** TB8 düzeldi (`tb8-eksik-plan`). Sırada TB7 (kapanan sekmenin son değişikliği
-klasöre inmiyor) ve TB1'in kalanı (üst çubuktaki "Dosyadan aç" bozuk dosyada istisna atıyor),
-ikisi de veri kaybı sınıfı, her biri `main`'den açılan kendi dalında, önce kırmızı gerileme
-testi (TODO §8l). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny testi). Onun
-TODO B7.33'ünü `ozellik/asil-ikon` önce birleşerek maskable ikona verdi, `ruflo/kurulum`
-birleşirken kendi numarasını kaydırır.
+**Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
+`tb7-sekme-kapanis` → `b7-32-kilit`) birleşince ana klasörde `npm run yayinla -- --kuru`
+(B7.32'nin doğrulaması). Açık iki dal, zincirin üstünden: `dosya-okuma-b7` (B7.34, B7.35,
+B7.37) ve `okunabilirlik` (B7.36, zebra). Etiketten önce Windows'ta gerçek exe'de pencere
+kapanışı (BUILD, "Sürüm"; Windows süiti TP7, kullanıcının kararını bekliyor). Kodu değiştiren
+her dal "bitti"den önce bitti kontrolünü yapar (CLAUDE.md). Birleşmeyi bekleyen öteki dal:
+`ruflo/kurulum` (Alp'in deny testi); onun B7.33'ü `main`'de maskable ikonun, birleşirken
+numarasını kaydırır.
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -132,26 +136,27 @@ birleşirken kendi numarasını kaydırır.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
 - Veri kaybı VK1 ve VK2 düzeldi (TODO B7.27): iki sekmede bayat olan yazmayı bırakıyor,
   dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
-  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7 (kapanan sekmenin son
-  değişikliği klasöre inmiyor) açık.
+  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7: exe'nin penceresi kapanmadan
+  sayfanın son yazımını bekliyor, Windows'ta ölçülmedi; tarayıcı sekmesinde klasör bir
+  değişiklik geride kalabiliyor, depo tutuyor ve sonraki açılış yazıyor (veri kaybı değil).
 - Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
   açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
   üretilemedi; açılıştaki plan listesi yazımı ve klasör kapısının testi açık.
-- Test programının bulguları (TODO §8l): `readPlanFile` bozuk dosyada istisna atıyor (TB1,
-  paket yolunda yakalanıyor, üst çubukta hâlâ değil); eksi ve sınırsız haftalık saat kabul ediliyor (TB6, TB9);
-  `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
+- Test programının bulguları (TODO §8l): açılışta depodan okunan bozuk bir plan
+  `parseState`'i düşürebilir (TB1'in açık yarısı, ölçülmedi); eksi ve sınırsız haftalık saat
+  kabul ediliyor (TB6, TB9); `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
+| Ana E2E süiti | 644 test, 34 dosya (2026-10-24, zincir) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Gerçek exe süiti | 14 test, hepsi geçti, 1,3 dk, XWayland'de, kirli (2026-10-24, `tb7-sekme-kapanis`) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
 | Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
@@ -171,6 +176,34 @@ birleşirken kendi numarasını kaydırır.
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
+
+
+---
+
+## 2026-10-24 akşam · Zincir ve kullanıcının dört cevabı
+
+**Zincir.** Kullanıcının cevabı (a: evet, b: şartlı evet) ve isteği: beş dal sırayla ileri
+sarılabilsin diye birbirini içeriyor. `bitti-kontrolu` `main`'i (c41223c) aldı; `tb8-eksik-plan`
+onu, `tb1-dosyadan-ac` tb8'i, `tb7-sekme-kapanis` tb1'i, `b7-32-kilit` tb7'yi. Çatışmalar
+TODO, WORKLOG, CHANGELOG ve TESTPLAN'da; B7 numaraları tb8'de B7.34–36, tb1'de B7.37. tb1'e
+tb8 girince `readBundlePlans`'ın `try/catch`'i gereksiz kaldı, ayrı commit'te kalktı.
+
+**B7.32.** Kilidin iki kök alanı (`version`, `packages[""].version`) yazılıyor ve test ikisini de
+soruyor. "Yazıldı, doğrulanmadı": `main`'de `--kuru` geçene kadar.
+
+**TB7'nin tarayıcı yarısı.** Ölçüldü (site E2E, beş koşunun beşi): kapanan sekmenin son
+değişikliği depoda, klasör bir değişiklik geride, sonraki açılış klasöre yazıyor. Veri kaybı
+değil; BİLİNEN KUSUR sıradan teste döndü, deponun kapanış flush'ı kalkınca kırmızı
+(`mutasyon-kaniti.sh`, kontrol yeşil, ağaç aynı). Yeni çare denenmedi.
+
+**Etiket kapısı.** `gercek-exe.spec.ts`'e "X ile hemen kapanan pencere…" testi; kapatma
+`scripts/pencere-kapat.mjs` ile (Linux'ta X11 WM_DELETE_WINDOW, Windows'ta WM_CLOSE). Süit
+Wayland masaüstünde XWayland'de koşuyor. `npm run exe:e2e` 14/14; yeni test 9 Ekim ikilisine
+karşı kırmızı. Windows yarısı yazıldı, koşulmadı (TP7); BUILD'de etiketten önce elle adım.
+
+**Koşulan.** Her birleştirmeden sonra `hizli` (son: 1357 geçti), `docs`, `surum`, site E2E'nin
+TB7 testi beş kez, mutasyon kanıtı, `npm run exe:e2e`, eski ikiliyle tek test, dalların CI'ı.
+**Koşulmayan.** Windows'ta gerçek exe, tam E2E yerelde (CI'da).
 
 ---
 
