@@ -201,12 +201,16 @@ var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa
 kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
 tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
 yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
-süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
-bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
-yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+süzgeci, boş ad, blok kırpması). `readPlanFile` hiçbir bozulmada istisna atmıyor (TODO TB1,
+2026-10-24'e kadar bozuk bir ders satırında atıyordu). İki cevap "BİLİNEN KUSUR" diye çivili:
+eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırının olmaması (TB9);
+değişmezler tam bu ikisinin etrafından geçer.
 
-Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
-TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+"Tümünü dosyadan aç"ın yolu (`readBundlePlans`) TB8'in düzeltmesiyle geldi (2026-10-23):
+bozuk bir planın yanındaki tam plan hep açılıyor, bozuk olan ya reddediliyor ya bütün, dört
+listeden biri hiç olmayan plan açılmıyor.
+
+Ölçmedikleri: arayüzün reddi göstermesi (`temel.spec.ts` 29'un işi), ve Excel'in `.xlsx`
 dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
 varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 
@@ -475,7 +479,6 @@ haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
-| Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
 | Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
 | Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |

@@ -668,7 +668,14 @@ export default function App() {
     // a full 426-placement week — so this is about the shape of the code, not
     // about speed. The thing that actually costs a reader time on this path is
     // the confirmation dialog, and that one is deliberate.)
-    const text = await file.text();
+    // A file deleted, locked or too big between picking and reading rejects
+    // here; it is an unreadable file like any other, not a silent nothing (TB1).
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      text = '';
+    }
     const read = readPlanFile(text);
     if ('problem' in read && read.problem === 'eksik') {
       await alert({

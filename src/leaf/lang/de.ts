@@ -606,6 +606,10 @@ const DE: Sozluk = {
     "Kein einziger Plan in der Datei konnte gelesen werden; nichts hat sich geändert.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:Plan|Pläne} geöffnet, {yazilamayan} konnten nicht geschrieben werden. Der Speicher könnte voll sein. Bewahren Sie die Datei auf.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:Plan|Pläne} in der Datei {eksik:ist|sind} unvollständig oder beschädigt und {eksik:wird|werden} nicht geöffnet.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:Plan|Pläne} geöffnet; {eksik} {eksik:war|waren} unvollständig oder beschädigt und {eksik:wurde|wurden} nicht geöffnet.",
   "{acilan} plan açıldı.": "{acilan} {acilan:Plan|Pläne} geöffnet.",
   "Bütün planlar tek dosyada": "Alle Pläne in einer Datei",
   "Tümünü dosyaya kaydet ({n} plan)":

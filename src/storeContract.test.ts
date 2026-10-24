@@ -18,6 +18,9 @@
 // jsdom rather than node, for the same reason `App.test.tsx` says: the two
 // halves that write a file and read a keyboard need a document.
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
@@ -25,6 +28,7 @@ import { createElement } from 'react';
 import { isTextInput, useStore } from './platform/useStore';
 import { collectStates, downloadBackup, downloadBundle } from './platform/download';
 import { listBackups, loadPlan, savePlan, storageWorks } from './platform/planStore';
+import { BUNDLE_VERSION, parseBundle } from './pure/bundle';
 import { parseState } from './pure/parseState';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
@@ -457,14 +461,14 @@ describe('sözleşme · React kancası', () => {
     mount();
     settle();
     const before = store.plans.library;
-    let result = { ok: -1, failed: -1 };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
     act(() => {
       result = store.plans.replaceLibrary({
         library: { plans: [{ id: 'x', name: 'Bozuk', draft: false }], activeId: 'x' },
         states: { x: 'bu bir State değil' },
       });
     });
-    expect(result).toEqual({ ok: 0, failed: 1 });
+    expect(result).toEqual({ ok: 0, failed: 0, unreadable: 1 });
     expect(store.plans.library).toBe(before);
   });
 
@@ -485,6 +489,174 @@ describe('sözleşme · React kancası', () => {
     expect(store.plans.planId).toBe('y');
     expect(loadPlan(eski)).toBeNull();
     expect(store.state.settings.schoolName).toBe('Gelen');
+  });
+
+  // TB8 (2026-10-09, veri kaybı sınıfı). The single-file reader refuses a plan
+  // with a list missing altogether (DENETIM DK11); the bundle path read each
+  // plan with the tolerant `parseState`, so the same plan opened as 0 teachers,
+  // 0 lessons, 0 placements, and every plan on this computer was gone after
+  // "Hepsini değiştir". A real school (v16 fixture), with a list taken out.
+  const school = () =>
+    JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', 'v16.json'), 'utf8')) as Record<
+      string,
+      unknown
+    >;
+  const without = (...fields: string[]) => {
+    const raw = school();
+    for (const field of fields) delete raw[field];
+    return raw;
+  };
+
+  it('TB8: zarftaki eksik plan boş plan olarak açılmıyor, hiçbir şey değişmiyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const before = store.plans.library;
+    for (const missing of [
+      ['teachers'],
+      ['lessons'],
+      ['teachers', 'lessons'],
+      ['rooms'],
+      ['classes'],
+    ]) {
+      let result = { ok: -1, failed: -1, unreadable: -1 };
+      act(() => {
+        result = store.plans.replaceLibrary({
+          library: { plans: [{ id: '1', name: 'Eksik', draft: false }], activeId: '1' },
+          states: { '1': without(...missing) },
+        });
+      });
+      expect(result, missing.join('+')).toEqual({ ok: 0, failed: 0, unreadable: 1 });
+      expect(store.plans.library).toBe(before);
+      expect(loadPlan('1')?.settings.schoolName, missing.join('+')).toBe('Burada');
+    }
+  });
+
+  it('TB8: eksik planın yanındaki tam plan açılıyor, eksiğin buradaki karşılığı kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: '1', name: 'Eksik', draft: false },
+            { id: 'y', name: 'Tam', draft: false },
+          ],
+          activeId: '1',
+        },
+        states: { '1': without('teachers'), y: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 1, failed: 0, unreadable: 1 });
+    // The plan the file could not read is still the one this computer had.
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['1', 'y']);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+    // Every part of the readable plan arrived, placements included.
+    const tam = loadPlan('y');
+    expect(tam?.teachers).toHaveLength(2);
+    expect(tam?.lessons).toHaveLength(3);
+    expect(Object.keys(tam?.programs[0]?.placements ?? {})).toHaveLength(6);
+  });
+
+  // TB8's review. An entry whose `state` is not even an object is dropped by
+  // parseBundle before anyone counts it; it is just as unreadable as a plan
+  // with a list missing, and the plan here with its id must stay the same way.
+  it('TB8: state’i nesne olmayan girdinin buradaki karşılığı da kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const bundle = parseBundle(
+      JSON.stringify({
+        bundleVersion: BUNDLE_VERSION,
+        activeId: 'y',
+        plans: [
+          { id: '1', name: 'Bozuk', draft: false, state: null },
+          { id: 'y', name: 'Tam', draft: false, state: school() },
+        ],
+      }),
+    )!;
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary(bundle);
+    });
+    expect(result).toEqual({ ok: 1, failed: 0, unreadable: 1 });
+    // The file's directory never had a row for it, so it comes after the file's plans.
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y', '1']);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+  });
+
+  // TB8's review, and older than TB8: with storage full, not one incoming plan
+  // was written, yet every plan here that the file does not carry was already
+  // dropped, while the note said nothing had changed.
+  it('depo dolu ve hiçbir plan yazılamadıysa buradaki planlar kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const before = store.plans.library;
+    localStorage.setItem = () => {
+      throw new Error('quota');
+    };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: { plans: [{ id: 'y', name: 'Gelen', draft: false }], activeId: 'y' },
+        states: { y: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 0, failed: 1, unreadable: 0 });
+    expect(store.plans.library).toBe(before);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+  });
+
+  // TB1's review, on TB8's path. The import used to CANCEL the pending
+  // autosave without writing it; when the open plan then stays (the file's
+  // copy unreadable), its last edit, made under 400 ms before, never reached
+  // storage.
+  it('kalan açık planın 400 ms dolmamış değişikliği depoya iniyor', () => {
+    mount();
+    settle();
+    act(() => store.change(() => named('Son değişiklik')));
+    act(() => {
+      store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: '1', name: 'Eksik', draft: false },
+            { id: 'y', name: 'Tam', draft: false },
+          ],
+          activeId: 'y',
+        },
+        states: { '1': without('teachers'), y: school() },
+      });
+    });
+    settle();
+    expect(loadPlan('1')?.settings.schoolName).toBe('Son değişiklik');
+  });
+
+  it('yazılamayan yeni plan dizinde verisiz bir satır olarak kalmıyor', () => {
+    mount();
+    settle();
+    const real = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = (k: string, v: string) => {
+      if (k === planKey('z')) throw new Error('quota');
+      real(k, v);
+    };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: 'y', name: 'Yazılan', draft: false },
+            { id: 'z', name: 'Sığmayan', draft: false },
+          ],
+          activeId: 'y',
+        },
+        states: { y: school(), z: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 1, failed: 1, unreadable: 0 });
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y']);
   });
 
   it('Ctrl+Z geri alıyor, metin kutusundayken almıyor', () => {

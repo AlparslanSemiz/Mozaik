@@ -856,6 +856,27 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
+- [ ] **B7.34 Paketteki daha yeni sürümün planı "eksik ya da bozuk" deniyor (2026-10-24, TB8'in
+      incelemesi).** `readBundlePlans` `readPlanFile`'ın `yeni` cevabını okunamayanla bir sayıyor;
+      tek dosya yolu aynı planda "programı güncelleyin" diyor (DENETIM DK10). Veri kaybı değil,
+      plan açılmıyor ve buradaki kalıyor. Çare adayı: `readBundlePlans` yeniyi ayrı döndürür, not
+      güncellemeyi söyler.
+- [ ] **B7.35 Kesik paket dosyası tek plan dosyası sanılıyor (2026-10-24, TB8'in tıklama testi).**
+      JSON'u yarım kalmış bir paket "Tümünü dosyadan aç"a verilince not "Bu dosya bütün planları
+      içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz." diyor:
+      `parseBundle` okunamayan metinle tek plan dosyasını ayırmıyor. Hiçbir şey değişmiyor, ama
+      kullanıcı yanlış düğmeye yollanıyor. Çare adayı: `bundleVersionOf` null ve metin JSON
+      değilse "dosya okunamadı" cümlesi.
+- [ ] **B7.36 Ayarlar'daki durum notları 13 px (2026-10-24, TB8'in tıklama testi).** Planlar
+      ve yedek'teki `.hint[role="status"]` notu 13 px, kontrastı 7,28 (açık tema, `getComputedStyle`).
+      Kontrast yeterli, boy az gören bir kullanıcı için küçük; bütün `.hint`'lerin boyu, yani
+      DESIGN'ın tipografi kararı, sade ekran turuyla birlikte.
+- [ ] **B7.37 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
+      inceleyicinin yoklamasından: `lessons[0].id = null` olan dosya kimliği `''` olan bir dersle,
+      aynı kimliği taşıyan iki ders (`l2`, `l2`) olduğu gibi açılıyor, yani yerleşimler hangi derse
+      ait belirsiz kalıyor; onaydan sonra açık planın yerine geçiyor. `fuzz.test.ts`'in
+      `wholeness`'ı kimliklerin dolu ve tek olduğunu sormuyor, fuzz bu yüzden görmüyor. TB6 ve TB9
+      ile aynı aile (`sanitize`'in süzgeci). Arayüzde koşulmadı.
 
 ---
 
@@ -1579,8 +1600,8 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
       alınır, ve o zaman `main`'den açılan bir dalda. Öne çıkanlar: TP7 (Windows'ta gerçek
       exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
       Windows güncelleme testine en yakın olanlar. TP4'ün paket yolu fuzz'u TB8'in
-      düzeltmesiyle gelir. Geri kalanlar sırasız: TP5 (veri yolunun mutasyonu), TP6 (gerçek
-      paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
+      düzeltmesiyle geldi (`src/fuzz.test.ts`, `readBundlePlans`). Geri kalanlar sırasız:
+      TP5 (veri yolunun mutasyonu), TP6 (gerçek paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
       TP13 (uzun süre açık kalma), TP14 (zayıf makine vekili), TP15 (performans), TP16 ve TP17
       (güvenlik), TP18 (metin bütçesi), TP19 (kabul), TP20 (bileşen katmanı), TP21
       (mutasyon listesi), TP22 (kararsızlık), TP23 (erişilebilirlik tabanı), TP24 (kapsam
@@ -1591,13 +1612,19 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
 2026-10-23'ten beri bir düzeltme aynı dalda ve gerileme testiyle yapılır, "BİLİNEN KUSUR"
 testi o commit'te sıradan bir teste döner.
 
-- [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
+- [~] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
       Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde
       `TypeError` (`reading 'trim'`, `'weeklyHours'`, `'id'`). "Dosyadan aç"ta `App.tsx`'in
       `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
       (sessiz ret). Aynı `parseState` açılışta depodan okurken de korumasız (`useStore.ts`'in
       `initialBox`'ı), orada bozuk bir plan boş ekran olur (koddan, ölçülmedi). Test TP4'te
-      "BİLİNEN KUSUR" olarak çivili; düzeltme `main`'de.
+      "BİLİNEN KUSUR" olarak çivili idi; düzeltme `main`'de.
+      **Üst çubuk yarısı düzeldi (2026-10-24, `tb1-dosyadan-ac`):** `readPlanFile` okurken
+      atılan istisnayı `{ problem: 'okunamadi' }`'ye çeviriyor, "Dosyadan aç" "Bu dosya
+      okunamadı" diyor ve açık plan değişmiyor; testleri `src/fuzz.test.ts` (fuzz artık
+      istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29; okunamayan dosya (`file.text()`
+      reddi) da aynı uyarıyı veriyor. **Kalan:** açılıştaki `parseState` (yukarıda), ölçülmedi.
+      İncelemenin bulduğu, TB1'den eski bir delik B7.37'de.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
       denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.
@@ -1643,7 +1670,7 @@ testi o commit'te sıradan bir teste döner.
       eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
       yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı); `klasor.spec.ts`'in
       BİLİNEN KUSUR testi yerinde. Kapanırken 5 s'yi aşan bir cevapsızlık ölçülmedi.
-- [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
+- [x] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
       paket yolu (`usePlans.ts`'in `replaceLibrary`'si) her planı çıplak `parseState` ile
@@ -1658,6 +1685,14 @@ testi o commit'te sıradan bir teste döner.
       `main`'den açılan. **Testini o dal yazar**, test dalı yazmaz. TP4'ün paket yolu fuzz'u
       bu düzeltmeyi ve sıra 6'yı bekler.
 
+      **Düzeltildi (2026-10-23, `tb8-eksik-plan`):** paketteki her plan `readPlanFile`'ın
+      kuralıyla okunuyor (`readBundlePlans`); eksik, bozuk ya da istisna atan plan açılmıyor
+      ve buradaki aynı kimlikli plan kalıyor; hiçbir plan okunamıyorsa soru sorulmuyor ve
+      hiçbir şey değişmiyor; onay sorusu açılmayacak planları sayıyor. Testleri
+      `src/storeContract.test.ts` ve `e2e/planlar.spec.ts` (ikisi de önce kırmızı) ile
+      `src/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
+      delik daha buldu ve aynı dalda kapandı: `state`'i nesne olmayan girdi okunamayan sayılıyor,
+      depo doluyken hiçbir plan yazılamazsa buradaki planlar silinmiyor; B7.34–B7.36 açık.
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.
