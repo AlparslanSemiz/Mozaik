@@ -39,11 +39,18 @@ const ground = (row: Locator) =>
     return 'rgb(255, 255, 255)';
   });
 
-async function grounds(rows: Locator): Promise<string[]> {
-  const out: string[] = [];
-  for (let i = 0; i < (await rows.count()); i++) out.push(await ground(rows.nth(i)));
-  return out;
-}
+/** Every row's ground in one round trip: Dersler has 99 rows, and one call per
+ *  row ran a CI runner past the test's 30 s. */
+const grounds = (rows: Locator) =>
+  rows.evaluateAll((list) =>
+    list.map((el) => {
+      for (let e: Element | null = el; e; e = e.parentElement) {
+        const bg = getComputedStyle(e).backgroundColor;
+        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+      }
+      return 'rgb(255, 255, 255)';
+    }),
+  );
 
 /** Two neighbours never share a ground, and every second row does. */
 function expectAlternating(seq: string[], what: string) {
@@ -336,22 +343,25 @@ async function olc(page: Page, l: Liste, theme: string) {
 
 test.describe('94. Zebra: her listede, görünen sırayla', () => {
   for (const theme of ['light', 'dark'] as const) {
-    test(`${theme}: örnek okulun her listesi dönüşümlü ve satırda her yazı 7:1`, async ({
-      page,
-    }) => {
-      await openWithSampleTheme(page, theme);
-      for (const l of ORNEK) {
+    // One test per list: a failure names its list, and no single test walks
+    // seventeen screens against a 30 s budget on a slower machine.
+    for (const l of ORNEK) {
+      test(`${theme}: ${l.ad} dönüşümlü ve satırda her yazı 7:1`, async ({ page }) => {
+        await openWithSampleTheme(page, theme);
         await olc(page, l, theme);
-        await page.keyboard.press('Escape');
-      }
-    });
+      });
+    }
 
-    test(`${theme}: Kontrol ve Kurallar'ın sorun listeleri de`, async ({ page }) => {
-      await loadWorld(page, listWorld(), 'Kontrol');
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      for (const l of DUNYA) await olc(page, l, theme);
-    });
+    for (const l of DUNYA) {
+      test(`${theme}: ${l.ad} (sorun listesi) dönüşümlü ve satırda her yazı 7:1`, async ({
+        page,
+      }) => {
+        await loadWorld(page, listWorld(), 'Kontrol');
+        if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+        await olc(page, l, theme);
+      });
+    }
   }
 
   // The four lists with a search, a sort and group chips. Each operation

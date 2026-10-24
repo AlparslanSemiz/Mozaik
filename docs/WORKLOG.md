@@ -147,7 +147,7 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 657 geçti, 8,5 dk (2026-10-24, `zebra-liste`) | `npx playwright test` |
+| Ana E2E süiti | 709 test (2026-10-24, `zebra-liste`, `zebra.spec.ts` liste başına bölündükten sonra; bölünmeden önce tam koşu 657/657, 8,5 dk) | `npx playwright test` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 43 (2026-10-24, `zebra-liste`) | `e2e/*.spec.ts` |
@@ -220,6 +220,11 @@ koruması); koyu `--muted` ve madde işaretleri beklendiği gibi yeşil (eski ko
 **Koşulan testler.** `npm run hizli` (53 dosya, 1340 geçti), tam kontrol tek betikle
 (biçim, `tipler`, `sinir`, lint, knip, birim 1453 geçti, derleme, `size-limit`, ana E2E
 657/657, 8,5 dk), her commit'ten önce dokunulan spec dosyaları.
+
+**CI.** İlk push'ta (`ci.yml` 40095428846) `e2e (3)` kırmızıydı: üç zebra testi 30 s'lik
+sınırı aştı (yerelde 12 ile 17 s). Sebep `grounds()`'un satır başına bir gidiş dönüşü
+(Dersler 99 satır). Tek `evaluateAll`'a indi ve on yedi ekranlık döngü liste başına teste
+bölündü: 67 test, en yavaşı yerelde 4,2 s; iki şerit mutasyonu yeniden kırmızı.
 
 **Koşulmayan testler.** `test:site`, çözücü stresi, WebKit, Windows, gerçek exe, süre
 ölçümü (yeni paket yok). Gerçek Windows 10 ve WebView2'de görünüm, yüksek kontrast teması
