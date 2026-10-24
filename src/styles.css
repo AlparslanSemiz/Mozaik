@@ -4069,6 +4069,14 @@ table.list td > .form-row {
   background: none;
 }
 
+/* Branşlar's second <tbody>, the subjects teachers hold that are not on the
+   list, is a group of its own and :nth-child starts again inside it. Two rows
+   on one ground where the groups meet was the result; a rule over the first
+   row says a new group starts, which is what the restart then means. */
+table.list > tbody + tbody > tr:first-child > td {
+  border-top: 2px solid var(--line-dark);
+}
+
 table.list tbody tr:hover,
 table.stat tbody tr:hover {
   background: var(--bg);
