@@ -264,8 +264,12 @@ Yerel `kontrol` dalda koşulmadı: kilit başka bir oturumun Stryker koşusunday
 **Birleşme.** `tb8-eksik-plan` ve `tb7-sekme-kapanis` bu dalın bir kopyasına çakışmasız
 birleşiyor ve tipler geçiyor. Anlamsal bir çakışma var: tb7'nin yeni gerçek exe testi ("X ile
 hemen kapanan pencere…") taze bir profilde klasörün kendiliğinden yazılmasını bekleyerek
-başlıyor, bu dal o yazımı kaldırıyor; o testin ilk `expect.poll` satırı birleşmede düşmeli
-(koddan okundu; birleşik kopyada `exe:e2e` bu girdi yazılırken bekleniyordu).
+başlıyor, bu dal o yazımı kaldırıyor; o testin ilk `expect.poll` satırı birleşmede düşmeli.
+Ölçüldü: birleşik kopyada (`main` + bu dal + tb8 + tb7) `npm run kontrol` çıkış 0 (1502 birim,
+653 E2E, 24 site, 7 çözücü, boyut eşiğin altında); `npm run exe:e2e` 15 testin 13'ü geçti, ikisi
+aynı satırda kırmızıydı: tb7'nin kapanış testi ve `main`'de zaten olan VK2 kurtarma testi.
+VK2 testi bu dalda düzeltildi (aşağıda); tb7 testinin bir satırlık düzeltmesiyle ikisi de
+gerçek Linux exe'de yeşil (birleşmede uygulanacak yama: ilk `expect.poll` yerine 1,5 s bekleme).
 `refactor/moduller` ile deneme birleşmesi: dört içerik çakışması, hepsi import bloğu
 (`storage/folder.test.ts`, `planStore.ts`, `useFolder.ts`, `useStore.ts`), ve `src/ui/App.tsx`'te
 sil/değiştir: şerit `src/ui/shell/Notices.tsx`'e taşınır.
@@ -274,8 +278,12 @@ sil/değiştir: şerit `src/ui/shell/Notices.tsx`'e taşınır.
 tb8 ve tb7'yle birleşik kopya 1 174 043 bayt ve `kontrol`'ün `boyut` adımında kırmızıydı
 (`npm run boyut`, "exceeded by 3.04 kB"). Ham eşik 1 186 500'e çekildi, gerekçesi BUILD.md'de.
 
-**Ölçülmedi.** Gerçek Windows exe'de hiçbiri koşulmadı; Linux'taki gerçek exe'de (`exe:e2e`)
-sonucu bu girdiyi yazarken bekleniyordu.
+**VK2'nin gerçek exe testi.** O da taze profilde klasörün kendiliğinden yazılmasını bekliyordu,
+ve depo doluyken sonraki açılışın canlı dosyayı eski (boş) durumla ezdiğini sabitliyordu. Yeni
+kuralla boş açılış iş taşıyan dosyanın üstüne yazmıyor, yani canlı dosya da örnek okulu tutuyor;
+test buna göre, kurtarma kopyasının dokunulmadığı iddiası aynen.
+
+**Ölçülmedi.** Gerçek Windows exe'de hiçbiri koşulmadı.
 
 ## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
 

@@ -488,7 +488,9 @@ test.describe('Gerçek exe (Linux)', () => {
   test('depo doluyken kurtarma kopyası yazılıyor ve sonraki açılış onu ezmiyor (VK2)', async ({
     exe,
   }) => {
-    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toBe('');
+    // A fresh profile writes nothing on its own any more (A2); the first save
+    // below is the sample's. This waits for the store's own first save only.
+    await new Promise((r) => setTimeout(r, 1_500));
     const dolgu = await exe.oturum.js(`
       let n = 0;
       for (const boy of [512 * 1024, 64 * 1024, 4 * 1024, 256]) {
@@ -518,9 +520,12 @@ test.describe('Gerçek exe (Linux)', () => {
     const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
     try {
       await yeni.bekle('h1', 20_000);
-      // The live file is rewritten from the old state: the very case the
-      // rescue copy is for. Then the rescue copy is untouched.
-      await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toContain('Örnek Kurs');
+      // The storage holds the empty plan from before the sample. It used to
+      // be written over the live file here, the very case the rescue copy was
+      // for; since A2 an empty plan never goes over a file that holds work,
+      // so the live file keeps the sample too. The rescue copy is untouched.
+      await new Promise((r) => setTimeout(r, 3_000)); // past 0.4 s and 2 s
+      expect(tumu(exe.klasor)).toContain('Örnek Kurs');
       expect(readFileSync(yol, 'utf8')).toContain('Örnek Kurs');
       expect(kurtarma()).toEqual([ad]);
     } finally {

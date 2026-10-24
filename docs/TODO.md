@@ -857,6 +857,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
       değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
       olsa, dolu ana dosyanın ve günün yedeğinin üstüne yazar (dünkü yedekler kalır).
+      **Birleşmede:** `tb7-sekme-kapanis`'in yeni gerçek exe testi ("X ile hemen kapanan
+      pencere…") taze profilde klasörün kendiliğinden yazılmasını bekleyerek başlıyor; o satır
+      1,5 s beklemeyle değişir (ölçüldü: birleşik kopyada gerçek Linux exe'de yeşil).
 - [ ] **B7.31 Depo hiç yazılamıyorken iki şerit, biri yanlış (2026-10-23).** localStorage'ın
       her çağrısı hata atınca "otomatik kayıt çalışmıyor" şeridinin yanında VK2'nin
       "depolama alanı dolu" şeridi de çıkıyor: otomatik kayıt düşen her yazımı "dolu" sayıyor,
