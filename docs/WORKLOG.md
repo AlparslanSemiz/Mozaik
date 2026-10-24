@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (`tp7-windows-exe`, dokuz dallık zincirin ucu).
+Son güncelleme: 2026-10-24 (`ogretmene-eposta`, on dallık zincirin ucu).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -56,11 +56,13 @@ okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kap
 
 **Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
 `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik` → `tb1-acilis` →
-`tp7-windows-exe`) tek doğrusal zincir, sırayla `--ff-only` ile alınır (CLAUDE.md); birleşince
+`tp7-windows-exe` → `ogretmene-eposta`) tek doğrusal zincir, sırayla `--ff-only` ile alınır
+(CLAUDE.md); birleşince
 ana klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). `tb1-acilis` açılışta bozuk
 planı kenara koyuyor; `tp7-windows-exe` Windows'ta gerçek exe süitini yeşil koşuyor, kapanış
-senaryosu içinde, `yayinla` etiketten önce onu bekliyor. Zincirin ucundan açılan sıradaki dal:
-`ogretmene-eposta` (öğretmen başına `mailto:`). Zebra mozaik-ed'in `zebra-liste` dalında
+senaryosu içinde, `yayinla` etiketten önce onu bekliyor. `ogretmene-eposta` şema v17'yi
+(öğretmenin e-postası) ve Çıktı'da öğretmen başına "E-postada aç"ı getiriyor, yalnız `mailto:`.
+Eyotek'e bir şey başlatılmadı: sorular okula gidiyor (kullanıcı, 2026-10-24). Zebra mozaik-ed'in `zebra-liste` dalında
 (kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi (`scratch/zebra-devir.md`). Kodu
 değiştiren her dal "bitti"den önce bitti kontrolünü yapar; bir TODO maddesine başlamadan önce
 worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum`
@@ -171,7 +173,7 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 174 099 bayt, brotli 282,28 kB (2026-10-24, zincirin ucu `tp7-windows-exe`); eşikler 1 184 000 (aynı gün çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 183 782 bayt, brotli 284,87 kB (2026-10-24, zincirin ucu `ogretmene-eposta`); eşikler 1 196 000 (aynı gece çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -218,6 +220,72 @@ tıklama testi iki kez (ilki incelemenin bulduğu çökmeye takıldı). **Koşul
 (CI'da).
 
 ---
+
+## 2026-10-24 gece · Öğretmene e-postayla, yalnız `mailto:` (`ogretmene-eposta`, B3.4)
+
+`tp7-windows-exe`'nin ucundan. **Şema v17:** `Teacher.email` (`''` yokken), v16'dan göç, okuyucuda
+ve `sanitize()`'da satır sonu, denetim karakteri ve eksik vekil karakter düşüyor (`cleanEmail`);
+örnek dosya reçetesine v17, v1–v16 bayt bayt aynı; birim (fixtures, storageNames, constraints,
+store, email) ve E2E (`temel.spec.ts`: v16 yedeği gerçek dosya penceresinden açılıyor, yazılan
+adres v17 olarak kaydediliyor ve yenilemede yerinde). **Arayüz:** Okul → Öğretmenler'de E-posta
+sütunu (8ch, kutunun tabanı 6ch; tablo `max-content` ve sütunu kutuların tabanı belirliyor, bir 10ch sütun daha %125'te 14 px taşıyordu), tek adrese benzemeyen kırmızı kenarlı;
+Çıktı'da Yazdır'ın altında "E-postayla gönder": öğretmen başına "E-postada aç" ya da neden yok
+(adres yok, adres hatalı, programı boş, e-postaya sığmıyor). **Gövde** düz metin,
+`teacherSheet`'ten (`pure/paper/mail.ts`): zil saati ve derslikle; sığmazsa onlarsız; sonra
+günde bir satır; sonra gövdede başlık ve okul adı olmadan (konu satırı adı taşıyor). Hiçbiri
+sığmazsa gönderilmiyor, kesilmiyor. **Exe:** `mail.rs`'in `eposta_ac`'ı; yeni paket yok, shell32,
+shlwapi ve ole32'ye doğrudan FFI. **Tarayıcı:** düz `mailto:` bağlantısı.
+
+**Ölçüm** (geçici `mailto-olcum.yml`, Windows runner, TESTFINDINGS): kayıtlı program yokken
+`AssocQueryStringW` 0x80070483, `ShellExecuteW` 42 ve OpenWith açılıyor; `ShellExecuteW`
+`mailto:`'yu 32 760 karaktere kadar kabuğa veriyor ve kendi şemamızda metni 32 000'e kadar bayt
+bayt iletiyor; Chromium 32 700'e kadar; Edge ölçülemedi (dış program sorusu, politikayla da);
+Linux Chromium da ölçülemedi (önce kendi "xdg-open açılsın mı?" sorusunu soruyor).
+Gerçek bir e-posta programının sınırı ölçülemedi: Windows `mailto` işleyicisini yalnız
+kullanıcının seçiminden (UserChoice) alıyor. **Sınır 2000** (`MAILTO_SINIRI` = `EN_UZUN`): taşıma
+değil e-posta programları, çünkü uzun `mailto:`'yu sessizce kesenler onlar ve son günü eksik bir
+hafta hiç gelmeyenden kötü. Tam dolu kursta (18 öğretmen) en uzun adres 1827 karakter, hepsi en
+dolu biçimde; her saati dolu sentetik bir hafta (7 gün × 12 ders) en kısa biçimde 1906 karakter,
+kesilen: zil saatleri, derslikler, gün başına satırlar ve gövdedeki başlık ile okul adı, hiçbir ders.
+
+**Veri nereye gidiyor:** yalnız kullanıcının kendi e-posta programına ve hesabına; Mozaik ağa
+çıkmıyor, bir şey göndermiyor, gönderen kullanıcı. Adres plan dosyasında ve her yedekte duruyor.
+
+**İnceleme** (taze bağlamlı alt ajan, `tp7-windows-exe...HEAD`). Düzelen: eksik vekil karakter
+`encodeURIComponent`'i atıp Çıktı'yı düşürüyordu (önce kırmızı test); Rust'un kapısı yazdırılabilir
+her ASCII'yi geçiriyordu, bir `"` programın komut satırına girebilirdi (şimdi yalnız
+`encodeURIComponent`'in karakterleri, önce kırmızı Rust testi); paketli uygulama (yeni Outlook,
+Posta) komut satırı vermiyorsa "yok" sayılabilirdi (şimdi COM işleyicisi ya da ProgID de sayılıyor,
+ölçülmedi); tarayıcıdaki 2 s'lik odak tahmini iki yaygın durumda da yanlıştı (yerine tıklamadan
+sonra koşullu tek satır); geri almadan sonra kutu eski taslağı gösterip geri yazabiliyordu
+(değere bağlı `key`, değişmeyen değer kaydedilmiyor); komut bekleyen havuzda; cümle "seçili bir
+e-posta programı yok" (kurulu ama varsayılan olmayan program için de doğru); Prettier; bayat
+yorumlar. Bırakılan: yetim bir sürücünün gerçek `xdg-open`'ı çağırması (süit her testten önce
+artıkları öldürüyor). CI'ın ilk koşusu ayrıca iki testin ad kutusu seçicisinin e-posta kutusunu
+saydığını ve v16 testinin bir yarışını buldu, düzeldi.
+
+**Tıklama testi** (`dist/index.html`, `file://`, Playwright Chromium, 1920×1080, örnek okul,
+sahte adresler; `scratch/eposta/tiklama/`): Otomatik diz → Okul → Öğretmenler: bir öğretmene
+adres, birine `ali@` (kenar kırmızı, üstünde ne yazılacağı) → Çıktı: adresli öğretmende adres ve
+"E-postada aç", yarım adreslide "adres hatalı", ötekilerde "adres yok" → bağlantı 1663 karakter,
+gövde 30 satır, tam biçim. Linux Chromium mailto'yu `xdg-open`'a vermeden kendi sorusunu sordu,
+o yüzden e-posta programına kadar giden yol exe'de koşuldu: Linux ikilisi, sahte ev, sahte
+`xdg-open` adresi (1831 karakter) aldı, satır yok. Komşu akış: Yazdır sayfa sayısı, yenilemeden
+sonra adres yerinde ve kayıt v17; %150'de panel. Konsol hatası yok. Görülen ve düzelen: kutu 8ch'te
+adresin beş harfini gösteriyordu (adres kutunun `title`'ında ve Çıktı satırında yazıyor),
+bağlantı düğmesinin yazısı altı çiziliydi.
+
+**Koşulan.** `hizli`; dokunulan birim testleri; `cargo test --lib mail` (3); E2E `temel.spec.ts`
+ve `yazdir.spec.ts`'in yeni iki testi; Linux'ta gerçek exe süiti (15 geçti, 1 atlandı, e-posta
+testi dahil); Windows'ta gerçek exe süiti (exe-windows 40107833319, 14 geçti, program yok satırı
+ve OpenWith açılmıyor); CI (1eb9382 yeşil); geçici ölçüm iş akışının dört koşusu. **Koşulmayan.**
+Gerçek bir e-posta programıyla açılış (runner'da kurulamıyor, bu makinede açılmadı ki bir hesaba
+dokunmasın); Edge ve Linux Chromium'da bağlantı (kendi soruları).
+
+**Boyut eşiği:** `dist/index.html` 1 174 099 → 1 183 782 bayt (+9 683: panel, metin kurucu,
+16 metnin dört çevirisi), brotli 284,87 kB; ham eşiğe (1 184 000) 218 bayt kaldı. Aşılmadı,
+ama bir sonraki dal aşardı: ham eşik BUILD'in kuralıyla on iki buçuk kilobayt kadar pay
+bırakacak yere çekildi, 1 196 000; brotli eşiği (289 000) yerinde.
 
 ## 2026-10-24 gece · TP7: Windows'ta gerçek exe süiti yeşil (`tp7-windows-exe`)
 

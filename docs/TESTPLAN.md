@@ -451,7 +451,9 @@ kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği,
 kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
-uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
+uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, "E-postada aç"ın
+öğretmenin haftasını kabuğa verdiği (Linux'ta sahte evin `xdg-open`'ı adresi yazıyor; Windows
+runner'ında e-posta programı yok ve sayfa bunu tek satırla söylüyor), ve Sığdır'da gerekçe çubuğuna
 sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
 pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
 WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
@@ -465,7 +467,9 @@ test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmız
 PDF'e dökümü (Yazdır'ın GTK penceresini açtığı elle görüldü).
 
 İki kural: her test kendi sahte ev dizininde açılır, çünkü programın yazdığı
-Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Sahte ev gerçek
+Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Sahte evin `PATH`'inde
+kendi `xdg-open`'ı var ve hiçbir şey açmıyor, yani bir test bu makinedeki e-posta
+programını ya da tarayıcıyı açamaz. Sahte ev gerçek
 evin programa değen her klasörünü kurar, yoksa eksik bir klasör ürün kusuru gibi
 görünür (tuzak 132). Ve tıklama, tuş
 ve sürükleme sayfanın içinde olay olarak üretilir, çünkü bu makinenin

@@ -76,7 +76,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
             B4.4 baskı tasarımları ──> §3 Bölüm 3 (çıktı aileleri)
                                               |
                                         B3.4 e-posta/WhatsApp
-                                        (öğretmende tel + e-posta = YENİ ŞEMA, bugün v16)
+                                        (e-posta v17'de geldi; tel = YENİ ŞEMA, bugün v17)
 
 §6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (YENİ ŞEMA) ──> B6.3 A/B haftası
 ```
@@ -327,12 +327,16 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
 - [ ] **B3.3 Excel ve HTML'e çıkarma.** aSc karar tablosunda **HTML önce**,
       Excel sonra. HTML zaten elimizdeki DOM. Excel için `.xlsx` bir zip'tir,
       `.csv` düz metin — hangisinin istendiği sorulacak (§8).
-- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme — YENİ BİR ŞEMA SÜRÜMÜ İSTİYOR.**
-      Öğretmene **telefon** ve **e-posta** alanı gerekiyor: `schemaVersion`
-      bugün 16, yani 17 + göç kodu + `sanitize()` dalı + hem birim hem E2E testi
-      ([DATA.md](DATA.md)'nin şema kuralı, tuzak 97). Saklamanın KVKK sorusu B3.8'de. Gönderme yolu `mailto:` ve
-      `https://wa.me/<numara>?text=` — ikisi de **tıklanınca** açılır, program
-      kendiliğinden hiçbir şey göndermez.
+- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme.** **E-posta yarısı yazıldı, doğrulanmadı
+      (2026-10-24, `ogretmene-eposta`):** şema v17'de `Teacher.email` (kullanıcının kararı:
+      State'te, her yedekle taşınır), Okul → Öğretmenler'de sütun, Çıktı'da öğretmen başına
+      "E-postada aç". Yol yalnız `mailto:`: program hiçbir şey göndermez, hesap ve ağ kodu
+      yok; exe'de kabuk (`mail.rs`), tarayıcıda düz bağlantı. Hafta düz metin, 2000
+      karakterlik `mailto:`'ya sığan en dolu biçimde (WORKLOG 2026-10-24 gece). Açık: gerçek
+      bir e-posta programında (Outlook, Windows Posta, Thunderbird) uzun gövdenin nasıl
+      geldiği ölçülmedi, runner'da e-posta programı kurulamıyor; Edge'de bağlantı ölçülemedi.
+      **WhatsApp yarısı açık:** öğretmene **telefon** alanı (yeni şema), `https://wa.me/<numara>?text=`,
+      o da **tıklanınca** açılır.
       **Not:** bu aSc'nin "Sharing"i DEĞİL (o EduPage'e yüklüyor, hesap açıyor,
       şifre veriyor). O 2026-10-08'de "yapılmıyor" listesinden çıktı, ama
       istenmedi.
@@ -368,9 +372,9 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       - aSc öğretmene e-postayı EduPage hesabı üzerinden gönderiyor, yerel bir "her
         öğretmene kendi PDF'i" akışı belgelenmemiş; Untis'te masaüstünden HTML ya da
         PDF ile gidiyor ([asc/ekran-envanteri.md](asc/ekran-envanteri.md) §7).
-      - Öğretmen e-postaları nerede saklanacak? Kişisel veri (KVKK): plan dosyasına
-        girerse her yedekle ve her paylaşılan dosyayla birlikte taşınır. Ayrı bir
-        yerde tutulursa bir makineye bağlı kalır. Karar verilmeden şemaya girmez.
+      - Öğretmen e-postaları nerede saklanacak? **Karar (kullanıcı, 2026-10-24): State'te**
+        (şema v17, B3.4). Kişisel veri (KVKK): plan dosyasıyla, her yedekle ve her
+        paylaşılan dosyayla birlikte taşınır.
       - `mailto:` bir dosyayı eke koyamıyor; ek gerekiyorsa yol exe'den geçiyor
         olabilir. Ölçülmeden yazılmaz.
 

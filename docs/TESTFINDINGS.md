@@ -26,6 +26,25 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `mailto-olcum.yml` 40104303724, 40105704173, 40105976835, 40106637571 (`ogretmene-eposta`, geçici) · Windows'ta `mailto:`
+Bulgu: (1) Kayıtlı e-posta programı yokken `AssocQueryStringW("mailto")` 0x80070483
+(ERROR_NO_ASSOCIATION) dönüyor, `ShellExecuteW` ise 42 (başarı) dönüp Windows'un "Bunu nasıl
+açmak istiyorsunuz?" seçicisini (OpenWith) açıyor: kabuğun dönüşü "program yok"u söylemiyor.
+(2) HKCU'ya yazılan bir `mailto` kaydını Windows kullanıcı seçimi (UserChoice, korumalı) olmadan
+saymıyor, `AssocQueryStringW` o zaman `OpenWith.exe "%1"` diyor; yani runner'da gerçek bir
+e-posta programı kaydedilemiyor. (3) Uzunluk: `ShellExecuteW` kendi kaydettiğimiz bir şemada
+metni 32 000 karaktere kadar bayt bayt aynı iletiyor (32 700'de 31); `mailto:`'yu 32 760'a
+kadar kabuğa veriyor, 32 767'de 2. Chromium (Playwright, 151) tıklanan bağlantıyı 32 700'e
+kadar veriyor, 32 760'tan sonra vermiyor. Edge, dış program sorusu politikayla kapalıyken de
+hiçbirini vermedi: ölçülemedi. OpenWith adresi COM ile alıyor (`-Embedding`), uzunluk oradan
+okunmuyor; ilk turdaki "gelen 1" ve "gelen 43" ölçüm hatası. (4) Linux'ta (bu makine, Playwright
+Chromium, sahte `xdg-open`): hiçbir uzunluk `xdg-open`'a ulaşmadı, çünkü Chromium önce kendi
+"xdg-open açılsın mı?" sorusunu soruyor ve o soru sayfanın dışında; ölçülemedi.
+Tür: bilgi (platform), tasarımı belirledi.
+Ne yapıldı: `mail.rs` önce `AssocQueryStringW` soruyor ve OpenWith'i program saymıyor;
+`mailto:` sınırı 2000 (taşıma değil, ölçülemeyen e-posta programları; `pure/paper/mail.ts`).
+Kalıcı kural: yok.
+
 ### 2026-10-24 · `exe-windows.yml` 40095284383 → 40101538104 (`tp7-windows-exe`) · Windows'ta gerçek exe
 Bulgu: (1) `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` bu exe'de portu açmıyor (release de
 debug de): wry 0.57 tarayıcı argümanlarını her zaman kendisi veriyor
