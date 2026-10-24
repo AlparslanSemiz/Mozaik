@@ -12,7 +12,7 @@
 import { t } from '../../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle, type Library } from '../../pure/io';
-import { isDesktop, openDesktopFolder } from '../desktop';
+import { isDesktop, openDesktopFolder } from '../exe';
 import {
   askPermission,
   dailyName,

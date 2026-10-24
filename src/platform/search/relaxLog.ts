@@ -10,7 +10,7 @@
 import { preference, RELAX_LOG_KEY, safely } from '../../leaf/preference';
 import { SURUM } from '../../leaf/app';
 import type { Relaxer } from '../../pure/relax';
-import { isDesktop } from '../desktop';
+import { isDesktop } from '../exe';
 
 export interface SearchRecord {
   /** When it ended, ISO. */

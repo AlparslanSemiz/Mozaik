@@ -160,7 +160,7 @@ describe('kimlik — verinin ADRESİ', () => {
 
 describe('exe köprüsü — sayfadaki window.__TAURI__', () => {
   it('withGlobalTauri açık: köprünün tek kapısı bu bayrak', () => {
-    // platform/desktop.ts finds the exe by `window.__TAURI__.core.invoke`
+    // platform/exe/desktop.ts finds the exe by `window.__TAURI__.core.invoke`
     // (`isDesktop`) and sends every Rust command through it. No @tauri-apps
     // package is installed, so that global exists only because this flag asks
     // Tauri to put it on the page. Read from desktop.ts, not run: with the flag

@@ -34,7 +34,7 @@ import { activePlacements } from '../../pure/grid';
 import type { PlanControls } from '../props';
 import type { UpdateRun } from '../../platform/update';
 import { SITE_ADRESI } from '../../platform/update';
-import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/desktop';
+import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/exe';
 import { surumEtiketi, tarihYazisi } from '../../leaf/app';
 import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
 import Plans from './Plans';

@@ -22,7 +22,7 @@ import tauriConf from '../src-tauri/tauri.conf.json';
 import { PREFERENCE_ROWS } from './leaf/preference/preferenceKeys';
 import { SCHEMA_VERSION } from './leaf/model/types';
 import { DB_NAME, MAIN_NAME, dailyName, prunable, rescueName } from './platform/storage/folder';
-import { EXE_FOLDER } from './platform/desktop';
+import { EXE_FOLDER } from './platform/exe/desktop';
 import {
   BACKUP_COUNT,
   BASE_KEY,

@@ -7,7 +7,7 @@
 // `saveInto`, and the adapter is merely what it is handed.
 
 import { describe, expect, it } from 'vitest';
-import { desktopFolder } from './platform/desktop';
+import { desktopFolder } from './platform/exe/desktop';
 import { MAIN_NAME, dailyName, rescueName, saveInto } from './platform/storage/folder';
 
 /** An in-memory stand-in for src-tauri/src/lib.rs. */

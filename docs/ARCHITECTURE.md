@@ -12,7 +12,7 @@ src/leaf/          model/* · i18n/* · lang/* · preference/* · app/*
 src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
                    grid/* · program/* · paper/* · io/* · listview/* · undo/*
    |
-src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
+src/platform/      storage/* · prefs/* · search/* · dom/* · exe/* · changelog · update
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -24,7 +24,7 @@ kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` 
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 Bir katmanın altındaki klasör bir paket: bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/undo/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -126,7 +126,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
 | `platform/storage/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
-| `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
+| `platform/exe/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
 | `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
 ### Doğrudan DOM'a yazan modüller

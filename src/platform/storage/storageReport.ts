@@ -20,7 +20,7 @@
 // reads this file and fails if a key is written out by hand.
 
 import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from '../../pure/io';
-import { isDesktop } from '../desktop';
+import { isDesktop } from '../exe';
 import { t } from '../../leaf/i18n';
 import { PREFERENCE_ROWS, safely } from '../../leaf/preference';
 

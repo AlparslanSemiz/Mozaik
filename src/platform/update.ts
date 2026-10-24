@@ -34,7 +34,7 @@
 import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';
+import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './exe';
 import { SURUM, tarihYazisi } from '../leaf/app';
 
 /**
