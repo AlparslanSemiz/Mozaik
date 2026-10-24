@@ -287,7 +287,9 @@ test.describe('74. Nereye kaydedilsin', () => {
   // question): the change is in the store when the tab is gone, and the next
   // opening writes it to the folder. The folder lags; it does not lose. The
   // exe's window waits for the write (`src-tauri/src/lib.rs`), so there it
-  // does not even lag.
+  // does not even lag. Whether the started write lands before the tab is gone
+  // is the runner's timing (CI, 2026-10-24: once it did, once the read met
+  // the file mid-write), so the lag itself is not asserted.
   //
   // Read from a page of the same origin that does not run the program, so the
   // program's own next opening is the only thing that writes the folder. The
@@ -327,15 +329,19 @@ test.describe('74. Nereye kaydedilsin', () => {
     expect(await reader.evaluate(() => localStorage.getItem('ders-programi') ?? '')).toContain(
       'Kapanış2',
     );
-    // The lag: the folder still holds the state before the change.
-    expect((await disk(reader))['ders-programi-tumu.json'] ?? '').not.toContain('Kapanış2');
-
     // The next opening carries the change to the folder.
     const next = await context.newPage();
     await fakePicker(next);
     await next.goto('/');
+    // Polled, and a read that meets the file mid-write is just tried again.
     await expect
-      .poll(async () => (await disk(reader))['ders-programi-tumu.json'] ?? '', { timeout: 10_000 })
+      .poll(
+        async () =>
+          (await disk(reader).catch(() => ({}) as Record<string, string>))[
+            'ders-programi-tumu.json'
+          ] ?? '',
+        { timeout: 10_000 },
+      )
       .toContain('Kapanış2');
   });
 });
