@@ -15,9 +15,12 @@ export default defineConfig({
   // under playwright.site.config.ts (npm run test:site), over http. So does
   // linux-tasima, whose old copy has to be the site build at a real origin.
   // And gercek-exe opens the real Linux program, which needs a Rust build
-  // first (npm run exe:e2e, playwright.gercek-exe.config.ts).
+  // first (npm run exe:e2e, playwright.gercek-exe.config.ts); guncelleme-exe
+  // opens what the released exe wrote on a Windows runner
+  // (playwright.guncelleme-exe.config.ts).
   testIgnore: [
     '**/gercek-exe.spec.ts',
+    '**/guncelleme-exe.spec.ts',
     '**/ekran.spec.ts',
     '**/patrol.spec.ts',
     '**/otomatik-stres.spec.ts',

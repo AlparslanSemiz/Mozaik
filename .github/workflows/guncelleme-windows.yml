@@ -1,0 +1,149 @@
+# Güncelleme kapısı, Windows'ta: babanın bugünkü exe'si → bu commit'in exe'si.
+# Son Release'in Mozaik.exe'si indirilir (özeti SHA256SUMS.txt'le), bir klasöre
+# "kurulur" ve kendi elleriyle veri üretir: örnek okul ve otomatik dizilmiş hafta,
+# Windows UI Automation ile (yayınlanan exe'de hata ayıklama portu yok,
+# scripts/uia.mjs). X ile kapanır. Sonra bu commit'in exe'si update.rs'in yaptığı
+# gibi aynı dosyanın yerine konur, açılır, ve eski sürümün yazdığı her şeyin
+# depoda ve Belgeler'de, bu commit'in şemasında durduğuna bakılır
+# (scripts/guncelleme-eski.mjs, e2e/guncelleme-exe.spec.ts).
+#
+# `npm run yayinla` etiketten önce bunun yeşilini bekler, son etiketle HEAD
+# arasında şema sürümü değiştiyse (scripts/sema-surumu.mjs); koşu yoksa
+# başlatır. Şemaya ve göçe dokunan main push'unda kendiliğinden koşar.
+#
+# Eski sürümün evresi Rust derlemesinden ÖNCE: UI Automation tutmazsa koşu
+# dakikalar içinde kırmızı, yirmi dakikalık bir derlemeden sonra değil.
+name: guncelleme-windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/leaf/types.ts'
+      - 'src/pure/parseState.ts'
+      - 'src/pure/library.ts'
+      - 'src/pure/bundle.ts'
+      - 'src-tauri/tauri.conf.json'
+      - 'src-tauri/src/update.rs'
+      - 'src/platform/**/libraryStore.ts'
+      - 'src/platform/**/planStore.ts'
+      - 'src/platform/**/folder.ts'
+      - 'e2e/guncelleme-exe.spec.ts'
+      - 'scripts/guncelleme-eski.mjs'
+      - 'scripts/uia.mjs'
+      - 'scripts/webdriver.mjs'
+      - 'playwright.guncelleme-exe.config.ts'
+      - '.github/workflows/guncelleme-windows.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guncelleme-windows-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  guncelleme:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      # Ekran exe-windows.yml'deki sebeple 1920×1080; burada bir sebep daha var:
+      # UI Automation'ın bastığı düğme görünür olmalı.
+      - name: Ekran 1920×1080
+        shell: pwsh
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force
+          Add-Type -AssemblyName System.Windows.Forms
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          Write-Host "ekran $($b.Width)x$($b.Height)"
+          if ($b.Width -lt 1920) { throw 'çözünürlük değişmedi' }
+
+      # Eski exe WebView2 ister; exe-windows.yml'deki gibi yoksa kurulur. Sürücü
+      # aynı sürümden, ikinci evre için.
+      - name: WebView2 Runtime ve eşleşen msedgedriver
+        shell: pwsh
+        run: |
+          $anahtarlar = @(
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          )
+          function Surum {
+            $anahtarlar | ForEach-Object { (Get-ItemProperty $_ -ErrorAction SilentlyContinue).pv } |
+              Where-Object { $_ -and $_ -ne '0.0.0.0' } | Select-Object -First 1
+          }
+          $pv = Surum
+          if (-not $pv) {
+            Write-Host 'WebView2 Runtime kurulu değil, kuruluyor'
+            $kur = Join-Path $env:RUNNER_TEMP 'webview2-kur.exe'
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $kur
+            Start-Process $kur -ArgumentList '/silent', '/install' -Wait
+            $pv = Surum
+          }
+          if (-not $pv) { throw 'WebView2 Runtime yok' }
+          Write-Host "WebView2 Runtime $pv"
+          $d = Join-Path $env:RUNNER_TEMP 'edgedriver'
+          Invoke-WebRequest "https://msedgedriver.microsoft.com/$pv/edgedriver_win64.zip" -OutFile "$d.zip"
+          Expand-Archive "$d.zip" $d -Force
+          & "$d\msedgedriver.exe" --version
+          "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
+
+      # Babanın indirdiği dosyanın kendisi: son Release'in Mozaik.exe'si, Release'in
+      # kendi özetiyle karşılaştırılmış.
+      - name: Yayınlanmış son exe
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $d = Join-Path $env:RUNNER_TEMP 'yayinlanan'
+          gh release download --repo $env:GITHUB_REPOSITORY --pattern Mozaik.exe --pattern SHA256SUMS.txt --dir $d
+          $etiket = gh release view --repo $env:GITHUB_REPOSITORY --json tagName --jq .tagName
+          $beklenen = (Select-String -Path "$d\SHA256SUMS.txt" -Pattern 'Mozaik\.exe$').Line.Split(' ')[0].ToLower()
+          $gercek = (Get-FileHash "$d\Mozaik.exe" -Algorithm SHA256).Hash.ToLower()
+          Write-Host "son Release $etiket, Mozaik.exe $gercek"
+          if ($beklenen -ne $gercek) { throw "özet tutmuyor: SHA256SUMS $beklenen" }
+
+      - name: Eski sürüm veriyi üretir
+        shell: bash
+        run: >
+          node scripts/guncelleme-eski.mjs
+          --eski "$RUNNER_TEMP/yayinlanan/Mozaik.exe"
+          --kur "$RUNNER_TEMP/kurulu"
+          --cikti "$RUNNER_TEMP/eski-veri.json"
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm run build
+      # exe-windows.yml'deki test exe'si: aynı CLI, pencereye hata ayıklama portu.
+      - name: Test exe'si
+        shell: bash
+        run: |
+          node --input-type=module -e "import { windowsTestAyari } from './scripts/webdriver.mjs'; import { writeFileSync } from 'node:fs'; writeFileSync(process.env.RUNNER_TEMP + '/test-exe.conf.json', JSON.stringify(windowsTestAyari()));"
+          npx --yes @tauri-apps/cli@^2 build --no-bundle --config "$RUNNER_TEMP/test-exe.conf.json"
+
+      - name: Yeni exe eski verinin yerine geçer
+        shell: bash
+        env:
+          MOZAIK_GUNCELLEME_ANLIK: ${{ runner.temp }}/eski-veri.json
+          MOZAIK_KURULU: ${{ runner.temp }}/kurulu/Mozaik.exe
+        run: npx playwright test --config playwright.guncelleme-exe.config.ts --reporter=list
+
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: guncelleme-windows
+          path: |
+            test-results/
+            ${{ runner.temp }}/eski-veri.json
+          retention-days: 7
+          if-no-files-found: ignore

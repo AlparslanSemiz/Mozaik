@@ -15,11 +15,14 @@
 //               -> windows.yml (Windows E2E; the site does not wait for it)
 //               -> exe-windows.yml (the real exe on Windows, when the push
 //                  touches the exe; the version commit always does)
+//               -> guncelleme-windows.yml (the last released exe's data
+//                  opened by this one; waited for only when the schema
+//                  moved since the last tag, started here if it did not run)
 //   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
 // So the order is: commit, push main ALONE, wait for that commit's ci.yml,
-// windows.yml and exe-windows.yml runs, and only when all three are green tag
-// it and push the tag. The tag used to go in the same push as the commit, i.e.
+// windows.yml and exe-windows.yml runs (and guncelleme-windows.yml's, when
+// the schema moved), and only when all are green tag it and push the tag. The tag used to go in the same push as the commit, i.e.
 // before any test had looked at it (2026-10-08); the Windows run joined on
 // 2026-10-09 and the real exe on 2026-10-10, because the tag is what reaches
 // my father's exe and his machine is Windows. Those Windows waits are the one
@@ -30,9 +33,9 @@
 // only".
 //
 // `--kuru` (dry run) changes nothing in the repository: it takes HEAD, which
-// must already be pushed, finds and waits for its three runs, says the result,
-// and stops where the tag would be cut. It may START one: exe-windows.yml when
-// HEAD has none (below).
+// must already be pushed, finds and waits for its runs, says the result,
+// and stops where the tag would be cut. It may START two: exe-windows.yml and
+// guncelleme-windows.yml when HEAD has none (below).
 //
 // Refuses outside the main checkout or off `main`, on a dirty tree, on a tag
 // that exists, and without a logged-in `gh`. Every one of those has a right
@@ -45,6 +48,7 @@ import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
 import { kilitSurumunuYaz } from './kilit-surumu.mjs';
+import { semaSurumu, sonEtiket } from './sema-surumu.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -127,46 +131,60 @@ async function kosuYesilMi(is, sha, kirmizidaNe) {
   console.log(`  ${kisa}'in ${is} koşusu yeşil.\n`);
 }
 
-// The real exe on Windows does not run on every push: its paths filter takes
-// the version commit (package.json, Cargo.toml) but not a tag-only release, or
-// `--kuru` on a commit that never touched the exe. Then it is started here, on
-// main, which has to BE this commit or the run would judge another one.
-async function exeKosusuVarMi(sha) {
+// The two Windows exe workflows do not run on every push: exe-windows.yml's
+// paths filter takes the version commit (package.json, Cargo.toml) but not a
+// tag-only release, or `--kuru` on a commit that never touched the exe, and
+// guncelleme-windows.yml's takes the schema and the storage code, not the
+// version commit. Then the run is started here, on main, which has to BE this
+// commit or the run would judge another one.
+async function kosuVarMi(is, sha) {
   const kisa = sha.slice(0, 7);
   for (let i = 0; i < 6; i++) {
     if (i > 0) await bekle(10_000);
-    const r = gh([
-      'run',
-      'list',
-      '--workflow',
-      'exe-windows.yml',
-      '--commit',
-      sha,
-      '--json',
-      'databaseId',
-    ]);
+    const r = gh(['run', 'list', '--workflow', is, '--commit', sha, '--json', 'databaseId']);
     if (r.status !== 0) dur('gh run list olmadı.', ...girintili(r.stderr.trim()));
     if (JSON.parse(r.stdout).length > 0) return;
   }
   git('fetch', '--quiet', 'origin', 'main');
   if (git('rev-parse', 'origin/main') !== sha) {
     dur(
-      `${kisa} için exe-windows.yml koşusu yok, ve ${kisa} main'in ucu değil: başlatılamaz.`,
-      'gh workflow run exe-windows.yml --ref main',
+      `${kisa} için ${is} koşusu yok, ve ${kisa} main'in ucu değil: başlatılamaz.`,
+      `gh workflow run ${is} --ref main`,
     );
   }
-  const r = gh(['workflow', 'run', 'exe-windows.yml', '--ref', 'main']);
-  if (r.status !== 0) dur('exe-windows.yml başlatılamadı.', ...girintili(r.stderr.trim()));
-  console.log(`\n  ${kisa} için exe-windows.yml koşusu yoktu, başlatıldı.\n`);
+  const r = gh(['workflow', 'run', is, '--ref', 'main']);
+  if (r.status !== 0) dur(`${is} başlatılamadı.`, ...girintili(r.stderr.trim()));
+  console.log(`\n  ${kisa} için ${is} koşusu yoktu, başlatıldı.\n`);
 }
 
-// The three runs a tag waits for. ci.yml first: it is the shortest, and the
+// Whether this release migrates plans: the schema at the last release tag
+// against HEAD's. With no tag to compare against, it waits (the safe answer).
+function semaDegistiMi() {
+  git('fetch', '--quiet', '--tags', 'origin');
+  const etiket = sonEtiket(git('tag', '--merged', 'HEAD'));
+  const yeni = semaSurumu(git('show', 'HEAD:src/leaf/types.ts'));
+  if (etiket === null) return true;
+  const eski = semaSurumu(git('show', `${etiket}:src/leaf/types.ts`));
+  console.log(
+    eski === yeni
+      ? `\n  Şema ${yeni}, ${etiket}'teki gibi: güncelleme kapısı beklenmiyor.\n`
+      : `\n  Şema ${eski} → ${yeni} (${etiket}'ten beri): güncelleme kapısı bekleniyor.\n`,
+  );
+  return eski !== yeni;
+}
+
+// The runs a tag waits for. ci.yml first: it is the shortest, and the
 // Windows runs are started by the same push, so they are already under way.
+// The upgrade gate last, and only when this release changes the schema.
 async function ciYesilMi(sha, kirmizidaNe) {
   await kosuYesilMi('ci.yml', sha, kirmizidaNe);
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
-  await exeKosusuVarMi(sha);
+  await kosuVarMi('exe-windows.yml', sha);
   await kosuYesilMi('exe-windows.yml', sha, kirmizidaNe);
+  if (semaDegistiMi()) {
+    await kosuVarMi('guncelleme-windows.yml', sha);
+    await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
+  }
 }
 
 // The first gate, before the arguments are even read: a release run from a
