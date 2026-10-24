@@ -12,7 +12,8 @@
 //     found weeks back as first guesses,
 //   - a suggestion is applied only to the plan it was made for, its yeses
 //     become data and its noes stay,
-//   - a new no drops the ways that used it, a new yes drops them all.
+//   - a new no drops the ways that used it, a new yes drops them all,
+//   - two pinned lessons that break a relation start no search (TODO RK2).
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -22,6 +23,7 @@ import type { Answers, State } from './leaf/types';
 import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/relax';
 import type { Solver, SolverProgress, SolverResult } from './pure/solver';
 import { activePlacements } from './pure/program/programs';
+import { addNotSameDay } from './pure/entities';
 import { sampleState } from './pure/sample';
 import { startRelax } from './platform/search/relaxPool';
 import { createSolver } from './pure/solver';
@@ -176,6 +178,41 @@ describe('useSolver', () => {
     expect(run.advice?.forState).toBe(left);
     expect(run.advice?.searching).toBe(true);
     expect(run.advice?.answers).toBe(answers);
+  });
+
+  // TODO RK2: every week the search builds keeps the pins, and the checker
+  // turns down any week with the breach in it, so the search could only come
+  // back empty, a minute later and without a word. It is not started.
+  it('sabitlenmiş iki ders bir ilişkiyi bozuyorsa takılan koşu öneri araması başlatmaz', () => {
+    const plan = sampleState();
+    const [a, b] = [
+      plan.lessons[0]!,
+      plan.lessons.find((x) => x.classId !== plan.lessons[0]!.classId)!,
+    ];
+    const keyA = `${a.classId}|0|0`;
+    const keyB = `${b.classId}|0|1`;
+    const base: State = addNotSameDay(
+      {
+        ...plan,
+        programs: plan.programs.map((p) => ({
+          ...p,
+          placements: { ...p.placements, [keyA]: a.id, [keyB]: b.id },
+          pinned: { ...p.pinned, [keyA]: 1, [keyB]: 1 },
+        })),
+      },
+      a.id,
+      b.id,
+    );
+    const outcome = { phase: 'stuck', state: base, stuck: [] } as unknown as SolverResult;
+    vi.mocked(createSolver).mockReturnValue(fakeSolver(outcome));
+
+    act(() => run.start(base));
+    frame();
+
+    expect(startRelax).not.toHaveBeenCalled();
+    expect(run.advice?.searching).toBe(false);
+    expect(run.advice?.suggestions).toEqual([]);
+    expect(run.advice?.forState).toBe(base);
   });
 
   it('Durdur aramayı keser, bulduğunu tutar ve durduğunu söyler; sürdür bulunanı ilk tahmin yapar', () => {

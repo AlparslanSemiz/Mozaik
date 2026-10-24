@@ -16,11 +16,13 @@
 // strengths. The answers are the plan's data (State.answers), so they outlive
 // the panel and the program; every answer runs the search again.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import type { Advice } from '../../platform/search';
+import { buildIndex } from '../../pure/constraints';
 import { answerNo, answerYes, dropAnswer } from '../../pure/entities';
+import { pinnedRelationBreaches } from '../../pure/rules';
 import {
   FAMILY_ORDER,
   answerParts,
@@ -264,6 +266,12 @@ export default function Suggestions({
   const [printing, setPrinting] = useState<Suggestion | null>(null);
   const { suggestions, searching, stopped, progress } = advice;
   const as = suggestions.find((s) => s.changes.length === 0);
+  // Two pinned lessons that break a relation: the search was not run, and
+  // the empty panel says why instead of "no way was found" (TODO RK2).
+  const pinnedBreach = useMemo(
+    () => pinnedRelationBreaches(advice.forState, buildIndex(advice.forState))[0],
+    [advice.forState],
+  );
 
   // Focus goes to the first way once the search is over: sooner, and it would
   // pull the keyboard away from whatever the reader was doing meanwhile.
@@ -368,26 +376,33 @@ export default function Suggestions({
     }
   }
   const firstFound = rows.find((r) => r.found !== null)?.family;
+  const why = !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
 
   return (
     <section className="panel suggestions" aria-labelledby="suggestions-title">
       <div className="suggestion-row">
         <h2 id="suggestions-title">{t('Kurulması için')}</h2>
-        <span className="hint inline">
-          {searching && suggestions.length === 0
-            ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
-                sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
-              })
-            : stopped
-              ? rows.length === 0
-                ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
-                : t('Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.')
-              : rows.length === 0
-                ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
-                : t(
-                    'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
-                  )}
-        </span>
+        {/* The pinned breach is the panel's whole answer, so it is read at the
+            size a way's own sentence is, not as a muted hint. */}
+        {why !== undefined ? (
+          <span className="suggestion-title">{why}</span>
+        ) : (
+          <span className="hint inline">
+            {searching && suggestions.length === 0
+              ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
+                  sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
+                })
+              : stopped
+                ? rows.length === 0
+                  ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
+                  : t('Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.')
+                : rows.length === 0
+                  ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
+                  : t(
+                      'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
+                    )}
+          </span>
+        )}
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">
             {t(

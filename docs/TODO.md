@@ -1499,7 +1499,12 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - [ ] **RK1 `--ink` hiçbir yerde tanımlı değil.** `src/styles.css`'in dört kuralı
       (4196, 4213, 4242, 6407) `color: var(--ink)` okuyor, değişken ne CSS'te ne kodda
       tanımlı, yani renk kalıtılana düşüyor. Okundu, ekranda görülmedi. Özellik dalı.
-- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `relax.ts` 1100 iki
+- [x] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** **Düzeldi (2026-10-24,
+      `rk2-bozuk-iliski`):** iki ders aynı güne sabitlenmişse (`pinnedRelationBreaches`,
+      `rules.ts`) öneri araması başlamıyor, panel sebebi tek cümleyle söylüyor, Kontrol'de bir
+      cümle; testleri `relations.test.ts` ve `useSolver.test.tsx`. Yalnız yerleşmiş (sabit
+      olmayan) iki ders için arama sürüyor, çünkü baştan dizen yol onları taşıyabiliyor.
+      Eski tarif: `relax.ts` 1100 iki
       ders de yerinde kalıyorsa ilişkinin o gününü atlıyor, `verifySuggestion` ise
       ilişkisi çiğnenmiş haftayı reddediyor. İki ders sabitliyse sonuç 0 öneri, oysa bir
       öğretmen saati açmak haftayı kuruyor (analizin kopyasında ölçüldü). Karar verildi:

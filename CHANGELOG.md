@@ -31,6 +31,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- When two lessons that must not share a day are both pinned on the same day, "Fill automatically" no longer searches for a minute and then shows an empty list of ways: the panel says at once which two lessons are pinned and that one of them has to move, and Check says it too.
 - A plan whose saved data can no longer be read no longer stops the program from opening, and is no longer emptied by the next change. It is left as it is, another plan opens, and one line says which plan it was.
 - "Open from file" no longer opens a plan in which two lessons, or a teacher, class or room and another one, share an id, or one has none; such a file is refused as unreadable. "Open all from file" leaves such a plan out and counts it with the broken ones.
 - "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".

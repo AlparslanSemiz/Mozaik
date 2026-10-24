@@ -206,7 +206,10 @@ taşındı." cümlesi de aynı kuralla susar. Geçici görünümle gizlenmiş ya
 Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
 altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9,
 B5.10): hafta hangi yollarla kurulur. Arama kendiliğinden başlar, sürerken panel
-"Nasıl kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Bir yol
+"Nasıl kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Aynı gün
+olmaması istenen iki ders aynı güne sabitlenmişse arama başlamaz: panel bunu tek
+cümleyle, gövde yazı boyunda söyler, Kontrol'ün kural ihlalleri paneli de bir cümleyle
+(TODO RK2). Bir yol
 seçilmez, hepsi gösterilir ve seçen babadır. Yolların yeri sabittir, sırası
 kullanıcının kendi listesi: öğretmenin zaten geldiği güne saat, en az saat (yan
 yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi başka

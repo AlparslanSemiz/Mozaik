@@ -8,7 +8,7 @@ import { blocker, buildIndex, dropMap, place } from './pure/constraints';
 import { addNotSameDay } from './pure/entities';
 import { activePlacements } from './pure/program/programs';
 import { suggest, verifySuggestion } from './pure/relax';
-import { findViolations } from './pure/rules';
+import { findViolations, pinnedRelationBreaches } from './pure/rules';
 import { solve } from './pure/solver';
 import { closeHours, illegalBlocks, makeWorld } from './worlds';
 import type { State } from './leaf/types';
@@ -121,5 +121,31 @@ describe('ilişki · aynı gün olmasın', () => {
     expect(verifySuggestion(d, s, { keepPlaced: false })).toEqual([]);
     const grid = { ...d, programs: [{ ...d.programs[0]!, placements: s.placements }] };
     expect(daysOf(grid, 'a')).not.toEqual(daysOf(grid, 'b'));
+  });
+
+  // TODO RK2. Placed on one day is a breach Kontrol lists and a search can
+  // mend by moving one; PINNED on one day no search can, because every week
+  // it builds keeps the pins. Only that second case is named.
+  it('yalnız ikisi de sabitlenmişse aranamaz sayılıyor, sebebi tek cümle', () => {
+    let d = place({ ...world(), relations: [] }, 'a', 0, 0);
+    d = place(d, 'b', 0, 1);
+    d = addNotSameDay(d, 'a', 'b');
+    const pin = (s: State, keys: string[]): State => ({
+      ...s,
+      programs: s.programs.map((p) => ({
+        ...p,
+        pinned: Object.fromEntries(keys.map((k) => [k, 1 as const])),
+      })),
+    });
+    expect(pinnedRelationBreaches(d, buildIndex(d))).toEqual([]);
+    const one = pin(d, ['s510|0|0']);
+    expect(pinnedRelationBreaches(one, buildIndex(one))).toEqual([]);
+    const both = pin(d, ['s510|0|0', 's511|0|1']);
+    const found = pinnedRelationBreaches(both, buildIndex(both));
+    expect(found).toHaveLength(1);
+    expect(found[0]!.day).toBe(0);
+    expect(found[0]!.message).toBe(
+      '510 · MÇ Matematik ile 511 · AV Fizik Salı günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.',
+    );
   });
 });

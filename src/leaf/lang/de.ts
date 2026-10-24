@@ -955,6 +955,10 @@ const DE: Sozluk = {
     "{bir} und {iki} liegen beide am {gun}; sie dürfen nicht auf denselben Tag.",
   "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
     "Liegen zwei Fächer, die nicht auf denselben Tag dürfen, am selben Tag, zeigt die Zeile **Nicht am selben Tag** auf der Seite des Fachs sie an.",
+  "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
+    "{bir} und {iki} sind am {gun} beide angeheftet; sie dürfen nicht am selben Tag liegen, also gibt es keinen Weg, bis eines verschoben wird.",
+  "İkisi de **sabitlenmişse** otomatik dizme öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Sind beide **angeheftet**, kann das automatische Füllen keine Vorschläge suchen; lösen Sie eines oder verschieben Sie es auf einen anderen Tag.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} darf am {gun} höchstens {sinir} Stunden unterrichten; hier wären es {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
