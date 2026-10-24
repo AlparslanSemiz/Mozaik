@@ -24,18 +24,10 @@ import {
   clampBlocks,
   patternLabel,
   type Id,
-  type Lesson,
   type State,
   paletteColor,
 } from '../../leaf/model';
-import {
-  applyList,
-  byNumberThen,
-  compareTr,
-  EMPTY_QUERY,
-  type ListConfig,
-  type ListQuery,
-} from '../../pure/listview';
+import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import type { LessonMode } from '../../platform/prefs';
 import {
   useDialogs,
@@ -57,7 +49,6 @@ import {
   subjectLabel,
   subjectKey,
   subjectOptions,
-  subjectRank,
   subjectTeachers,
   teacherSubjects,
   updateLesson,
@@ -65,6 +56,7 @@ import {
 } from '../../pure/entities';
 import { KIND_ICON } from '../program';
 import { Paste, Summary, ListTools, AddPanel, useRowOrder } from '../lists';
+import { lessonListConfig } from '../../pure/lists';
 
 interface Props {
   state: State;
@@ -113,86 +105,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // Ninety-nine rows, and every one of them is a pair. Searching has to see
   // both halves of the pair and the teacher's SHORT form, because the short
   // form is what the grid says and therefore what gets remembered.
-  const listCfg = useMemo<ListConfig<Lesson>>(() => {
-    const cls = (x: Lesson) => state.classes.find((c) => c.id === x.classId);
-    const tch = (x: Lesson) => state.teachers.find((t) => t.id === x.teacherId);
-    const rank = subjectRank(state);
-    return {
-      haystack: (x) => {
-        const t = tch(x);
-        return `${cls(x)?.name ?? ''} ${t?.name ?? ''} ${t?.short ?? ''} ${lessonSubject(state, x)}`;
-      },
-      // Three axes, and they narrow TOGETHER: "kolay seçme filtresinde sadece
-      // branş değil, öğretmene göre veya sınıfa göre de filtreleme olsun".
-      // Ninety-nine rows is where reading a column stops working, and a lesson
-      // is the one row in this program that belongs to two other lists.
-      facets: [
-        // The LESSON's subject, not the teacher's first one: filtering by
-        // Edebiyat has to return the Edebiyat lessons of a teacher who also
-        // teaches Türkçe, and none of their Türkçe ones. The chips run in the
-        // school's own order (Ayarlar > Branşlar), not the alphabet.
-        {
-          id: 'brans',
-          always: true,
-          label: t('Branş'),
-          of: (x) => subjectLabel(lessonSubject(state, x)),
-          order: (name) => rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER,
-        },
-        ...(mode === 'teacher'
-          ? []
-          : [
-              {
-                id: 'ogretmen',
-                always: true,
-                label: t('Öğretmen'),
-                of: (x: Lesson) => tch(x)?.short ?? '',
-              },
-            ]),
-        ...(mode === 'class'
-          ? []
-          : [
-              {
-                id: 'sinif',
-                always: true,
-                label: t('Sınıf'),
-                of: (x: Lesson) => cls(x)?.name ?? '',
-              },
-            ]),
-      ],
-      sorts: [
-        {
-          id: 'sinif',
-          label: t('Sınıfa göre'),
-          cmp: (a, b) =>
-            compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') ||
-            compareTr(tch(a)?.short ?? '', tch(b)?.short ?? ''),
-        },
-        {
-          id: 'ogretmen',
-          label: t('Öğretmene göre'),
-          cmp: (a, b) =>
-            compareTr(tch(a)?.name ?? '', tch(b)?.name ?? '') ||
-            compareTr(cls(a)?.name ?? '', cls(b)?.name ?? ''),
-        },
-        {
-          id: 'saat',
-          label: t('Haftalık saate göre'),
-          cmp: byNumberThen(
-            (x) => x.weeklyHours,
-            (x) => cls(x)?.name ?? '',
-          ),
-        },
-        {
-          id: 'blok',
-          label: t('Blok sayısına göre'),
-          cmp: byNumberThen(
-            (x) => x.blocks.length,
-            (x) => cls(x)?.name ?? '',
-          ),
-        },
-      ],
-    };
-  }, [state, mode, t]);
+  const listCfg = useMemo(() => lessonListConfig(state, mode, t), [state, mode, t]);
 
   // The rows this screen is ABOUT, narrowed before the search box ever sees
   // them. Not through `query.facets`: the ribbon and the chip row would then be

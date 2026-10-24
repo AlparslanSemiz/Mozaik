@@ -2,30 +2,14 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useMemo, useState } from 'react';
-import {
-  applyList,
-  byNumberThen,
-  compareTr,
-  EMPTY_QUERY,
-  type ListConfig,
-  type ListQuery,
-} from '../../pure/listview';
-import {
-  roomClasses,
-  weeklyLoad,
-  addRoom,
-  deletionQuestion,
-  deleteRoom,
-  updateRoom,
-} from '../../pure/entities';
-import type { Room } from '../../leaf/model';
+import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
+import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs, type PanelProps, useT } from '../common';
 import { parseRooms } from '../../pure/io';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
-import { buildCapacity } from '../../pure/feasibility';
-import { loadStatusFacet } from './loadStatusFacet';
+import { roomListConfig } from '../../pure/lists';
 
 export default function Rooms({ state, change }: PanelProps) {
   const t = useT();
@@ -33,39 +17,7 @@ export default function Rooms({ state, change }: PanelProps) {
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
-  const listCfg = useMemo<ListConfig<Room>>(() => {
-    const capacity = buildCapacity(state);
-    return {
-      haystack: (r) =>
-        `${r.name} ${roomClasses(state, r.id)
-          .map((c) => c.name)
-          .join(' ')}`,
-      facets: [loadStatusFacet<Room>(capacity.rooms, t)],
-      sorts: [
-        {
-          id: 'ad',
-          label: t('Ada göre'),
-          cmp: (a, b) => compareTr(a.name, b.name),
-        },
-        {
-          id: 'yuk',
-          label: t('Ders yüküne göre'),
-          cmp: byNumberThen(
-            (r) => weeklyLoad(state, 'room', r.id),
-            (r) => r.name,
-          ),
-        },
-        {
-          id: 'sinif',
-          label: t('Sınıf sayısına göre'),
-          cmp: byNumberThen(
-            (r) => roomClasses(state, r.id).length,
-            (r) => r.name,
-          ),
-        },
-      ],
-    };
-  }, [state, t]);
+  const listCfg = useMemo(() => roomListConfig(state, t), [state, t]);
   const shown = applyList(state.rooms, query, listCfg);
   const order = useRowOrder({
     kind: 'rooms',

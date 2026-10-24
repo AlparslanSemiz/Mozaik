@@ -1,7 +1,10 @@
-import { type ReportRow, type LoadStatus, loadStatus } from '../../pure/feasibility';
-import type { Facet } from '../../pure/listview';
+import { type ReportRow, type LoadStatus, loadStatus } from '../feasibility';
+import type { Facet } from '../listview';
 import type { Id } from '../../leaf/model';
-import type { Translate } from '../common';
+import type { Vars } from '../../leaf/i18n';
+
+/** The `t()` the screen hands down. */
+type Translate = (key: string, vars?: Vars) => string;
 
 const STATUS_KEYS: Record<LoadStatus, string> = {
   empty: 'Boş',
