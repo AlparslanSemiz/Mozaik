@@ -1668,8 +1668,13 @@ testi o commit'te sıradan bir teste döner.
       ölçüldü: önce 0/3, sonra 5/5 ve 3/3, pencere 0,17–0,26 s'de kapandı; denetim (3 s bekleyip
       kapatmak) 2/2. Windows'ta (WebView2) ölçülmedi. **Tarayıcı yarısı düzelmez:** kapanan sekme
       eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
-      yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı); `klasor.spec.ts`'in
-      BİLİNEN KUSUR testi yerinde. Kapanırken 5 s'yi aşan bir cevapsızlık ölçülmedi.
+      yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı). Kapanırken 5 s'yi aşan
+      bir cevapsızlık ölçülmedi.
+      **Tarayıcı yarısı veri kaybı değil (2026-10-24, kullanıcının sorusu):** beş koşunun beşinde
+      değişiklik kapanıştan sonra depoda, klasör bir değişiklik geride, sonraki açılış onu klasöre
+      yazıyor (`klasor.spec.ts`, BİLİNEN KUSUR'dan sıradan teste döndü; deponun kapanış flush'ı
+      kalkınca kırmızı). Yeni bir çare denenmedi. Açık kalan: exe yarısının Windows'ta ölçümü,
+      etiketten önceki gerçek exe kapanış senaryosuyla (BUILD, "Sürüm").
 - [x] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);

@@ -140,7 +140,9 @@ açılışta klasörü kendisi yazıyor; ikinci ölçüm programı açmayan ayn�
 Tür: ürün kusuru (yedek gecikmesi; depo veriyi tutuyor).
 Ne yapıldı: TODO §8l TB7, `klasor.spec.ts`'te "BİLİNEN KUSUR"; `fix/veri-kaybi` birleştikten
 sonra ayrı bir dalda düzeltilecek. Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):
-pencere sayfanın yazımını bekliyor; tarayıcı yarısı düzelmez (TODO TB7).
+pencere sayfanın yazımını bekliyor; tarayıcı yarısı düzelmez. Tarayıcı yarısı veri kaybı
+değil (2026-10-24, beş koşunun beşi): değişiklik depoda, sonraki açılış klasöre yazıyor; BİLİNEN
+KUSUR testi sıradan bir teste döndü.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · test programının analizi (Playwright kütüphanesi ve Linux exe, sahte ev) · iki kopya ve kota
