@@ -410,8 +410,8 @@ makinesinin Windows olması (2026-10-09). Düzeltip itince aynı komut yeniden v
 ve `package.json` zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar
 commit ile etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
 
-Yer kapısı 2026-10-09'da geldi, argümanlardan bile önce ve `--kuru`'da da: o günden beri
-her iş kendi dalında ve worktree'sinde, ve başka yerden çıkan bir sürüm sitenin
+Yer kapısı 2026-10-09'da geldi, argümanlardan bile önce ve `--kuru`'da da: iş dallarda ve
+geçici worktree'lerde yürüyor, ve başka yerden çıkan bir sürüm sitenin
 yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor, ama bir
 worktree `main`'in commit'inde ayrık durabilir.
 

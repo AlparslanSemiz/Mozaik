@@ -856,6 +856,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8a · Sende — kullanıcı kararı
 
+- [x] **Çalışma yeri: tek checkout mu, sürekli worktree'ler mi? (2026-10-23.)** **Karar
+      (Alp, 2026-10-23, 2026-10-24'te netleşti):** tek kalıcı checkout,
+      `~/GitHub/Mozaikler/Mozaik`, işler `main`'den açılan dallarda; paralel çalışan her
+      oturum ya da ajan geçici bir worktree alır, dalı birleşince worktree kaldırılır
+      (DECISIONS 2026-10-23, CLAUDE.md "Çalışma düzeni").
 - [ ] **Roboders hesabı ücretli bir plan mı, süren bir deneme mi?** Deneme ise
       kaç gün kaldığı R6'nın kapsamını belirler.
 - [ ] **R6 ne zaman koşsun?** Görünür bir Chromium penceresi açılacak ve odağı
