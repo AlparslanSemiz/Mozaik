@@ -207,7 +207,7 @@ eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırın�
 değişmezler tam bu ikisinin etrafından geçer.
 
 Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
-TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün reddi göstermesi (`temel.spec.ts` 29'un işi), ve Excel'in `.xlsx`
 dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
 varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 

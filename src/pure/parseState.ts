@@ -391,7 +391,9 @@ function readDays(x: unknown, fallback: Day[]): Day[] {
 
 /**
  * Turns outside text into a State. Tolerates broken/missing fields; returns
- * null if it cannot be converted. ALWAYS ends with sanitize().
+ * null if it cannot be converted. ALWAYS ends with sanitize(). It can still
+ * THROW on a row that is not an object (a null lesson, TODO TB1): a reader of
+ * outside files goes through `readPlanFile`, which turns that into a refusal.
  */
 export function parseState(text: string): State | null {
   let raw: unknown;

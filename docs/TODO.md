@@ -849,6 +849,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       durduruyor. `surec-sadelestirme`'de elle eşitlendi. Çare adayı: `yayinla.mjs` sürümü
       yazarken `npm install --package-lock-only` koşar ve kilidi aynı commit'e ekler. Sürüm
       yolu, yani testiyle; ölçülmedi.
+- [ ] **B7.36 Bozuk kimlikli plan dosyası açılıyor (2026-10-24, TB1'in incelemesi).** Koddan ve
+      inceleyicinin yoklamasından: `lessons[0].id = null` olan dosya kimliği `''` olan bir dersle,
+      aynı kimliği taşıyan iki ders (`l2`, `l2`) olduğu gibi açılıyor, yani yerleşimler hangi derse
+      ait belirsiz kalıyor; onaydan sonra açık planın yerine geçiyor. `fuzz.test.ts`'in
+      `wholeness`'ı kimliklerin dolu ve tek olduğunu sormuyor, fuzz bu yüzden görmüyor. TB6 ve TB9
+      ile aynı aile (`sanitize`'in süzgeci). Arayüzde koşulmadı.
 
 ---
 
@@ -1590,12 +1596,13 @@ testi o commit'te sıradan bir teste döner.
       `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
       (sessiz ret). Aynı `parseState` açılışta depodan okurken de korumasız (`useStore.ts`'in
       `initialBox`'ı), orada bozuk bir plan boş ekran olur (koddan, ölçülmedi). Test TP4'te
-      "BİLİNEN KUSUR" olarak çivili; düzeltme `main`'de.
+      "BİLİNEN KUSUR" olarak çivili idi; düzeltme `main`'de.
       **Üst çubuk yarısı düzeldi (2026-10-24, `tb1-dosyadan-ac`):** `readPlanFile` okurken
       atılan istisnayı `{ problem: 'okunamadi' }`'ye çeviriyor, "Dosyadan aç" "Bu dosya
       okunamadı" diyor ve açık plan değişmiyor; testleri `src/fuzz.test.ts` (fuzz artık
-      istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29. **Kalan:** açılıştaki
-      `parseState` (yukarıda), ölçülmedi.
+      istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29; okunamayan dosya (`file.text()`
+      reddi) da aynı uyarıyı veriyor. **Kalan:** açılıştaki `parseState` (yukarıda), ölçülmedi.
+      İncelemenin bulduğu, TB1'den eski bir delik B7.36'da.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
       denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.
