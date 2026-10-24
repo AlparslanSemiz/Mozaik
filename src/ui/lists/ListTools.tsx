@@ -7,9 +7,9 @@
  * this draws controls and reports what was chosen.
  */
 import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, X } from 'lucide-react';
-import { canReorder, facetCounts, isFiltering } from '../pure/listview';
-import type { ListConfig, ListQuery } from '../pure/listview';
-import { T, useT } from './T';
+import { canReorder, facetCounts, isFiltering } from '../../pure/listview';
+import type { ListConfig, ListQuery } from '../../pure/listview';
+import { T, useT } from '../T';
 
 interface Props<T> {
   items: T[];

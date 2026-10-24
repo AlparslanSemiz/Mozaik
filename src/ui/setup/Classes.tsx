@@ -2,8 +2,6 @@
 // clash with each other — only through a shared room.
 
 import { useMemo, useState } from 'react';
-import ListTools from '../ListTools';
-import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
 import type { ListConfig, ListQuery } from '../../pure/listview';
 import { roomName } from '../../pure/entities';
@@ -22,10 +20,9 @@ import {
   weeklyLoad,
 } from '../../pure/entities';
 import LimitBox from '../LimitBox';
-import { Paste } from '../lists';
+import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
 import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 

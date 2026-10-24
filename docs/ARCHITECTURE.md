@@ -165,7 +165,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/T.tsx` | `useT()` ve `<T>` |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `loadStatusFacet` |
-| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `Paste` (yapıştırarak ekleme), `Summary` (Özet) |
+| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/index.tsx` | Dersler |
 | `ui/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
@@ -180,15 +180,11 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
-| `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
 | `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
-| `ui/CapacityRows.tsx` | kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor |
 | `ui/ColorPick.tsx` | renk seçme diyaloğu |
 | `ui/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
 | `ui/Field.tsx` | etiketli kontrol |
 | `ui/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
-| `ui/ListTools.tsx` | listelerin üstündeki ara, sırala ve süz şeridi |
-| `ui/useRowOrder.tsx` | listelerin ortak elle sıralama kancası |
 | `ui/useSample.ts` | örnek okulu yükleme sorusu |
 | `ui/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
 

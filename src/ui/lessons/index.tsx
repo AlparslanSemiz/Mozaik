@@ -19,9 +19,7 @@
 // for by name: pick the total first, then how it falls apart.
 
 import { useEffect, useMemo, useState } from 'react';
-import ListTools from '../ListTools';
 import { blockPlan, clampBlocks, patternLabel } from '../../leaf/blocks';
-import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
 import type { ListConfig, ListQuery } from '../../pure/listview';
 import type { Id, Lesson, State } from '../../leaf/types';
@@ -48,10 +46,9 @@ import {
 import { KIND_ICON } from '../program';
 import LimitBox from '../LimitBox';
 import BlockCounts, { blockCeiling } from '../BlockCounts';
-import { Paste, Summary } from '../lists';
+import { Paste, Summary, ListTools, AddPanel, useRowOrder } from '../lists';
 import Field from '../Field';
 import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
 
 interface Props {
   state: State;

@@ -2,8 +2,6 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useMemo, useState } from 'react';
-import ListTools from '../ListTools';
-import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
 import type { ListConfig, ListQuery } from '../../pure/listview';
 import { roomClasses, weeklyLoad } from '../../pure/entities';
@@ -13,10 +11,9 @@ import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
 import { parseRooms } from '../../pure/io';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
-import { Paste } from '../lists';
+import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import type { PanelProps } from '../props';
 import { useT } from '../T';
-import AddPanel from '../AddPanel';
 import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 
