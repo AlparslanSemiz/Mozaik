@@ -110,9 +110,9 @@ Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 > paralel yürüyor. Kayıt [DECISIONS.md](DECISIONS.md)'de. Aynı gün asıl rakip Roboders
 > oldu (babanın bugün kullandığı program), aSc ikinci kaynak.
 >
-> Bölümün işi değişmedi: 5. ilke (*"bir dönem kullanılmadan özellik
-> eklenmez"*) 2026-08-30'da kaldırıldı ve yerine geçen şey **rakibin gerçekten
-> yaptığı iş** oldu (DECISIONS 2026-08-30). §3–§7'deki her madde bir yerden
+> Bölümün işi değişmedi: özellik **rakibin gerçekten yaptığı işten** türetiliyor
+> (DECISIONS 2026-10-08, "Hedef: Roboders'teki ve aSc'deki her iyi özelliğin daha
+> iyisi"). §3–§7'deki her madde bir yerden
 > geliyor olmak zorunda; bu bölüm o "yer"lerden biri, öteki babanın kendisi.
 > Eksik bir envanterden türetilen bir yol haritası, tuzak 101'in ta kendisidir.
 

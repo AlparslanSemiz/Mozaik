@@ -1,6 +1,6 @@
 # Kararlar ve denenip bırakılanlar
 
-Duruşun ne zaman, neden ve neyden değiştiği, ve denenip bırakılan yolların tarihli kaydı.
+Duruşun ne zaman ve neden değiştiği, ve denenip bırakılan yolların tarihli kaydı.
 
 Bu dosya baştan sona okunmak için değil, "bu neden böyle" ya da "bu daha önce
 denendi mi" sorusu için var. Bir duruşun değişmesi de, bir şeyi yapmamaya karar
@@ -74,10 +74,6 @@ Etiketi yalnız `npm run yayinla` atıyor ve `ci.yml` ile `windows.yml`'i bekliy
 önce Windows'ta gerçek güncelleme testi yeşil olmalı. Var olan E2E ve birim süitleri her push'ta
 CI'da koşuyor, site yalnız yeşil bir `main` push'unda yayınlanıyor, birleştirme Alp'in.
 
-**Eski hâli.** Yedi durma sebebi, test programının kuralları (2026-10-09), değişiklik başına
-mutasyon kanıtı, belge kapısında cümle içeriğini sabitleyen on bir test, oturum sonunda yedi zorunlu belge,
-sürekli iki worktree (çalışma yeri, aşağıda).
-
 **Gerekçe.** Sürecin maliyeti özellik işinin önüne geçti: bir arayüz değişikliği E2E, mutasyon
 kanıtı ve dört belge güncellemesi istiyordu, bir belge cümlesi değişikliği bir test
 değişikliği oluyordu. Babayı koruyan şey verisinin ve programının güncellemesinin bozulmaması,
@@ -111,26 +107,21 @@ paralel çalışan her oturum ya da ajan geçici bir worktree alır
 (`~/GitHub/Mozaikler/Mozaik-<iş>`), dalı birleşince worktree kaldırılır. Sürekli
 `Mozaik-refactor` worktree'si de kalktı. Kural CLAUDE.md'nin "Çalışma düzeni"nde.
 
-**Eski hâli.** Ana klasör yalnız `main`'i tutuyordu ve orada oturum çalışmıyordu; her iş
-alanı kendi worktree'sinde (2026-10-09), 2026-10-23 sabahından beri sürekli iki tane:
-`Mozaik` ve `Mozaik-refactor` (`~/GitHub/Mozaikler/`'e taşınırken tuzak 152).
-
 **Gerekçe.** Kullanıcının kararı. 2026-10-24 sabahı üç oturum aynı anda açıldı, ikisi
 worktree'lerde yazıyordu; ana klasörde aynı anda tek oturum yazabildiği için paralel
 oturumlar geçici worktree'ye çıktı ve "bir worktree'de tek yazar" kuralı böyle tutuyor.
 
 ### 2026-10-10 · Linux'ta günlük kopya Chrome'un app modunda, yalnız Chrome; rpm bırakıldı
 
-**Ne.** Kullanıcının Linux'taki Mozaik'i, `scripts/linux-kur.sh`'nin `~/GitHub/Mozaik`'in
+**Ne.** Kullanıcının Linux'taki Mozaik'i, `scripts/linux-kur.sh`'nin `~/GitHub/Mozaikler/Mozaik`'in
 temiz `main`'inden derleyip `~/.local/share/mozaik/app/`'e kopyaladığı `dist/index.html`.
 `scripts/linux-mozaik.sh` onu yalnız `google-chrome` ile, kendi profilinde
 (`~/.local/share/mozaik/profil`) ve `--app=file://…` ile açar; Chrome yoksa bunu bildirimle
 söyler ve çıkar. `npm run exe:rpm` kaldırıldı. Linux ikilisi (`exe:linux`, `exe:e2e`)
 Windows exe'sinin Rust yarısını bu makinede sınayan test aracı olarak kalıyor
-([BUILD.md](BUILD.md), "Linux uygulaması").
-
-**Eski hâli.** Linux paketi Tauri'nin rpm'iydi, yalnız yerel (2026-10-09). Kullanıcı
-pratikte siteyi Chrome'a kurulu bir web uygulaması olarak kullanıyordu.
+([BUILD.md](BUILD.md), "Linux uygulaması"). Linux hiçbir biçimde Release'e girmiyor ve
+`surum.yml`'e Linux işi eklenmiyor: o iş akışı babanın exe'sini üreten tek yol, ona eklenen
+her iş o exe'yi bekleten ya da düşüren bir adım daha olurdu (kullanıcının kararı).
 
 **Gerekçe.** Tauri'nin Linux penceresi WebKitGTK, ve kasıyor; ana süitin WebKit koşusunda
 19 kırmızı var (TODO B7.21). Babanın motoru Chromium (WebView2). Ölçülenler (TODO B7.28):
@@ -148,17 +139,13 @@ yok.
 **Ne.** İş akışlarındaki Linux işleri `ubuntu-latest` yerine `ubuntu-24.04`'te;
 `actions/upload-artifact` v4'ten v7'ye elle, Dependabot beklenmeden (Alp'in kararı).
 
-**Eski hâli.** `ubuntu-latest`; `upload-artifact` için "Dependabot beklenecek, elle
-yapılmaz" (TODO B7.20, 2026-10-09).
-
 **Neden.** `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiyor: imaj, bir yayın kapısı
 ve mutasyon parçaları sürerken kendiliğinden değişirse CI'ın kırmızısının kodda mı imajda
 mı olduğu ayrılamaz. Ubuntu 26'ya geçiş ayrı ve ölçümlü bir iş olur. Sabitleme geçici: Ubuntu 26'da
 Playwright/WebKit bağımlılıkları doğrulanınca `ubuntu-latest`'e dönülür (TODO B7.29). `upload-artifact@v4`
-Node 20 uyarısının son kaynağıydı. Bir gün önce test programının K6'sı (aşağıda)
-`ci.yml`, `site.yml` ve `windows.yml`'i sabitlemiş ve `kanarya.yml`'i eklemişti; bu kayıt
-sabitlemeyi `surum.yml` ve `haftalik.yml`'e genişletiyor ve Linux'unkinin geçici olduğunu
-söylüyor. Dönüşün işareti kanaryanın yeşili.
+Node 20 uyarısının son kaynağıydı. Linux işleri bütün iş akışlarında (`ci.yml`, `site.yml`,
+`surum.yml`, `haftalik.yml`) `ubuntu-24.04`'te, `kanarya.yml` Ubuntu 26'yı haftada bir koşuyor.
+Dönüşün işareti kanaryanın yeşili.
 
 ---
 
@@ -166,12 +153,7 @@ söylüyor. Dönüşün işareti kanaryanın yeşili.
 
 **Ne.** Kullanıcının kararı: uzun testler ve yavaş süitler push'u ve birleştirmeyi
 beklemez; `npm run yayinla` ise Windows E2E'yi bekler. Bu, "uzun testler hiçbir şeyi
-bekletmez" kuralının tek istisnası. CLAUDE.md'de iki kural tek cümlede birleşti.
-
-**Eski hâli.** CLAUDE.md'de iki cümle çelişiyordu: "uzun testler (Windows E2E dahil)
-hiçbir şeyi bekletmez" ve "yavaş süitler sürümü beklemez" bir yanda, "etiket `windows.yml`
-yeşil olmadan atılmaz" (aşağıda, "Windows E2E her main push'unda, ve etiket onu da
-bekliyor") öbür yanda.
+bekletmez" kuralının tek istisnası.
 
 **Gerekçe.** Etiket babanın exe'sine ulaşıyor, Windows onun gerçek ortamı. Push ve
 birleştirme babaya ulaşmıyor, onlar beklemez.
@@ -183,9 +165,6 @@ birleştirme babaya ulaşmıyor, onlar beklemez.
 yalnız `programs` ile `programMask`'ı taşıyor. Ayrıca ekranın ve kâğıdın teneffüste blok
 kesmesi (iki algoritma) tek fonksiyonda birleşmedi.
 
-**Eski hâli.** Ağaç (2026-10-09 gece): `program/` = programs, programMask, YENİ programView.
-Analiz (2026-10-08, R8): ekran ve kâğıt için tek bir `cellSpans`.
-
 **Gerekçe.** `constraints.ts`, `entities.ts`, `relax.ts` ve `solver.ts` `programs`'ı paketin
 `index`'inden alıyor; `programView` de `constraints` ile `entities`'i çağırıyor. Tek `index`
 `constraints → program/index → programView → constraints` döngüsü olurdu ve `no-circular`
@@ -194,46 +173,12 @@ bir hata. Seçenekler: `programView` kökte (seçilen, tek dosyalık modül kura
 sınıfa yazılmış bir öğretmende farklı hücre çiziyor (RK15); birleştirmek birinin davranışını
 değiştirirdi, refactor dalı davranış değiştirmez.
 
-### 2026-10-09 · Test programı başladı; yavaş süitler hiçbir şeyi beklemez
-
-**Ne.** Kullanıcının kararları (test programının analizi, `test/kapsam`):
-- Eksik test türleri eklenecek, var olan her katman ölçülebilir bir hedefe çıkacak, gereken
-  CI'da koşacak, kapatılmış testler gerekçesiyle yeniden açılacak, program bir son
-  kontrolle bitecek. Plan fazlı ve her madde ayrı commit; karara bağlanmış özeti
-  [TODO.md](TODO.md) §8l'de.
-- Test dalı bulduğu ürün hatasını düzeltmez, "BİLİNEN KUSUR" ile işaretler ve TODO'ya
-  numaralı madde açar; veri kaybı sınıfında bir hata bulunursa durulur ve bildirilir.
-  Yollardan bağımsız işler önce gelir, taşınan modüllere dokunan birim ve mutasyon işleri
-  paket turunu bekler. Her faz bitince dal birleşmeye hazırdır, programın sonu beklenmez.
-- **Yavaş süitler** (mutasyon, uzun süre açık kalma, görsel regresyon, Windows'ta gerçek exe,
-  sürüm yükseltme) push'u, birleştirmeyi ya da sürümü beklemez: gece ya da haftalık arka
-  planda koşar, kırmızı sonucu görünür bir yere düşer.
-- K kararları: görsel regresyon yalnız kapta ve sıfır eşikle geri gelir (K1, aşağıda ayrı
-  kayıt); gerçek paketin adsız fikstürü depoya girer (K2); bileşen katmanı yalnız girdi
-  bileşenleri için açılır (K3); paket turlarının hedef ağacını refactor oturumu yazar,
-  bekleyen maddeler ona göre işaretlenir (K4); runner'lar ve artefakt aksiyonları
-  2026-10-19'dan önce sabitlenir (K6); Dependabot alerts depo ayarından açılır (K7, Alp);
-  mutasyonun iş akışı `ci/mutasyon-parca` dalında kalır (K8); veri kaybı düzeltmeleri ve
-  testleri `fix/veri-kaybi` dalında (K9); yeni WebKit süiti eklenmez (K10, aşağıda).
-
-**Eski hâli.** Test türleri ihtiyaç çıktıkça eklendi; fuzz, kontrat, kabul, uzun süre,
-güvenlik ve bileşen katmanı yoktu; yavaş süitler için bir kural yoktu.
-
-**Gerekçe.** Analiz eksikleri ölçerek buldu: iki veri kaybı (iki kopya, kota; düzeltmesi
-`fix/veri-kaybi`'de), 2026-09-24'ten beri bitmeyen mutasyon (haftalık koşu 6 saat
-tavanında iptal) ve hiç olmayan fuzz, kontrat ve kabul katmanları. Yavaş süitin bir
-push'u bekletmesi, o süitin ya hiç koşmamasına ya da herkesi beklemesine dönüyor.
-
 ### 2026-10-09 · Görsel regresyon geri geliyor, yalnız kapta ve sıfır eşikle
 
 **Ne.** Yedi sekme, iki tema, 1920×1080. Referans yalnız Playwright'ın sürümü sabit kabında
 (`mcr.microsoft.com/playwright:v1.62.1-noble`) üretilir ve karşılaştırılır; yerel koşu
 referans üretmez. Eşik sıfır. Referans yalnız fark görüntüsüne bakıldıktan sonra yenilenir.
 `kontrol`'ün parçası değil; yavaş süit, haftalık arka planda. Henüz yazılmadı (TODO §8l, Faz 6).
-
-**Eski hâli.** 2026-08-26'da silindi ("sistem fontuna göre çözülen referans tek makinede
-doğru, ve redesign'in her adımında kırmızı"), kullanıcı "düzen testleri gitsin" dedi;
-2026-08-27'de "geri gelmiyor" ve yerine satır içi metin anlık görüntüleri geldi.
 
 **Gerekçe, ölçülmüş.** Font gömülü, tasarım turları bitti. Aynı yedi sekme iki temada on
 kez çekildi: bu makinede de kapta da on dördün on dördü bayt bayt aynı, yani kabın içinde
@@ -248,9 +193,6 @@ görüntüleri kalıyor: resim düzeni, metin tamlığı ölçer.
 **Ne.** WebKit için yeni bir süit ya da CI işi eklenmez; `npm run test:webkit` ve gerçek
 Linux exe süiti olduğu gibi kalır. TODO B7.21 (19 kırmızının ayrılması) bu yüzden kapanıyor.
 
-**Eski hâli.** B7.21 açıktı, ve analiz WebKit'i 19 kırmızı ayrıldıktan sonra haftalık CI'a
-almayı öneriyordu (K10).
-
 **Gerekçe.** Kullanıcının kararı: Linux yolu ileride Chromium uygulama modu olacak, babanın
 yolu WebView2 (Chromium). WebKit hiçbir teslim yolunun motoru olmayacak.
 
@@ -259,10 +201,6 @@ yolu WebView2 (Chromium). WebKit hiçbir teslim yolunun motoru olmayacak.
 **Ne.** Kullanıcının kararı (gece): uzun testler (mutasyon, Windows E2E, WebKit) hiçbir
 şeyi bekletmez, arkada koşar. Bir dal `main`'e birleşmeden önce yerelde tam `kontrol`
 gerekmez: yerelde `npm run hizli`, tam doğrulama dalın CI'ında.
-
-**Eski hâli.** Birleşmeden önce `git merge main`, sonra kilit altında `scripts/agir.sh npm
-run kontrol` yeşil, sonra dalın CI'ı yeşil (aynı günün "Çalışma düzeni" kaydı ve
-CLAUDE.md).
 
 **Gerekçe.** Kilit tekti ve `kontrol` 15 dakika tutuyordu: aynı akşam bir dalın beş
 saniyelik mutasyon kanıtı başka oturumların `kontrol`'ü ve ölçümleri arkasında yarım saat
@@ -279,27 +217,16 @@ ve `@arama` testleri aynı gün kendi işlerine bölündü (`e2e-arama` matrisi)
 listesi ve sırası değişiklikle ve değişikliksiz üçünde de aynıydı. Kazanç yalnız yerel
 `kontrol`'de olurdu, ve o ölçülmedi.
 
-### 2026-10-09 · Çalışma düzeni: her iş alanı kendi worktree'sinde, "Şu an"ı birleşen dal yazar, ne zaman durulduğu yazılı
+### 2026-10-09 · "Şu an"ı ve tuzak numarasını birleşen dal yazar
 
-**Ne.** Kullanıcının kararları (hız oturumu, C ve E):
-- Paralel çalışan her iş alanı kendi worktree'sinde ve dalında çalışır, sayı işe göre
-  değişir. `~/GitHub/Mozaik` yalnız `main`'i tutar, orada oturum çalışmaz. Birleştirmeyi
-  Alp yapar.
-- "Şu an"ı dal yazar, `git merge main`'den sonra ve birleşmeden hemen önceki son
-  commit'inde. Tuzak numarası da o commit'te verilir.
-- Oturum yalnız CLAUDE.md'nin "Ne zaman durulur" listesindeki bir durumda durup sorar,
-  gerisinde kurala göre devam eder ve sonda tek rapor verir.
-
-**Eski hâli.** Bir oturum `main`'de çalışıyordu ve "Şu an" onundu, dal oturumları
-durumlarını TODO §8k'ye yazıyordu. "İş `main`'e itilir" kuralı vardı. Ne zaman durulacağı
-yazılı değildi.
+**Ne.** Kullanıcının kararı (hız oturumu): "Şu an"ı dal yazar, `git merge main`'den sonra ve
+birleşmeden hemen önceki son commit'inde. Tuzak numarası da o commit'te verilir.
 
 **Gerekçe.** Üç oturum aynı bloğu yazarsa çatışır. `--ff-only` birleşmede `main` dalın
 son commit'inin tam altında durduğu için o commit'in yazdığı "Şu an" çatışamaz; aynı
 sebeple tuzak numarası iki dalda aynı anda verilemez. Seçenekler şunlardı: yalnız
 birleştirmenin yazması (seçilen), her alana bir alt blok (blok büyür, her birleşme ona
-dokunur), bloğu kaldırmak (özet kaybolur). Durma listesi kullanıcının: kapsam ve veri
-riski dışındaki her soru bir turu bekletiyordu.
+dokunur), bloğu kaldırmak (özet kaybolur).
 
 ### 2026-10-09 · TODO'nun arşivi ayrı dosyada, oturum TODO'nun yalnız haritasını okuyor
 
@@ -308,10 +235,8 @@ riski dışındaki her soru bir turu bekletiyordu.
 TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i, sonra işin bölümü okunur. TRAPS'ın başında grup
 listesi var, yalnız işin grubu okunur.
 
-**Eski hâli.** Oturum başında TODO'nun tamamı okunuyordu: 345 323 bayt, yaklaşık 96 bin
-token, %93'ü TODO.
-
-**Gerekçe.** Ölçüldü (WORKLOG 2026-10-09, hız oturumu): sabit okuma 32 154 bayta indi.
+**Gerekçe.** Ölçüldü (WORKLOG 2026-10-09, hız oturumu): oturum başının sabit okuması
+345 323 bayttan (yaklaşık 96 bin token, %93'ü TODO) 32 154 bayta indi.
 WORKLOG'un eski girdileri **taşınmadı**: oturum başında okunmuyorlar ve Read'in varsayılan
 2000 satırı tamamen daha yeni girdilerde kalıyor, kazanç yalnız aramada olurdu.
 
@@ -323,9 +248,9 @@ WORKLOG'un eski girdileri **taşınmadı**: oturum başında okunmuyorlar ve Rea
 - Dal `main`'i `git merge main` ile alır, rebase yapmaz. Dal artık itiliyor ve rebase
   zorla push ister, hash'leri de değiştirir. Belgelere yine yalnız `main`'in hash'i yazılır.
   `main`'e birleşme `--ff-only`.
-- Dal oturumu yalnız `git push origin refactor/yapi` ile iter; zorla push ve etiket yok.
-- Kurallar CLAUDE.md'nin "Paralel oturumlar" bölümünde, çünkü her oturum onu kendiliğinden
-  okuyor.
+- Dal oturumu yalnız kendi dalını açık refspec'le iter (`git push origin <dal>`); zorla push
+  ve etiket yok.
+- Kurallar CLAUDE.md'nin "Çalışma düzeni"nde, çünkü her oturum onu kendiliğinden okuyor.
 
 **Denendi ve bırakıldı: `.gitattributes`'ta `merge=union`** (WORKLOG ve TESTFINDINGS
 için). Geçici bir klonda iki dal aynı yere girdi ekleyince çatışma kalktı, ama iki tarafın
@@ -341,37 +266,17 @@ kilitlemiyor; `npm run yayinla` (ve `--kuru`) etiketi ancak o commit'in `ci.yml`
 `windows.yml` koşuları ikisi de yeşilse atıyor. `haftalik.yml` Windows işini artık
 `windows.yml`'i çağırarak koşuyor (kullanıcının kararı).
 
-**Eski hâli.** Windows E2E yalnız haftada bir ve elle koşuyordu (`haftalik.yml`, 2026-10-09
-sabahı), etiket yalnız `ci.yml`'i bekliyordu.
-
 **Gerekçe.** Etiket babanın exe'sine gidiyor ve babanın makinesi Windows. İlk haftalık
 koşu Linux'ta görünmeyen bir kusuru yalnız Windows'ta gösterdi (B7.22, tuzak 146). Site
 beklemiyor, çünkü site babanın asıl yolu değil ve bir Windows koşusu `ci.yml`'den iki
 kat uzun.
 
-### 2026-10-09 · Linux şimdilik yalnız yerel, Release'te yok
-
-**Ne.** Linux paketi `npm run exe:rpm` ile, kullanıcının kendi makinesinde üretilir
-([BUILD.md](BUILD.md), Exe). `surum.yml`'e Linux işi eklenmedi; rpm bir Release
-varlığı değil (kullanıcının kararı, A7).
-
-**Eski hâli.** A6 rpm'i elle, `npx @tauri-apps/cli build --bundles rpm` ile üretmişti;
-A7 olarak `surum.yml`'e bir Linux işi eklenmesi kullanıcının kararını bekliyordu.
-
-**Gerekçe.** Babanın sürüm yoluna dokunmamak. `surum.yml` babanın exe'sini üreten tek
-yol, ve ona eklenen her iş o exe'yi bekleten ya da düşüren bir adım daha olurdu.
-Linux'u bugün yalnız kullanıcı kullanıyor.
-
-### 2026-10-09 · v0 bitti; dünkü "bitmedi" kaydı yanlış bilgiye dayanıyordu
+### 2026-10-09 · v0 bitti
 
 **Ne.** v0'ın çıkma şartı sağlandı: baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
 ve 2026-10-08'de gelen geri bildirimi (daha az yazı ve soru, Eyotek'e ve e-postayla
 gönderme, zebra) o denemeden geldi. [ROADMAP.md](ROADMAP.md) v0'ı bitti sayıyor, TODO
 §8c'deki çıkma şartı maddesi kapandı.
-
-**Eski hâli.** Aşağıdaki 2026-10-08 kaydı "v0 bitmedi, çıkma şartı bekliyor" diyordu.
-O kayıt yanlış bilgiye dayanıyordu: babanın Mozaik'te bir hafta dizdiği bilinmiyordu.
-Kayıt geriye dönük düzeltilmedi, bu kayıt onun yerine geçiyor.
 
 **Gerekçe.** Kullanıcının bilgisi.
 
@@ -382,9 +287,6 @@ Kayıt geriye dönük düzeltilmedi, bu kayıt onun yerine geçiyor.
 (Eyotek turu, salt okunur), bulunamazsa babanın hesabıyla otomasyon karar bekleyen
 bir seçenek olarak kalır ([TODO.md](TODO.md) B3.8). Öğretmenler programa genelde
 Eyotek'ten baktığı için B3.8'de Eyotek'e gönderme e-postadan önce gelir.
-
-**Eski hâli.** 2026-10-08'de §8b'ye "baba Turtek'e soracak" yazılmıştı, ve önce
-Turtek'in resmî bir yolu aranacaktı.
 
 **Gerekçe.** Kullanıcının kararı; öncelik babanın cevabından (öğretmenler Eyotek'e
 bakıyor).
@@ -419,8 +321,7 @@ WORKLOG'da ayrıca bir "A turu" var. Refactor dışı kusurlar RK1'den başlıyo
 
 **Gerekçe.** Kullanıcının kararı.
 
-**2026-10-09.** RF2'nin ret sayısı adım 6'dan adım 2'ye, mutasyon tabanının önüne
-alındı, çünkü sayı ölçülmezken `sat.ts`'in ya da `relax.ts`'in bozuk bir kodlamasını
+**RF2'nin ret sayısı adım 2'de, mutasyon tabanından önce** (2026-10-09), çünkü sayı ölçülmezken `sat.ts`'in ya da `relax.ts`'in bozuk bir kodlamasını
 `verifySuggestion` sessizce eliyor, hiçbir test kırmızıya dönmüyor ve taban skoru hem
 yanıltıcı hem RF1'den sonraki skorla karşılaştırılamaz olurdu (kullanıcının kararı).
 
@@ -432,12 +333,8 @@ alınabilir, gönderme gibi işler ağı kullanabilir. Sorma sırası: önce dep
 sonra platformun ve framework'ün resmi cevabı, sonra olgun bir paket. Platformun
 çözümü belirgin biçimde zayıfsa paket alınır, gerekçesi yazılır.
 
-**Eski hâli.** Ölçüt "çalışma anında ağa çıkmıyorsa", sıra önce paket, sonra
-framework, sonra platformdu.
-
-**Gerekçe.** Çevrimdışı ilkesi aynı gün kalktı, geriye "Açılış ağa bağlı değil"
-kaldı ([PRINCIPLES.md](PRINCIPLES.md)); eski ölçüt kalkan ilkeyi koruyordu.
-Sıra kullanıcının kararı.
+**Gerekçe.** İlke olan açılışın ağa bağlı olmaması ([PRINCIPLES.md](PRINCIPLES.md), "Açılış
+ağa bağlı değil"), çalışma anında ağa hiç çıkmamak değil. Sıra kullanıcının kararı.
 
 ### 2026-10-08 · Depodaki gerçek veri kalıyor
 
@@ -446,9 +343,6 @@ Sıra kullanıcının kararı.
 öğretmen adı ve kurum adı. Aşağıdaki üç seçeneğin hiçbiri uygulanmıyor. Bundan sonra
 depoya **yeni** gerçek veri eklenmez: Roboders'in görüntüleri ve ham notları yalnız
 `scratch/`'te durur. Soru kapandı, sonraki oturumlar yeniden sormaz.
-
-**Eski hâli.** Aynı gün açılan soru (aşağıdaki kayıt): karar verilene kadar yeni gerçek
-veri girmez.
 
 **Gerekçe.** Kullanıcının kararı.
 
@@ -484,33 +378,22 @@ sayfadan çıkarken giden istek router'ı atlıyor (tuzak 144). **Denendi:** yal
 
 **Görüntüler ve notlar.** Roboders'in görüntüleri ve ham notları yalnız
 `scratch/roboders/`'te, depo herkese açık ve görüntülerde babanın gerçek verisi var
-(kullanıcının kararı). Belgelerde öğretmenler yalnız kısaltmasıyla geçer. Depodaki
-gerçek veri sorusuna karar verilene kadar depoya yeni gerçek veri (ad, fotoğraf, PDF)
-eklenmez (kullanıcı, 2026-10-08).
+(kullanıcının kararı). Belgelerde öğretmenler yalnız kısaltmasıyla geçer. Depoya yeni
+gerçek veri (ad, fotoğraf, PDF) eklenmez (yukarıdaki kayıt).
 
-### 2026-10-08 · "aSc'nin yarısı" ölçüsü kalktı: her iyi özelliğin daha iyisi
+### 2026-10-08 · Hedef: Roboders'teki ve aSc'deki her iyi özelliğin daha iyisi
 
-**Eski hâli.** 2026-08-30'dan beri hedef aSc'nin bu kursla ilgili kısmının yarısını
-yapmak ve o yarıyı aSc'den iyi yapmaktı (önce %10'du). Aynı günün "Asıl rakip
-Roboders" kaydı bu ölçünün değişmediğini yazıyordu.
-
-**Şimdi.** Kullanıcının kararı: ölçü kalktı. Hedef, Roboders'teki ve aSc'deki her
+**Ne.** Kullanıcının kararı: hedef bir yüzde değil. Hedef, Roboders'teki ve aSc'deki her
 iyi özelliğin daha iyisini yapmak, kopyasını değil. Bir özelliğin iyi sayılma şartı,
 babaya yeni yazı ya da soru eklemeden iş görmesi. Gerekçe babanın kendi cümlesi:
 çok yazı ve soru görünce kafası karışıyor (TODO §0).
 
-**Sonucu.** CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve ASC.md'nin
-"%50" cümleleri değişti. Eski kayıtlarda geçen "%50" o günün diliyle kalıyor. ASC.md'nin
-kovaları duruyor. R8'in karar tablosundaki her "alınacak" satırı artık bu şarta göre
+**Sonucu.** CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve ASC.md bu hedefi
+söylüyor. WORKLOG'un eski girdilerinde geçen "%50", aSc'nin kursla ilgili kısmının yarısı
+demek. ASC.md'nin kovaları duruyor. R8'in karar tablosundaki her "alınacak" satırı artık bu şarta göre
 okunuyor: babaya kaç yazı ve soru eklediği satırın parçası.
 
 ### 2026-10-08 · Babam fikir değiştirdi; ilk dönemin tercihleri bağlayıcı değil
-
-**Eski hâli.** [PRINCIPLES.md](PRINCIPLES.md)'deki ilkeler aynı ağırlıkta duruyordu,
-ve bir kısmı projenin başında babanın o günkü isteklerine göre yazılmıştı. Sunucusuz
-ve Çevrimdışı bir özelliği tek başına reddedebiliyordu ([ASC.md](ASC.md)'nin "Geriye
-üç şey kaldı" listesi). "Şu an yapılmıyor" listesindeki dört satırın gerekçesi de bu
-ikisiydi.
 
 **Ne değişti.** Kullanıcı, 2026-10-08: *"Babam fikir değiştirdi. Bundan sonra geçerli
 olan babamın ve benim şimdi söylediklerimiz; eski ilkeyle çatışırsa yeni söylenen
@@ -542,14 +425,10 @@ daraltılır, kaldırılmaz.
 
 ### 2026-10-08 · Asıl rakip Roboders, aSc değil
 
-**Eski hâli.** CLAUDE.md projeyi "aSc Timetables'ın yerine geçiyor" diye tanımlıyordu.
-[ROBODERS.md](ROBODERS.md) kendine "ikinci rakip" diyordu.
-
-**Şimdi.** Kullanıcı, 2026-10-08: baba bugün fiilen Roboders kullanıyor, aSc'yi değil.
+**Ne.** Kullanıcı, 2026-10-08: baba bugün fiilen Roboders kullanıyor, aSc'yi değil.
 Asıl rakip Roboders, ve Mozaik onun yerine geçmeyi hedefliyor. aSc'nin kaydı
 ([ASC.md](ASC.md)) özellik bilgisinin ikinci kaynağı olarak kalıyor, karar tablosu
-geçerli. aSc için konan ölçü (bu kursla ilgili kısmının yarısı) değiştirilmedi.
-CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve Kullanılabilirlik'i,
+geçerli. CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve Kullanılabilirlik'i,
 ROBODERS.md ve ASC.md'nin başı buna göre düzeldi.
 
 **Ne değişmedi.** R6'nın güvenlik sözleşmesi, yani Roboders hesabındaki babanın
@@ -557,68 +436,48 @@ verisine dokunulmaması, aynen duruyor.
 
 ### 2026-10-08 · Rakip envanteri "her şeyden önce" değil, ve yerine bir sıra konmadı
 
-**Eski hâli.** TODO §1 (2026-08-31): aSc ve Roboders envanteri (R6–R9) öteki her
-bölümün önünde. §3–§7 o tablodan yeniden türetilecekti.
+**Ne.** Kullanıcının kararı: rakip envanteri (TODO §1, R6–R9) öteki bölümlerin ön şartı
+değil, ve ona bir sıra konmuyor. Babanın geri bildirimi (TODO §8b) envanterin ön şartı
+değil, envanterle paralel yürüyor.
 
-**Şimdi.** Kullanıcının kararı: kural kalktı ve yerine bir sıra konmuyor. Babanın
-geri bildirimi (TODO §8b) envanterin ön şartı değil, envanterle paralel yürüyor.
-
-**Aynı günün ilk hâli.** Bu kayıt ilk yazıldığında (6854592) "önce babanın makinesinde
-ölçüm ve geri bildirim, sonra rakip envanteri" diye bir sıra koyuyordu, ve o sırayı
-savunan iki önerilmiş gerekçe taşıyordu. Kullanıcı aynı gün düzeltti: sıra yok. O iki
-gerekçe kayıttan çıktı.
-
-**Gerekçe.** Kural fiilen uygulanmıyordu: 2026-09-24'ten 2026-09-27'ye kadarki
+**Gerekçe.** "Envanter her şeyden önce" fiilen uygulanmıyordu: 2026-09-24'ten 2026-09-27'ye kadarki
 turlar (B5.8–B5.11, elle denetim ve on üç kusuru) R6–R9 açıkken yürüdü. (kayıtlı,
 [WORKLOG.md](WORKLOG.md))
 
-### 2026-10-08 · v0 bitmedi: kod tamam, çıkma şartı bekliyor
-
-**Eski hâli.** [ROADMAP.md](ROADMAP.md) v0'ı "Bitti" diye sayıyordu. TODO §8c ise
-v0'ın çıkma şartını açık tutuyordu.
-
-**Şimdi.** Kullanıcının kararı: v0 bitmedi. Kodu tamam, çıkma şartı bekliyor. Şart,
-babanın gerçek bir haftayı Mozaik'te baştan sona kendisinin dizmesi. Sonraki
-kilometre taşları bu şartı beklemeden yazıldı ve yayınlandı. ROADMAP artık bunu
-söylüyor.
-
 ### 2026-09-27 · Kısaltmalar sözlükten değil kendi tablosundan
 
-**Eski hâli.** Yerleşik branş ve gün kısaltmaları, Türkçe kısaltmanın kendisi anahtar
-olarak `t()`'den geçiyordu. Sözlükte bir anahtar tek bir anlam taşıyabiliyor, ve Kimya'nın
-`Kim`'i Müsaitlik şeridindeki "Kim" (kim?) etiketiyle aynı anahtardı: dört dilde de Kimya
-"Who", "Wer", "Quién", "Qui" okunuyordu (DENETIM DK12). İzlenen başka adaylar vardı
-(`Tarih`, `Din`, `Fen`, gün kısaltmaları).
+**Neden.** Sözlükte bir anahtar tek bir anlam taşır. Türkçe kısaltma anahtar olarak `t()`'den
+geçince Kimya'nın `Kim`'i Müsaitlik şeridindeki "Kim" (kim?) etiketiyle aynı anahtar olur,
+ve dört dilde Kimya "Who", "Wer", "Quién", "Qui" okunur (DENETIM DK12). Aynı risk `Tarih`,
+`Din`, `Fen` ve gün kısaltmalarında.
 
 **Seçenekler.** Sözlükte bir bağlam eki (`Kim|branş` gibi genel bir mekanizma) ya da
 kısaltmalar için ayrı bir tablo. Kullanıcı ayrı tabloyu seçti.
 
-**Şimdi.** `lang/kisaltmalar.ts` dil başına, Türkçe kısaltmayla anahtarlanmış bir tablo.
+**Ne.** `lang/kisaltmalar.ts` dil başına, Türkçe kısaltmayla anahtarlanmış bir tablo.
 `names.ts`'in `builtInShort()` ve `shortDay()`'i onu okur, sözlüklerin kısaltma satırları
-kalktı, "Kim" = "Who" şerit için sözlükte kaldı. Kimya artık "Chm", "Che", "Quí", "Chi".
+yok, "Kim" = "Who" şerit için sözlükte. Kimya "Chm", "Che", "Quí", "Chi".
 Bir kısaltma hiçbir cümlenin anahtarına düşemez, yani bu çakışma sınıfının tamamı kapandı.
 Test: `i18n.test.ts`'in iki vakası.
 
 ### 2026-09-27 · Ders adları ders sayısını belirlemiyor
 
-**Eski hâli.** `hourLabels(count, names)` bir ad listesi verildiğinde onu olduğu gibi
-döndürüyordu, yani ad sayısı günlük ders sayısıydı. "Ders adları"na dört ad yazmak günü
-dört derse indirip 433 yerleşmiş saatin 245'ini sorusuz kaldırıyordu, "Günlük ders sayısı"
-kutusu da 12 demeye devam ediyordu (DENETIM DK9).
+**Neden.** Ad sayısı günlük ders sayısını belirlerse "Ders adları"na dört ad yazmak günü
+dört derse indirir ve yerleşmiş saatleri sorusuz kaldırır (DENETIM DK9: 433 saatin 245'i),
+"Günlük ders sayısı" kutusu da 12 demeye devam eder.
 
-**Şimdi.** Kullanıcının kararıyla sayıyı yalnız "Günlük ders sayısı" belirler. Ad
+**Ne.** Kullanıcının kararıyla sayıyı yalnız "Günlük ders sayısı" belirler. Ad
 listesi baştan saatlere dağılır, adı olmayan saat numarasını alır, fazla ad kullanılmaz
-(`extraNames()`, kutunun altında bir satır). Sayı kutusu değişince de adlar korunur,
-eskiden numaraya sıfırlanıyordu. Ad yazmak artık hiçbir dersi ızgaradan indiremez, bu
+(`extraNames()`, kutunun altında bir satır). Sayı kutusu değişince de adlar korunur.
+Ad yazmak hiçbir dersi ızgaradan indiremez, bu
 yüzden bu yolun DK8'deki gibi bir sorusu yok. Test: `ayarlar.spec.ts` 32'nin iki vakası ve
 `entities.test.ts`'in `hourLabels` vakası.
 
 ### 2026-09-27 · Gün ya da saat kaldırmak önce kaybı sorar, dersler yerinde bırakılmaz
 
-**Eski hâli.** Ayarlar → Zil ve günler'de dersleri dizili bir günün işaretini kaldırmak
+**Neden.** Ayarlar → Zil ve günler'de dersleri dizili bir günün işaretini kaldırmak
 ya da günlük ders sayısını düşürmek, o gün ya da saatteki yerleşmiş ve sabitli dersleri
-sorusuz havuza indiriyordu (DENETIM DK8: örnek okulda Pazar'la 65 saat, 65'i sabitli).
-Odak onay kutusunda kaldığı için Ctrl+Z de çalışmıyordu.
+havuza indirir (DENETIM DK8: örnek okulda Pazar'la 65 saat, 65'i sabitli).
 
 **Seçenekler.** (a) Önce kaybı sayan bir soru. (b) Dersler Müsaitlik'teki kapalı
 saatteki dersler gibi yerinde kalıp işaretlenir. (c) İkisi. Kullanıcı (a)'yı seçti,
@@ -629,9 +488,9 @@ gün ise değildir: dersin çizilecek yeri kalmıyor. (b) günü silmek yerine "
 olarak tutmayı gerektirirdi, bu da `sanitize()`'ın aralık dışı yerleşimi silme kuralını
 (tuzak 5), çözücüyü, kâğıdı ve sayaçları değiştirirdi.
 
-**Şimdi.** `settingsLoss()` yazmanın kendisinin yaratacağı farkı sayar (etkin programda
+**Ne.** `settingsLoss()` yazmanın kendisinin yaratacağı farkı sayar (etkin programda
 yerleşmiş ve sabitli saat, öteki programlarda yerleşmiş saat). Soru `School.tsx`'te,
-Vazgeç kutuyu eski değerine döndürür. `isTextInput()` artık yalnız yazı alan kutuları
+Vazgeç kutuyu eski değerine döndürür. `isTextInput()` yalnız yazı alan kutuları
 sayıyor, yani onay kutusundayken Ctrl+Z geri alıyor. Test: `ayarlar.spec.ts` 32'nin
 üç vakası ve `storeContract.test.ts`'in onay kutusu vakası.
 
@@ -717,7 +576,7 @@ kullanıcı iki yarıyı seçti. İkisi de yalnız Sığdır'da:
   duruyor, yalnız Sığdır'da gizleniyor. Veri değişmedi. Aday olan "aSc'deki gibi bir
   kısa ad alanı" (şema v17) seçilmedi.
 - Sığmayan satır kesilmek yerine küçülür (`platform/gridFit.ts`, `--fit`). Satırın
-  yüksekliği küçülmemiş boyda kalır. İlk onay 10 px tabanlaydı.
+  yüksekliği küçülmemiş boyda kalır.
 
 **Ölçütün kendisi yanlıştı, ve karar değişti.** Taslaktaki "1920'de 12 kırpık" sayısı
 `scrollWidth > clientWidth` ile sayılmıştı. `clientWidth` en yakına yuvarlıyor (24,53 →
@@ -760,9 +619,8 @@ değişmedi, yalnız cümle "(2 blok)" diyor.
 babanın her sınıfı tam dolu olduğu için kutu tam bir haftada da "Dikkat edilmesi
 gereken noktalar var… İmkânsız yazan satırlar" diyordu (gerçek exe turunda görüldü).
 Kullanıcı ayrı bir cümleyi seçti: yalnız Sıkışık varsa yeşil kutu "Sorun görünmüyor"
-diyor ve Sıkışık'ı adıyla anlatıyor. Onaylanan taslak "açık saati yükü kadar"
-diyordu. Sıkışık %85'ten başladığı için uygularken "yüküne eşit ya da çok yakın"
-yapıldı ve kullanıcıya söylendi.
+diyor ve Sıkışık'ı adıyla anlatıyor: açık saati yüküne eşit ya da çok yakın, çünkü
+Sıkışık %85'ten başlıyor.
 
 **İlk ilişki (TODO B5.3).** Beş alt madde ölçüldü, hiçbirinde babanın kullandığına
 dair kanıt yok (sıra ve gerekçe TODO B5.3'te). Kullanıcı kartlar arası ilişkinin ilk
@@ -773,10 +631,6 @@ dilimini seçti: iki ders arasında "aynı gün olmasın". Kararları:
   bir yol saymıyor. Sonradan çiğnenen ilişki Kontrol'de ihlal, dersler oynatılmıyor.
 - Düzenleme dersin sayfasında (kartın sağ tık menüsü → Dersi düzenle). Dersler
   tablosuna sütun eklenmedi, çünkü tablo zaten yana kayıyor.
-
-**Sürüm.** Kullanıcı 2.2.0'ı oturumun sonuna koydu: tag ve push'tan hemen önce bir kez
-daha sorulacak. `src-tauri/Cargo.lock`'un bayat sürüm satırı (2.0.3) yayından önce
-ayrı bir commit'le düzelecek.
 
 ### 2026-09-26 (akşam) · Denendi ve bırakıldı: bütçesi yetmeyen komşuluğu artan bütçeyle yeniden sormak
 
@@ -875,9 +729,7 @@ babanın dosyasında, ikişer koşu:
 | ret sonrası en az öğretmen | 6 | 7 |
 
 Süreler makinenin düşük güç profilinde alındı, iki sütun da aynı profilde (TESTFINDINGS
-2026-09-26). Bu tablonun ilk hâli "bugün"ü normal profilde alınmış 57,6 ve 64 s ile
-karşılaştırıyordu, ve "süre iki katına çıktı" diyordu. Aynı profilde süre aşağı
-yukarı aynı. Yalnız karma saat ve sınır iyileşti, gerisi kötüleşti. Kod olduğu gibi
+2026-09-26): süre aşağı yukarı aynı. Yalnız karma saat ve sınır iyileşti, gerisi kötüleşti. Kod olduğu gibi
 kaldı, yorumları yaptığı şeyi söylüyor.
 
 ### 2026-09-26 · Öneri araması: eşleşme yolu boşa aramıyor, karma yollar kendi hattında
@@ -929,7 +781,7 @@ aynı:
 - Olmaz'dan sonra en az saat 5.
 
 Ayrı hatta karma yollar `seed` olmadan 1 ders ve 7 saate düşüyordu. Yeni test
-(`relax.test.ts`, bugün `relaxLaidOut.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
+(`relaxLaidOut.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
 onu kırmızıya çeviriyor (6 saat).
 
 **Denenmeyen ve sebebi.** Bütçeleri kısmak. 2026-09-25'te üç bütçe denemesinin
@@ -938,16 +790,12 @@ bitiyor, tek bir darboğaz kalmadı.
 
 ### 2026-09-25 · Raptiye dururken görünmez, ve havuz çekmecesi boşken kendini kapatıyor
 
-**Raptiye.** 2026-08-30 kaydı raptiyenin "hep görünür, sönük" olduğunu kullanıcı
-kararı olarak yazıyordu, aynı gün `fb052f4` onu dururken görünmez yaptı (aşağıdaki
-2026-08-30 girdisi). Kullanıcıya soruldu, cevap: **dururken görünmez**, kod doğru.
-Raptiye hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür.
+**Raptiye dururken görünmez** (kullanıcının kararı). Raptiye hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür.
 "Hover'da beliren kontrol bulunmaz" kaygısı iki yoldan karşılanıyor: sabitli kartta
 raptiye hep görünür, ve aynı iş sağ tık menüsünde de var.
 
-**Havuz çekmecesi.** 2026-08-25 kaydı havuzun boşalınca kendiliğinden kapandığını
-yazıyordu, ve 2026-09-11'de "kodda bulunamadı" denmişti. Arama tercih yazan yere
-bakmıştı (`writeDock`, yalnız düğme çağırıyor). Kapanma çizimde:
+**Havuz çekmecesi boşalınca kendiliğinden kapanıyor**, çünkü boş bir tepsi yeri hiçbir
+şey için tutar. Kapanma tercihte değil çizimde (`writeDock`'u yalnız düğme çağırıyor):
 `LessonPool.tsx` kart yokken `pool-closed` çiziyor, düğmeyi kapatıyor ve tercihe
 dokunmuyor. Chromium'da ölçüldü (v15 örnek dosyası, 2 bekleyen kart):
 - açık çekmece 143 px;
@@ -955,8 +803,7 @@ dokunmuyor. Chromium'da ölçüldü (v15 örnek dosyası, 2 bekleyen kart):
 - Ctrl+Z kartları geri getirince çekmece kendiliğinden 143 px'e açıldı;
 - elle kapatılmış çekmece boşalıp yeniden dolunca kapalı kaldı (tercih "kapali").
 
-Yani eski kayıt doğruydu, bulunamayan şey onu yapan satırdı. Kart sayısı süzgeçten
-sonra sayılıyor, yani süzgeç sıfıra inerse de çekmece kapanır. Bu kaynaktan okundu,
+Kart sayısı süzgeçten sonra sayılıyor, yani süzgeç sıfıra inerse de çekmece kapanır. Bu kaynaktan okundu,
 ekranda üretilmedi, çünkü süzgecin branşları bekleyen kartlardan geliyor.
 
 ### 2026-09-25 · Cevap defteri: "en az" müsaitlikte, cevaplar planın verisi, karma yollar ve önizleme
@@ -1045,10 +892,9 @@ gibi duruyor. Her yol babanın cümlesiyle yazılıyor: "KY Cumartesi 3–4. saa
 de gelebilirse hafta kuruluyor." Bir değişikliğe `Olmaz` denebiliyor, ve arama o
 değişiklik olmadan yeniden koşuyor. Arama worker'larda, yol başına bir hat.
 
-**Eski hâli.** Aile başına tek bir öneri vardı: en az sayıda değişiklik. Hangi
-4 saatin önerileceği aramanın rastlantısıydı (bu veride 10 ayrı 4 saatlik çare
-görüldü). Arama ana iş parçacığında sırayla koşuyordu, ilk öneri 25–51 s'de
-geliyordu.
+**Neden.** Aile başına tek bir "en az değişiklik" önerisinde hangi çarenin gösterileceği
+aramanın rastlantısı (bu veride 10 ayrı 4 saatlik çare görüldü). Ana iş parçacığında
+sırayla koşan arama ilk öneriyi 25–51 s'de veriyordu.
 
 **Kullanıcının kararları.**
 - "En mantıklı" tek bir ölçüt olarak seçilmedi: "hepsi olsun, babam seçsin,
@@ -1058,12 +904,10 @@ geliyordu.
 - Worker, ana iş parçacığına dönen bir yedekle.
 - Panel kompakt: satırda cümle, `Uygula` ve `Ayrıntı`; `Olmaz` Ayrıntı'nın içinde.
 
-**Worker kararı geri alındı.** 2026-08-25'te "ayrı parça tek dosyaya girmez,
-`blob:` worker `file://`'da güvenilmez" diye bırakılmıştı (aşağıda). İlk yarısı
-hâlâ doğru. İkinci yarısı ölçülmemişti ve ölçülünce tutmadı: `blob:` worker
-Chromium'da `file://`'dan 5/5, Linux exe'sinde 4 paralel çalıştı. Parça sorunu da
-worker'ı sayfanın kendi betiği yaparak aşıldı (tuzak 136), dosyaya bayt eklenmedi.
-Çözücünün kendisi ana iş parçacığında kalıyor.
+**Worker.** Vite worker'ı ayrı bir parça olarak üretir ve tek dosyaya gömülmez (aşağıdaki
+2026-08-25 denemesi). Worker sayfanın kendi betiği, bir `blob:` worker (tuzak 136), dosyaya
+bayt eklenmedi. `blob:` worker Chromium'da `file://`'dan 5/5, Linux exe'sinde 4 paralel
+çalıştı. Çözücünün kendisi ana iş parçacığında kalıyor.
 
 **Arama.** Bir yolun bedeli ağırlıklı ve iki aşamalı:
 - zaten geldiği gün: saat + gelinmeyen gün başına 2;
@@ -1218,12 +1062,11 @@ düğüm boyunca iyileşmezse ya da ağacı tükenirse en iyi ızgara bir onarı
 aşamasına geçiyor (yinelemeli ileri arama): yersiz bir blok, en az blok iten
 hücreye konur ve itilenler sıraya girer. Yanında iki yeni parça var. Tam dolu bir
 sınıfın boş kalamayacak hücrelerini soran pay denetimi (`coverable`), ve sık
-yersiz kalan bloğu ağırlaştıran bir sayaç. `STALL_LIMIT` 20 000'den 2 000'e indi.
-Onarım da iyileşmeden blok başına 500 hamle geçerse duruyor.
+yersiz kalan bloğu ağırlaştıran bir sayaç. `STALL_LIMIT` 2 000. Onarım da iyileşmeden blok başına 500 hamle geçerse duruyor.
 
-**Eski hâli.** Takılınca bir ders "vazgeçildi" diye işaretlenir, en iyi ızgara
-tabana dondurulur ve kalan dersler yeniden aranırdı (`reseed`, tuzak 26). Kaldırıldı:
-onarım vazgeçilen dersi de sıraya alıyor, yani vazgeçmenin artık bir işi yok.
+**Denendi, kaldırıldı: vazgeçmek.** Takılınca bir dersi "vazgeçildi" diye işaretleyip en
+iyi ızgarayı tabana dondurmak ve kalanları yeniden aramak (`reseed`, tuzak 26). Onarım
+vazgeçilen dersi de sıraya aldığı için vazgeçmenin işi kalmadı.
 
 **Gerekçe, ölçülmüş.** Kullanıcının not defteri: "Roboders'te program oluşuyor,
 bizde oluşmuyor". Babanın verisinin anonimleştirilmiş kopyasında
@@ -1264,12 +1107,11 @@ durması beklenmiyor, ama ölçüldü ve yazılı.
 kaldığını uygulamanın zaten kullandığı solmayla söylüyor (`.pool-list`'e
 `attachScrollFade`). Kullanıcı kararı, ölçüm gösterildikten sonra.
 
-**Eski hâli.** Tepsi kaydırılabilirdi ama kaydığını söylemiyordu: kaydırma
-çubuğunun kapladığı genişlik 0 px ve ekranda çubuk görünmüyor. Babanın verisinde,
-onun baktığı 1600x1000'lik exe kutusunda, 205 kartın 19'u görünüyor ve 182'si
-katlamanın altında kalıyordu, 18 öğretmen grubunun yalnız biri sığıyordu. Aynı
-ekranda ızgaranın kabı kendi tablosundan 75,6 px uzundu ve o şeritte hiçbir şey
-çizilmiyordu.
+**Neden.** Kaydırma çubuğunun kapladığı genişlik 0 px ve ekranda çubuk görünmüyor, yani
+kaydırılabilir bir tepsi kaydığını kendi söylemeli. Babanın verisinde, onun baktığı
+1600x1000'lik exe kutusunda, 205 kartın 19'u görünüyor ve 182'si katlamanın altında
+kalıyordu, 18 öğretmen grubunun yalnız biri sığıyordu. Aynı ekranda ızgaranın kabı kendi
+tablosundan 75,6 px uzundu ve o şeritte hiçbir şey çizilmiyordu.
 
 **Gerekçe.** Alınan yer kimsenin kullanmadığı yerdi ve ölçüldü: çareden sonra
 ızgaranın boş şeridi 0,9 px'e indi ve ızgara iki kutuda da kaydırmaya başlamadı.
@@ -1287,17 +1129,15 @@ değiştirmiyor (ölçüldü, üç koşu). Sebebi mekanik, büyüyen bir flex ö
 tabanından bağımsız hâle geliyor, yani `--dock-h` yazılıyor ama ekranda bir
 karşılığı olmuyor. Bir kontrolü yer kazanmak için feda etmek bir çare değil.
 
-**Rozet geri gelmedi.** 2026-08-28'de kullanıcı isteğiyle kaldırılmıştı ve bu
-tur onu geri getirmeyi düşündü, çünkü ilk teori destenin kaç kart taşıdığının
-görünmemesiydi. Ölçüm teoriyi düşürdü: babanın verisinde üç bloklu deste hiç
+**Denendi, bırakıldı: deste rozetini geri getirmek** (2026-08-28'de kullanıcı isteğiyle
+kalktı). Teori destenin kaç kart taşıdığının görünmemesiydi. Ölçüm teoriyi düşürdü: babanın verisinde üç bloklu deste hiç
 yok, en kalabalığı iki, yani rozetin söyleyeceği şey onun ekranında zaten yok.
 Kaldırma kararı yerinde duruyor.
 
 ### 2026-09-12 · Sürüklerken kasmanın çaresi: sıklık, ve elenen dört aday
 
 **Karar (kullanıcı).** Gerekçe çubuğunun cümlesi en çok 100 ms'de bir yazılır
-(`REASON_GAP`, `platform/drag.ts`, `88fffc2`). Şikayet ikinci kez gelmişti ve
-sebebi ikinci turda bulundu: `textContent` yazmak 6704 nesnelik belgede tam
+(`REASON_GAP`, `platform/drag.ts`, `88fffc2`). Sebep: `textContent` yazmak 6704 nesnelik belgede tam
 yerleşim tetikliyor, hedef hücre her değiştiğinde bir kez.
 
 **Ölçüm.** Aynı ağaçta, üçer koşu: düşen kare %9,5–14,1'den %1,1'e, Layout
@@ -1432,32 +1272,17 @@ başlarsa.
 
 ---
 
-### 2026-09-12 · Hedef ölçek %150 değil %100
+### 2026-09-12 · Hedef ölçek %100
 
-**Değişen.** Belgelerde ve kod yorumlarında dolaşan "hedef kullanıcı %125 ya da
-%150 kullanıyor" varsayımı yanlış: %100 kullanıyor. Altı yerde bu varsayıma
-dayanan gerekçeler vardı ve düzeltildi. Hiçbir karar geri alınmadı, çünkü
-altısında da karar başka bir gerekçeyle ayakta kalıyor.
+**Ne.** Hedef kullanıcı uygulamanın ölçeğini %100'de kullanıyor, %125 ya da %150'de değil.
 
-**Karışan üç eksen, ve ayrılması düzeltmenin kendisi.** Windows'un kendi DPI
-ölçeklemesi gerçekten büyük ve bu kullanıcının kendi cümlesiyle kayıtlı
-(`styles.css`, kök yazının 16'dan 13 px'e inmesinin sebebi). Uygulamanın kendi
-`--ui-scale`'i ise %100 ve bu da iki yerde kullanıcı kararı olarak kayıtlı
-(`SCALE_DEFAULT = 1`). Bir avuç yorum birinciden ikinciye atlayıp "okuyucu %125
-ya da %150 kullanıyor" demişti.
+**İki eksen ayrı.** Windows'un kendi DPI ölçeklemesi gerçekten büyük ve bu kullanıcının
+kendi cümlesiyle kayıtlı (`styles.css`, kök yazının 16'dan 13 px'e inmesinin sebebi).
+Uygulamanın kendi `--ui-scale`'i ise %100 ve bu da kullanıcı kararı (`SCALE_DEFAULT = 1`).
+%150 gerekçelerde "okuyucunun ölçeği" diye değil "şeridin en çok baskı altında olduğu
+ölçek" diye geçer.
 
-**Düzeltilen yerler.** Şerit tercihinin gerekçesi ve ölçek tavanının gerekçesi
-(`theme.ts`), şerit kural 4'ün erişilebilirlik yarısı, katlamanın gerekçesi ve
-ızgara grubunun ölçümü (`Ribbon.tsx`), şerit standardının 4. maddesi
-(`LAYOUT.md`), ve ölçek tavanı testinin gerekçesi (`e2e/gorunum.spec.ts`).
-Şeridin taşma testininki 1b'de düzeltilmişti.
-
-**Ölçümler yerinde kaldı.** "%150'de şu kadar piksel taştı" gibi cümleler
-doğruydu ve duruyor; düşen şey yalnız araya sıkışmış "okuyucunun kullandığı
-ölçek" ifadeleri. %150 artık gerekçelerde "okuyucunun ölçeği" diye değil
-"şeridin en çok baskı altında olduğu ölçek" diye geçiyor.
-
-**Bundan sonraki ölçüm kuralı.** Bir düzen kusuru önce %100'de ölçülür, %150
+**Ölçüm kuralı.** Bir düzen kusuru önce %100'de ölçülür, %150
 ikinci ölçüm olarak kalır ve hiçbir testten çıkarılmaz, çünkü merdiven hâlâ %80
 ile %150 arası ve tavan bilerek ulaşılabilir bırakıldı.
 
@@ -1520,10 +1345,6 @@ düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmi
 bir ölçek basamağı değil şeridin kendi genişliği (`@container`), yani dar bir
 pencere %100'de de aynı adımlara ulaşıyor.
 
-**Eski hâli.** Hiçbir daralma kuralı yoktu. `.ribbon-group` eşit sütunlu bir
-grid, `.ribbon`'da `flex-wrap` yok, `overflow` yok, `min-width` yok. Sığmayan
-düğme kutunun dışına çıkıyor ve tıklanamaz oluyordu.
-
 **Gerekçe.** Tuzak 48 bu kuralı zaten yazıyor ve üst çubuk onu uyguluyordu,
 şerit uygulamıyordu. Ölçüm (a81c79a, 1920 px, Program şeridi): %80'de esneyen
 pay 669,9 px, %100'de 391,4 px, %125'te 78,5 px, %150'de 0 ve "İşlemler" düğmesi
@@ -1557,11 +1378,8 @@ de, açılış başlığının korunması da ve adın feda edilmemesi de `e2e/se
 kondu: `ders-programi-tema` okunuyor ve `<html>`'e `data-theme` yazılıyor. Aynı
 betik `scripts/favicon.mjs`'in şablonunda da duruyor (tuzak 93).
 
-**Eski hâli.** Temayı yalnız `main.tsx` yazıyordu ve yorumu "ilk boyamadan
-önce" diyordu. Derlenmiş tek dosyada o kod inline bir modül betiğinin içinde,
-yani spec gereği ertelenmiş: belge ayrıştırıldıktan sonra koşuyor.
-
-**Gerekçe.** Yorumun sözü yavaş bir makinede tutmuyordu ve bu ölçülmüştü:
+**Gerekçe.** Derlenmiş tek dosyada `main.tsx` inline bir modül betiğinin içinde, yani
+spec gereği ertelenmiş: belge ayrıştırıldıktan sonra koşuyor. Temayı yalnız o yazınca
 4 kat yavaşlatılmış işlemcide karanlık tema kayıtlıyken ilk kare dokuz açılışın
 dokuzunda açık zeminle geliyordu, sonra karanlığa dönüyordu. Hedef kullanıcı zor
 görüyor, ve kullanılabilirlik ilkesi kontrastı süs değil gereksinim sayıyor.
@@ -1596,12 +1414,6 @@ tetikleyip tetiklemediği varsayılmadı, ölçüldü: tetiklemiyor, sınır "be
 güncellenmiyor, ve en üstünde 2026-09-12'de kaynaktan doğrulanmış bir "bugün
 yanlış olan ne" tablosu taşıyor.
 
-**Eski hâli.** Tek bir dosya hem v0'ın planını, hem beş biten sürümün tarifini,
-hem gelecekteki üç sürümü, hem de on dokuz maddelik bir tuzak listesini
-tutuyordu. Kendi güncelleme notları "v0'ın kaydı olarak duruyor" ve "gerekçeler
-geçerli, sayılar değil" diyordu, yani okuyan kişi her paragrafta bunun hâlâ
-doğru olup olmadığını sormak zorundaydı.
-
 **Gerekçe.** Bir belgenin bir işi olur. Karışık bir arşiv ne plan olarak
 güvenilir ne kayıt olarak okunur, ve yanlış olduğu bilinen bir cümle bir
 belgede durduğu sürece bir gün doğru sanılır.
@@ -1623,12 +1435,10 @@ satırı, kâğıt seçenekleri, program kart rengi ve görülen sürüm notu. A
 `applyScale`, `writeDock` ve öteki) değişmedi, fabrika nesnelerinin kendi
 fonksiyonları.
 
-**Eski hâli.** Her tercih kendi try/catch'li okumasını ve yazmasını taşıyordu. Kopyalar
-bir değerin saklanmadan önce normalize edilip edilmediğinde (havuz boyu ediyordu, ölçek
-etmiyordu) ve bir boolean'ı tanıyıp tanımadığında (şeridin gizlenmesi tanıyordu,
-müsaitlik saati tanımıyordu) ayrışmıştı. Anahtar dizeleri `library.ts`'te bir kez daha
-yazılıydı, ve ikisi için `library.ts` `changelog.ts` ile `programColor.ts`'i import
-ediyordu.
+**Neden.** Tercih başına kendi try/catch'li okuma ve yazma kopyaları ayrışmıştı: bir değerin
+saklanmadan önce normalize edilip edilmediğinde (havuz boyu ediyordu, ölçek etmiyordu) ve
+bir boolean'ı tanıyıp tanımadığında (şeridin gizlenmesi tanıyordu, müsaitlik saati
+tanımıyordu).
 
 **Sözleşme.** Kullanıcının koyduğu değişmezler fabrikanın kendi testinde
 (`preference.test.ts`), her tercihin bugünkü davranışı da bağlamadan önce
@@ -1689,10 +1499,6 @@ ESLint yalnız React'in kanca kurallarıyla başladı (`rules-of-hooks` hata,
 kusuru ayrı commit'lerle düzeltildi, ve yalnız testten çağrılan altı fonksiyonun
 testleriyle birlikte silinmesine karar verildi.
 
-**Eski hâli.** Depoda biçimleyici ve linter yoktu. 20 dosya çift, geri kalanı tek
-tırnak kullanıyordu, ve ESLint olmayan bir depoda bir `eslint-disable` yorumu
-duruyordu.
-
 **Gerekçe.** Hazır çözüm önceliği, ve üçü de bundle'a girmiyor (ölçüldü,
 `dist/index.html` araçlar kurulunca değişmedi). ESLint'in dar başlaması bilerek:
 tam `recommended` setleri yüzlerce bulgu üretir ve refactorun diff'lerini gürültüye
@@ -1722,9 +1528,6 @@ Her oturum sonunda E2E koşma beklentisi kalktı, yerine `TESTPLAN.md`'deki kada
 geldi. `CONVENTIONS.md`'ye commit mesajı, hazır çözüm önceliği ve kod kalitesi
 kuralları eklendi.
 
-**Eski hâli.** Tek dosyada bir kural kitabı, bir karar günlüğü ve bir laboratuvar
-defteri iç içeydi.
-
 **Gerekçe.** Neye uyulması gerektiği ile neyin yalnız tarih olduğu ayırt
 edilemiyordu, ve değiştirilebilir bir kuralın tek savunması gerekçesi olduğu
 hâlde kurallar "tartışılamaz" diye yazılmıştı. Kullanıcı kararı.
@@ -1738,9 +1541,8 @@ notları yeniden biçimlendirme riski var. Bu risk ölçülmedi.
 
 ### 2026-09-01 · Exe penceresi büyütülmüş açılıyor
 
-**Değişen.** `tauri.conf.json` penceresine `maximized: true` eklendi, `minHeight`
-700'den 640'a indi. **Eski hâli.** Pencere 1600×1000 mantıksal piksel istiyordu
-ve büyütülmüyordu, ve belge "ekran 1920×1080 varsayılır" diyordu. **Gerekçe.**
+**Değişen.** `tauri.conf.json` penceresinde `maximized: true` ve `minHeight` 640.
+**Gerekçe.**
 Exe sayfayı 1600 CSS pikselde koşturuyordu ve Sığdır'da 374 kartın 315'i
 kırpılıyordu. Windows %150'de çalışma alanı 672 mantıksal piksel, yani 700
 pencereyi o ekrana sığdırılamaz yapıyordu (tuzak 107).
@@ -1755,11 +1557,10 @@ kararı.
 tarafından doğrudan yönetiliyor, `Grid` ve havuz yalnız gerçek veri değişince
 yeniden çiziliyor. Hedef dışını karartmak için satırlara `opacity` değil, görünür
 alanı örten iki `pointer-events: none` gölgeleme düzlemi kullanılıyor. `dropMap()`
-hedef sınıfın blok tablosunu bir kez kuruyor. **Eski hâli.** `dragging` bir React
-durumuydu ve her satırın `dim` prop'u yaklaşık 1950 hücreyi yeniden
-uzlaştırıyordu, geniş tablonun satırlarındaki `opacity` her satırı ayrı bir raster
-katmanına alıyordu. **Gerekçe.** Kartı renkli hücrelerin üstünde gezdirirken
-takılma. Ölçülen ikinci kare süresi ~125 ms'den 46,2 ms'e indi (4× CPU kısıtı).
+hedef sınıfın blok tablosunu bir kez kuruyor. **Gerekçe.** Kartı renkli hücrelerin
+üstünde gezdirirken takılma: React durumu olan bir `dragging` her satırın `dim` prop'uyla
+yaklaşık 1950 hücreyi yeniden uzlaştırır, geniş tablonun satırlarındaki `opacity` her
+satırı ayrı bir raster katmanına alır. Ölçülen ikinci kare süresi ~125 ms'den 46,2 ms'e indi (4× CPU kısıtı).
 Performans testi ham `blocker()` döngüsünü değil gerçek `dropMap()`'i ölçer.
 
 ### 2026-09-01 · Kartın üstüne bırakmak takas edebiliyor
@@ -1776,9 +1577,7 @@ bölümünde koddan okunarak yazıldı.
 **Değişen.** `ddae9fe` depoyu `ders-programi` yerine `Mozaik` yaptı. Kırılan
 güncelleme üç yerden onarıldı: `update.rs` iki önek tanıyor (`RELEASE_KOKLERI`),
 `surum.yml` manifeste eski adlı adresi yazıyor, ve `src/surum.test.ts` iki dosyayı
-birbirine karşı okuyor. `SITE_ADRESI` `…github.io/Mozaik/` oldu. **Eski hâli.**
-Depo adı "değişmeyen kimlikler" listesindeydi ve yanında "depo yeniden
-adlandırılırsa o kopyalar bir daha hiç güncellenemez" uyarısı vardı. **Bedeli.**
+birbirine karşı okuyor. `SITE_ADRESI` `…github.io/Mozaik/` oldu. **Bedeli.**
 Yayınlanmış v2.0.2 "Güncellemeleri denetle"de `Beklenmeyen adres` dedi, ve Pages
 eski adreste 404 verdi (tuzak 106). Ad geri alınmadı.
 
@@ -1803,45 +1602,17 @@ Tıklamadan boyamaya süre kıpırdamadı: ertelenmiş 105,5 ve 104,9 ms, olduğ
 yalnız faturanın nereye kesildiğini seçiyordu. Aynı sayıyı ölçen bir iyileştirme
 geri alındı (tuzak 105).
 
-### 2026-08-30 · Çerçeve değişti: "bir dönem kullanılmadan özellik eklenmez" kalktı
-
-**Değişen.** İki yıl 5. ilke olan kural kaldırıldı. Yerine bir kural gelmedi,
-iki yeni ilke geldi ("Kolay kullanılabilir ve yenilikçi", "Şık ve modern") ve
-hedef aSc'nin kursla ilgili kısmının %10'undan %50'sine çıktı. `docs/ASC.md`
-özellik pusulası oldu (commit `a4cef3a`).
-
-**Eski hâli.** *"Bir dönem kullanılmadan özellik eklenmez. Tahmine dayalı özellik
-= yanlış özellik."* Elde veri yokken yazmamayı ve babanın bir dönem kullanmasını
-bekliyordu.
-
-**Gerekçe.** Bu bir gevşetme değil bir yön değişikliği: özellik artık rakibin
-gerçekten yaptığı işten türetiliyor, ve aSc'nin yardım konuları ile arayüz
-metinleri okunabilir hâlde duruyor, yani tahmin ile ölçülmüş bir rakip davranışı
-aynı şey değil. Değişmeyenler: ilk üç ilke, yasak liste, ve ölçmek. Bir özellik
-artık "baba istemedi" diye değil, "ilk üç ilkeyi bozuyor" ya da "ölçülmedi" diye
-reddediliyor.
-
-`docs/STATUS.md` (bugün `docs/WORKLOG.md`) ve `docs/TASKS.md`'deki (bugün
-`docs/TODO.md`) eski `(ilke 5)` atıfları olduğu gibi bırakıldı: o gün geçerli
-olan kuralla alınmış kararları anlatıyorlar ve geriye dönük düzeltilirlerse kayıt
-yalan söyler.
-
-### 2026-08-30 · Kurulum yasağı kalktı
+### 2026-08-30 · Kurulum serbest, kurulmadan çalışan yol kalıyor
 
 **Değişen.** Kurulum serbest. Kalan iki şey: hesap ve şifre sorulmaz, ve kurulmadan
 da çalışan bir yol hep kalır (`dist/index.html` çift tıklanır). Bir kurulum bir
-seçenek olabilir, tek kapı olamaz. **Eski hâli.** *"Kurulum yok. Sihirbaz, hesap,
-şifre, güncelleme yok."* **Gerekçe.** Kurulumun yarısı zaten yapılmıştı:
+seçenek olabilir, tek kapı olamaz. **Gerekçe.** Kurulumun yarısı zaten yapılmıştı:
 `kurulum/Kur.cmd`, `dist-kurulum/` ve exe üç ayrı teslim yoluydu. Kullanıcı kararı.
 
 ### 2026-08-30 · Paylaşmak yapılacak işlerden
 
 **Değişen.** Programın çıktısını e-postayla ve WhatsApp'la göndermek yapılacaklar
-arasına girdi (kullanıcı: "babam istedi"). **Gerekçe.** Sunucu yok ilkesini
-bozmuyor: paylaşılan şey bir dosya (PNG, PDF, bağlantı) ve onu taşıyan işletim
-sisteminin kendi paylaşım yolu, ortada sunucu, hesap, oturum ya da yüklenen veri
-yok. Ağ kuralı güncellemeninkiyle aynı, yalnız tıklanınca. aSc'nin EduPage'e veri
-yükleyip öğretmene ve veliye hesap açan Sharing'i bu değil ve hâlâ yapılmıyor.
+arasına girdi (kullanıcı: "babam istedi"; bugün [TODO.md](TODO.md) B3.8).
 
 ### 2026-08-30 · Vitrin İngilizce
 
@@ -1849,15 +1620,12 @@ yükleyip öğretmene ve veliye hesap açan Sharing'i bu değil ve hâlâ yapıl
 `surum-notu.md`, iş akışlarının görünen adları, `description` alanları.
 CLAUDE.md, `docs/`, `.claude/` ve `.mcp.json` Türkçe kaldı. İki istisna:
 `surum-notu.md`'nin sonundaki üç satır Türkçe kurulum özeti ve `kurulum/OKU.txt`.
-Kullanıcı kararı. O günkü kayıt "programın kendisi de öyle: arayüzün varsayılanı
-hâlâ Türkçe" diyordu, kod ise 2026-08-28'den beri cihazın diline bakıyor (aşağıda).
+Kullanıcı kararı. Arayüzün varsayılan dili cihazın dili (aşağıda, 2026-08-28).
 
 ### 2026-08-30 · Yasak listeden üç madde çıktı
 
 **Değişen.** İstatistik ve pano, SMS ve e-posta, aynı planın sürüm ağacı listeden
-çıktı ve `PLAN.md`'de de silindi. Listeden çıkmak yapılacak olmak demek değil,
-üçü de artık ölçülüp karar verilebilir. Sürüm ağacının 2026-08-25 tarihli
-daraltma kaydı bu tarihten sonra tarihseldir.
+çıktı. Listeden çıkmak yapılacak olmak demek değil, üçü de ölçülüp karar verilebilir.
 
 ### 2026-08-30 · Kurulum betiklerinde `Bypass` yerine `RemoteSigned`
 
@@ -1873,17 +1641,6 @@ desen. Aynı iş, benzemeyen imza ([BUILD.md](BUILD.md)).
 ücretli ve cevap hayırdı, imza yoksa "bu, yayınladıkları dosya mı" sorusunun
 cevabı bir özet. VERSIONINFO'nun eksik olduğu varsayılmıştı, yayınlanmış ikilide
 ölçülünce `tauri-build`'in onu zaten gömdüğü görüldü (tuzak 101).
-
-### 2026-08-30 · İkon eşiği 20'den 32'ye
-
-**Değişen.** `.ico`'nun 16, 20 ve 24 px'i sade, 32 px ve üstü ayrıntılı çizim
-oldu. **Gerekçe.** Şikayet üçüncü kez geldi (*"sanki küçük simge yani 9x9
-pixellik kullanılıyor gibi"*). Önce yayınlanmış 2.0.0'ın içine bakıldı: dokuz
-`RT_ICON`, gömülü boylar 16 ile 256 arası ve `kurulum/icon.ico` ile birebir, yani
-eksik boy yoktu. 24 px'te ayrıntılı çizimin altı çubuğu 2,25 cihaz pikseli ve
-araları 0,56 piksel, bir cihaz pikselinin altındaki boşluk yoktur. Önceki iki
-taşıma görev çubuğunun hangi boyu istediğini tahmin ederek yapılmıştı, bu ilk
-ölçülen taşımaydı. Eşik 2026-09-01'de yeniden 20'ye indi.
 
 ### 2026-08-30 · Kök yazı 13 px, ölçek %80'e iniyor
 
@@ -1907,15 +1664,8 @@ uzun `.hint` 438 karakterden 126 karaktere indi.
 sabitle, geçici görünüm). Kartın sol alt köşesindeki sabitleme işareti tıklanabilir
 bir düğme oldu, kullanıcı: *"kartların üzerinde sabitleye basınca dersi sabitlesin
 babamın en çok kullanacağı bu"*. Raptiye kartın çocuğu değil kardeşi, çünkü kart
-bir `<button>` ve düğme içinde düğme geçersiz HTML.
-
-**Kayıtlı karar ve koddaki hâl ayrışıyor.** O günkü kayıt raptiyenin "hep görünür,
-sönük (`opacity: .38`)" olduğunu ve bunun kullanıcı kararı olduğunu yazıyordu,
-gerekçesi: hover'da beliren bir kontrol bu programın okuyucusunun bir daha
-bulamadığı kontroldür. Aynı gün `fb052f4` raptiyeyi dururken görünmez yaptı
-(`opacity: 0`, hücrenin üstüne gelince, odakta ya da sabitliyken görünür). Bu
-değişikliğin gerekçesi kayıtlı değildi. 2026-09-25'te kullanıcıya soruldu, karar
-"dururken görünmez" (yukarıdaki 2026-09-25 girdisi).
+bir `<button>` ve düğme içinde düğme geçersiz HTML. Raptiyenin ne zaman görünür olduğu
+2026-09-25 kaydında.
 
 ### 2026-08-30 · Denendi: tek saatlik sabitlemeyi alt menüye almak
 
@@ -1926,8 +1676,7 @@ değişikliğin gerekçesi kayıtlı değildi. 2026-09-25'te kullanıcıya sorul
 ### 2026-08-30 · Program şeridinin sırası
 
 **Değişen.** `Görünüm · Diz · Program` solda, boşluktan sonra `Renk · Yoğunluk ·
-Izgara`. Program kitaplığı ve ızgara işlemleri birer menü. **Eski hâli.** Kitaplık
-bir tur şeridin başına girip Görünüm'ü sağa itmişti. **Gerekçe.** Kullanıcı:
+Izgara`. Program kitaplığı ve ızgara işlemleri birer menü. **Gerekçe.** Kullanıcı:
 *"öğretmen ve sınıftan seçimleri en solda eski yerinde olmalı"*. Menüler bir
 ölçümden: eşit sütunlu bir grupta üç uzun kelime en uzununun üç katı, ve %150'de
 şerit 1920 px'lik kutuda 2061 px istiyordu, iki düğme tıklanamaz kalıyordu. Menüye
@@ -1960,8 +1709,7 @@ komut paleti oraya çıkıyor, ve `Öğretmeni düzenle` ile `Sınıfı düzenle
 ### 2026-08-29 · Tauri kimliği geri alındı
 
 **Değişen.** `identifier` `me.mozaik.arac`'tan `com.dersprogrami.arac`'a geri alındı
-ve "değişmeyen kimlikler" listesine girdi. **Eski hâli.** v2.0.0 kimliği programın
-yeni adıyla birlikte değiştirmişti. **Gerekçe.** Kimlik WebView2 profilinin yolu,
+ve "değişmeyen kimlikler" listesine girdi. **Gerekçe.** Kimlik WebView2 profilinin yolu,
 yani localStorage'ın durduğu yer: o exe planları diskte bırakıp boş açılıyordu
 (tuzak 95). Yayınlanmış v2.0.0 varlığı bu kusuru taşıdı, düzeltme 2.0.1 ile gitti.
 
@@ -1970,47 +1718,39 @@ yani localStorage'ın durduğu yer: o exe planları diskte bırakıp boş açıl
 **Değişen.** Programın adı Mozaik, tek kaynağı `APP_NAME`. **Değişmeyen.**
 localStorage anahtarları, yedek dosya adları, `Belgelerim\Ders Programı` klasörü ve
 Tauri kimliği eski adla kaldı, çünkü bunlar veri ([DATA.md](DATA.md)). Kurulum
-yolunda eski adla duran kısayol siliniyor, eski klasör yalnız söyleniyor. CLAUDE.md
-bu bölümü 2026-08-28 tarihiyle, TODO ise işi 2026-08-29'da bitmiş olarak yazıyor.
+yolunda eski adla duran kısayol siliniyor, eski klasör yalnız söyleniyor.
 
 ### 2026-08-29 · Ekleme kendi bloğu, sağ rayda kayan şey liste
 
 **Değişen.** Beş liste ekranının her biri iki kardeş panel oldu: bir ekleme paneli
-ve sayılı başlıklı liste paneli. Sıra değişmedi. Aynı gün sağ rayda kayan şey
-panelden içindeki listeye indi. **Eski hâli.** Ekleme ile liste arasındaki ayrım
-tek bir çizgiydi, ve bir tur boyunca kaydırma çubuğu paneldeydi. **Gerekçe.**
+ve sayılı başlıklı liste paneli. Sıra değişmedi. Sağ rayda kayan şey panel değil
+içindeki liste. **Gerekçe.**
 Kullanıcı: *"aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın"*,
 *"ama yerleri değişmesin"*, ve *"özet kutusu değil içindeki liste"*.
 
 ### 2026-08-29 · Sol tık taşır, sağ tık menü açar
 
 **Değişen.** Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza
-gönderir. **Eski hâli.** Yerleşmiş bir derse sol tıklamak bloğu siliyordu, taşımanın
-tek yolu silip havuzdan yeniden sürüklemekti.
+gönderir.
 
 ### 2026-08-28 · Türkçe tek dil değil kaynak dil
 
-**Değişen.** İlke 4 yeniden yazıldı: beş dil konuşuluyor, anahtar Türkçe cümlenin
-kendisi. O gün sözlük 786 anahtar × 4 dil olarak tamamlandı. **Eski hâli.** *"Tek
-dil. i18n altyapısı yok, string dosyası yok, doğrudan Türkçe yazılır."* Bu cümle
-altyapı v2.0.0'da kurulduktan sonra iki sürüm boyunca yanlıştı. **Değişmeyen üç
-şey.** JSX Türkçe okunur, eksik çeviri doğru Türkçeye düşer, State'e giren metin
+**Değişen.** Türkçe kaynak dil: beş dil konuşuluyor, anahtar Türkçe cümlenin
+kendisi. O gün sözlük 786 anahtar × 4 dil olarak tamamlandı. **Kalan üç şey.** JSX Türkçe okunur, eksik çeviri doğru Türkçeye düşer, State'e giren metin
 çevrilmez.
 
 ### 2026-08-28 · Varsayılan dil cihazın dili
 
 **Değişen.** İlk açılışta `navigator.language`'ın ilk parçası beş dilden biriyse o
-seçiliyor, değilse İngilizce (commit `a1f3c1a`). **Eski hâli.** Bir tur boyunca
-yedek dil Türkçeydi, çünkü tamamlanmış tek dil oydu. **Gerekçe.** Beş sözlük
+seçiliyor, değilse İngilizce (commit `a1f3c1a`). **Gerekçe.** Beş sözlük
 tamamlanınca yedek, en çok kişinin okuyabildiği dil oldu. E2E süiti `kapan.ts`'te
 Türkçeye sabitli.
 
 ### 2026-08-28 · İki sekme ve bir bölüm yeniden adlandırıldı
 
 **Değişen.** `Kurulum` sekmesi `Okul`, `Yazdır` sekmesi `Çıktı`, Ayarlar'ın
-`Okul ve zil` bölümü `Zil ve günler` oldu. **Gerekçe.** İlk ilkenin ilk cümlesi o gün
-"kurulum yok"tu ve ilk sekmenin adı Kurulum'du, üstelik o sekme okulun dört
-listesini tutuyordu. `Yazdır` adlar arasındaki tek fiildi. Üçüncüsü zorunluydu: bir
+`Okul ve zil` bölümü `Zil ve günler` oldu. **Gerekçe.** İlk sekme okulun dört listesini
+tutuyor, bir kurulum değil. `Yazdır` adlar arasındaki tek fiildi. Üçüncüsü zorunluydu: bir
 düğme adı üç piksel ötedeki sekmenin adını taşıyamıyor (tuzak 49 ve 74).
 
 ### 2026-08-28 · Branşlar Okul'a, Ayarlar beş bölüm
@@ -2044,8 +1784,7 @@ sade çizime geçti, çünkü o boyda ayrıntılı çizimin eşiğinin altında.
 
 ### 2026-08-27 · Güncelleme söyleniyor, zorlanmıyor
 
-**Netleştirildi.** "Güncelleme yok" zorlanan güncelleme yok demek. Site yolunda
-program yeni sürümün geldiğini söyler: `Yenile` denene kadar hiçbir şey değişmez,
+**Ne.** Güncelleme zorlanmaz. Site yolunda program yeni sürümün geldiğini söyler: `Yenile` denene kadar hiçbir şey değişmez,
 `Sonra` denince o oturumda bir daha sorulmaz. **Gerekçe.** Söylenmeyen bir güncelleme
 başka bir şeyi bozuyordu: baba bir kusur bildiriyor, düzeltiliyor, ve düzeltmenin ona
 ulaşıp ulaşmadığını iki taraf da göremiyordu. Yasaklanan şey kendiliğinden değişen
@@ -2053,13 +1792,11 @@ bir arayüz, kapatılamayan bir bildirim ve sürüm soran bir açılış ekranı
 
 **Genişletildi.** Exe kendini güncelleyebilir, ağa yalnız tıklanınca çıkarak, ve
 üç ayrı düğmeyle (`Denetle`, `İndir`, `Şimdi yeniden başlat`) çünkü üçü üç ayrı
-karar. `kur.ps1`'deki gerekçe: ilke çalışan programın kendisi hakkındadır, çalışan
-sayfa hiçbir yere bağlanmaz, bir güncelleme bağlanır çünkü işi budur.
+karar.
 
 ### 2026-08-27 · Tema varsayılanı açık, sistemi izlemiyor
 
-**Değişen.** `normalizeTheme` artık `prefersDark` almıyor. **Eski hâli.** İlk açılış
-sistemin koyu temasını izliyordu. **Gerekçe.** İşlevsel renkler açık zeminde seçildi
+**Değişen.** `normalizeTheme` `prefersDark` almıyor, ilk açılış açık temada. **Gerekçe.** İşlevsel renkler açık zeminde seçildi
 ve orada ölçüldü, koyu bilerek yapılan bir seçim. Hareket ayarının tersi ve fark
 bilerek: makinesinde "hareketi azalt" diyen biri bir ihtiyaç bildiriyor, koyu tema
 diyen biri bir zevk.
@@ -2088,19 +1825,17 @@ En çok kullanılan ekrana bir sihirbazın dördüncü adımından geçilerek va
 ### 2026-08-27 · Şerit yedi sekmede ve bir standardı var
 
 **Değişen.** Araç şeridi yedi sekmenin yedisinde çiziliyor ve beş maddelik bir
-şekli var ([LAYOUT.md](LAYOUT.md)). **Eski hâli.** Beş şerit beş ayrı nesneydi
-(biri simgeli ama başlıksız, ikisi salt yazı) ve Kontrol'de şerit hiç çizilmiyordu,
-gerekçesi "okunan bir rapor, ona yapılacak bir şey yok"tu. **Gerekçe.** Şekli olmayan
-bir şeyi hiçbir test koruyamaz. Kontrol'ün şeritsiz olması içerik açısından
-doğruydu, ekran açısından değildi: şeridin yüksekliği sekmeyle gelip gittiği için
+şekli var ([LAYOUT.md](LAYOUT.md)). **Gerekçe.** Şekli olmayan bir şeyi hiçbir test
+koruyamaz. Kontrol okunan bir rapor ve ona yapılacak bir şey az, ama şeritsiz bir Kontrol
+ekranı zıplatır: şeridin yüksekliği sekmeyle gelip gittiği için
 Kontrol'e her girişte altındaki her şey 45 px zıplıyordu.
 
 ### 2026-08-27 · Havuzda blok başına kart ve deste
 
 **Değişen.** Havuzda ders başına değil blok başına kart var (`2+1` bir ders bir
 ikili ve bir tekli bırakır), ve aynı dersin aynı boydaki blokları tek deste oluyor.
-**Eski hâli.** Altı saatlik bir ders altı özdeş kart ve altı kez aynı `0/6`
-bırakıyordu. **Yan fayda.** Haftalık saati elle aşmak imkânsızlaştı, kart bitince
+**Gerekçe.** Ders başına kart altı saatlik bir derste altı özdeş kart ve altı kez aynı
+`0/6` demek. **Yan fayda.** Haftalık saati elle aşmak imkânsızlaştı, kart bitince
 sürüklenecek bir şey kalmıyor.
 
 ### 2026-08-27 · Branşlar elle sıralanıyor, bölüm renk tekerleği dolu
@@ -2111,26 +1846,15 @@ rengi isteyince çember iki temada tarandı ve serbest kalan her yayın ya işle
 bir rengin ya komşu bir sekmenin ailesine düştüğü ölçüldü. Sekizinci bir renk
 aranırsa aynı ölçüm tekrarlanır.
 
-### 2026-08-27 · İkon eşiği aynı gün iki kez taşındı
-
-**Değişen.** Sade çizimin eşiği önce 48'den 32'ye, sonra 32'den 20'ye indi ve
-`.ico`'ya 20, 24 ve 40 px eklendi. **Gerekçe.** Görev çubuğundaki işaret için
-"eksik pikselli küçük logo" şikayeti, ve Windows'un %125'te 40, küçük düğmelerde
-24 px istediği. İki taşıma da görev çubuğunun hangi boyu istediğini tahmin ederek
-yapıldı (tuzak 78). Eşik 2026-08-30'da 32'ye, 2026-09-01'de yeniden 20'ye taşındı.
-
 ### 2026-08-26 · Dört yasak kalktı
 
 **Değişen.** Animasyon, web font, bağımlılık ve tasarım sistemi yasakları kaldırıldı.
 Animasyonun yerine kural gelmedi, tek şart `prefers-reduced-motion: reduce` ile
-hepsinin kapanması. Web font serbest, şartı tek dosyaya gömülmesi. Bağımlılıkta tek
-ölçüt gömülebilir ve ağsız olması, sabit bir KB tavanı yok ve eski 420 KB sınırı da
-kalktı. Tasarım sistemi kısıtları (merdivenler, sayı sınırları) silindi. "Hedef
+hepsinin kapanması. Web font serbest, şartı tek dosyaya gömülmesi. Bağımlılıkta sabit
+bir KB tavanı yok, ölçütü 2026-10-08 kaydında. Tasarım sistemi kısıtları (merdivenler, sayı sınırları) silindi. "Hedef
 makine yavaş" bir gerekçe olmaktan çıkıp ölçülecek bir varsayım oldu.
 
-**Eski hâli.** Tailwind, Radix, ikon ve animasyon kütüphaneleri "bağımlılık"
-gerekçesiyle reddedilmişti. Tasarım bölümü tek tek gerekçeli ama toplamı yeni bir
-arayüz yazmayı imkânsız kılan bir kural kümesiydi. **Gerekçe.** Kullanıcı kararı.
+**Gerekçe.** Kullanıcı kararı.
 O gün Radix'in diyalog ve menü paketleri ile `lucide-react` alındı, maliyetleri
 ölçüldü (WORKLOG).
 
@@ -2162,20 +1886,13 @@ tıklanabilir olması 68 ms'e indi (tuzak 55).
 
 ### 2026-08-26 · Yerel statik sunucu
 
-**Daraltıldı.** Sunucu yok ilkesinin dışında bırakılan şeye babanın makinesinde koşan
-küçük bir dosya sunucusu da girdi (`kurulum/sunucu.ps1`,
+**Ne.** Babanın makinesinde küçük bir dosya sunucusu koşabilir (`kurulum/sunucu.ps1`,
 `dersprogrami.localhost:7654`). Backend, veritabanı, hesap, oturum ve API yok. Çift
 tıklanan `dist/index.html` asıl teslim yolu olarak kaldı. **Gerekçe bir kez yanlış
 yazıldı.** İlk hâli "`file://` güvenli bağlam değildir, orada `showDirectoryPicker`
 tanımlı bile değildir" diyordu, Chromium'da ikisi de yanlış çıktı. `file://`'ın eksiği
 bir köken: service worker yok, programa ait bir depo yok, izin tek bir siteye
 saklanamıyor. Yani sunucu klasör özelliğinin tek evi değil, daha iyi evi (tuzak 65).
-
-### 2026-08-26 · Görsel regresyon ve düzen testleri kaldırıldı
-
-**Değişen.** Piksel referanslı görsel regresyon katmanı ve düzen geometrisi ölçen
-testler silindi, erişilebilirlik ölçümleri kaldı. Kullanıcı kararı. Yerine
-bir şey iddia etmeyen, bakılmak için görüntü üreten `npm run ekran` kaldı.
 
 ### 2026-08-26 · Program ekranı ve kâğıt kararları
 
@@ -2185,44 +1902,29 @@ bir şey iddia etmeyen, bakılmak için görüntü üreten `npm run ekran` kald�
 - **Bir A4'e 1, 2 ya da 4 program**, ve kâğıttaki yazı boyutu ayrı bir ayar.
 - **Öğretmen sayfasında hücreyi sınıf rengi boyar.** Bir öğretmenin kendi sayfasında her dolu hücre zaten o öğretmen, on iki hücre aynı pasteli boyayıp hiçbir şey söylemez.
 - **Kapalı saat kâğıda çıkmıyor.** Duvara asılan kâğıt "saat 10:40'ta neredeyim" sorusuna cevap verir, çarpı kimsenin kâğıdı eline alıp sormadığı bir sorunun cevabı.
-- **Uyuşmayan sütunda saat boş bırakılmıyor.** Bir ders numarası günlere göre farklı saatlere düşüyorsa başlık iki grubu gün aralığıyla yazıyor. Eski kural "yanlış saat yazmaktansa hiç yazma"ydı ve boş sütun bir kusur olarak okundu. Tarih git geçmişinden: bugünkü davranışı üreten `periodGroups()` bu tarihte eklendi (`5fe8d64`), ve kod bugün iki grubu yazıyor (`Print.tsx`).
+- **Uyuşmayan sütunda saat boş bırakılmıyor.** Bir ders numarası günlere göre farklı saatlere düşüyorsa başlık iki grubu gün aralığıyla yazıyor (`periodGroups()`, `Print.tsx`), çünkü boş sütun bir kusur olarak okunuyor.
 - **"Nereye kaydedilsin".** Seçilen bir klasöre bütün planlar ve günlük bir yedek yazılıyor. Yedekler ad kalıbıyla budanıyor, sayılarak değil, çünkü klasör Belgelerim ve orada babanın kendi dosyaları duruyor.
 - **Marka işareti üst çubukta.** Düğme değil, `aria-hidden`, ve satır içi SVG, çünkü dosya dışarıdan bir şey istemiyor.
 
 ### 2026-08-25 · Sekmeler üstte, çift bar
 
-**Değişen.** Soldaki ray kalktı, sekmeler üstte, altında o sekmenin araç şeridi.
-**Eski hâli.** Rayın savı "yatay bant ızgaradan bir satır götürür"dü. **Gerekçe.**
-O sav 768 px'lik ekran için yazılmıştı ve rayın kendi maliyeti hiç sayılmamıştı: her
-sekmede 92 px genişlik, ve Program dışındaki sekmelerin harcayacak genişliği yok.
+**Değişen.** Sekmeler üstte, altında o sekmenin araç şeridi. **Gerekçe.** "Yatay bant
+ızgaradan bir satır götürür" 768 px'lik bir ekranın savı. Soldaki bir ray her sekmede
+92 px genişlik alır, ve Program dışındaki sekmelerin harcayacak genişliği yok.
 Ölçülen baş toplamı raylı düzende 139 px, çift barda 116 px.
 
-### 2026-08-25 · Statik yayın
+### 2026-08-25 · Ayrı planlar
 
-**Netleştirildi.** Sunucu yok ilkesi statik bir yayını dışarıda bırakıyor: GitHub
-Pages'te duran site. Backend, veritabanı, hesap, oturum ve API yok, CDN'den bayt
-çekilmiyor, sayfa ilk açılıştan sonra bağlantısız çalışıyor.
-
-### 2026-08-25 · Ayrı planlar, sürüm ağacı değil
-
-**Daraltıldı.** "Birden çok program sürümünü yan yana tutma" yasağı "aynı planın
-sürüm ağacı" yasağına daraltıldı. **Gerekçe.** Yasaklanan şey "geçen salı neye
-benziyordu" sorusuna cevap veren, dallanan, kimsenin bakmadığı bir geçmişti. Babanın
-istediği ayrı planlardı: aralarında geçilen ve teki seçilen. `library.ts` ile
-uygulandı, plan kimliği State'e konmadı, şema değişmedi. Bu kayıt 2026-08-30'dan
-beri tarihsel.
+**Ne.** Babanın istediği ayrı planlar: aralarında geçilen ve teki seçilen, dallanan bir
+geçmiş değil. `library.ts` ile uygulandı, plan kimliği State'e konmadı, şema değişmedi.
 
 ### 2026-08-25 · Havuz alta döndü
 
 **Değişen.** Havuz ızgaranın altında ve boyu sürüklenebilir, bırakılan boy
-hatırlanıyor. O günkü kayıt havuzun boşalınca kendiliğinden kapandığını da
-yazıyordu (gerekçesi: boş bir tepsi yeri hiçbir şey için tutar), 2026-09-11'de
-kodda bunu yapan bir yer bulunamadı. 2026-09-25'te bulundu ve ekranda ölçüldü:
-kapanma tercihte değil çizimde (yukarıdaki 2026-09-25 girdisi). **Eski hâli.** Bir sürüm havuz sağda durdu
-(tarihi kayıtlı değil). Sağın savı "ızgara yatayda zaten taşıyor"du ve doğruydu, ama
-havuzu üç kart genişliğinde bir sütuna çeviriyordu: 99 bekleyen ders görülen bir
-tepsi değil kaydırılan bir liste oluyordu. Altı daha önce imkânsız kılan şey
-başkasının seçtiği sabit bir yükseklikti (215 px, 25 öğretmenin altısı).
+hatırlanıyor. Boşalınca kendiliğinden kapanıyor (2026-09-25 kaydı). **Gerekçe.**
+Sağda bir sütun, ızgara yatayda zaten taşısa da, havuzu üç kart genişliğine indirir: 99
+bekleyen ders görülen bir tepsi değil kaydırılan bir liste olur. Boy sürüklenebilir,
+çünkü sabit bir yükseklik (215 px'te 25 öğretmenin altısı) okula göre değişmez.
 
 ### 2026-08-25 · Denendi: çözücüde simetri kırması
 
@@ -2233,11 +1935,10 @@ blokları oradan sonrasına hapsoldu: 57718 düğümde 26 blok, kaldırılınca 
 
 ### 2026-08-25 · Denendi: otomatik dizmeyi Web Worker'da koşmak
 
-**Denenen.** TODO'da otomatik dizme bir Web Worker'da planlıydı. **Neden bırakıldı.**
-İki bağımsız sebep: Vite worker'ı ayrı bir chunk olarak üretir ve
-`vite-plugin-singlefile` onu gömmez, kalan `blob:` yolu `file://`'in opak kökeninde
-Chromium'da güvenilmez ve kaynağı `tsc`'den geçmez. Çözücü ana iş parçacığında
-dilim dilim koşuyor (tuzak 19).
+**Denenen.** Otomatik dizmeyi Vite'ın kendi worker'ıyla koşmak. **Neden bırakıldı.**
+Vite worker'ı ayrı bir chunk olarak üretir ve `vite-plugin-singlefile` onu gömmez.
+Çözücü ana iş parçacığında dilim dilim koşuyor (tuzak 19). Öneri araması sayfanın kendi
+betiğinden bir `blob:` worker'da koşuyor (2026-09-25 kaydı).
 
 ### 2026-08-24 · Karanlık mod ve tema seçimi yasaktan çıktı
 
@@ -2260,4 +1961,4 @@ Hazır çözümün sorulan üç sorusuna o günkü cevap buydu ([CONVENTIONS.md]
 
 - **`Sıfırla` üst çubuktan Ayarlar'a taşındı.** Üst çubukta "Dosyadan aç"a bir yanlış tıklama uzaklıktaydı ve geri alınamıyordu. `Dosyaya kaydet` ve `Dosyadan aç` üst çubukta kaldı, çünkü veri kaybına karşı önlemin görünür olması gerekiyor.
 - **Örnek veri Ayarlar'a taşındı.** Tek evi Kurulum'du ve ancak boş bir projeyle ulaşılabiliyordu, yani kendi verisine başlamış biri örneğe bir daha bakamıyordu. Kurulum'da yalnız ilk kullanımda tek satırlık bir teklif kaldı.
-- **Görünüm düğmeleri önce yalnız simgeydi.** Bir tur `aria-label`'lı yazısız iki simge düğmesi olarak durdular, şerit standardıyla (2026-08-27) simge ve kelime taşımaya başladılar.
+- **Görünüm düğmeleri simge ve kelime taşıyor** (şerit standardı, 2026-08-27). `aria-label`'lı yazısız iki simge düğmesi bir tur denendi.
