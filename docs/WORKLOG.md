@@ -172,6 +172,38 @@ birleşirken kendi numarasını kaydırır.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 
+
+---
+
+## 2026-10-24 akşam · Okunabilirlik: B7.36 ve zebra her listede (`okunabilirlik`)
+
+Dal `tb1-dosyadan-ac`'in ucundan (TODO'nun B7.36'sı TB8'in dalında doğdu). Zebra analizi
+mozaik-ed'in `zebra-liste` worktree'sinden (`scratch/zebra-analiz.md`, yalnız okundu; ölçüm
+betikleri bu dalın `scratch/zebra-olc/`'üne kopyalandı). Oturum o worktree'yi ve zebrayı
+kimin tuttuğunu dört oturuma sorarak buldu, uygulamayı ben aldım, onlar yazmadı.
+
+**B7.36.** Ayarlar'ın çıktısı `.settings-pane`'de, notlar 15 px (gövde). Beş bölümde ölçüldü
+(`scratch/okunabilirlik/tiklama/ayarlar-sonra/`), yatay kaydırma yok.
+
+**Zebra.** Aynı token dört listeye daha, `:where()` altında; zil önizlemesinin ve Branşlar'ın
+sırası; `--muted` açıkta #464d58, koyuda #b3bbc6. Önce/sonra (23 ekran × 2 tema,
+`scratch/zebra-olc/karsilastirma.md`): soluk yazı hiçbir listede düşmedi; yeni şeritli
+yapıştırma önizlemesinde düz metin zebrada 17,47 → 15,96 (açık) ve 14,99 → 13,75 (koyu), her
+`table.list` zebra satırıyla aynı değer, `--text` değişmeden önlenemez.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: varlık sayfasının seçicisi zebra satırında
+kutusunu kaybediyordu; zil önizlemesi üstüne gelmeyi kaybetmişti; `display: contents` kaydırma
+solmasını kör ediyordu; Branşlar'ın çizgisi boş gövdenin altında; yapıştırma önizlemesinin madde
+işaretleri; bayat yorumlar ve DESIGN cümleleri. Reddedilen: Ayarlar tablolarındaki notların
+hücre yazısıyla aynı boy olması (istek bu), diyaloglardaki `.hint`'in 13 px kalması (Ayarlar'ın
+içi değil, sade ekran turu).
+
+**Koşulan.** `hizli` (1347 geçti), `renk.spec.ts`'in yeni testi düzeltmesiz derlemede kırmızı
+(açıkta soluk yazı zebrada 6,65; koyuda varlık listesinin 2. satırı zebrasız; zil önizlemesinde
+üstüne gelme), sonra `renk`, `erisim`, `panel` 51/51; önce/sonra ölçümü iki kez; Ayarlar betiği.
+**Koşulmayan.** Tam E2E yerelde (CI'da); görsel regresyon (haftalık; açık ve koyu temanın bütün
+görüntüleri `--muted` yüzünden değişti).
+
 ---
 
 ## 2026-10-24 · TB1'in üst çubuk yarısı (`tb1-dosyadan-ac`)
