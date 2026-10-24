@@ -83,10 +83,10 @@ describe("workflow'larda adı geçen dallar", () => {
 });
 
 describe('koruma', () => {
-  it('main, stabil ve gh-pages birleşmiş olsalar da silinmiyor, yerelde de uzakta da', () => {
+  it('main ve gh-pages birleşmiş olsalar da silinmiyor, yerelde de uzakta da', () => {
     const p = planKur({
       ...bos,
-      yerel: [dal('main', true), dal('stabil', true)],
+      yerel: [dal('main', true), dal('gh-pages', true)],
       uzak: [dal('main', true), dal('gh-pages', true)],
     });
     expect(p.silinecekYerel).toEqual([]);

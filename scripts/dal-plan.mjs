@@ -8,7 +8,7 @@
 // is already in main. Everything else is listed for a person to decide.
 
 /** Never touched, whatever else is true of them. */
-export const SABIT_KORUNAN = ['main', 'stabil', 'gh-pages'];
+export const SABIT_KORUNAN = ['main', 'gh-pages'];
 
 /**
  * Ignored paths that are rebuilt by a command and so are not archived when a
