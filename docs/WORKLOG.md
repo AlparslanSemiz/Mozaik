@@ -216,6 +216,21 @@ yerelde (CI'da), mutasyon. İkinci incelemeden sonra `hizli` 1347 geçti.
 
 ---
 
+## 2026-10-24 · Bitti kontrolü (`bitti-kontrolu`)
+
+Kullanıcının isteği: kodu değiştiren her işin "bitti"den önceki standart kontrolü. CLAUDE.md'de
+kısa "Bitti kontrolü" bölümü, ayrıntısı `paket-turu` becerisinde, her dal için geçerli: taze
+bağlamlı bir alt ajanın `git diff main...HEAD` incelemesi (doğruluk, veri riski, sadelik,
+bayat belge; inceleyen düzeltmez), kullanıcıya görünen değişiklikte `dist/index.html`'in
+`file://` ile Playwright Chromium'da, 1920×1080'de, sahte veriyle tıklama testi, ve raporda
+"İnceleme ve tıklama testi" bölümü. Yalnız belge değişen dalda ikisi de yok. Dal
+`surec-sadelestirme`'nin üstünden açıldı, çünkü o dal açıldığı an `main`'e henüz girmemişti
+(origin/main be3ff75) ve değişiklik onun 80 satırlık CLAUDE.md'sine yazılıyordu; dakikalar sonra
+girdi, dal `main`'i aldı. Koşulan: `npm run hizli`.
+Koşulmayan: E2E, `kontrol` (yalnız belge).
+
+---
+
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 
 **Mavi.** Kullanıcının kararı: yalnız `site/icon-small.svg`'de mavi `#65b6ec` → `#3f9fe3`,
