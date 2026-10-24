@@ -228,7 +228,7 @@ export default function Check({ state, view }: Props) {
                   in the panel, in one sentence. */}
               {pinnedBreaks > 0 && (
                 <p className="hint">
-                  <T k="İkisi de **sabitlenmişse** otomatik dizme öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
+                  <T k="İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
                 </p>
               )}
               <table className="list">

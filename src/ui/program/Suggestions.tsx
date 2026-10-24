@@ -376,7 +376,9 @@ export default function Suggestions({
     }
   }
   const firstFound = rows.find((r) => r.found !== null)?.family;
-  const why = !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
+  // Not once the plan moved: the stale note below then speaks alone.
+  const why =
+    !stale && !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
 
   return (
     <section className="panel suggestions" aria-labelledby="suggestions-title">

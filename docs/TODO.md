@@ -1509,6 +1509,12 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       ilişkisi çiğnenmiş haftayı reddediyor. İki ders sabitliyse sonuç 0 öneri, oysa bir
       öğretmen saati açmak haftayı kuruyor (analizin kopyasında ölçüldü). Karar verildi:
       kendiliğinden çözülmez, panel ve Kontrol tek cümleyle söyler. Özellik dalı.
+- [ ] **RK2b Gizlenen satır ya da gündeki bozuk ilişki de aramayı boş döndürüyor (2026-10-24,
+      `rk2-bozuk-iliski`'in incelemesi).** `preservedPlacements` sabitlerin yanında Program'da
+      gizlenen öğretmen ve sınıf satırlarının ve günlerin hücrelerini de her geçişte tutuyor; ilişkili
+      iki ders gizli bir günde aynı gündeyse arama RK2'deki gibi bir dakika sonra sessizce boş
+      dönüyor. Çare RK2'nin yüklemi `fixedCells(from, false, exclusions)` üstüne kurulup gizli durum
+      için ayrı bir cümle. Koddan, ölçülmedi.
 - [ ] **RK3 Kapalı saatin iki tanımı. Karar bekliyor.** Program'ın satır başı sınıfın
       ya da dersliğinin kapalı saatini sayıyor (`Program.tsx` 307), `openHours` yalnız
       varlığın kendi saatini (`entities.ts` 987). Sınıflar listesinin "Ders saati" sütunu

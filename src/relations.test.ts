@@ -148,4 +148,36 @@ describe('ilişki · aynı gün olmasın', () => {
       '510 · MÇ Matematik ile 511 · AV Fizik Salı günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.',
     );
   });
+
+  // Why the search is not started (TODO RK2): the same stuck world gives a way
+  // while the two lessons are only placed, and none once both are pinned, so
+  // skipping the search hides no answer. If a change family ever learned to
+  // move a pin, this turns red before the skip could hide its suggestions.
+  it('aynı güne sabitlenmiş iki ders varken öneri araması hiçbir yol bulamıyor', () => {
+    const closed = closeHours(
+      closeHours(world(), 'oMC', [
+        [1, 0],
+        [1, 1],
+        [1, 2],
+      ]),
+      'oAV',
+      [
+        [1, 0],
+        [1, 1],
+        [1, 2],
+      ],
+    );
+    const placed = place(place({ ...closed, relations: [] }, 'a', 0, 0), 'b', 0, 1);
+    const broken = addNotSameDay(placed, 'a', 'b');
+    const pinned: State = {
+      ...broken,
+      programs: broken.programs.map((p) => ({ ...p, pinned: { 's510|0|0': 1, 's511|0|1': 1 } })),
+    };
+    const search = (d: State) =>
+      suggest(d, activePlacements(d), { keepPlaced: false, families: ['teacherHours'] })
+        .suggestions;
+    expect(search(broken).length).toBeGreaterThan(0);
+    expect(pinnedRelationBreaches(pinned, buildIndex(pinned))).toHaveLength(1);
+    expect(search(pinned)).toEqual([]);
+  });
 });

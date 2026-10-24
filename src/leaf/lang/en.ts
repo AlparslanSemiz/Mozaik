@@ -944,8 +944,8 @@ const EN: Sozluk = {
     "When two lessons that must not share a day are on the same day, the **Not on the same day** row on the lesson's sheet shows them.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} and {iki} are both pinned on {gun}; they must not share a day, so no way can be found until one of them moves.",
-  "İkisi de **sabitlenmişse** otomatik dizme öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "If both are **pinned**, automatic filling cannot look for suggestions; unpin one or move it to another day.",
+  "İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "If both are **pinned**, **Fill automatically** cannot look for suggestions; unpin one or move it to another day.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} may teach at most {sinir} hours on {gun}; this would make {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":

@@ -955,8 +955,8 @@ const ES: Sozluk = {
     "Si dos clases que no deben coincidir en el mismo día están el mismo día, la fila **No el mismo día** de la ficha de la clase las muestra.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} y {iki} están fijadas el {gun}; no deben coincidir en el mismo día, así que no hay ninguna salida hasta que una se mueva.",
-  "İkisi de **sabitlenmişse** otomatik dizme öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "Si las dos están **fijadas**, el relleno automático no puede buscar sugerencias; suelte una o muévala a otro día.",
+  "İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Si las dos están **fijadas**, **Colocar automáticamente** no puede buscar sugerencias; suelte una o muévala a otro día.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} puede dar como máximo {sinir} horas el {gun}; aquí serían {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
