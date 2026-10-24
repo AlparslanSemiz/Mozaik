@@ -333,7 +333,7 @@ function BrandMark() {
       <rect x="128" y="128" width="768" height="768" rx="64" fill="#fff" />
       <rect x="256" y="256" width="128" height="256" rx="32" fill="#c576f3" />
       <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454" />
-      <rect x="640" y="512" width="128" height="256" rx="32" fill="#65b6ec" />
+      <rect x="640" y="512" width="128" height="256" rx="32" fill="#3f9fe3" />
     </svg>
   );
 }

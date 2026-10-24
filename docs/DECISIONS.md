@@ -93,7 +93,8 @@ elle çizildi, kopyalanmadı: indigo zemin üstünde iki laciverde kancaya asıl
 sayfa ve beş ders sütunu (sarı, mavi, uzun mercan, mor, nane yeşili), resmin kendi
 renkleriyle; mavisi zaten `palette.ts`'in `#65b6ec`'i. Sade çizimi kancasız sayfa ve
 üç ders: mor `#c576f3` (beyaza karşı 2,89:1), mercan `#fd6454` (2,95:1), mavi
-`#65b6ec` (2,22:1). Sade çizimde sarının yerine mor, çünkü sarı beyaza karşı 1,6:1.
+`#3f9fe3` (2,88:1). Sade çizimde sarının yerine mor, çünkü sarı beyaza karşı 1,6:1, ve
+mavisi büyük çizimin `#65b6ec`'inden koyu, çünkü o beyaza karşı 2,22:1 (Alp).
 **Gerekçe.** Çizim 16, 20, 24, 32, 40 ve 48 px'te açık ve koyu zeminde çizilip
 bakıldı (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizimin kancaları ve beş sütunun
 aralıkları 16 ve 20 px'te leke, 24 px'te bulanık, 32 px'te okunuyor.
