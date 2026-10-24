@@ -272,6 +272,13 @@ test.describe('74. Nereye kaydedilsin', () => {
   // lost is the folder being up to date when the tab closed, which is the one
   // promise the folder makes.
   //
+  // In the exe the window now waits for the page before it closes (2026-10-24,
+  // `tb7-sekme-kapanis`). A browser tab cannot be made to: a closing tab does
+  // not wait for an asynchronous write, and asking "leave this page?" does not
+  // help either, because Chromium stops the page while the question is open
+  // and the write does not move (measured the same day, the answer given
+  // 1.5 s later). So this half stays a known defect.
+  //
   // The clock is paused so the two-second write cannot fire first; the test
   // asserts that the write was still pending. When the flush is fixed, the
   // `not.toContain` below goes red by name: turn it around and drop this label.

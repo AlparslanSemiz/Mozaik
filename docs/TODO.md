@@ -1615,7 +1615,7 @@ testi o commit'te sıradan bir teste döner.
       (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
       çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
       yapıştırma tarafındaki eşi.
-- [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
+- [~] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
       Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
       kapanışı `useFolder.ts`'in `beforeunload` flush'ı karşılamalı, ama flush eşzamansız bir
       yazımı yalnız başlatıyor ve sayfa yazım inmeden gidiyor. Sitede beş denemenin beşinde
@@ -1627,6 +1627,15 @@ testi o commit'te sıradan bir teste döner.
       ikinci bir düzeltme dalında. O dal `fix/veri-kaybi` `main`'e birleşir birleşmez
       `main`'den açılır, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda dokunmamalı.
       `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da aynı kalmalı.
+      **Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):** pencere kapatılmak istenince
+      Rust kapanışı durdurup sayfaya söylüyor, sayfa deposunu ve klasörünü yazıp
+      `kapanabilir` diyor, cevap gelmezse pencere 5 s sonra yine kapanıyor (ARCHITECTURE, "Exe
+      bir adaptör takar"). Linux ikilisinde, sahte HOME'la, gerçek bir WM_DELETE_WINDOW ile
+      ölçüldü: önce 0/3, sonra 5/5 ve 3/3, pencere 0,17–0,26 s'de kapandı; denetim (3 s bekleyip
+      kapatmak) 2/2. Windows'ta (WebView2) ölçülmedi. **Tarayıcı yarısı düzelmez:** kapanan sekme
+      eşzamansız yazımı beklemiyor, Chromium'un "ayrılınsın mı?" sorusu da sayfayı durduruyor ve
+      yazım o arada ilerlemiyor (ölçüldü, soru 1,5 s sonra cevaplandı); `klasor.spec.ts`'in
+      BİLİNEN KUSUR testi yerinde. Kapanırken 5 s'yi aşan bir cevapsızlık ölçülmedi.
 - [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);

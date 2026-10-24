@@ -381,7 +381,10 @@ sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taş
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
 değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı bir
 BİLİNEN KUSUR'u sabitliyor (TODO TB7): 2 s'lik yazım dolmadan kapanan sekmenin
-değişikliği klasöre inmiyor, depoya iniyor.
+değişikliği klasöre inmiyor, depoya iniyor. Exe'de pencere sayfayı bekliyor (2026-10-24);
+o yarının sayfa tarafı `src/desktop.test.ts`'te, pencerenin kendisi elle ölçüldü (gerçek
+bir WM_DELETE_WINDOW ile Linux ikilisinde; WebDriver'ın pencere kapatması Tauri'nin
+kapanma isteğinden geçmiyor, o yüzden gerçek exe süitine girmedi).
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden

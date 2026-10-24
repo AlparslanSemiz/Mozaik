@@ -27,6 +27,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- In the Windows program, closing the window within two seconds of a change no longer leaves the copy in Documents\Ders Programı one change behind. The window now waits until the change is written, a fraction of a second, and closes on its own after five seconds if the page does not answer.
 - A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
 - When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.

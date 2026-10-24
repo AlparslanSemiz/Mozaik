@@ -23,9 +23,11 @@
     not inline, and "tek dosya" is the whole delivery. */
 type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 
+type Listen = (event: string, handler: () => void) => Promise<() => void>;
+
 declare global {
   interface Window {
-    __TAURI__?: { core?: { invoke?: Invoke } };
+    __TAURI__?: { core?: { invoke?: Invoke }; event?: { listen?: Listen } };
   }
 }
 
@@ -111,6 +113,33 @@ export async function openDesktopFolder(): Promise<FileSystemDirectoryHandle | n
   if (!invoke) return null;
   const label = await invoke<string>('data_dir_path');
   return desktopFolder(invoke, label);
+}
+
+/**
+ * The exe's window was asked to close and is waiting for this page (TB7,
+ * `src-tauri/src/lib.rs`): `flush` writes what is still pending, then the
+ * window is told it may go. Whatever `flush` does, the answer is sent; and if
+ * it never comes, the window goes on its own after a few seconds. Outside the
+ * exe this does nothing. Returns the unsubscribe.
+ */
+export function onDesktopClose(flush: () => Promise<void>): () => void {
+  const listen = window.__TAURI__?.event?.listen;
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!listen || !invoke) return () => undefined;
+  let off: (() => void) | undefined;
+  let gone = false;
+  void listen('kapaniyor', () => {
+    void flush()
+      .catch(() => undefined)
+      .finally(() => void invoke<void>('kapanabilir'));
+  }).then((unlisten) => {
+    if (gone) unlisten();
+    else off = unlisten;
+  });
+  return () => {
+    gone = true;
+    off?.();
+  };
 }
 
 // ------------------------------------------------------------ the update path
