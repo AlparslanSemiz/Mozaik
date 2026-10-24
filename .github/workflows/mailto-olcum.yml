@@ -1,13 +1,13 @@
 # GEÇİCİ ÖLÇÜM (ogretmene-eposta, 2026-10-24): bir mailto: adresinin Windows'ta
-# ShellExecute'tan ve Chromium'dan e-posta programına ne kadarının ulaştığı, ve
-# kayıtlı bir program yokken ikisinin ne dediği. Runner atılan bir makine: sahte
-# program yalnız onun HKCU'suna kaydediliyor. Dal birleşmeden önce kalkar.
+# ShellExecute'tan ve tarayıcıdan e-posta programına ne kadarının ulaştığı, ve
+# kayıtlı bir program yokken ne olduğu. Runner atılan bir makine. Dal birleşmeden
+# önce kalkar.
 #
-# İlk koşunun (40104303724) bulgusu: Windows HKCU'ya yazılan bir mailto kaydını
-# kullanıcı seçimi (UserChoice, korumalı) olmadan saymıyor, OpenWith'e gidiyor. Bu
-# yüzden uzunluk kendi şemamızla ölçülüyor (ShellExecute adresi şemaya bakmadan
-# iletir), tarayıcının mailto'yu kabuğa verip vermediği de OpenWith'in açılıp
-# açılmamasından okunuyor.
+# 40104303724: kayıtlı program yokken AssocQueryStringW 0x80070483, ShellExecuteW 42
+# ve OpenWith açılıyor; HKCU'ya yazılan mailto kaydı UserChoice olmadan sayılmıyor.
+# 40105704173: ShellExecuteW 32 000'i kabuğa veriyor, 40 000'de 2; Chromium 4000'i
+# veriyor; Edge hiçbirini (dış program sorusu). Burada: ulaşan uzunluk OpenWith'in
+# komut satırından (gerçek mailto yolu), Edge'de soru politikayla kapalı.
 name: mailto-olcum
 
 on:
@@ -31,98 +31,73 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium
 
-      - name: Betikler
+      - name: Edge'in dış program sorusu kapalı (yalnız mailto)
         shell: pwsh
         run: |
-          $d = "$env:RUNNER_TEMP\olc"; New-Item -ItemType Directory -Force $d | Out-Null
-          Set-Content "$d\yakala.mjs" @'
-          import { appendFileSync } from 'node:fs';
-          appendFileSync(process.env.YAKALA_DOSYA ?? 'C:\\yakala.txt', JSON.stringify(process.argv.slice(2)) + '\n');
-          '@
-          Set-Content "$d\Kabuk.cs" @'
-          using System; using System.Runtime.InteropServices; using System.Text;
-          public static class Kabuk {
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-            public static extern IntPtr ShellExecuteW(IntPtr h, string op, string file, string args, string dir, int show);
-            [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
-            public static extern int AssocQueryStringW(int flags, int str, string assoc, string extra, StringBuilder outp, ref int len);
-            public static string Assoc(string scheme, int what) {
-              var sb = new StringBuilder(2048); int n = 2048;
-              int hr = AssocQueryStringW(0x1000, what, scheme, null, sb, ref n);
-              return hr == 0 ? "ok: " + sb.ToString() : "hr=0x" + hr.ToString("X8");
-            }
-          }
-          '@
-
-      - name: Kayıtlı program yokken
-        shell: pwsh
-        run: |
-          Add-Type -Path "$env:RUNNER_TEMP\olc\Kabuk.cs"
-          Write-Host "Assoc komut: $([Kabuk]::Assoc('mailto', 1))"
-          $r = [Kabuk]::ShellExecuteW([IntPtr]::Zero, 'open', 'mailto:a@ornek.com?subject=deneme', $null, $null, 1)
-          Start-Sleep -Seconds 4
-          $ow = @(Get-Process OpenWith -ErrorAction SilentlyContinue)
-          Write-Host "ShellExecuteW dönüşü: $r, OpenWith süreci: $($ow.Count)"
-          $ow | Stop-Process -Force
-
-      - name: ShellExecuteW, uzunluk (kendi şemamızla)
-        shell: pwsh
-        timeout-minutes: 8
-        run: |
-          $node = (Get-Command node).Source
-          $k = 'HKCU:\Software\Classes\mozaikolc'
+          $k = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
           New-Item -Force $k | Out-Null
-          Set-ItemProperty $k '(default)' 'URL:Mozaik olcum'
-          Set-ItemProperty $k 'URL Protocol' ''
-          New-Item -Force "$k\shell\open\command" | Out-Null
-          Set-ItemProperty "$k\shell\open\command" '(default)' "`"$node`" `"$env:RUNNER_TEMP\olc\yakala.mjs`" `"%1`""
-          Add-Type -Path "$env:RUNNER_TEMP\olc\Kabuk.cs"
-          Write-Host "Assoc komut (mozaikolc): $([Kabuk]::Assoc('mozaikolc', 1))"
-          $env:YAKALA_DOSYA = "$env:RUNNER_TEMP\olc\se.txt"
-          foreach ($n in 500, 2000, 2046, 2047, 2048, 2049, 2083, 2084, 4000, 8000, 16000, 32000, 40000) {
-            Remove-Item $env:YAKALA_DOSYA -ErrorAction SilentlyContinue
-            $on = 'mozaikolc:a@ornek.com?subject=S&body='
-            $parca = 'Pazartesi%0D%0A%20%201.%20ders%2008%3A30%20%20510A%20Mat%20%C4%9F%C3%BC%C5%9F%C4%B1%0D%0A'
-            $u = $on; while ($u.Length -lt $n) { $u += $parca }; $u = $u.Substring(0, $n)
-            $r = [Kabuk]::ShellExecuteW([IntPtr]::Zero, 'open', $u, $null, $null, 1)
-            $gelen = $null
-            for ($i = 0; $i -lt 20 -and -not $gelen; $i++) { Start-Sleep -Milliseconds 250; if (Test-Path $env:YAKALA_DOSYA) { $gelen = Get-Content $env:YAKALA_DOSYA -Raw } }
-            if ($gelen) { $a = ($gelen | ConvertFrom-Json)[0]; Write-Host "SE gönderilen $n dönüş $r -> gelen $($a.Length) aynı mı $($a -eq $u)" }
-            else { Write-Host "SE gönderilen $n dönüş $r -> GELMEDİ" }
-            Get-Process OpenWith -ErrorAction SilentlyContinue | Stop-Process -Force
+          Set-ItemProperty $k 'AutoLaunchProtocolsFromOrigins' '[{"allowed_origins":["*"],"protocol":"mailto"}]'
+          $c = 'HKLM:\SOFTWARE\Policies\Chromium'
+          New-Item -Force $c | Out-Null
+          Set-ItemProperty $c 'AutoLaunchProtocolsFromOrigins' '[{"allowed_origins":["*"],"protocol":"mailto"}]'
+
+      - name: Ölçüm
+        shell: pwsh
+        timeout-minutes: 20
+        run: |
+          Set-Content "$env:GITHUB_WORKSPACE\olc.mjs" @'
+          import { chromium } from 'playwright';
+          import { execFileSync, execSync } from 'node:child_process';
+          import { writeFileSync } from 'node:fs';
+          import { createServer } from 'node:http';
+          const parca = 'Pazartesi%0D%0A%20%201.%20ders%2008%3A30%20%20510A%20Mat%20%C4%9F%C3%BC%C5%9F%C4%B1%0D%0A';
+          const url = (n) => { let u = 'mailto:a@ornek.com?subject=S&body='; while (u.length < n) u += parca; return u.slice(0, n); };
+          const ps = (k) => execFileSync('powershell', ['-NoProfile', '-Command', k], { encoding: 'utf8', maxBuffer: 64 << 20 });
+          const kapat = () => { try { execSync('taskkill /IM OpenWith.exe /F', { stdio: 'ignore' }); } catch {} };
+          // The mailto as OpenWith received it: its command line is `OpenWith.exe "<url>"`.
+          const gelen = async () => {
+            for (let i = 0; i < 24; i++) {
+              await new Promise((r) => setTimeout(r, 250));
+              const c = ps("(Get-CimInstance Win32_Process -Filter \"Name='OpenWith.exe'\" | Select-Object -First 1).CommandLine").trim();
+              if (c !== '') { const m = /"(mailto:[^"]*)"/.exec(c) ?? /(mailto:\S*)/.exec(c); return m ? m[1] : c; }
+            }
+            return null;
+          };
+          const yaz = (ad, n, g, u) => console.log(ad, 'gönderilen', n, '->', g === null ? 'GELMEDİ' : `gelen ${g.length} aynı mı ${g === u}`);
+
+          // 1. ShellExecuteW, the exe's own path. The url goes through a file:
+          // a command line would hit its own 32 767 first.
+          const dosya = process.env.RUNNER_TEMP + '\\olc-url.txt';
+          for (const n of [2000, 2083, 8000, 16000, 32000, 32700, 32760, 32767, 32768, 33000]) {
+            kapat();
+            const u = url(n);
+            writeFileSync(dosya, u);
+            const r = ps(`Add-Type -TypeDefinition 'using System; using System.Runtime.InteropServices; public static class K { [DllImport("shell32.dll", CharSet = CharSet.Unicode)] public static extern IntPtr ShellExecuteW(IntPtr h, string op, string f, string a, string d, int s); }'; [K]::ShellExecuteW([IntPtr]::Zero, 'open', [IO.File]::ReadAllText('${dosya}'), $null, $null, 1)`).trim();
+            const g = await gelen();
+            console.log('SE dönüş', r); yaz('SE', n, g, u);
           }
 
-      - name: Chromium ve Edge, mailto tıklaması kabuğa ulaşıyor mu
-        shell: pwsh
-        timeout-minutes: 10
-        run: |
-          Set-Content "$env:GITHUB_WORKSPACE\olc-tarayici.mjs" @'
-          import { chromium } from 'playwright';
-          import { execSync } from 'node:child_process';
-          const parca = 'Pazartesi%0D%0A%20%201.%20ders%2008%3A30%20%20510A%20Mat%20%C4%9F%C3%BC%C5%9F%C4%B1%0D%0A';
-          const openWith = () => {
-            try { return execSync('tasklist /FI "IMAGENAME eq OpenWith.exe" /NH', { encoding: 'utf8' }).includes('OpenWith.exe'); }
-            catch { return false; }
-          };
-          const kapat = () => { try { execSync('taskkill /IM OpenWith.exe /F', { stdio: 'ignore' }); } catch {} };
+          // 2. The browsers, from a real http origin.
+          const sunucu = createServer((_, res) => { res.setHeader('content-type', 'text/html'); res.end('<a id=a>x</a>'); }).listen(0);
+          await new Promise((r) => sunucu.once('listening', r));
+          const adres = `http://127.0.0.1:${sunucu.address().port}/`;
           for (const channel of [undefined, 'msedge']) {
             const ad = channel ?? 'chromium';
             let tarayici;
             try { tarayici = await chromium.launch({ headless: false, channel }); }
             catch (e) { console.log(ad, 'açılmadı', String(e).slice(0, 200)); continue; }
             const sayfa = await tarayici.newPage();
-            await sayfa.goto('data:text/html,<a id=a>x</a>');
-            for (const n of [500, 2000, 2044, 2045, 2046, 2047, 2048, 2083, 4000]) {
+            await sayfa.goto(adres);
+            for (const n of [2000, 4000, 8000, 16000, 32000, 32700, 32760, 33000, 100000, 2000000]) {
               kapat();
-              let u = 'mailto:a@ornek.com?subject=S&body='; while (u.length < n) u += parca; u = u.slice(0, n);
+              const u = url(n);
               await sayfa.evaluate((h) => { document.getElementById('a').href = h; }, u);
               await sayfa.click('#a');
-              let acildi = false;
-              for (let i = 0; i < 16 && !acildi; i++) { await new Promise((r) => setTimeout(r, 250)); acildi = openWith(); }
-              console.log(ad, 'mailto', n, '->', acildi ? 'KABUĞA ULAŞTI (OpenWith açıldı)' : 'kabuğa ulaşmadı');
+              yaz(ad, n, await gelen(), u);
             }
             kapat();
             await tarayici.close();
           }
+          sunucu.close();
           '@
-          node "$env:GITHUB_WORKSPACE\olc-tarayici.mjs"
+          node "$env:GITHUB_WORKSPACE\olc.mjs"
