@@ -44,9 +44,9 @@ komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
 **Dallar (2026-10-24).** Biten dal ve worktree'ler `npm run dal-temizle` ile gider (önce
 kuru koşu, `-- --uygula`; yalnız `origin/main`'e birleşmiş olanı, bundle, `arsiv/` etiketi
-ve `scratch/`'i `~/GitHub/Mozaikler/_arsiv/`'e aldıktan sonra). İlk uygulamada 11 yerel ve
-13 uzak birleşmiş dal silindi. Birleşmemiş iki eski dal TODO B7.38'de. `stabil` dalı yok
-(kullanıcının kararı, 2026-10-24).
+ve `scratch/`'i `~/GitHub/Mozaikler/_arsiv/`'e aldıktan sonra). Silinen dalların uçları
+`~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24*.bundle`'da. `klasorleme`'den taşınacak
+testler TODO B7.38'de.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 turları ve test programı 2026-10-23'te donduruldu. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
@@ -186,36 +186,33 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 `main`; `windows.yml` yalnız `main`; `surum.yml` `v*` etiketinde derler ve Release yayınlar,
 exe en son Release'in `surum.json`'ına bakar (`update.rs`). Başka adlı etiket ve dal silmek
 hiçbir şey tetiklemiyor. Yeni bir dal itmek bir CI koşusu başlatıyor, deploy ya da sürüm
-başlatmıyor (tuzak 154). Son sürüm: `v2.2.0` → `cbe6526`; Release "Latest" ve yayınlanmış
-`surum.json` da 2.2.0.
+başlatmıyor (tuzak 154).
 
-**Yapılan.** `scripts/dal-temizle.mjs` (girdiler ve uygulama) ile `scripts/dal-plan.mjs`
-(saf kurallar, `src/dalPlan.test.ts` 13 test). Korunan: `main`, `gh-pages`,
-workflow'da adı geçen dal, açık PR'ı olan dal, kirli worktree'deki dal; ayrıca plandan
-fazla iki koruma: içinde bir sürecin durduğu worktree (`/proc/*/cwd`, açık oturum) ve
-komutun koştuğu worktree. Ayrık HEAD'li worktree yalnız listeleniyor. `yayinla` etiketten
-sonra `stabil`'i fast-forward edip itiyor (`stabiliIlerlet`, `src/gitKomut.test.ts`'te
-çıplak bir uzakla dört test: ilk açılış, ileri, geri gitmiyor, uzak ayrıştıysa zorlamıyor).
-`yayinla` koşulmadı.
+**Betik.** `npm run dal-temizle`: `scripts/dal-temizle.mjs` (girdiler ve uygulama) ile
+`scripts/dal-plan.mjs` (saf kurallar, `src/dalPlan.test.ts` 13 test). Varsayılanı kuru koşu,
+`-- --uygula` uygular. Yalnız `origin/main`'in atası olan dal silinir. Korunan: `main`,
+`gh-pages`, workflow'da adı geçen dal, açık PR'ı olan dal, kirli worktree'deki dal, içinde bir
+sürecin durduğu worktree (`/proc/*/cwd`, açık oturum) ve komutun koştuğu worktree. Ayrık
+HEAD'li worktree yalnız listelenir. Silmeden önce doğrulanmış bir bundle, yerel `arsiv/<dal>`
+etiketleri ve kaldırılacak worktree'nin `scratch/`'i `_arsiv/<dal>/`'a (tuzak 153).
 
-**Uygulama.** İlk `--uygula` 12:36'da bundle'ı yazıp doğruladı
-(`_arsiv/dallar-2026-10-24.bundle`, 24 uç, 75 MB), 16 `arsiv/` etiketi attı, 11 yerel dalı
-ve 8 uzak dalı sildi, ve oturum kesilince yarıda kaldı. İkinci koşu kalan beş uzak dalı
-kendi bundle'ıyla (`dallar-2026-10-24-2.bundle`) sildi. İkisi de `git bundle verify`'dan
-geçiyor, uzakta `arsiv/` etiketi yok, prunable worktree yok. Hiçbir worktree kaldırılmadı:
-birleşmiş dalı olan tek worktree (`zebra`) kirliydi. Yarıda kalan bir koşunun yeniden
-verilince planı baştan kurup kalanı bitirdiği böylece görüldü.
+**Temizlik.** 11 yerel ve 14 uzak dal silindi: birleşmiş olanların hepsi (`ispc`, `PC`,
+`ozellik/sade-ekran`, `rakip/asc-karar`, `refactor/storage`, `ruflo-oncesi`, `v0.6`-`v2.0`,
+`z-turu`) ve kullanıcının kararıyla `origin/klasorleme`. Uçları üç bundle'da, üçü de
+`git bundle verify`'dan geçiyor:
 
-**Sonra: `stabil` geri alındı.** Kullanıcının kararı: `stabil` dalı olmayacak. Yerel dal
-silindi (hiç itilmemişti), `yayinla` adımı ve testleri `git revert` ile geri alındı, dal
-`dal-temizle`'nin korunanlarından, DECISIONS'tan, CLAUDE.md'den, BUILD.md'den ve tuzak
-154'ten çıktı. 12:36'daki yarıda kalan koşu bu oturumundu: oturumun kaydında 10:35:50Z'de
-verilen `--uygula`'nın sonucu yok, sıradaki mesaj 10:39:59Z'de "devam et". Başka hiçbir
-oturum betiği koşmamış, bu yüzden kilit eklenmedi. İki eski dal `git cherry`'de `+` verdi
-ve tutuldu (TODO B7.38).
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24.bundle`: birleşmiş 24 uç
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-2.bundle`: son beş uzak uç (`v1.0-teslim`,
+  `v1.1-kurulum`, `v1.2-blok-dagilimi`, `v2.0-dil`, `z-turu`)
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`: `origin/klasorleme` (`d202775`)
 
-**Koşulan.** `npm run hizli` (bir kez docs kapısı kırmızı, düzeltildi), `src/dalPlan.test.ts`,
-`src/gitKomut.test.ts`, `src/docs.test.ts`, `tsc --noEmit`, eslint, knip, prettier.
+Her ucun yerel bir `arsiv/` etiketi var (17), uzakta hiçbiri yok. Hiçbir worktree
+kaldırılmadı: birleşmiş dalı olan tek worktree (`zebra`) kirliydi. Duranlar: bugün açılan
+dallar ve `ruflo/kurulum` (çalışan oturumların), `test/gercek-ortam` (süren iş, TP7).
+`klasorleme`'nin testlerinden main'de karşılığı olmayanlar TODO B7.38'de.
+
+**Koşulan.** `npm run hizli`, `src/dalPlan.test.ts`, `src/docs.test.ts`, `tsc --noEmit`,
+eslint, knip, prettier.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

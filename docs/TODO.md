@@ -856,13 +856,21 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
       `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
       ayrı bir dalda.
-- [ ] **B7.38 Birleşmemiş iki eski dal: `test/gercek-ortam` ve `origin/klasorleme` (2026-10-24).**
-      `npm run dal-temizle` birleşmiş dalları sildi, birleşmemişlere dokunmadı. Bugün açılan
-      dallar ve `ruflo/kurulum` çalışan oturumların, onlara dokunulmuyor. İki eski dalda
-      `git cherry origin/main <dal>` `+` veriyor, yani main'de aynısı olmayan commit var:
-      `test/gercek-ortam` 14 (TP6, TP7, TP9, TP10, TP12 testleri ve `exe-windows` CI denemeleri),
-      `origin/klasorleme` 29 (2026-09'un klasörleme turu A1-C4 ve B7.16-B7.19 testleri). İkisi
-      de tutuldu; ne olacakları kullanıcının kararı.
+- [ ] **B7.38 `klasorleme`'nin main'de karşılığı olmayan testlerini taşı (2026-10-24).**
+      Dal silindi, ucu `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`'da ve yerel
+      `arsiv/klasorleme` etiketinde (`d202775`). Testleri o dalda `swap`, `bar`, `rows` ve
+      `pool` test dosyaları (`git ls-tree -r arsiv/klasorleme`); main'de karşılıkları
+      `src/constraints.test.ts` (takas), `src/programView.test.ts` ve `src/programScreen.test.tsx`.
+      Eksik olanlar:
+      - takas: kaynak blok sabitliyse takas yok (main yalnız sabit hedefi soruyor);
+      - takas: Uyar seviyesindeki bir kuralın uyarısı takas cümlesine ` · ` ile ekleniyor;
+      - takas: başarılı takas girdi state'i değiştirmiyor;
+      - takas: bilinmeyen sınıf ya da öğretmende blok adı `?` (`blockName`);
+      - alt satır: koşu sürüyor ama ilerleme henüz yoksa boştaki satıra düşüyor;
+      - alt satır: koşu sürerken eski bir sonuç olsa da ilerleme yazılıyor;
+      - ızgara: `continues` 1+1+1'de hiçbir hücrede yok, günün son saatinden ertesi güne geçmiyor;
+      - ızgara: dersi silinmiş (yetim) bir yerleşim sınıf ekseninde `?` ile çiziliyor, çökertmiyor;
+      - havuz: hiçbir branşa uymayan süzgeç boş tepsi veriyor, toplam aynı kalıyor.
 
 ---
 
