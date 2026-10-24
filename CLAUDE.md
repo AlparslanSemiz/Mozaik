@@ -45,6 +45,7 @@ Tuzaklar işe başlarken okunur: [docs/TRAPS.md](docs/TRAPS.md)'nin başındaki 
 - Bir TODO maddesine başlamadan önce `git worktree list`'e ve dal adlarına (`git branch -a`) bakılır; o madde için bir dal varsa madde alınmıştır: başlanmaz, raporda söylenir.
 - Commit'ten önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yok. Taşıma, içerik ve biçim değişikliği ayrı commit'lerde.
 - Push SSH ile ve yalnız kendi dalı: `git push origin <dal>`. Zorla push, etiket ve `main`'e push yok. CI'ın sonucu beklenmez, `gh run view` ile okunur, dalın CI'ı kırmızıysa önce o düzeltilir.
+- Hazır diye bildirilen dallar her zaman birleşme sırasıyla tek bir doğrusal zincir kurar: her dal bir öncekinin ucunu içerir (`git merge <önceki>`), kullanıcı bir döngüde sırayla `--ff-only` ile alır. Raporda zincirin sırası ve her dalın ucu yazılır.
 - Birleştirmeyi Alp yapar ya da onaylar, `--ff-only` ile: önce `git merge main`, yerelde `npm run hizli` yeşil, dalın CI'ı yeşil. "Şu an" ve tuzak numarası dalın birleşmeden önceki son commit'inde yazılır, önce birleşen numarayı alır. Belgelere yalnız `main`'deki commit hash'i yazılır.
 
 ## Ağır komutlar
