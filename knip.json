@@ -3,5 +3,5 @@
   "entry": ["scripts/*.mjs"],
   "project": ["src/**/*.{ts,tsx}", "e2e/**/*.ts", "scripts/**/*.mjs", "*.ts", "*.js"],
   "ignoreExportsUsedInFile": { "interface": true, "type": true },
-  "ignoreBinaries": ["tauri-driver", "pgrep", "desktop-file-validate", "shellcheck"]
+  "ignoreBinaries": ["tauri-driver", "pgrep", "desktop-file-validate", "shellcheck", "tasklist"]
 }
