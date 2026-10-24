@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-23.
+Son güncelleme: 2026-10-24.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -31,9 +31,10 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Çalışma düzeni (2026-10-23, süreç sadeleşti, DECISIONS).** `~/GitHub/Mozaikler/Mozaik`
-yalnız `main`'i tutar, her iş kendi dalında ve yanındaki kendi worktree'sinde, "Şu an"ı
-birleşen dalın son commit'i yazar. Durma sebepleri beş (veri kaybı riski, Roboders'e ya da
+**Çalışma düzeni (2026-10-23, süreç sadeleşti, DECISIONS).** Tek kalıcı checkout,
+`~/GitHub/Mozaikler/Mozaik`; her iş `main`'den açılan bir dalda, paralel çalışan her oturum
+ya da ajan geçici bir worktree'de, dalı birleşince kaldırılır. "Şu an"ı birleşen dalın son
+commit'i yazar. Durma sebepleri beş (veri kaybı riski, Roboders'e ya da
 gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış eylem, kullanıcının parası ya da
 hesapları), gerisi raporda "Aldığım kararlar". Test riske göre ([TESTPLAN.md](TESTPLAN.md),
 "Test politikası"): commit'ten önce yalnız `npm run hizli` ve dokunulan testler, tam
@@ -51,8 +52,9 @@ TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `ma
 dalda gerileme testiyle.
 
 **Sıradaki iş.** Önce TB8 (veri kaybı sınıfı, TODO §8l): "Tümünü dosyadan aç" eksik planı
-boş plan olarak açıyor. `tb8-eksik-plan` dalında, `~/GitHub/Mozaikler/Mozaik-tb8`'de, önce
-kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor` 2026-10-23'te kalktı.
+boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalında
+(`~/GitHub/Mozaikler/Mozaik-tb8`), henüz `main`'de değil. Birleşmeyi bekleyen öteki iki dal:
+`ozellik/asil-ikon` (`Mozaik-ikon`) ve `ruflo/kurulum` (Alp'in deny testi, o dalın TODO B7.33'ü).
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -155,6 +157,31 @@ kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor`
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
+
+**Durum.** Üç worktree açıktı: `Mozaik-ikon`, `Mozaik-surec`, `Mozaik-tb8`. Hiçbirinde cwd'si
+içeride bir süreç yoktu, ama sabah 09:58'de aynı anda üç oturum açıldı. Cwd'leri ana klasördeydi,
+ikisi mutlak yolla worktree'lere yazıyordu: biri `Mozaik-ikon`'da küçük ikonun mavisini
+değiştiriyordu (commit edilmemiş dört dosya onun), öteki `tb8-eksik-plan`'a `main`'i
+birleştirip inceleme ve tıklama testi yapacaktı. İkisine dokunulmadı.
+
+**Birleşen.** `surec-sadelestirme` (bfa6099), `main`'in torunuydu, `main` ona ileri sarıldı
+(`--ff-only`), çatışma yok. Önce `npm run hizli` dalın ucunda yeşil (1339 geçti, 1 atlandı),
+dalın CI'ı yeşildi (40028473202). Worktree'nin `scratch/mutasyon-kaniti/`'si
+`~/GitHub/Mozaikler/arsiv/Mozaik-surec/`'e kopyalandı, worktree kaldırıldı, dal yerelde ve
+origin'de silindi.
+
+**Kural.** Alp'in cevabı: tek kalıcı checkout, paralel çalışan her oturum ya da ajan geçici
+bir worktree'de (DECISIONS 2026-10-23, CLAUDE.md "Çalışma düzeni"). `surec`'in "her iş kendi
+worktree'sinde" cümlesi ve eski 2026-10-23 kaydı bununla değişti; BUILD, `git-komut.mjs`,
+`linux-kur.sh` ve `gitKomut.test.ts`'teki yorumlar da. Bu dal da (`belge/calisma-yeri`) kendi
+geçici worktree'sinde yazıldı.
+
+**Bekleyen.** `ozellik/asil-ikon` ve `tb8-eksik-plan`: canlı oturumları var, onlar ya da Alp
+birleştirir. `ikon`'un TODO numarası B7.32, `main`'deki B7.32 `surec`'in (`yayinla` kilit
+dosyası); `ikon` birleşirken ilk boş numarayı alır. `ruflo/kurulum`: Alp'in deny testini
+bekliyor; birleşirken CLAUDE.md'deki çakışma bu kuralın ve sadeleşen sürecin lehine çözülür.
 
 ## 2026-10-23 gece · Süreç sadeleşti (`surec-sadelestirme`)
 
