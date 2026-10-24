@@ -26,8 +26,8 @@ import {
   varsayilanIkili,
   windowsYerleri,
 } from '../scripts/webdriver.mjs';
-import { LIBRARY_KEY, planKey } from '../src/pure/library';
-import { SCHEMA_VERSION } from '../src/leaf/types';
+import { LIBRARY_KEY, planKey } from '../src/pure/io';
+import { SCHEMA_VERSION } from '../src/leaf/model';
 
 const KOK = resolve(import.meta.dirname, '..');
 const ANLIK = process.env.MOZAIK_GUNCELLEME_ANLIK;

@@ -420,9 +420,8 @@ Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.
 `Unreleased` bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve dördü tek commit olur.
 Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu,
 sonra `exe-windows.yml` koşusu (yoksa `main`'de başlatılarak) bulunup sonuna kadar
-beklenir. Şema sürümü son etiketten beri değiştiyse (`scripts/sema-surumu.mjs`, son
-`vX.Y.Z` etiketindeki `SCHEMA_VERSION` ile `HEAD`'inki) dördüncü olarak güncelleme kapısı
-`guncelleme-windows.yml` da (aşağıda) aynı yolla beklenir. Hepsi yeşilse etiket annotated atılır, adıyla itilir
+beklenir, dördüncü olarak güncelleme kapısı `guncelleme-windows.yml` da (aşağıda), her
+sürümde. Hepsi yeşilse etiket annotated atılır, adıyla itilir
 ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi
 görünür: site güncellenir, üç indirme dosyası eski kalır. Biri kırmızıysa, iptal
 edildiyse ya da hiç görünmediyse etiket atılmadan durur. Site yalnız `ci.yml`'in
@@ -438,8 +437,7 @@ yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor
 worktree `main`'in commit'inde ayrık durabilir.
 
 `npm run yayinla -- --kuru` depoda hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`,
-`windows.yml` ve `exe-windows.yml` koşularını (şema değiştiyse `guncelleme-windows.yml`'inkini
-de) bulur, bekler, sonucu söyler ve etiket adımında durur. İki exe iş akışı her push'ta
+`windows.yml`, `exe-windows.yml` ve `guncelleme-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. İki exe iş akışı her push'ta
 koşmadığı için commit'in koşusu yoksa onu `main`'de başlatır (2026-10-10, güncelleme kapısı
 2026-10-24).
 
@@ -452,9 +450,9 @@ Windows UI Automation ile, `scripts/uia.mjs`), X ile kapanır
 dosyanın yerine konur (`.yeni`, `.eski`), açılır, ve eski sürümün yazdığı her değerin
 depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hiçbir listenin boyunun
 değişmediği ve eski sürümün günlük kopyalarının silinmediği sorulur
-(`e2e/guncelleme-exe.spec.ts`). Şemaya ve depolama koduna dokunan bir `main` push'unda ve
-elle koşar; `yayinla` onu yalnız şema değişen bir sürümde bekler, çünkü babanın verisini
-ilk kez göç ettiren sürüm o.
+(`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
+push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
+bekler (kullanıcının kararı, 2026-10-24).
 
 **Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
 `e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta

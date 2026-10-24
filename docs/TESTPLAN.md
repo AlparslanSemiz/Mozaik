@@ -54,7 +54,7 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Kanarya | `.github/workflows/kanarya.yml` | Salı 02:00 UTC ve elle: denetim ve ana E2E'nin bir parçası runner'ın bir sonraki imajında (bugün `ubuntu-26.04`). Hiçbir şeyi kilitlemez; iki hafta yeşil kalınca `ci.yml`'in sabit sürümü ona çekilir |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 | Gerçek exe, Windows | `.github/workflows/exe-windows.yml` | Pazartesi 01:30 UTC, exe'ye dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: aynı süit `Mozaik.exe`'ye karşı, WebView2'de. Yavaş süit, push'u ve birleştirmeyi beklemez; `npm run yayinla` etiketten önce onun da yeşilini bekler |
-| Güncelleme, Windows | `.github/workflows/guncelleme-windows.yml` | şemaya ya da depolama koduna dokunan bir `main` push'unda ve elle: son Release'in exe'si veri üretir, bu commit'in exe'si onun yerine geçer ve veriyi eksiksiz, şimdiki şemada açar. `npm run yayinla` şema değişen bir sürümde etiketten önce onun da yeşilini bekler |
+| Güncelleme, Windows | `.github/workflows/guncelleme-windows.yml` | exe'ye, şemaya ya da depolama koduna dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: son Release'in exe'si veri üretir, bu commit'in exe'si onun yerine geçer ve veriyi eksiksiz, şimdiki şemada açar. `npm run yayinla` her sürümde etiketten önce onun da yeşilini bekler |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
