@@ -154,6 +154,10 @@ const DE: Sozluk = {
     "**Dieser Plan wurde in einem anderen Fenster geändert.** Dieses Fenster speichert nicht mehr.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**Der gespeicherte Plan konnte beim Start nicht gelesen werden.** Er wurde nicht überschrieben.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**Der gespeicherte Plan wurde von einer neueren Version geschrieben.** Diese Version kann ihn nicht öffnen und überschreibt ihn nicht; was Sie hier tun, wird nicht gespeichert.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**Der gespeicherte Plan konnte nicht gelesen werden.** Er wurde nicht überschrieben; was Sie hier tun, wird nicht gespeichert. Ihre Sicherungsdatei öffnen Sie mit **Aus Datei öffnen**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Das automatische Speichern funktioniert auf diesem Computer nicht.** Alles geht verloren, wenn das Programm geschlossen wird. Drücken Sie beim Arbeiten häufig **In Datei speichern** und legen Sie vor dem Herunterfahren unbedingt eine Sicherung an.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -633,6 +637,9 @@ const DE: Sozluk = {
   Oturum: "Sitzung",
   "bir önceki": "die vorige",
   "{n} oturum önce": "vor {n} {n:Sitzung|Sitzungen}",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "von einer neueren Version geschrieben, diese Version kann sie nicht öffnen",
+  "okunamadı": "nicht lesbar",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "Bis dahin ist **In Datei speichern** in der oberen Leiste das einzige Mittel.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":

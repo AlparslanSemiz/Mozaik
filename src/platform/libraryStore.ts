@@ -23,6 +23,14 @@
 // it is marked every write reads the key again first: still empty is a first
 // use, the write goes ahead and the mark is dropped; full is a plan this window
 // never saw, and nothing is written over it.
+//
+// A plan read UNREADABLE is frozen (A1, the audit of 2026-10-24). Its key holds
+// text this copy cannot parse, a newer copy's plan or a body cut short, and
+// the opening read, a switch and the switch after a delete used to hand back
+// an empty plan the autosave then wrote over it. `planStore.ts` decides what
+// is unreadable, because that takes `parseState`; this file only keeps the
+// list and refuses the writes. The user lifts it: opening a file over the
+// plan, deleting it, or opening a whole library over it (`explicitly`).
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../pure/library';
 import { safely } from '../leaf/storage';
@@ -72,6 +80,47 @@ export function writeRefused(): boolean {
   return refused;
 }
 
+/** Why a key is frozen: a newer copy's plan, or text nobody can read. */
+export type Unreadable = 'yeni' | 'okunamadi';
+
+const frozen = new Map<Id, Unreadable>();
+let explicit = false;
+
+/** Plan `id`'s key holds text this copy cannot read: nothing goes over it. */
+export function freezePlan(id: Id, why: Unreadable): void {
+  frozen.set(id, why);
+}
+
+export function frozenPlan(id: Id): Unreadable | null {
+  return frozen.get(id) ?? null;
+}
+
+/** The user has put something in this plan's place: its key may be written. */
+export function thawPlan(id: Id): void {
+  frozen.delete(id);
+}
+
+/**
+ * Runs `act` as the user's own decision about the plans it writes or drops: a
+ * frozen key it reaches is thawed and written. Only the controls that replace
+ * or delete a plan on purpose, behind a question, go through here.
+ */
+export function explicitly<T>(act: () => T): T {
+  explicit = true;
+  try {
+    return act();
+  } finally {
+    explicit = false;
+  }
+}
+
+function mayOverwrite(id: Id): boolean {
+  if (!frozen.has(id)) return true;
+  if (!explicit) return false;
+  frozen.delete(id);
+  return true;
+}
+
 /**
  * Returns whether the write actually happened.
  *
@@ -81,7 +130,7 @@ export function writeRefused(): boolean {
  * plan, and there the panel has to be able to say which one did not fit.
  */
 export function writePlanText(id: Id, text: string): boolean {
-  if (writesClosed() || !mayWritePlan(id)) return false;
+  if (writesClosed() || !mayWritePlan(id) || !mayOverwrite(id)) return false;
   return (
     safely(() => {
       localStorage.setItem(planKey(id), text);
@@ -91,6 +140,6 @@ export function writePlanText(id: Id, text: string): boolean {
 }
 
 export function dropPlanText(id: Id): void {
-  if (writesClosed() || !mayWritePlan(id)) return;
+  if (writesClosed() || !mayWritePlan(id) || !mayOverwrite(id)) return;
   safely(() => localStorage.removeItem(planKey(id)));
 }

@@ -23,7 +23,14 @@ import { usePlans } from './usePlans';
 import { emptyState } from '../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
 import { parseState } from '../pure/parseState';
-import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
+import {
+  explicitly,
+  frozenPlan,
+  readLibrary,
+  thawPlan,
+  writeLibrary,
+  writeRefused,
+} from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../leaf/types';
 
@@ -91,14 +98,25 @@ export function useStore() {
   }, []);
   const undo = useCallback(() => dispatch({ type: 'undo' }), []);
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
-  const loadState = useCallback((state: State) => dispatch({ type: 'load', state }), []);
+  // A load is "Dosyadan aç" or "Her şeyi sil", each behind its own question:
+  // the user has put something in this plan's place, so a plan this copy
+  // could not read may be written over now (libraryStore.ts, A1). A plain
+  // change, the sample school included, does not count.
+  const openNow = useRef(box.planId);
+  openNow.current = box.planId;
+  const loadState = useCallback((state: State) => {
+    thawPlan(openNow.current);
+    dispatch({ type: 'load', state });
+  }, []);
 
   // Every save goes through here, so the answer reaches the screen. It used to
   // be dropped: with the storage full the autosave failed and the page said
   // "Örnek veri yüklendi." over it (VK2, measured by the test session).
   const [trouble, setTrouble] = useState<SaveTrouble>(null);
   const write = useCallback((id: Id, d: State) => {
-    if (writesClosed()) return;
+    // A plan this copy could not read is on screen as an empty stand-in, and
+    // the stand-in is never saved: the strip says so instead (A1).
+    if (writesClosed() || frozenPlan(id) !== null) return;
     const landed = savePlan(id, d);
     setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');
   }, []);
@@ -220,7 +238,19 @@ export function useStore() {
     return () => window.removeEventListener('keydown', onKey);
   }, [undo, redo]);
 
+  // Deleting a plan and opening a whole library over this one are the other
+  // two decisions that may go over a plan this copy could not read. The empty
+  // stand-in itself is still never written: `write` above refuses it first.
+  const decided = {
+    ...plans,
+    deletePlan: (id: Id) => explicitly(() => plans.deletePlan(id)),
+    replaceLibrary: (bundle: Parameters<typeof plans.replaceLibrary>[0]) =>
+      explicitly(() => plans.replaceLibrary(bundle)),
+  };
+
   return {
+    /** The open plan's key holds text this copy cannot read, and why: the strip. */
+    unreadable: frozenPlan(box.planId),
     state: box.present,
     change,
     manageProgram,
@@ -237,6 +267,6 @@ export function useStore() {
     saveTrouble: trouble,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
-    plans,
+    plans: decided,
   };
 }

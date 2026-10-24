@@ -352,6 +352,7 @@ export default function App() {
     plans,
     park,
     saveTrouble,
+    unreadable,
   } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -1060,6 +1061,22 @@ export default function App() {
                 <button className="btn" onClick={() => window.location.reload()}>
                   {t('Yenile')}
                 </button>
+              </div>
+            )}
+
+            {/* THE SAVED PLAN IS THERE AND THIS COPY CANNOT READ IT (A1): a newer
+            copy's plan, or one cut short. The screen holds an empty stand-in
+            that is never saved over it; opening a file in its place, or
+            deleting the plan, is what lifts that (libraryStore.ts). No reload
+            button: a reload reads the same text. */}
+            {unreadable !== null && (
+              <div className="save-warning" role="alert">
+                ⚠{' '}
+                {unreadable === 'yeni' ? (
+                  <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez." />
+                ) : (
+                  <T k="**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz." />
+                )}
               </div>
             )}
 

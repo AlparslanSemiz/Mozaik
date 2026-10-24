@@ -113,6 +113,15 @@ geçer. Yalnız bir koşunun içindeki blok sınırı yeniden okunur, ve hiçbir
 kısıt o sınıra bakmaz (tuzak 75). Bilinmeyen, ileriki bir sürüm `null` döner,
 tahmin edilmez. Üst çubuk o dosyaya "okunamadı" değil "daha yeni bir sürümle yazılmış" der (`readPlanFile()`).
 
+Bu bilgisayarın deposundaki bir plan üç cevaptan birini verir: yok, okundu, okunamadı
+(`readStoredPlan()`). Okunamayan daha yeni bir sürümün planı, yarıda kesilmiş bir metin ya da
+`parseState`'i attıran bir gövde olabilir. Okunamayan anahtar dondurulur: açılışta, plan
+geçişinde ve silmeden sonra açılan planda ekrana boş bir yer tutucu gelir, kırmızı şerit
+nedenini söyler, ve ne otomatik kayıt ne klasör o anahtarın üstüne yazar. Dondurmayı yalnız
+kullanıcının açık bir eylemi kaldırır: "Dosyadan aç" ya da "Her şeyi sil" ile o planın yerine
+bir şey koymak, planı Planlar'dan silmek, ya da "Tümünü dosyadan aç". 2026-10-24'e kadar
+okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i).
+
 v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünkü
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
 Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.

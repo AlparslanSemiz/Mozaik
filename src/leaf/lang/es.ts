@@ -153,6 +153,10 @@ const ES: Sozluk = {
     "**Este plan se cambió en otra ventana.** Esta ventana ya no guarda.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**No se pudo leer el plan guardado al iniciar.** No se ha sobrescrito.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**El plan guardado lo escribió una versión más reciente.** Esta versión no puede abrirlo y no lo sobrescribe; lo que haga aquí no se guarda.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**No se pudo leer el plan guardado.** No se ha sobrescrito; lo que haga aquí no se guarda. Puede abrir su archivo de copia con **Abrir desde archivo**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**El guardado automático no funciona en este ordenador.** Todo lo que haga se pierde al cerrar el programa. Pulse a menudo **Guardar en archivo** mientras trabaja y haga siempre una copia antes de apagar el ordenador.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -631,6 +635,9 @@ const ES: Sozluk = {
   Oturum: "Sesión",
   "bir önceki": "la anterior",
   "{n} oturum önce": "hace {n} {n:sesión|sesiones}",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "escrita por una versión más reciente, esta versión no puede abrirla",
+  "okunamadı": "no se pudo leer",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "Hasta entonces, **Guardar en archivo** en la barra superior es el único remedio.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":
