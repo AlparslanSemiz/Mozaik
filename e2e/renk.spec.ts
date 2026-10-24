@@ -797,7 +797,7 @@ test.describe('93. Listelerde zebra', () => {
     row.evaluate((el) => getComputedStyle(el).backgroundColor);
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`${theme} temada çift satır zebrada, üstüne gelinen satır zebrayı eziyor`, async ({
+    test(`${theme} temada çift satır zebrada, üstüne gelinen satır halka alıyor ve zebrada kalıyor`, async ({
       page,
     }) => {
       await openWithSample(page);
@@ -866,11 +866,15 @@ test.describe('93. Listelerde zebra', () => {
         expect(f.edge, 'girdinin kenarı').toBe(t['--line']);
       }
 
-      // The row under the pointer wins over the zebra, on a zebra row.
+      // The row under the pointer gets a ring and keeps its stripe: a ground
+      // of its own took the row's ink down with it.
+      const ring = (row: import('@playwright/test').Locator) =>
+        row.evaluate((el) => getComputedStyle(el).outlineStyle);
       await rows.nth(1).locator('td.row-no').hover();
-      await expect.poll(() => ground(rows.nth(1))).toBe(t['--bg']);
+      await expect.poll(() => ring(rows.nth(1))).toBe('solid');
+      expect(await ground(rows.nth(1))).toBe(t['--zebra']);
       await page.mouse.move(0, 0);
-      await expect.poll(() => ground(rows.nth(1))).toBe(t['--zebra']);
+      await expect.poll(() => ring(rows.nth(1))).toBe('none');
 
       // table.stat: the same rule, the same token.
       await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
@@ -881,7 +885,8 @@ test.describe('93. Listelerde zebra', () => {
       expect(await ground(stat.nth(0))).toBe('rgba(0, 0, 0, 0)');
       expect(await ground(stat.nth(1))).toBe(t['--zebra']);
       await stat.nth(1).hover();
-      await expect.poll(() => ground(stat.nth(1))).toBe(t['--bg']);
+      await expect.poll(() => ring(stat.nth(1))).toBe('solid');
+      expect(await ground(stat.nth(1))).toBe(t['--zebra']);
       await page.mouse.move(0, 0);
 
       // The split picker was the one control in a list on the browser's own

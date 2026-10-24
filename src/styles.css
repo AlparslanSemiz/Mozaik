@@ -3757,7 +3757,11 @@ select:focus-visible,
 textarea:focus-visible,
 .card:focus-visible,
 .card-pin:focus-visible,
-.pool-card:focus-visible {
+.pool-card:focus-visible,
+.row-grip:focus-visible,
+.color-pick:focus-visible,
+.split-pick:focus-visible,
+.entity:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
      a lesson card, a swatch — and that is precisely where somebody navigating
@@ -4077,9 +4081,30 @@ table.list > tbody + tbody > tr:first-child > td {
   border-top: 2px solid var(--line-dark);
 }
 
+/* THE ROW UNDER THE POINTER: a ring, not a ground. A ground of its own had
+   to beat both stripes, and it took the row's ink down with it (--muted on
+   --bg measured 5.06 in the light theme); a ring leaves the row's contrast
+   what it is on either stripe. Outline and not box-shadow, because
+   forced-colors keeps an outline and drops a shadow. Grey and inside the row,
+   so it cannot be taken for the keyboard's ring, which is the accent, outside
+   the control, with a paper gap. Off while a row is in the air: the drop mark
+   is the one thing that speaks then. */
 table.list tbody tr:hover,
-table.stat tbody tr:hover {
-  background: var(--bg);
+table.stat tbody tr:hover,
+table.sheet-lessons tbody tr:hover {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
+}
+
+body.row-dragging table.list tbody tr:hover {
+  outline: none;
+}
+
+/* The open plan, on its own row (Planlar): the accent edge the suggestion
+   list uses for "this one", so the reader does not have to find "· açık
+   olan" at the end of a name. */
+table.list tbody tr[aria-current='true'] > td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 /* A field in a list row gives up its recess. In the light theme --zebra is a
@@ -4809,14 +4834,17 @@ table.sheet-lessons select.transfer-pick {
   background: var(--zebra);
 }
 
-.entity:hover {
-  background: var(--bg);
+.entity:hover:not([aria-current='true']) {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
 }
 
 .entity[aria-current="true"] {
   background: var(--accent-bg);
   border-color: var(--accent);
-  color: var(--accent);
+  /* --text, not the accent: the accent on its own ground is 6.28 / 6.70, and
+     the ground and the edge already say "this one". */
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -5322,7 +5350,8 @@ table.print td .p-bottom {
 tr.break-row th,
 tr.break-row td {
   background: var(--bg);
-  color: var(--muted);
+  /* --text: --muted on --bg measured 5.06, in the smallest type on screen. */
+  color: var(--text);
   font-size: var(--fs-xs);
   font-weight: 600;
 }
