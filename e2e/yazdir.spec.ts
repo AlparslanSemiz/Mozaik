@@ -17,7 +17,7 @@ import {
   openLessons,
   PDF_YALNIZ_CHROMIUM,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 
 // Hook order. "Yazdırılacak program yok" returned before a `useMemo`, so
 // lessons coming back while the tab stayed open (Ctrl+Z, "Dosyadan aç") asked

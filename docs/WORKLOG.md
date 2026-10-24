@@ -25,6 +25,16 @@ Son güncelleme: 2026-10-24 gece (`ogretmene-eposta`; zincirin ucu artık `rk2-b
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
 denetimin on üç kusuru).
 
+**`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
+okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
+sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
+siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
+
+**`refactor/moduller` `main`'de (2026-10-24)**, `fix/okunamayan-plan`'dan sonra. Açık her dal
+birleşmeden önce `git merge main` yapar; eski yol → yeni yol tablosu ve her dalın çakışan
+dosyaları `~/GitHub/Mozaikler/Mozaik-refactor/scratch/refactor/` altında, `yol-haritasi.md` ve
+`merge-tree.txt` (o worktree o dallar birleşene kadar kalır).
+
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
 program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
@@ -43,16 +53,13 @@ olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de ko�
 komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-turları ve test programı 2026-10-23'te donduruldu. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
-paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi,
-`platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
-`pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
-Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
-TP-B birikim maddesi. 2026-10-24'te yedi dal zincir olarak birleşti (aşağıdaki girdiler):
-TB8 düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in iki yarısı da düzeldi (açılış yarısı
-`tb1-acilis`'te); TB7'nin exe yarısı düzeldi (Linux'ta ve Windows'ta gerçek exe süitinde yeşil),
-tarayıcı yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor; dosya
-okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kapandı.
+turları açık (DECISIONS 2026-10-24). `refactor/moduller` (2026-10-24, aşağıdaki girdiler) her
+kaynak dosyayı `src/<katman>/<alan>/`'a koydu; RF1, RF5, RF6, RF8, RF9 ve RF10 bitti, açık
+kalanlar RF11, RF12, RF20, RF2'nin kalanı, RF3 ve RF18, RF4 park ([TODO.md](TODO.md) §8k).
+Sıradaki üç bileşen bölmesi (Teachers, Dersler'in formu, Program'ın sağ tık menüleri) her
+biri kendi dalında, TODO RF24–RF26. Test programı (2026-10-09, [TODO.md](TODO.md) §8l,
+2026-10-23'te donduruldu): Faz 0 ve Faz 1'in çoğu bitti, kalanı TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir
+dalda gerileme testiyle.
 
 **Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
 `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik` → `tb1-acilis` →
@@ -117,7 +124,9 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
    koştuğu bir yolu koruyorsa alınır, önce TP7, TP8 ve TP10 (güncelleme yolu). `yayinla`
    Windows E2E'yi bekliyor (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu
    26.04'ü haftada bir koşuyor.
-9. Refactor donduruldu (TODO §8k): yeni paket turu açılmıyor. RK15 (bir öğretmenin aynı
+9. Refactor turları açık (TODO §8k): bir tur davranış değiştirmez, bulduğu hatayı §8k'ye
+   yazar. Bileşen bölmesi demeti prop adları kadar büyütüyor; `size-limit` yalnız bir dalın
+   ölçtüğü kadar ve gerekçesi buraya yazılarak yükselir (RF24–RF26). RK15 (bir öğretmenin aynı
    saatte iki sınıfı) özellik dalının işi.
 10. Birleştirme turunun açık işleri (2026-10-23, aşağıdaki girdi): 2026-10-23 yönünün
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
@@ -165,20 +174,20 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 16 (2026-09-26) `main`'de; 17 `ogretmene-eposta`'da (2026-10-24) | `src/leaf/types.ts` |
-| Ana E2E süiti | 644 test, 34 dosya (2026-10-24, zincir) | `npx playwright test --list` |
+| Şema sürümü | 16 (2026-09-26) `main`'de; 17 `ogretmene-eposta`'da (2026-10-24) | `src/leaf/model/types.ts` |
+| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 14 test, hepsi geçti, 1,3 dk, XWayland'de, kirli (2026-10-24, `tb7-sekme-kapanis`) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Gerçek exe süiti | 13 test, hepsi geçti, 1,1 dk (2026-10-24, `refactor/moduller`) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
-| Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
-| `npm run hizli` | 51 dosya, 1334 test, 7,4–9,8 s, temiz koşulda (2026-10-23 gece, `surec-sadelestirme`) | `npm run hizli` |
+| Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preference/preferenceKeys.ts`'te, tablo `platform/storage/storageReport.ts`'te |
+| Birim testleri | 58 dosyada 1470 test (2026-10-24, `refactor/moduller`); CI'da 1470 geçti, bu makinede 1'i atlanıyor (`shellcheck` yok) | `npm test` |
+| `npm run hizli` | 54 dosya, 1357 test (1356 geçti, 1 atlandı), 10,2 s, kirli koşulda (2026-10-24, `refactor/moduller`); `npm test`'in 1470'inden dört yavaş dosyanın 113 testi eksik | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, 6 dk 52 sn, en uzun iş `e2e (2)` 409 s, Playwright kurulumu her işte 8–14 s (2026-10-23 gece, `--with-deps` kalktıktan sonra); öncesi `main` 4a2901c'de 14 dk 28 sn, kurulum bir işte 597 s | `gh run view 40025191968`, `40019600457` |
-| Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
-| Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
+| Ana E2E, Windows | 642/642 (639 ana süit 17,7 dk, öneri araması 3 test 6,3 dk), iş 25,3 dk (2026-10-24, `refactor/moduller` 6e395ca, elle tetiklendi) | `windows.yml` 40096520521 |
+| Ana E2E, WebKit | 614 geçti, 17 kırmızı, 11 atlandı, 15,0 dk; aynı gün `main` c41223c'de 613, 18, 11 ve dalın kırmızıları main'inkilerin alt kümesi (2026-10-24, `refactor/moduller`) | Playwright'ın kabında, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
@@ -186,10 +195,10 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | Güncelleme kapısı | 1 geçti, iki koşuda; eski sürümün evresi yaklaşık 20 s (2026-10-24, `ogretmene-eposta`) | `guncelleme-windows.yml` 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
-| Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
+| Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
-| Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
-| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
+| Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/pure/solver/solver.test.ts`, "gerçek ölçek" |
+| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/pure/relax/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 
@@ -558,6 +567,172 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ---
 
+## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
+
+**Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
+`main`'in üstündeydi; son commit'i "Şu an"ı birleşmiş hâline çevirdi, `npm run hizli` 54/54
+dosya, dalın CI'ı 40115539939 yeşil, `main`'e `--ff-only` (d8426d6), `main`'in `ci`'ı
+40116068594 ve `windows`'u 40116068668 yeşil. Refactor ajanı önceki sohbetin alt ajanıydı,
+erişilemedi; `git merge main`'i bu oturum yaptı.
+
+**Çakışmalar.** Beş dosya, hepsi davranışsız. `planStore`, `useStore`, `useFolder` ve
+`folder.test`'te yalnız import satırları (main'in yeni adları, refactor'un paket yollarıyla;
+`readStoredPlan` ve `Library` `pure/io`'nun girişinden). `src/ui/App.tsx` refactor'da silinmiş,
+main'de okunamayan plan şeridini almıştı: şerit aynı metin ve aynı sırayla (boş açılış
+şeridinin altı) `ui/shell/Notices.tsx`'e, `unreadable` `App`'ten prop olarak; tipi
+`ReturnType<typeof useStore>['unreadable']`, `platform/storage`'ın girişini genişletmemek için.
+Main'in köke koyduğu iki birim testi (`okunamayan`, `useFolder`) öteki testler gibi
+`src/platform/storage/`'a; TODO, TRAPS ve bu dosyadaki yolları, `lib.rs`'teki bir yorumun yolu
+ona göre. Boyut eşiği main'in 1 186 500'ü (fix dalının kararı), refactor yükseltmedi.
+
+**Doğrulama (birleşik kopya, 272f671).** `npm run kontrol` (`agir.sh`) çıkış 0: vitest 60/60
+dosya, 1506 test; Playwright 651; site 24; çözücü stresi 7. `dist/index.html` 1 173 991 bayt,
+`main`'in 1 170 864'ünün 3 127 bayt (%0,27) üstü, refactor'un birleşmeden önceki farkıyla aynı.
+Ölçülmeyen: ekran görüntüsü farkı, WebKit, gerçek Windows exe (önceki girdideki gibi).
+
+**Bırakılan.** `yol-haritasi.md` (113 taşıma, 6 bölünen dosya, adı kalıp parçası ayrılan 5)
+ve `merge-tree.txt` (14 açık dalın 272f671'e karşı çakışan dosyaları) refactor worktree'sinin
+`scratch/refactor/`'unda. Çoğu dalın çakışması refactor'dan değil, `fix/okunamayan-plan`'ın
+dokunduğu `parseState`, `usePlans`, `storeContract.test` ve `fuzz.test`'ten.
+
+## 2026-10-24 akşam · `refactor/moduller`'in birleşmeye hazırlık doğrulaması
+
+Dalın HEAD'i 6e395ca, taban `main` c41223c (dalın içinde, ilerlemedi). Karşılaştırma için iki
+geçici ayrık worktree: `Mozaik-refactor-taban` (main) ve `Mozaik-refactor-mut` (6e395ca,
+mutasyon koşarken asıl ağaç serbest kalsın diye), ikisi de `node_modules`'u bağla paylaşıyor.
+
+**Koşulanlar (dalda, bu makinede, `scripts/agir.sh` altında).**
+
+```
+ci.yml 40095546438 (6e395ca)       yeşil: denetim (58 dosya, 1470 birim), e2e 3 parça, e2e-arama 3 parça
+windows.yml 40096520521 (elle)     642/642 (639 + öneri araması 3), iş 25,3 dk
+çözücü stresi (npm run cozucu)     7/7 dalda ve main'de; yerleşen blok, yerleşemeyen ders, delik
+                                   sayıları birebir; deterministik iki dünyanın düğümü aynı (253,
+                                   2840), 15 s'lik bütçeyi dolduran iki dünyada 90 694 / 92 645 ve
+                                   99 995 / 100 407 (dal / main, makine yükü)
+WebKit, Playwright'ın kabında      dal 614 geçti, 17 kırmızı, 11 atlandı; main 613, 18, 11; dalın 17
+                                   kırmızısı main'in 18'inin alt kümesi (fazlası hareket.spec.ts'in
+                                   süreye bağlı "AZ süreleri kısaltıyor"u)
+site süiti (npm run test:site)     24/24
+gerçek exe (npm run exe:e2e)       13/13, sahte evde: açılış, örnek okulun dizilmesi, diske yedek,
+                                   "Dosyadan aç" ile geri yükleme, VK1, VK2
+npm run hizli                      54 dosya, 1357 test (1356 geçti, 1 atlandı)
+```
+
+İlk WebKit denemesi kapsız koştu ve 635 test tarayıcı açılamadan düştü (`libicu74` yok,
+TESTPLAN "WebKit"); sonuç sayılmadı.
+
+**Veri güvenliği, main ve dal.** İki `dist/index.html` acorn ile ayrıştırıldı ve bütün dize,
+şablon ve sayı literallerinin çoklu kümesi karşılaştırıldı: 8 197 ayrı literal iki tarafta
+aynı. Fark yalnız gömülü commit kimliği ve bir JSX metninin bölünüşü: kabuğun bildirimi
+main'de `⚠{' '}` (iki metin düğümü), dalda `⚠ ` (biri); ekrandaki metin aynı. Yani
+`ders-programi*` anahtarlarının hepsi, `ders-programi-klasor` IndexedDB'si (sürüm 1), yedek
+adları (`ders-programi-${…}.json`, `ders-programi-kurtarma-${…}-${…}.json`,
+`ders-programi-tumu.json`), "Ders Programı" ve `schemaVersion` 16 aynı. `src-tauri/`'de hiç
+fark yok (`identifier` `com.dersprogrami.arac`, `FOLDER` "Ders Programı"). Eski sürüm
+yedeğini açan testler: birimde `src/pure/io/fixtures.test.ts` (v1–v16, "Dosyadan aç
+kapısından geçiyor" dahil, 296 test), E2E'de `e2e/temel.spec.ts:87` (v1), 138, 174 ve 250
+(v2–v4); dördü ve dosya CI'da 6e395ca'da yeşil.
+
+**Mutasyon.** Stryker, dalda (6e395ca) ve main'de (c41223c) aynı yapılandırmayla: dört işçi,
+`npm run hizli`'nin test kümesi (dört yavaş dosya hariç; tam küme kısıt motorunun
+mutantlarında dakikada bir mutanta düştü), mutasyona giren dosyalar kısıt motoru (`rules.ts`
+dahil), fizibilite, varlıklar ve `bell.ts`: main'de beş dosya, dalda otuz.
+
+```
+                 mutant  öldü  zaman aşımı  hayatta  kapsamsız  skor   kapsanan skor
+main c41223c      3761   2696      49         736       280     72,99   78,86
+dal  6e395ca      3761   2695      53         733       280     73,07   78,94
+```
+
+Mutantlar (mutatör, özgün metin, yerine geçen) anahtarıyla eşlendi: 3761'in hepsi iki
+tarafta var, dalda daha az yakalanan anahtar yok, üçü dalda fazladan yakalanıyor
+(`teacherSubjects(...).some` → `every` ve iki `capacity > 0`). Koşular 40 ve 42 dk, makine
+yüklüyken (yük ortalaması 11–13, başka işler); zaman aşımları bu yüzden oynayabilir. Relax ve
+`sat.ts` ölçülemedi: `relax.test.ts:89` enstrümante kodda kendi 30 s tavanını aşıyor
+(TESTFINDINGS, aynı gün; TODO RF3).
+
+**Test sayıları.** `npm test` 58 dosyada 1470; `npm run hizli` dört yavaş dosyayı dışarıda
+bırakıyor (`relaxFullCourse` 2, `relaxLaidOut` 2, `invariants` 16, `solver.test` 93, toplam
+113), 1470 − 113 = 1357. Kayıtlardaki 1457, efe1247'de taşımalar sırasında ölçülen `npm
+test`'in toplamı (56 dosya), bölmelerin 13 yeni testinden önce.
+
+**Çakışma tahmini (`git merge-tree --write-tree`, salt okunur).** Dalın içinde olmayan
+commit'i olan her yerel dal çakışıyor; kod çakışması taşınan dosyalarda (rename algılandı,
+çakışan yollar dalın yeni yolları). En geniş `tb1-acilis` (14 dosya), sonra `tp7-windows-exe`
+(10), `b7-32-kilit`, `dosya-okuma-b7` ve `okunabilirlik` (9), `tb7-sekme-kapanis` (8),
+`test/gercek-ortam` (7), `tb1-dosyadan-ac` ve `tb8-eksik-plan` (6), `ruflo/kurulum` (4,
+yalnız belgeler), `zebra-liste` (2), `bitti-kontrolu`, `dal-temizlik` ve
+`ozellik/belge-temizlik` (1, WORKLOG). Ortak kod yolları `pure/io/parseState.ts`,
+`platform/storage/usePlans.ts`, `storeContract.test.ts`, `fuzz.test.ts`, `ui/App.tsx`,
+`ui/settings/Data.tsx`. Ana checkout'taki `fix/okunamayan-plan`'ın commit'lenmemiş 23
+dosyası (çoğu bu dalın taşıdığı yollarda) tahmine girmedi.
+
+**Belgeler.** Refactor dondurması (2026-10-23) CLAUDE.md, DECISIONS, TODO, bu dosyanın "Şu
+an"ı ve `paket-turu` becerisinden çıktı, yerine bugünkü kural (DECISIONS 2026-10-24). TODO
+§8k'ye RF24–RF26.
+
+**Koşulmayan.** Relax ve `sat.ts`'in mutasyonu, ve yavaş dört test dosyasıyla tam mutasyon;
+Windows'ta gerçek exe ve güncelleme yolu (Windows makinesi gerekiyor, TP7).
+
+## 2026-10-24 · Modül modül yapısal refactor (`refactor/moduller`)
+
+Kullanıcının yapıştırdığı görev ve aynı günün ek talimatı: her modül tek sorumluluklu ve bir
+alanda, davranış değişmeden ([DECISIONS.md](DECISIONS.md), aynı gün). Worktree
+`~/GitHub/Mozaikler/Mozaik-refactor`, kontrol için ikinci bir checkout
+(`Mozaik-refactor-kontrol`, her modülün commit'i orada tam kontrol edildi, çalışma ağacı
+ölçüme karışmasın diye). Plan, envanter (121 modül) ve modül başına kayıt
+`scratch/refactor/plan.md`'de, git dışında.
+
+**Yöntem.** Taşıma: `git mv` ve yollar, aynı HEAD'de derlemenin sha'sı taşımadan önce ve sonra
+aynı (her taşıma commit'inin mesajında). Bölme: eski dosyanın dolu satırlarının yeni
+dosyalarda aynı çokluk olarak durduğu betikle sayıldı, farklar commit mesajlarında. Her
+modülden sonra tam kontrol: prettier, tipler, sinir, lint (0 uyarı), knip, bütün birim, derleme,
+`size-limit`, ana E2E süiti, ve 68 ekran görüntüsü (34 sahne × iki tema: `e2e/helpers.ts`'in
+sahneleri ile on beş ek diyalog ve ekran, hareket kapalı, kısa satırlar gizli, çözücünün süresi
+sabit; aynı derlemede iki koşu piksel piksel aynı çıktı) tabana karşı ImageMagick ile
+piksel piksel.
+
+**Sonuç, modül başına.** On bir modülün hepsinde ekran 0 piksel fark ve birim yeşil; E2E onunda
+ilk koşuda 642/642. Altıncı modülün ilk koşusunda altı E2E makine yükünden düştü (yük
+ortalaması 58, kendi derlemelerim de koşuyordu, tuzak 118); aynı commit'te sessiz makinede
+serit ve otomatik 41/41. Birim testleri 56 dosyada 1453'ten 58 dosyada 1470'e (1469 geçti, 1
+atlandı): yeni saf fonksiyonların testleri (describeStrip, keepPinnedOnly, describeMenu,
+poolMenuFacts, blockMaskedDays, dropNotice, liste eksenleri, ders formu). Taşınan testlerde
+iddia değişmedi; taşıma öncesi ve sonrası 56 dosya, 1457 test.
+
+**Ölçüm (`main` c41223c'ye karşı, 1f9678d, temiz koşul, dönüşümlü iki tur, dokuzar koşu).**
+
+```
+dist/index.html          1 164 918 → 1 168 018 bayt (+3 100, %0,27; size-limit 1 171 000)
+açılış, boş depo, hazır  111,6 / 109,6 → 108,7 / 104,5 ms medyan
+açılış, dolu plan, hazır 213,9 / 192,7 → 199,1 / 194,9 ms medyan
+açılış, dolu plan, DCL    63,9 /  55,4 →  57,7 /  57,1 ms medyan
+Program'a geçiş x1        34,9 /  35,4 →  37,0 /  35,9 ms medyan
+Program'a geçiş x4       164,5 / 162,9 → 168,0 / 163,7 ms medyan
+```
+
+Kapanış ölçümü, son kod commit'i baa0c2f (aynı yöntem, dört koşu da temiz koşulda):
+
+```
+dist/index.html          1 164 918 → 1 168 018 bayt
+açılış, boş depo, hazır  108,9 / 110,5 → 109,9 / 108,7 ms medyan
+açılış, dolu plan, hazır 195,7 / 200,7 → 199,3 / 200,6 ms medyan
+açılış, dolu plan, DCL    56,1 /  57,4 →  57,9 /  57,7 ms medyan
+Program'a geçiş x1        36,0 /  36,7 →  36,7 /  36,8 ms medyan
+Program'a geçiş x4       164,5 / 219,3 → 170,3 / 164,3 ms medyan (tabanın ikinci turu sapkın)
+```
+
+İki ölçümde de farklar tabanın kendi iki turu arasındaki yayılımın içinde; açılış gerilemedi. Boyutun neredeyse tamamı kabuğun
+bölmesi (+1 688: prop adları küçültülemiyor), Program bölmesi (+659) ve ders formu (+308).
+
+**Yolda bulunanlar.** TODO §8k'ye: RK16 (`i18n.test.ts`'in ölü anahtar süzgeci bayat), RF21
+(scripts/ alt klasörleri), RF22 (`src/fixtures/`'ın yeri), RF23 (kökte bilerek kalanlar), RO1
+ve RO2 (ölçülmeden yapılmayan iki optimizasyon), iki tuzak adayı. Hiçbiri veri kaybı sınıfında
+değil.
+
+**Koşulmayan.** Stryker (haftalık), Windows ve WebKit süitleri, site süiti (`test:site`),
+`cozucu` stres süiti; dalın CI'ı push edilmediği için okunmadı.
 ## 2026-10-24 · TB8'in bitti kontrolü (`tb8-eksik-plan`)
 
 **`main` alındı** (bfa6099, `surec-sadelestirme`): çatışma TODO §8l'de (dondurulan bölümde
@@ -659,6 +834,69 @@ build`, `build:site`, `boyut`, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `
 altında 7/7. `index.html` `prettier --check`'te uyarı veriyor, `main`'de de, `favicon.mjs`
 üretiyor ve `bicim`'in kapsamında değil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta
 görev çubuğu ve exe.
+
+## 2026-10-24 · Okunamayan plan ve boş açılış: A1, A2, madde 7 (`fix/okunamayan-plan`)
+
+**Kaynak.** Denetimin ana raporu (`~/GitHub/Mozaikler/Mozaik-analiz/scratch/analiz/RAPOR.md`
+§1 A1 ve A2, §3 madde 7), `T1/RAPOR.md` ve `T2/RAPOR.md`. Görevde adı geçen `DEVIR.md` o klasörde
+yok; tekrar adımları T1'in probe'undan (`T1/probe/yeniSema.probe.test.tsx`) ve T2'nin
+betiklerinden (`T2/e2e/veri.t2.spec.ts`, `eski.t2.spec.ts`, `budama.t2.spec.ts`, `kota.mjs`)
+alındı. TODO B7.37, tuzak 153.
+
+**Yapılan.** Depo okuması üç cevap veriyor (`readStoredPlan`: yok, okundu, okunamadı/yeni;
+`parseState`'i attıran gövde de okunamayan). Okunamayan anahtar `libraryStore`'da dondurulur;
+açılış, plan geçişi, silmeden sonra açılan plan, otomatik kayıt ve `park` onun üstüne yazmaz.
+Dondurmayı "Dosyadan aç" ve "Her şeyi sil" (`loadState`), plan silme ve "Tümünü dosyadan aç"
+(`explicitly`) kaldırır; örnek okul kaldırmaz. Kırmızı şerit iki cümleyle, dört dilde.
+`usePlans.ts`'e dokunulmadı (tb8 onu yeniden yazıyor). Klasör: açılıştaki ilk yazım yalnız
+okunmuş bir plandan (`openedReadable`), iş taşımayan paket yalnız olmayan ya da boş dosyaya
+(`holdsWork`), budama yalnız iş taşıyan günlükleri sayıyor ve yalnız iş taşıyan bir yazımdan
+sonra koşuyor, okunamayan plan pakete deposundaki hâliyle giriyor (JSON değilse klasöre
+yazılmıyor), okunamayan klasör sessiz kalmıyor. Exe'ye `read_file` (lib.rs, cargo testli).
+Oturum yedeği içerik (plan) değişmediyse dönmüyor; okunamayan yedek Ayarlar → Planlar ve
+yedek'te satır olarak görünüyor.
+
+**Testler ve kanıt.** `src/platform/storage/okunamayan.test.tsx` (18), `src/platform/storage/useFolder.test.tsx` (13, `useFolder`'ın
+ilk birim testi), `e2e/okunamayan.spec.ts` (94, 8 test). Aynı testler `main`'de: birim 31'in
+26'sı kırmızı (geçen beşi kontrol, biri `main`'de zaten olan B7.30 kapısı), E2E 8/8 kırmızı;
+dalda hepsi yeşil. `e2e/exe.spec.ts` 76'nın
+ilk testi taze profilde tıklamasız yazmayı sabitliyordu, yani A2'nin kendisini; okunmuş bir
+plandan yazıyor ve boş açılışın yazmadığı ayrı bir test. `klasor.spec.ts`'in budama testi ve
+`gercek-exe.spec.ts`'in yazma testi aynı sebeple yeni kurala göre. Elle mutasyon kanıtı
+(`scripts/mutasyon-kaniti.sh`, 12 mutasyon): ilk koşuda 10 kırmızı; yeşil kalan ikisi
+(saveInto'nun boş yazıda budamaması, libraryStore'un dondurma kapısı) üst katman aynı şeyi önce
+tuttuğu için görünmüyordu, doğrudan testleri eklendi, ikisi de kırmızı.
+
+**Koşulanlar.** `npm run hizli` yeşil (1370 test, ilk kod commit'inden önce); `cargo test` 29/29;
+dokunulan E2E'ler yerelde yeşil (`okunamayan`, `exe`, `iki-kopya`, `kapanis`, `planlar`;
+`klasor` site yapılandırmasıyla 9/9); CI 40101737031 yeşil (lint, knip, biçim, birim ve belge
+kapısı, derleme, boyut, bütün E2E parçaları); ilk CI 40101100704 lint'te kırmızıydı, düzeltildi.
+Yerel `kontrol` dalda koşulmadı: kilit başka bir oturumun Stryker koşusundaydı ve CI aynı şeyi
+ölçtü. Windows E2E (`windows.yml`) yalnız `main`'de koşuyor, bu dalda koşmadı.
+
+**Birleşme.** `tb8-eksik-plan` ve `tb7-sekme-kapanis` bu dalın bir kopyasına çakışmasız
+birleşiyor ve tipler geçiyor. Anlamsal bir çakışma var: tb7'nin yeni gerçek exe testi ("X ile
+hemen kapanan pencere…") taze bir profilde klasörün kendiliğinden yazılmasını bekleyerek
+başlıyor, bu dal o yazımı kaldırıyor; o testin ilk `expect.poll` satırı birleşmede düşmeli.
+Ölçüldü: birleşik kopyada (`main` + bu dal + tb8 + tb7) `npm run kontrol` çıkış 0 (1502 birim,
+653 E2E, 24 site, 7 çözücü, boyut eşiğin altında); `npm run exe:e2e` 15 testin 13'ü geçti, ikisi
+aynı satırda kırmızıydı: tb7'nin kapanış testi ve `main`'de zaten olan VK2 kurtarma testi.
+VK2 testi bu dalda düzeltildi (aşağıda); tb7 testinin bir satırlık düzeltmesiyle ikisi de
+gerçek Linux exe'de yeşil (birleşmede uygulanacak yama: ilk `expect.poll` yerine 1,5 s bekleme).
+`refactor/moduller` ile deneme birleşmesi: dört içerik çakışması, hepsi import bloğu
+(`storage/folder.test.ts`, `planStore.ts`, `useFolder.ts`, `useStore.ts`), ve `src/ui/App.tsx`'te
+sil/değiştir: şerit `src/ui/shell/Notices.tsx`'e taşınır.
+
+**Boyut eşiği.** Dal tek başına `dist/index.html`'i 1 170 864 bayta getiriyor (eşik 1 171 000);
+tb8 ve tb7'yle birleşik kopya 1 174 043 bayt ve `kontrol`'ün `boyut` adımında kırmızıydı
+(`npm run boyut`, "exceeded by 3.04 kB"). Ham eşik 1 186 500'e çekildi, gerekçesi BUILD.md'de.
+
+**VK2'nin gerçek exe testi.** O da taze profilde klasörün kendiliğinden yazılmasını bekliyordu,
+ve depo doluyken sonraki açılışın canlı dosyayı eski (boş) durumla ezdiğini sabitliyordu. Yeni
+kuralla boş açılış iş taşıyan dosyanın üstüne yazmıyor, yani canlı dosya da örnek okulu tutuyor;
+test buna göre, kurtarma kopyasının dokunulmadığı iddiası aynen.
+
+**Ölçülmedi.** Gerçek Windows exe'de hiçbiri koşulmadı.
 
 ## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
 
@@ -4507,7 +4745,7 @@ değil — geç başlangıç / erken bitiş). Denetçinin kendisi test edildi (t
 
 ### 2. Deney B — DÖRT ağır dünyanın hepsinde önce/sonra
 
-[src/pure/solver.ts](../src/pure/solver.ts)'teki `order()`'a **beşinci** bir anahtar
+[src/pure/solver.ts](../src/pure/solver/solver.ts)'teki `order()`'a **beşinci** bir anahtar
 girdi: sınıfın o gün zaten dolu olan saatine yaslanan hücre önce dener.
 Yayma kuralları (1. ve 2. anahtar) dokunulmadan kaldı — Deney A tam da onlara
 dokunduğu için reddedilmişti (tuzak 21). MEASURED, `npm run cozucu`'nun

@@ -8,7 +8,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { makeWorld, type WorldSpec } from '../src/worlds';
+import { makeWorld, type WorldSpec } from '../src/pure/worlds';
 import {
   loadWorld,
   onScreen,
@@ -22,7 +22,7 @@ import {
 /**
  * Loads a tiny hand-built world through the real backup dialog.
  *
- * The world itself is built by src/worlds.ts, which the solver tests use too —
+ * The world itself is built by src/pure/worlds/worlds.ts, which the solver tests use too —
  * one description of "a small school", type-checked by `tsc` because it lives
  * under src/ where the e2e folder is not checked at all.
  */

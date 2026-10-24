@@ -719,6 +719,8 @@ version = "2.2.0"
 dependencies = [
  "reqwest",
  "serde",
+ "serde_json",
+ "sha2",
  "tauri",
  "tauri-build",
  "tauri-plugin-single-instance",

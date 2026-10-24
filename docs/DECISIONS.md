@@ -36,6 +36,41 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-24 · Modül modül yapısal refactor: her kaynak dosya bir alanda (`refactor/moduller`)
+
+**Ne.** Kullanıcının açıkça istediği bir tur (yapıştırılan görev ve aynı günün ek talimatı):
+davranış değişmeden her modül tek sorumluluklu ve bir alan paketinde. Refactor turları açık:
+bir tur davranış değiştirmez, kendi dalında yürür, bulduğu hatayı düzeltmez ve TODO §8k'ye
+yazar, veri kaybı riskinde durur. Kurallar:
+
+- Her kaynak dosya `src/<katman>/<alan>/`'da, her alanın tek `index.ts`'i; en derin
+  `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda. Katmanın
+  kökünde dosya durmaz, iki dependency-cruiser kuralı ölçüyor (`katman-koku-hedef`,
+  `katman-koku-kaynak`). Kökte bilerek kalanlar adıyla muaf: `ui/main.tsx` (`index.html` ve
+  `scripts/favicon.mjs` yolunu anıyor, ikisi de kapsam dışı), `platform/changelog.ts` (yayın
+  betikleri ve `surum.yml` yolunu okuyor), `platform/update.ts` (`SITE_ADRESI`, görevin sert
+  sınırı); `leaf/raw.d.ts` grafikte yok, `docs.test.ts`'in bir iddiası yolunu arıyor.
+- Birim testi modülünün yanında, birden çok paketi saran test ana konusunun paketinde. Konusu
+  `src/`'nin dışında olan yedi test (belgeler, betikler, sürüm akışı, `index.html`'i de okuyan
+  `preferences.test.ts`) `src/`'nin kökünde.
+- İş mantığı bileşenden saf katmana (şerit sayıları, menü hesabı, liste eksenleri, ders
+  formu), büyük saf modüller soruya göre dosyalara (RF1, RF5, RF6, fizibilite, tercihler).
+- Bölmenin ölçüsü bayt aynılığı değil (tuzak 114): taşımada aynı HEAD'de sha, bölmede eski
+  dosyanın dolu satırlarının yeni dosyalarda aynı çokluk olarak durması (betikle sayıldı),
+  her modülden sonra tam kontrol ve 68 ekran görüntüsünün piksel piksel aynılığı.
+
+**Yapılmayanlar ve gerekçeleri.** `solver.ts` park (RF4, 2026-10-08 kararı). `worlds.ts`
+bölünmedi: `i18n.test.ts`'in ölü anahtar taraması onu dosya adıyla dışarıda bırakıyor, bölmek
+testin taradığını sessizce değiştirirdi. Teachers, Dersler'in formu ve Program'ın iki sağ tık
+menüsü bileşenlere bölünmedi: bir bileşen bölmesi prop adları kadar demeti büyütüyor (kabuğun
+bölmesi +1 688 bayt), ve `size-limit` kapısı 1 171 000 bayt. RF11, RF12 ve RF20 açık.
+
+**Eski hâli.** Paket ağacı TODO §8k'nin hedef ağacıydı ve bazı dosyalar katmanın kökünde
+kalıyordu.
+
+**Gerekçe.** Kullanıcının kararı. Okunabilirlik ve kolay genişleme; davranış değişmedi.
+Ölçümler WORKLOG'un aynı günkü girdisinde.
+
 ### 2026-10-23 · Süreç sadeleşti: beş durma sebebi, riske göre test, yapısal belge kapısı
 
 **Ne.** Kullanıcının kararı (dal `surec-sadelestirme`): CLAUDE.md fazla kurallıydı ve test
@@ -61,8 +96,7 @@ her işi yavaşlatıyordu, özellik işi hızlanmalı. Kesilenler:
 - Oturum sonunda şart olan yalnız TODO ile WORKLOG'un "Şu an"ı ve tarihli girdisi.
   CHANGELOG kullanıcıya görünen bir değişiklikte, TRAPS, DECISIONS ve TESTFINDINGS gerçek
   bir içerik çıkınca.
-- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Refactor
-  turları da: süren tur yoktu (`refactor/program` `main`'de), yeni tur açılmıyor ve sürekli
+- Test programı (TODO §8l) donduruldu, kalan fazları tek bir birikim maddesi. Sürekli
   `Mozaik-refactor` worktree'si kuralı CLAUDE.md'den çıktı.
 - CI: ölçüm, `ci.yml`'in mutasyon, kapsam ya da yavaş süit beklemediğini gösterdi. Kritik yol
   `playwright install --with-deps`'in apt yarısıydı (main'in koşusunda tek işte 597 sn), o
