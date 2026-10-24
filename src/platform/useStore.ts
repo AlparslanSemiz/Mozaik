@@ -144,29 +144,11 @@ export function useStore() {
     write(box.planId, box.present);
   }, [box.planId, box.present, write]);
 
-  // Cancels the pending write WITHOUT performing it. The only caller is the
-  // bundle import in `usePlans.ts`, and the two are opposites that look alike:
-  // park writes then cancels (pitfall 28), this one only cancels (pitfall 27
-  // mirrored). The comment at the head of `usePlans.ts` says the same thing
-  // from the other side.
-  //
-  // Measured while splitting the file, because the old comment claimed more
-  // than it could show: taking this call away does NOT resurrect the outgoing
-  // plan, and neither does taking away the effect's cleanup. What actually
-  // cancels the pending write is the FIRST LINE of the autosave effect below —
-  // it clears the previous handle every time the box changes. This call is
-  // what makes the intent survive a rewrite of that effect, not what enforces
-  // it today.
-  const discardPendingSave = useCallback(() => {
-    window.clearTimeout(timer.current);
-    pending.current = false;
-  }, []);
-
   const openPlan = useCallback((id: Id, state: State) => {
     dispatch({ type: 'switch', id, state });
   }, []);
 
-  const plans = usePlans({ planId: box.planId, park, discardPendingSave, openPlan });
+  const plans = usePlans({ planId: box.planId, park, openPlan });
 
   // Another window changed our data: this one stops writing, and says so.
   // What this window holds is read through a ref, so the listener is set once.
@@ -227,8 +209,9 @@ export function useStore() {
     undo,
     redo,
     loadState,
-    // Exposed for the one caller that leaves the page without unloading it:
-    // the exe restarting onto a new version. `beforeunload` covers a closing
+    // Exposed for the two callers that leave the page without unloading it:
+    // the exe restarting onto a new version, and the exe's window closing
+    // (App.tsx, TB7). `beforeunload` covers a closing
     // tab, but a WebView2 window torn down by `app.exit(0)` is not a closing
     // tab, and the 400 ms debounce is exactly long enough to eat the edit
     // somebody made right before pressing the button (pitfall 28).

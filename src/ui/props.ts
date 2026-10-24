@@ -28,6 +28,7 @@ export interface PlanControls {
   renamePlan: (id: Id, name: string) => void;
   markDraft: (id: Id, draft: boolean) => void;
   /** Puts a bundle file in place of EVERY plan on this machine. Returns how
-      many landed and how many were unreadable or did not fit. */
-  replaceLibrary: (bundle: Bundle) => { ok: number; failed: number };
+      many landed, how many did not fit, and how many the file could not give
+      (missing a list, broken or newer; the plan here with that id stays). */
+  replaceLibrary: (bundle: Bundle) => { ok: number; failed: number; unreadable: number };
 }

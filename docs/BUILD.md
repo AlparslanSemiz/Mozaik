@@ -420,6 +420,15 @@ worktree `main`'in commit'inde ayrık durabilir.
 `npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml` ve
 `windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur.
 
+**Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
+`e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
+gerçek `Mozaik.exe`'ye karşı yeşil olur: son değişiklik, başlık çubuğunun kapatma mesajıyla
+kapanış (WM_CLOSE, `scripts/pencere-kapat.mjs`), Belgeler'deki dosyada değişiklik, yeniden
+açılışta değişiklik yerinde. `yayinla` bunu kendisi beklemiyor: Windows'ta gerçek exe süitini
+koşan iş akışı TP7, `test/gercek-ortam` dalında ve kullanıcının kararını bekliyor (TODO §8l);
+o gelene kadar bu test sürümü çıkaran kişinin elle koştuğu bir adım. Linux'ta
+`npm run exe:e2e` ile her sürümden önce zaten koşuyor.
+
 ## İşaret ve ikon
 
 İşaret indigo zemin üstünde iki kancaya asılı bir duvar takvimi sayfası

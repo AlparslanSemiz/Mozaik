@@ -24,7 +24,8 @@ mod update;
 
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::Manager;
+use std::time::Duration;
+use tauri::{Emitter, Manager};
 
 /// The folder under Belgelerim. Turkish on purpose: this is a name my father
 /// reads in Explorer, so it falls under the same exception as the
@@ -154,6 +155,42 @@ fn data_dir_path(app: tauri::AppHandle) -> Result<String, String> {
     Ok(data_dir(&app)?.to_string_lossy().into_owned())
 }
 
+// CLOSING THE WINDOW WAITS FOR THE PAGE (TB7). The page writes Belgeler two
+// seconds after the last change, and the store 0.4 s after it; a window closed
+// inside those seconds took the last edit with it, because a webview torn down
+// does not finish an asynchronous write (measured on the Linux exe, 2026-10-24:
+// 0 of 3 closes inside two seconds reached the folder, 2 of 2 after them did).
+// So the close is held, the page is told (`KAPANIYOR`), and the page answers
+// with `kapanabilir` once both are written. A page that never answers — hung,
+// or still loading — does not keep the window: it closes after `KAPANIS_SURESI`.
+
+/// The event the page listens for. The same string is in `src/platform/desktop.ts`.
+const KAPANIYOR: &str = "kapaniyor";
+
+/// How long a close waits for the page at most. A folder write is a few
+/// milliseconds; this is for a page that is not going to answer.
+const KAPANIS_SURESI: Duration = Duration::from_secs(5);
+
+/// The page has written everything: the window may go.
+#[tauri::command]
+fn kapanabilir(window: tauri::Window) {
+    // `destroy`, not `close`: close would ask again and be held again.
+    let _ = window.destroy();
+}
+
+/// No "already asked" flag: a second click while the page writes tells it
+/// again and starts a second timer, both harmless, and a flag that stuck would
+/// be the one way to a window nobody can close.
+fn kapanis_istendi(window: &tauri::Window, api: &tauri::CloseRequestApi) {
+    api.prevent_close();
+    let _ = window.emit(KAPANIYOR, ());
+    let pencere = window.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(KAPANIS_SURESI);
+        let _ = pencere.destroy();
+    });
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 /// Linux only: draw without WebKitGTK's DMA-BUF renderer, unless the shell
 /// already says otherwise.
@@ -202,7 +239,13 @@ pub fn run() {
                 let _ = pencere.set_focus();
             }
         }))
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                kapanis_istendi(window, api);
+            }
+        })
         .invoke_handler(tauri::generate_handler![
+            kapanabilir,
             write_file,
             list_files,
             remove_file,

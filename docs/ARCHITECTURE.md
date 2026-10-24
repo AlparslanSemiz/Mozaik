@@ -385,6 +385,13 @@ karşılığı olmayan şey var: hangi klasör, ve bir adın gerçekten bir ad o
 doğrulayan kapı (`safe_name`). `src/desktop.test.ts` gerçek `saveInto()`'yu
 adaptörün üstünde koşturur.
 
+Kapanış da Rust'ta tutulur (TODO TB7, 2026-10-24): pencere kapatılmak istenince
+`lib.rs` kapanışı durdurur ve sayfaya `kapaniyor` olayını yollar; `App.tsx` deponun
+bekleyen kaydını (`park`) ve klasörün bekleyen yazımını (`useFolder`'ın `flush`'ı) yapıp
+`kapanabilir` komutunu çağırır (`desktop.ts`'in `onDesktopClose`'u), pencere ancak o zaman
+gider. Cevap gelmezse 5 s sonra yine gider. Bir tarayıcı sekmesinde bunun karşılığı yok:
+kapanan sekme eşzamansız bir yazımı beklemez.
+
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).
 
