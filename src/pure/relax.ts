@@ -27,13 +27,13 @@
 // and `verifySuggestion` checks that week against the CHANGED data through the
 // same blocker() the drag uses, and through rules.ts, before anything is shown.
 
-import { blocker, buildIndex, liftBlock, pendingBlocks, placedBlocks } from './constraints';
-import type { Index } from './constraints';
-import { forbids, setAvailability, setTeacherLimit, updateLesson } from './entities';
-import { lessonName } from './feasibility';
-import { lessonExcluded, type SolverExclusions } from './program';
-import { activePinned, activePlacements, replaceActiveGrid } from './grid';
 import {
+  blocker,
+  buildIndex,
+  liftBlock,
+  pendingBlocks,
+  placedBlocks,
+  type Index,
   findViolations,
   lessonDayCount,
   lessonLimit,
@@ -42,7 +42,11 @@ import {
   ruleActive,
   ruleLevel,
   teacherDayCount,
-} from './rules';
+} from './constraints';
+import { forbids, setAvailability, setTeacherLimit, updateLesson } from './entities';
+import { lessonName } from './feasibility';
+import { lessonExcluded, type SolverExclusions } from './program';
+import { activePinned, activePlacements, replaceActiveGrid } from './grid';
 import { fixedCells } from './solver';
 import { Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
 import type { Lit } from './sat';

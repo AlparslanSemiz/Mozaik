@@ -11,12 +11,13 @@ import {
   closedConflicts,
   closedKey,
   pendingBlocks,
+  type BlockCode,
+  type Index,
+  findViolations,
+  type Violation,
 } from './constraints';
-import type { BlockCode, Index } from './constraints';
 import { activePlacements } from './grid';
 import { parseKey, placementKey } from '../leaf/keys';
-import { findViolations } from './rules';
-import type { Violation } from './rules';
 import { blockPlan } from '../leaf/blocks';
 import { dayLabel } from '../leaf/names';
 import type { State, Id } from '../leaf/types';

@@ -17,6 +17,9 @@ import {
   closedKey,
   placementKey,
   liftBlock,
+  classDayGaps,
+  teacherDayCount,
+  teacherDayGaps,
 } from './pure/constraints';
 import { parseKey } from './leaf/keys';
 import {
@@ -26,7 +29,6 @@ import {
   NO_TEACHER_LIMITS,
   hourNames,
 } from './pure/entities';
-import { classDayGaps, teacherDayCount, teacherDayGaps } from './pure/rules';
 import { sampleState } from './pure/io';
 import type {
   ClassGroup,

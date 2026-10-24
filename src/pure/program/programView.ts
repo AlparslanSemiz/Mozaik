@@ -21,8 +21,8 @@ import {
   pinScopeCells,
   placedBlocks,
   placementKey,
+  type Index,
 } from '../constraints';
-import type { Index } from '../constraints';
 import {
   lessonSubject,
   subjectKey,

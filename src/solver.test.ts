@@ -5,10 +5,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place, setBlockPinned } from './pure/constraints';
+import { buildIndex, placementKey, place, setBlockPinned } from './pure/constraints/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import { parseState } from './pure/io/parseState';
-import { findViolations } from './pure/rules';
+import { findViolations } from './pure/constraints/rules';
 import { sampleState } from './pure/io/sample';
 import { createSolver, solve } from './pure/solver';
 import type { RuleLevel, State } from './leaf/types';

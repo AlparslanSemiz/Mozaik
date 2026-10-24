@@ -5,7 +5,13 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/TRAPS.md pitfall 11).
 
-import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './pure/constraints';
+import {
+  buildIndex,
+  closedKey,
+  place,
+  placementKey,
+  setBlockPinned,
+} from './pure/constraints/constraints';
 import { lessonSubject } from './leaf/subjects';
 import {
   addClass,

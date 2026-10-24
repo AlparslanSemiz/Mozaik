@@ -90,8 +90,8 @@ export default defineConfig({
       reportsDirectory: 'test-results/kapsam',
       reporter: ['text', 'html'],
       include: [
-        'src/pure/constraints.ts',
-        'src/pure/rules.ts',
+        'src/pure/constraints/constraints.ts',
+        'src/pure/constraints/rules.ts',
         'src/leaf/blocks.ts',
         'src/pure/io/parseState.ts',
         'src/pure/undo.ts',

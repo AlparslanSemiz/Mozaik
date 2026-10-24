@@ -23,8 +23,9 @@ import {
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
+  type BlockRef,
+  type PinScope,
 } from '../../pure/constraints';
-import type { BlockRef, PinScope } from '../../pure/constraints';
 import { cellKey, parseCellKey } from '../../leaf/keys';
 import { useToast } from '../Toasts';
 import { useInspect } from './Inspector';

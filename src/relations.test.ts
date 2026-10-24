@@ -4,11 +4,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { blocker, buildIndex, dropMap, place } from './pure/constraints';
+import { blocker, buildIndex, dropMap, place } from './pure/constraints/constraints';
 import { addNotSameDay } from './pure/entities';
 import { activePlacements } from './pure/grid/programs';
 import { suggest, verifySuggestion } from './pure/relax';
-import { findViolations } from './pure/rules';
+import { findViolations } from './pure/constraints/rules';
 import { solve } from './pure/solver';
 import { closeHours, illegalBlocks, makeWorld } from './worlds';
 import type { State } from './leaf/types';

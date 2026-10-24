@@ -17,17 +17,19 @@ import {
   buildIndex,
   check,
   occupy,
-  pendingBlocks,
-  // Aliased: `placedBlocks` is also this file's counter for how many blocks the
+  pendingBlocks, // Aliased: `placedBlocks` is also this file's counter for how many blocks the
   // SEARCH has put down, and the two mean different things.
   placedBlocks as blocksOnGrid,
   vacate,
+  type Index,
+  lessonLimit,
+  limitFor,
+  ruleActive,
+  ruleLevel,
 } from './constraints';
 import { t } from '../leaf/i18n';
 import { closedKey, parseKey, placementKey } from '../leaf/keys';
-import type { Index } from './constraints';
 import { commonestBlock, holeReason, lessonName } from './feasibility';
-import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import { lessonExcluded, type SolverExclusions } from './program';
 import { activePinned, activePlacements, replaceActiveGrid } from './grid';
 import type { Id, Lesson, State } from '../leaf/types';

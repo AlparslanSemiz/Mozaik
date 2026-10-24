@@ -9,7 +9,7 @@ import {
   holeReason,
   loadStatus,
 } from './pure/feasibility';
-import { place } from './pure/constraints';
+import { place } from './pure/constraints/constraints';
 import {
   addClass,
   addLesson,
@@ -19,8 +19,8 @@ import {
   setAvailability,
   setWholeWeek,
 } from './pure/entities';
-import { buildIndex } from './pure/constraints';
-import { closedKey } from './pure/constraints';
+import { buildIndex } from './pure/constraints/constraints';
+import { closedKey } from './pure/constraints/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import type { State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';

@@ -5,7 +5,7 @@
 //   2. Is the real drop-map cost small enough not to stutter
 //      on my father's slow machine?
 
-import { blocker, buildIndex, dropMap, sanitize, place } from './pure/constraints';
+import { blocker, buildIndex, dropMap, sanitize, place } from './pure/constraints/constraints';
 import { buildReport } from './pure/feasibility';
 import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/io/sample';

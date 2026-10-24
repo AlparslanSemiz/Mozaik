@@ -1299,7 +1299,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
 | RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver.ts` |
 | RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities.ts` |
-| RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints.ts` |
+| RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
 | RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
 | RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
 | RF9 | öğretmen ve sınıf kâğıdı `Print()`'in içinde, ayrı üretilemiyor | `src/ui/Print.tsx` |

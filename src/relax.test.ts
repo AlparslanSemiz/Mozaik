@@ -13,8 +13,8 @@ import {
 import type { RelaxFamily, RelaxOptions, Suggestion } from './pure/relax';
 import { solve } from './pure/solver';
 import { activePlacements, replaceActiveGrid } from './pure/grid/programs';
-import { buildIndex } from './pure/constraints';
-import { findViolations } from './pure/rules';
+import { buildIndex } from './pure/constraints/constraints';
+import { findViolations } from './pure/constraints/rules';
 import { parseKey } from './leaf/keys';
 import { WORLDS, closeHours, closeWeek, illegalBlocks, makeWorld } from './worlds';
 import { forbids } from './pure/entities';

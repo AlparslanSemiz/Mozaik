@@ -10,7 +10,7 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
                    names · subjects · blocks · version · dateStamp · storage
    |
-src/pure/          constraints · rules · feasibility · bell · entities · solver
+src/pure/          constraints/* · feasibility · bell · entities · solver
                    relax · sat · grid/* · program/* · paper/* · io/* · listview · undo
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · changelog · desktop · update
@@ -24,7 +24,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/constraints/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -79,8 +79,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
-| `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
+| `pure/constraints/index.ts` | kısıt paketinin giriş noktası: motorun ve kuralların bütün dışa aktarımları |
+| `pure/constraints/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
+| `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays`, öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`) |

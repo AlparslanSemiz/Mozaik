@@ -19,8 +19,7 @@
 import { t } from '../../leaf/i18n';
 import { useCallback, useEffect, useRef } from 'react';
 import type React from 'react';
-import type { DropVerdict } from '../../pure/constraints';
-import type { BlockRef } from '../../pure/constraints';
+import type { DropVerdict, BlockRef } from '../../pure/constraints';
 import { cellKey } from '../../leaf/keys';
 import { paletteColor } from '../../leaf/palette';
 import type { Id } from '../../leaf/types';

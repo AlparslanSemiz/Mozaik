@@ -4,7 +4,7 @@
 // illegal before it is trusted to judge one that should not be.
 
 import { describe, expect, it } from 'vitest';
-import { placementKey } from './pure/constraints';
+import { placementKey } from './pure/constraints/constraints';
 import { parseState } from './pure/io/parseState';
 import {
   closeHours,

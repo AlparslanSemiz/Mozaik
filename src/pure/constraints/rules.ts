@@ -14,13 +14,13 @@
 // Only the TYPE Index comes from constraints.ts (erased at compile time), so
 // there is no runtime import cycle.
 
-import { t } from '../leaf/i18n';
-import { dayLabel, subjectLabel } from '../leaf/names';
-import { lessonSubject } from '../leaf/subjects';
+import { t } from '../../leaf/i18n';
+import { dayLabel, subjectLabel } from '../../leaf/names';
+import { lessonSubject } from '../../leaf/subjects';
 import type { Index } from './constraints';
-import { closedKey, placementKey } from '../leaf/keys';
-import { activePlacements } from './grid';
-import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../leaf/types';
+import { closedKey, placementKey } from '../../leaf/keys';
+import { activePlacements } from '../grid';
+import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../../leaf/types';
 
 export interface Violation {
   key: string; // stable-ish key for React lists

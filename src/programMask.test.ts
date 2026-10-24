@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { place } from './pure/constraints';
+import { place } from './pure/constraints/constraints';
 import { activeProgram } from './pure/grid/programs';
 import { setDayMask, setRowMask, solverExclusions } from './pure/program/programMask';
 import { EMPTY_PROGRAM_MASK } from './pure/program/programMask';

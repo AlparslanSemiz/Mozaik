@@ -21,7 +21,7 @@
 
 import fc from 'fast-check';
 import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
-import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints';
+import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints/constraints';
 import { addNotSameDay, remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
 import { activeProgram, replaceActiveGrid } from './pure/grid/programs';
