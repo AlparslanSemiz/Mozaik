@@ -108,6 +108,13 @@ yaklaşık yirmi beş yeni cümle: kaybı sayan sorular, durdurulan arama, eksik
 Kontrol'ün kapalı saat hükmü, takasın gerekçesi), yeni kısaltma tablosu 2,8 kB, kalanı kod.
 Ham eşik on iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 171 000. Brotli hâli
 280,2 kB ile eşiğin altında kaldığı için brotli eşiği yerinde (WORKLOG 2026-09-27).
+2026-10-24'ün yedi dallık zinciri (VK ve TB düzeltmeleri, dosya okumanın üç deliği, Ayarlar'ın
+not boyu) ham boyu on iki buçuk kilobayt büyüttü (1 158 660'tan 1 171 212 bayta): dört dile
+giren yeni cümleler (paketin eksik ve yeni planları, depo dolu notu), exe'nin kapanışı
+beklemesi, okuyucuların kimlik ve paket kuralları. Her dal tek başına eşiğin altındaydı,
+zincir `dosya-okuma-b7`'de 145 baytla aştı. Ham eşik yine on iki buçuk kilobayt kadar pay
+bırakacak yere çekildi, 1 184 000; brotli hâli 281,8 kB ile eşiğin altında, yerinde (WORKLOG
+2026-10-24 akşam, dosya okuma).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
