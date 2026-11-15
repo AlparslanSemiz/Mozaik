@@ -18,7 +18,7 @@ Her birinin neyi koruduğu ve onu ölçen testler:
 | Ne | Neyi koruyor | Nerede ölçülüyor |
 |---|---|---|
 | İşlevsel renk kanalı: yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | aracın çalışma biçimi bu dört renk | `palette.test.ts`, `e2e/renk.spec.ts` |
-| Erişilebilirlik: liste satırında ve kartta yazı 7:1, kontrol kenarı 3:1, görünür odak, `forced-colors`, `aria-live`, varsayılan ölçekte 12 px taban, 24 px tıklama hedefi | hedef kullanıcı zor görüyor | `e2e/zebra.spec.ts`, `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
+| Erişilebilirlik: liste satırında ve kartta yazı 7:1, kontrol kenarı 3:1, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban; ayrıca `forced-colors` ve 24 px tıklama hedefi | hedef kullanıcı zor görüyor | `e2e/zebra.spec.ts`, `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts`; `forced-colors`, hedefler ve yer tutucu süitte değil, 2026-11-15'te betikle ölçüldü (WORKLOG) |
 | Kâğıt: A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | ekran ne olursa olsun yazıcı aynı yazıcı | `e2e/yazdir.spec.ts` |
 | Açılış ağa bağlı değil: bugün çalışma anında ağa hiç çıkılmıyor | çift tıkla çalışır ilkesi, babanın makinesinde ağ olup olmadığı bilinmiyor | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
 
@@ -186,7 +186,7 @@ ve açılış da; iki sayı da yeniden ölçüldü ve WORKLOG'da duruyor.
 yüzey        --bg masa · --chrome kabuk · --chrome-2 ikinci kabuk
              --chrome-lit üst barın gradyan durağı · --paper kâğıt
              --paper-sunk girdi · --band ızgara gün bandı · --zebra liste çift satırı
-çizgi        --hairline kabuk · --line denetim kenarı · --line-dark en yüksek ses
+çizgi        --hairline kabuk · --line veri çizgisi · --line-dark en yüksek ses
 mürekkep     --text · --muted · --on-color (temayla dönmez) · --on-color-sub (yalnız kâğıt)
 kontrol      --border-strong   (girdi, seçici, düğme kenarı; her zeminde >= 3:1)
 accent       --accent #373bdb · --accent-hover · --accent-bg · --on-accent

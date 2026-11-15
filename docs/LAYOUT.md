@@ -34,7 +34,8 @@ Okul yalnız listeleri, Ayarlar yalnız ayarları tutar: dönem başında doldur
 şeyle yılda bir dokunulan şey aynı ekranda durmuyor. Dersler kendi sekmesi, çünkü
 en çok kullanılan ekran ve bir sihirbazın dördüncü adımından geçilerek varılmıyor.
 Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). Üst bar dar kalınca (%100'de
-yaklaşık 1250 pikselin altında, programın kendi ölçeğiyle birlikte) sekme etiketi simgenin
+yaklaşık 1320 piksellik bir barın altında, yani 1366'da yan yana, 1280'de alt alta;
+programın kendi ölçeğiyle birlikte) sekme etiketi simgenin
 altına iner ve bir basamak küçülür; gizlenmez (2026-11-15).
 
 ## Üst çubuk

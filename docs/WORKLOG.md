@@ -108,6 +108,17 @@ Okunurluk denetiminin on bulgusu, yalnız `src/styles.css`, belgeler ve dokundu�
 
 Ekranda 12 px kalanlar DESIGN'da (Tipografi); `.hint` 13 px ve SD5 Alp'in kararı.
 
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`): düzeltilen — LAYOUT ve
+`kabuk.spec.ts` eşiği 1250 diyordu, doğrusu 1320 px'lik bar; panelin haftasındaki
+`.sheet-cell-bottom` hâlâ `--on-color-sub`'dı (artık `--on-color`); `.inspect`'in uzantısı bir
+üstteki yapışkan satır başına taşıyordu (artık yalnız aşağı, kendi ikinci satırına; isabet
+`elementFromPoint` ile ölçüldü); saat 13 px Müsaitlik'e de geçmişti (artık yalnız ızgarada);
+`forced-colors`'ta seçili sekmenin noktası ve gölgesi; bayat yorumlar (`styles.css`, `serit.spec.ts`,
+`exe-windows.yml`, DESIGN). Bırakılan — Sığdır'da `.inspect` 17-19 px genişlikte kalıyor (satır başı
+`min-width: 0` ile daralıyor, 24 px'lik genişlik ölçülen pencereyi bozar); Çıktı'nın kenar sütunu
+24 px'lik kutularla %150'de yeniden ölçülmedi; `forced-colors`, hedefler ve yer tutucu için süitte
+test yok (CLAUDE.md: düzen için yeni test yazılmaz).
+
 **Boyut.** Ham `dist/index.html` 1 229 155 → 1 230 657 B (+1,5 kB CSS), eşik 1 230 000'i 657 B
 aştı; brotli 287,49 kB (eşik 292). Eşik 1 232 000 B oldu. Önce `file://` açılışı, Chromium,
 CPU 4× yavaş, 1920×1080, 7 koşu `loadEventEnd` medyanı, iki tur (kirli, yük ortalaması ~40):
