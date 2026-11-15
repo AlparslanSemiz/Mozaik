@@ -168,9 +168,25 @@ pub fn is_newer(aday: &str, simdiki: &str) -> bool {
 }
 
 /// Nothing is fetched from outside our own releases.
+///
+/// The prefix is checked on the address as the HTTP client will send it, not
+/// as written: `.../releases/../../other/repo/...` and its `%2e%2e` spelling
+/// start with our prefix and resolve to somebody else's files (security
+/// review, 2026-11-15). Parsing normalises the dot segments first.
 pub fn safe_url(url: &str) -> Result<(), String> {
-    if !RELEASE_KOKLERI.iter().any(|kok| url.starts_with(kok)) {
-        return Err(format!("Beklenmeyen adres: {url}"));
+    let hata = || format!("Beklenmeyen adres: {url}");
+    let parsed = reqwest::Url::parse(url).map_err(|_| hata())?;
+    if parsed.scheme() != "https"
+        || parsed.host_str() != Some("github.com")
+        || parsed.port().is_some()
+        || !parsed.username().is_empty()
+        || parsed.password().is_some()
+    {
+        return Err(hata());
+    }
+    let normal = parsed.as_str();
+    if !RELEASE_KOKLERI.iter().any(|kok| normal.starts_with(kok)) {
+        return Err(hata());
     }
     Ok(())
 }
@@ -645,6 +661,25 @@ mod tests {
     }
 
     // ----------------------------------------------------------------- gates
+
+    #[test]
+    fn dot_segments_cannot_leave_our_releases() {
+        for kotu in [
+            "https://github.com/AlparslanSemiz/Mozaik/releases/../../baska/depo/releases/x.exe",
+            "https://github.com/AlparslanSemiz/Mozaik/releases/%2e%2e/%2E%2E/baska/depo/x.exe",
+            "https://github.com/AlparslanSemiz/Mozaik/releases/./../../../baska/x.exe",
+            "http://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "https://github.com:8443/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "https://kim@github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "kot\u{0}u",
+        ] {
+            assert!(safe_url(kotu).is_err(), "{kotu}");
+        }
+        assert!(safe_url(
+            "https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-Kurulum.exe"
+        )
+        .is_ok());
+    }
 
     #[test]
     fn the_manifest_is_under_a_pinned_prefix() {
