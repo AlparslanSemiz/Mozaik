@@ -50,7 +50,36 @@ function luby(i: number): number {
   return 2 ** seq;
 }
 
-export class Sat {
+/**
+ * What a formula is built into. Our own solver below is one; a recording for
+ * OR-Tools CP-SAT (cpsat.ts) is the other, so `model.ts` writes the week once
+ * and either can answer it. The encodings at the bottom of this file ask for
+ * `native` first: CP-SAT gets "at most one" and "count" as constraints it can
+ * reason about linearly, which is where its speed on the father's week comes
+ * from (DECISIONS 2026-11-15), and this solver gets the same clauses as before.
+ */
+export interface Formula {
+  newVar(): number;
+  addClause(input: readonly Lit[]): boolean;
+  trueLit(): Lit;
+  setPhase(v: number, value: boolean): void;
+  value(l: Lit): boolean;
+  readonly native?: NativeForms;
+}
+
+/** The encodings a formula can take as they are. */
+export interface NativeForms {
+  atMostOne(lits: readonly Lit[]): void;
+  exactlyOne(lits: readonly Lit[]): void;
+  /**
+   * `totalizer`'s contract with its outputs made by the caller: outs[k - 1] is
+   * forced true once at least k of `lits` are, counts past outs.length landing
+   * on the last. A literal listed twice counts twice.
+   */
+  counter(lits: readonly Lit[], outs: readonly Lit[]): void;
+}
+
+export class Sat implements Formula {
   // ---- per variable, in typed arrays that double when full
   private cap = 0;
   private n = 0;
@@ -579,8 +608,9 @@ export class Sat {
 // --------------------------------------------------------------- encodings
 
 /** At most one of `lits`: pairwise when few, the sequential counter otherwise. */
-export function atMostOne(sat: Sat, lits: readonly Lit[]): void {
+export function atMostOne(sat: Formula, lits: readonly Lit[]): void {
   if (lits.length <= 1) return;
+  if (sat.native !== undefined) return sat.native.atMostOne(lits);
   if (lits.length <= 5) {
     for (let i = 0; i < lits.length; i++) {
       for (let j = i + 1; j < lits.length; j++) sat.addClause([not(lits[i]!), not(lits[j]!)]);
@@ -599,7 +629,8 @@ export function atMostOne(sat: Sat, lits: readonly Lit[]): void {
   sat.addClause([not(lits[lits.length - 1]!), not(prev)]);
 }
 
-export function exactlyOne(sat: Sat, lits: readonly Lit[]): void {
+export function exactlyOne(sat: Formula, lits: readonly Lit[]): void {
+  if (sat.native !== undefined) return sat.native.exactlyOne(lits);
   sat.addClause(lits);
   atMostOne(sat, lits);
 }
@@ -610,8 +641,14 @@ export function exactlyOne(sat: Sat, lits: readonly Lit[]): void {
  * forbids k or more. Counts past `cap` all land on out[cap]. A literal may be
  * listed more than once, which is how a weight is written.
  */
-export function totalizer(sat: Sat, lits: readonly Lit[], cap: number): Lit[] {
+export function totalizer(sat: Formula, lits: readonly Lit[], cap: number): Lit[] {
   if (lits.length === 0 || cap <= 0) return [];
+  if (sat.native !== undefined) {
+    const outs: Lit[] = [];
+    for (let i = 0; i < Math.min(lits.length, cap); i++) outs.push(pos(sat.newVar()));
+    sat.native.counter(lits, outs);
+    return outs;
+  }
   const build = (from: number, to: number): Lit[] => {
     if (to - from === 1) return [lits[from]!];
     const mid = (from + to) >> 1;

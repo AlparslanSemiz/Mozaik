@@ -18,7 +18,7 @@ import { lessonExcluded } from '../program';
 import { fixedCells } from '../solver';
 import { HAND_CAP, type RelaxFamily, type RelaxOptions } from './options';
 import { sameLimit, teacherLimit, withGrid } from './reading';
-import { type Lit, Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
+import { type Formula, type Lit, Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
 import { holds } from './verify';
 
 // ---------------------------------------------------------------- the model
@@ -58,8 +58,8 @@ export interface Slot {
   vars: Lit[];
 }
 
-export interface Model {
-  sat: Sat;
+export interface Model<F extends Formula = Sat> {
+  sat: F;
   slots: Slot[];
   /** Closed teacher hours by closedKey → "taught anyway". */
   opened: Map<string, Lit>;
@@ -118,8 +118,24 @@ export function buildModel(
   kind: ModelKind,
   opts: RelaxOptions,
   hint: Readonly<Record<string, Id>>,
-): Model {
-  const sat = new Sat();
+): Model;
+export function buildModel<F extends Formula>(
+  base: State,
+  frame: Frame,
+  kind: ModelKind,
+  opts: RelaxOptions,
+  hint: Readonly<Record<string, Id>>,
+  make: () => F,
+): Model<F>;
+export function buildModel(
+  base: State,
+  frame: Frame,
+  kind: ModelKind,
+  opts: RelaxOptions,
+  hint: Readonly<Record<string, Id>>,
+  make: () => Formula = () => new Sat(),
+): Model<Formula> {
+  const sat = make();
   const { fixed, fixedState, fixedIx } = frame;
   const days = base.settings.days.length;
   const hours = base.settings.hours.length;
@@ -131,7 +147,7 @@ export function buildModel(
   const hands = kind === 'reassign' || kind === 'hand';
   const openTeacher = kind === 'teacher' || kind === 'mixed' || hands;
   const relaxRules = kind === 'rules' || kind === 'mixed';
-  const model: Model = {
+  const model: Model<Formula> = {
     sat,
     slots: [],
     opened: new Map(),
@@ -599,7 +615,7 @@ export function buildModel(
 }
 
 /** What each way counts, first and then among equals. */
-export function costsOf(which: RelaxFamily, model: Model): [Lit[], Lit[]] {
+export function costsOf(which: RelaxFamily, model: Model<Formula>): [Lit[], Lit[]] {
   const opened = [...model.opened.values()];
   switch (which) {
     case 'teacherDays':
@@ -640,7 +656,7 @@ export function subsets(items: readonly number[], size: number): number[][] {
 }
 
 /** A flag that is true whenever one of `xs` is. */
-function indicator(sat: Sat, xs: Lit[]): Lit {
+function indicator(sat: Formula, xs: Lit[]): Lit {
   if (xs.length === 1) return xs[0]!;
   const y = pos(sat.newVar());
   for (const x of xs) sat.addClause([not(x), y]);
@@ -648,7 +664,7 @@ function indicator(sat: Sat, xs: Lit[]): Lit {
 }
 
 /** `later` may not start before `earlier` does (same lesson, same length). */
-function orderAfter(sat: Sat, earlier: Slot, later: Slot): void {
+function orderAfter(sat: Formula, earlier: Slot, later: Slot): void {
   // prefix[i]: `earlier` starts at one of its first i+1 cells.
   const prefix: Lit[] = [];
   earlier.vars.forEach((x, i) => {
@@ -668,7 +684,7 @@ function orderAfter(sat: Sat, earlier: Slot, later: Slot): void {
 }
 
 /** The week in a model: the fixed cells and every block's start. */
-export function gridOf(base: State, frame: Frame, model: Model): Record<string, Id> {
+export function gridOf(base: State, frame: Frame, model: Model<Formula>): Record<string, Id> {
   const hours = base.settings.hours.length;
   const grid: Record<string, Id> = { ...frame.fixed };
   for (const slot of model.slots) {
@@ -682,7 +698,7 @@ export function gridOf(base: State, frame: Frame, model: Model): Record<string, 
   return grid;
 }
 
-export function countTrue(sat: Sat, lits: readonly Lit[]): number {
+export function countTrue(sat: Formula, lits: readonly Lit[]): number {
   let n = 0;
   for (const l of lits) if (sat.value(l)) n++;
   return n;

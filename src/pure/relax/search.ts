@@ -35,16 +35,52 @@ import {
   WIDE_NEIGHBOURHOOD_SIZES,
 } from './options';
 import { hoursOver, openedHours, openedOf, raisedLimits, sortChanges, withGrid } from './reading';
-import { type Lit, Sat, not, totalizer } from './sat';
+import { type CpAnswer, CpFormula } from './cpsat';
+import { type Formula, type Lit, Sat, not, totalizer } from './sat';
 import { applyRelaxations, verifySuggestion } from './verify';
 
 // ---------------------------------------------------------------- the search
+
+/** One question for CP-SAT: the serialized model and which way it is for. */
+export interface CpAsk {
+  bytes: Uint8Array;
+  family: RelaxFamily;
+}
+
+/**
+ * The same search with OR-Tools CP-SAT answering instead of our own solver
+ * (cpsat.ts). Not sliced: each question is one call into the library, which
+ * the exe makes on its own thread. `next()` hands out a question, `next(answer)`
+ * takes its answer, until it hands out the result.
+ */
+export interface CpRelaxer {
+  next(answer?: CpAnswer): { ask: CpAsk } | { done: RelaxResult };
+  progress(): RelaxProgress;
+  cancel(): RelaxResult;
+}
 
 export function createRelaxer(
   given: State,
   hint: Readonly<Record<string, Id>>,
   options?: Partial<RelaxOptions>,
 ): Relaxer {
+  return relaxerCore(given, hint, options, false).relaxer;
+}
+
+export function createCpRelaxer(
+  given: State,
+  hint: Readonly<Record<string, Id>>,
+  options?: Partial<RelaxOptions>,
+): CpRelaxer {
+  return relaxerCore(given, hint, options, true).cp;
+}
+
+function relaxerCore(
+  given: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions> | undefined,
+  withCp: boolean,
+): { relaxer: Relaxer; cp: CpRelaxer } {
   const opts: RelaxOptions = { ...DEFAULTS, ...options };
   // What the reader said yes to is made first and costs nothing: the search
   // runs on that data, and every week it offers is checked against the data
@@ -91,7 +127,11 @@ export function createRelaxer(
    * dropped) off the formula's last model, which is always the week's: `best`
    * is copied every time a model is found.
    */
-  function changesOf(which: RelaxFamily, model: Model, grid: Record<string, Id>): Relaxation[] {
+  function changesOf(
+    which: RelaxFamily,
+    model: Model<Formula>,
+    grid: Record<string, Id>,
+  ): Relaxation[] {
     switch (which) {
       case 'teacherDays':
       case 'teacherHours':
@@ -429,7 +469,7 @@ export function createRelaxer(
 
   function offer(
     which: RelaxFamily,
-    model: Model,
+    model: Model<Formula>,
     grid: Record<string, Id>,
     proven: boolean,
   ): void {
@@ -467,17 +507,80 @@ export function createRelaxer(
     else suggestions.push(s);
   }
 
-  function* pass(): Generator<void, void> {
+  /** Whether an answer holds a week: CP-SAT found one, proven best or not. */
+  const holds = (a: CpAnswer | undefined): a is CpAnswer =>
+    a !== undefined && (a.status === 'optimal' || a.status === 'feasible');
+
+  /**
+   * One family on CP-SAT. The same two counts as `familySearch` (costsOf),
+   * pushed down by the solver's own optimisation instead of by neighbourhoods:
+   * the first count to its minimum, then the second under the first's bound.
+   * "optimal" is the proof `familySearch` rarely reaches on the father's week.
+   */
+  function* cpFamilySearch(which: RelaxFamily): Generator<CpAsk, void, CpAnswer | undefined> {
+    family = which;
+    stage = 'building';
+    const latest = suggestions[suggestions.length - 1];
+    const own = opts.previous.find((x) => x.family === which && x.relaid === relaid);
+    const seeded = opts.seed.find((x) => x.relaid === relaid);
+    const model = buildModel(
+      base,
+      frame,
+      kindOf(which),
+      opts,
+      own?.placements ?? latest?.placements ?? seeded?.placements ?? hint,
+      () => new CpFormula(),
+    );
+    const [cost, cost2] = costsOf(which, model);
+    const must: Lit[] = [];
+    if (model.needHand !== null) must.push(model.needHand);
+    if (which === 'handHours' && model.handCap !== null) must.push(model.handCap);
+
+    stage = 'solving';
+    const first = yield {
+      bytes: model.sat.request({ minimize: cost, mustTrue: must }),
+      family: which,
+    };
+    if (!holds(first)) return;
+    model.sat.load(first);
+    let best = gridOf(base, frame, model);
+    const ub = countTrue(model.sat, cost);
+    let proven = first.status === 'optimal';
+    // As in familySearch: the hand-over way's week must open no hour at all.
+    if (which === 'reassign' && ub > 0) return;
+    if (cost2.length > 0) {
+      stage = 'proving';
+      const second = yield {
+        bytes: model.sat.request({
+          minimize: cost2,
+          mustTrue: must,
+          atMost: [{ lits: cost, max: ub }],
+        }),
+        family: which,
+      };
+      if (holds(second)) {
+        model.sat.load(second);
+        best = gridOf(base, frame, model);
+        proven = proven && second.status === 'optimal';
+      } else {
+        proven = false;
+      }
+    }
+    offer(which, model, best, proven);
+  }
+
+  function* pass(): Generator<CpAsk | void, void, CpAnswer | undefined> {
     doneFamilies = [];
     for (const which of opts.families) {
-      yield* familySearch(which);
+      if (withCp) yield* cpFamilySearch(which);
+      else yield* familySearch(which);
       doneFamilies.push(which);
       // A week that needs no change at all is the answer to every family.
       if (suggestions.some((s) => s.changes.length === 0)) return;
     }
   }
 
-  function* all(): Generator<void, void> {
+  function* all(): Generator<CpAsk | void, void, CpAnswer | undefined> {
     if (opts.startRelaid && opts.keepPlaced) {
       relaid = true;
       frame = frameOf(base, { ...opts, keepPlaced: false });
@@ -506,7 +609,19 @@ export function createRelaxer(
     rejected,
   });
 
-  return {
+  const progress = (): RelaxProgress => ({
+    family,
+    stage,
+    finished: [...doneFamilies],
+    suggestions: [...suggestions],
+    elapsedMs,
+  });
+  const cancel = (): RelaxResult => {
+    if (finished === null) finished = result('cancelled');
+    return finished;
+  };
+
+  const relaxer: Relaxer = {
     step(sliceMs: number): RelaxResult | null {
       if (finished !== null) return finished;
       const t0 = performance.now();
@@ -516,20 +631,29 @@ export function createRelaxer(
       if (next.done === true) finished = result('done');
       return finished;
     },
-    progress(): RelaxProgress {
-      return {
-        family,
-        stage,
-        finished: [...doneFamilies],
-        suggestions: [...suggestions],
-        elapsedMs,
-      };
-    },
-    cancel(): RelaxResult {
-      if (finished === null) finished = result('cancelled');
-      return finished;
-    },
+    progress,
+    cancel,
   };
+
+  // Wall-clock from the first question: the time the library spends answering
+  // is the time the reader waits.
+  let since = -1;
+  const cp: CpRelaxer = {
+    next(answer?: CpAnswer) {
+      if (finished !== null) return { done: finished };
+      if (since < 0) since = performance.now();
+      const step = body.next(answer);
+      elapsedMs = performance.now() - since;
+      if (step.done === true) {
+        finished = result('done');
+        return { done: finished };
+      }
+      return { ask: step.value as CpAsk };
+    },
+    progress,
+    cancel,
+  };
+  return { relaxer, cp };
 }
 
 /** Runs to completion in one go. For tests. */
