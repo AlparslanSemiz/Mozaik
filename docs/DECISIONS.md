@@ -38,7 +38,7 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ### 2026-11-16 · 2.2.0'dan kuruluma: aynı sürümde öneri, bekleyici, eski dosya kalır (`guncelleme/windows-yolu`)
 
-**Karar.** Windows denetiminin bulguları (TRAPS 159–162), Alp'in verdiği işle. Baba 2.2.0'da,
+**Karar.** Windows denetiminin bulguları (TRAPS 161–164), Alp'in verdiği işle. Baba 2.2.0'da,
 tek başına exe'de; bir sonraki sürüm ona kurulumu ve CP-SAT'ı güvenle getirmeli.
 
 - **Aynı sürümde geçiş.** 2.2.0 kurulum alanlarını tanımaz ve tek başına exe'yi takas eder;

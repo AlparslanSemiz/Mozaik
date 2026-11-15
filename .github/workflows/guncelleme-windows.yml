@@ -10,7 +10,7 @@
 # ve Belgeler'de, bu commit'in şemasında durduğuna bakılır
 # (e2e/guncelleme-exe.spec.ts).
 #
-# İKİNCİ EVRE, babanın kendi yolu (2026-11-16, TRAPS 162): yukarıdaki A bu commit'in
+# İKİNCİ EVRE, babanın kendi yolu (2026-11-16, TRAPS 164): yukarıdaki A bu commit'in
 # kodu, 0.0.1 diye numaralanmış; sahadaki 2.2.0'ın güncelleyicisi orada hiç koşmaz.
 # Burada yayınlanmış v2.2.0'ın kendisi (özeti sabit) `Ders-Programi.exe` adıyla açılır,
 # github.com runner'da geçici olarak bu makineye yönlendirilir (hosts ve makinenin

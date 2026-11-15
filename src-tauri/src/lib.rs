@@ -377,7 +377,7 @@ pub fn run() {
         update::acilis(&args, &exe);
         // A standalone copy on a machine where Mozaik is installed opens the
         // installed program instead, before it claims the single instance:
-        // the pin and the shortcut to the old file keep working (TRAPS 160).
+        // the pin and the shortcut to the old file keep working (TRAPS 162).
         // Not after an installer that did not finish: then this copy is the
         // one that works.
         // Not a development build either: `tauri dev` on a machine where Mozaik

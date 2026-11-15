@@ -514,7 +514,7 @@ pub fn kurulu_mu(exe: &Path) -> bool {
 /// so the old file -- on the desktop, pinned to the taskbar, behind a shortcut
 /// he made by hand -- keeps opening Mozaik. Until 2026-11-16 the installed
 /// program DELETED that file, and every pin and shortcut to it would have
-/// broken (TRAPS 160).
+/// broken (TRAPS 162).
 pub const KURULU_NOTU: &str = "kurulu-yol.txt";
 
 /// The note's text for the installed program at `exe`. The version is the
@@ -1160,7 +1160,7 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
 /// program started the installer with `/S` and exited, and every way Tauri's
 /// installer can stop (the running copy would not close, WebView2's setup
 /// failed, the disk, an antivirus) would have ended with no window and nothing
-/// on screen (TRAPS 161). The standalone copy is never deleted: once the
+/// on screen (TRAPS 163). The standalone copy is never deleted: once the
 /// installed program has started it forwards to it (`kurulu_hedef`).
 fn kurulumu_baslat(
     app: &tauri::AppHandle,

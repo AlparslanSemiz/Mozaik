@@ -1,4 +1,4 @@
-# Kurulum, Windows'ta, uçtan uca (2026-11-16, TRAPS 162): bugüne kadar hiçbir iş kurulumu
+# Kurulum, Windows'ta, uçtan uca (2026-11-16, TRAPS 164): bugüne kadar hiçbir iş kurulumu
 # çalıştırmıyordu, `ortools.dll`'i de hiçbir iş Windows'ta yüklemiyordu.
 #
 #   1. Kurulum, surum.yml'in derlediği gibi: OR-Tools'un sabit arşivi ve Tauri NSIS.

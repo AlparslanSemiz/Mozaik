@@ -18,7 +18,15 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open } from './helpers';
+import {
+  answerDialog,
+  mainList,
+  open,
+  openSettings,
+  openSetup,
+  openWithSample,
+  reopen,
+} from './helpers';
 import { SCHEMA_VERSION } from '../src/leaf/model';
 
 const DOLU = JSON.parse(readFileSync(resolve('src/fixtures/tam-dolu-kurs-dizili.json'), 'utf8'));
@@ -226,5 +234,167 @@ test.describe('94. Exe: boş ya da okunamayan depo klasörü ezmiyor', () => {
       ).length;
       expect(full, `gün+${k}`).toBe(10);
     }
+  });
+});
+
+// The audit of 2026-11-16: a wiped WebView2 profile opened empty, and the first
+// change went over the whole school in the live file and in today's backup.
+// Two copies of the full fixture: a plan of 192 rows each, and the sample
+// school's 152 rows are under half of the two together (folder.ts, `shrinks`).
+const TWO_PLANS = JSON.stringify({
+  bundleVersion: 1,
+  savedAt: '2026-10-23T18:00:00.000Z',
+  activeId: '1',
+  plans: [
+    { id: '1', name: '1. plan', draft: false, state: DOLU },
+    { id: 'ikinci', name: '2. plan', draft: false, state: DOLU },
+  ],
+});
+const found = (page: Page) =>
+  page.locator('.save-warning', { hasText: 'daha dolu bir plan dosyası var' });
+const shrunk = (page: Page) => page.locator('.save-warning', { hasText: 'Plan çok küçüldü' });
+const writesOf = (d: { calls: string[] }) => d.calls.filter((c) => /^(write|remove)_file/.test(c));
+
+test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (denetim 2026-11-16)', () => {
+  test('boş açılış: şerit dolu dosyayı söylüyor, “son kaydı aç” iki planı da getiriyor', async ({
+    page,
+  }) => {
+    await fakeExe(page, { 'ders-programi-tumu.json': TWO_PLANS });
+    await open(page);
+    await expect(found(page)).toContainText('ders-programi-tumu.json');
+    await expect(found(page)).toContainText(`${DOLU.teachers.length * 2} öğretmen`);
+    await page.waitForTimeout(3000);
+    expect(writesOf(await disk(page))).toEqual([]);
+    await page.getByRole('button', { name: "Belgelerim'deki son kaydı aç" }).click();
+    await expect(found(page)).toHaveCount(0);
+    await expect
+      .poll(async () => JSON.parse((await stored(page, 'ders-programi')) ?? '{}').teachers?.length)
+      .toBe(DOLU.teachers.length);
+    expect(await stored(page, 'ders-programi-plan-ikinci')).not.toBeNull();
+    // Written back only now, and it is the same school.
+    await expect
+      .poll(async () => (await disk(page)).calls.includes('write_file:ders-programi-tumu.json'))
+      .toBe(true);
+    const main = JSON.parse((await disk(page)).files['ders-programi-tumu.json']!) as {
+      plans: unknown[];
+    };
+    expect(main.plans).toHaveLength(2);
+  });
+
+  test('“Boş başla” ve örnek okul: ana dosya korunuyor, yeni hâl kurtarma dosyasında, yenilemede de', async ({
+    page,
+  }) => {
+    await fakeExe(page, { 'ders-programi-tumu.json': TWO_PLANS });
+    await open(page);
+    await page.getByRole('button', { name: 'Boş başla' }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+    await answerDialog(page);
+    await expect(shrunk(page)).toBeVisible({ timeout: 8000 });
+    let d = await disk(page);
+    expect(d.files['ders-programi-tumu.json']).toBe(TWO_PLANS);
+    const rescue = Object.keys(d.files).filter((n) => /^ders-programi-kurtarma-/.test(n));
+    expect(rescue).toHaveLength(1);
+    expect(teachersIn(d.files[rescue[0]!])).toBe(25);
+    // The reload: the storage holds the sample now, read and full. The live
+    // file still holds the school, and the line is back after the first write.
+    await page.reload();
+    await expect(shrunk(page)).toBeVisible({ timeout: 8000 });
+    await expect(found(page)).toHaveCount(0);
+    d = await disk(page);
+    expect(d.files['ders-programi-tumu.json']).toBe(TWO_PLANS);
+    // The user says the sample is the one to keep, and is asked once more.
+    await shrunk(page).getByRole('button', { name: 'Yeni hâlini asıl dosya yap' }).click();
+    await answerDialog(page);
+    await expect(shrunk(page)).toHaveCount(0);
+    await expect
+      .poll(async () => teachersIn((await disk(page)).files['ders-programi-tumu.json']))
+      .toBe(25);
+  });
+
+  test('küçülme şeridinden “son kaydı aç” klasördeki okulu geri getiriyor', async ({ page }) => {
+    await fakeExe(page, { 'ders-programi-tumu.json': TWO_PLANS });
+    await open(page);
+    await page.getByRole('button', { name: 'Boş başla' }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+    await answerDialog(page);
+    await expect(shrunk(page)).toBeVisible({ timeout: 8000 });
+    await shrunk(page).getByRole('button', { name: "Belgelerim'deki son kaydı aç" }).click();
+    await expect
+      .poll(async () => JSON.parse((await stored(page, 'ders-programi')) ?? '{}').teachers?.length)
+      .toBe(DOLU.teachers.length);
+    await expect(shrunk(page)).toHaveCount(0, { timeout: 8000 });
+    expect(teachersIn((await disk(page)).files['ders-programi-tumu.json'])).toBe(
+      DOLU.teachers.length,
+    );
+  });
+
+  test('silme günün silmeden-önce dosyasına önceki hâli yazıyor', async ({ page }) => {
+    await fakeExe(page, {});
+    await open(page);
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+    await answerDialog(page);
+    await page.waitForTimeout(2500);
+    await openSetup(page, 'Sınıflar');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect
+      .poll(async () =>
+        Object.keys((await disk(page)).files).filter((n) =>
+          /^ders-programi-silmeden-once-/.test(n),
+        ),
+      )
+      .toHaveLength(1);
+    const d = await disk(page);
+    const name = Object.keys(d.files).find((n) => /^ders-programi-silmeden-once-/.test(n))!;
+    expect((JSON.parse(d.files[name]!) as { classes: unknown[] }).classes).toHaveLength(20);
+  });
+});
+
+// TODO SD1's deletions ask no question and keep their undo in memory. After a
+// reload the state from before them was nowhere (the audit of 2026-11-16).
+test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
+  const lastDelete = (page: Page) =>
+    page.locator('.save-warning', { hasText: 'Son silmeyi geri almak için' });
+  const classesStored = async (page: Page) =>
+    (JSON.parse((await stored(page, 'ders-programi')) ?? '{}') as { classes?: unknown[] }).classes
+      ?.length;
+
+  test('sınıf silinip sayfa yenilenince bir kez “Geri getir” çıkıyor ve sınıfı getiriyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect.poll(() => classesStored(page)).toBe(19);
+    await reopen(page);
+    await expect(lastDelete(page)).toContainText('silindi');
+    await lastDelete(page).getByRole('button', { name: 'Geri getir' }).click();
+    await expect(lastDelete(page)).toHaveCount(0);
+    await expect.poll(() => classesStored(page)).toBe(20);
+    // Once: the next reload does not offer it again.
+    await reopen(page);
+    await page.waitForTimeout(500);
+    await expect(lastDelete(page)).toHaveCount(0);
+  });
+
+  test('“Her şeyi sil”den sonra yenileme: plan geri geliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Hakkında');
+    await page.getByRole('button', { name: 'Her şeyi sil' }).click();
+    await answerDialog(page);
+    await expect.poll(() => classesStored(page)).toBe(0);
+    await reopen(page);
+    await lastDelete(page).getByRole('button', { name: 'Geri getir' }).click();
+    await expect.poll(() => classesStored(page)).toBe(20);
+  });
+
+  test('geri alınmış silme yenilemede önerilmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await page.locator('.toast').getByRole('button', { name: 'Geri al' }).click();
+    await expect.poll(() => classesStored(page)).toBe(20);
+    await reopen(page);
+    await page.waitForTimeout(500);
+    await expect(lastDelete(page)).toHaveCount(0);
   });
 });

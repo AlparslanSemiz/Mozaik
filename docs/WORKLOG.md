@@ -50,7 +50,7 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
   ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
 - Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
   Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
-  2026-11-16, tuzak 159–162). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
+  2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -79,6 +79,11 @@ LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand,
 weeklyHours) eski formülle ve ikinci bakışa girmiyor; `hiz/tepki`'den sonra bırakma 4×'te hâlâ
 ~156 ms (hedef 100) ve öneri aramasında iki işçi iki gerçek çekirdekte ölçülmedi.
 
+**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
+kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
+budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
+ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -89,6 +94,37 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Veri koruması: silinmiş profil, küçülme, yenilemeden sonra geri getir (`veri/koruma`)
+
+Denetimin sondası (oturum scratch'inde `denetim2/veri/`) beş yolu ölçmüştü. (1) Exe'nin WebView2
+deposu boş okununca Mozaik boş açılıyor, ilk öğretmen ya da örnek okul `ders-programi-tumu.json`'ın
+ve günün yedeğinin üstüne gidiyor, sonraki günlerde tek öğretmenli günlük "dolu" sayıldığı için
+budama gerçek yedekleri birer birer siliyordu: 10 gerçek günlük + 11 gün tek öğretmen = 0 büyük
+kopya. Şimdi boş ya da okunamayan açılış klasördeki daha dolu kaydı şeritle öneriyor
+("Belgelerim'deki son kaydı aç" / "Boş başla") ve seçilene kadar klasöre yazmıyor; dört liste
+satırının yarısının altına düşüren yazım günün `ders-programi-kurtarma-YYYY-AA-GG.json`'ına
+gidiyor ve şerit söylüyor ("Yeni hâlini asıl dosya yap" kabul ediyor); budama en dolu günlüğü
+silmiyor. Yerleşim ölçüte girmiyor: "Programı boşalt" bilerek her saati alıyor. (2) SD1'in sorusuz
+silmeleri ve `Her şeyi sil` geri almayı yalnız bellekte tutuyordu; şimdi önceki hâl tek bir depo
+yuvasında ve klasörde günün `silmeden-once` dosyasında, sonraki açılış bir kez "Geri getir" diyor.
+(3) Paketteki kimliksiz ya da tekrarlanan plan adıyla söyleniyor. (4) Plan listesi her açılışta
+yeniden yazılmıyor, bilinmeyen alanlar kalıyor. (5) JSON olmayan plan klasör satırını kırmızı
+yapıyor (B7.37'nin kalanı).
+
+Kararlar: silmeden-önce dosyası gün başına tek (exe'nin `remove_in`'i yalnız günlüğü siliyor;
+tarihli ad başına dosya Belgelerim'de birikirdi; Rust'a dokunulmadı). Klasör kopyasını açmak
+`explicitly` olmadan: dondurulmuş plan anahtarında kalıyor. Yeni şeritlerin yalnız İngilizcesi
+yazıldı (boyut: brotli 304,2 / 306 kB, ham 1 312 741 / 1 320 000 B). Taze bağlamlı incelemenin
+bulguları düzeltildi: başka klasör seçmek tutmayı ve küçülme kabulünü sıfırlıyor; kopya yalnız
+buradaki OKUNAN planlarda satır yoksa öneriliyor (dondurulmuş plan sayılmıyor), klasör okunurken
+yazılmıyor; küçülme şeridinde "son kaydı aç" da var ve kabul soru soruyor; yuva yalnız plan
+silmeden sonra değişmediyse öneriliyor (`noteAfter`); kilitli dosya küçülme denetiminde hata
+değil; JSON olmayan planda "klasörü yeniden seçin" denmiyor. Reddedilen: canlı dosyanın küçülme
+şeridi kapatılmazsa günlerce eski kalması (bilerek: eski ve büyük olan güvenli yön; şerit her
+oturum yeniden çıkıyor). Doğrulama: `npm run hizli` 1604/1604 (linuxKur süre aşımı tek başına
+yeşil), E2E klasor, exe, okunamayan (yeni 7 test), planlar, ayarlar, kurulum, iki-kopya 168/168
+(`--workers=2`). Gerçek Windows exe'de koşulmadı.
 
 ## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
 
@@ -150,7 +186,7 @@ src/kontrat.test.ts src/surum.test.ts` yeşil, `npx tsc --noEmit -p .` 0, dokunu
 
 ## 2026-11-16 · 2.2.0'dan kuruluma giden Windows yolu (`guncelleme/windows-yolu`)
 
-Windows denetiminin altı bulgusu (DECISIONS 2026-11-16, tuzak 159–162). Commit'ler: `update.rs`
+Windows denetiminin altı bulgusu (DECISIONS 2026-11-16, tuzak 161–164). Commit'ler: `update.rs`
 ve `lib.rs` (aynı sürümde `gecis`, bekleyici ve `/P /R`, eski dosyanın kurulan programı açması,
 `guncelleme_durumu`), sayfa (Hakkında metinleri, şerit, dört sözlük), CP-SAT (alt çözücü sırası,
 en az iki işçi, `BELOW_NORMAL`), CI (`guncelleme-220.mjs`, `kurulum-windows.yml`, `yayinla`

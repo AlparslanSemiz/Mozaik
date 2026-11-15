@@ -532,7 +532,7 @@ boyunun değişmediği ve günlük kopyaların silinmediği sorulur (`e2e/guncel
 push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
 bekler (kullanıcının kararı, 2026-10-24).
 
-İkinci evre babanın kendi yolu (2026-11-16, tuzak 162): yukarıdaki eski kopya bu commit'in
+İkinci evre babanın kendi yolu (2026-11-16, tuzak 164): yukarıdaki eski kopya bu commit'in
 kodu, 2.2.0'ınki değil. Yayınlanmış v2.2.0 (özeti sabit) `Ders-Programi.exe` adıyla açılır;
 manifest adresi içine derlenmiş olduğu için github.com runner'da geçici olarak bu makineye
 çevrilir (hosts dosyası ve makinenin güvendiği tek günlük bir sertifika, adım bitince ikisi de
@@ -618,14 +618,14 @@ yazardı (tuzak 126). Babanın makinesindeki
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
 taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. Kurulmamış bir kopyaya
 kurulum aynı sürümde de önerilir (`gecis`, `windows_karari`; 2026-11-16): sahadaki 2.2.0 tek
-dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 159). Güncellemeden sonraki
+dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 161). Güncellemeden sonraki
 ilk açılışta şerit bunu bir kez söyler (`guncelleme_durumu`, ağsız). "Şimdi kur" kurulumu
 kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kurulum-bekleyici.exe`)
 programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
-ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 161). Eski dosya
+ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 163). Eski dosya
 silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,
 ve tek başına kopya onu bulunca, kurulan program en az kendisi kadar yeniyse, kurulan programı açıp
-çıkar (`kurulu_program`, tuzak 160; geliştirme derlemesi açmaz). Bekleyici kurulumun özetini
+çıkar (`kurulu_program`, tuzak 162; geliştirme derlemesi açmaz). Bekleyici kurulumun özetini
 çalıştırmadan hemen önce yeniden denetler.
 CP-SAT sorusu sürerken exe kendi sürecini `BELOW_NORMAL`'a indirir (`cpsat.rs`).
 

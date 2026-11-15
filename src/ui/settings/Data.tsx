@@ -34,6 +34,7 @@ import {
   useDialogs,
   useT,
   useToast,
+  useKeepBefore,
   useUndoIf,
   WRONG_FILE,
 } from '../common';
@@ -94,6 +95,7 @@ export default function Data({
   const { confirm } = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const loadSample = useLoadSample();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
@@ -125,6 +127,7 @@ export default function Data({
       return;
     }
     const said = t('Bu plandaki her şey silindi.');
+    keepBefore(state, said);
     const next = replaceState(emptyState(), said);
     if (next === null) notify(said, 'info');
     else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
@@ -191,7 +194,14 @@ export default function Data({
       });
       return;
     }
-    const eksik = read.unreadable.length - yeni;
+    // Entries with no id, or the id of an entry before them, are counted
+    // with the incomplete ones and named: they used to vanish without a word.
+    const dropped = bundle.dropped ?? [];
+    const eksik = read.unreadable.length - yeni + dropped.length;
+    const named =
+      dropped.length > 0
+        ? t('Kimliği eksik ya da tekrarlanan plan: {adlar}.', { adlar: dropped.join(', ') })
+        : '';
     // A plan here whose counterpart in the file is unreadable stays.
     const stays = plans.library.plans.filter((p) => read.unreadable.includes(p.id)).length;
     const replaced = t(
@@ -204,6 +214,7 @@ export default function Data({
         body: [
           replaced,
           eksik > 0 ? t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik }) : '',
+          named,
           yeni > 0
             ? t(
                 "Dosyadaki {yeni} plan Mozaik'in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik'i güncelleyin.",
@@ -242,13 +253,14 @@ export default function Data({
               eksik,
             })
           : t('{acilan} plan açıldı.', { acilan: ok });
+    const said = named === '' ? opened : `${opened} ${named}`;
     setNote({
-      bad: failed > 0 || unreadable > 0,
+      bad: failed > 0 || unreadable > 0 || dropped.length > 0,
       update: yeni > 0,
       text:
         yeni > 0
-          ? `${opened} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
-          : opened,
+          ? `${said} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
+          : said,
     });
   }
 
