@@ -13,7 +13,9 @@ export default defineConfig({
   // something that does not exist under file:// — a service worker (site), a
   // secure context (sunucu), the File System Access API (klasor). They run
   // under playwright.site.config.ts (npm run test:site), over http. So does
-  // linux-tasima, whose old copy has to be the site build at a real origin.
+  // linux-tasima, whose old copy has to be the site build at a real origin,
+  // and tasima, which serves dist-site at the two real addresses (only the
+  // site job builds dist-site; here every file would answer 404).
   // And gercek-exe opens the real Linux program, which needs a Rust build
   // first (npm run exe:e2e, playwright.gercek-exe.config.ts); guncelleme-exe
   // opens what the released exe wrote on a Windows runner
@@ -28,6 +30,7 @@ export default defineConfig({
     '**/sunucu.spec.ts',
     '**/klasor.spec.ts',
     '**/linux-tasima.spec.ts',
+    '**/tasima.spec.ts',
   ],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
   // gecerli oldugu olculdu (bkz. docs/WORKLOG.md).
