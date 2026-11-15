@@ -1902,9 +1902,23 @@ const DE: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
   "Program baştan dizildi.": "Der Stundenplan wurde von vorn gelegt.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "Der Stundenplan wurde von vorn gelegt; {n} fixierte {n:Stunde blieb|Stunden blieben}.",
-  // The plan-file reminder (2026-11-16).
+  // Moving to the new address and the plan-file reminder (2026-11-16).
   "son plan dosyasının tarihi":
     "Datum der letzten Plandatei",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "Die Pläne von der alten Adresse hierher holen?",
+  "**Yeni adres planları alamadı.** Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → **Tümünü dosyadan aç** ile açın.":
+    "**Die neue Adresse konnte die Pläne nicht übernehmen.** Alle Pläne wurden in eine Plandatei geschrieben (Downloads). Öffnen Sie sie an der neuen Adresse mit Einstellungen → Pläne und Sicherung → **Alle aus Datei öffnen**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra Mozaik'i yeni adresinden açın:":
+    "**Die Pläne sind an die neue Adresse umgezogen.** Öffnen Sie Mozaik von jetzt an unter der neuen Adresse:",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "Die neue Adresse wurde geöffnet. Beantworten Sie dort die Frage.",
+  "**Mozaik yeni adresine taşındı.** Planlarınızı oraya götürmek için **Planları taşı** düğmesine basın; burada da kalırlar.":
+    "**Mozaik ist an eine neue Adresse umgezogen.** Um Ihre Pläne dorthin mitzunehmen, drücken Sie **Pläne umziehen**; sie bleiben auch hier.",
+  "Hiçbir plan taşınmadı.":
+    "Kein Plan wurde umgezogen.",
+  "Planları taşı":
+    "Pläne umziehen",
   "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
     "**Für diesen Plan gibt es keine Plandatei.** Was Sie getan haben, ist nur in diesem Browser.",
   "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":

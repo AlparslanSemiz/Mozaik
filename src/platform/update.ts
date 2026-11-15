@@ -35,7 +35,7 @@ import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './exe';
-import { SURUM, tarihYazisi } from '../leaf/app';
+import { ESKI_SITE, SURUM, tarihYazisi, YENI_ADRES_ACIK, YENI_SITE } from '../leaf/app';
 
 /**
  * Where the newest build always is. Written down ONCE, because it appears on
@@ -49,8 +49,11 @@ import { SURUM, tarihYazisi } from '../leaf/app';
  * `ders-programi` -> `Mozaik` moved this page and left the old address a 404
  * (measured 2026-08-31). Unlike the release URLs there is no redirect here:
  * the sentence in Ayarlar -> Hakkında was pointing my father at nothing.
+ *
+ * Since 2026-11-16 the site is moving to its own subdomain, and which of the
+ * two addresses is shown follows the one switch in `leaf/app/adres.json`.
  */
-export const SITE_ADRESI = 'https://alparslansemiz.github.io/Mozaik/';
+export const SITE_ADRESI = YENI_ADRES_ACIK ? YENI_SITE : ESKI_SITE;
 
 /**
  * How often a tab that stays open asks. Half an hour, because the answer only

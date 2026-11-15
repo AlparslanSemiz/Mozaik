@@ -51,6 +51,7 @@ import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
+import { useMoveIn, useMoveOut } from './useMove';
 
 // The shell: the tabs, the top bar, the long-lived state and the keyboard.
 // What each of those is made of lives beside this file (ARCHITECTURE, "React
@@ -227,6 +228,10 @@ export default function App() {
     },
     hide: () => setReminderHidden(true),
   };
+  // Moving the plans to the new address: the old end and the new end
+  // (useMove.ts). Each does nothing on any other page.
+  const move = useMoveOut(plans, peek);
+  useMoveIn(plans);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const openShortcuts = useShortcutsHelp();
   // Read once at mount (a fresh profile has never seen any version, so this
@@ -387,6 +392,7 @@ export default function App() {
                   folder={folder}
                   goTab={goTab}
                   ui={ui}
+                  move={move}
                   reminder={reminder}
                 />
 

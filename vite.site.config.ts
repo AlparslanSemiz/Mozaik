@@ -28,6 +28,41 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   });
 }`;
 
+/** The old and the new address, from the one file that holds them. */
+const ADRES = JSON.parse(readFileSync(resolve('src/leaf/app/adres.json'), 'utf8')) as {
+  eski: string;
+  yeni: string;
+};
+
+/**
+ * DOES THE NEW ADDRESS ANSWER? Asked only by a page at the OLD origin, once
+ * per load, and only in the site build (DECISIONS 2026-11-16).
+ *
+ * Why here and not in the app. The answer cannot be a build-time switch: once
+ * Pages redirects the old address, the copy there can never be updated again
+ * (its service worker's update check gets a redirect), so the copy already
+ * there has to find out by itself. And the double-clicked file must not carry
+ * a fetch at all (site.spec.ts reads it for one); this script exists only in
+ * dist-site, beside the registration above. Before the move the request fails
+ * (no certificate for the new name yet) and nothing is said. Pages answers
+ * every file with `access-control-allow-origin: *` (measured 2026-11-16), so
+ * the manifest can be read and checked to be Mozaik's own.
+ *
+ * The answer reaches the app as a flag and an event (platform/storage/move.ts).
+ */
+const yeniAdresYoklamasi = `
+if (location.origin === ${JSON.stringify(new URL(ADRES.eski).origin)} && typeof fetch === 'function') {
+  fetch(${JSON.stringify(new URL('manifest.webmanifest', ADRES.yeni).toString())}, { cache: 'no-store', credentials: 'omit' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (m) {
+      if (m && m.name === 'Mozaik') {
+        window.__mozaikYeniAdres = true;
+        dispatchEvent(new Event('mozaik-yeni-adres'));
+      }
+    })
+    .catch(function () {});
+}`;
+
 /**
  * The manifest link and the registration script exist ONLY here.
  *
@@ -56,7 +91,7 @@ function siteShell(): Plugin {
           attrs: { name: 'theme-color', content: '#2e4ba8' },
           injectTo: 'head' as const,
         },
-        { tag: 'script', children: REGISTER, injectTo: 'body' as const },
+        { tag: 'script', children: REGISTER + yeniAdresYoklamasi, injectTo: 'body' as const },
       ],
     },
   };

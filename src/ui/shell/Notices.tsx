@@ -2,11 +2,12 @@
 // that a new build is waiting. Each one says it where it failed, in words, and
 // the ones that can be acted on carry their button.
 
-import { surumEtiketi, tarihYazisi } from '../../leaf/app';
+import { surumEtiketi, tarihYazisi, YENI_SITE } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
 import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
 import { T, useT } from '../common';
+import type { MoveOut } from './useMove';
 
 /** The file reminder, decided in App (it knows the route and the folder). */
 export interface FileReminder {
@@ -29,6 +30,7 @@ interface Props {
   folder: FolderRun;
   goTab: (tab: Tab) => void;
   ui: { setSection: (section: SectionId) => void };
+  move: MoveOut;
   reminder: FileReminder;
 }
 
@@ -43,11 +45,48 @@ export default function Notices({
   folder,
   goTab,
   ui,
+  move,
   reminder,
 }: Props) {
   const t = useT();
+  const ms = move.state;
+  const moving = ms?.ad === 'bekliyor' || ms?.ad === 'soruldu';
+  const moved = ms?.ad === 'bitti' && ms.durum === 'acildi';
   return (
     <>
+      {/* THE SITE MOVED (DECISIONS 2026-11-16). Only at the old address and
+      only once the new one answers (move.ts). The plans stay here too: the
+      button copies, it does not move anything out from under anybody. */}
+      {move.live && (
+        <div className="update-bar" role="status">
+          <span>
+            {move.toFile ? (
+              <T k="**Yeni adres planları alamadı.** Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → **Tümünü dosyadan aç** ile açın." />
+            ) : moved ? (
+              <T k="**Planlar yeni adrese taşındı.** Bundan sonra Mozaik'i yeni adresinden açın:" />
+            ) : moving ? (
+              <T k="Yeni adres açıldı. Oradaki soruyu cevaplayın." />
+            ) : (
+              <>
+                <T k="**Mozaik yeni adresine taşındı.** Planlarınızı oraya götürmek için **Planları taşı** düğmesine basın; burada da kalırlar." />
+                {(ms?.ad === 'kapandi' || (ms?.ad === 'bitti' && ms.durum === 'vazgecildi')) &&
+                  ` ${t('Hiçbir plan taşınmadı.')}`}
+              </>
+            )}{' '}
+            <a href={YENI_SITE} target="_blank" rel="noreferrer">
+              {YENI_SITE}
+            </a>
+          </span>
+          {!moving && !moved && (
+            <span className="update-acts">
+              <button className="btn primary" onClick={move.start}>
+                {t('Planları taşı')}
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
       {!canSave && (
         <div className="save-warning">
           ⚠{' '}

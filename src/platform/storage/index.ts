@@ -12,9 +12,18 @@
  */
 export { isTextInput, useStore, type SaveTrouble } from './useStore';
 export { listBackups, loadPlan, storageWorks, unreadablePlan } from './planStore';
-export { downloadBackup, downloadBundle } from './download';
+export { bundleText, downloadBackup, downloadBundle } from './download';
 export { isoDay, markChanged, reminderDue, useFileRecord, type FileRecord } from './fileSaved';
 export { askToKeep } from './persist';
+export {
+  moveRequested,
+  newAddressLive,
+  NEW_ADDRESS_EVENT,
+  receivePlans,
+  sendPlans,
+  type MoveOutcome,
+  type SendState,
+} from './move';
 export { KEEP_DAILY, MAIN_NAME } from './folder';
 export { useFolder, type FolderRun } from './useFolder';
 export { routeName, storageAddress, storageKind, storageReport } from './storageReport';

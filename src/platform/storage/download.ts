@@ -68,6 +68,11 @@ export function collectStates(library: Library, planId: Id, present: State): Rec
   return out;
 }
 
+/** The all-plans file's text: what "Tümünü dosyaya kaydet" writes and the move sends. */
+export function bundleText(library: Library, planId: Id, present: State): string {
+  return buildBundle(library, collectStates(library, planId, present), searchLog());
+}
+
 export function downloadBundle(library: Library, planId: Id, present: State): number {
   const states = collectStates(library, planId, present);
   download(bundleFileName(new Date()), buildBundle(library, states, searchLog()));
