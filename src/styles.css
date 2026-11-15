@@ -5306,6 +5306,11 @@ table.sheet-lessons select.transfer-pick {
 }
 
 .entity {
+  /* The row is the containing block of its `.sr-only` counter sentence. With
+     none, that absolute box hung off the sticky rail, outside the list's own
+     scroll clip, so a row scrolled out of the list still made the RAIL scroll
+     (190 px on Müsaitlik at 1600 x 700, kabuk.spec 83). */
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-2);
