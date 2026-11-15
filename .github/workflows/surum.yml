@@ -266,8 +266,14 @@ jobs:
           sudo apt-get install -y -qq minisign >/dev/null
           gizli=$(mktemp -d); chmod 700 "$gizli"
           umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
-          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig
-          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig
+          # Güvenilen yorum sürümü ve dosyayı bağlıyor (update.rs, `imza_yorumu`):
+          # eski imzalı bir sürüm yenisi diye, ya da bir dosya ötekinin yerine
+          # sunulamaz.
+          surum=$(node -p "require('./depo/package.json').version")
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig \
+            -t "mozaik $surum Mozaik.exe"
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
+            -t "mozaik $surum Mozaik-Kurulum.exe"
           rm -rf "$gizli"
 
       - name: Build surum.json

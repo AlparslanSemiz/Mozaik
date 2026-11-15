@@ -451,9 +451,19 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
 /// changing it strands every copy out there, so it is never changed lightly.
 const IMZA_ANAHTARI: &str = "RWRS2NVsciPlIF8hWDq+YKRut30HIVv3UTP1++4tS/Mcp0vhVLe3rKsl";
 
-/// Is `imza` a signature of `bytes` by the release key? The test copy, which
-/// has no release key behind it, accepts a missing signature (see `karar`).
-pub fn imza_dogru(bytes: &[u8], imza: Option<&str>) -> Result<(), String> {
+/// What the release signs into each file's trusted comment: the version and
+/// the file. A signature alone says a file is ours; this says WHICH, so an
+/// older signed release cannot be served as the new one and the installer
+/// cannot be swapped for the standalone exe (commit security review,
+/// 2026-11-15). surum.yml writes the same string with `minisign -t`.
+pub fn imza_yorumu(surum: &str, dosya: &str) -> String {
+    format!("mozaik {surum} {dosya}")
+}
+
+/// Is `imza` a signature of `bytes` by the release key, made for `beklenen`
+/// (`imza_yorumu`)? The test copy, which has no release key behind it,
+/// accepts a missing signature (see `karar`).
+pub fn imza_dogru(bytes: &[u8], imza: Option<&str>, beklenen: &str) -> Result<(), String> {
     let Some(imza) = imza else {
         return if TEST_KOKU.is_some() {
             Ok(())
@@ -467,8 +477,16 @@ pub fn imza_dogru(bytes: &[u8], imza: Option<&str>) -> Result<(), String> {
         .map_err(|_| "İnen dosyanın imzası okunamadı.".to_string())?;
     anahtar
         .verify(bytes, &imza, false)
-        .map_err(|_| "İnen dosya bizim imzamızı taşımıyor.".to_string())
+        .map_err(|_| "İnen dosya bizim imzamızı taşımıyor.".to_string())?;
+    // The trusted comment is covered by the signature, so it cannot be edited.
+    if imza.trusted_comment() != beklenen {
+        return Err("İnen dosya bu sürüm için imzalanmamış.".into());
+    }
+    Ok(())
 }
+
+/// The version `check_update` last offered: what a download must be signed for.
+static ONERILEN: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
 /// SHA-256 of `bytes`, lowercase hex, as `sha256sum` writes it.
 fn ozet(bytes: &[u8]) -> String {
@@ -603,7 +621,11 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
         .await
         .map_err(|_| "Sürüm listesi anlaşılamadı.".to_string())?;
 
-    karar(m, &current)
+    let cevap = karar(m, &current)?;
+    if let Ok(mut slot) = ONERILEN.lock() {
+        *slot = cevap.yeni_var.then(|| cevap.version.clone());
+    }
+    Ok(cevap)
 }
 
 /// Downloads next to the running program and stops there. Nothing is replaced
@@ -632,7 +654,13 @@ pub async fn download_update(
         .map_err(|e| ag_hatasi(&e))?;
 
     verify(&bytes, boyut, &sha256)?;
-    imza_dogru(&bytes, imza.as_deref())?;
+    let surum = ONERILEN
+        .lock()
+        .map_err(|_| "Sürüm kaydı okunamadı.")?
+        .clone()
+        .ok_or("Önce güncellemeleri denetleyin.")?;
+    let dosya = url.rsplit('/').next().unwrap_or_default();
+    imza_dogru(&bytes, imza.as_deref(), &imza_yorumu(&surum, dosya))?;
     if kurulum {
         // The temporary folder, not next to the program: an installed program
         // lives in a folder the installer owns, and the wizard is run once and
@@ -811,14 +839,27 @@ mod tests {
     /// A sample signed with the release key on 2026-11-15 (`minisign -S`); the
     /// signature is public, the key that made it is not in this repository.
     const ORNEK: &[u8] = b"MZ Mozaik imza deneme";
-    const ORNEK_IMZA: &str = "untrusted comment: signature from minisign secret key\nRURS2NVsciPlIBWWdJ4OrNHuMdvRm2kbBkf4k1CpAJH7qRWo8Y2zPi4+Ll2H8OfST9QwPnzKR1RJ5X54iu4kXE4UNuU9iX1yvgQ=\ntrusted comment: timestamp:1794748737	file:ornek.bin	hashed\nF1mdPreLXs9BcLrz79s/mCJOcTTt4KMNM5Ed8mNLMEqqrKyJGRN+QxsMppTQB24vKIkhWseXI5rM0bSUo+9QAw==\n";
+    const ORNEK_IMZA: &str = "untrusted comment: signature from minisign secret key
+RURS2NVsciPlIBWWdJ4OrNHuMdvRm2kbBkf4k1CpAJH7qRWo8Y2zPi4+Ll2H8OfST9QwPnzKR1RJ5X54iu4kXE4UNuU9iX1yvgQ=
+trusted comment: mozaik 9.9.9 ornek.bin
+SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydma/rxBQ==
+";
 
     #[test]
     fn only_our_signature_on_these_bytes_passes() {
-        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA)).is_ok());
-        assert!(imza_dogru(b"MZ Mozaik imza denemf", Some(ORNEK_IMZA)).is_err());
-        assert!(imza_dogru(ORNEK, Some("untrusted comment: x\nRWQ=\n")).is_err());
-        assert!(imza_dogru(ORNEK, None).is_err());
+        let dogru = imza_yorumu("9.9.9", "ornek.bin");
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &dogru).is_ok());
+        assert!(imza_dogru(b"MZ Mozaik imza denemf", Some(ORNEK_IMZA), &dogru).is_err());
+        assert!(imza_dogru(ORNEK, Some("untrusted comment: x\nRWQ=\n"), &dogru).is_err());
+        assert!(imza_dogru(ORNEK, None, &dogru).is_err());
+    }
+
+    #[test]
+    fn a_signature_for_another_version_or_file_does_not_pass() {
+        // An older signed release served as the new one, and one file passed
+        // off as the other: both signed by us, neither for this download.
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &imza_yorumu("9.9.8", "ornek.bin")).is_err());
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &imza_yorumu("9.9.9", "Mozaik.exe")).is_err());
     }
 
     #[test]
