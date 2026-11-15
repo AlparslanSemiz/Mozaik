@@ -1886,6 +1886,15 @@ const EN: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variant {ad} deleted, with its {n} placed {n:hour|hours}.",
   "Program baştan dizildi.": "The timetable was laid out from scratch.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
+  // The plan-file reminder (2026-11-16).
+  "son plan dosyasının tarihi":
+    "date of the last plan file",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**This plan has no plan file.** What you have done is only in this browser.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**The last plan file is from {tarih}.** What you have done since then is only in this browser.",
+  "Son plan dosyası: {tarih}.":
+    "Last plan file: {tarih}.",
 };
 
 registerSozluk("en", EN);

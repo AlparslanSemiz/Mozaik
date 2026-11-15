@@ -1902,6 +1902,15 @@ const ES: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} borrada, con {n} {n:hora colocada|horas colocadas}.",
   "Program baştan dizildi.": "El horario se montó desde cero.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "El horario se montó desde cero; {n} {n:hora fijada siguió|horas fijadas siguieron} en su sitio.",
+  // The plan-file reminder (2026-11-16).
+  "son plan dosyasının tarihi":
+    "fecha del último archivo de plan",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Este plan no tiene archivo de plan.** Lo que ha hecho solo está en este navegador.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**El último archivo de plan es del {tarih}.** Lo que ha hecho desde entonces solo está en este navegador.",
+  "Son plan dosyası: {tarih}.":
+    "Último archivo de plan: {tarih}.",
 };
 
 registerSozluk("es", ES);

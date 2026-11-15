@@ -2,11 +2,21 @@
 // that a new build is waiting. Each one says it where it failed, in words, and
 // the ones that can be acted on carry their button.
 
-import { surumEtiketi } from '../../leaf/app';
+import { surumEtiketi, tarihYazisi } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
 import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
 import { T, useT } from '../common';
+
+/** The file reminder, decided in App (it knows the route and the folder). */
+export interface FileReminder {
+  /** Up: unsaved changes older than a week, and no folder writing a copy. */
+  due: boolean;
+  /** The last plan file's date, YYYY-MM-DD, or null when there never was one. */
+  savedDay: string | null;
+  save: () => void;
+  hide: () => void;
+}
 
 interface Props {
   canSave: boolean;
@@ -19,6 +29,7 @@ interface Props {
   folder: FolderRun;
   goTab: (tab: Tab) => void;
   ui: { setSection: (section: SectionId) => void };
+  reminder: FileReminder;
 }
 
 export default function Notices({
@@ -32,6 +43,7 @@ export default function Notices({
   folder,
   goTab,
   ui,
+  reminder,
 }: Props) {
   const t = useT();
   return (
@@ -137,6 +149,33 @@ export default function Notices({
               {t('Yenile')}
             </button>
             <button className="btn" onClick={() => setUpdateHidden(true)}>
+              {t('Sonra')}
+            </button>
+          </span>
+        </div>
+      )}
+
+      {/* CHANGES NO PLAN FILE HOLDS, FOR A WEEK (web audit, 2026-11-16). On a
+      browser with no folder to write to, the browser's own storage is the
+      only copy, and Safari clears it after seven days without a visit. Once,
+      gently: "Sonra" puts it away for the session, and a file clears it. */}
+      {reminder.due && (
+        <div className="update-bar" role="status">
+          <span>
+            {reminder.savedDay === null ? (
+              <T k="**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor." />
+            ) : (
+              <T
+                k="**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor."
+                vars={{ tarih: tarihYazisi(reminder.savedDay) }}
+              />
+            )}
+          </span>
+          <span className="update-acts">
+            <button className="btn primary" onClick={reminder.save}>
+              {t('Dosyaya kaydet')}
+            </button>
+            <button className="btn" onClick={reminder.hide}>
               {t('Sonra')}
             </button>
           </span>
