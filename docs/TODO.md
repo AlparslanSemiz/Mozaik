@@ -851,6 +851,33 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
       (3) OR-Tools DLL'leri kuruluma (`bundle.resources`, sabit SHA256), Rust'ta C API
       (`libloading`), sayfada CP-SAT modeli; CP-SAT yüklenemezse bugünkü arama.
+- [~] **B7.39 Güvenlik sertleştirmesi (2026-11-15, `guvenlik/sertlestirme`, #20'nin üstünde).**
+      Güvenlik ve veri denetiminin küçük maddeleri. **Yapılan:** `write_in` geçici dosyayı
+      `sync_all` ile diske yazıp yeniden adlandırıyor, Unix'te klasörü de (V2); `verify`
+      `boyut == 0`'ı reddediyor (G4); `.eski` yeni sürümün sayfası yüklenince siliniyor (V9);
+      `remove_file` yalnız `ders-programi-YYYY-AA-GG.json` siliyor (G7); `.yeni` ve kurulum
+      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun (`ESKI_KOPYA_NOTU`) sınırının testleri (V8); üçüncü
+      taraf action'lar SHA ile sabit (G5); Dependabot'ta cargo. Hepsi `cargo test`'te, Windows'ta
+      koşulmadı. **Kalan, karar ya da ölçüm isteyen:**
+      (1) **Capability (G6).** `core:default` yerine yalnız `core:event:allow-listen` ve
+      `core:event:allow-unlisten` yeter gibi görünüyor (sayfa yalnız `core.invoke` ve
+      `event.listen` kullanıyor, özel komutlar capability'ye bağlı değil). Değiştirilmedi:
+      yanlışsa kapanış el sıkışması (`kapaniyor`) sessizce düşer ve pencere 5 s sonra son
+      düzenlemeyi yazmadan kapanır, bunu ölçen bir CI testi yok. Önce gerçek exe'de (`gercek-exe`
+      süiti, kapanış testiyle) denenmeli; sonra `build.rs`'e `AppManifest::commands` ve
+      capability'ye yalnız kullanılan `allow-*` izinleri.
+      (2) **CSP (G4).** `tauri.conf.json` `csp: null` bilerek kaldı. Öneri:
+      `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'
+      data: blob:; worker-src blob:; connect-src ipc: http://ipc.localhost; object-src 'none';
+      base-uri 'none'; form-action 'none'`. Risk: tek dosyalı derleme betiği satır içi
+      koyuyor; Tauri yalnız kendi eklediklerine hash basıyorsa sayfa açılmaz. Exe'de bir kez
+      açılıp konsolda CSP ihlali aranmalı, gerekiyorsa satır içi betiğin hash'i derlemede
+      üretilmeli.
+      (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
+      Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
+      (4) `apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).
+      (5) G1 (imza), G2 (iş akışı izinleri, CLI sabitleme), V1, V3–V7 denetim raporunda, bu dala
+      girmedi.
 - [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
       Numarası B7.33–B7.36'dan sonra, çünkü o numaralar `tb8-eksik-plan` ve
       `tb1-dosyadan-ac` dallarında; yeri B7.30'un yanı, çünkü aynı ailenin devamı. Denetimin

@@ -367,10 +367,10 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
   }
 
   /** Read as `Option` with `serde(default)`: a manifest published before each was added still parses. */
-  const OPTIONAL = ['sha256', 'kurulum', 'kurulum_boyut', 'kurulum_sha256'];
+  const OPTIONAL = ['sha256', 'kurulum', 'kurulum_boyut', 'kurulum_sha256', 'imza', 'kurulum_imza'];
 
-  it('Manifest sekiz alan okuyor, surum.yml sekizini yazıyor', () => {
-    expect(MANIFEST.length).toBe(8);
+  it('Manifest on alan okuyor, surum.yml onunu yazıyor', () => {
+    expect(MANIFEST.length).toBe(10);
     expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
   });
 

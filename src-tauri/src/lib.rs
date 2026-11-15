@@ -99,11 +99,33 @@ fn safe_name(name: &str) -> Result<(), String> {
 /// would write its fixtures into it — and a test that is afraid to run is not
 /// a test. These three functions are everything this file DOES; the
 /// `#[tauri::command]` wrappers below them only answer "which folder".
+///
+/// THE BYTES REACH THE DISK BEFORE THE NAME DOES. A rename alone is atomic for
+/// the NAME, not for the contents: NTFS journals the rename, not the data, so a
+/// power cut after the rename and before the cache is written back can leave
+/// `ders-programi-tumu.json` empty or full of zeros, which is exactly the crash
+/// principle 6 is about (security review 2026-11-15, V2). So the temporary file
+/// is `sync_all`ed first, and on Unix the folder too, so the rename itself
+/// survives. Windows cannot open a folder as a plain file (it needs
+/// `FILE_FLAG_BACKUP_SEMANTICS`), and NTFS journals the rename anyway.
 fn write_in(dir: &Path, name: &str, text: &str) -> Result<(), String> {
+    use std::io::Write;
     safe_name(name)?;
     let tmp = dir.join(format!("{name}.tmp"));
-    fs::write(&tmp, text.as_bytes()).map_err(|e| format!("Yazılamadı: {e}"))?;
+    let yaz = || -> std::io::Result<()> {
+        let mut f = fs::File::create(&tmp)?;
+        f.write_all(text.as_bytes())?;
+        f.sync_all()
+    };
+    if let Err(e) = yaz() {
+        let _ = fs::remove_file(&tmp);
+        return Err(format!("Yazılamadı: {e}"));
+    }
     fs::rename(&tmp, dir.join(name)).map_err(|e| format!("Yerine konamadı: {e}"))?;
+    #[cfg(unix)]
+    if let Ok(klasor) = fs::File::open(dir) {
+        let _ = klasor.sync_all();
+    }
     Ok(())
 }
 
@@ -139,9 +161,37 @@ fn read_in(dir: &Path, name: &str) -> Result<Option<String>, String> {
     }
 }
 
+/// Is this the name of a daily backup: `ders-programi-YYYY-MM-DD.json`?
+///
+/// The same shape as `DAILY` in `src/platform/storage/folder.ts`, the only
+/// names `prunable()` ever hands to `removeEntry`.
+fn gunluk_yedek_mi(name: &str) -> bool {
+    let Some(tarih) = name
+        .strip_prefix("ders-programi-")
+        .and_then(|n| n.strip_suffix(".json"))
+    else {
+        return false;
+    };
+    let b = tarih.as_bytes();
+    b.len() == 10
+        && b.iter().enumerate().all(|(i, c)| match i {
+            4 | 7 => *c == b'-',
+            _ => c.is_ascii_digit(),
+        })
+}
+
 /// Deletes one daily backup. Missing is not an error: the caller is pruning.
+///
+/// ONLY a daily backup. The page decides WHICH ones go (`prunable()`), but
+/// what may go at all is decided here too: a bug or a script in the page
+/// could otherwise delete any `.json` in the folder, my father's own files
+/// among them (security review 2026-11-15, G7). Listing still shows
+/// everything; deleting does not reach everything.
 fn remove_in(dir: &Path, name: &str) -> Result<(), String> {
     safe_name(name)?;
+    if !gunluk_yedek_mi(name) {
+        return Err(format!("Yalnız günlük yedek silinir: {name}"));
+    }
     match fs::remove_file(dir.join(name)) {
         Ok(()) => Ok(()),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
@@ -212,6 +262,9 @@ fn kapanis_istendi(window: &tauri::Window, api: &tauri::CloseRequestApi) {
     });
 }
 
+/// Once per process: a page reloaded later has nothing left to sweep.
+static ESKI_SUPURME: std::sync::Once = std::sync::Once::new();
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 /// Linux only: draw without WebKitGTK's DMA-BUF renderer, unless the shell
 /// already says otherwise.
@@ -237,13 +290,6 @@ pub fn run() {
     // claiming the single instance below (`update::eskisi_gitsin` says why).
     if std::env::args().any(|a| a == update::GUNCELLENDI) {
         update::eskisi_gitsin(std::io::stdin(), update::DEVIR_SURESI);
-    }
-
-    // The version this replaced, if we are the replacement. Here rather than
-    // right after the swap, because right after the swap that file is still
-    // the process doing the asking.
-    if let Ok(exe) = std::env::current_exe() {
-        update::sweep_old(&exe);
     }
 
     tauri::Builder::default()
@@ -273,6 +319,21 @@ pub fn run() {
                 }
             }
             Ok(())
+        })
+        // The version this replaced, if we are the replacement, goes only once
+        // THIS version has drawn its page. Not at the first line of `run`, as
+        // it used to: a new version that cannot open its window (a WebView2
+        // error, a missing DLL) then had already deleted the one copy that
+        // still worked (security review 2026-11-15, V9). Kept, `.eski` is what
+        // a person renames back by hand; the next swap clears it anyway.
+        .on_page_load(|_webview, payload| {
+            if payload.event() == tauri::webview::PageLoadEvent::Finished {
+                ESKI_SUPURME.call_once(|| {
+                    if let Ok(exe) = std::env::current_exe() {
+                        update::sweep_old(&exe);
+                    }
+                });
+            }
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -317,7 +378,7 @@ mod linux_tests {
 
 #[cfg(test)]
 mod tests {
-    use super::{list_in, read_in, remove_in, safe_name, write_in};
+    use super::{gunluk_yedek_mi, list_in, read_in, remove_in, safe_name, write_in};
     use std::fs;
     use std::path::PathBuf;
 
@@ -421,6 +482,59 @@ mod tests {
             fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(),
             "yeni"
         );
+    }
+
+    #[test]
+    fn a_temporary_left_by_a_crash_is_written_over_and_does_not_stay() {
+        // A power cut between the write and the rename leaves `name.json.tmp`
+        // behind, possibly empty. The next save must not append to it or trip
+        // on it: the file read back is the new text, and no `.tmp` stays.
+        let s = Scratch::new("crash-tmp");
+        fs::write(s.0.join("ders-programi-tumu.json.tmp"), "yarim kalmis cok daha uzun bir metin").unwrap();
+        write_in(&s.0, "ders-programi-tumu.json", "{\"bundleVersion\":1}").unwrap();
+
+        assert_eq!(list_in(&s.0).unwrap(), ["ders-programi-tumu.json"]);
+        assert_eq!(
+            read_in(&s.0, "ders-programi-tumu.json").unwrap().as_deref(),
+            Some("{\"bundleVersion\":1}")
+        );
+    }
+
+    #[test]
+    fn a_failed_write_leaves_the_old_file_and_no_temporary() {
+        // The temporary cannot be created (a folder holds its name): the save
+        // fails loudly and the file that was there is untouched.
+        let s = Scratch::new("fail-tmp");
+        write_in(&s.0, "ders-programi-tumu.json", "eski").unwrap();
+        fs::create_dir(s.0.join("ders-programi-tumu.json.tmp")).unwrap();
+        assert!(write_in(&s.0, "ders-programi-tumu.json", "yeni").is_err());
+        assert_eq!(fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(), "eski");
+    }
+
+    #[test]
+    fn only_a_daily_backup_can_be_removed() {
+        // The live bundle, a rescue file and my father's own `.json` all pass
+        // `safe_name`; none of them may be deleted through `remove_file`.
+        let s = Scratch::new("remove-gate");
+        for ad in [
+            "ders-programi-tumu.json",
+            "ders-programi-kurtarma-2026-11-15-101010.json",
+            "vergi-beyani.json",
+        ] {
+            fs::write(s.0.join(ad), "x").unwrap();
+            assert!(remove_in(&s.0, ad).is_err(), "silinebildi: {ad}");
+            assert!(s.0.join(ad).exists(), "silindi: {ad}");
+        }
+        assert!(gunluk_yedek_mi("ders-programi-2026-08-27.json"));
+        for kotu in [
+            "ders-programi-2026-8-27.json",
+            "ders-programi-2026-08-27.json.tmp",
+            "ders-programi-2026_08_27.json",
+            "ders-programi-20260-8-27.json",
+            "xders-programi-2026-08-27.json",
+        ] {
+            assert!(!gunluk_yedek_mi(kotu), "kabul edildi: {kotu}");
+        }
     }
 
     #[test]
