@@ -108,6 +108,23 @@ modeli yazıldıktan sonra (TODO B7.38). **Denendi:** ipucu çatışma sınırı
 ipucunu hiç tamamlamıyordu, 2 000 tamamlıyor, 20 000 kötü; sayaçların kullanılmayan çıktıları
 yazılmayınca bir soru 30 s'den 14,5 s'ye indi.
 
+**İkinci bakış açıldı: CP-SAT'a kendi modeli (`ozellik/cpsat`, aynı gün).** Öğretmen saati
+aileleri ve kurallar artık `model.ts`'in formülüyle değil `cpModel.ts`'le soruluyor: eş bloklar
+sayılı tek grup, dolu sınıf saati "tam bir", açılan saat başlangıçların toplamı, günlük sınırlar
+doğrusal, kural adımları üç sıralı bayrak. Soru da değişti: "bir eksiği olur mu" kararı değil,
+bizim aramanın haftası ipucuyla tek bir en aza indirme, seçilmiş alt çözücülerle
+(`CP_PROOF_SUBSOLVERS`); "optimal" kanıt. Babanın verisinde (kirli ölçüm, bu Mac, başka
+oturumlar koşuyor) ikinci bakış 4 / 6 / 9'un üçünü de 18 koşunun 18'inde kanıtladı: 4 işçide
+toplam 10–16 s, 8 işçide 13–25 s. Eşik (4 işçide üç aile en az 2/3 tohumda kanıtlı, toplam
+≤ 60 s) aşıldı, `CP_SECOND_LOOK` açık. İkinci bakış yalnız bu dört aileye; ötekiler
+(`CpFormula` yolu) yeni soruyla ölçülmedi, bizim aramanın bulduğu gibi kalıyor. **Denendi:**
+aynı modelde "bir eksiği olur mu" (hedefsiz karar) 4 işçide 4 saat için 9–30 s (biri 30 s'de
+cevapsız), az öğretmenin ikinci sayısında 3/3 cevapsız; en aza indirme 1,1–4,1 s. Hedef `core`
+alt çözücüsüne alt sınır veriyor, karar sorusunda o yok. **Çıkan hata:** `verifySuggestion`
+iki saatlik bloğun tek saatini ya da iki güne bölünmüş saatlerini tam sayıyordu
+(`pendingBlocks` tekliyi bloğun yerine sayıyor); `cpModel.test.ts`'in bozulmuş haftaları buldu,
+denetçi artık dersin ızgaradaki koşularının planına bölünmesini istiyor.
+
 **Açık kalan.** Gerçek Windows'ta eski sürümden yenisine güncelleme (CLAUDE.md, "Sürüm")
 ve kurulumun antivirüs ve SmartScreen davranışı ölçülmedi; TODO B7.38.
 

@@ -24,6 +24,7 @@ import {
   CP_PROOF_SUBSOLVERS,
   type CpAnswer,
   type CpRelaxer,
+  cpNative,
   cpParams,
   createCpRelaxer,
   createRelaxer,
@@ -168,26 +169,27 @@ function startOn(
 }
 
 /**
- * OFF until CP-SAT has a model of its own (TODO B7.38). On the father's week,
- * three runs of the second look (8 workers, 3 s + 20 s per count): one proved
- * the rules' 9, one proved nothing in 89 s, and none beat our search's 4 / 6
- * / 9; a model written for CP-SAT directly (scratch, Python) proves the 4 in
- * 7.9 s. The bridge, the library in the installer and `cpsatOr` stay, tested,
- * so that turning this on is the one line it should be.
+ * ON since CP-SAT has a model of its own (pure/relax/cpModel.ts, TODO B7.38).
+ * MEASURED on the father's week (2026-11-15, this Mac, kirli: other sessions
+ * running): after our search's 4 / 6 / 9, the second look proved all three in
+ * every run, 3 seeds on 4 workers in 10-16 s and on 8 in 13-25 s. On model.ts's
+ * formula it had proved one of them in 20 s at best (DECISIONS).
  */
-const CP_SECOND_LOOK = false;
+const CP_SECOND_LOOK = true;
 
 /**
  * The exe with OR-Tools CP-SAT next to it (src-tauri/src/cpsat.rs): the search
- * runs as everywhere else, and AFTER it CP-SAT looks again at every way it
- * found, starting from that way's week. A week CP-SAT finds replaces the one
+ * runs as everywhere else, and AFTER it CP-SAT looks again at the ways it
+ * found that cpModel.ts writes (the teacher-hour ways and the rules), each
+ * starting from that way's week. The others are left as our search found
+ * them: on model.ts's recorded formula the second look did not prove even
+ * these in time, and theirs is not measured. A week CP-SAT finds replaces the one
  * shown only when it is smaller, or as small and proven ("Bundan küçük bir
  * değişiklik yetmiyor"). Why after and not instead (MEASURED 2026-11-15, the
- * father's week): our search finds 4, 6 and 9 in ~26 s and proves none;
- * CP-SAT on the same formula proves the rules' 9 within seconds and the 4
- * hours in 10-20 s on 8 cores, sometimes not inside its ceiling, so on its own
- * it would sometimes show 5 where today's search shows 4. After, it can only
- * make the panel better. Without the library, or when it fails, the panel
+ * father's week): our search finds 4, 6 and 9 and proves none; CP-SAT
+ * proves them, but finding the 4 hours from the stuck week took it 9-60 s
+ * (scratch analiz/1-cpsat-model.md), so on its own it could show 5 where
+ * today's search shows 4. After, it can only make the panel better. Without the library, or when it fails, the panel
  * gets exactly today's answer.
  */
 function cpsatOr(
@@ -226,9 +228,10 @@ function cpsatOr(
   };
 
   const second = async (answer: RelaxResult) => {
+    const families = [...new Set(answer.suggestions.map((x) => x.family))].filter(cpNative);
     const worth =
       answer.phase === 'done' &&
-      answer.suggestions.length > 0 &&
+      families.length > 0 &&
       !answer.suggestions.some((x) => x.changes.length === 0);
     if (!worth || !(await available) || cancelled) {
       finished ??= answer;
@@ -237,7 +240,7 @@ function cpsatOr(
     if (typeof document !== 'undefined') document.documentElement.dataset['oneriMotor'] = 'cpsat';
     cp = createCpRelaxer(base, hint, {
       ...options,
-      families: [...new Set(answer.suggestions.map((x) => x.family))],
+      families,
       previous: answer.suggestions,
       startRelaid: answer.suggestions.some((x) => x.relaid),
     });
@@ -254,7 +257,7 @@ function cpsatOr(
           workers,
           seconds: step.ask.seconds,
           hintConflicts: CP_HINT_CONFLICTS,
-          ...(step.ask.proof ? { subsolvers: CP_PROOF_SUBSOLVERS } : {}),
+          subsolvers: CP_PROOF_SUBSOLVERS,
         }),
         step.ask.bytes,
       );
@@ -283,7 +286,7 @@ function cpsatOr(
       const p = cp.progress();
       // Every way our search finished, less the ones CP-SAT is still looking
       // at again: only those say "(daha iyisi aranıyor)".
-      const again = new Set(first.suggestions.map((x) => x.family));
+      const again = new Set(first.suggestions.map((x) => x.family).filter(cpNative));
       for (const f of p.finished) again.delete(f);
       const all = options.families ?? DEFAULT_FAMILIES;
       return {

@@ -850,10 +850,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       (1) `surum.yml`'i yayınlamadan koşup kurulumun üretildiğini ve kancaların girdiğini
       görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
       (3) Yazıldı (`ozellik/cpsat`): DLL'ler kurulumda, Rust C API'si, `CpFormula`, ikinci
-      bakış (`cpsatOr`) — kapalı (`CP_SECOND_LOOK`, DECISIONS). Kalan: (a) CP-SAT'a kendi
-      modeli (Python'daki deneme 7,9 s'de kanıtlıyor; `scratch` değil, depo içi,
-      `pure/relax/` altında yeni bir dosya), (b) babanın makinesinde çekirdek sayısı ve süre, (c) gerçek
-      exe'de `cpsat_var` doğru mu (WebView2'de ham bayt `invoke`'u ölçülmedi).
+      bakış (`cpsatOr`), CP-SAT'a kendi modeli (`cpModel.ts`, öğretmen saati aileleri ve
+      kurallar) — ikinci bakış açık (`CP_SECOND_LOOK`, DECISIONS; ölçüm kirli). Kalan:
+      (a) öteki aileler `cpModel.ts`'e (mixed, hand, reassign, blockShape, weeklyHours) ve
+      ikinci bakışa, (b) babanın makinesinde çekirdek sayısı ve süre, temiz koşulda yeniden
+      ölçüm, (c) gerçek exe'de `cpsat_var` doğru mu (WebView2'de ham bayt `invoke`'u
+      ölçülmedi), (d) CP-SAT'lı altın sayı testi (4, 6+..., 9) yerelde ya da haftalık işte.
 - [~] **B7.39 Güvenlik sertleştirmesi (2026-11-15, `guvenlik/sertlestirme`, #20'nin üstünde).**
       Güvenlik ve veri denetiminin küçük maddeleri. **Yapılan:** `write_in` geçici dosyayı
       `sync_all` ile diske yazıp yeniden adlandırıyor, Unix'te klasörü de (V2); `verify`
