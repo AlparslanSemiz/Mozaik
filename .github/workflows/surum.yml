@@ -58,10 +58,10 @@ jobs:
   package:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: npm
@@ -104,7 +104,7 @@ jobs:
           (cd dist-kurulum && zip -qr "../teslim/Mozaik-Windows-kurulum.zip" .)
           ls -l teslim
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: package
           path: teslim/*
@@ -114,10 +114,10 @@ jobs:
   exe:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: npm
@@ -249,7 +249,7 @@ jobs:
       # in a build instead of turning up in a complaint six months later.
       - name: Are the icon and the version info REALLY embedded
         run: node scripts/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: exe
           path: teslim/*
@@ -263,7 +263,7 @@ jobs:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: indirilen
 
@@ -275,7 +275,7 @@ jobs:
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/surum-notu.md
