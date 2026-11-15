@@ -481,7 +481,7 @@ kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
 taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir ve `/S /R` ile
-çalıştırır; tek dosyalık bir kopya geçerken yolunu `eski-kopya.txt`'ye yazar ve kurulan
+çalıştırır; tek dosyalık bir kopya geçerken yolunu bir not dosyasına (`update.rs`, `ESKI_KOPYA_NOTU`) yazar ve kurulan
 program onu açılışta siler (`update.rs`).
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
