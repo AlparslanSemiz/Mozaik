@@ -53,6 +53,19 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 **Bırakılan.** `core:default`'u daraltmak ve CSP yazmak bu dala girmedi: ikisi de exe'de
 ölçülmeden yanlışsa sessizce kırılıyor (kapanışta son düzenleme, ya da açılmayan sayfa).
 
+### 2026-11-15 · Güncellemeler imzalı (`guvenlik/imza`)
+
+**Karar (Alp: "her düzeltmeyi yap").** Güvenlik denetiminin bulgusu: indirilen exe ve kurulum
+yalnız boyut, `MZ` ve aynı Release'ten gelen SHA-256 ile denetleniyordu, sonra kurulum `/S`
+ile sessiz çalışıyordu. Özet dosyanın eksiksiz geldiğini söyler, bizim olduğunu söylemez. Artık
+`surum.yml` iki programı minisign (ed25519) ile imzalıyor, imzalar `surum.json`'da (`imza`,
+`kurulum_imza`), ve yayınlanan kopya imzası bizim anahtarımızla tutmayan hiçbir şeyi kurmuyor
+(`update.rs`, `imza_dogru`; doğrulayıcı `minisign-verify`, bağımlılıksız). Anahtarın açık yarısı
+`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı depo sırrı `MOZAIK_IMZA_ANAHTARI` ve Alp'in makinesinde
+`~/.config/mozaik-imza/` (600). Sır yoksa yayın durur. Test kopyası (`TEST_KOKU`) yerel sunucudan
+beslendiği için imza istemez. **Bedel:** anahtar değişirse dağıtılmış her kopya yeni sürümü
+reddeder; gizli yarı kaybolursa aynı. Yedeği Alp'te.
+
 ### 2026-11-15 · Exe bir kurulum paketiyle de teslim ediliyor (`teslim/kurulum-paketi`)
 
 **Karar (Alp).** Yayın, tek başına `Mozaik.exe`'nin yanında bir kurulum sihirbazı

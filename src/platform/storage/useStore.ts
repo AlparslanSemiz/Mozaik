@@ -25,7 +25,7 @@ import { findPlan, LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../
 import {
   explicitly,
   frozenPlan,
-  readLibrary,
+  readLibraryAtStart,
   thawPlan,
   writeLibrary,
   writeRefused,
@@ -56,7 +56,7 @@ function initialBox(): Box {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
   // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
   // timetable is already sitting in. Adoption therefore copies NOTHING.
-  const library = readLibrary();
+  const library = readLibraryAtStart();
   writeLibrary(library);
   let planId = library.activeId;
   let present = loadPlanAtStart(planId);

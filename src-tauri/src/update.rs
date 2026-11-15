@@ -173,6 +173,14 @@ pub struct Manifest {
     /// installer fields or none: `karar` offers the installer only with all.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kurulum_sha256: Option<String>,
+    /// The minisign signatures of `exe` and of the installer (surum.yml signs
+    /// both with the release key; `IMZA_ANAHTARI` below is its public half).
+    /// A digest from the same release says the file arrived whole; only a
+    /// signature says it is ours (security review, 2026-11-15).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub imza: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kurulum_imza: Option<String>,
 }
 
 /// The answer the settings panel draws.
@@ -189,6 +197,8 @@ pub struct Cevap {
     /// need to know -- `download_update` reads the same thing off the address --
     /// but the About panel may say it.
     pub kurulum: bool,
+    /// The chosen file's minisign signature, handed back to `download_update`.
+    pub imza: Option<String>,
 }
 
 // --------------------------------------------------------------- pure parts
@@ -298,12 +308,22 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
     // The installer when the release has one this copy may fetch, otherwise the
     // standalone program exactly as before. A manifest whose installer address
     // is not ours is not an error: the standalone one still updates the copy.
-    let (exe, boyut, sha256, kurulum) = match (m.kurulum, m.kurulum_boyut, m.kurulum_sha256) {
+    let (exe, boyut, sha256, kurulum, imza) = match (m.kurulum, m.kurulum_boyut, m.kurulum_sha256) {
         (Some(url), Some(boyut), Some(ozet)) if kurulum_mu(&url) && safe_url(&url).is_ok() => {
-            (url, boyut, Some(ozet), true)
+            (url, boyut, Some(ozet), true, m.kurulum_imza)
         }
-        _ => (m.exe, m.boyut, m.sha256, false),
+        _ => (m.exe, m.boyut, m.sha256, false, m.imza),
     };
+    // A published copy installs nothing it cannot check the signature of. The
+    // test copy (TEST_KOKU) is fed by a local server and has no release key.
+    if yeni_var && imza.is_none() && TEST_KOKU.is_none() {
+        return Err(format!(
+            "Yeni sürüm ({}) yayımlandı, ama imzası yok; bu kopya onu kendi kurmuyor.\n\
+             Şu adresten indirip eskisinin üzerine koyabilirsiniz:\n{}",
+            m.version,
+            releases_sayfasi()
+        ));
+    }
     Ok(Cevap {
         yeni_var,
         version: m.version,
@@ -312,6 +332,7 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
         boyut,
         sha256,
         kurulum,
+        imza,
     })
 }
 
@@ -432,6 +453,49 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
     }
     Ok(())
 }
+
+/// The public half of the release key (minisign, ed25519). The secret half is
+/// the repository secret MOZAIK_IMZA_ANAHTARI and lives nowhere else but its
+/// owner's machine. A copy can only ever trust the key it was built with:
+/// changing it strands every copy out there, so it is never changed lightly.
+const IMZA_ANAHTARI: &str = "RWRS2NVsciPlIF8hWDq+YKRut30HIVv3UTP1++4tS/Mcp0vhVLe3rKsl";
+
+/// What the release signs into each file's trusted comment: the version and
+/// the file. A signature alone says a file is ours; this says WHICH, so an
+/// older signed release cannot be served as the new one and the installer
+/// cannot be swapped for the standalone exe (commit security review,
+/// 2026-11-15). surum.yml writes the same string with `minisign -t`.
+pub fn imza_yorumu(surum: &str, dosya: &str) -> String {
+    format!("mozaik {surum} {dosya}")
+}
+
+/// Is `imza` a signature of `bytes` by the release key, made for `beklenen`
+/// (`imza_yorumu`)? The test copy, which has no release key behind it,
+/// accepts a missing signature (see `karar`).
+pub fn imza_dogru(bytes: &[u8], imza: Option<&str>, beklenen: &str) -> Result<(), String> {
+    let Some(imza) = imza else {
+        return if TEST_KOKU.is_some() {
+            Ok(())
+        } else {
+            Err("İnen dosyanın imzası yok.".into())
+        };
+    };
+    let anahtar = minisign_verify::PublicKey::from_base64(IMZA_ANAHTARI)
+        .map_err(|_| "İmza anahtarı okunamadı.".to_string())?;
+    let imza = minisign_verify::Signature::decode(imza)
+        .map_err(|_| "İnen dosyanın imzası okunamadı.".to_string())?;
+    anahtar
+        .verify(bytes, &imza, false)
+        .map_err(|_| "İnen dosya bizim imzamızı taşımıyor.".to_string())?;
+    // The trusted comment is covered by the signature, so it cannot be edited.
+    if imza.trusted_comment() != beklenen {
+        return Err("İnen dosya bu sürüm için imzalanmamış.".into());
+    }
+    Ok(())
+}
+
+/// The version `check_update` last offered: what a download must be signed for.
+static ONERILEN: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
 /// SHA-256 of `bytes`, lowercase hex, as `sha256sum` writes it.
 fn ozet(bytes: &[u8]) -> String {
@@ -586,13 +650,22 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
         .await
         .map_err(|_| "Sürüm listesi anlaşılamadı.".to_string())?;
 
-    karar(m, &current)
+    let cevap = karar(m, &current)?;
+    if let Ok(mut slot) = ONERILEN.lock() {
+        *slot = cevap.yeni_var.then(|| cevap.version.clone());
+    }
+    Ok(cevap)
 }
 
 /// Downloads next to the running program and stops there. Nothing is replaced
 /// until `apply_update`, which is a second button.
 #[tauri::command]
-pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<u64, String> {
+pub async fn download_update(
+    url: String,
+    boyut: u64,
+    sha256: String,
+    imza: Option<String>,
+) -> Result<u64, String> {
     self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
@@ -610,6 +683,13 @@ pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<
         .map_err(|e| ag_hatasi(&e))?;
 
     verify(&bytes, boyut, &sha256)?;
+    let surum = ONERILEN
+        .lock()
+        .map_err(|_| "Sürüm kaydı okunamadı.")?
+        .clone()
+        .ok_or("Önce güncellemeleri denetleyin.")?;
+    let dosya = url.rsplit('/').next().unwrap_or_default();
+    imza_dogru(&bytes, imza.as_deref(), &imza_yorumu(&surum, dosya))?;
     if kurulum {
         // The temporary folder, not next to the program: an installed program
         // lives in a folder the installer owns, and the wizard is run once and
@@ -785,6 +865,39 @@ mod tests {
 
     // ----------------------------------------------------------------- gates
 
+    /// A sample signed with the release key on 2026-11-15 (`minisign -S`); the
+    /// signature is public, the key that made it is not in this repository.
+    const ORNEK: &[u8] = b"MZ Mozaik imza deneme";
+    const ORNEK_IMZA: &str = "untrusted comment: signature from minisign secret key
+RURS2NVsciPlIBWWdJ4OrNHuMdvRm2kbBkf4k1CpAJH7qRWo8Y2zPi4+Ll2H8OfST9QwPnzKR1RJ5X54iu4kXE4UNuU9iX1yvgQ=
+trusted comment: mozaik 9.9.9 ornek.bin
+SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydma/rxBQ==
+";
+
+    #[test]
+    fn only_our_signature_on_these_bytes_passes() {
+        let dogru = imza_yorumu("9.9.9", "ornek.bin");
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &dogru).is_ok());
+        assert!(imza_dogru(b"MZ Mozaik imza denemf", Some(ORNEK_IMZA), &dogru).is_err());
+        assert!(imza_dogru(ORNEK, Some("untrusted comment: x\nRWQ=\n"), &dogru).is_err());
+        assert!(imza_dogru(ORNEK, None, &dogru).is_err());
+    }
+
+    #[test]
+    fn a_signature_for_another_version_or_file_does_not_pass() {
+        // An older signed release served as the new one, and one file passed
+        // off as the other: both signed by us, neither for this download.
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &imza_yorumu("9.9.8", "ornek.bin")).is_err());
+        assert!(imza_dogru(ORNEK, Some(ORNEK_IMZA), &imza_yorumu("9.9.9", "Mozaik.exe")).is_err());
+    }
+
+    #[test]
+    fn a_new_version_without_a_signature_is_not_offered() {
+        let mut m = manifest("9.0.0", TEK);
+        m.imza = None;
+        assert!(karar(m, "2.2.0").is_err());
+    }
+
     #[test]
     fn dot_segments_cannot_leave_our_releases() {
         for kotu in [
@@ -852,6 +965,8 @@ mod tests {
             kurulum: None,
             kurulum_boyut: None,
             kurulum_sha256: None,
+            imza: Some(String::new()),
+            kurulum_imza: None,
         }
     }
 
@@ -868,8 +983,10 @@ mod tests {
         m.kurulum = Some(KURULUM.into());
         m.kurulum_boyut = Some(31_000_000);
         m.kurulum_sha256 = Some("ab".repeat(32));
+        m.kurulum_imza = Some("imza".into());
         let c = karar(m, "2.2.0").unwrap();
         assert!(c.kurulum);
+        assert_eq!(c.imza.as_deref(), Some("imza"));
         assert_eq!(c.exe, KURULUM);
         assert_eq!(c.boyut, 31_000_000);
         assert_eq!(c.sha256.as_deref(), Some("ab".repeat(32).as_str()));

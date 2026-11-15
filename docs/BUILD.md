@@ -313,7 +313,8 @@ ile derler ve iki şey teslim eder: tek başına `Mozaik.exe` ve kurulum sihirba
 `Mozaik-Kurulum.exe` (NSIS, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`).
 Kurulumun gerekçesi CP-SAT'ın exe'nin yanında duran kütüphaneleri; tek dosya, eski
 kopyaların güncellenebilmesi için yayında kalıyor (DECISIONS 2026-11-15). Kaldırıcı
-veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz.
+veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz. İki program da
+minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, DECISIONS 2026-11-15), exe imzasız hiçbir şey kurmaz.
 
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
