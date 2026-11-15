@@ -192,6 +192,23 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · CP-SAT: kanıt "bir eksiği olur mu" kararıyla (`ozellik/cpsat`)
+
+Model ajanının bulgusu (scratch `analiz/1-cpsat-model.md`): kanıtı `max_lp_sym` veriyor ve 4
+işçinin varsayılan portföyünde yok; kendi CP-SAT modeliyle "≤ 3 olur mu" 4 işçide 2–13 s. Bu
+dalda `lowest()` artık kısa bir bakıştan sonra en aza indirme değil karar soruyor, seçilmiş alt
+çözücülerle (`CP_PROOF_SUBSOLVERS`), ve `proven` öğretmen ailelerinde birinci sayıya bağlı.
+`model.ts`'in formülüyle ölçüm (babanın verisi, bizim arama sonra ikinci bakış, kirli: makinede
+başka ajanlar):
+
+| İşçi | teacherHours ≤ 3 | fewTeachers ≤ 5 | rules ≤ 5 / ikinci |
+|---|---|---|---|
+| 4 | 20 s'de cevapsız | 20 s'de cevapsız | olmaz 9,0 s / cevapsız |
+| 8 | 20 s'de cevapsız | 20 s'de cevapsız | olmaz 8,4 s / olmaz 20,2 s |
+
+Kazanç alt çözücü listesinden değil modelin biçiminden geliyor; `CP_SECOND_LOOK` kapalı kalıyor,
+sıradaki iş CP-SAT'a kendi modeli (`cpModel.ts`, ajan raporundaki tasarım).
+
 ## 2026-11-15 · Kurulum paketi ve CP-SAT (`teslim/kurulum-paketi`, `ozellik/cpsat`)
 
 Alp: "en hızlısı neyse o olsun", sonra kurulum paketi (b) seçildi (DECISIONS 2026-11-15).
