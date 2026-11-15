@@ -98,6 +98,17 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+
+## 2026-11-16 · Boyut eşiği geçici olarak 1 340 000 B ve brotli 310 000 B (`guvenlik/sertlestirme`, zincirin ucu)
+
+Veri koruması, Windows geçişi ve güvenlik zinciri `dist/index.html`'i 1 327 749 B'a taşıdı
+(eşik 1 320 000, `main` f5d4417'de 1 319 045), brotli 306,5 kB (eşik 306). `file://` açılışı,
+işlemci 4× yavaş, 9 koşu dönüşümlü: `main` medyan 619 ms, uç 624 ms (makine çok yüklü, yük
+117–159; fark gürültünün içinde). Eşikler geçici: `boyut/kucult` dalı (sözlükler, çift gömülen
+işçi kodu) birleşince yeniden düşürülecek.
+
+---
+
 ## 2026-11-16 · Veri koruması: silinmiş profil, küçülme, yenilemeden sonra geri getir (`veri/koruma`)
 
 Denetimin sondası (oturum scratch'inde `denetim2/veri/`) beş yolu ölçmüştü. (1) Exe'nin WebView2
