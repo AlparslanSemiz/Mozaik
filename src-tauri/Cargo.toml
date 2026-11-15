@@ -56,7 +56,7 @@ serde = { version = "1", features = ["derive"] }
 
 # The digest update.rs holds a download against (the manifest's `sha256`).
 # Already in Cargo.lock: tauri depends on it, so nothing new is compiled.
-sha2 = "0.10"
+sha2 = "0.11"
 
 # The release signature (update.rs, `imza_dogru`): minisign's own verifier,
 # pure Rust and no dependencies of its own, so the exe grows by kilobytes.
