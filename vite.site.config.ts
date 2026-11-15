@@ -69,11 +69,14 @@ function siteShell(): Plugin {
  *   logo-adaylari/   the two marks the chosen one beat, kept on purpose
  *   icon-small.svg   where the favicon data: URI and the .ico's 16/32 px
  *                    entries are generated FROM — nothing fetches it
+ *   eski-adres/      the stub for the OLD address /ders-programi/, which is
+ *                    published from its own repository, not from here
+ *                    (BUILD.md, "Eski adres")
  *
  * The service worker's origin should not carry files nothing ever asks for.
  * Found by listing dist-site/ rather than by assuming.
  */
-const SERVIS_EDILMEYEN = ['logo-adaylari', 'icon-small.svg'];
+const SERVIS_EDILMEYEN = ['logo-adaylari', 'icon-small.svg', 'eski-adres'];
 
 /** The placeholder site/sw.js carries where its cache name goes. */
 const ISARET = '__SURUM__';

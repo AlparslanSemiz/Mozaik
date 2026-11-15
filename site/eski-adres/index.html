@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  The OLD address, alparslansemiz.github.io/ders-programi/. Published from its
+  own repository, not by site.yml (BUILD.md, "Eski adres"). It removes the old
+  service worker and sends the reader to Mozaik on the SAME origin, where the
+  plans the old app kept are still readable: localStorage is per origin, not
+  per path. From there Mozaik itself moves them on to the new address.
+-->
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Mozaik</title>
+    <style>
+      body {
+        font: 1.25rem/1.5 system-ui, sans-serif;
+        margin: 3rem auto;
+        max-width: 36rem;
+        padding: 0 1rem;
+        color: #1b1f2a;
+        background: #f4f5f7;
+      }
+      a {
+        color: #2e4ba8;
+        font-weight: 600;
+      }
+    </style>
+    <script>
+      (function () {
+        var hedef = '/Mozaik/';
+        function git() {
+          location.replace(hedef);
+        }
+        if ('serviceWorker' in navigator) {
+          // The page's own guard beside the worker's: if the old worker is
+          // still in charge it is removed from here too, and the redirect
+          // waits for that so the next load is not served from its cache.
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (list) {
+              return Promise.all(
+                list
+                  .filter(function (r) {
+                    return new URL(r.scope).pathname.indexOf('/ders-programi/') === 0;
+                  })
+                  .map(function (r) {
+                    return r.unregister();
+                  }),
+              );
+            })
+            .then(git, git);
+        } else {
+          git();
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Mozaik artık burada değil. <a href="/Mozaik/">Mozaik'i açın</a>.</p>
+  </body>
+</html>
