@@ -209,11 +209,11 @@ test.describe('83. Panelden ders aktarma', () => {
     await pick.selectOption('oAV');
     // Precondition: both blocks are on the grid, and AV's week is shut.
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
-      '2 bloğu',
+      '2 kartı',
     );
     await page.getByRole('button', { name: 'Aktar' }).click();
 
-    await expect(page.locator('.toast').last()).toContainText('2 blok havuza döndü');
+    await expect(page.locator('.toast').last()).toContainText('2 kart havuza döndü');
   });
 
   // The whole reason this is not a one-line teacherId write.
@@ -299,7 +299,7 @@ test.describe('87. Panelden düzenleme', () => {
 
     // The row head of the grid IS the short form, so changing it here is the
     // shortest end-to-end this sheet has.
-    const short = sheet(page).getByRole('textbox', { name: 'Kısaltma' });
+    const short = sheet(page).getByRole('textbox', { name: 'Kısa ad' });
     await short.fill('ZZ');
     await short.blur();
     await page.keyboard.press('Escape');

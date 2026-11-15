@@ -120,7 +120,7 @@ const EMPTY_TEXT: Record<Kind, string> = {
 };
 
 const HINT: Record<Kind, string> = {
-  teacher: 'Öğretmenin gelemeyeceği saatlere tıklayın.',
+  teacher: 'Öğretmenin müsait olmadığı saatlere tıklayın.',
   class: 'Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.',
   room: 'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
 };
@@ -277,7 +277,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
           <p
             className="hint"
             title={t(
-              'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına tıklayınca haftanın o saati değişir.',
+              'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki saat numarasına tıklayınca haftanın o saati değişir.',
             )}
           >
             {t(HINT[kind])}
@@ -425,7 +425,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                                     ),
                                   } as React.CSSProperties)
                             }
-                            title={t('{gun} {ders}. ders: {kapali} / {toplam} kapalı', {
+                            title={t('{gun} {ders}. saat: {kapali} / {toplam} kapalı', {
                               gun: dayLabel(day.name),
                               ders: sIdx + 1,
                               kapali: n,
@@ -485,10 +485,15 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                   </span>
                   {/* "48/0" read aloud is two numbers and a slash. */}
                   <span className="sr-only">
-                    {t('{acik} saat açık, {yuk} saat ders yüklenmiş', {
-                      acik: x.open,
-                      yuk: x.load,
-                    })}
+                    {kind === 'teacher'
+                      ? t('{acik} saat müsait, {yuk} saat ders yüklenmiş', {
+                          acik: x.open,
+                          yuk: x.load,
+                        })
+                      : t('{acik} saat açık, {yuk} saat ders yüklenmiş', {
+                          acik: x.open,
+                          yuk: x.load,
+                        })}
                     {x.open < x.load &&
                       `, ${t('{n} saat fazla, bu program dizilemez.', { n: x.load - x.open })}`}
                   </span>
@@ -507,10 +512,17 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
           </div>
 
           <p className={open < selected.load ? 'error-box' : 'hint'}>
-            <T
-              k="**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş."
-              vars={{ kim: selected.short, acik: open, yuk: selected.load }}
-            />
+            {kind === 'teacher' ? (
+              <T
+                k="**{kim}**: {acik} saat müsait, {yuk} saat ders yüklenmiş."
+                vars={{ kim: selected.short, acik: open, yuk: selected.load }}
+              />
+            ) : (
+              <T
+                k="**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş."
+                vars={{ kim: selected.short, acik: open, yuk: selected.load }}
+              />
+            )}
             {open < selected.load &&
               ` ${t('{n} saat fazla, bu program dizilemez.', { n: selected.load - open })}`}
           </p>

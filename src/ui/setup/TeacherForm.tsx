@@ -52,7 +52,7 @@ export function TeacherForm({ state, change }: PanelProps) {
   const subjects = subjectOptions(state);
 
   // Left empty, the short form is derived — so show what it will be.
-  const suggested = newTeacher.name.trim() === '' ? t('Kısaltma') : makeShort(newTeacher.name);
+  const suggested = newTeacher.name.trim() === '' ? t('Kısa ad') : makeShort(newTeacher.name);
 
   /** What the Ekle button will actually store as the branch. */
   function subjectOf(): string {
@@ -105,7 +105,7 @@ export function TeacherForm({ state, change }: PanelProps) {
             {t("Excel'den yapıştır")}
           </button>
         }
-        description={<T k="Branş **listeden seçilir**; kısaltma ızgarada satır başlığı olur." />}
+        description={<T k="Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur." />}
         more={t(
           'Bir öğretmen iki branş veriyorsa + İkinci branş ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; boş bırakılırsa Ayarlar → Kurallar’daki sayı geçerli olur.',
         )}
@@ -122,7 +122,7 @@ export function TeacherForm({ state, change }: PanelProps) {
           />
           <input
             type="text"
-            aria-label={t('Kısaltma')}
+            aria-label={t('Kısa ad')}
             placeholder={suggested}
             title={t('Boş bırakırsanız addan üretilir')}
             className="text-sm"
@@ -254,7 +254,7 @@ export function TeacherForm({ state, change }: PanelProps) {
           open={pasteOpen}
           close={() => setPasteOpen(false)}
           title={t('Öğretmenleri yapıştır')}
-          example={t('Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta')}
+          example={t('Ad Soyad · Kısa ad · Branş · Cinsiyet · İkinci branş · E-posta')}
           parse={parseTeachers}
           rowText={(x) =>
             `${x.name} (${x.short}) · ${subjectLabel(x.subject)}` +

@@ -97,19 +97,19 @@ export default function Setup({ state, change, plans, step }: Props) {
           {!introSeen && (
             <p className="hint intro-line">
               <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
-              {t('Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.')}
+              {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
               <button
                 className="btn"
                 onClick={async () => {
                   if (await loadSample(state, change)) setIntroSeen(true);
                 }}
               >
-                {t('Örnek veriyle doldur')}
+                {t('Örnek okulu yükle')}
               </button>
               <button
                 className="btn quiet"
                 title={t(
-                  'Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder',
+                  'Bu satır bir daha çıkmaz; örnek okul Ayarlar → Hakkında’da durmaya devam eder',
                 )}
                 onClick={() => {
                   markIntroSeen();

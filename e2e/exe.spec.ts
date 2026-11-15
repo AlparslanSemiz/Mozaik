@@ -174,7 +174,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await fakeExe(page);
     await open(page);
 
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
 
     await expect

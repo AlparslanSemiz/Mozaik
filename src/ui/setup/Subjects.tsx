@@ -119,7 +119,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
           blank header, so the label was written once per subject and the
           column itself was never named. Where the box already holds the
           default the cell carries the empty-cell mark, a SHORT dash. */}
-      <td className="hint" title={t('Programda gömülü olan kısaltma')}>
+      <td className="hint" title={t("Mozaik'te gömülü olan kısaltma")}>
         {current === shown ? '–' : shown}
       </td>
       <td>

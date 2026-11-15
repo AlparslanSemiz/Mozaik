@@ -56,7 +56,7 @@ describe('öğretmenin haftası e-posta olarak', () => {
     const day = w.settings.days[1]!.name;
     expect(mail.body).toMatch(
       new RegExp(
-        `^MÇ · Haftalık ders programı\\nBirey Kurs\\n\\n${day}\\n  1–2\\. ders  \\d\\d:\\d\\d–\\d\\d:\\d\\d  510 · A$`,
+        `^MÇ · Haftalık ders programı\\nBirey Kurs\\n\\n${day}\\n  1–2\\. saat  \\d\\d:\\d\\d–\\d\\d:\\d\\d  510 · A$`,
       ),
     );
     expect(mail.url.startsWith('mailto:mc@example.com?subject=')).toBe(true);

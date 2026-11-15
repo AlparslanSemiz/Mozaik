@@ -279,7 +279,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
           open={pasteOpen}
           close={() => setPasteOpen(false)}
           title={t('Dersleri yapıştır')}
-          example={t('Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)')}
+          example={t('Sınıf · Öğretmen (ad veya kısa ad) · Haftalık saat · Blok (1 · 2 · 3)')}
           parse={parseLessons}
           rowText={(x) =>
             t('{sinif} · {kim}: {saat} saat ({dagilim})', {

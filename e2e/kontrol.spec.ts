@@ -237,7 +237,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
   });
 });
 
-test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
+test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
   test("haftadan çok gün isteyen dersi Danışman'da listeler, engel saymaz", async ({ page }) => {
     // 1-day world (load()'s default): a 2-hour lesson needs 2 separate days.
     await load(page, {
@@ -251,7 +251,7 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
       .locator('.ribbon')
       .getByRole('button', { name: /^Danışman/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
+    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
     await expect(panel).toContainText('yalnızca 1 gün var');
     await expect(panel).toContainText('en az bir günde iki kez görülecek');
     // A single-day world with a 2-block lesson trips BOTH heuristics — the
@@ -276,7 +276,7 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
       .locator('.ribbon')
       .getByRole('button', { name: /^Danışman/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
+    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
     await expect(panel).toContainText('MÇ yalnızca 1 günde müsait');
     await expect(panel).toContainText('bir güne iki kez düşebilir');
   });
@@ -294,7 +294,7 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
       .locator('.ribbon')
       .getByRole('button', { name: /^Danışman/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
+    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
     await expect(panel).toContainText('2 ayrı bloğa bölünmüş');
     await expect(panel).toContainText('çözücünün deneyebileceği tek şekil bu');
   });

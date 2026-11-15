@@ -363,7 +363,7 @@ ve onarım evresi ilişkili dersin o günkü bloklarını da yerinden edilecekle
 içinde ilk ve son dolu saat arasında kalan boş saat sayılır. Tek tanımı
 `rules.ts`'teki `gapsBetween()` ve üç okuyucusu var: iki kural ve `worlds.ts`'teki
 çözücü kalitesi ölçümü (`gridQuality()`). Bir bırakmayı engelleyemez, yani yalnız
-`Kapalı` ya da `Uyar` seçilebilir. 0 öteki sınırlardan farklı olarak olduğu gibi
+`Kapalı` ya da `Uyarı` seçilebilir. 0 öteki sınırlardan farklı olarak olduğu gibi
 kullanılır ("hiç boşluk olmasın", öteki dört kuralda ise `limit > 0` şart), ve etkinliğini yalnız seviye belirler
 (`gapRuleActive()`, `ruleActive()`'in ayrı ikizi).
 

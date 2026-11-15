@@ -36,6 +36,7 @@ export default function CapacityRows({
   empty,
   problemsFirst = false,
   colorOf,
+  openLabel = 'Açık',
 }: {
   rows: ReportRow[];
   empty: string;
@@ -47,6 +48,8 @@ export default function CapacityRows({
   problemsFirst?: boolean;
   /** Palette index for a row, or null where the kind has none (rooms). */
   colorOf?: ((id: Id) => number | null) | undefined;
+  /** The first number's heading: a teacher is "Müsait", a class or room "Açık". */
+  openLabel?: 'Açık' | 'Müsait';
 }) {
   const t = useT();
   if (rows.length === 0) return <p className="hint">{empty}</p>;
@@ -65,7 +68,7 @@ export default function CapacityRows({
         <thead>
           <tr>
             <th>{t('Ad')}</th>
-            <th className="num">{t('Açık')}</th>
+            <th className="num">{t(openLabel)}</th>
             <th className="num">{t('Yük')}</th>
             <th>{t('Durum')}</th>
           </tr>

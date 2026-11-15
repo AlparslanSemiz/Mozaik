@@ -5594,7 +5594,7 @@ table.bell-preview td {
   .topbar,
   .pool,
   .reason-bar,
-  /* A toast is fixed, so Chrome prints it on EVERY sheet. "Yedek yüklendi"
+  /* A toast is fixed, so Chrome prints it on EVERY sheet. "Plan dosyası açıldı"
      stays six seconds, and a print started inside them carried it onto the
      paper (seen 2026-11-15 while checking the dark-theme sheet). */
   .toasts,

@@ -208,8 +208,14 @@ function stripComments(text: string): string {
 }
 
 describe('sözlükler kaynakla aynı şeyi konuşuyor', () => {
+  // The glob runs from this folder, so a dictionary arrives as `./en.ts`. The
+  // filter once looked for `./lang/` and let all four in: every key was found
+  // in its own dictionary and the dead-key test passed for free (pitfall 156).
   const source = Object.entries(SOURCE)
-    .filter(([p]) => !p.includes('.test.') && !p.startsWith('./lang/') && !p.endsWith('worlds.ts'))
+    .filter(
+      ([p]) =>
+        !p.includes('.test.') && !/^\.\/(en|de|es|fr)\.ts$/.test(p) && !p.endsWith('worlds.ts'),
+    )
     .map(([, text]) => stripComments(text as string))
     .join('\n');
 

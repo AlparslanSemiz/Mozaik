@@ -54,12 +54,12 @@ async function openWithOneLesson(page: Page) {
 const openRow = (page: Page) => page.locator('table.list tr[aria-current="true"]');
 
 test.describe('40. Plan kitaplığı', () => {
-  test('üst çubukta plan seçici var ve tek plan "1. plan" adıyla geliyor', async ({ page }) => {
+  test('üst çubukta plan seçici var ve tek plan "Plan 1" adıyla geliyor', async ({ page }) => {
     await openWithSample(page);
     await expect(picker(page)).toBeVisible();
     await expect(picker(page).locator('option')).toHaveCount(1);
     await expect(picker(page)).toHaveValue('1');
-    await expect(picker(page).locator('option')).toHaveText(['1. plan']);
+    await expect(picker(page).locator('option')).toHaveText(['Plan 1']);
   });
 
   test('devralma: kitaplık kurulsa da program ESKİ anahtarda duruyor', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('40. Plan kitaplığı', () => {
     expect(directory).not.toBeNull();
     expect(JSON.parse(directory!)).toEqual({
       activeId: '1',
-      plans: [{ id: '1', name: '1. plan', draft: false }],
+      plans: [{ id: '1', name: 'Plan 1', draft: false }],
     });
     // ...and nothing was written to a second key for plan 1.
     const keys = await page.evaluate(() => Object.keys(localStorage));
@@ -108,7 +108,7 @@ test.describe('40. Plan kitaplığı', () => {
     expect(await placedCards(page)).toBe(0);
   });
 
-  test('her plan KENDİ anahtarında; 1. plan tarihsel anahtarda kalıyor', async ({ page }) => {
+  test('her plan KENDİ anahtarında; Plan 1 tarihsel anahtarda kalıyor', async ({ page }) => {
     await openWithSample(page);
     const first = await settledText(page);
 
@@ -167,7 +167,7 @@ test.describe('40. Plan kitaplığı', () => {
   test('ad değiştirme kalıcı ve seçicide görünüyor', async ({ page }) => {
     await openWithSample(page);
     await openPlans(page);
-    const box = page.getByLabel('1. plan adı');
+    const box = page.getByLabel('Plan 1 adı');
     await box.fill('Güz dönemi');
     await box.blur();
 
@@ -337,7 +337,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
       plans: Array<{ id: string; name: string; state: { teachers: unknown[] } }>;
     };
     expect(bundle.bundleVersion).toBe(1);
-    expect(bundle.plans.map((p) => p.name)).toEqual(['1. plan', 'Boş plan']);
+    expect(bundle.plans.map((p) => p.name)).toEqual(['Plan 1', 'Boş plan']);
     // Each plan carries its OWN school, not a shared one.
     expect(bundle.plans[0]!.state.teachers.length).toBeGreaterThan(0);
     expect(bundle.plans[1]!.state.teachers).toHaveLength(0);
@@ -359,7 +359,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     );
 
     // Now destroy it: switch away and delete the plan entirely.
-    await picker(page).selectOption({ label: '1. plan' });
+    await picker(page).selectOption({ label: 'Plan 1' });
     await openPlans(page);
     await page.getByRole('button', { name: 'Sil', exact: true }).nth(1).click();
     await answerDialog(page);
@@ -386,7 +386,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await picker(page).selectOption({ label: 'Boş plan' });
     await expect(page.locator('.app-title')).toHaveText('İkinci Okul');
     // ...and so did the first plan's teachers.
-    await picker(page).selectOption({ label: '1. plan' });
+    await picker(page).selectOption({ label: 'Plan 1' });
     await openSetup(page, 'Öğretmenler');
     expect(await page.locator('table.list tbody tr').count()).toBeGreaterThan(0);
   });
@@ -534,7 +534,7 @@ test.describe('43. Veriler nerede', () => {
     expect(shown).toContain('ders-programi-planlar');
 
     // The open plan's row carries a real size, not a dash.
-    const row = panel.locator('tbody tr', { hasText: '1. plan' });
+    const row = panel.locator('tbody tr', { hasText: 'Plan 1' });
     await expect(row.locator('td.num')).toHaveText(/KB|B$/);
   });
 

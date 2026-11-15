@@ -345,7 +345,7 @@ test.describe('8. Tema', () => {
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Koyu tema' }).click();
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();

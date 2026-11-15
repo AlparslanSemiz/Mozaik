@@ -19,7 +19,7 @@ export default function PreviewBar({ previewed, preview, setPreview, diff, stale
   return (
     <div className="preview-bar" role="region" aria-label={t('Önizleme')}>
       <b>{t('Önizleme: {yol}', { yol: wayName(t, previewed.family) })}</b>
-      <span className="segmented" role="group" aria-label={t('Hangi hafta')}>
+      <span className="segmented" role="group" aria-label={t('Hangi program')}>
         <button
           className="btn"
           aria-pressed={preview.show === 'before'}

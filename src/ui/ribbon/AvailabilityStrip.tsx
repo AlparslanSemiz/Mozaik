@@ -26,12 +26,7 @@ export function availabilityStrip({
     ui.kind === 'teacher' ? state.teachers : ui.kind === 'class' ? state.classes : state.rooms;
   const selected = list.find((x) => x.id === ui.chosen) ?? list[0];
   return (
-    <div
-      className="ribbon"
-      data-section={ui.tab}
-      role="toolbar"
-      aria-label={t('Müsaitlik araçları')}
-    >
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Müsaitlik')}>
       <Group label="Kim">
         {KINDS.map((k) => (
           <button
@@ -96,7 +91,7 @@ export function availabilityStrip({
         <button
           className="btn"
           aria-pressed={availClock}
-          title={t('Ders numaralarının altına başlangıç saatlerini yaz')}
+          title={t('Saat numaralarının altına başlangıç saatlerini yaz')}
           onClick={() => setAvailClock(!availClock)}
         >
           <Clock {...ICON} />

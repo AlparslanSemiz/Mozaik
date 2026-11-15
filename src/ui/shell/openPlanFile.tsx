@@ -44,7 +44,7 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
         title: t('Bu dosya eksik'),
         tone: 'warn',
         body: t(
-          'Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+          "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Mozaik'in kaydettiği bir .json plan dosyası seçin.",
         ),
       });
       return;
@@ -72,8 +72,8 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
               'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
             )
           : newer
-            ? t('Programı güncelleyin, sonra tekrar deneyin.')
-            : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
+            ? t("Mozaik'i güncelleyin, sonra tekrar deneyin.")
+            : t("Mozaik'in kaydettiği bir .json plan dosyası seçin."),
       });
       return;
     }
@@ -89,7 +89,7 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
     });
     if (
       !(await confirm({
-        title: t('Şu anki programın yerine geçecek'),
+        title: t('Açık olan planın yerine geçecek'),
         body: (
           <>
             <p>
@@ -110,14 +110,14 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
             </p>
           </>
         ),
-        confirmLabel: t('Yedeği yükle'),
+        confirmLabel: t('Planı aç'),
         danger: true,
       }))
     ) {
       return;
     }
     loadState(read.state);
-    notify(t('Yedek yüklendi.'));
+    notify(t('Plan dosyası açıldı.'));
   }
   return fileChosen;
 }

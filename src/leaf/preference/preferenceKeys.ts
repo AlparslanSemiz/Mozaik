@@ -45,7 +45,7 @@ export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: RIBBON_AUTO_KEY, label: 'şerit kaydırınca gizlensin mi' },
   { key: AVAIL_CLOCK_KEY, label: 'müsaitlikte saat gösterimi' },
   { key: MOTION_KEY, label: 'hareket (animasyon) tercihi' },
-  { key: INTRO_KEY, label: 'örnek veri satırı görüldü mü' },
+  { key: INTRO_KEY, label: 'örnek okul satırı görüldü mü' },
   { key: PRINT_OPTIONS_KEY, label: 'kâğıt seçenekleri' },
   { key: CHANGELOG_SEEN_KEY, label: 'görülen sürüm notu' },
   { key: RELAX_LOG_KEY, label: 'öneri aramasının ölçümleri' },

@@ -132,7 +132,7 @@ function LessonSheet({
         body:
           preview.returned === 0 && preview.unpinned === 0
             ? t('Yerleşmiş saatler olduğu gibi taşınır. Ctrl+Z ile geri alınabilir.')
-            : t('{n} blok havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.', {
+            : t('{n} kart havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.', {
                 n: preview.returned,
                 s: preview.unpinned,
               }),
@@ -146,7 +146,7 @@ function LessonSheet({
     toast(
       preview.returned === 0
         ? t('Ders {ad} sınıfına taşındı.', { ad: to.name })
-        : t('Ders {ad} sınıfına taşındı. {n} blok havuza döndü.', {
+        : t('Ders {ad} sınıfına taşındı. {n} kart havuza döndü.', {
             ad: to.name,
             n: preview.returned,
           }),
@@ -166,7 +166,7 @@ function LessonSheet({
         body:
           preview.returned === 0
             ? t('Yerleşmiş saatler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.')
-            : t('{n} blok havuza döner. Ctrl+Z ile geri alınabilir.', { n: preview.returned }),
+            : t('{n} kart havuza döner. Ctrl+Z ile geri alınabilir.', { n: preview.returned }),
         confirmLabel: t('Aktar'),
         danger: preview.returned > 0,
       }))
@@ -177,7 +177,7 @@ function LessonSheet({
     toast(
       preview.returned === 0
         ? t('Ders {kim} öğretmenine geçti.', { kim: to.short })
-        : t('Ders {kim} öğretmenine geçti. {n} blok havuza döndü.', {
+        : t('Ders {kim} öğretmenine geçti. {n} kart havuza döndü.', {
             kim: to.short,
             n: preview.returned,
           }),
@@ -307,7 +307,7 @@ function LessonSheet({
                     blocks={lesson.blocks}
                     dayLimit={blockCeiling(state, lesson)}
                     title={t(
-                      'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da',
+                      'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş kartlar da',
                     )}
                     onPick={(blocks) => change((d) => updateLesson(d, lesson.id, { blocks }))}
                   />

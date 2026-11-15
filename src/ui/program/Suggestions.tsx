@@ -162,15 +162,15 @@ export default function Suggestions({
         <div className="suggestion-row">
           <h2 id="suggestions-title">
             {enough
-              ? t('Olur dedikleriniz yetiyor: hafta kuruluyor')
+              ? t('Olur dedikleriniz yetiyor: program kuruluyor')
               : as.relaid
-                ? t('Hafta baştan dizilince değişiklik gerekmeden kuruluyor')
-                : t('Hafta değişiklik gerekmeden kuruluyor')}
+                ? t('Program baştan dizilince değişiklik gerekmeden kuruluyor')
+                : t('Program değişiklik gerekmeden kuruluyor')}
           </h2>
           <span className="hint inline">
             {enough
-              ? t('Uygulayınca cevaplarınız veriye yazılır ve hafta yerleşir.')
-              : t('Otomatik dizme bu haftayı bulamadı; ikinci arama buldu ve denetledi.')}
+              ? t('Uygulayınca cevaplarınız veriye yazılır ve program dizilir.')
+              : t('Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.')}
           </span>
           <button
             className="btn"
@@ -182,7 +182,7 @@ export default function Suggestions({
             {t('Izgarada göster')}
           </button>
           <button ref={first} className="btn primary" disabled={stale} onClick={() => onApply(as)}>
-            {as.relaid ? t('Programı baştan yerleştir') : t('Programı yerleştir')}
+            {as.relaid ? t('Uygula ve baştan diz') : t('Uygula ve diz')}
           </button>
           <button className="btn" onClick={onClose}>
             {t('Kapat')}
