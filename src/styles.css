@@ -2285,10 +2285,11 @@ table.grid thead tr:nth-child(2) th {
    plus the rule whatever the scale (4.25px, against 1.0). The padding is on
    the clock and not the `th`: the hour number above it is narrower and needs
    none. It costs width, and that is said out loud: the clock IS the column's
-   floor, so Rahat's week went from 2516px to about 3000px at 1920. Rahat
+   floor, so Rahat's week went from 2516px to 2946px at 1920. Rahat
    already scrolled sideways; Sığdır, which hides the clock, is unchanged. */
 table.grid .hour-clock {
   padding-inline: var(--space-1);
+  font-size: var(--fs-sm);
 }
 
 /* And the hairline between two bell times steps up to --line, so the gap has
@@ -2298,9 +2299,11 @@ table.grid thead tr:nth-child(2) th {
   border-right-color: var(--line);
 }
 
+/* Müsaitlik's heading keeps 12px: its columns are `table-layout: fixed` and
+   the two-line heading is measured to hold its reserved line (pitfall 102). */
 .hour-clock {
   display: block;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   color: var(--muted);
 }
 
@@ -3021,8 +3024,9 @@ table.grid tbody td:hover > .card-pin,
    The LINE BOX does not grow with the letters: it is the one the lines had
    at 12px (12px x --lh-base = 18px at %100), written out because `.card`'s
    `font: inherit` would otherwise hand them 1.5 x their new size and every
-   row would come out 4.5px taller. It is also exactly Sığdır's line box, so
-   switching density moves no row (gorunum.spec.ts, "satır kutusu"). */
+   row would come out 4.5px taller. At %100 and below it is exactly Sığdır's
+   line box, so switching density moves no row (gorunum.spec.ts, "satır
+   kutusu"); above %100 Sığdır's floor stops growing and its box is smaller. */
 .card-top,
 .card-bottom {
   line-height: calc(var(--fs-xs) * var(--lh-base));
@@ -4297,7 +4301,7 @@ table.list tbody tr[aria-current='true'] > td:first-child {
 /* A field in a list row gives up its recess. In the light theme --zebra is a
    hair from --paper-sunk (ΔE 1.7), so on every second row a sunk box would
    vanish into the row it sits in. It goes to paper, and with the recess gone its edge is its only
-   boundary, which is the button's case: --line, not --hairline. The split
+   boundary, which is the button's case: --border-strong. The split
    picker is a bare <button> and was on the browser's own grey (4.53 for its
    text in the dark theme); in a list it is a field like its neighbours. */
 table.list td input[type='text'],
@@ -6293,7 +6297,9 @@ table.availability.heat td.closed {
 .sheet-cell-bottom {
   display: block;
   font-size: var(--fs-2xs);
-  color: var(--on-color-sub);
+  /* --on-color, not --on-color-sub (4.71:1 on the worst palette colour): this
+     is the panel's week ON SCREEN, the same surface as the grid's card. */
+  color: var(--on-color);
 }
 
 /* Closed and empty: the same hatch the availability grid uses, so the two
@@ -6338,10 +6344,12 @@ table.availability.heat td.closed {
   /* The name is the target, and a short one ("MÇ") was 15x16px: under the
      24px floor (WCAG 2.5.8). The box grows by padding and gives the same
      amount back as negative margin, so the row head it sits in — measured to
-     the pixel in Sığdır — keeps its height and nothing beside it moves. */
+     the pixel in Sığdır — keeps its height and nothing beside it moves.
+     DOWNWARD only: the extra reaches over its own second line and never up
+     into the row head above, which is sticky and would paint over it. */
   min-width: 24px;
-  padding: 4.5px 0;
-  margin-block: -4.5px;
+  padding: 0 0 8.5px;
+  margin-bottom: -8.5px;
   border: none;
   background: none;
   color: inherit;
@@ -6573,8 +6581,9 @@ table.availability thead .hour-clock:empty::before {
      that vanishes when the screen is busy is a status nobody relies on. */
   /* A small basis growing to the whole sentence, for `.topbar-doc`'s reason:
      the bar wraps, and a wrapping line breaks on the basis before anything
-     shrinks. The 28rem cap moved onto the sentence, because the box's own
-     max-width is now its content. */
+     shrinks. The old 28rem cap moved onto the sentence (24rem, the box's
+     28rem less its padding and dot), because the box's own max-width is now
+     its content. */
   flex: 1 1 2.5rem;
   min-width: 2.5rem;
   max-width: max-content;
@@ -7148,6 +7157,11 @@ body.row-dragging {
        vanished from every pressed control. Inherited, so the label and the
        icon inside are covered too. */
     forced-color-adjust: none;
+    box-shadow: none !important;
+  }
+
+  .tab[aria-current='true'] .tab-dot {
+    background: HighlightText;
   }
 
   .btn[aria-pressed='true'] svg,

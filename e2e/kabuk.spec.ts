@@ -36,7 +36,7 @@ test.describe('23. Sekmeler', () => {
     await openWithSample(page);
     await expect(page.locator('.tabstrip .tab-label').first()).toBeVisible();
 
-    // Under ~1250px the label moves UNDER the icon instead of going away: %150
+    // Under ~1320px of bar the label moves UNDER the icon instead of going away: %150
     // on a 1920 screen is this box, and a bar of seven bare pictures is what a
     // reader who has trouble seeing got there (2026-11-15). And the page does
     // not scroll sideways for it.

@@ -407,9 +407,8 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       } else {
         expect(m.icBaslikSayisi, `${d.ad}: iç başlıklar hâlâ duruyor`).toBe(0);
       }
-      // Step 3, and rule 4 of the contract underneath it: the drawing may go,
-      // the name may not (pitfall 56).
-      // Since 2026-11-15 the last step no longer takes the word away: it takes
+      // Step 3, and rule 4 of the contract underneath it: the name may never
+      // go (pitfall 56). Since 2026-11-15 the last step no longer takes the word away: it takes
       // it one step down the ladder. So the word is drawn in every state, and
       // in the narrowest it is smaller than the strip's own size.
       expect(m.yaziBoyu, `${d.ad}: düğme kelimesi çizilmiyor`).toBeGreaterThan(0);
@@ -418,8 +417,8 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       } else {
         expect(m.yaziBoyu, `${d.ad}: son adım kelimeyi küçültmedi`).toBeLessThan(m.normal);
       }
-      // In every state, including the one where the word is not drawn: the text
-      // node is still in the tree and the button still answers to a name.
+      // In every state the text node is still in the tree and the button
+      // still answers to a name.
       expect(m.metin, `${d.ad}: düğmenin metin düğümü gitti`).not.toBe('');
       expect(m.ad, `${d.ad}: düğme adını kaybetti`).not.toBe('');
 
