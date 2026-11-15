@@ -73,6 +73,54 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-15 · Okunurluk turu (`erisim/gorsel`)
+
+Okunurluk denetiminin on bulgusu, yalnız `src/styles.css`, belgeler ve dokunduğu testler
+(metinlere ve `src/leaf/lang/*`'a dokunulmadı; başka bir dal adları değiştiriyor). Ölçüm betikleri
+`scratch/olc/` (`olc.js` kontrast ve ızgara, `nav.js` dar kutular, `forced.js` karşıtlık teması),
+`file://` derlemesi, örnek okul, `Otomatik diz` sonrası, iki temada. Önce → sonra:
+
+- Saat başlığı 12 px, iki saat arası 1,0 px ("09:0009:50") → 13 px, 4,25 px ve `--line` bir çizgi;
+  %100, %125 (1536) ve %200 (960) aynı. Rahat'ın haftası 2516 → 2946 px (saat sütunun tabanı,
+  tuzak 37), Ferah 3,5rem'e çıktı ki Rahat'tan geniş kalsın (2793 → 3378 px). Sığdır değişmedi (1919).
+- Kart 12/12 px, alt satır `--on-color-sub` en kötü 4,71 → 14/13 px (iki saatlik blokta 15), iki
+  satır `--on-color` en kötü 7,36. Satır kutusu 18 px'te tutuldu: satır 40,5 → 38 px değil, aynı.
+  Sığdır 12 px tabanında kaldı (sığdırma sözü), 0/374 kart kırpık, üç yoğunlukta.
+- Seçili sekme gradyanı: açık üst durak 4,51–4,56, koyu alt durak 3,76–3,89 → düz dolgu, açık en
+  kötü 7,75, koyu 7,19. Yorumdaki "5,63" durakların değil düz rengin sayısıydı, düzeltildi.
+- `forced-colors`: kart kenarsız, basılı düğme ve sekme ayırt edilmiyordu → kart 1 px `CanvasText`,
+  basılı/seçili `Highlight`/`HighlightText` (`forced-color-adjust: none`, yoksa arka plaka yazıyı
+  siliyordu), odak 3 px `Highlight`. Zebra'nın halkası dokunulmadı.
+- Kontrol kenarı: girdi 1,16, düğme 1,11 (koyu 1,2 ve 1,49) → `--border-strong`, açık en kötü 3,16
+  (masa zemininde), koyu 3,59.
+- Yer tutucu #757575: 4,21 / koyu 3,82 → `--muted`: 7,79 / 9,39.
+- Rozet, sağlık çipi, sebep çubuğu `ok` 4,84 → `--ok-ink` 7,47 (`warn` 7,63, `bad` 7,20; koyu
+  temada değişmedi, 8,78). `zebra.spec.ts`'in `.badge` istisnası kalktı; E1'de "Sil" kaldı.
+- Dar kutu: %100'de 1280 px'te sekme etiketi gizli, 1100'de şerit sözcüğü 0 px → etiket simgenin
+  altında 12 px, şerit sözcüğü 12 px; üst bar sığmazsa iki satır (1024 ve 960). Programın %150'si
+  1440 / 1024 px'te sayfa 366 / 169 px yana taşıyordu → 0. En dar kutularda (%100 960, %150 1280
+  ve 1024) şeritte 2 ile 6 uzun sözcük üç noktayla kısalıyor.
+- Hedefler: `.inspect` 15–19×16, `.toast-close` 19,5, onay kutuları 13, `.row-grip` 22,8, havuz
+  seçicisi 23 → hepsi en az 24 px; `.inspect`'in yüksekliği negatif kenar boşluğuyla, satır başı
+  kıpırdamadı. Kalan tek <24 öğe `.pool-split` (1920×11, sürükleme ayracı).
+- Kapalı saat çarpısı ızgarada kırmızı 25 px kalın → `--muted` 17 px 600; tarama durum taşıyor.
+  Müsaitlik'inki aynı kaldı (DECISIONS).
+
+Ekranda 12 px kalanlar DESIGN'da (Tipografi); `.hint` 13 px ve SD5 Alp'in kararı.
+
+**Boyut.** Ham `dist/index.html` 1 229 155 → 1 230 657 B (+1,5 kB CSS), eşik 1 230 000'i 657 B
+aştı; brotli 287,49 kB (eşik 292). Eşik 1 232 000 B oldu. Önce `file://` açılışı, Chromium,
+CPU 4× yavaş, 1920×1080, 7 koşu `loadEventEnd` medyanı, iki tur (kirli, yük ortalaması ~40):
+`main` 248 / 232 ms, bu dal 234 / 230 ms, yani fark yok (`scratch/olc/acilis.js`).
+
+**Koşulan.** `tsc --noEmit -p .`, eslint, prettier (dokunulan e2e dosyaları), `npx vite build`,
+`npm run boyut` (eşik yükseltildikten sonra yeşil). `npm run hizli`: bu Mac'in yükünde (ortalama
+~40, başka ajanlar) 10 test 5 s'lik süreye takıldı; aynı beş dosya `--testTimeout=120000` ile
+74/74 yeşil, hiçbiri CSS okumuyor. E2E (`--workers=4`, `scripts/agir.sh` çalışmıyor, `flock` yok):
+renk, zebra, izgara, gorunum, kayma, ekran, erisim, temel, kabuk, serit — 223/225, sonra serit
+26/26; kalan `kayma.spec.ts:129` `main`'in derlemesinde de kırmızı (macOS'un kaydırma çubuğu yer
+kaplamıyor, testin kendi bekçisi).
+
 ## 2026-11-15 · Eski dallar birleşti (`eski/birlestirme`)
 
 `birlesme-sonrasi` ve `ozellik/belge-temizlik` (yalnız belgeler, `main`'in hâli korunarak),
