@@ -39,11 +39,11 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { createServer } from 'node:https';
 import { join, resolve } from 'node:path';
 import { pencereyiKapat } from './pencere-kapat.mjs';
 import { uiaBas } from './uia.mjs';
 import { windowsTemizle, windowsYerleri } from './webdriver.mjs';
+import { sunucuBaslat } from './yerel-sunucu.mjs';
 
 const arguman = (ad) => {
   const i = process.argv.indexOf(ad);
@@ -98,9 +98,8 @@ const surum = JSON.parse(readFileSync('package.json', 'utf8')).version;
 const ilkSurum = surum === '2.2.0' ? '2.2.1' : surum;
 const yeniBayt = readFileSync(yeni);
 const KOK = 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/';
-let takasEdildi = false;
-const manifest = () => ({
-  version: takasEdildi ? surum : ilkSurum,
+const manifest = (version) => ({
+  version,
   date: '2026-11-16',
   exe: `${KOK}Mozaik.exe`,
   boyut: yeniBayt.length,
@@ -112,7 +111,6 @@ const manifest = () => ({
   kurulum_imza: 'untrusted comment: deneme\n',
 });
 
-const gelen = [];
 const pfx = join(process.env.RUNNER_TEMP ?? kur, 'github-test.pfx');
 const HOSTS = 'C:\\Windows\\System32\\drivers\\etc\\hosts';
 const hostsOnce = readFileSync(HOSTS, 'utf8');
@@ -144,21 +142,20 @@ try {
   }
   ps('ipconfig /flushdns | Out-Null');
 
-  sunucu = createServer({ pfx: readFileSync(pfx), passphrase: 'mozaik' }, (istek, cevap) => {
-    gelen.push(istek.url);
-    console.log(`istek: ${istek.method} ${istek.url} (${istek.headers['user-agent'] ?? ''})`);
-    if (istek.url === '/AlparslanSemiz/Mozaik/releases/latest/download/surum.json') {
-      cevap.writeHead(200, { 'content-type': 'application/json' });
-      cevap.end(JSON.stringify(manifest()));
-    } else if (istek.url === '/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe') {
-      cevap.writeHead(200, { 'content-type': 'application/octet-stream' });
-      cevap.end(yeniBayt);
-    } else {
-      cevap.writeHead(404);
-      cevap.end();
-    }
+  // On a thread of its own: `uiaBas` blocks this one (scripts/yerel-sunucu.mjs).
+  const MANIFEST = '/AlparslanSemiz/Mozaik/releases/latest/download/surum.json';
+  const KURULUM = '/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Kurulum.exe';
+  sunucu = await sunucuBaslat({
+    port: 443,
+    pfx,
+    parola: 'mozaik',
+    yollar: {
+      [MANIFEST]: { json: manifest(ilkSurum), json2: manifest(surum) },
+      '/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe': { dosya: yeni },
+      // Asked for and counted; its answer (JSON, not a program) fails the check.
+      [KURULUM]: { json: {} },
+    },
   });
-  await new Promise((tamam) => sunucu.listen(443, '127.0.0.1', tamam));
 
   // The father's file name: the exe he downloaded before the rename.
   mkdirSync(kur, { recursive: true });
@@ -180,17 +177,13 @@ try {
   if (ozet(babanin) !== createHash('sha256').update(yeniBayt).digest('hex')) {
     throw new Error('Ders-Programi.exe yeni exe değil');
   }
-  takasEdildi = true;
+  sunucu.ikinci();
   console.log("2.2.0 takas etti: Ders-Programi.exe artık bu commit'in exe'si");
 
   // The new exe, started by 2.2.0 with no flag: the strip, then its own check.
   console.log(uiaBas(ADLAR.oneri, { tam: true, sureMs: 120_000 }));
   console.log(uiaBas(ADLAR.kurulum, { tam: true, sureMs: 60_000 }));
-  await bekleKi(
-    'Kurulumun istenmesi',
-    () => gelen.some((u) => u.endsWith('/Mozaik-Kurulum.exe')),
-    30_000,
-  );
+  await bekleKi('Kurulumun istenmesi', () => sunucu.sayi(KURULUM) > 0, 30_000);
   console.log('yeni exe aynı sürümün kurulumunu önerdi ve istedi');
 } finally {
   try {
@@ -199,7 +192,7 @@ try {
     // nothing open
   }
   program?.kill();
-  sunucu?.close();
+  await sunucu?.kapat();
   writeFileSync(HOSTS, hostsOnce);
   if (parmakIzi !== '') {
     ps(

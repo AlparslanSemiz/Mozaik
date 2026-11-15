@@ -25,11 +25,11 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { createServer } from 'node:http';
 import { join, resolve } from 'node:path';
 import { pencereyiKapat } from './pencere-kapat.mjs';
 import { uiaBas } from './uia.mjs';
 import { windowsTemizle, windowsYerleri } from './webdriver.mjs';
+import { sunucuBaslat } from './yerel-sunucu.mjs';
 
 const arguman = (ad) => {
   const i = process.argv.indexOf(ad);
@@ -111,14 +111,12 @@ const tekBayt = readFileSync(tek);
 const kurBayt = readFileSync(kurulum);
 const ozet = (b) => createHash('sha256').update(b).digest('hex');
 const KOK = 'http://127.0.0.1:8765/';
-const gelen = [];
-const sunucu = createServer((istek, cevap) => {
-  gelen.push(istek.url);
-  console.log(`istek: ${istek.method} ${istek.url}`);
-  if (istek.url === '/surum.json') {
-    cevap.writeHead(200, { 'content-type': 'application/json' });
-    cevap.end(
-      JSON.stringify({
+// On a thread of its own: `uiaBas` blocks this one (scripts/yerel-sunucu.mjs).
+const sunucu = await sunucuBaslat({
+  port: 8765,
+  yollar: {
+    '/surum.json': {
+      json: {
         version: surum,
         date: '2026-11-16',
         exe: `${KOK}Mozaik.exe`,
@@ -127,17 +125,11 @@ const sunucu = createServer((istek, cevap) => {
         kurulum: `${KOK}Mozaik-Kurulum.exe`,
         kurulum_boyut: kurBayt.length,
         kurulum_sha256: ozet(kurBayt),
-      }),
-    );
-  } else if (istek.url === '/Mozaik-Kurulum.exe') {
-    cevap.writeHead(200, { 'content-type': 'application/octet-stream' });
-    cevap.end(kurBayt);
-  } else {
-    cevap.writeHead(404);
-    cevap.end();
-  }
+      },
+    },
+    '/Mozaik-Kurulum.exe': { dosya: kurulum },
+  },
 });
-await new Promise((tamam) => sunucu.listen(8765, '127.0.0.1', tamam));
 
 try {
   spawn(tek, [], { stdio: 'ignore' });
@@ -179,7 +171,7 @@ try {
   pencereyiKapat('Mozaik');
   await bekleKi('Kapanması', () => calisanlar().length === 0, 30_000);
 } finally {
-  sunucu.close();
+  await sunucu.kapat();
   ps('Get-Process -Name Mozaik -ErrorAction SilentlyContinue | Stop-Process -Force');
 }
 

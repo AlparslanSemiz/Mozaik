@@ -27,6 +27,7 @@ on:
       - 'src/platform/exe/**'
       - 'src/ui/settings/About.tsx'
       - 'scripts/kurulum-gecisi.mjs'
+      - 'scripts/yerel-sunucu.mjs'
       - 'scripts/uia.mjs'
       - 'scripts/webdriver.mjs'
       - '.github/workflows/kurulum-windows.yml'

@@ -46,6 +46,7 @@ on:
       - 'e2e/guncelleme-exe.spec.ts'
       - 'scripts/guncelleme-eski.mjs'
       - 'scripts/guncelleme-220.mjs'
+      - 'scripts/yerel-sunucu.mjs'
       - 'scripts/uia.mjs'
       - 'scripts/webdriver.mjs'
       - 'playwright.guncelleme-exe.config.ts'
