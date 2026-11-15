@@ -1912,6 +1912,8 @@ const FR: Sozluk = {
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "L’emploi du temps a été reconstruit de zéro ; {n} {n:heure épinglée est restée|heures épinglées sont restées} en place.",
 
   // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Autre disposition",
+  "Program yeniden dizildi, {n} saat yer değiştirdi.": "Reconstruit ; {n} {n:heure déplacée|heures déplacées}.",
   "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim} : {yuk} heures de cours, {acik} disponibles ; il faut en ouvrir {fazla}",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif} : {yuk} heures de cours, {acik} ouvertes ; il faut en ouvrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Salle {derslik} : {yuk} heures de cours, {acik} ouvertes ; en ouvrir {fazla} ou passer une classe dans une autre salle",

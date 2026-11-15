@@ -1888,6 +1888,8 @@ const EN: Sozluk = {
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
 
   // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Another layout",
+  "Program yeniden dizildi, {n} saat yer değiştirdi.": "Laid out again; {n} {n:hour|hours} moved.",
   "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim}: {yuk} hours of lessons, {acik} available; {fazla} more must be opened",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} hours of lessons, {acik} open; {fazla} more must be opened",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Room {derslik}: {yuk} hours of lessons, {acik} open; open {fazla} more or move a class to another room",

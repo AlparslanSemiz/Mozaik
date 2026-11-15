@@ -1904,6 +1904,8 @@ const ES: Sozluk = {
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "El horario se montó desde cero; {n} {n:hora fijada siguió|horas fijadas siguieron} en su sitio.",
 
   // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Otra distribución",
+  "Program yeniden dizildi, {n} saat yer değiştirdi.": "Montado de nuevo; {n} {n:hora movida|horas movidas}.",
   "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim}: {yuk} horas de clase, {acik} disponibles; hay que abrir {fazla}",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} horas de clase, {acik} abiertas; hay que abrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Aula {derslik}: {yuk} horas de clase, {acik} abiertas; abrir {fazla} más o pasar un grupo a otra aula",

@@ -1904,6 +1904,8 @@ const DE: Sozluk = {
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "Der Stundenplan wurde von vorn gelegt; {n} fixierte {n:Stunde blieb|Stunden blieben}.",
 
   // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Andere Anordnung",
+  "Program yeniden dizildi, {n} saat yer değiştirdi.": "Neu gelegt; {n} {n:Stunde|Stunden} verschoben.",
   "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim}: {yuk} Unterrichtsstunden, {acik} verfügbar; {fazla} müssen geöffnet werden",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} müssen geöffnet werden",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Raum {derslik}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} öffnen oder eine Klasse in einen anderen Raum legen",
