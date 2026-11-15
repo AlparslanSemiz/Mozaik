@@ -19,7 +19,8 @@
 // them, and when the job was stamped.
 
 import { printStamp } from '../../leaf/app';
-import { useMemo } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { blockSpans, buildIndex } from '../../pure/constraints';
 import { parseKey, paletteColor, type State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
@@ -91,6 +92,44 @@ function sheets(plans: React.ReactElement[], per: number): React.ReactElement[] 
   return out;
 }
 
+/**
+ * How many timetables the tab draws before it answers, and how many more each
+ * frame after that. Every page at once was some 6,200 nodes in one task on
+ * the father's week: a click on Çıktı froze for a fifth of a second on the
+ * weak machine before anything moved. The first sheets are what is on screen;
+ * the rest arrive behind them, a frame at a time.
+ */
+const FIRST_PAGES = 4;
+const MORE_PAGES = 6;
+
+/**
+ * How many pages are drawn, growing to all of them after the first frame.
+ * Printing never waits on it: `all()` draws the rest at once, and the print
+ * button and the browser's own Ctrl+P (`beforeprint`) both call it first, so
+ * paper always gets every page.
+ */
+function useGrowingCount(total: number): { drawn: number; all: () => void } {
+  const [drawn, setDrawn] = useState(FIRST_PAGES);
+  useEffect(() => {
+    if (drawn >= total) return undefined;
+    const frame = requestAnimationFrame(() =>
+      startTransition(() => setDrawn((n) => n + MORE_PAGES)),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [drawn, total]);
+  const all = useMemo(
+    () => () => {
+      flushSync(() => setDrawn(Number.POSITIVE_INFINITY));
+    },
+    [],
+  );
+  useEffect(() => {
+    window.addEventListener('beforeprint', all);
+    return () => window.removeEventListener('beforeprint', all);
+  }, [all]);
+  return { drawn, all };
+}
+
 export default function Print({
   state,
   excluded,
@@ -136,6 +175,8 @@ export default function Print({
     return { busyClasses: classes, busyTeachers: teachers };
   }, [state, ix]);
 
+  const { drawn, all } = useGrowingCount(state.classes.length + state.teachers.length);
+
   if (state.lessons.length === 0) {
     return (
       <>
@@ -155,6 +196,9 @@ export default function Print({
     ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
     : [];
   const pageCount = chosenClasses.length + chosenTeachers.length;
+  // The pages drawn so far (see `useGrowingCount`): classes first, as before.
+  const drawnClasses = chosenClasses.slice(0, drawn);
+  const drawnTeachers = chosenTeachers.slice(0, Math.max(0, drawn - drawnClasses.length));
 
   const placedHours = Object.keys(activePlacements(state)).length;
 
@@ -224,7 +268,7 @@ export default function Print({
       <div className="print-area" data-per={options.perSheet} data-size={options.size}>
         {sheets(
           [
-            ...chosenClasses.map((group) => (
+            ...drawnClasses.map((group) => (
               <Sheet
                 key={group.id}
                 sheet={classSheet(state, ix, spans, group, options, t)}
@@ -233,7 +277,7 @@ export default function Print({
                 stamped={options.stamp ? stamped : null}
               />
             )),
-            ...chosenTeachers.map((teacher) => (
+            ...drawnTeachers.map((teacher) => (
               <Sheet
                 key={teacher.id}
                 sheet={teacherSheet(state, ix, spans, teacher, options)}
@@ -260,7 +304,10 @@ export default function Print({
             <button
               className="btn primary"
               disabled={pageCount === 0}
-              onClick={() => window.print()}
+              onClick={() => {
+                all();
+                window.print();
+              }}
             >
               {/* Sheets, not timetables: at 4-up, twenty classes are five
                   pieces of paper, and the number beside the button is the

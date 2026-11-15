@@ -291,6 +291,11 @@ function drawPrint(state: State) {
       </Providers>,
     ),
   );
+  // Every page, as the printer gets them: the tab draws the rest of them
+  // before printing (Print.tsx, `useGrowingCount`).
+  act(() => {
+    window.dispatchEvent(new Event('beforeprint'));
+  });
 }
 
 const text = (el: Element | null | undefined): string => (el?.textContent ?? '').trim();
