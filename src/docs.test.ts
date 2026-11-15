@@ -117,6 +117,9 @@ const FILES: Set<string> = new Set(
       '../kurulum/**/*',
       '../src-tauri/*.*',
       '../src-tauri/src/**/*',
+      // The Mac bundle's icon and Info.plist (tauri.macos.conf.json).
+      '../src-tauri/icons/*',
+      '../src-tauri/macos/*',
       // `docs/asc/` is 62 MB of screenshots. Lazy, so this is 179 names and
       // not one byte of PNG.
       '../docs/**/*',
@@ -303,9 +306,11 @@ const BARE_EXT = /\.(ts|tsx|js|mjs|cjs|json|md|css|rs|toml|yml|yaml|ps1|cmd|txt|
 /** Produced by a build, so absent from a clean checkout. `dist-exe` and
     `src-tauri/target` joined the list with `npm run exe:linux` (2026-09-24):
     the Linux binary cargo writes and the copy the script puts beside it.
-    `src-tauri/gen` (Tauri's schemas) joined with `dal-temizle`'s cache list. */
+    `src-tauri/gen` (Tauri's schemas) joined with `dal-temizle`'s cache list.
+    `src-tauri/ortools` is the OR-Tools libraries the release (and
+    `scripts/ortools-mac.sh`) download before `tauri build`. */
 const GENERATED_DIR =
-  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|src-tauri\/gen|test-results|playwright-report|node_modules|scratch)\//;
+  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|src-tauri\/gen|src-tauri\/ortools|test-results|playwright-report|node_modules|scratch)\//;
 
 /**
  * Produced by the release workflow rather than held in the repository. The
