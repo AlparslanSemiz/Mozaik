@@ -26,3 +26,9 @@ dist-exe/
 # aSc ekran görüntülerinin arşivi, elle üretiliyor ve depoya girmez
 docs/asc/**/*.zip
 blob-report/
+
+# Ajan worktree'leri (CLAUDE.md, "Çalışma düzeni"): bir `git add -A` onları
+# gömülü depo olarak eklemesin.
+.claude/worktrees/
+# Playwright MCP'nin oturum dökümleri (konsol ve sayfa)
+.playwright-mcp/
