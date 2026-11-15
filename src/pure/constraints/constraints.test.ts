@@ -66,6 +66,7 @@ function build(): State {
         short: 'MÇ',
         subject: 'Matematik',
         subject2: '',
+        email: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -76,6 +77,7 @@ function build(): State {
         short: 'AV',
         subject: 'Fizik',
         subject2: '',
+        email: '',
         gender: '',
         color: 1,
         limits: { ...NO_TEACHER_LIMITS },
@@ -86,6 +88,7 @@ function build(): State {
         short: 'MB',
         subject: 'Kimya',
         subject2: '',
+        email: '',
         gender: '',
         color: 2,
         limits: { ...NO_TEACHER_LIMITS },
@@ -552,6 +555,20 @@ describe('countPlacedHours — sayaç', () => {
     expect(countPlacedHours(d, 'x1')).toBe(1);
     expect(countPlacedHours(d, 'x3')).toBe(0);
     expect(buildIndex(d).placedHours.get('x4')).toBe(2);
+  });
+});
+
+describe('sanitize — öğretmenin e-postası (v17)', () => {
+  it('adresteki satır sonu düşüyor, temiz bir planda aynı nesne dönüyor', () => {
+    const d = build();
+    expect(sanitize(d)).toBe(d);
+    const kirli = {
+      ...d,
+      teachers: d.teachers.map((t, i) => (i === 0 ? { ...t, email: 'a@example.com\nb' } : t)),
+    };
+    const s = sanitize(kirli);
+    expect(s.teachers[0]!.email).toBe('a@example.comb');
+    expect(s.teachers.slice(1)).toEqual(kirli.teachers.slice(1));
   });
 });
 

@@ -48,8 +48,10 @@ on:
         type: string
         default: ''
 
+# Okuma, yalnız yayınlayan iş yazar (aşağıda, `publish`): derleme adımları
+# (`npm ci`, Tauri CLI) yazma yetkili bir token görmesin (güvenlik denetimi 2026-11-15).
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # ------------------------------------------------------------ 1 · package
@@ -57,6 +59,8 @@ jobs:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
@@ -111,6 +115,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
@@ -166,7 +172,7 @@ jobs:
       # (target/release) hem kurulum sihirbazını (bundle/nsis) üretir
       # (DECISIONS 2026-11-15). Eski kopyalar tek dosyayla güncellenmeye devam
       # eder, yenileri kurulumu indirir (update.rs, `karar`).
-      - run: npx --yes @tauri-apps/cli@^2 build --config src-tauri/tauri.ortools.json
+      - run: npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
 
       # İKİ ADA DA BAKIYOR, ve sebebi ölçülmüş bir kırıklık: v2.0.3 koşusu tam
       # burada düştü (`tauri build` başarılı, bu adım başarısız) ve o yüzden
@@ -250,6 +256,8 @@ jobs:
   # ------------------------------------------------------------- 3 · publish
   publish:
     needs: [package, exe]
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
@@ -282,6 +290,29 @@ jobs:
       # `__SURUM__` odur (scripts/surum.mjs), yani exe kendini o numarayla
       # tanıtır. Etiket ondan başkaysa iş burada durur — yayınlanmış ama
       # kendini asla güncel sayamayan bir exe, hiç yayınlamamaktan kötüdür.
+      # İMZA (güvenlik denetimi 2026-11-15). Özet aynı Release'ten geliyor, yani
+      # dosyanın eksiksiz indiğini söylüyor ama bizim olduğunu söylemiyor; imza
+      # söylüyor. Anahtarın gizli yarısı depo sırrı MOZAIK_IMZA_ANAHTARI, açık
+      # yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
+      # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
+      - name: Sign the two programs
+        env:
+          ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
+        run: |
+          test -n "$ANAHTAR" || { echo "MOZAIK_IMZA_ANAHTARI sırrı tanımlı değil" >&2; exit 1; }
+          sudo apt-get install -y -qq minisign >/dev/null
+          gizli=$(mktemp -d); chmod 700 "$gizli"
+          umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
+          # Güvenilen yorum sürümü ve dosyayı bağlıyor (update.rs, `imza_yorumu`):
+          # eski imzalı bir sürüm yenisi diye, ya da bir dosya ötekinin yerine
+          # sunulamaz.
+          surum=$(node -p "require('./depo/package.json').version")
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig \
+            -t "mozaik $surum Mozaik.exe"
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
+            -t "mozaik $surum Mozaik-Kurulum.exe"
+          rm -rf "$gizli"
+
       - name: Build surum.json
         env:
           ETIKET: ${{ inputs.tag || github.ref_name }}
@@ -294,7 +325,11 @@ jobs:
             exit 1
           fi
           boyut=$(stat -c%s teslim/Mozaik.exe)
+          # The digest update.rs holds the download against (2026-10-24): the
+          # same file, the same sha256sum line SHA256SUMS.txt carries.
+          ozet=$(sha256sum teslim/Mozaik.exe | cut -d' ' -f1)
           kurulum_boyut=$(stat -c%s teslim/Mozaik-Kurulum.exe)
+          kurulum_ozet=$(sha256sum teslim/Mozaik-Kurulum.exe | cut -d' ' -f1)
           # ADRES DEPONUN BUGÜNKÜ ADINDAN GELMEZ, ve bu bilerek.
           #
           # `update.rs`'in kabul ettiği adres önekleri, dağıtılmış her exe'nin
@@ -322,10 +357,14 @@ jobs:
               date: new Date().toISOString().slice(0, 10),
               exe: process.argv[2],
               boyut: Number(process.argv[3]),
-              kurulum: process.argv[4],
-              kurulum_boyut: Number(process.argv[5]),
+              sha256: process.argv[4],
+              kurulum: process.argv[5],
+              kurulum_boyut: Number(process.argv[6]),
+              kurulum_sha256: process.argv[7],
+              imza: fs.readFileSync('imza-exe.minisig', 'utf8'),
+              kurulum_imza: fs.readFileSync('imza-kurulum.minisig', 'utf8'),
             }, null, 2) + '\n');
-          " "$surum" "$adres" "$boyut" "$kurulum" "$kurulum_boyut"
+          " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
 
       # WHAT WAS DOWNLOADED, in a form somebody can check. The .exe is unsigned

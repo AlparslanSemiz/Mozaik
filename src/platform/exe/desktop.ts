@@ -25,9 +25,11 @@ type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 /** The same `invoke`, with a raw body: Tauri passes a Uint8Array through as bytes. */
 type RawInvoke = <T>(cmd: string, body: Uint8Array) => Promise<T>;
 
+type Listen = (event: string, handler: () => void) => Promise<() => void>;
+
 declare global {
   interface Window {
-    __TAURI__?: { core?: { invoke?: Invoke } };
+    __TAURI__?: { core?: { invoke?: Invoke }; event?: { listen?: Listen } };
   }
 }
 
@@ -126,6 +128,33 @@ export async function openDesktopFolder(): Promise<FileSystemDirectoryHandle | n
   return desktopFolder(invoke, label);
 }
 
+/**
+ * The exe's window was asked to close and is waiting for this page (TB7,
+ * `src-tauri/src/lib.rs`): `flush` writes what is still pending, then the
+ * window is told it may go. Whatever `flush` does, the answer is sent; and if
+ * it never comes, the window goes on its own after a few seconds. Outside the
+ * exe this does nothing. Returns the unsubscribe.
+ */
+export function onDesktopClose(flush: () => Promise<void>): () => void {
+  const listen = window.__TAURI__?.event?.listen;
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!listen || !invoke) return () => undefined;
+  let off: (() => void) | undefined;
+  let gone = false;
+  void listen('kapaniyor', () => {
+    void flush()
+      .catch(() => undefined)
+      .finally(() => void invoke<void>('kapanabilir'));
+  }).then((unlisten) => {
+    if (gone) unlisten();
+    else off = unlisten;
+  });
+  return () => {
+    gone = true;
+    off?.();
+  };
+}
+
 // ------------------------------------------------------------ the update path
 //
 // Three more commands, and they are the only place in this program that
@@ -149,6 +178,12 @@ export interface UpdateCevap {
       copy's updater. */
   exe: string;
   boyut: number;
+  /** The exe's SHA-256 as published; update.rs refuses a download without it. */
+  sha256: string | null;
+  /** `exe` is the installer rather than the standalone program (update.rs, `karar`). */
+  kurulum: boolean;
+  /** The chosen file's minisign signature; update.rs installs nothing unsigned. */
+  imza: string | null;
 }
 
 function bridge(): Invoke {
@@ -163,8 +198,13 @@ export function desktopCheck(current: string): Promise<UpdateCevap> {
 }
 
 /** Downloads it NEXT TO the running program and stops there. */
-export function desktopDownload(url: string, boyut: number): Promise<number> {
-  return bridge()<number>('download_update', { url, boyut });
+export function desktopDownload(
+  url: string,
+  boyut: number,
+  sha256: string,
+  imza: string | null,
+): Promise<number> {
+  return bridge()<number>('download_update', { url, boyut, sha256, imza });
 }
 
 /**
@@ -183,6 +223,21 @@ export function desktopSelfUpdates(): Promise<boolean> {
 /** Puts the downloaded program in place and restarts onto it. */
 export function desktopApply(): Promise<void> {
   return bridge()<void>('apply_update');
+}
+
+/**
+ * What became of a `mailto:` handed to the user's mail program: opened, or no
+ * mail program on this machine at all (the page says so in one line), or
+ * refused for another reason. Nothing is sent either way (src-tauri/src/mail.rs).
+ */
+export type EpostaSonucu = 'acildi' | 'istemci-yok' | 'olmadi';
+
+/** Opens the user's own mail program with this message in it. */
+export function desktopMail(adres: string): Promise<EpostaSonucu> {
+  return bridge()<void>('eposta_ac', { adres }).then(
+    () => 'acildi' as const,
+    (e: unknown) => (String(e) === 'istemci-yok' ? ('istemci-yok' as const) : ('olmadi' as const)),
+  );
 }
 
 // ------------------------------------------------------------- CP-SAT

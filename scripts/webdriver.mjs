@@ -13,17 +13,141 @@
 // this machine that folder holds my father's real plan. Every run gets its own
 // HOME and XDG directories, so neither that folder nor WebKit's real
 // localStorage is ever touched by a test.
+//
+// ON WINDOWS (TP7) there is no sandbox: the exe asks the shell for Documents
+// (SHGetKnownFolderPath, HOME and USERPROFILE do not move it) and WebView2
+// keeps its profile under %LOCALAPPDATA%. So the suite uses the real folders
+// and empties them before every test, and for that reason it refuses to run
+// anywhere but a GitHub-hosted runner, a throwaway machine (`windowsYerleri`).
+//
+// AND NO tauri-driver ON WINDOWS. It hands msedgedriver the exe to start, and
+// msedgedriver then asks WebView2 for its debugging port through
+// WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS -- which wry overrides: it always
+// passes its own browser arguments, and those win over the variable. Every
+// session died with "DevToolsActivePort file doesn't exist" (2026-10-10 to
+// 2026-10-24, TESTFINDINGS). What works (measured 2026-10-24): the TEST exe is
+// built with the port in `additionalBrowserArgs` (`windowsTestAyari`, the
+// workflow passes it to `tauri build --config`; the release exe never has it),
+// the suite starts the exe itself, and msedgedriver attaches to the running
+// WebView2 with `ms:edgeOptions.debuggerAddress`, the attach Microsoft
+// documents. msedgedriver's version has to match the installed WebView2
+// Runtime; the workflow fetches it and names it in MOZAIK_NATIVE_DRIVER.
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const KOK = resolve(import.meta.dirname, '..');
 
-/** The binary `npm run exe:linux` leaves behind, else the raw cargo output. */
+export const WINDOWS = process.platform === 'win32';
+
+/** WebView2's debugging port in the Windows test exe, and nowhere else. */
+export const WINDOWS_PORTU = 9222;
+
+/**
+ * The `tauri build --config` for the Windows test exe: the window as
+ * tauri.conf.json has it, plus the debugging port. The config is merged as a
+ * JSON patch, so the whole window goes in (an array is replaced, not merged),
+ * and the `--disable-features` switch is wry's own default, which setting the
+ * field replaces.
+ */
+export function windowsTestAyari() {
+  const ayar = JSON.parse(readFileSync(join(KOK, 'src-tauri', 'tauri.conf.json'), 'utf8'));
+  const pencere = {
+    ...ayar.app.windows[0],
+    additionalBrowserArgs:
+      '--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection ' +
+      `--remote-debugging-port=${WINDOWS_PORTU}`,
+  };
+  return { app: { windows: [pencere] } };
+}
+
+/**
+ * The binary to drive: MOZAIK_IKILI if set, else what `npm run exe:linux`
+ * leaves behind, else the raw cargo output. On Windows Tauri names it after
+ * `productName` or, when that rename is skipped, after the cargo package
+ * (surum.yml looks for both for the same reason).
+ */
 export function varsayilanIkili() {
+  if (process.env.MOZAIK_IKILI) return resolve(process.env.MOZAIK_IKILI);
+  const cikti = join(KOK, 'src-tauri', 'target', 'release');
+  if (WINDOWS) {
+    const adaylar = ['Mozaik.exe', 'ders-programi.exe'].map((ad) => join(cikti, ad));
+    return adaylar.find((yol) => existsSync(yol)) ?? adaylar[0];
+  }
   const kopya = join(KOK, 'dist-exe', 'Mozaik');
-  return existsSync(kopya) ? kopya : join(KOK, 'src-tauri', 'target', 'release', 'ders-programi');
+  return existsSync(kopya) ? kopya : join(cikti, 'ders-programi');
+}
+
+/** One answer from PowerShell, for the folders Windows names per user. */
+function powershell(komut) {
+  const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', komut], {
+    encoding: 'utf8',
+  });
+  const cevap = (r.stdout ?? '').trim();
+  if (r.status !== 0 || cevap === '') throw new Error(`PowerShell cevap vermedi: ${komut}`);
+  return cevap;
+}
+
+/**
+ * Where the Windows exe really writes: the folder under Documents, WebView2's
+ * profile (the identifier is the PATH localStorage sits under, lib.rs), and
+ * Downloads.
+ *
+ * REFUSES OFF A GITHUB-HOSTED RUNNER. `windowsTemizle` deletes the first two,
+ * and on any real Windows machine -- my father's above all -- they hold the
+ * timetables. A runner is a fresh virtual machine thrown away after the job.
+ */
+export function windowsYerleri() {
+  if (process.env.GITHUB_ACTIONS !== 'true' || process.env.RUNNER_ENVIRONMENT !== 'github-hosted') {
+    throw new Error(
+      "Gerçek exe süiti Windows'ta yalnız GitHub'ın runner'ında koşar: Belgeler'deki " +
+        "'Ders Programı' klasörünü ve programın profilini her testte siliyor.",
+    );
+  }
+  const yerel = process.env.LOCALAPPDATA;
+  if (!yerel) throw new Error('LOCALAPPDATA yok');
+  return {
+    klasor: join(powershell("[Environment]::GetFolderPath('MyDocuments')"), 'Ders Programı'),
+    profil: join(yerel, 'com.dersprogrami.arac'),
+    indirilenler: powershell(
+      "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path",
+    ),
+  };
+}
+
+/**
+ * Empties what the last test left: any program, WebView2 or msedgedriver
+ * still running (a test that timed out inside its own `Oturum.ac` leaves an
+ * exe nobody holds), the folder, the profile (so the next start is a first
+ * start, as the sandbox HOME is on Linux), and the program's own files in
+ * Downloads. Asks `windowsYerleri` again so it can never run off a runner.
+ * Retried, because WebView2's processes can hold the profile for a moment
+ * after the program is killed.
+ */
+export function windowsTemizle({ klasor, profil, indirilenler }) {
+  windowsYerleri();
+  spawnSync(
+    'taskkill',
+    ['/IM', 'Mozaik.exe', '/IM', 'ders-programi.exe', '/IM', 'msedgedriver.exe', '/T', '/F'],
+    { stdio: 'ignore' },
+  );
+  const tekrar = { recursive: true, force: true, maxRetries: 20, retryDelay: 250 };
+  rmSync(klasor, tekrar);
+  rmSync(profil, tekrar);
+  if (existsSync(indirilenler)) {
+    for (const ad of readdirSync(indirilenler)) {
+      if (/^ders-programi.*\.json$/.test(ad)) rmSync(join(indirilenler, ad), tekrar);
+    }
+  }
 }
 
 /**
@@ -35,19 +159,32 @@ export function varsayilanIkili() {
  * a file to download, and with no download folder named it wrote the file into
  * the program's working directory -- the repository -- while the page said to
  * look in Downloads (2026-09-24). Every real desktop names one.
+ *
+ * And an `xdg-open` of its own, first on PATH, that writes what it was given
+ * to `$HOME/xdg-open.txt` and opens nothing. "E-postada aç" hands a `mailto:`
+ * to xdg-open (src-tauri/src/mail.rs), and on this machine the real one would
+ * open my mail program, or a browser, with a test's message in it.
  */
 export function evHazirla(ev, { koru = false } = {}) {
   if (!koru) rmSync(ev, { recursive: true, force: true });
   const ayar = join(ev, '.config');
+  const bin = join(ev, 'bin');
   mkdirSync(join(ev, 'Documents'), { recursive: true });
   mkdirSync(join(ev, 'Downloads'), { recursive: true });
   mkdirSync(ayar, { recursive: true });
+  mkdirSync(bin, { recursive: true });
   writeFileSync(
     join(ayar, 'user-dirs.dirs'),
     'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\n',
   );
+  writeFileSync(
+    join(bin, 'xdg-open'),
+    '#!/bin/sh\nprintf \'%s\\n\' "$1" >> "$HOME/xdg-open.txt"\n',
+    { mode: 0o755 },
+  );
   const yerel = join(ev, '.local');
   return {
+    PATH: `${bin}:${process.env.PATH ?? ''}`,
     HOME: ev,
     XDG_CONFIG_HOME: ayar,
     XDG_DATA_HOME: join(yerel, 'share'),
@@ -61,10 +198,12 @@ export function basizMumkun() {
 }
 
 /**
- * Starts tauri-driver detached, so it outlives the shell command that started
- * it. Returns its pid; the caller keeps it to tear it down.
+ * Starts the driver: on Linux tauri-driver, detached, so it outlives the shell
+ * command that started it; on Windows msedgedriver alone (`windowsSurucu`).
+ * Returns its pid; the caller keeps it to tear it down (`surucuyuKapat`).
  */
 export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil = 'tr_TR' }) {
+  if (WINDOWS) return windowsSurucu({ port, ev, gunluk });
   // The language is pinned for the same reason the browser suites pin
   // `locale: 'tr-TR'`: with nothing stored the interface follows the device,
   // WebKitGTK reads the device from LANG, and this machine is English.
@@ -94,14 +233,110 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
   return { pid: surec.pid, basiz };
 }
 
+/**
+ * On Windows only msedgedriver: the exe is started by `Oturum.ac` (the top of
+ * the file says why). No xvfb (a runner has a desktop session) and no sandbox
+ * HOME. WebView2 does not read LANG; the language is pinned once the session
+ * is open (`turkceYap`).
+ */
+function windowsSurucu({ port, ev, gunluk }) {
+  const surucu = process.env.MOZAIK_NATIVE_DRIVER;
+  if (!surucu || !existsSync(surucu)) {
+    throw new Error(`msedgedriver yok: MOZAIK_NATIVE_DRIVER=${surucu ?? ''}`);
+  }
+  mkdirSync(ev, { recursive: true });
+  const cikti = gunluk === undefined ? 'ignore' : openSync(gunluk, 'a');
+  // Verbose into the test's own log: when a session does not open, the reason
+  // is only written there, and the workflow uploads it with a red run.
+  const surec = spawn(surucu, [`--port=${port}`, '--verbose'], {
+    cwd: ev,
+    stdio: ['ignore', cikti, cikti],
+    windowsHide: true,
+  });
+  surec.unref();
+  return { pid: surec.pid, basiz: false };
+}
+
+/** Does WebView2 answer on the test exe's debugging port? */
+async function portAcik() {
+  try {
+    const cevap = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/version`, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    return cevap.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Does the debugging port list the program's own page yet? */
+async function sayfaVar() {
+  try {
+    const cevap = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/list`, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    const hedefler = await cevap.json();
+    return hedefler.some((h) => h.type === 'page' && h.url.startsWith('http://tauri.localhost'));
+  } catch {
+    return false;
+  }
+}
+
+async function sayfaBekle(son) {
+  while (Date.now() < son) {
+    if (await sayfaVar()) return true;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return false;
+}
+
+/** Waits until the port answers (`acik`) or stops answering; false at the deadline. */
+async function portBekle(acik, son) {
+  while (Date.now() < son) {
+    if ((await portAcik()) === acik) return true;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return false;
+}
+
+/** The exe and every WebView2 process under it. Gone already is fine. */
+function agaciOldur(pid) {
+  spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+}
+
+/**
+ * Tears the driver down with everything it started: on Linux the process
+ * group, on Windows msedgedriver's process tree (the exe is the session's,
+ * `kapat`). Gone already is fine.
+ */
+export function surucuyuKapat(pid) {
+  if (WINDOWS) {
+    agaciOldur(pid);
+    return;
+  }
+  try {
+    process.kill(-pid, 'SIGTERM');
+  } catch {
+    // Already gone.
+  }
+}
+
 /** One WebDriver session. Everything is a method so a test reads like a script. */
 export class Oturum {
-  constructor(port, id) {
+  /** `program`: on Windows the exe this session started (a ChildProcess), killed by `kapat`. */
+  constructor(port, id, program) {
     this.port = port;
     this.id = id;
+    this.program = program;
   }
 
   static async ac({ port = 4444, ikili, bekleMs = 20_000 }) {
+    return WINDOWS
+      ? Oturum.windowsAc({ port, ikili, bekleMs })
+      : Oturum.linuxAc({ port, ikili, bekleMs });
+  }
+
+  static async linuxAc({ port, ikili, bekleMs }) {
     const son = Date.now() + bekleMs;
     let hata;
     // The driver needs a moment to listen, and the first session a moment
@@ -120,6 +355,135 @@ export class Oturum {
       }
     }
     throw new Error(`Oturum açılamadı: ${hata?.message ?? hata}`);
+  }
+
+  /**
+   * Starts the exe, waits until its WebView2 lists the program's page on the
+   * debugging port, and attaches msedgedriver to it. The last program has to
+   * be gone first: a second exe on the same profile would hand its page to
+   * the old WebView2. Once on a runner the port opened and no page came, and
+   * the browser process went away 18 s later (2026-10-24): so a start with no
+   * page in 30 s is killed and made once more. One deadline for all of it,
+   * the language included.
+   */
+  static async windowsAc({ port, ikili, bekleMs }) {
+    const son = Date.now() + bekleMs;
+    let hata = new Error('süre doldu');
+    for (let deneme = 1; deneme <= 2 && Date.now() < son; deneme++) {
+      if (!(await portBekle(false, son))) throw new Error("Önceki programın WebView2'si kapanmadı");
+      const program = spawn(ikili, [], { stdio: 'ignore' });
+      if (!(await sayfaBekle(Math.min(son, Date.now() + 30_000)))) {
+        hata = new Error(`WebView2 programın sayfasını açmadı (deneme ${deneme})`);
+        agaciOldur(program.pid);
+        continue;
+      }
+      let oturum;
+      try {
+        while (oturum === undefined) {
+          if (Date.now() > son) throw hata;
+          try {
+            const cevap = await istek(port, 'POST', '/session', {
+              capabilities: {
+                alwaysMatch: {
+                  browserName: 'webview2',
+                  'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
+                },
+              },
+            });
+            oturum = new Oturum(port, cevap.sessionId, program);
+          } catch (e) {
+            hata = e;
+            await new Promise((r) => setTimeout(r, 300));
+          }
+        }
+        await oturum.turkceYap(son);
+        return oturum;
+      } catch (e) {
+        if (oturum !== undefined) await oturum.kapat();
+        else agaciOldur(program.pid);
+        throw new Error(`Oturum açılamadı: ${e?.message ?? e}`);
+      }
+    }
+    throw new Error(`Oturum açılamadı: ${hata.message}`);
+  }
+
+  /**
+   * Attaches to a program somebody else started, on Windows: the one the old
+   * copy's own update started (update.rs, `apply_update`), which the suite
+   * did not spawn and so cannot kill by its process. The port is the same
+   * port, and for a moment it may still be the OLD program's: so the caller
+   * marks the old page (`window.__mozaikEski = true`) before it goes, and a
+   * session that lands on a marked page, or on none, is dropped and tried
+   * again until the new program's page answers.
+   */
+  static async windowsBaglan({ port = 4444, bekleMs = 120_000 }) {
+    const son = Date.now() + bekleMs;
+    let hata = new Error('süre doldu');
+    while (Date.now() < son) {
+      await new Promise((r) => setTimeout(r, 500));
+      if (!(await sayfaVar())) continue;
+      let oturum;
+      try {
+        const cevap = await istek(port, 'POST', '/session', {
+          capabilities: {
+            alwaysMatch: {
+              browserName: 'webview2',
+              'ms:edgeOptions': { debuggerAddress: `127.0.0.1:${WINDOWS_PORTU}` },
+            },
+          },
+        });
+        oturum = new Oturum(port, cevap.sessionId);
+        const yeni = await oturum.js(
+          `return location.origin === 'http://tauri.localhost' && !window.__mozaikEski;`,
+        );
+        if (!yeni) throw new Error('eski programın sayfası');
+        await oturum.turkceYap(son);
+        return oturum;
+      } catch (e) {
+        hata = e;
+        await oturum?.komut('DELETE', '').catch(() => undefined);
+      }
+    }
+    // What the port listed at the end: a WebView2 of the old program that did
+    // not let go (2026-10-24, `windowsAc`) is the likely reason, and this says so.
+    const liste = await fetch(`http://127.0.0.1:${WINDOWS_PORTU}/json/list`)
+      .then((c) => c.text())
+      .catch((e) => `port cevap vermedi: ${e}`);
+    throw new Error(`Yeni programa bağlanılamadı: ${hata?.message ?? hata}\n/json/list: ${liste}`);
+  }
+
+  /**
+   * The language, pinned the only way WebView2 leaves open. It follows the
+   * user's Windows display language (wry's `--lang` comes after ours and wins),
+   * the runner's is English, and changing it needs a sign-out. So the
+   * interface's own language record (`ders-programi-dil`, preferenceKeys.ts)
+   * says Turkish and the page is loaded again: what my father's machine shows,
+   * except that there the language comes from Windows and no record is stored.
+   * A reopened program on the same profile has the record and is not reloaded.
+   * The old page is marked, so the wait is for the NEW page (index.html says
+   * `lang="tr"` before any script runs).
+   */
+  async turkceYap(son) {
+    // The attached target can still be the blank document WebView2 starts
+    // with, where localStorage is refused ("Access is denied").
+    const uygulama = `location.origin === 'http://tauri.localhost' && document.readyState === 'complete' && !!document.querySelector('h1')`;
+    while (!(await this.js(`return ${uygulama};`).catch(() => false))) {
+      if (Date.now() > son) throw new Error('Programın sayfası açılmadı');
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    const yuklendi = await this.js(`
+      if (localStorage.getItem('ders-programi-dil') === 'tr') return false;
+      localStorage.setItem('ders-programi-dil', 'tr');
+      window.__mozaikEski = true;
+      setTimeout(() => location.reload(), 0);
+      return true;`);
+    if (!yuklendi) return;
+    while (Date.now() < son) {
+      await new Promise((r) => setTimeout(r, 300));
+      const hazir = await this.js(`return !window.__mozaikEski && ${uygulama};`).catch(() => false);
+      if (hazir) return;
+    }
+    throw new Error('Sayfa Türkçe açılmadı');
   }
 
   yol(alt) {
@@ -318,11 +682,25 @@ export class Oturum {
     return this.js(AGAC);
   }
 
+  /**
+   * Ends the session and the program with it. On Linux tauri-driver closes
+   * the program; on Windows an attached session leaves it running, so the exe
+   * is killed here and its port waited out, ready for the next `ac`.
+   */
   async kapat() {
     try {
       await this.komut('DELETE', '');
     } catch {
       // Already gone: the window was closed by hand, or the program exited.
+    }
+    // Only while it is still running: a pid that has exited can be reused by
+    // Windows, and taskkill /T would take that stranger's tree with it.
+    if (this.program !== undefined) {
+      if (this.program.exitCode === null && this.program.signalCode === null) {
+        agaciOldur(this.program.pid);
+      }
+      this.program = undefined;
+      await portBekle(false, Date.now() + 15_000);
     }
   }
 }

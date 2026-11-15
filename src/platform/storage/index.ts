@@ -10,7 +10,7 @@
  * this folder writes a plan text or watches another window.
  */
 export { isTextInput, useStore, type SaveTrouble } from './useStore';
-export { listBackups, loadPlan, storageWorks } from './planStore';
+export { listBackups, loadPlan, storageWorks, unreadablePlan } from './planStore';
 export { downloadBackup, downloadBundle } from './download';
 export { KEEP_DAILY, MAIN_NAME } from './folder';
 export { useFolder, type FolderRun } from './useFolder';

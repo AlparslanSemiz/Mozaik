@@ -67,6 +67,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | Dosya | Görevi |
 |---|---|
 | `leaf/model/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
+| `leaf/model/email.ts` | öğretmenin e-posta adresi (şema v17): saklanan adresin temizliği (`cleanEmail`), tek adrese benzerlik (`looksLikeEmail`) ve `mailto:` bağlantısı (`mailtoUrl`) |
 | `leaf/model/keys.ts` | sözlük anahtarları, motorun dosyaları ile `rules.ts` birbirini import etmesin diye |
 | `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
 | `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
@@ -136,6 +137,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), sağ tık menülerinin okuduğu (`describeMenu`, `poolMenuFacts`), bırakmanın cümlesi (`dropNotice`) ve kenara ayrılan günün reddi (`blockMaskedDays`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
+| `pure/paper/mail.ts` | aynı öğretmen sayfasının düz metin e-postası ve `mailto:`'su: sınıra (`MAILTO_SINIRI`) sığan en dolu biçim, sığmazsa hiç |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün Kontrol'le paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
@@ -153,7 +155,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | Dosya | Görevi |
 |---|---|
 | `platform/storage/index.ts` | depolama paketinin giriş noktası: kutuyu süren kanca, plan deposunun okunan yarısı, diske inen dosyalar, klasör ve "Veriler nerede"; ham localStorage tarafı (`libraryStore`), öteki pencerenin bekçisi (`otherWindow`) ve plan işlemleri (`usePlans`) paketin içinde kalır |
-| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
+| `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), açılışta okunamayıp kenara konan planlar (`setAside`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/storage/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/storage/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
@@ -175,7 +177,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
 | `platform/storage/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
-| `platform/exe/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
+| `platform/exe/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları, e-posta programını açan komut (`desktopMail`) |
 | `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
 ### Doğrudan DOM'a yazan modüller
@@ -229,12 +231,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Commands.tsx` | paletin komut listesi |
 | `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes` |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
-| `ui/lessons/index.tsx` | Dersler |
+| `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
-| `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menüsünü bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menülerini bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/GridMenu.tsx` | ızgaranın sağ tık menüsü (kart, satır ya da gün başlığı, sütun); okuduğunu `describeMenu` hesaplar, seçimleri Program'a döner |
+| `ui/program/PoolMenu.tsx` | havuz kartının sağ tık menüsü; okuduğunu `poolMenuFacts` hesaplar |
 | `ui/program/usePreview.ts` | önerinin önizlemesi: hangi yol, haftası hâlâ bu planın mı, farkı, "Önerilen"de hafta; Escape kapatır |
 | `ui/program/PreviewBar.tsx` | önizlenirken ızgaranın üstündeki çubuk |
 | `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
@@ -249,6 +253,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
+| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına bir düğme ya da neden olmadığı; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
 | `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
 | `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
@@ -455,6 +460,22 @@ kılığına sokar ve `saveInto()` exe'de olduğu gibi koşar. Rust'ta yalnız t
 karşılığı olmayan şey var: hangi klasör, ve bir adın gerçekten bir ad olduğunu
 doğrulayan kapı (`safe_name`). `src/platform/exe/desktop.test.ts` gerçek `saveInto()`'yu
 adaptörün üstünde koşturur.
+
+Kapanış da Rust'ta tutulur (TODO TB7, 2026-10-24): pencere kapatılmak istenince
+`lib.rs` kapanışı durdurur ve sayfaya `kapaniyor` olayını yollar; `App.tsx` deponun
+bekleyen kaydını (`park`) ve klasörün bekleyen yazımını (`useFolder`'ın `flush`'ı) yapıp
+`kapanabilir` komutunu çağırır (`desktop.ts`'in `onDesktopClose`'u), pencere ancak o zaman
+gider. Cevap gelmezse 5 s sonra yine gider. Bir tarayıcı sekmesinde bunun karşılığı yok:
+kapanan sekme eşzamansız bir yazımı beklemez.
+
+E-posta da öyle (TODO B3.4): sayfa `mailto:`'yu kurar, `mail.rs`'in `eposta_ac`'ı onu
+kabuğa verir. Windows'ta önce `AssocQueryStringW` varsayılan bir e-posta programı var mı diye
+sorulur, çünkü yokken `ShellExecuteW` başarı döner ve Windows'un "nasıl açılsın" seçicisini
+(OpenWith) açar (runner'da ölçüldü, 2026-10-24); seçici program sayılmaz, komut satırı
+olmayan paketli bir uygulamanın (yeni Outlook, Posta) COM işleyicisi ya da ProgID'si sayılır
+(ölçülmedi). Komut yalnız `mailto:` ile başlayan, yalnız `encodeURIComponent`'in ürettiği
+karakterleri ve `:@?&=` taşıyan ve sınırdan kısa bir adresi kabul eder, yani "herhangi bir
+dosyayı aç"a dönüşemez ve bir `"` programın komut satırına giremez. Hiçbir şey gönderilmez.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).

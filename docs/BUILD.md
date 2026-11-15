@@ -114,6 +114,22 @@ bayt altına. Ondan önce birleşecek `tb7-sekme-kapanis` (`tb8-eksik-plan` içi
 3 175 bayt getiriyor, ve üçü birlikte 1 174 043 bayt, eşiğin 3 kB üstü. Ham eşik birleşik boyun
 on iki buçuk kilobayt kadar üstüne çekildi, 1 186 500; brotli hâli birlikte 282,4 kB, eşiği
 yerinde (WORKLOG 2026-10-24).
+2026-10-24'ün yedi dallık zinciri (VK ve TB düzeltmeleri, dosya okumanın üç deliği, Ayarlar'ın
+not boyu) ham boyu on iki buçuk kilobayt büyüttü (1 158 660'tan 1 171 212 bayta): dört dile
+giren yeni cümleler (paketin eksik ve yeni planları, depo dolu notu), exe'nin kapanışı
+beklemesi, okuyucuların kimlik ve paket kuralları. Her dal tek başına eşiğin altındaydı,
+zincir `dosya-okuma-b7`'de 145 baytla aştı. Ham eşik yine on iki buçuk kilobayt kadar pay
+bırakacak yere çekildi, 1 184 000; brotli hâli 281,8 kB ile eşiğin altında, yerinde (WORKLOG
+2026-10-24 akşam, dosya okuma). Aynı gece öğretmene e-posta (şema v17, Çıktı'nın paneli, haftanın
+metnini kuran modül, on altı cümlenin dört çevirisi) ham boyu 9,7 kB büyüttü (1 174 099'dan
+1 183 782 bayta) ve eşiğe 218 bayt kaldı: aşılmadı, ama bir sonraki dal aşardı. Ham eşik yine on
+iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 196 000; brotli hâli 284,9 kB ile 289 kB'ın
+altında, yerinde (WORKLOG 2026-10-24 gece, öğretmene e-posta).
+Zincir `main`'e bağlanınca (2026-10-24 gece) bu dalda birleşik ham boy 1 194 380 bayt, eşik
+1 196 000'de kaldı.
+`rk2-bozuk-iliski`'te (zincirin ucu) birleşik ham boy 1 198 108 bayt; ham eşik CLAUDE.md'nin ölçüm
+çizgisine, 1 200 000'e çekildi: onu aşan ilk dal, eşiği yükseltmeden önce `file://` açılışını 4×
+yavaşlatılmış işlemcide ölçer.
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
@@ -220,14 +236,16 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 
 ### Site
 
-Depoda altı iş akışı var (2026-10-09'dan beri). `ci.yml` her dala her push'ta
+Depoda yedi iş akışı var (2026-10-10'dan beri). `ci.yml` her dala her push'ta
 süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
 derleme ve boyut bir işte; ana E2E süiti üç parçada; öneri aramasını başlatan
 iki E2E testi kendi işinde, sırayla; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
 yeşilse ve push `main`'e ise `site.yml`'yi çağırır ve site yayınlanır. `site.yml`
 kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir commit'i
 yayınlayamaz. `windows.yml` her `main` push'unda ana E2E süitini Windows'ta koşar; siteyi
-kilitlemez, sürümü kilitler (aşağıda, `yayinla`). `haftalik.yml` haftada bir mutasyonu
+kilitlemez, sürümü kilitler (aşağıda, `yayinla`). `exe-windows.yml` gerçek exe süitini
+Windows'ta `Mozaik.exe`'ye karşı koşar: haftada bir, exe'ye dokunan bir `main` push'unda
+ve elle; o da yalnız sürümü kilitler. `haftalik.yml` haftada bir mutasyonu
 koşar ve `windows.yml`'i çağırır. `surum.yml` bir etiketle üç teslim dosyasını üretir.
 `kanarya.yml` haftada bir `ci.yml`'in denetimini ve ana E2E'nin bir parçasını runner'ın bir
 sonraki imajında koşar ve hiçbir şeyi kilitlemez: `ci.yml`, `site.yml` ve `windows.yml`
@@ -291,7 +309,8 @@ ile derler ve iki şey teslim eder: tek başına `Mozaik.exe` ve kurulum sihirba
 `Mozaik-Kurulum.exe` (NSIS, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`).
 Kurulumun gerekçesi CP-SAT'ın exe'nin yanında duran kütüphaneleri; tek dosya, eski
 kopyaların güncellenebilmesi için yayında kalıyor (DECISIONS 2026-11-15). Kaldırıcı
-veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz.
+veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz. İki program da
+minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, DECISIONS 2026-11-15), exe imzasız hiçbir şey kurmaz.
 
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
@@ -302,7 +321,7 @@ kendini güncellemiyor (aşağıda). İşi gerçek pencereyi sürmek: `scripts/e
 onu açar, ekran görüntüsü alır, tıklar, yazar, sürükler ve sayfada betik çalıştırır,
 `e2e/gercek-exe.spec.ts` de aynı yoldan programın kendisini sınar (neyi sınadığı [TESTPLAN.md](TESTPLAN.md)'de). Sürücü `tauri-driver`
 (`cargo install tauri-driver --locked`) ile sistemin `WebKitWebDriver`'ı üstünden
-çalışır. Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
+çalışır (Windows'ta sürücü başka yoldan bağlanıyor, TESTPLAN, "Gerçek exe"). Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
 ile), gerçek klasörlere dokunmaz. Sürücünün oturum kaydı ve sahte evi
 `scratch/exe-surucu/`'da durur, `test-results/`'da değil: her Playwright koşusu o
 klasörü boşaltır (tuzak 131). Linux ikilisi WebKitGTK'nın DMA-BUF çizimini kendisi
@@ -371,7 +390,7 @@ README'nin indirme bağlantıları bunlar.
 | `Mozaik-Windows-kurulum.zip` | `Kur.cmd` ve yerel sunucu |
 | `Mozaik.exe` | kendi penceresi olan program |
 | `SHA256SUMS.txt` | üç dosyanın özeti |
-| `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu tek satırlık manifest |
+| `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu manifest: sürüm, tarih, exe'nin adresi, boyutu ve SHA-256 özeti |
 
 Varlık adları yalnız ASCII, çünkü URL'de kodlanıyorlar. Release sayfasının
 gövdesini `surum.yml` etiket anında `scripts/surum-notu.mjs` ile kuruyor, üç
@@ -386,14 +405,16 @@ kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
 Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
 `tauri.conf.json` numarayı kopyalamaz, `"../package.json"` yolunu gösterir.
 `Cargo.toml`'daki numarayı `yayinla.mjs` yazar, çünkü cargo başka bir dosyadan
-numara okumuyor. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
+numara okumuyor. `package-lock.json`'ın kökündeki iki numarayı da o yazar
+(`scripts/kilit-surumu.mjs`, TODO B7.32), yoksa sonraki `npm install` onları değiştirip
+ağacı kirletir. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
 basar ve `src/leaf/app/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
 ve Vitest modül yüklenirken çöker). Aynı damga `dist-site/sw.js`'in önbellek
 adına girer. Ayarlar → Hakkında hangi sürüm olduğunu gösterir. Bu bir derleme
 bayrağı değil, dört teslim yoluna basılan aynı damga.
 
-`src/surum.test.ts` bunları her koşuda ölçer: `package.json` ile `Cargo.toml`'un
-aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
+`src/surum.test.ts` bunları her koşuda ölçer: `package.json`, `Cargo.toml` ve
+`package-lock.json`'ın kökünün aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
 değişmediğini (tuzak 95), exe penceresinin ayarlarını, `surum.yml`'in manifeste
 yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (tuzak 106),
 `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu, ve
@@ -404,16 +425,18 @@ klasörde (bir worktree değil) ve `main`'de, çalışma ağacı temiz, etiket d
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
 Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü aşağıdaki
 bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
-Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
-bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
-Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu
-bulunup sonuna kadar beklenir. İkisi de yeşilse etiket annotated atılır, adıyla itilir
+Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.md`'deki
+`Unreleased` bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve dördü tek commit olur.
+Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu,
+sonra `exe-windows.yml` koşusu (yoksa `main`'de başlatılarak) bulunup sonuna kadar
+beklenir, dördüncü olarak güncelleme kapısı `guncelleme-windows.yml` da (aşağıda), her
+sürümde. Hepsi yeşilse etiket annotated atılır, adıyla itilir
 ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi
 görünür: site güncellenir, üç indirme dosyası eski kalır. Biri kırmızıysa, iptal
 edildiyse ya da hiç görünmediyse etiket atılmadan durur. Site yalnız `ci.yml`'in
 arkasında, yani bir Windows kırmızısında site güncellenmiş, exe güncellenmemiş olur.
 Windows'un beklenmesinin sebebi etiketin babanın exe'sine gitmesi ve babanın
-makinesinin Windows olması (2026-10-09). Düzeltip itince aynı komut yeniden verilir,
+makinesinin Windows olması (2026-10-09; gerçek exe 2026-10-10'da katıldı). Düzeltip itince aynı komut yeniden verilir,
 ve `package.json` zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar
 commit ile etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
 
@@ -422,8 +445,36 @@ geçici worktree'lerde yürüyor, ve başka yerden çıkan bir sürüm sitenin
 yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor, ama bir
 worktree `main`'in commit'inde ayrık durabilir.
 
-`npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml` ve
-`windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur.
+`npm run yayinla -- --kuru` depoda hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`,
+`windows.yml`, `exe-windows.yml` ve `guncelleme-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. İki exe iş akışı her push'ta
+koşmadığı için commit'in koşusu yoksa onu `main`'de başlatır (2026-10-10, güncelleme kapısı
+2026-10-24).
+
+**Güncelleme kapısı (2026-10-24, `guncelleme-windows.yml`).** Babanın bugünkü exe'sinden bu
+commit'in exe'sine geçişin kendisi: son Release'in `Mozaik.exe`'si indirilir ve özeti
+`SHA256SUMS.txt`'le karşılaştırılır, bir klasöre kurulur ve kendi elleriyle veri üretir
+(örnek okul ve otomatik dizilmiş hafta; yayınlanan exe'de hata ayıklama portu olmadığı için
+Windows UI Automation ile, `scripts/uia.mjs`), X ile kapanır
+(`scripts/guncelleme-eski.mjs`). Yayınlanan exe yalnız GitHub'dan güncellenebildiği için
+yerine dosya takasıyla bu commit'in bir test kopyası konur: 0.0.1 numaralı, `update.rs`'in
+kökleri derleme anında yerel bir sunucuya verilmiş (`MOZAIK_TEST_GUNCELLEME_KOKU`; yayınlanan
+exe'de yok, `kontrat.test.ts` surum.yml'in onu hiç anmadığını ve iki gerçek kökü soruyor).
+Test, o sunucuda bu commit'in exe'sini bir Release gibi yayınlar (`surum.json`: sürüm, adres,
+boyut, özet), ve eski kopya Ayarlar → Hakkında'nın üç düğmesiyle onu bulur, indirir,
+doğrular, kendi dosyasını değiştirir ve yeni sürümü başlatır. Yeni sürümde kurulu dosyanın
+yayınlanan dosya olduğu, `.eski`'nin silindiği, ekrandaki numara, ve eski sürümün yazdığı her
+değerin depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hiçbir listenin
+boyunun değişmediği ve günlük kopyaların silinmediği sorulur (`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
+push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
+bekler (kullanıcının kararı, 2026-10-24).
+
+**Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
+`e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
+gerçek `Mozaik.exe`'ye karşı yeşil olur: son değişiklik, başlık çubuğunun kapatma mesajıyla
+kapanış (WM_CLOSE, `scripts/pencere-kapat.mjs`), Belgeler'deki dosyada değişiklik, yeniden
+açılışta değişiklik yerinde. Test `exe-windows.yml`'in süitinde, ve `yayinla` etiketten önce o
+koşunun yeşilini bekliyor (yukarıda), yani elle bir adım yok. Linux'ta `npm run exe:e2e` ile
+her sürümden önce koşuyor.
 
 ## İşaret ve ikon
 
@@ -471,8 +522,10 @@ yeni sürümü internetten alır, internet yoksa yanındaki paketi kurar.
 `Şimdi yeniden başlat`, çünkü üçü üç ayrı karar. Ağa yalnız tıklanınca çıkılır:
 açılışta, arka planda ya da bir zamanlayıcıyla değil. İnternet yoksa sonuç bir
 cümle olur ve program çalışmaya devam eder. `src-tauri/src/update.rs` indirilen
-dosyanın `MZ` ile başladığını ve boyutunun tuttuğunu doğrular, adresin yalnız bu
-deponun Release öneklerinden gelmesine izin verir, takası çalışan programın kendi
+dosyanın `MZ` ile başladığını, boyutunun ve SHA-256 özetinin manifesttekiyle tuttuğunu
+doğrular (özet 2026-10-24'ten beri; özeti olmayan bir manifestteki yeni sürüm indirilmez,
+elle indirme adresi söylenir), adresin yalnız bu deponun Release öneklerinden gelmesine izin
+verir, takası çalışan programın kendi
 dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
 yarıda kalırsa eski programı yerine geri koyar. İndirme ve takas yalnız
 Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya

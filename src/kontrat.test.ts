@@ -1,0 +1,512 @@
+// The exe's bridge, judged as a CONTRACT between three parties that never meet
+// (TP9, B9a).
+//
+// `src-tauri/src/*.rs` registers the commands, `desktop.ts` calls them, and
+// two stand-ins (`e2e/exe.spec.ts`'s `fakeExe`, `desktop.test.ts`'s `fakeDisk`)
+// answer for Rust in every test that has no exe. Each side is checked by its
+// own suite and none of them reads the others: rename `list_files` in Rust and
+// cargo test is green, the page's tests are green against a fake that still
+// answers the old name, and the real exe throws on its first save. The only
+// suite that would see it, the real-exe one, needs a built binary and runs on
+// Linux by hand.
+//
+// So the three are read as TEXT and compared here, on every `npm test`:
+//   - every command the page sends is registered, with the argument names
+//     Tauri will look for (a Rust `snake_case` parameter is `camelCase` on the
+//     page) and the return type the Rust side declares,
+//   - every registered command is sent by the page: a command nobody calls is
+//     a contract nobody tests,
+//   - `UpdateCevap` and Rust's `Cevap` carry the same fields,
+//   - a fake answers no command Rust lacks, reads no argument Rust does not
+//     take, returns the type Rust declares, and its update answer has exactly
+//     `Cevap`'s fields.
+// A fake may still leave a command out: `fakeExe` has no
+// `self_update_supported` on purpose (desktop.ts counts an unknown command as
+// yes), and `fakeDisk` only knows the folder.
+//
+// The update's manifest is the second contract, at the bottom of the file
+// (TP10).
+//
+// `desktop.ts` is found by NAME, not by path. It moves to `platform/exe` in a
+// later package round (TODO §8k), and a contract test that broke on the move
+// would be the one thing that round has to touch for no reason.
+
+import ts from 'typescript';
+import { describe, expect, it } from 'vitest';
+
+import { createHash } from 'node:crypto';
+
+import libRs from '../src-tauri/src/lib.rs?raw';
+import updateRs from '../src-tauri/src/update.rs?raw';
+import mailRs from '../src-tauri/src/mail.rs?raw';
+import exeSpec from '../e2e/exe.spec.ts?raw';
+import gercekExeSpec from '../e2e/gercek-exe.spec.ts?raw';
+import surumYml from '../.github/workflows/surum.yml?raw';
+import { MAILTO_SINIRI } from './pure/paper';
+import tauriConf from '../src-tauri/tauri.conf.json?raw';
+import kayitliSurum from './fixtures/release-v2.2.0/surum.json?raw';
+import kayitliToplam from './fixtures/release-v2.2.0/SHA256SUMS.txt?raw';
+import kayitliRelease from './fixtures/release-v2.2.0/release.json';
+
+/** The one file the glob found. Vite wants the pattern literal, hence two globs. */
+function only(name: string, all: Record<string, unknown>): string {
+  const hits = Object.values(all);
+  if (hits.length !== 1) {
+    throw new Error(`${name}: tek dosya bekleniyordu, ${hits.length} bulundu`);
+  }
+  return hits[0] as string;
+}
+
+const desktopTs = only(
+  'desktop.ts',
+  import.meta.glob('./**/desktop.ts', { query: '?raw', import: 'default', eager: true }),
+);
+const desktopTest = only(
+  'desktop.test.ts',
+  import.meta.glob('./**/desktop.test.ts', { query: '?raw', import: 'default', eager: true }),
+);
+
+// ------------------------------------------------------------- the Rust side
+
+interface Command {
+  /** What the page passes: Tauri renames a `snake_case` parameter to `camelCase`. */
+  args: string[];
+  /** The page-side type of what the command resolves to. */
+  returns: string;
+}
+
+/** Parameters Tauri fills in itself; the page never sends them. */
+const INJECTED = /AppHandle|State<|Window|Webview/;
+
+/** Rust's declared answer, in the words `desktop.ts` writes its type arguments in. */
+const PAGE_TYPE: Record<string, string> = {
+  '()': 'void',
+  String: 'string',
+  'Vec<String>': 'string[]',
+  'Option<String>': 'string | null',
+  bool: 'boolean',
+  u64: 'number',
+  Cevap: 'UpdateCevap',
+};
+
+const camel = (snake: string) => snake.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+
+function rustCommands(): Map<string, Command> {
+  const found = new Map<string, Command>();
+  const FN =
+    /#\[tauri::command\]\s*(?:pub\s+)?(?:async\s+)?fn\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^{]+?))?\s*\{/g;
+  for (const source of [libRs, updateRs, mailRs]) {
+    for (const [, name, params, ret] of source.matchAll(FN)) {
+      const args = (params ?? '')
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p !== '' && !INJECTED.test(p))
+        .map((p) => camel(p.split(':')[0]!.trim()));
+      const inner = (ret ?? '()').trim().replace(/^Result<(.+),\s*String>$/, '$1');
+      found.set(name!, { args, returns: PAGE_TYPE[inner] ?? `?${inner}` });
+    }
+  }
+  return found;
+}
+
+function registered(): string[] {
+  const list = /generate_handler!\[([^\]]*)\]/.exec(libRs)?.[1] ?? '';
+  return list
+    .split(',')
+    .map((s) => s.trim().split('::').pop()!)
+    .filter((s) => s !== '');
+}
+
+function rustFields(struct: string, source: string): string[] {
+  const body = new RegExp(`pub struct ${struct} \\{([^}]*)\\}`).exec(source)?.[1] ?? '';
+  return [...body.matchAll(/pub (\w+):/g)].map((m) => m[1]!);
+}
+
+// ------------------------------------------------------------- the page side
+
+function parse(name: string, text: string): ts.SourceFile {
+  return ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true);
+}
+
+function walk(node: ts.Node, visit: (n: ts.Node) => void) {
+  visit(node);
+  node.forEachChild((child) => walk(child, visit));
+}
+
+interface Call {
+  command: string;
+  args: string[];
+  /** The type argument, as written. */
+  returns: string;
+}
+
+/** Every `invoke<T>('cmd', {...})` and `bridge()<T>('cmd', {...})` in the file. */
+function pageCalls(file: ts.SourceFile): Call[] {
+  const calls: Call[] = [];
+  walk(file, (node) => {
+    if (!ts.isCallExpression(node)) return;
+    const callee = node.expression;
+    const isInvoke =
+      (ts.isIdentifier(callee) && callee.text === 'invoke') ||
+      (ts.isCallExpression(callee) &&
+        ts.isIdentifier(callee.expression) &&
+        callee.expression.text === 'bridge');
+    const [first, second] = node.arguments;
+    if (!isInvoke || first === undefined || !ts.isStringLiteral(first)) return;
+    const args =
+      second !== undefined && ts.isObjectLiteralExpression(second)
+        ? second.properties.map((p) => p.name?.getText(file) ?? '?')
+        : [];
+    calls.push({
+      command: first.text,
+      args,
+      returns: node.typeArguments?.[0]?.getText(file) ?? '?',
+    });
+  });
+  return calls;
+}
+
+function interfaceFields(file: ts.SourceFile, name: string): string[] {
+  let fields: string[] = [];
+  walk(file, (node) => {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === name) {
+      fields = node.members.map((m) => m.name?.getText(file) ?? '?');
+    }
+  });
+  return fields;
+}
+
+// ------------------------------------------------------------- the fakes
+
+interface Answer {
+  command: string;
+  /** `args.x` / `args!.x` read inside the branch. */
+  reads: string[];
+  /** The page-side type of each `return`, or the field list of an object. */
+  returns: string[];
+}
+
+function returnType(e: ts.Expression | undefined, file: ts.SourceFile): string {
+  if (e === undefined) return 'void';
+  if (ts.isIdentifier(e) && e.text === 'undefined') return 'void';
+  if (ts.isStringLiteral(e) || ts.isNoSubstitutionTemplateLiteral(e)) return 'string';
+  if (ts.isNumericLiteral(e)) return 'number';
+  if (e.kind === ts.SyntaxKind.TrueKeyword || e.kind === ts.SyntaxKind.FalseKeyword) {
+    return 'boolean';
+  }
+  if (ts.isArrayLiteralExpression(e)) return 'string[]';
+  // A fake's `map.get(name) ?? null`: a stored text or nothing, `Option<String>`.
+  if (
+    ts.isBinaryExpression(e) &&
+    e.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken &&
+    e.right.kind === ts.SyntaxKind.NullKeyword
+  ) {
+    return 'string | null';
+  }
+  if (ts.isObjectLiteralExpression(e)) {
+    return `{${e.properties
+      .map((p) => p.name?.getText(file) ?? '?')
+      .sort()
+      .join(',')}}`;
+  }
+  return `?${e.getText(file)}`;
+}
+
+/** Every `if (cmd === '...') { ... }` branch of a fake bridge. */
+function fakeAnswers(file: ts.SourceFile): Answer[] {
+  const answers: Answer[] = [];
+  walk(file, (node) => {
+    if (!ts.isIfStatement(node)) return;
+    const c = node.expression;
+    if (
+      !ts.isBinaryExpression(c) ||
+      c.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken ||
+      !ts.isIdentifier(c.left) ||
+      c.left.text !== 'cmd' ||
+      !ts.isStringLiteral(c.right)
+    ) {
+      return;
+    }
+    const reads = new Set<string>();
+    const returns: string[] = [];
+    walk(node.thenStatement, (n) => {
+      if (ts.isPropertyAccessExpression(n)) {
+        const target = ts.isNonNullExpression(n.expression)
+          ? n.expression.expression
+          : n.expression;
+        if (ts.isIdentifier(target) && target.text === 'args') reads.add(n.name.text);
+      }
+      if (ts.isReturnStatement(n)) returns.push(returnType(n.expression, file));
+    });
+    // `thenStatement` is the block or, for `if (cmd === 'x') return y;`, the
+    // return itself; the walk covers both.
+    answers.push({ command: c.right.text, reads: [...reads], returns });
+  });
+  return answers;
+}
+
+// ------------------------------------------------------------- the checks
+
+const RUST = rustCommands();
+const CEVAP = rustFields('Cevap', updateRs);
+const CEVAP_SHAPE = `{${[...CEVAP].sort().join(',')}}`;
+
+describe('exe köprüsü — Rust ile desktop.ts aynı sözleşmeyi konuşuyor', () => {
+  const desktop = parse('desktop.ts', desktopTs);
+  const calls = pageCalls(desktop);
+
+  it('okuyucular bir şey buluyor', () => {
+    // Without this, a regex that stopped matching would turn every check
+    // below into a loop over nothing.
+    expect(RUST.size).toBeGreaterThanOrEqual(8);
+    expect(calls.length).toBeGreaterThanOrEqual(8);
+    expect(CEVAP.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('kayıtlı komutlar ile #[tauri::command] fonksiyonları aynı küme', () => {
+    expect([...registered()].sort()).toEqual([...RUST.keys()].sort());
+  });
+
+  it('sayfanın gönderdiği her komut kayıtlı, kayıtlı her komutu sayfa gönderiyor', () => {
+    expect([...new Set(calls.map((c) => c.command))].sort()).toEqual([...registered()].sort());
+  });
+
+  it.each(calls.map((c) => [c.command, c] as const))(
+    '%s: argüman adları ve dönüş tipi Rust’ınkiyle aynı',
+    (command, call) => {
+      const rust = RUST.get(command);
+      expect(rust, `${command} Rust'ta yok`).toBeDefined();
+      expect([...call.args].sort(), `${command} argümanları`).toEqual([...rust!.args].sort());
+      expect(call.returns, `${command} dönüş tipi`).toBe(rust!.returns);
+    },
+  );
+
+  it('UpdateCevap ile Cevap aynı alanları taşıyor', () => {
+    expect(interfaceFields(desktop, 'UpdateCevap').sort()).toEqual([...CEVAP].sort());
+  });
+});
+
+describe.each([
+  ['e2e/exe.spec.ts', exeSpec],
+  ['desktop.test.ts', desktopTest],
+])('köprünün taklidi (%s) sözleşmeden sapmıyor', (name, text) => {
+  const answers = fakeAnswers(parse(name, text));
+
+  it('taklit bir şey cevaplıyor', () => {
+    expect(answers.length).toBeGreaterThanOrEqual(4);
+    // And the reader sees its arguments: `write_file` reads both.
+    expect(answers.find((a) => a.command === 'write_file')?.reads.sort()).toEqual(['name', 'text']);
+  });
+
+  it.each(answers.map((a) => [a.command, a] as const))(
+    '%s: Rust’ta var, Rust’ın almadığı argümanı okumuyor, Rust’ın tipini döndürüyor',
+    (command, answer) => {
+      const rust = RUST.get(command);
+      expect(rust, `taklit ${command} cevaplıyor, Rust'ta yok`).toBeDefined();
+      for (const read of answer.reads) {
+        expect(rust!.args, `taklit ${command}'ın ${read} argümanını okuyor`).toContain(read);
+      }
+      expect(answer.returns.length, `${command} hiçbir şey döndürmüyor`).toBeGreaterThan(0);
+      const expected = rust!.returns === 'UpdateCevap' ? CEVAP_SHAPE : rust!.returns;
+      for (const returned of answer.returns) {
+        expect(returned, `taklit ${command} için`).toBe(expected);
+      }
+    },
+  );
+});
+
+// The real-exe suite calls the bridge by hand too, `invoke('cmd', { ... })`
+// inside a page script, past desktop.ts. A Rust argument added and not sent
+// there makes Tauri refuse the call before the command runs ("missing
+// required key"), and the test reads that refusal as the wrong answer
+// (review, 2026-10-24: `download_update` gained `sha256`).
+describe('gerçek exe süitinin elle köprü çağrıları sözleşmeden sapmıyor', () => {
+  const calls = [...gercekExeSpec.matchAll(/invoke\('(\w+)'(?:,\s*\{([^}]*)\})?\)/g)].map((m) => ({
+    command: m[1]!,
+    args: [...(m[2] ?? '').matchAll(/(?:^|[{,])\s*(\w+)\s*:/g)].map((a) => a[1]!).sort(),
+  }));
+
+  it('süit köprüyü elle çağırıyor', () => {
+    expect(calls.some((c) => c.command === 'download_update')).toBe(true);
+  });
+
+  it.each(calls.map((c, i) => [`${c.command} #${i}`, c] as const))(
+    '%s: Rust’ın aldığı argümanların tamamını gönderiyor',
+    (_, call) => {
+      const rust = RUST.get(call.command);
+      expect(rust, `${call.command} Rust'ta yok`).toBeDefined();
+      expect(call.args).toEqual([...rust!.args].sort());
+    },
+  );
+});
+
+// ------------------------------------------------------------- the update
+
+// THE SECOND CONTRACT (TP10, B9b): what `surum.yml` publishes and what every
+// copy already on a machine reads. `update.rs` deserialises `surum.json` into
+// `Manifest` and then downloads `exe` and checks it is `boyut` bytes; a key
+// renamed on one side, or a size that is not the exe's, breaks an update in a
+// copy nobody can rebuild any more. Judged against a RECORDED release (v2.2.0,
+// the files as published, plus its asset list from `gh release view`), so the
+// test needs no network. `surum.test.ts` already pins the address prefixes.
+describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyayı anlatıyor', () => {
+  const MANIFEST = rustFields('Manifest', updateRs);
+  const manifest = JSON.parse(kayitliSurum) as Record<string, unknown>;
+  const assets = new Map(kayitliRelease.assets.map((a) => [a.name, a.size]));
+
+  /** The object literal `surum.yml` hands to JSON.stringify. */
+  function writerKeys(): string[] {
+    const body = /JSON\.stringify\(\{([^}]*)\}/.exec(surumYml)?.[1] ?? '';
+    return [...body.matchAll(/^\s*(\w+):/gm)].map((m) => m[1]!);
+  }
+
+  /** The files after `gh release create`, i.e. what a Release carries. */
+  function publishedFiles(): string[] {
+    const block = surumYml.slice(surumYml.indexOf('gh release create'));
+    return [...block.matchAll(/teslim\/(\S+)/g)].map((m) => m[1]!);
+  }
+
+  /** Read as `Option` with `serde(default)`: a manifest published before each was added still parses. */
+  const OPTIONAL = ['sha256', 'kurulum', 'kurulum_boyut', 'kurulum_sha256', 'imza', 'kurulum_imza'];
+
+  it('Manifest on alan okuyor, surum.yml onunu yazıyor', () => {
+    expect(MANIFEST.length).toBe(10);
+    expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
+  });
+
+  // v2.2.0's file predates the digest (2026-10-24); update.rs reads it as
+  // `Option`, so every manifest already published still tells a copy it is
+  // up to date. Only `sha256` may be missing.
+  it('kayıtlı surum.json Manifest’in alanlarını, Rust’ın tipleriyle taşıyor (özet ve kurulum öncesi)', () => {
+    expect(Object.keys(manifest).sort()).toEqual(
+      MANIFEST.filter((k) => !OPTIONAL.includes(k)).sort(),
+    );
+    expect(updateRs).toMatch(/#\[serde\(default\)\]\s*pub sha256: Option<String>/);
+    for (const k of OPTIONAL.slice(1)) {
+      expect(updateRs).toMatch(new RegExp(`#\\[serde\\(default[^\\]]*\\)\\]\\s*pub ${k}: Option<`));
+    }
+    expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(manifest.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(typeof manifest.exe).toBe('string');
+    expect(Number.isSafeInteger(manifest.boyut) && (manifest.boyut as number) > 0).toBe(true);
+  });
+
+  it('kayıtlı dosya surum.yml’in biçiminde: iki boşluk girinti, sonda satır sonu', () => {
+    expect(kayitliSurum).toBe(JSON.stringify(manifest, null, 2) + '\n');
+    expect(surumYml).toContain("}, null, 2) + '\\n');");
+  });
+
+  it('surum.yml boyutu ve özeti adresin gösterdiği dosyadan ölçüyor', () => {
+    const measured = /boyut=\$\(stat -c%s teslim\/(\S+)\)/.exec(surumYml)?.[1];
+    const hashed = /ozet=\$\(sha256sum teslim\/(\S+) /.exec(surumYml)?.[1];
+    const address = /^\s*adres="[^"]*\/([^/"]+)"/m.exec(surumYml)?.[1];
+    expect(measured).toBeDefined();
+    expect(measured).toBe(address);
+    expect(hashed).toBe(address);
+    // The installer's size and digest are its own file's, and its address names it.
+    const kMeasured = /kurulum_boyut=\$\(stat -c%s teslim\/(\S+)\)/.exec(surumYml)?.[1];
+    const kHashed = /kurulum_ozet=\$\(sha256sum teslim\/(\S+) /.exec(surumYml)?.[1];
+    const kAddress = /^\s*kurulum="[^"]*\/([^/"]+)"/m.exec(surumYml)?.[1];
+    expect(kMeasured).toBe('Mozaik-Kurulum.exe');
+    expect(kHashed).toBe(kMeasured);
+    expect(kAddress).toBe(kMeasured);
+  });
+
+  it('sürüm etiketin numarası, boyut Release’teki exe’nin boyutu', () => {
+    expect(`v${String(manifest.version)}`).toBe(kayitliRelease.tagName);
+    expect(manifest.boyut).toBe(assets.get('Mozaik.exe'));
+    expect(kayitliRelease.isDraft || kayitliRelease.isPrerelease).toBe(false);
+  });
+
+  it('exe adresi Release’teki bir dosyayı gösteriyor', () => {
+    const exe = String(manifest.exe);
+    const name = exe.slice(exe.lastIndexOf('/') + 1);
+    expect(exe).toMatch(/\/releases\/latest\/download\/[^/]+$/);
+    expect([...assets.keys()]).toContain(name);
+  });
+
+  // The recorded release is v2.2.0; the installer is published from 2026-11-15
+  // on, so a release now carries exactly that one file more.
+  it('Release’in dosyaları surum.yml’in yayınladıkları, artı 2026-11-15’ten beri kurulum', () => {
+    const published = publishedFiles();
+    expect(published).toContain('Mozaik-Kurulum.exe');
+    expect(published.filter((n) => n !== 'Mozaik-Kurulum.exe').sort()).toEqual(
+      [...assets.keys()].sort(),
+    );
+  });
+
+  it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {
+    const lines = kayitliToplam
+      .trim()
+      .split('\n')
+      .map((line) => line.split(/\s+/));
+    const listed = new Map(lines.map(([hash, name]) => [name!, hash!]));
+    expect([...listed.keys()].sort()).toEqual(
+      [...assets.keys()].filter((n) => n !== 'SHA256SUMS.txt').sort(),
+    );
+    // The recorded manifest is the published one, byte for byte.
+    expect(createHash('sha256').update(kayitliSurum).digest('hex')).toBe(listed.get('surum.json'));
+  });
+});
+
+// The Windows real-exe suite builds a TEST exe whose WebView2 opens a debugging
+// port (scripts/webdriver.mjs, `windowsTestAyari`): anyone on the machine could
+// read and drive the page, the plans included. That port must never reach my
+// father's exe, which surum.yml builds from tauri.conf.json alone.
+// The upgrade gate builds its OLD copy with MOZAIK_TEST_GUNCELLEME_KOKU, a
+// local server in place of the release (update.rs, `TEST_KOKU`). A released
+// exe built with it would fetch its next version from wherever the variable
+// pointed. So surum.yml must never name it, in any env block or on the build
+// line, and update.rs keeps exactly the two real roots. The check is shown red
+// against a tampered surum.yml, so a green here is not a check that cannot fail.
+describe('yayınlanan exe — güncelleme yalnız gerçek Release köklerinden', () => {
+  const ADI = 'MOZAIK_TEST_GUNCELLEME_KOKU';
+  const sizanlar = (yml: string) => yml.split('\n').filter((satir) => satir.includes(ADI));
+
+  it('update.rs iki gerçek kökü taşıyor, test kökü yalnız derleme anında verilirse', () => {
+    const kokler = /const RELEASE_KOKLERI: \[&str; (\d+)\] = \[([^\]]*)\]/.exec(updateRs);
+    expect(kokler?.[1]).toBe('2');
+    expect([...(kokler?.[2] ?? '').matchAll(/"([^"]+)"/g)].map((m) => m[1])).toEqual([
+      'https://github.com/AlparslanSemiz/Mozaik/releases/',
+      'https://github.com/AlparslanSemiz/ders-programi/releases/',
+    ]);
+    expect(updateRs).toContain(`option_env!("${ADI}")`);
+  });
+
+  it('surum.yml exe’yi test kökü olmadan derliyor', () => {
+    expect(sizanlar(surumYml)).toEqual([]);
+  });
+
+  it('kontrol kırmızıya dönebiliyor: test kökü eklenmiş bir surum.yml yakalanıyor', () => {
+    const satirda = surumYml.replace(
+      /(npx --yes @tauri-apps\/cli\S* build)/,
+      `${ADI}=http://127.0.0.1:8765/ $1`,
+    );
+    const blokta = surumYml.replace(/^jobs:/m, `env:\n  ${ADI}: http://127.0.0.1:8765/\njobs:`);
+    expect(satirda).not.toBe(surumYml);
+    expect(blokta).not.toBe(surumYml);
+    expect(sizanlar(satirda).length).toBeGreaterThan(0);
+    expect(sizanlar(blokta).length).toBeGreaterThan(0);
+  });
+});
+
+describe('yayınlanan exe — WebView2 hata ayıklama portu yok', () => {
+  it('tauri.conf.json tarayıcıya argüman vermiyor, surum.yml başka ayar katmıyor', () => {
+    expect(tauriConf).not.toMatch(/remote-debugging|additionalBrowserArgs/);
+    const derlemeler = surumYml
+      .split('\n')
+      .filter((satir) => /tauri-apps\/cli\S* build/.test(satir));
+    expect(derlemeler.length).toBeGreaterThan(0);
+    for (const satir of derlemeler) expect(satir).not.toMatch(/--config|-c /);
+  });
+});
+
+// The page builds a `mailto:` no longer than MAILTO_SINIRI, and the exe refuses
+// one longer than EN_UZUN. Two numbers for one decision: if they part, either
+// a fitting week is refused by the shell, or the guard stops guarding.
+describe('e-posta sınırı — sayfa ile Rust aynı sayıyı biliyor', () => {
+  it('MAILTO_SINIRI === EN_UZUN', () => {
+    const rust = /pub const EN_UZUN: usize = ([\d_]+);/.exec(mailRs)?.[1]?.replace(/_/g, '');
+    expect(Number(rust)).toBe(MAILTO_SINIRI);
+  });
+});

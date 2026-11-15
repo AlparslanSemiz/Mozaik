@@ -11,7 +11,7 @@
 // out, so those are the props. Everything else is here.
 
 import { useDialogs, useT, type PlanControls } from '../common';
-import { loadPlan } from '../../platform/storage';
+import { loadPlan, unreadablePlan } from '../../platform/storage';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
 
 interface Props {
@@ -36,6 +36,15 @@ export default function DraftStart({ plans, label, notify }: Props) {
           className="btn"
           onClick={async () => {
             const seed = loadPlan(d.id);
+            // Read but not readable is not empty (TB1): its text is there.
+            if (seed === null && unreadablePlan(d.id) !== null) {
+              await alert({
+                title: t('Bu taslak okunamadı'),
+                tone: 'warn',
+                body: t('Kayıtlı metni okunamadı; açılmıyor, silinmedi.'),
+              });
+              return;
+            }
             if (seed === null) {
               await alert({
                 title: t('Bu taslağın verisi bulunamadı'),

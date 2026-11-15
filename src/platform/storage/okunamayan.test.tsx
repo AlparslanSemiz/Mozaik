@@ -150,6 +150,21 @@ describe('okunamayan plan · açılış', () => {
     expect(JSON.parse(localStorage.getItem(BASE_KEY)!).settings.schoolName).toBe('Yeni');
   });
 
+  it('dizin boş okunursa öteki planlar gizlenmiyor: dizin geri kuruluyor, hiçbir plan ezilmiyor', async () => {
+    // TRAPS 108's empty read, the directory half (security review 2026-11-15):
+    // the plans are in their keys, the directory key is gone. The default
+    // one-plan directory used to be written over it, and every other plan was
+    // left in a key nothing pointed at.
+    twoPlans(FULL);
+    localStorage.removeItem(LIBRARY_KEY);
+    const { get, settle } = await mount();
+    settle();
+    const dir = JSON.parse(localStorage.getItem(LIBRARY_KEY)!) as { plans: Array<{ id: string }> };
+    expect(dir.plans.map((p) => p.id)).toEqual(['1', 'zz']);
+    expect(get().plans.library.plans.map((p) => p.id)).toEqual(['1', 'zz']);
+    expect(localStorage.getItem(planKey('zz'))).toBe(FULL);
+  });
+
   it('kontrol: hiç kaydı olmayan ilk açılış şeritsiz, ilk kullanım yazılıyor', async () => {
     const { get, settle } = await mount();
     settle();
@@ -321,5 +336,116 @@ describe('oturum yedekleri (madde 7)', () => {
       [1, 'okunamadi'],
       [2, 'ok'],
     ]);
+  });
+});
+
+// TB1's opening half, on A1's design (the user's decision, 2026-10-24): the
+// plan open at startup cannot be read, another one can. The other one opens
+// instead of an empty stand-in, the unreadable one stays frozen byte for byte
+// in its key and in the directory, and one line names it for the session.
+describe('okunamayan plan · açılışta okunabilen ilk plan', () => {
+  function brokenFirst(broken: string) {
+    twoPlans(FULL);
+    localStorage.setItem(BASE_KEY, broken);
+  }
+
+  for (const [ad, broken] of [
+    ['yarıda kesilmiş', CUT],
+    ['parseState’i attıran', THROWS],
+    ['daha yeni şemalı', NEWER],
+  ] as const) {
+    it(`açık plan ${ad} ise okunabilen ilk plan açılıyor, okunamayan bayt bayt yerinde`, async () => {
+      brokenFirst(broken);
+      const { get, act, settle } = await mount();
+      expect(get().plans.planId).toBe('zz');
+      expect(get().state.teachers.length).toBe(JSON.parse(FULL).teachers.length);
+      expect(get().unreadable).toBeNull();
+      expect(get().setAside).toEqual(['1. plan']);
+      // Not saved: the directory still points at the unreadable plan.
+      const lib = JSON.parse(localStorage.getItem(LIBRARY_KEY)!);
+      expect(lib.activeId).toBe('1');
+      expect(lib.plans.map((p: { id: string }) => p.id)).toEqual(['1', 'zz']);
+      act(() => get().change((d) => ({ ...d, settings: { ...d.settings, schoolName: 'Yeni' } })));
+      settle();
+      expect(JSON.parse(localStorage.getItem(planKey('zz'))!).settings.schoolName).toBe('Yeni');
+      expect(localStorage.getItem(BASE_KEY)).toBe(broken);
+    });
+  }
+
+  it('geri dönülen açılış zinciri döndürmüyor: ne açılan plan ne okunamayanın metni', async () => {
+    brokenFirst(CUT);
+    await mount();
+    expect(localStorage.getItem(backupKey(0))).toBeNull();
+  });
+
+  it('okunabilen plan yoksa boş yerine-geçen açılıyor, şerit söylüyor, kenara konan yok', async () => {
+    twoPlans(CUT);
+    localStorage.setItem(BASE_KEY, NEWER);
+    const { get, settle } = await mount();
+    settle();
+    expect(get().plans.planId).toBe('1');
+    expect(get().unreadable).toBe('yeni');
+    expect(get().setAside).toEqual([]);
+    expect(localStorage.getItem(BASE_KEY)).toBe(NEWER);
+    expect(localStorage.getItem(planKey('zz'))).toBe(CUT);
+  });
+
+  // The review finding of tb1-acilis: a backup or a plan whose body makes
+  // parseState throw took Ayarlar → Planlar ve yedek down with it. Those two
+  // reads are what the screen makes (Data.tsx, Plans.tsx).
+  it('parseState’i attıran yedek ve plan Planlar ve yedek’in iki okumasını düşürmüyor', async () => {
+    twoPlans(THROWS);
+    localStorage.setItem(backupKey(0), THROWS);
+    const { listBackups, loadPlan } = await import('./planStore');
+    expect(() => listBackups()).not.toThrow();
+    expect(listBackups()[0]).toEqual({ index: 0, problem: 'okunamadi' });
+    expect(() => loadPlan('zz')).not.toThrow();
+    expect(loadPlan('zz')).toBeNull();
+    expect(localStorage.getItem(planKey('zz'))).toBe(THROWS);
+  });
+
+  // The Planlar list asked only `loadPlan`, and an unreadable plan read as
+  // "verisi yok" with 0 lessons: a row that invites deleting real text.
+  it('Planlar listesi okunamayan planı boş değil okunamadı diye tanıyor', async () => {
+    twoPlans(CUT);
+    const { loadPlan, unreadablePlan } = await import('./planStore');
+    expect(loadPlan('zz')).toBeNull();
+    expect(unreadablePlan('zz')).toBe('okunamadi');
+    expect(loadPlan('1')).not.toBeNull();
+    expect(unreadablePlan('1')).toBeNull();
+  });
+
+  // The review's finding (2026-10-24): the switch used to be saved, so every
+  // later session rotated the readable plan into the session chain, and the
+  // unreadable plan's last good copy (yedek-0 from before it broke) was gone
+  // by the third start, with no line saying anything after the first. Not
+  // saved, the directory keeps pointing at the unreadable plan: every start
+  // falls back again, says so again, and leaves the chain alone.
+  it('dört oturum boyunca okunamayan planın sağlam yedeği zincirde kalıyor, satır her açılışta', async () => {
+    const IYI = JSON.stringify({
+      ...JSON.parse(FULL),
+      settings: { ...JSON.parse(FULL).settings, schoolName: 'İyi' },
+    });
+    brokenFirst(CUT);
+    localStorage.setItem(backupKey(0), IYI);
+    for (let oturum = 0; oturum < 4; oturum++) {
+      vi.resetModules();
+      const { get, act, settle } = await mount();
+      expect(get().plans.planId).toBe('zz');
+      expect(get().setAside).toEqual(['1. plan']);
+      act(() =>
+        get().change((d) => ({
+          ...d,
+          settings: { ...d.settings, schoolName: `Oturum ${oturum}` },
+        })),
+      );
+      settle();
+      unmount();
+      unmount = () => undefined;
+    }
+    expect(localStorage.getItem(backupKey(0))).toBe(IYI);
+    expect(JSON.parse(localStorage.getItem(LIBRARY_KEY)!).activeId).toBe('1');
+    expect(localStorage.getItem(BASE_KEY)).toBe(CUT);
+    expect(JSON.parse(localStorage.getItem(planKey('zz'))!).settings.schoolName).toBe('Oturum 3');
   });
 });

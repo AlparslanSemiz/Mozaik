@@ -43,6 +43,7 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
+| Brave | `npm run test:brave` | elle, yerelde, Brave kurulu bir makinede: ana E2E'nin `temel`, `planlar` ve `erisim` dosyaları Brave'de (`/usr/bin/brave-browser`, başka yerdeyse `BRAVE_YOLU`). Brave yoksa atlanmaz, her test açılışta Playwright'ın "executable doesn't exist" hatasıyla düşer. CI'da yok: runner'larda Brave yok ve kurulumu sürümü sabitlenemeyen üçüncü taraf ikili |
 | Mutasyon | `npm run mutasyon` | `haftalik.yml` haftada bir koşar, hiçbir şeyi beklemez. Değişiklik başına koşulmaz |
 | Görüntü | `npm run ekran` | arayüzün düzeni ya da metni değişince, 1920×1080'de bakmak için |
 | Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |
@@ -52,6 +53,8 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: mutasyon, ve `windows.yml`'i çağırır. Siteyi kilitlemez |
 | Kanarya | `.github/workflows/kanarya.yml` | Salı 02:00 UTC ve elle: denetim ve ana E2E'nin bir parçası runner'ın bir sonraki imajında (bugün `ubuntu-26.04`). Hiçbir şeyi kilitlemez; iki hafta yeşil kalınca `ci.yml`'in sabit sürümü ona çekilir |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
+| Gerçek exe, Windows | `.github/workflows/exe-windows.yml` | Pazartesi 01:30 UTC, exe'ye dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: aynı süit `Mozaik.exe`'ye karşı, WebView2'de. Yavaş süit, push'u ve birleştirmeyi beklemez; `npm run yayinla` etiketten önce onun da yeşilini bekler |
+| Güncelleme, Windows | `.github/workflows/guncelleme-windows.yml` | exe'ye, şemaya ya da depolama koduna dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: son Release'in exe'si veri üretir, bu commit'in exe'si onun yerine geçer ve veriyi eksiksiz, şimdiki şemada açar. `npm run yayinla` her sürümde etiketten önce onun da yeşilini bekler |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
@@ -103,7 +106,8 @@ yazılır: koşulmamış bir süit yeşil bir süitle aynı şey değil. Bir ko�
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor,linux-tasima}.spec.ts` | `file://`'da olmayan her şey, http üstünde, ve siteden `file://`'a taşıma |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
-| Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
+| Kontrat | `src/kontrat.test.ts`, `src/fixtures/release-v2.2.0/` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma; `surum.yml`, Release ve `update.rs` arasındaki sapma |
+| Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin ve Windows'ta `Mozaik.exe`'nin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
 | Devriye | `e2e/patrol.spec.ts` | iddiasız gezinmede çıkan şikayetler |
@@ -196,23 +200,28 @@ türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapış
 Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
 kuralı: bir dosya ya reddedilir ya bütün bir plan olarak açılır, asla yarım plan.
 
-Ölçtükleri: açılan her planda her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
+Ölçtükleri: açılan her planda her satırın kimliği dolu ve tek (derslik, öğretmen ve sınıf
+birlikte, dersler ayrı), her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
 var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa dosya açılmıyor;
 kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
 tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
 yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
-süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
-bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
-yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+süzgeci, boş ad, blok kırpması). `readPlanFile` hiçbir bozulmada istisna atmıyor (TODO TB1,
+2026-10-24'e kadar bozuk bir ders satırında atıyordu). İki cevap "BİLİNEN KUSUR" diye çivili:
+eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırının olmaması (TB9);
+değişmezler tam bu ikisinin etrafından geçer.
 
-Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
-TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+"Tümünü dosyadan aç"ın yolu (`readBundlePlans`) TB8'in düzeltmesiyle geldi (2026-10-23):
+bozuk bir planın yanındaki tam plan hep açılıyor, bozuk olan ya reddediliyor ya bütün, dört
+listeden biri hiç olmayan plan açılmıyor.
+
+Ölçmedikleri: arayüzün reddi göstermesi (`temel.spec.ts` 29'un işi), ve Excel'in `.xlsx`
 dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
 varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 
 ### Şema örnekleri
 
-`src/pure/io/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v14.json` arası. Tuzak
+`src/pure/io/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v16.json` arası. Tuzak
 97'nin mekanik yarısı. `store.test.ts` zaten sürüm başına bir `describe` tutuyor,
 ama o liste elle uzatılıyor: yeni bir sürüm bloğu yazılmadan çıkarılabilir ve süit
 yeşil kalır, ki `version === 8` tam olarak böyle unutuldu ve yayınlanmış v2.0.0'ın
@@ -379,9 +388,14 @@ dosyadan aç" ile içerikleriyle aynı geri geliyor, ve yeni kopya ağa çıkmı
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
 sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taşıması, ve
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
-değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı bir
-BİLİNEN KUSUR'u sabitliyor (TODO TB7): 2 s'lik yazım dolmadan kapanan sekmenin
-değişikliği klasöre inmiyor, depoya iniyor.
+değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı (TODO TB7):
+2 s'lik yazım dolmadan kapanan sekmenin değişikliği depoda kalıyor, klasör bir değişiklik
+geride kalıyor ve sonraki açılış onu klasöre yazıyor; yani gecikme, kayıp değil. Deponun
+kapanış flush'ı kalkınca test kırmızı (mutasyonla, 2026-10-24). Exe'de pencere sayfayı bekliyor (2026-10-24);
+o yarının sayfa tarafı `src/platform/exe/desktop.test.ts`'te, pencerenin kendisi gerçek exe süitinde
+(`gercek-exe.spec.ts`, pencere yöneticisinin kapatma mesajıyla; WebDriver'ın pencere
+kapatması Tauri'nin kapanma isteğinden geçmiyor). O test etiketten önce Windows'ta da yeşil
+olur (BUILD, "Sürüm"); düzeltmesiz Linux ikilisine karşı kırmızıydı.
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
@@ -399,6 +413,34 @@ hiçbir şey sorulmadan ağa çıkılmaması (panel çizilmiş olsa bile `check_
 çağrılmaz), üç cevabın üç ayrı cümle yazması, indirmenin yeniden başlatmaması,
 internet yokken programın çalışmaya devam etmesi.
 
+### Kontrat
+
+`src/kontrat.test.ts` (TP9) köprünün üç tarafını metin olarak okur ve karşılaştırır,
+çünkü her biri yalnız kendi süitinde ölçülüyor: Rust'ta `#[tauri::command]` ve
+`generate_handler!` (`lib.rs`, `update.rs`), sayfada `desktop.ts`'in `invoke` ve `bridge()`
+çağrıları, ve taklitler (`e2e/exe.spec.ts`'in `fakeExe`'si, `desktop.test.ts`'in `fakeDisk`'i).
+Ölçtükleri: kayıtlı komutlar ile sayfanın gönderdikleri aynı küme; her çağrının argüman adları
+Rust parametrelerinin `camelCase`'i ve tip argümanı Rust'ın dönüşü; `UpdateCevap` ile `Cevap`
+aynı alanlar; taklit Rust'ta olmayan bir komutu cevaplamıyor, Rust'ın almadığı bir argümanı
+okumuyor, Rust'ın tipini döndürüyor, güncelleme cevabında tam `Cevap`'ın alanları var. Taklit
+bir komutu eksik bırakabilir (`fakeExe`'de `self_update_supported` bilerek yok). Sayfa ve
+taklit TypeScript'in ayrıştırıcısıyla, Rust düzenli ifadeyle okunuyor. `desktop.ts` yoluyla
+değil adıyla bulunuyor, sıra 5'in taşıması testi değiştirmesin diye. On bir mutasyonla
+sınandı (sayfada komut adı, argüman, dönüş tipi; Rust'ta parametre, `Cevap` alanı, kayıt,
+dönüş tipi; e2e taklidinde komut, argüman, alan; birim taklidinde dönüş).
+
+İkinci yarısı güncelleme (TP10): `surum.yml`'in yayınladığı ile dağıtılmış her kopyanın
+okuduğu. Ağsız, kayıtlı bir Release'e karşı: `src/fixtures/release-v2.2.0/` v2.2.0'ın
+yayınlanan `surum.json`'u ve `SHA256SUMS.txt`'si bayt bayt, ve `gh release view`'ın varlık
+listesi (2026-10-10). Ölçtükleri: `surum.yml`'in yazdığı anahtarlar `update.rs`'in
+`Manifest`'i; kayıtlı dosya o alanları Rust'ın tipleriyle ve yazarın biçiminde taşıyor;
+sürüm etiketin numarası, `boyut` Release'teki exe'nin boyutu ve `surum.yml` onu adresin
+gösterdiği dosyadan ölçüyor; adres Release'teki bir dosya; Release'in dosyaları
+`gh release create`'in listesi; `SHA256SUMS` kendisi dışında hepsini sayıyor ve kayıtlı
+`surum.json`'ın özeti tutuyor. Beş mutasyonla sınandı (yazarın anahtarı, `Manifest`'in alanı,
+yayın listesi, girinti, ölçülen dosya). Yeni bir sürüm çıkınca kayıt eskir ama yanlış olmaz:
+sözleşme değişirse yeni sürümün dosyaları kaydedilir.
+
 ### Gerçek exe
 
 `npm run exe:e2e` Linux ikilisini derler ve `e2e/gercek-exe.spec.ts`'i ona karşı
@@ -410,8 +452,14 @@ kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği,
 kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
-uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
-sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
+uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, "E-postada aç"ın
+öğretmenin haftasını kabuğa verdiği (Linux'ta sahte evin `xdg-open`'ı adresi yazıyor; Windows
+runner'ında e-posta programı yok ve sayfa bunu tek satırla söylüyor), ve Sığdır'da gerekçe çubuğuna
+sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
+pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
+WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
+kapanma isteğinden geçmiyor; Wayland masaüstünde süit bunun için XWayland'de koşar).
+Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
 
@@ -420,7 +468,9 @@ test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmız
 PDF'e dökümü (Yazdır'ın GTK penceresini açtığı elle görüldü).
 
 İki kural: her test kendi sahte ev dizininde açılır, çünkü programın yazdığı
-Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Sahte ev gerçek
+Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Sahte evin `PATH`'inde
+kendi `xdg-open`'ı var ve hiçbir şey açmıyor, yani bir test bu makinedeki e-posta
+programını ya da tarayıcıyı açamaz. Sahte ev gerçek
 evin programa değen her klasörünü kurar, yoksa eksik bir klasör ürün kusuru gibi
 görünür (tuzak 132). Ve tıklama, tuş
 ve sürükleme sayfanın içinde olay olarak üretilir, çünkü bu makinenin
@@ -428,14 +478,49 @@ WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor (tuzak 127). Yani bu
 süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek programın
 sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
 
-Windows'taki `Mozaik.exe`'yi (WebView2) ölçmez, o hâlâ babanın makinesinde
-görülmeyi bekliyor.
+**Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar, ilk
+yeşili 2026-10-24 (13 geçti, 2 platform atlaması). `tauri-driver` yok: exe'yi süit açıyor ve
+WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver` ona `ms:edgeOptions.debuggerAddress` ile
+bağlanıyor. Bunun için test exe'si pencereye bir hata ayıklama portu ekleyerek derleniyor
+(`windowsTestAyari`, `tauri build --config`); yayınlanan exe'de port yok. Arayüz Türkçe,
+çünkü oturum açılınca dil kaydı yazılıp sayfa yeniden yükleniyor (runner'ın Windows'u
+İngilizce; babada dil Windows'tan geliyor ve kayıt yok), ve ekran 1920×1080, çünkü
+runner'ın 1024×768'inde sekmelerin yazısı gizleniyor. Sahte ev yok, çünkü exe Belgeler'i
+kabuğa soruyor ve WebView2 profilini `%LOCALAPPDATA%\com.dersprogrami.arac`'ta tutuyor:
+süit runner'ın gerçek klasörlerini her testten önce siliyor, ve bu yüzden GitHub'ın
+runner'ı dışında Windows'ta koşmayı reddediyor (`windowsYerleri`). Platformların
+cevabı ayrıldığı yerde test hangisini beklediğini söylüyor: sayfa `http://tauri.localhost`'ta,
+Hakkında "kendini güncelleyebilir" diyor, Linux'un güncelleme reddi yerine Windows'ta
+`safe_url`'in yabancı adresi ağdan önce reddetmesi soruluyor, ve kare ölçümü (tuzak 117,
+WebKitGTK'nin kusuru) yalnız Linux'ta. Babanın makinesinin kendisi değil: runner Windows
+Server 2025, ekran ve GPU'su yok.
+
+**Güncelleme kapısı (2026-10-24).** `guncelleme-windows.yml`, iki evre, aynı runner'da. İlki
+(`scripts/guncelleme-eski.mjs`) son Release'in `Mozaik.exe`'sini kurar ve onu sürücüsüz
+sürer: yayınlanan exe'de hata ayıklama portu yok ve dışarıdan verilemiyor (TESTFINDINGS
+2026-10-24), ama her WebView2 penceresi Windows UI Automation'a cevap veriyor; düğmeye
+üstündeki adla basılıyor (`scripts/uia.mjs`; runner İngilizce olduğu için eski sürüm
+İngilizce konuşuyor). Örnek okul yüklenir, hafta otomatik dizilir, Belgeler'deki paket
+durulunca X ile kapanır ve o paket saklanır. İkincisi (`e2e/guncelleme-exe.spec.ts`,
+kendi config'iyle, çünkü gerçek exe süiti her testten önce klasörü ve profili siliyor)
+yayınlanan exe'nin dosyasına bu commit'in 0.0.1 numaralı, güncelleme kökü yerel sunucuda
+portlu test kopyasını (A) koyar; yayınlanan exe'nin kendi `update.rs`'i yalnız GitHub'dan
+indirdiği için bu ilk adım bir dosya takası. Sonra yerel sunucuda bu commit'in portlu exe'sini
+(B) bir Release gibi yayınlar ve A'yı sürer: Güncellemeleri denetle, Yeni sürümü indir, Şimdi
+yeniden başlat. A manifesti ve dosyayı ister, boyutu ve özeti doğrular, takası yapar ve B'yi
+başlatır; test B'ye bağlanır (eski sayfa işaretlenir, `Oturum.windowsBaglan`). B'de kurulu
+dosyanın B olduğu, `.eski`'nin silindiği, Hakkında'daki numara, ve eski paketteki her değerin
+depoda ve Belgeler'de durduğu sorulur: kaybolan değer, boyu değişen liste ya da silinen günlük
+kopya kırmızıdır; şema bu commit'inki olmalı.
 
 ### Rust
 
 `npm run exe:test` (`cargo test`): `safe_name` kapısı, atomik yazımın geçici dosya
 bırakmaması, listenin yabancı dosyaları da göstermesi. Güncellemede: `is_newer`'ın
-`1.10 > 1.9` bildiği, inen dosyanın `MZ` ile başladığı ve boyutunun tuttuğu,
+`1.10 > 1.9` bildiği, inen dosyanın `MZ` ile başladığı, boyutunun ve SHA-256 özetinin
+tuttuğu, özeti olmayan bir manifestteki yeni sürümün indirilmediği, özetten önceki manifestlerin
+okunmaya devam ettiği, test kökü olmadan derlenen kopyanın yalnız Release'ten indirdiği ve test
+kökünün yalnız `http://127.0.0.1:<port>/` olabildiği,
 adresin yalnız bu deponun Release öneklerinden olabildiği, takas yarıda kalırsa
 eski programın yerine geri konduğu. Rust her makinede kurulu olmadığı için
 `kontrol`'ün parçası değil, `surum.yml`'de koşuyor.
@@ -472,12 +557,8 @@ haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
-| Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
-| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
-| Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
-| Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |
 | Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |
 | Zayıf makine vekili | TP14 | öneri aramasının bellek tepesi, az çekirdekte süre; babanın makinesinin cevabı değil | yerel, temiz koşul |
 | Performans | TP15 | iş sayaçlı eşikler (ana E2E); süre eşikleri yalnız temiz koşulda | sayaçlar E2E'de, süreler elle |
@@ -524,15 +605,23 @@ kullanır. Denetçinin kendisi `worlds.test.ts`'te bilerek bozuk ızgaralarla s�
 ve her dünya testi kaydedilen yerleşim sayısının girişten büyük olduğunu ayrıca
 iddia eder (tuzak 23).
 
-Sahte olmayan veri iki dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
+Sahte olmayan veri üç dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
 öğretmen adları "Öğretmen N" yapılmış ve ızgarası boşaltılmış.
 `src/fixtures/tam-dolu-kurs-dizili.json` aynı dosya, babanın kendi dizdiği 330
 saatle: yalnız yerleşimler eklendi, ve onlar kimlikten kimliğe, ad taşımıyor
 (2026-09-25). Dizili dersler yerinde kalırken yol olmayan, yani her yolun yeniden
 dizdiği hafta bu; `relaxLaidOut.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
 Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
-yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
-dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
+yanında duruyor ama onlardan değil, `fixtures.test.ts`'in şema döngüsü yalnız sürüm
+numaralı dosyaları (`v1.json` ile `v16.json` arası) okuyor. Üçüncüsü
+`src/fixtures/gercek-paket-v1.json`: aynı okulun en yeni gerçek "Tümünü kaydet" paketi
+(2026-09-04; paket v1, içinde v14 plan), adları `scripts/adsiz-paket.mjs` ile
+`tam-dolu-kurs.json`'dan, kimlikten kimliğe (TP6, K2). Betik o dosyada olmayan tek bir
+dizeyi bile yazmıyor, bilmediği bir kimlikte duruyor; commit'ten önce gerçek adlar
+klasördeki dosyalardan kurulan listeyle arandı, listesi `scratch/`'te. Zarfın kendisini
+ölçen tek dosya bu: `fixtures.test.ts`'in "gerçek paket, adsız" bloğu `parseBundle` ile
+açıyor, plan bugünkü sürüme göçüyor, okul kayıpsız ve 330 saat dizili dosyayla hücre
+hücre aynı. `solver.test.ts` dizili olmayanı iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
 125). `relaxFullCourse.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
 değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6

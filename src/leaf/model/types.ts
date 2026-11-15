@@ -51,6 +51,14 @@ export interface Teacher {
   color: number; // index into PALETTE (palette.ts), not a hex value
   /** null -> use settings.limits. A number wins over the school-wide default. */
   limits: TeacherLimits;
+  /**
+   * Where the teacher's own week is sent (schema v17, B3.4), or '' for none.
+   * Personal data: it travels with every backup and every shared plan file,
+   * which is why it is the one contact field and not a contact card. Mozaik
+   * sends nothing itself; the address only fills a `mailto:` the user's own
+   * mail program opens.
+   */
+  email: string;
 }
 
 export interface TeacherLimits {
@@ -335,5 +343,7 @@ export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
  *      panel. A file below it has none.
  * v16: State.relations — two lessons that may not share a day. A file below
  *      it has none.
+ * v17: Teacher.email — where the teacher's week is sent. A file below it has
+ *      none, and '' is what none means.
  */
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;

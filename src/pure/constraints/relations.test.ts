@@ -8,7 +8,7 @@ import { blocker, buildIndex, dropMap, place } from './index';
 import { addNotSameDay } from '../entities';
 import { activePlacements } from '../grid/programs';
 import { suggest, verifySuggestion } from '../relax';
-import { findViolations } from './rules';
+import { findViolations, pinnedRelationBreaches } from './rules';
 import { solve } from '../solver/solver';
 import { closeHours, illegalBlocks, makeWorld } from '../worlds';
 import type { State } from '../../leaf/model/types';
@@ -121,5 +121,63 @@ describe('ilişki · aynı gün olmasın', () => {
     expect(verifySuggestion(d, s, { keepPlaced: false })).toEqual([]);
     const grid = { ...d, programs: [{ ...d.programs[0]!, placements: s.placements }] };
     expect(daysOf(grid, 'a')).not.toEqual(daysOf(grid, 'b'));
+  });
+
+  // TODO RK2. Placed on one day is a breach Kontrol lists and a search can
+  // mend by moving one; PINNED on one day no search can, because every week
+  // it builds keeps the pins. Only that second case is named.
+  it('yalnız ikisi de sabitlenmişse aranamaz sayılıyor, sebebi tek cümle', () => {
+    let d = place({ ...world(), relations: [] }, 'a', 0, 0);
+    d = place(d, 'b', 0, 1);
+    d = addNotSameDay(d, 'a', 'b');
+    const pin = (s: State, keys: string[]): State => ({
+      ...s,
+      programs: s.programs.map((p) => ({
+        ...p,
+        pinned: Object.fromEntries(keys.map((k) => [k, 1 as const])),
+      })),
+    });
+    expect(pinnedRelationBreaches(d, buildIndex(d))).toEqual([]);
+    const one = pin(d, ['s510|0|0']);
+    expect(pinnedRelationBreaches(one, buildIndex(one))).toEqual([]);
+    const both = pin(d, ['s510|0|0', 's511|0|1']);
+    const found = pinnedRelationBreaches(both, buildIndex(both));
+    expect(found).toHaveLength(1);
+    expect(found[0]!.day).toBe(0);
+    expect(found[0]!.message).toBe(
+      '510 · MÇ Matematik ile 511 · AV Fizik Salı günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.',
+    );
+  });
+
+  // Why the search is not started (TODO RK2): the same stuck world gives a way
+  // while the two lessons are only placed, and none once both are pinned, so
+  // skipping the search hides no answer. If a change family ever learned to
+  // move a pin, this turns red before the skip could hide its suggestions.
+  it('aynı güne sabitlenmiş iki ders varken öneri araması hiçbir yol bulamıyor', () => {
+    const closed = closeHours(
+      closeHours(world(), 'oMC', [
+        [1, 0],
+        [1, 1],
+        [1, 2],
+      ]),
+      'oAV',
+      [
+        [1, 0],
+        [1, 1],
+        [1, 2],
+      ],
+    );
+    const placed = place(place({ ...closed, relations: [] }, 'a', 0, 0), 'b', 0, 1);
+    const broken = addNotSameDay(placed, 'a', 'b');
+    const pinned: State = {
+      ...broken,
+      programs: broken.programs.map((p) => ({ ...p, pinned: { 's510|0|0': 1, 's511|0|1': 1 } })),
+    };
+    const search = (d: State) =>
+      suggest(d, activePlacements(d), { keepPlaced: false, families: ['teacherHours'] })
+        .suggestions;
+    expect(search(broken).length).toBeGreaterThan(0);
+    expect(pinnedRelationBreaches(pinned, buildIndex(pinned))).toHaveLength(1);
+    expect(search(pinned)).toEqual([]);
   });
 });

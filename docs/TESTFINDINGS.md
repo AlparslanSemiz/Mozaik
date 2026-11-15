@@ -26,6 +26,55 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-24 · `exe-windows.yml` 40126622451, `guncelleme-windows.yml` 40126620642 → 40128285002 (`tp7-windows-exe`) · zincir `main`'e bağlandıktan sonra
+Bulgu: (1) `main`'in iki A2 gerçek exe testi Windows'ta ilk kez koştu ve düştü: oturum dil için
+sayfayı bir kez yeniden yüklediğinden boş açılış iki açılış oluyor ve ikincisi boş paketi boş
+klasöre yazıyor; ve `taskkill /F` ile öldürülen exe'nin WebView2'si depoyu diske yazmadan gidiyor,
+yeniden açılış boş depoyla başlıyor, budama haklı olarak çalışmıyor. Linux'ta WebKit yazdığı için
+görünmüyordu. (2) Güncelleme kapısında "Şimdi yeniden başlat" tıklaması, takas ve çıkış betiğin
+cevabından önce bitince oturumu düşürdü. (3) Hakkında'daki sürüm "v0.0.1 · tarih" biçiminde.
+(4) İnceleme: gerçek exe süitinin elle `download_update` çağrıları yeni `sha256` argümanını
+göndermiyordu, Tauri çağrıyı reddediyordu.
+Tür: test kusuru (1, 2, 3, 4); ürün kusuru yok.
+Ne yapıldı: (1) testler Windows'ta pencereyi X ile kapatıyor ve yeniden yüklemenin boş paketini
+kabul ediyor; (2) tıklama beklemeden kuyruğa konuyor; (3) karşılaştırma `v`'yi tanıyor; (4)
+argüman eklendi, kontrat e2e'deki elle çağrıları da soruyor. Kapı ve exe süiti yeşil.
+Kalıcı kural: yok (WebView2'nin zorla öldürülünce depoyu yazmaması TODO RK17'nin yanında not).
+### 2026-10-24 · `guncelleme-windows.yml` 40117527794, 40118278485 (`ogretmene-eposta`) · yayınlanmış exe'den yeni exe'ye
+Bulgu: (1) Portsuz yayınlanmış `Mozaik.exe` (v2.2.0, özeti `SHA256SUMS.txt`'le tuttu) Windows UI
+Automation'la sürülebiliyor: WebView2'nin erişilebilirlik ağacında düğmeler adlarıyla
+(`ControlType.Button`, İngilizce, "Fill with sample data", "Load", "Timetable", "Fill automatically
+(367)") ve Invoke deseniyle basılıyor; ilk açılışta düğme 6 s'de bulundu. Eski sürüm örnek okulu
+yükledi ve 433 saati dizdi (şema 16, 1 plan, 25 öğretmen, 99 ders), X ile 0,5 s'de kapandı. (2) Test
+exe'si `update.rs`'in takasıyla aynı dosyaya geçince `.eski` açılışta silindi, plan şema 17'de açıldı,
+eski paketteki hiçbir değer depoda ve Belgeler'de kaybolmadı, günlük kopya yerinde. İki koşuda da 1
+geçti. (3) İnceleme iki test kusuru buldu, ikisi koşu yeşilken: testin kendi yazdığı adres, eski sürüm
+v17 olduğunda "kayıp" sayılacaktı; UI Automation, React'in yeniden çizdiği bir öğeyi okurken
+yeniden denemeden düşebilirdi.
+Tür: test altyapısı; ürün kusuru yok.
+Ne yapıldı: kapı `guncelleme-windows.yml` oldu, `yayinla` şema değişince onu bekliyor (BUILD,
+TESTPLAN); iki test kusuru düzeldi (1c99dd8'in öncesi, dalda).
+Kalıcı kural: yok.
+
+### 2026-10-24 · `mailto-olcum.yml` 40104303724, 40105704173, 40105976835, 40106637571 (`ogretmene-eposta`, geçici) · Windows'ta `mailto:`
+Bulgu: (1) Kayıtlı e-posta programı yokken `AssocQueryStringW("mailto")` 0x80070483
+(ERROR_NO_ASSOCIATION) dönüyor, `ShellExecuteW` ise 42 (başarı) dönüp Windows'un "Bunu nasıl
+açmak istiyorsunuz?" seçicisini (OpenWith) açıyor: kabuğun dönüşü "program yok"u söylemiyor.
+(2) HKCU'ya yazılan bir `mailto` kaydını Windows kullanıcı seçimi (UserChoice, korumalı) olmadan
+saymıyor, `AssocQueryStringW` o zaman `OpenWith.exe "%1"` diyor; yani runner'da gerçek bir
+e-posta programı kaydedilemiyor. (3) Uzunluk: `ShellExecuteW` kendi kaydettiğimiz bir şemada
+metni 32 000 karaktere kadar bayt bayt aynı iletiyor (32 700'de 31); `mailto:`'yu 32 760'a
+kadar kabuğa veriyor, 32 767'de 2. Chromium (Playwright, 151) tıklanan bağlantıyı 32 700'e
+kadar veriyor, 32 760'tan sonra vermiyor. Edge, dış program sorusu politikayla kapalıyken de
+hiçbirini vermedi: ölçülemedi. OpenWith adresi COM ile alıyor (`-Embedding`), uzunluk oradan
+okunmuyor; ilk turdaki "gelen 1" ve "gelen 43" ölçüm hatası. (4) Linux'ta (bu makine, Playwright
+Chromium, sahte `xdg-open`): hiçbir uzunluk `xdg-open`'a ulaşmadı, çünkü Chromium önce kendi
+"xdg-open açılsın mı?" sorusunu soruyor ve o soru sayfanın dışında; ölçülemedi.
+Tür: bilgi (platform), tasarımı belirledi.
+Ne yapıldı: `mail.rs` önce `AssocQueryStringW` soruyor ve OpenWith'i program saymıyor;
+`mailto:` sınırı 2000 (taşıma değil, ölçülemeyen e-posta programları; `pure/paper/mail.ts`).
+Kalıcı kural: yok.
+
 ### 2026-10-24 · `npx stryker run --mutate <relax ve sat>`, `npm run hizli`'nin test kümesiyle, bu makine · `src/pure/relax/relax.test.ts:89`
 Bulgu: relax'ın dokuz dosyası (3160 mutant) mutasyona sokulunca ilk koşu düştü: "derslik
 darboğazı: derslik hiçbir yolda açılmıyor, saat azaltmak kalıyor" enstrümante kodda kendi
@@ -36,6 +85,41 @@ pratikte koşamıyor, çünkü onu kapsayan her mutant testi yeniden koşturur.
 Ne yapıldı: bırakıldı; TODO RF3'ün (relax ve `sat.ts` ne mutasyon ne kapsam listesinde) ön
 şartı olarak orada. Aynı gün kısıt motoru, fizibilite ve varlıklar aynı test kümesiyle
 ölçüldü (WORKLOG, 2026-10-24 akşam).
+### 2026-10-24 · `exe-windows.yml` 40095284383 → 40101538104 (`tp7-windows-exe`) · Windows'ta gerçek exe
+Bulgu: (1) `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` bu exe'de portu açmıyor (release de
+debug de): wry 0.57 tarayıcı argümanlarını her zaman kendisi veriyor
+(`--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection`) ve onlar değişkeni
+geçersiz kılıyor; 2026-10-10'un "DevToolsActivePort file doesn't exist"ının sebebi bu.
+(2) Pencereye `additionalBrowserArgs` ile `--remote-debugging-port=9222` verilerek derlenen
+exe portu açıyor (Edg/155.0.4283.62) ve msedgedriver ona `ms:edgeOptions.debuggerAddress` ile
+bağlanıp sayfayı okuyor (başlık "Mozaik", `http://tauri.localhost/`). (3) Oturum açılınca
+15 testin 10'u kırmızı: arayüz İngilizce (runner'ın Windows'u İngilizce, WebView2 dili
+oradan alıyor; wry'ın `--lang`'i bizimkinden sonra geliyor). (4) Dil sabitlenince 7'si
+kırmızı: runner'ın ekranı 1024×768, büyütülmüş pencere 1280 px'in altında, sekmelerin yazısı
+gizli, süit sekmeyi adıyla bulamıyor. (5) Ekran 1920×1080'e çekilince 13 geçti, 2 platform
+atlaması; X ile kapanış (WM_CLOSE) 5,4 s'de yeşil. (6) İncelemeden sonraki koşuda
+(40100749981) iki kırmızı: ilk açılışta port açıldı ama WebView2 18 s hiç sayfa listelemedi ve
+tarayıcı süreci gitti (bir kez); ve oturum boş başlangıç belgesine bağlanınca `localStorage`
+"Access is denied" dedi (önceki koşularda oturum döngüsünün yeniden denemesi bunu örtüyordu).
+Sayfa beklenince ve sayfasız açılış bir kez yeniden yapılınca 40101538104 yeşil (13 geçti,
+kapanış 6,1 s).
+Tür: test altyapısı.
+Ne yapıldı: Windows'ta `tauri-driver` bırakıldı, exe'yi süit açıyor ve msedgedriver
+`debuggerAddress` ile bağlanıyor (`scripts/webdriver.mjs`); test exe'si portla derleniyor
+(`windowsTestAyari`), yayınlanan exe portsuz ve `kontrat.test.ts` bunu soruyor; dil kaydı ve
+yeniden yükleme; iş akışında ekran 1920×1080; oturumdan önce programın sayfası beklenir. Windows'ta düzeltmesiz ikiliye karşı mutasyon koşulmadı.
+Kalıcı kural: yok.
+
+### 2026-10-24 · bitti kontrolü (alt ajan incelemesi ve tıklama testi) · `tb8-eksik-plan`
+Bulgu: (1) `parseBundle` `state`'i nesne olmayan girdiyi sayılmadan atıyordu, buradaki aynı
+kimlikli plan "Hepsini değiştir"den sonra siliniyordu. (2) TB8'den eski: depo doluyken hiçbir
+plan yazılamazsa dosyada olmayan yerel planlar yine siliniyor, not "hiçbir şey değişmedi"
+diyordu; yazılamayan yeni plan dizinde verisiz satır kalıyordu. Üçü de birim testinde
+kırmızıydı. Tıklama testi (`dist/index.html`, Chromium, 1920×1080, örnek okul): kesik paket
+dosyası tek plan dosyası sanılıyor, Ayarlar'daki durum notu 13 px.
+Tür: ürün kusuru, (1) ve (2) veri kaybı sınıfı.
+Ne yapıldı: (1) ve (2) aynı dalda düzeltildi, testleri `src/storeContract.test.ts`'te. Kesik
+dosya ve 13 px TODO B7.35 ve B7.36, daha yeni planın cümlesi B7.34.
 Kalıcı kural: yok.
 
 ### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
@@ -105,6 +189,47 @@ Ne yapıldı: deste iddiası yazılmadı, sebebi testin yorumunda; öbür ikisi 
 düzeltilerek kırmızıya döndü. Kaynaktaki bayat yorum düzeltildi.
 Kalıcı kural: yok (TODO §8k'de tuzak adayı).
 
+
+### 2026-10-10 · `exe-windows.yml`, ilk dört koşu (`test/gercek-ortam`) · Windows'ta gerçek exe
+Bulgu: derleme, `tauri-driver` 2.0.6, WebView2 Runtime (runner'da yoktu, kuruldu,
+153.0.4234.48) ve aynı sürüm `msedgedriver` tamam; program sürücüsüz açılıyor (15 s sonra
+`ders-programi.exe` ve altı `msedgewebview2` süreci; Tauri ikiliyi `Mozaik.exe` diye
+adlandırmadı, `surum.yml`'in bildiği durum). Sürücüyle her oturum 60 s'de "DevToolsActivePort
+file doesn't exist" ile düşüyor (on dört testin on dördü, üç koşu). msedgedriver'ın
+ayrıntılı günlüğü: WebView2'nin argümanlarını (`--remote-debugging-port=0` dahil)
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` ile kendisi veriyor, `tauri:options.args`'ı programın
+komut satırına koyuyor (dil oradan WebView2'ye ulaşmıyor). Oturum denemesinden sonra
+`%LOCALAPPDATA%`, `%TEMP%` ve `RUNNER_TEMP` altında hiçbir `DevToolsActivePort` yok ve
+Tauri'nin profili (`com.dersprogrami.arac`) oluşmamış: WebView2 sürücünün geçici profilini
+kullanıyor ama portu açmıyor. Aday sebepler (ölçülmedi): release derlemede WebView2'nin
+DevTools'u kapalı (Tauri'nin `devtools` özelliği), ya da Tauri'nin kendi
+`AdditionalBrowserArguments`'ı sürücünün ortam değişkenini geçersiz kılıyor.
+Tür: test altyapısı; planın varsayımı (runner'da tauri-driver release exe'yi sürer) çürüdü.
+Ne yapıldı: durdu, kullanıcıya getirildi (TODO TP7). Dil için ortam değişkeni ve
+`tauri:options.args` denendi, ikisi de bırakıldı.
+Kalıcı kural: yok.
+
+### 2026-10-10 · `npm run test:brave` (Brave 1.96.61, temiz profil) · `file://`'da klasör API'si
+Bulgu: 59 testin 58'i geçti; `temel.spec.ts`'in "GÜVENLİ BAĞLAM ve klasör API'si file://
+altında VAR" ölçümü düştü: Brave'de `file://` güvenli bağlam ama `showDirectoryPicker`
+yok (Brave Dosya Sistemi Erişimi API'sini varsayılan olarak kapatıyor). Yani Brave'de
+"Nereye kaydedilsin"in klasör yolu yok; kalan her şey (açılış, depo, çevrimdışı, font,
+planlar, erişilebilirlik) Chromium'daki gibi. Özellik oturumu aynı şeyi B7.28'in
+analizinde ölçtü.
+Tür: bilgi (tarayıcının kararı), ürün kusuru değil.
+Ne yapıldı: ölçüm Brave projesinde Brave'in cevabını bekliyor, 59/59.
+Kalıcı kural: yok.
+
+### 2026-10-10 · `npm run exe:e2e` (`test/gercek-ortam`, Linux) · gerçek exe süitinde yetim sürücü
+Bulgu: yük 3–4 iken "gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor" 3 s'de yalnız 6
+yazma yapabildi (eşik 15) ve 1,7 dk sürdü; fikstürün kapanışı (kırmızıda ekran görüntüsü)
+takıldı, `tauri-driver` öldürülmeden kaldı ve 4444'ü tuttu. Sonraki iki test (VK1, VK2)
+"Maximum number of active sessions" ile düştü, yeniden koşu da üçünü birden düşürdü. Yetim
+süreçler kapatılınca üçü 14 s'de yeşil (yük 1,4). Kapanış yolu `main`'dekiyle aynı.
+Tür: test kusuru (araç), kararsızlık adayı.
+Ne yapıldı: TODO §8l TB10; TP22'nin (C2) kök neden listesine.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `npx vitest run src/fuzz.test.ts`, ilk koşular · "Dosyadan aç" ve Excel yapıştırması
 Bulgu: (1) `readPlanFile` bozulan dosyaların %2–5'inde `TypeError` atıyor (`reading 'trim'`,
 `'weeklyHours'`, `'id'`; en küçüğü `lessons[0] = null`), `App.tsx`'in `fileChosen`'ı yakalamıyor.
@@ -115,7 +240,8 @@ beş milyonluk dizi. Üçü de her koşuda aynı tohumla tekrarlanıyor. Kesik d
 açılmadı; dört listeden biri eksik dosya hiç açılmadı (DK11 tutuyor).
 Tür: ürün kusuru (üçü), veri kaybı değil.
 Ne yapıldı: TODO §8l TB1, TB6, TB9; testte "BİLİNEN KUSUR" diye çivili, değişmezler
-etraflarından geçiyor. Düzeltme `main`'de.
+etraflarından geçiyor. Düzeltme `main`'de. TB1'in üst çubuk yarısı düzeldi (2026-10-24,
+`tb1-dosyadan-ac`): `readPlanFile` istisnayı "okunamadı" cevabına çeviriyor.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · Vitest yoklaması (`scratch/test-plan/dk11-paket.test.ts`) · "Tümünü dosyadan aç"
@@ -127,7 +253,8 @@ yalnız plan sayısını söylüyor. Arayüzde uçtan uca koşulmadı.
 Tür: ürün kusuru, veri kaybı sınıfı (onaydan sonra).
 Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi. Kullanıcının kararı
 (2026-10-10): düzeltmesi ve testi TB7 ile birlikte, `fix/veri-kaybi` birleşir birleşmez
-`main`'den açılan ikinci düzeltme dalında.
+`main`'den açılan ikinci düzeltme dalında. Düzeltildi (2026-10-23 ve 24, `tb8-eksik-plan`,
+`readBundlePlans`), gerileme testleri `src/storeContract.test.ts` ve `e2e/planlar.spec.ts`'te.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · `scratch/test-plan/b2-klasor.mjs` ve `klasor.spec.ts` · kapanan sekmenin klasör yazımı
@@ -137,7 +264,10 @@ Bulgu: klasör seçiliyken bir derslik eklenip 2 s'lik yazım gecikmesi dolmadan
 açılışta klasörü kendisi yazıyor; ikinci ölçüm programı açmayan aynı kökenli bir sayfadan okudu.
 Tür: ürün kusuru (yedek gecikmesi; depo veriyi tutuyor).
 Ne yapıldı: TODO §8l TB7, `klasor.spec.ts`'te "BİLİNEN KUSUR"; `fix/veri-kaybi` birleştikten
-sonra ayrı bir dalda düzeltilecek.
+sonra ayrı bir dalda düzeltilecek. Exe yarısı düzeldi (2026-10-24, `tb7-sekme-kapanis`):
+pencere sayfanın yazımını bekliyor; tarayıcı yarısı düzelmez. Tarayıcı yarısı veri kaybı
+değil (2026-10-24, beş koşunun beşi): değişiklik depoda, sonraki açılış klasöre yazıyor; BİLİNEN
+KUSUR testi sıradan bir teste döndü.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · test programının analizi (Playwright kütüphanesi ve Linux exe, sahte ev) · iki kopya ve kota

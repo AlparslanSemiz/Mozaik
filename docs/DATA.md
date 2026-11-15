@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 16
+  schemaVersion: 17
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -42,7 +42,7 @@ Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }
 Limits     { maxConsecutive, maxPerDay, minPerDay, maxSameLessonPerDay,
              maxGapsTeacher, maxGapsClass }     // 0 = sınır yok, iki boşluk alanı hariç
 Room       { id, name }
-Teacher    { id, name, short, subject, subject2, gender, color, limits }
+Teacher    { id, name, short, subject, subject2, gender, color, limits, email }
              // limits: { maxConsecutive, maxPerDay, minPerDay }, null = okul varsayılanı
 ClassGroup { id, name, roomId, color, maxSameLessonPerDay }
 Lesson     { id, classId, teacherId, weeklyHours, blocks, second, maxPerDay }
@@ -51,6 +51,7 @@ Lesson     { id, classId, teacherId, weeklyHours, blocks, second, maxPerDay }
 Alanların anlamı:
 
 - `Teacher.subject2` öğretmenin ikinci branşı ya da `''`. `''` bir değer, eksik veri değil: listelerin çoğu tek branşlı ve bu da veri.
+- `Teacher.email` öğretmenin haftasının gönderileceği adres ya da `''` (v17, TODO B3.4). Kişisel veri: plan dosyasıyla, her yedekle ve paylaşılan her dosyayla birlikte taşınır (kullanıcının kararı, 2026-10-24: State'te). Yazıldığı gibi saklanır; yalnız satır sonu ve denetim karakteri düşer, okuyucuda da `sanitize()`'da da (`cleanEmail`), çünkü bir `mailto:`'da satır sonu adresi bitirip başka bir şey başlatır. Tek bir adrese benzeyip benzemediği (`looksLikeEmail`) saklamayı değil, Çıktı'daki düğmeyi belirler. Mozaik hiçbir şey göndermez: adres yalnız kullanıcının kendi e-posta programının açtığı bir `mailto:`'ya girer.
 - `Teacher.gender` `''`, `'k'` ya da `'e'`. Listelerde sıralama ve gruplama için, kâğıda çıkmaz. Bir boolean değil, çünkü boolean ikisinden birini varsayılan seçip herkese sessizce atardı.
 - `Teacher.color` ve `ClassGroup.color` paletin indeksi, bir hex değer değil.
 - `ClassGroup.roomId` sınıfın sabit dersliği. `null` ise derslik çakışması denetlenmez.
@@ -103,8 +104,9 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v14 | `Limits.maxGapsTeacher` ve `maxGapsClass`: boşluk kuralı, eksik alan 0 ve `off` |
 | v15 | `answers`: öneriye verilen Olur ve Olmaz cevapları; eksik alan boş, okunamayan tek bir cevap tek başına düşer |
 | v16 | `relations`: iki dersin aynı güne konmaması; eksik alan boş, okunamayan tek bir ilişki tek başına düşer |
+| v17 | `Teacher.email`: öğretmenin adresi; eksik ya da metin olmayan alan `''`, satır sonu ve denetim karakteri düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v16'ya her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v17'ye her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -130,7 +132,7 @@ Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v16 çıkarılırken `version === 15` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v17 çıkarılırken `version === 16` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri
@@ -242,18 +244,32 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 ## Dosya biçimleri
 
 ```
-{ "schemaVersion": 16, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 17, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 
 Üst çubuk tek planı yazar ve okur. Okurken `parseState`'ten sıkı olan `readPlanFile()`'dan
 geçer: öğretmen, sınıf, ders ya da derslik listesinin alanı hiç yoksa (v1'de Türkçe adlarıyla)
-dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. `parseState` localStorage'ı ve
+dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. Bu dört listeden birinde kimliği
+boş ya da iki satırda aynı olan bir dosya "okunamadı" diye reddedilir (2026-10-24, TODO B7.37),
+çünkü yerleşim derse kimliğiyle bağlı; derslik, öğretmen ve sınıf kimlikleri birlikte tek sayılır,
+çünkü kapalı saatin anahtarı yalnız kimlik. `parseState` localStorage'ı ve
 oturum yedeklerini de okuduğu için hoşgörülü kalır. Yükleme sorusu dosyayı açık planla yan
 yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). `schemaVersion`'ı bu programınkinden büyük bir dosya bozuk sayılmaz, "daha yeni bir sürümle yazılmış" diye reddedilir ve programın güncellenmesi söylenir. Paket Ayarlar → Planlar ve yedek'te duruyor,
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
 Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki
-her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.
+her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer, ama üst
+çubuğun kuralıyla okunur (`readBundlePlans`, 2026-10-23, TODO TB8): liste alanı eksik,
+bozuk ya da daha yeni bir plan açılmaz ve buradaki aynı kimlikli plan kalır. Açılmayacak
+planları onay sorusu sayar; daha yeni bir programın yazdığı planları ayrı sayar ve onlar için
+programın güncellenmesini söyler, "eksik ya da bozuk" demez (`newer`, TODO B7.34). Hiçbir plan
+okunamıyorsa soru sorulmaz ve hiçbir şey değişmez. Paket olmayan bir dosya "Tümünü dosyadan
+aç"a verilince üst çubuğa yalnız tek bir plansa yollanır (üst çubuğun kendi gerekçesiyle
+reddedeceği eksik ya da yeni bir plan da); yarım kalmış ya da JSON olmayan dosya için
+"okunamadı" denir (TODO B7.35).
+`state`'i nesne olmayan bir girdi de okunamayan plan sayılır (`skipped`). Depo dolduğu için
+yazılamayan plan da açılmamış sayılır: buradaki aynı kimlikli plan kalır, yoksa dizine verisiz
+satır girmez; hiçbir plan yazılamazsa hiçbir şey silinmez ve not depolamayı söyler.
 `bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil.
 Zarfta isteğe bağlı bir `olcum` alanı da olabilir. O, bu makinedeki öneri
 aramalarının ölçümü (`ders-programi-oneri-olcum`), ve babanın gönderdiği dosyanın
@@ -284,7 +300,14 @@ paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski d
 yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
 uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
 değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
-şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30).
+şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Açılışta açık plan okunamıyorsa
+(dondurulur, yukarıda) okunabilen ilk plan açılır; okunamayan anahtarında bayt bayt ve dizinde
+kalır, ekranda tek satır adını söyler (`useStore`'un `setAside`'ı, 2026-10-24, TODO TB1). Geçiş
+dizine yazılmaz: dizinde etkin plan okunamayan kalır, her açılış yeniden geri döner ve yeniden
+söyler, ve geri dönülen oturum yedek zincirini döndürmez, okunamayan planın zincirdeki son sağlam
+kopyası yerinde kalsın diye. Okunabilen plan yoksa boş yerine-geçen açılır ve şerit söyler. Planlar
+listesi okunamayan planı "okunamadı" diye ve sayısız gösterir, silme sorusu metninin de gideceğini
+söyler; taslaklarda "Bu taslak okunamadı".
 
 ## Neden böyle
 
