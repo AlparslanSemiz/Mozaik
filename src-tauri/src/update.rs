@@ -405,7 +405,16 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
     if bytes.is_empty() {
         return Err("İnen dosya boş.".into());
     }
-    if boyut != 0 && bytes.len() as u64 != boyut {
+    // A size of 0 is refused, not read as "unknown". `boyut` comes from the
+    // page (`download_update`'s argument), and the old `boyut != 0` exception
+    // let it switch this check off (security review 2026-11-15, G4). No path
+    // needs that exception: every manifest ever published carries the real
+    // size (`stat` in surum.yml, a required field since the first one), and
+    // `verify` has no other caller.
+    if boyut == 0 {
+        return Err("Beklenen boyut bilinmiyor: indirme durduruldu.".into());
+    }
+    if bytes.len() as u64 != boyut {
         return Err(format!(
             "İnen dosya eksik: {} bayt bekleniyordu, {} geldi.",
             boyut,
@@ -1014,6 +1023,15 @@ mod tests {
         assert!(verify(b"<!doctype html>", 15, &ozet(b"<!doctype html>")).is_err());
         // Truncated: right shape, wrong length.
         assert!(verify(b"MZ", 4, &ozet(b"MZ")).is_err());
+    }
+
+    #[test]
+    fn a_size_of_zero_does_not_switch_the_size_check_off() {
+        // The page sends `boyut`; 0 used to mean "do not check", so any length
+        // passed. Now a download with no promised size is refused.
+        let ok = b"MZ\x90\x00";
+        assert!(verify(ok, 0, &ozet(ok)).is_err());
+        assert!(verify(b"MZ", 0, &ozet(b"MZ")).is_err());
     }
 
     #[test]
