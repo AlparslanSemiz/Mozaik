@@ -938,6 +938,39 @@ mod tests {
     }
 
     #[test]
+    fn the_note_reaches_only_an_exe_and_never_the_running_program() {
+        // V8 of the security review: whatever writes `eski-kopya.txt` decides
+        // what the installed program deletes, so the gate is pinned here.
+        let tmp = Scratch::new("not-siniri");
+        let simdiki = tmp.exe();
+        fs::write(&simdiki, b"MZ").unwrap();
+        fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
+        // The running program under another spelling of its own path.
+        let kendisi = tmp.0.join(".").join("Mozaik.exe");
+        assert_eq!(silinecek_eski(&kendisi.to_string_lossy(), &simdiki), None);
+        // Only the extension `.exe`, in any case, and nothing that merely
+        // contains it.
+        for ad in ["Mozaik.exe.txt", "Mozaik.exe.yeni", "Mozaik", "ayarlar.json"] {
+            let yol = tmp.0.join("baska").join(ad);
+            assert_eq!(silinecek_eski(&yol.to_string_lossy(), &simdiki), None, "{ad}");
+        }
+        let buyuk = tmp.0.join("baska").join("ESKI.EXE");
+        assert_eq!(silinecek_eski(&buyuk.to_string_lossy(), &simdiki), Some(buyuk));
+        // An empty note is no path at all.
+        assert_eq!(silinecek_eski("  \n", &simdiki), None);
+    }
+
+    #[test]
+    fn a_folder_named_uninstall_exe_does_not_make_a_copy_installed() {
+        let tmp = Scratch::new("sahte-kurulu");
+        let simdiki = tmp.exe();
+        fs::create_dir(tmp.0.join("uninstall.exe")).unwrap();
+        assert!(!kurulu_mu(&simdiki));
+        let eski = tmp.0.join("baska").join("Mozaik.exe");
+        assert_eq!(silinecek_eski(&eski.to_string_lossy(), &simdiki), None);
+    }
+
+    #[test]
     fn a_new_version_without_a_digest_is_not_offered_for_download() {
         let mut m = manifest("9.0.0", &format!("{}latest/download/Mozaik.exe", RELEASE_KOKLERI[0]));
         m.sha256 = None;
