@@ -74,6 +74,18 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
+
+Cmd+C/V elle denendi, çalışıyor (Alp, 2026-11-16). Alp'in önceliği: Windows ve web önce, Mac
+hiçbir şeyi engellemez (DECISIONS 2026-11-16). `surum.yml`: `publish` `always()` ile koşuyor ve
+yalnız `package` ile `exe`'yi şart koşuyor, `mac` matrisi `fail-fast: false`; ilk adım her mimarinin
+iki dosyasına bakıp gelenleri `MAC_VAR`'a yazıyor, gelmeyen için uyarı ve iş özeti ("Mac paketi bu
+sürümde yok"); imza, `surum.json` alanları (`undefined` ile düşen), `SHA256SUMS.txt` ve
+`gh release create` yalnız gelen mimariyi alıyor. `kontrat.test.ts` yayınlanan dosyaları "Publish
+the release" adımından okuyor ve yeni şartları ölçüyor. Koşulan: `actionlint` (yalnız SC2012
+bilgi), `cargo test` 73/73, `vitest` kontrat + surum + docs 82/82, `npm run hizli` yeşil. İş akışı
+koşmadı.
+
 ## 2026-11-15 · Mac sürümü (`platform/mac`, TODO B7.42)
 
 Alp'in kararı (DECISIONS 2026-11-15, "Mac sürümü"): Apple imzasız bir Mac sürümü, güncellemesi

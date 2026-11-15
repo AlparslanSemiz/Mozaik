@@ -271,9 +271,14 @@ jobs:
   # tanımlı değilse ad-hoc imza (`signingIdentity: "-"`, tauri.macos.conf.json),
   # ki Apple Silicon imzasız bir programı hiç çalıştırmaz. Bugün sır yok
   # (DECISIONS 2026-11-15): ilk açılışta "Yine de Aç" gerekir (README.md, "Mac").
+  #
+  # MAC HİÇBİR ŞEYİ ENGELLEMEZ (Alp, 2026-11-16: Windows ve web önce). Bu iş
+  # kırmızıysa ya da hiç koşmadıysa `publish` yine Windows'u ve surum.json'ı
+  # yayınlar; o sürümde Mac paketi olmaz ve Mac kopyaları güncelleme görmez.
+  # İki mimari birbirini de engellemez (`fail-fast: false`).
   mac:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - mimari: arm64
@@ -387,21 +392,38 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
-    if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
+    # `always()`: mac işi düşse de bu iş koşar; yalnız Windows ve paket şart.
+    if: >-
+      always() &&
+      needs.package.result == 'success' &&
+      needs.exe.result == 'success' &&
+      (startsWith(github.ref, 'refs/tags/v') || inputs.publish)
     steps:
       - uses: actions/download-artifact@v8
         with:
           path: indirilen
 
-      - name: Did all three assets arrive
+      - name: Did the assets arrive
         run: |
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
-          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe \
-                   Mozaik-mac-arm64.app.tar.gz Mozaik-mac-arm64.dmg \
-                   Mozaik-mac-x86_64.app.tar.gz Mozaik-mac-x86_64.dmg; do
+          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe; do
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
+          # Mac: bir mimari ancak iki dosyası da geldiyse yayına girer. Gelmeyen
+          # durdurmaz, görünür olur: uyarı ve iş özeti.
+          var=""
+          for m in arm64 x86_64; do
+            if [ -s "teslim/Mozaik-mac-$m.app.tar.gz" ] && [ -s "teslim/Mozaik-mac-$m.dmg" ]; then
+              var="$var $m"
+            else
+              rm -f "teslim/Mozaik-mac-$m.app.tar.gz" "teslim/Mozaik-mac-$m.dmg"
+              echo "::warning title=Mac paketi bu sürümde yok::$m derlenmedi; Windows ve surum.json yine yayınlanıyor, bu mimarideki Mac kopyaları güncelleme görmez."
+              echo "**Mac paketi bu sürümde yok: $m.** Windows ve web yayınlandı." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          echo "MAC_VAR=${var# }" >> "$GITHUB_ENV"
+          echo "Mac: ${var:- yok}"
 
       - uses: actions/checkout@v7
         with:
@@ -443,7 +465,7 @@ jobs:
             -t "mozaik $surum Mozaik-Kurulum.exe"
           # Mac'in güncelleme arşivleri, aynı anahtar ve aynı biçimde yorum
           # (update_mac.rs). .dmg'ler elle kurulur, program onları indirmez.
-          for m in arm64 x86_64; do
+          for m in $MAC_VAR; do
             minisign -S -s "$gizli/anahtar" -m "teslim/Mozaik-mac-$m.app.tar.gz" -x "imza-mac-$m.minisig" \
               -t "mozaik $surum Mozaik-mac-$m.app.tar.gz"
           done
@@ -488,9 +510,11 @@ jobs:
           kurulum="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Kurulum.exe"
           # Mac arşivleri de aynı önekte; her Mac yalnız kendi mimarisininkini
           # alır (update.rs, `mac_karari`). Eski Windows kopyaları bu alanları
-          # tanımaz ve atlar (kontrat.test.ts, OPTIONAL).
+          # tanımaz ve atlar (kontrat.test.ts, OPTIONAL). Gelmeyen mimarinin
+          # alanları hiç yazılmaz (undefined), Mac kopyası o zaman güncelleme
+          # önermez (`mac_karari`).
           mac_kok="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download"
-          for m in arm64 x86_64; do
+          for m in $MAC_VAR; do
             f="teslim/Mozaik-mac-$m.app.tar.gz"
             export "MAC_${m}_ADRES=$mac_kok/Mozaik-mac-$m.app.tar.gz"
             export "MAC_${m}_BOYUT=$(stat -c%s "$f")"
@@ -498,6 +522,8 @@ jobs:
           done
           node -e "
             const fs = require('fs');
+            const oku = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : undefined);
+            const sayi = (v) => (v ? Number(v) : undefined);
             fs.writeFileSync('teslim/surum.json', JSON.stringify({
               version: process.argv[1],
               date: new Date().toISOString().slice(0, 10),
@@ -510,13 +536,13 @@ jobs:
               imza: fs.readFileSync('imza-exe.minisig', 'utf8'),
               kurulum_imza: fs.readFileSync('imza-kurulum.minisig', 'utf8'),
               mac_arm64: process.env.MAC_arm64_ADRES,
-              mac_arm64_boyut: Number(process.env.MAC_arm64_BOYUT),
+              mac_arm64_boyut: sayi(process.env.MAC_arm64_BOYUT),
               mac_arm64_sha256: process.env.MAC_arm64_OZET,
-              mac_arm64_imza: fs.readFileSync('imza-mac-arm64.minisig', 'utf8'),
+              mac_arm64_imza: oku('imza-mac-arm64.minisig'),
               mac_x86_64: process.env.MAC_x86_64_ADRES,
-              mac_x86_64_boyut: Number(process.env.MAC_x86_64_BOYUT),
+              mac_x86_64_boyut: sayi(process.env.MAC_x86_64_BOYUT),
               mac_x86_64_sha256: process.env.MAC_x86_64_OZET,
-              mac_x86_64_imza: fs.readFileSync('imza-mac-x86_64.minisig', 'utf8'),
+              mac_x86_64_imza: oku('imza-mac-x86_64.minisig'),
             }, null, 2) + '\n');
           " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
@@ -531,10 +557,10 @@ jobs:
         run: |
           set -o pipefail
           cd teslim
+          mac=()
+          for m in $MAC_VAR; do mac+=("Mozaik-mac-$m.app.tar.gz" "Mozaik-mac-$m.dmg"); done
           sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe \
-            Mozaik-mac-arm64.app.tar.gz Mozaik-mac-arm64.dmg \
-            Mozaik-mac-x86_64.app.tar.gz Mozaik-mac-x86_64.dmg \
-            surum.json > SHA256SUMS.txt
+            "${mac[@]}" surum.json > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       # WHAT IS NEW, on the Release page itself: the Turkish lines Ayarlar →
@@ -562,6 +588,12 @@ jobs:
           # çalıştırmak olurdu.
           # Notu ayrı dosyadan: bir YAML blok skalerinin içine heredoc koymak
           # girintiyi bozuyor. Dosyayı bir önceki adım kuruyor.
+          # Mac dosyaları yalnız geldiyse (`MAC_VAR`, ilk adım).
+          mac=()
+          for f in teslim/Mozaik-mac-arm64.app.tar.gz teslim/Mozaik-mac-arm64.dmg \
+                   teslim/Mozaik-mac-x86_64.app.tar.gz teslim/Mozaik-mac-x86_64.dmg; do
+            if [ -s "$f" ]; then mac+=("$f"); fi
+          done
           gh release create "$ETIKET" \
             --repo "${{ github.repository }}" \
             --title "Mozaik $ETIKET" \
@@ -570,9 +602,6 @@ jobs:
             teslim/Mozaik-Windows-kurulum.zip \
             teslim/Mozaik.exe \
             teslim/Mozaik-Kurulum.exe \
-            teslim/Mozaik-mac-arm64.app.tar.gz \
-            teslim/Mozaik-mac-arm64.dmg \
-            teslim/Mozaik-mac-x86_64.app.tar.gz \
-            teslim/Mozaik-mac-x86_64.dmg \
+            "${mac[@]}" \
             teslim/surum.json \
             teslim/SHA256SUMS.txt

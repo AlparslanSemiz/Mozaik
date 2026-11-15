@@ -36,6 +36,16 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
+
+**Karar (Alp, 2026-11-16).** Babanın programı Windows'ta ve sitede; Mac ikinci sırada. `surum.yml`'in
+`publish` işi `mac`'i yine bekler ama sonucunu şart koşmaz (`always()`, yalnız `package` ve
+`exe` yeşil olmalı), iki mimari birbirini de durdurmaz (`fail-fast: false`). Gelmeyen mimarinin
+dosyaları yayına, alanları `surum.json`'a girmez; alanlar isteğe bağlı olduğu için Windows
+kopyaları fark etmez, o Mac kopyaları "Mac'in kurabileceği bir paket yok" der ve güncellemez.
+Eksik Mac görünür kalır: bir `::warning::` ve iş özetinde "Mac paketi bu sürümde yok". Gelen her
+Mac dosyası yine minisign ile imzalanır. `kontrat.test.ts` bu şartları ölçüyor.
+
 ### 2026-11-15 · Mac sürümü: Apple imzasız, güncellemesi bizim imzamızla (`platform/mac`)
 
 **Karar (Alp, 2026-11-15).** Mozaik'in bir Mac sürümü şimdi çıkıyor, Apple'ın Developer ID

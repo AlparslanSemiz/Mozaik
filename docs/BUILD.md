@@ -426,7 +426,10 @@ olmadan bitiriyor. Dock'tan "Çık" ve oturum kapatma hâlâ o yoldan gidiyor.
 **Yayın.** `surum.yml`'in `mac` işi iki mimariyi `macos-15`'te derler, paketin içine bakar
 (`codesign --verify --deep --strict`, Frameworks, en düşük sürüm, mimari) ve
 `Mozaik-mac-<mimari>.app.tar.gz` ile `Mozaik-mac-<mimari>.dmg`'yi verir. `publish` arşivleri
-minisign ile imzalar ve `surum.json`'a yazar. Apple imzası bir anahtar: `APPLE_CERTIFICATE`,
+minisign ile imzalar ve `surum.json`'a yazar. Mac yayını engellemez (DECISIONS 2026-11-16):
+`publish` yalnız `package` ve `exe`'nin yeşilini bekler; bir mimarinin işi düştüyse ya da hiç
+koşmadıysa o mimarinin dosyaları ve `mac_*` alanları o sürümde yok, iş özetinde ve bir uyarıda
+"Mac paketi bu sürümde yok" yazar, o Mac kopyaları da güncelleme önermez. Apple imzası bir anahtar: `APPLE_CERTIFICATE`,
 `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` sırları tanımlıysa Developer ID ve
 sertleştirilmiş çalışma zamanı, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` de varsa
 notarization; yoksa ad-hoc. `.github/workflows/mac.yml` yayından önceki hafif ikizi: yalnız

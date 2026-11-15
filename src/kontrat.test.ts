@@ -369,10 +369,12 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     return [...body.matchAll(/^\s*(\w+):/gm)].map((m) => m[1]!);
   }
 
-  /** The files after `gh release create`, i.e. what a Release carries. */
+  /** The files the publishing step names, i.e. what a Release carries. From
+      2026-11-16 the Mac files are listed just above `gh release create` and go
+      in only when their job delivered them (Mac never blocks a release). */
   function publishedFiles(): string[] {
-    const block = surumYml.slice(surumYml.indexOf('gh release create'));
-    return [...block.matchAll(/teslim\/(\S+)/g)].map((m) => m[1]!);
+    const block = surumYml.slice(surumYml.indexOf('- name: Publish the release'));
+    return [...block.matchAll(/teslim\/([^\s;]+)/g)].map((m) => m[1]!);
   }
 
   /** The Mac archives' four fields per architecture (2026-11-15, update_mac.rs). */
@@ -467,9 +469,7 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
   // address names it, and the trusted comment is the one update.rs expects
   // (`imza_yorumu`: "mozaik <sürüm> <dosya>").
   it('surum.yml her Mac arşivini kendi dosyasından ölçüp imzalıyor', () => {
-    expect(surumYml).toMatch(
-      /for m in arm64 x86_64; do\s+f="teslim\/Mozaik-mac-\$m\.app\.tar\.gz"/,
-    );
+    expect(surumYml).toMatch(/for m in \$MAC_VAR; do\s+f="teslim\/Mozaik-mac-\$m\.app\.tar\.gz"/);
     expect(surumYml).toContain('MAC_${m}_ADRES=$mac_kok/Mozaik-mac-$m.app.tar.gz');
     expect(surumYml).toContain('MAC_${m}_BOYUT=$(stat -c%s "$f")');
     expect(surumYml).toContain(`MAC_\${m}_OZET=$(sha256sum "$f" | cut -d' ' -f1)`);
@@ -480,6 +480,21 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
       expect(updateMacRs).toContain(`"Mozaik-mac-${m}.app.tar.gz"`);
     expect(updateMacRs).toContain('pub const ARSIVDEKI_AD: &str = "Mozaik.app";');
     expect(surumYml).toContain('.app.tar.gz" Mozaik.app');
+  });
+
+  // Owner's rule (2026-11-16): Windows and the web first, Mac never blocks them.
+  it('Mac işi düşse de Windows ve surum.json yayınlanıyor, Mac alanları yalnız gelen mimari için', () => {
+    const publish = surumYml.slice(surumYml.indexOf('  publish:'));
+    expect(publish).toMatch(
+      /always\(\) &&\s+needs\.package\.result == 'success' &&\s+needs\.exe\.result == 'success'/,
+    );
+    expect(publish).not.toMatch(/needs\.mac\.result/);
+    expect(surumYml).toContain('fail-fast: false');
+    expect(surumYml).toContain('Mac paketi bu sürümde yok');
+    // An arch that did not arrive writes no field: undefined, which JSON.stringify drops.
+    expect(surumYml).toContain("mac_arm64_imza: oku('imza-mac-arm64.minisig')");
+    expect(surumYml).toContain('mac_x86_64_boyut: sayi(process.env.MAC_x86_64_BOYUT)');
+    expect(surumYml).toMatch(/for m in \$MAC_VAR; do\s+minisign -S/);
   });
 
   it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {
