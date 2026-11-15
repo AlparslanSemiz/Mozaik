@@ -19,7 +19,8 @@ testleri kalır ve CI'da koşar, davranış bilerek değiştiyse test o commit't
 
 **Yerelde.** Commit'ten önce yalnız `npm run hizli` ve dokunulan test dosyaları: değişen
 test dosyası ve değişen kaynağın kendi testi. Başka bir şey yerelde koşulmaz, tam doğrulama
-dalın CI'ında.
+dalın CI'ında. `src/agir.test.ts` Linux dışında atlanır, çünkü sınadığı `scripts/agir.sh`
+`flock`, `/proc` ve `setsid` ister; CI Linux'ta olduğu için orada her push'ta koşar.
 
 **Mutasyon** haftalık koşar (`haftalik.yml`), hiçbir şeyi beklemez ve değişiklik başına
 koşulmaz. Elle bir mutasyon kanıtı istenirse `scripts/mutasyon-kaniti.sh` ile yapılır (tuzak 149).

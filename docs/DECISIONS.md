@@ -36,6 +36,23 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-15 · Güvenlik sertleştirmesi: küçük kapılar Rust'ta, capability ve CSP sonraya (`guvenlik/sertlestirme`)
+
+**Karar.** Güvenlik denetiminin küçük maddeleri kodda kapandı (TODO B7.39). Üç seçim:
+- **`boyut == 0` artık "bilinmiyor" değil, ret.** İstisna yalnız sayfanın boyut denetimini
+  kapatmasına yarıyordu; yayınlanan her manifest gerçek boyutu taşıyor ve `verify`'ın başka
+  çağıranı yok, yani eski bir yol ona muhtaç değil.
+- **`.eski` sayfa yüklenince siliniyor** (`on_page_load`, `Finished`, süreçte bir kez), açılışın
+  ilk satırında değil. Pencere açamayan bir yeni sürüm geri dönülecek kopyayı bırakır; sonraki
+  takas onu zaten siler. Bir sonraki açılışa ertelemek seçilmedi: bu sürüm de pencere açtıysa
+  çalışıyor demektir.
+- **Silme kuralı iki yerde.** `remove_file` yalnız günlük yedek adını siliyor. Bu, "kural tek
+  yerde" ilkesinin bilinçli bir istisnası: `prunable()` hangisinin gideceğine karar veriyor,
+  Rust neyin hiç gidemeyeceğine. Liste yine her şeyi gösteriyor.
+
+**Bırakılan.** `core:default`'u daraltmak ve CSP yazmak bu dala girmedi: ikisi de exe'de
+ölçülmeden yanlışsa sessizce kırılıyor (kapanışta son düzenleme, ya da açılmayan sayfa).
+
 ### 2026-11-15 · Güncellemeler imzalı (`guvenlik/imza`)
 
 **Karar (Alp: "her düzeltmeyi yap").** Güvenlik denetiminin bulgusu: indirilen exe ve kurulum

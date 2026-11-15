@@ -27,6 +27,11 @@ dist-exe/
 docs/asc/**/*.zip
 blob-report/
 
+# Ajan worktree'leri (CLAUDE.md, "Çalışma düzeni"): bir `git add -A` onları
+# gömülü depo olarak eklemesin.
+.claude/worktrees/
+# Playwright MCP'nin oturum dökümleri (konsol ve sayfa)
+.playwright-mcp/
 # OR-Tools DLLs and the override the release workflow writes (surum.yml)
 src-tauri/ortools/
 src-tauri/tauri.ortools.json

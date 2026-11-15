@@ -426,7 +426,16 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
     if bytes.is_empty() {
         return Err("İnen dosya boş.".into());
     }
-    if boyut != 0 && bytes.len() as u64 != boyut {
+    // A size of 0 is refused, not read as "unknown". `boyut` comes from the
+    // page (`download_update`'s argument), and the old `boyut != 0` exception
+    // let it switch this check off (security review 2026-11-15, G4). No path
+    // needs that exception: every manifest ever published carries the real
+    // size (`stat` in surum.yml, a required field since the first one), and
+    // `verify` has no other caller.
+    if boyut == 0 {
+        return Err("Beklenen boyut bilinmiyor: indirme durduruldu.".into());
+    }
+    if bytes.len() as u64 != boyut {
         return Err(format!(
             "İnen dosya eksik: {} bayt bekleniyordu, {} geldi.",
             boyut,
@@ -494,6 +503,24 @@ fn ozet(bytes: &[u8]) -> String {
     Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// Writes a downloaded program whole or not at all: `<yol>.tmp`, `sync_all`,
+/// rename. `fs::write` straight to `.yeni` left half a program behind when the
+/// disk filled up, and `swap` only asks whether the file is there (security
+/// review 2026-11-15, V10). A failed write removes its temporary.
+fn diske_yaz(yol: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    let tmp = yan(yol, "tmp");
+    let yaz = || -> std::io::Result<()> {
+        let mut f = fs::File::create(&tmp)?;
+        f.write_all(bytes)?;
+        f.sync_all()?;
+        fs::rename(&tmp, yol)
+    };
+    yaz().inspect_err(|_| {
+        let _ = fs::remove_file(&tmp);
+    })
+}
+
 /// `<program>.exe` -> `<program>.exe.<ek>`
 fn yan(exe: &Path, ek: &str) -> PathBuf {
     let mut ad = exe.as_os_str().to_os_string();
@@ -546,8 +573,10 @@ fn swap_files(exe: &Path, yeni: &Path, eski: &Path) -> Result<(), String> {
 
 /// Drops the previous version, if one is lying next to us.
 ///
-/// Called at startup rather than right after the swap, because right after the
-/// swap the old file is still the process doing the asking.
+/// Called once the new version's page has loaded (`lib.rs`, `on_page_load`),
+/// not right after the swap -- right after the swap the old file is still the
+/// process doing the asking -- and not at the first line of startup either: a
+/// version that never gets a window must leave the old one to go back to.
 pub fn sweep_old(exe: &Path) {
     let _ = fs::remove_file(yan(exe, ESKI));
 }
@@ -667,13 +696,13 @@ pub async fn download_update(
         // never kept. Its digest goes with it: `apply_update` checks the file
         // again right before running it, since the folder is not ours alone.
         let hedef = std::env::temp_dir().join(KURULUM_ADI);
-        fs::write(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
+        diske_yaz(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
         *INDIRILEN_KURULUM
             .lock()
             .map_err(|_| "Kurulum kaydı okunamadı.")? = Some((hedef, sha256.to_ascii_lowercase()));
         return Ok(bytes.len() as u64);
     }
-    fs::write(yan(&exe, YENI), &bytes).map_err(|e| {
+    diske_yaz(&yan(&exe, YENI), &bytes).map_err(|e| {
         format!(
             "Yeni sürüm diske yazılamadı: {e}\n\
              Programı Belgelerim gibi yazılabilir bir klasöre taşıyıp tekrar deneyin."
@@ -1044,6 +1073,39 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     }
 
     #[test]
+    fn the_note_reaches_only_an_exe_and_never_the_running_program() {
+        // V8 of the security review: whatever writes `eski-kopya.txt` decides
+        // what the installed program deletes, so the gate is pinned here.
+        let tmp = Scratch::new("not-siniri");
+        let simdiki = tmp.exe();
+        fs::write(&simdiki, b"MZ").unwrap();
+        fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
+        // The running program under another spelling of its own path.
+        let kendisi = tmp.0.join(".").join("Mozaik.exe");
+        assert_eq!(silinecek_eski(&kendisi.to_string_lossy(), &simdiki), None);
+        // Only the extension `.exe`, in any case, and nothing that merely
+        // contains it.
+        for ad in ["Mozaik.exe.txt", "Mozaik.exe.yeni", "Mozaik", "ayarlar.json"] {
+            let yol = tmp.0.join("baska").join(ad);
+            assert_eq!(silinecek_eski(&yol.to_string_lossy(), &simdiki), None, "{ad}");
+        }
+        let buyuk = tmp.0.join("baska").join("ESKI.EXE");
+        assert_eq!(silinecek_eski(&buyuk.to_string_lossy(), &simdiki), Some(buyuk));
+        // An empty note is no path at all.
+        assert_eq!(silinecek_eski("  \n", &simdiki), None);
+    }
+
+    #[test]
+    fn a_folder_named_uninstall_exe_does_not_make_a_copy_installed() {
+        let tmp = Scratch::new("sahte-kurulu");
+        let simdiki = tmp.exe();
+        fs::create_dir(tmp.0.join("uninstall.exe")).unwrap();
+        assert!(!kurulu_mu(&simdiki));
+        let eski = tmp.0.join("baska").join("Mozaik.exe");
+        assert_eq!(silinecek_eski(&eski.to_string_lossy(), &simdiki), None);
+    }
+
+    #[test]
     fn a_new_version_without_a_digest_is_not_offered_for_download() {
         let mut m = manifest("9.0.0", &format!("{}latest/download/Mozaik.exe", RELEASE_KOKLERI[0]));
         m.sha256 = None;
@@ -1134,6 +1196,15 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     }
 
     #[test]
+    fn a_size_of_zero_does_not_switch_the_size_check_off() {
+        // The page sends `boyut`; 0 used to mean "do not check", so any length
+        // passed. Now a download with no promised size is refused.
+        let ok = b"MZ\x90\x00";
+        assert!(verify(ok, 0, &ozet(ok)).is_err());
+        assert!(verify(b"MZ", 0, &ozet(b"MZ")).is_err());
+    }
+
+    #[test]
     fn a_download_has_to_be_the_published_file() {
         let ok = b"MZ\x90\x00";
         // Same size, same shape, another file.
@@ -1221,6 +1292,41 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
 
         swap(&exe).unwrap();
         assert_eq!(fs::read_to_string(&exe).unwrap(), "yeni program");
+    }
+
+    #[test]
+    fn the_old_version_goes_only_after_the_new_page_has_loaded() {
+        // Read from lib.rs, not run: a page load needs a webview. The sweep
+        // must sit inside the page-load hook and nowhere before it, or a new
+        // version that cannot open its window deletes the copy that still
+        // works (V9). Measured red: the call moved back to the top of `run`.
+        let lib = include_str!("lib.rs");
+        let kod = &lib[..lib.find("#[cfg(all(test").unwrap()];
+        let cagri: Vec<_> = kod.match_indices("update::sweep_old(").map(|(i, _)| i).collect();
+        assert_eq!(cagri.len(), 1, "sweep_old tek yerden çağrılmalı");
+        let kanca = kod.find(".on_page_load(").expect("on_page_load yok");
+        let sonraki = kod[kanca..].find(".on_window_event(").unwrap() + kanca;
+        assert!(kanca < cagri[0] && cagri[0] < sonraki, "sweep_old sayfa yüklenince değil");
+        assert!(kod[kanca..sonraki].contains("PageLoadEvent::Finished"));
+    }
+
+    #[test]
+    fn a_download_is_written_whole_or_not_at_all() {
+        let s = Scratch::new("diske-yaz");
+        let yeni = yan(&s.exe(), YENI);
+        diske_yaz(&yeni, b"MZ yeni").unwrap();
+        assert_eq!(fs::read(&yeni).unwrap(), b"MZ yeni");
+        assert!(!yan(&yeni, "tmp").exists());
+
+        // The rename cannot happen (a folder holds the name): no `.yeni` file
+        // appears, and the temporary does not stay either.
+        let s2 = Scratch::new("diske-yaz-dusen");
+        let yeni2 = yan(&s2.exe(), YENI);
+        fs::create_dir(&yeni2).unwrap();
+        fs::write(yeni2.join("dolu"), b"x").unwrap();
+        assert!(diske_yaz(&yeni2, b"MZ").is_err());
+        assert!(!yeni2.is_file());
+        assert!(!yan(&yeni2, "tmp").exists());
     }
 
     #[test]
