@@ -174,9 +174,16 @@ jobs:
         run: |
           $nsi = Get-ChildItem src-tauri/target/release/nsis -Recurse -Filter installer.nsi | Select-Object -First 1
           if (-not $nsi) { throw "installer.nsi bulunamadı" }
+          # Tauri kanca dosyasını kopyalamaz, `!include` ile bağlar: önce
+          # betiğin onu içeri aldığı, sonra dosyanın iki kuralı taşıdığı.
           $metin = Get-Content $nsi.FullName -Raw
+          if ($metin -notmatch '!include\s+"[^"]*kancalar\.nsh"') {
+            Write-Host ($metin -split "`n" | Select-String -Pattern 'include' | Out-String)
+            throw "kurulum betiği kancalar.nsh'i içeri almıyor"
+          }
+          $kanca = Get-Content src-tauri/nsis/kancalar.nsh -Raw
           foreach ($iz in @('StrCpy $DeleteAppDataCheckboxState 0', '$LOCALAPPDATA\Programs\${PRODUCTNAME}')) {
-            if (-not $metin.Contains($iz)) { throw "kanca kurulum betiğinde yok: $iz" }
+            if (-not $kanca.Contains($iz)) { throw "kanca dosyasında yok: $iz" }
           }
           $kur = Get-ChildItem src-tauri/target/release/bundle/nsis -Filter *-setup.exe | Select-Object -First 1
           if (-not $kur) { throw "kurulum üretilmedi" }
