@@ -6238,13 +6238,13 @@ input.search-box:focus-visible {
   font-weight: 600;
 }
 
+/* The count is set apart by weight, not by fading it: at opacity .75 the
+   chip's --muted came out 3.69:1 on --paper-sunk (13 px, under AA's 4.5),
+   measured on the full course 2026-11-15. Full ink is the chip's own colour,
+   which holds AA on both the resting and the pressed chip. */
 .chip-count {
   font-variant-numeric: tabular-nums;
-  opacity: .75;
-}
-
-.chip[aria-pressed='true'] .chip-count {
-  opacity: .85;
+  font-weight: 400;
 }
 
 /* The sort picker sizes itself from its own longest option, not from the
