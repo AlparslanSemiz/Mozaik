@@ -404,31 +404,33 @@ pub fn kurulu_mu(exe: &Path) -> bool {
 
 // ------------------------------------------------- the standalone copy after
 
-/// The note the INSTALLED program leaves at every start: its own path. A
-/// standalone copy that finds it starts the installed program instead of
-/// itself (`kurulu_hedef`), so the old file -- on the desktop, pinned to the
-/// taskbar, behind a shortcut he made by hand -- keeps opening Mozaik. Until
-/// 2026-11-16 the installed program DELETED that file, and every pin and
-/// shortcut to it would have broken (TRAPS 160).
+/// The note the INSTALLED program leaves at every start: its own path, and
+/// its version on the second line (`kurulu_notu`). A standalone copy that
+/// finds it starts the installed program instead of itself (`kurulu_hedef`),
+/// so the old file -- on the desktop, pinned to the taskbar, behind a shortcut
+/// he made by hand -- keeps opening Mozaik. Until 2026-11-16 the installed
+/// program DELETED that file, and every pin and shortcut to it would have
+/// broken (TRAPS 160).
 pub const KURULU_NOTU: &str = "kurulu-yol.txt";
+
+/// The note's text for the installed program at `exe`. The version is the
+/// crate's, which `npm run yayinla` writes from package.json with the rest.
+pub fn kurulu_notu(exe: &Path) -> String {
+    format!("{}\n{}", exe.to_string_lossy(), env!("CARGO_PKG_VERSION"))
+}
 
 /// Where WebView2 keeps the profile, and the note beside it:
 /// `%LOCALAPPDATA%\<identifier>`. Spelled out here because the standalone copy
 /// reads it before Tauri is up (`lib.rs`, `run`); a test holds it to
 /// tauri.conf.json.
-#[cfg_attr(not(windows), allow(dead_code))]
+#[cfg_attr(any(not(windows), debug_assertions), allow(dead_code))]
 pub const KIMLIK: &str = "com.dersprogrami.arac";
-
-/// The installer's folder when nobody chose another (nsis/kancalar.nsh), under
-/// `%LOCALAPPDATA%`: the fallback when the note is not there yet.
-#[cfg_attr(not(windows), allow(dead_code))]
-pub const KURULUM_KLASORU: [&str; 3] = ["Programs", "Mozaik", "Mozaik.exe"];
 
 /// The installed program a standalone copy hands over to, or `None`: only an
 /// installed program (its uninstaller beside it), only a different `.exe`, and
 /// only from a standalone copy, so an installed program never forwards and a
 /// copy never starts itself.
-#[cfg_attr(not(windows), allow(dead_code))]
+#[cfg_attr(any(not(windows), debug_assertions), allow(dead_code))]
 pub fn kurulu_hedef(aday: &str, simdiki: &Path) -> Option<PathBuf> {
     if kurulu_mu(simdiki) {
         return None;
@@ -449,20 +451,26 @@ pub fn kurulu_hedef(aday: &str, simdiki: &Path) -> Option<PathBuf> {
     Some(yol)
 }
 
-/// The installed program this standalone copy should start, read from the
-/// note, else from the installer's default folder. `yerel` is `%LOCALAPPDATA%`.
-#[cfg_attr(not(windows), allow(dead_code))]
-pub fn kurulu_program(yerel: &Path, simdiki: &Path) -> Option<PathBuf> {
-    let not = fs::read_to_string(yerel.join(KIMLIK).join(KURULU_NOTU)).unwrap_or_default();
-    let varsayilan = KURULUM_KLASORU
-        .iter()
-        .fold(yerel.to_path_buf(), |p, s| p.join(s));
-    kurulu_hedef(&not, simdiki).or_else(|| kurulu_hedef(&varsayilan.to_string_lossy(), simdiki))
+/// The installed program this standalone copy (version `surum`) should start,
+/// from the note. `yerel` is `%LOCALAPPDATA%`. Only when the installed one is
+/// at least as new: a newer exe downloaded by hand -- what the error sentences
+/// above tell a person to do -- must run, not open the older installed copy.
+/// A note without a version (none was ever written so) forwards nowhere.
+#[cfg_attr(any(not(windows), debug_assertions), allow(dead_code))]
+pub fn kurulu_program(yerel: &Path, simdiki: &Path, surum: &str) -> Option<PathBuf> {
+    let not = fs::read_to_string(yerel.join(KIMLIK).join(KURULU_NOTU)).ok()?;
+    let mut satirlar = not.lines();
+    let yol = satirlar.next()?;
+    let kurulu_surum = satirlar.next()?.trim();
+    if parse(kurulu_surum).is_none() || is_newer(surum, kurulu_surum) {
+        return None;
+    }
+    kurulu_hedef(yol, simdiki)
 }
 
 // ---------------------------------------------------- waiting on the installer
 
-/// The flag the waiter is started with: `--kurulum-bekle <kurulum> <eski exe> [--kurulu]`.
+/// The flag the waiter is started with: `--kurulum-bekle <kurulum> <eski exe> <özet> [--kurulu]`.
 pub const KURULUM_BEKLE: &str = "--kurulum-bekle";
 /// The flag the old copy is started again with when the installer did not finish.
 pub const KURULUM_OLMADI: &str = "--kurulum-olmadi";
@@ -476,6 +484,8 @@ pub const BEKLEYICI_ADI: &str = "Mozaik-kurulum-bekleyici.exe";
 pub struct Bekleyici {
     pub kurulum: PathBuf,
     pub eski: PathBuf,
+    /// The installer's SHA-256, checked again right before it runs.
+    pub ozet: String,
     pub kurulu: bool,
 }
 
@@ -484,9 +494,11 @@ pub fn bekleyici_mi(args: &[String]) -> Option<Bekleyici> {
     let i = args.iter().position(|a| a == KURULUM_BEKLE)?;
     let kurulum = PathBuf::from(args.get(i + 1)?);
     let eski = PathBuf::from(args.get(i + 2)?);
+    let ozet = args.get(i + 3)?.clone();
     Some(Bekleyici {
         kurulum,
         eski,
+        ozet,
         kurulu: args.iter().any(|a| a == "--kurulu"),
     })
 }
@@ -525,18 +537,33 @@ pub fn acilis(args: &[String], exe: &Path) {
     GUNCELLENDI_MI.store(guncellendi, std::sync::atomic::Ordering::Relaxed);
 }
 
+/// What the waiter does with an installer file: `None` to run it, or the code
+/// the old copy is started again with. The file sat in the shared temporary
+/// folder for as long as the old copy took to exit, so it is the checked file
+/// again or nothing runs (review 2026-11-16).
+pub fn kurulum_dogru_mu(kurulum: &Path, ozet_beklenen: &str) -> Option<i32> {
+    match fs::read(kurulum) {
+        Ok(bytes) if ozet(&bytes) == ozet_beklenen.to_ascii_lowercase() => None,
+        Ok(_) => Some(-3),
+        Err(_) => Some(-4),
+    }
+}
+
 /// The waiter's whole life: wait for the old copy to go, run the installer,
 /// and if it did not finish start the old copy again with the reason. Never
 /// returns. No window, no Tauri: a process that only waits.
 pub fn bekle_ve_bitir(b: Bekleyici) -> ! {
     eskisi_gitsin(std::io::stdin(), DEVIR_SURESI);
-    let durum = std::process::Command::new(&b.kurulum)
-        .args(kurulum_argumanlari(b.kurulu))
-        .status();
-    let kod = match durum {
-        Ok(s) if s.success() => std::process::exit(0),
-        Ok(s) => s.code().unwrap_or(-1),
-        Err(_) => -2,
+    let kod = match kurulum_dogru_mu(&b.kurulum, &b.ozet) {
+        Some(kod) => kod,
+        None => match std::process::Command::new(&b.kurulum)
+            .args(kurulum_argumanlari(b.kurulu))
+            .status()
+        {
+            Ok(s) if s.success() => std::process::exit(0),
+            Ok(s) => s.code().unwrap_or(-1),
+            Err(_) => -2,
+        },
     };
     let _ = std::process::Command::new(&b.eski)
         .args([KURULUM_OLMADI, &kod.to_string()])
@@ -913,7 +940,7 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
         if ozet(&bytes) != beklenen {
             return Err("İndirilen kurulum bozulmuş. Tekrar indirin.".into());
         }
-        return kurulumu_baslat(&app, &exe, &kurulum);
+        return kurulumu_baslat(&app, &exe, &kurulum, &beklenen);
     }
     let beklenen = INDIRILEN_EXE
         .lock()
@@ -943,14 +970,19 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
 /// failed, the disk, an antivirus) would have ended with no window and nothing
 /// on screen (TRAPS 161). The standalone copy is never deleted: once the
 /// installed program has started it forwards to it (`kurulu_hedef`).
-fn kurulumu_baslat(app: &tauri::AppHandle, exe: &Path, kurulum: &Path) -> Result<(), String> {
+fn kurulumu_baslat(
+    app: &tauri::AppHandle,
+    exe: &Path,
+    kurulum: &Path,
+    ozet: &str,
+) -> Result<(), String> {
     let kurulu = kurulu_mu(exe);
     let bekleyici = std::env::temp_dir().join(BEKLEYICI_ADI);
     let _ = fs::remove_file(&bekleyici);
     let mut komut = match fs::copy(exe, &bekleyici) {
         Ok(_) => {
             let mut k = std::process::Command::new(&bekleyici);
-            k.arg(KURULUM_BEKLE).arg(kurulum).arg(exe);
+            k.arg(KURULUM_BEKLE).arg(kurulum).arg(exe).arg(ozet);
             if kurulu {
                 k.arg("--kurulu");
             }
@@ -1399,30 +1431,53 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     }
 
     #[test]
-    fn the_note_wins_and_the_default_folder_is_the_fallback() {
+    fn the_note_forwards_only_to_an_installed_program_at_least_as_new() {
         let tmp = Scratch::new("ilet-not");
         let yerel = tmp.0.clone();
         let simdiki = tmp.0.join("Ders-Programi.exe");
         fs::write(&simdiki, b"MZ").unwrap();
-        assert_eq!(kurulu_program(&yerel, &simdiki), None);
+        assert_eq!(kurulu_program(&yerel, &simdiki, "2.3.0"), None);
 
-        let varsayilan = yerel.join("Programs").join("Mozaik").join("Mozaik.exe");
-        fs::create_dir_all(varsayilan.parent().unwrap()).unwrap();
-        fs::write(&varsayilan, b"MZ").unwrap();
-        fs::write(varsayilan.parent().unwrap().join("uninstall.exe"), b"MZ").unwrap();
-        assert_eq!(kurulu_program(&yerel, &simdiki), Some(varsayilan.clone()));
-
-        let secilen = yerel.join("Baska").join("Mozaik.exe");
-        fs::create_dir_all(secilen.parent().unwrap()).unwrap();
-        fs::write(&secilen, b"MZ").unwrap();
-        fs::write(secilen.parent().unwrap().join("uninstall.exe"), b"MZ").unwrap();
+        let kurulu = yerel.join("Programs").join("Mozaik").join("Mozaik.exe");
+        fs::create_dir_all(kurulu.parent().unwrap()).unwrap();
+        fs::write(&kurulu, b"MZ").unwrap();
+        fs::write(kurulu.parent().unwrap().join("uninstall.exe"), b"MZ").unwrap();
         fs::create_dir_all(yerel.join(KIMLIK)).unwrap();
-        fs::write(
-            yerel.join(KIMLIK).join(KURULU_NOTU),
-            secilen.to_string_lossy().as_bytes(),
-        )
-        .unwrap();
-        assert_eq!(kurulu_program(&yerel, &simdiki), Some(secilen));
+        let not = yerel.join(KIMLIK).join(KURULU_NOTU);
+
+        // The note as the installed program writes it.
+        let metin = kurulu_notu(&kurulu);
+        assert!(metin.ends_with(env!("CARGO_PKG_VERSION")));
+        fs::write(&not, format!("{}\n2.3.0\n", kurulu.to_string_lossy())).unwrap();
+        assert_eq!(
+            kurulu_program(&yerel, &simdiki, "2.3.0"),
+            Some(kurulu.clone())
+        );
+        assert_eq!(
+            kurulu_program(&yerel, &simdiki, "2.2.0"),
+            Some(kurulu.clone())
+        );
+        // A newer exe downloaded by hand runs itself.
+        assert_eq!(kurulu_program(&yerel, &simdiki, "2.4.0"), None);
+        // No version, or one that does not parse: nowhere.
+        fs::write(&not, kurulu.to_string_lossy().as_bytes()).unwrap();
+        assert_eq!(kurulu_program(&yerel, &simdiki, "2.3.0"), None);
+        fs::write(&not, format!("{}\nx", kurulu.to_string_lossy())).unwrap();
+        assert_eq!(kurulu_program(&yerel, &simdiki, "2.3.0"), None);
+    }
+
+    #[test]
+    fn the_waiter_runs_only_the_installer_that_was_checked() {
+        let tmp = Scratch::new("bekleyici-ozet");
+        let kur = tmp.0.join("Mozaik-Kurulum.exe");
+        fs::write(&kur, b"MZ kurulum").unwrap();
+        let dogru = ozet(b"MZ kurulum");
+        assert_eq!(kurulum_dogru_mu(&kur, &dogru), None);
+        assert_eq!(kurulum_dogru_mu(&kur, &dogru.to_uppercase()), None);
+        fs::write(&kur, b"MZ baska").unwrap();
+        assert_eq!(kurulum_dogru_mu(&kur, &dogru), Some(-3));
+        fs::remove_file(&kur).unwrap();
+        assert_eq!(kurulum_dogru_mu(&kur, &dogru), Some(-4));
     }
 
     #[test]
@@ -1439,9 +1494,6 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         let conf: serde_json::Value =
             serde_json::from_str(include_str!("../tauri.conf.json")).unwrap();
         assert_eq!(conf["identifier"], KIMLIK);
-        let kanca = include_str!("../nsis/kancalar.nsh");
-        assert!(kanca.contains(r"$LOCALAPPDATA\Programs\${PRODUCTNAME}"));
-        assert_eq!(KURULUM_KLASORU[1], conf["productName"]);
     }
 
     // ------------------------------------------------------------- the waiter
@@ -1454,20 +1506,25 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
                 "x.exe",
                 KURULUM_BEKLE,
                 r"C:\T\Mozaik-Kurulum.exe",
-                r"C:\D P\Ders-Programi.exe"
+                r"C:\D P\Ders-Programi.exe",
+                "ab"
             ])),
             Some(Bekleyici {
                 kurulum: PathBuf::from(r"C:\T\Mozaik-Kurulum.exe"),
                 eski: PathBuf::from(r"C:\D P\Ders-Programi.exe"),
+                ozet: "ab".into(),
                 kurulu: false,
             })
         );
         assert!(
-            bekleyici_mi(&args(&["x.exe", KURULUM_BEKLE, "a", "b", "--kurulu"]))
+            bekleyici_mi(&args(&["x.exe", KURULUM_BEKLE, "a", "b", "c", "--kurulu"]))
                 .unwrap()
                 .kurulu
         );
-        assert_eq!(bekleyici_mi(&args(&["x.exe", KURULUM_BEKLE, "a"])), None);
+        assert_eq!(
+            bekleyici_mi(&args(&["x.exe", KURULUM_BEKLE, "a", "b"])),
+            None
+        );
         assert_eq!(bekleyici_mi(&args(&["x.exe", GUNCELLENDI])), None);
     }
 

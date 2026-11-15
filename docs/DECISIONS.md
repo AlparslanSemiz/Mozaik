@@ -56,7 +56,8 @@ tek başına exe'de; bir sonraki sürüm ona kurulumu ve CP-SAT'ı güvenle geti
   (bekleyicisiz) daha basitti ama başarısızlıkta programı kapalı bırakırdı.
 - **Eski dosya kalır, kurulan programı açar.** Kurulan program eski kopyayı silmiyor;
   her açılışta yolunu `kurulu-yol.txt`'ye (profil klasöründe) yazıyor, ve tek başına kopya o
-  notu (yoksa `%LOCALAPPDATA%\Programs\Mozaik`'i) bulursa kurulan programı açıp çıkıyor.
+  notu bulursa ve kurulan program en az kendisi kadar yeniyse (notun ikinci satırı sürüm; elle
+  indirilmiş daha yeni bir exe kendisi açılır) kurulan programı açıp çıkıyor.
   Görev çubuğundaki ve masaüstündeki simge çalışmaya devam ediyor. **Seçenek:** silip yeni
   kısayol açmak; sabitlenmiş simgeyi kırdığı için bırakıldı. **Bedel:** iki program dosyası
   kalıyor (eskisi 4 MB) ve eskisi kaldırılana kadar bir yönlendirici.

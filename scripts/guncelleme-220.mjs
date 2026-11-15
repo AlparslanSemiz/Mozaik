@@ -125,12 +125,23 @@ try {
     "$c = New-SelfSignedCertificate -DnsName 'github.com' -Type SSLServerAuthentication " +
       '-CertStoreLocation Cert:\\LocalMachine\\My -KeyExportPolicy Exportable -NotAfter (Get-Date).AddDays(1); ' +
       `$p = ConvertTo-SecureString -String 'mozaik' -Force -AsPlainText; ` +
-      `Export-PfxCertificate -Cert $c -FilePath '${pfx}' -Password $p | Out-Null; ` +
+      `Export-PfxCertificate -Cert $c -FilePath '${pfx}' -Password $p -CryptoAlgorithmOption AES256_SHA256 | Out-Null; ` +
       `$cer = '${pfx}.cer'; Export-Certificate -Cert $c -FilePath $cer | Out-Null; ` +
       'Import-Certificate -FilePath $cer -CertStoreLocation Cert:\\LocalMachine\\Root | Out-Null; ' +
       '$c.Thumbprint',
   );
   writeFileSync(HOSTS, `${hostsOnce.trimEnd()}\r\n127.0.0.1 github.com\r\n`);
+  // Defender can put a redirected well-known name back (HostsFileHijack): said
+  // here rather than as a TLS error three steps later.
+  console.log(
+    ps(
+      "try { 'Defender gerçek zamanlı: ' + (Get-MpComputerStatus).RealTimeProtectionEnabled } catch { 'Defender yok' }",
+    ),
+  );
+  await bekle(2000);
+  if (!readFileSync(HOSTS, 'utf8').includes('127.0.0.1 github.com')) {
+    throw new Error('hosts dosyasındaki yönlendirme geri alındı (Defender?)');
+  }
   ps('ipconfig /flushdns | Out-Null');
 
   sunucu = createServer({ pfx: readFileSync(pfx), passphrase: 'mozaik' }, (istek, cevap) => {

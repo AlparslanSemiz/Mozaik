@@ -310,9 +310,9 @@ Okunarak bulundu 2026-11-16. Kurulan program açılışta tek başına eski kopy
 dosyaya bağlı: silinince simge "öğe bulunamadı" der, kurulumun açtığı yeni kısayolu ise
 aramayı bilmez. Karşı önlem: eski dosya kalıyor; kurulan program yolunu
 `%LOCALAPPDATA%\com.dersprogrami.arac\kurulu-yol.txt`'ye yazıyor, tek başına kopya açılışta
-onu (yoksa kurulumun varsayılan klasörünü) bulursa kurulan programı başlatıp çıkıyor
+onu bulur ve kurulan program en az kendisi kadar yeniyse onu başlatıp çıkıyor
 (`kurulu_hedef`: yalnız kaldırıcısı yanında duran başka bir `.exe`). Koruyan:
-`a_standalone_copy_forwards_only_to_an_installed_program`, `the_note_wins_...`, ve
+`a_standalone_copy_forwards_only_to_an_installed_program`, `the_note_forwards_only_to_an_installed_program_at_least_as_new`, ve
 `kurulum-windows.yml`'de eski dosyanın kurulan programı açtığı adım.
 
 ### 161 · Sessiz kurulum (`/S`) durunca hiçbir şey söylemez, program yalnız kaybolur

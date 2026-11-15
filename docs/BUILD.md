@@ -571,7 +571,9 @@ kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kuru
 programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
 ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 161). Eski dosya
 silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,
-ve tek başına kopya onu bulunca kurulan programı açıp çıkar (`kurulu_hedef`, tuzak 160).
+ve tek başına kopya onu bulunca, kurulan program en az kendisi kadar yeniyse, kurulan programı açıp
+çıkar (`kurulu_program`, tuzak 160; geliştirme derlemesi açmaz). Bekleyici kurulumun özetini
+çalıştırmadan hemen önce yeniden denetler.
 CP-SAT sorusu sürerken exe kendi sürecini `BELOW_NORMAL`'a indirir (`cpsat.rs`).
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son

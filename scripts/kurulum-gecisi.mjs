@@ -151,7 +151,8 @@ try {
   await bekleKi(
     'Kurulan programın açılıp notunu yazması',
     () =>
-      existsSync(not) && readFileSync(not, 'utf8').trim().toLowerCase() === kurulu.toLowerCase(),
+      existsSync(not) &&
+      readFileSync(not, 'utf8').split(/\r?\n/)[0].trim().toLowerCase() === kurulu.toLowerCase(),
     300_000,
   );
   console.log(`kuruldu ve açıldı: ${kurulu}`);

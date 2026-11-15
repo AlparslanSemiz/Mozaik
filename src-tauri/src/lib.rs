@@ -308,10 +308,13 @@ pub fn run() {
         // the pin and the shortcut to the old file keep working (TRAPS 160).
         // Not after an installer that did not finish: then this copy is the
         // one that works.
-        #[cfg(windows)]
+        // Not a development build either: `tauri dev` on a machine where Mozaik
+        // is installed must run the code being worked on.
+        #[cfg(all(windows, not(debug_assertions)))]
         if !args.iter().any(|a| a == update::KURULUM_OLMADI) {
             if let Some(yerel) = std::env::var_os("LOCALAPPDATA") {
-                if let Some(kurulu) = update::kurulu_program(Path::new(&yerel), &exe) {
+                let surum = env!("CARGO_PKG_VERSION");
+                if let Some(kurulu) = update::kurulu_program(Path::new(&yerel), &exe, surum) {
                     let devir = std::process::Command::new(&kurulu)
                         .arg(update::GUNCELLENDI)
                         .stdin(std::process::Stdio::piped())
@@ -341,15 +344,14 @@ pub fn run() {
         }))
         // The installed program leaves its own path where a standalone copy
         // looks for it (update.rs, `KURULU_NOTU`), and clears the installer's
-        // waiter out of the temporary folder.
+        // waiter out of the temporary folder. Right after an install the waiter
+        // is still running and this fails; the next start, or the next
+        // `kurulumu_baslat`, removes it.
         .setup(|app| {
             if let (Ok(dir), Ok(exe)) = (app.path().app_local_data_dir(), std::env::current_exe()) {
                 if update::kurulu_mu(&exe) {
                     let _ = fs::create_dir_all(&dir);
-                    let _ = fs::write(
-                        dir.join(update::KURULU_NOTU),
-                        exe.to_string_lossy().as_bytes(),
-                    );
+                    let _ = fs::write(dir.join(update::KURULU_NOTU), update::kurulu_notu(&exe));
                 }
             }
             let _ = fs::remove_file(std::env::temp_dir().join(update::BEKLEYICI_ADI));
