@@ -194,6 +194,13 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · cpModel ve ikinci bakış, `main` ile birleşti (`ozellik/cpsat`)
+
+Ajan haftalık kullanım sınırına takılıp `main`'in birleştirmesinde durdu; birleştirme (yalnız
+WORKLOG çakışıyordu) tamamlandı. Ham eşik 1 230 000 B için `file://` açılışı, CPU 4× yavaş,
+7 koşu medyanı (kirli): bugünkü `main` (1 204 559 B) 207 ms, bu dal (1 223 937 B) 204 ms.
+`tsc`, `hizli` (1540 yeşil, 4 atlandı), size-limit; `dist/` tek `index.html`.
+
 ## 2026-11-15 · CP-SAT'a kendi modeli, ikinci bakış açık (`ozellik/cpsat`)
 
 `src/pure/relax/cpModel.ts`: ajan raporunun (scratch `analiz/1-cpsat-model.md`) tasarımı,
