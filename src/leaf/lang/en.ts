@@ -93,10 +93,6 @@ const EN: Sozluk = {
   "Bu dosya okunamadı": "This file could not be read",
   "Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki \"Tümünü dosyadan aç\" düğmesini kullanın.":
     "It replaces every plan on this computer, not a single one. Use the \"Open all from file\" button in Settings → Plans and backup.",
-  "Mozaik'i güncelleyin, sonra tekrar deneyin.":
-    "Update Mozaik, then try again.",
-  "Mozaik'in kaydettiği bir .json plan dosyası seçin.":
-    "Choose a .json plan file saved by Mozaik.",
   "Açık olan planın yerine geçecek":
     "It will replace the plan that is open",
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
@@ -104,8 +100,6 @@ const EN: Sozluk = {
   "Planı aç": "Open the plan",
   "Bu dosya eksik":
     "This file is incomplete",
-  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Mozaik'in kaydettiği bir .json plan dosyası seçin.":
-    "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose a .json plan file saved by Mozaik.",
   "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
     "In the file: {ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes}, {ders} {ders:lesson|lessons}, {saat} {saat:hour|hours} placed.",
   "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
@@ -157,12 +151,6 @@ const EN: Sozluk = {
   "Klasörü düzelt": "Fix the folder",
   "**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın.":
     "**The last change could not be saved on this computer:** the storage is full. To keep your work, press **Save to file**.",
-  "**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor.":
-    "**This plan was changed in another window.** This window no longer saves.",
-  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
-    "**The saved plan could not be read at startup.** Nothing was written over it.",
-  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
-    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved.",
   "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Plan dosyanızı **Dosyadan aç** ile açabilirsiniz.":
     "**The saved plan could not be read.** Nothing was written over it; what you do here is not saved. You can open your plan file with **Open from file**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Mozaik kapanınca yaptığınız her şey kaybolur. Çalışırken ve bilgisayarı kapatmadan önce sık sık **Dosyaya kaydet** düğmesine basın.":
@@ -189,8 +177,6 @@ const EN: Sozluk = {
     "{gun}, hour {ders}: {kapali} of {toplam} closed",
   "Kimin saatleri": "Whose hours",
   "Müsaitlik listesi": "Availability list",
-  "Tümünü aç": "Open all",
-  "Tümünü kapat": "Close all",
   "{n} saat fazla, bu program dizilemez.":
     "{n} {n:hour|hours} too many; this timetable cannot be laid out.",
   ", {n} tanesi {kim} üzerinde": ", {n} of them on {kim}",
@@ -267,8 +253,6 @@ const EN: Sozluk = {
 
   // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı": "This draft's data could not be found",
-  'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
-    'It is in the plan list but its own key is empty. The "Where the data is" table in Settings → About shows how many bytes each key holds.',
   "{ad} kopyası": "copy of {ad}",
   '"{ad}" taslağından yeni bir plan açıldı.':
     'A new plan was opened from the "{ad}" draft.',
@@ -410,7 +394,6 @@ const EN: Sozluk = {
   "Havuzda bekleyen kart yok": "No card is waiting in the tray",
   "Havuzdaki kartları kurallara uyarak dizer":
     "Lays out the cards in the tray while obeying the rules",
-  "Otomatik diz ({n})": "Fill automatically ({n})",
   "Dizilmiş programı silip baştan dizer":
     "Clears the timetable and lays it out from scratch",
   "Dizilmiş {n} saatin tamamı silinecek":
@@ -737,8 +720,6 @@ const EN: Sozluk = {
   Ara: "Break",
   "Öğle arası, {dk} dk": "Lunch break, {dk} min",
   Bitiş: "End",
-  "Şu an **{gun} gün × {saat} saat** = {yer} hücre.":
-    "Right now **{gun} days × {saat} hours** = {yer} cells.",
 
   // src/ui/setup/Classes.tsx
   Derslik: "Room",
@@ -1689,16 +1670,12 @@ const EN: Sozluk = {
     "The state at each of the last three openings is kept apart as an automatic backup; it belongs to **this computer** and the plan open at startup.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":
     "**{yer}** hours per class ({gun} days × {ders} lessons); the load entered is **{yuk}**.",
-  "Sırayla: **derslikler**, **branşlar**, **öğretmenler**, **sınıflar**, sonra **dersler**.":
-    "In order: **rooms**, **subjects**, **teachers**, **classes**, then **lessons**.",
   "Tarayıcının bu site için ayırdığı depoda duruyor.":
     "It sits in the store the browser keeps for this site.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** in total; the browser allows Mozaik about **5 MB**.",
   "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
     "Affects only the **Timetable** grid: cell size and how many days fit the screen.",
-  "Yazdırma penceresinde **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz.":
-    "In the print dialog turn **background graphics on**, or the colours will not print.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "A new plan opens straight away and the **undo** history is cleared.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1759,6 +1736,108 @@ const EN: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} deleted, with {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} placed {n:hour|hours} went back to the pool.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
+  "{ilk}–{son}, günde {saat} ders":
+    "{ilk}–{son}, {saat} {saat:hour|hours} a day",
+  "Okul adı ve saatler":
+    "School name and hours",
+  "Okul adı boş. Şu an: {hafta}. Doğru değilse değiştirin.":
+    "No school name yet. Now: {hafta}. Change it if that is wrong.",
+  "Okul adını ve zili gir":
+    "Enter school name and bell",
+  "Derslik ekle":
+    "Add rooms",
+  "{n} branş":
+    "{n} {n:subject|subjects}",
+  "Branş ekle":
+    "Add subjects",
+  "Öğretmen ekle":
+    "Add teachers",
+  "Sınıf ekle":
+    "Add classes",
+  "Ders gir":
+    "Enter lessons",
+  "{n} kapalı saat":
+    "{n} closed {n:hour|hours}",
+  "Gelemeyen öğretmenin saatlerini kapatın. Herkes her saat gelebiliyorsa geçin.":
+    "Close the hours a teacher cannot come. If everyone can come at any hour, skip this.",
+  "Kapalı saat işaretle":
+    "Mark closed hours",
+  "{yer} / {toplam} saat yerleşmiş":
+    "{yer} / {toplam} hours placed",
+  "Programı diz":
+    "Fill the timetable",
+  "Bu bilgisayarda bir kez yazdırıldı":
+    "Printed once on this computer",
+  "Sınıflara ve öğretmenlere birer sayfa":
+    "One page per class and per teacher",
+  "Çıktıya geç":
+    "Go to printing",
+  "Liste bir daha çıkmaz. Her adım kendi sekmesinde durmaya devam eder.":
+    "The list will not come back. Every step stays in its own tab.",
+  "Listeyi kapat":
+    "Close the list",
+  "{n} / {toplam} adım":
+    "{n} / {toplam} steps",
+  "Sıradaki: {adim}":
+    "Next: {adim}",
+  "Listeyi göster":
+    "Show the list",
+  "Listeyi daralt":
+    "Fold the list",
+  "yapıldı":
+    "done",
+  "yapılmadı":
+    "not done",
+  "Başlarken listesi açık mı":
+    "whether the Getting started list is open",
+  "Bu Mozaik onu açamıyor. Önce Mozaik'i güncelleyin, sonra dosyayı yeniden açın.":
+    "This Mozaik cannot open it. Update Mozaik first, then open the file again.",
+  "Güncellemeye bak":
+    "See the update",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.":
+    "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose the file you saved with “Save to file”.",
+  "Bu, Mozaik'in kaydettiği bir dosya değil. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.":
+    "This is not a file Mozaik saved. Choose the file you saved with “Save to file”.",
+  "Excel'deki bir listeyi almak için Okul'daki listelerde Excel'den yapıştır düğmesini kullanın.":
+    "To bring in a list from Excel, use the “Paste from Excel” button in the School lists.",
+  "**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın.":
+    "**Mozaik is also open in another window, and the plan was changed there.** The last changes in this window were not saved. Press **Reload**.",
+  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın.":
+    "**The saved plan could not be read at startup.** Nothing was written over it. Press **Reload**; if the plan still does not come back, open your saved plan file with **Open from file**.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez. Mozaik'i güncelleyin.":
+    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved. Update Mozaik.",
+  "Bu taslağın içi boş. Silip yeniden oluşturabilirsiniz.":
+    "This draft is empty. You can delete it and create it again.",
+  "{ad}: {yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.":
+    "{ad}: {yuk} lesson hours, {acik} open hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{ad}: {yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.":
+    "{ad}: {yuk} lesson hours, {acik} available hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.":
+    "{yuk} lesson hours, {acik} open hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.":
+    "{yuk} lesson hours, {acik} available hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "Bir dersin saatini azaltın ya da Müsaitlik sekmesinde kapalı saat açın.":
+    "Reduce the hours of a lesson, or open closed hours in the Availability tab.",
+  "Önce bir branş seçin.":
+    "Choose a subject first.",
+  "Şu an **{gun} gün × {saat} saat** = haftada {yer} saat.":
+    "Right now **{gun} days × {saat} hours** = {yer} hours a week.",
+  "Sağdaki sayılar: açık saat / ders saati.":
+    "The numbers on the right: open hours / lesson hours.",
+  "{acik} açık saat, {yuk} saat ders":
+    "{acik} open hours, {yuk} lesson hours",
+  "Bütün haftayı aç":
+    "Open the whole week",
+  "Bütün haftayı kapat":
+    "Close the whole week",
+  "**Art arda**: üst üste en fazla kaç saat. **Günde ↑**: bir günde en fazla, **Günde ↓**: geldiği gün en az kaç saat. Boş kutuda Ayarlar → Kurallar’daki sayı geçerli.":
+    "**In a row**: at most how many hours back to back. **Per day ↑**: at most in a day, **Per day ↓**: at least on a day the teacher comes. An empty box takes the number in Settings → Rules.",
+  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
+    "If the colours do not print: in the print window, open **More settings** and tick **Background graphics**.",
+  "Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.":
+    "The whole week does not fit; Fit in the strip shows every day.",
+  "Otomatik diz ({n} kart)":
+    "Fill automatically ({n} {n:card|cards})",
 };
 
 registerSozluk("en", EN);
