@@ -273,17 +273,17 @@ export class CpFormula implements Formula {
       }
     }
     const used = new Set<number>();
-    const use = (lits: readonly Lit[]) => {
+    const mark = (lits: readonly Lit[]) => {
       for (const l of lits) used.add(l >> 1);
     };
     for (const r of this.recorded) {
-      if (r.kind === 'counter') use(r.lits);
+      if (r.kind === 'counter') mark(r.lits);
       else if (!(r.kind === 'or' && r.lits.length === 1 && forcedOff.has(r.lits[0]! ^ 1)))
-        use(r.lits);
+        mark(r.lits);
     }
-    use(q.minimize ?? []);
-    use(q.mustTrue ?? []);
-    for (const b of q.atMost ?? []) use(b.lits);
+    mark(q.minimize ?? []);
+    mark(q.mustTrue ?? []);
+    for (const b of q.atMost ?? []) mark(b.lits);
 
     const w = new Writer();
     const variable = new Writer();
