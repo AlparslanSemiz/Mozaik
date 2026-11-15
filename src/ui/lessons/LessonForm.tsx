@@ -68,7 +68,11 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
   const [newSplit, setNewSplit] = useState<number[]>([]);
   // The class and teacher of the lesson added last: the form clears one of
   // them, and the over-capacity line below must still be about that lesson.
-  const [lastAdded, setLastAdded] = useState<{ classId: Id; teacherId: Id } | null>(null);
+  const [lastAdded, setLastAdded] = useState<{
+    classId: Id;
+    teacherId: Id;
+    focus: Id;
+  } | null>(null);
   // In a focused mode the axis comes from the ribbon, not from the form: that
   // IS the shortening the reader asked for.
   const classId = mode === 'class' ? (focused?.id ?? '') : newLesson.classId;
@@ -115,7 +119,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
     );
     setNewLesson(afterAdd(newLesson, mode));
     setNewSplit([]);
-    setLastAdded({ classId, teacherId });
+    setLastAdded({ classId, teacherId, focus: focused?.id ?? '' });
   }
 
   // OVER CAPACITY IS SAID WHERE IT IS TYPED. A class with 54 lesson hours and
@@ -127,8 +131,14 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
   const capacity = useMemo(() => buildCapacity(state), [state]);
   const overloaded = (() => {
     const lines: string[] = [];
-    const classIds = new Set([classId, lastAdded?.classId ?? ''].filter((x) => x !== ''));
-    const teacherIds = new Set([teacherId, lastAdded?.teacherId ?? ''].filter((x) => x !== ''));
+    // The lesson just added only while the screen is still on its axis: a
+    // warning about 9A must not follow the reader to 10B.
+    const last =
+      lastAdded !== null && (mode === 'all' || lastAdded.focus === (focused?.id ?? ''))
+        ? lastAdded
+        : null;
+    const classIds = new Set([classId, last?.classId ?? ''].filter((x) => x !== ''));
+    const teacherIds = new Set([teacherId, last?.teacherId ?? ''].filter((x) => x !== ''));
     for (const r of capacity.classes) {
       if (classIds.has(r.id) && r.load > r.capacity) {
         lines.push(

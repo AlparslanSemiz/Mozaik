@@ -229,6 +229,7 @@ export default function App() {
     alert,
     notify,
     goUpdate: () => goTo({ tab: 'settings', section: 'about' }),
+    canUndo,
   });
 
   return (

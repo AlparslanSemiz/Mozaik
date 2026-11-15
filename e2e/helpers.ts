@@ -349,7 +349,7 @@ export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(state)),
   });
-  await openedWithoutQuestion(page);
+  await fileOpened(page);
 
   // ...and wait until the WORLD is in storage, not merely until something is.
   //
@@ -621,6 +621,18 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
 export async function openedWithoutQuestion(page: Page) {
   await expect(page.locator('.toasts')).toContainText('Plan dosyası açıldı.');
   await expect(page.locator('.dlg')).toHaveCount(0);
+}
+
+/**
+ * "Dosyadan aç" asks only when the open plan holds something: a world loaded
+ * over another world answers the question, one loaded into a fresh page sees
+ * none. Either way the file is open afterwards.
+ */
+export async function fileOpened(page: Page) {
+  const asked = page.locator('.dlg');
+  const opened = page.locator('.toasts', { hasText: 'Plan dosyası açıldı.' });
+  await expect(asked.or(opened).first()).toBeVisible();
+  if ((await asked.count()) > 0) await answerDialog(page);
 }
 
 export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): Promise<string> {

@@ -233,7 +233,7 @@ export function Checklist({ state, children }: { state: State; children?: React.
           ))}
         </ol>
       )}
-      {!folded && children}
+      {children}
     </section>
   );
 }

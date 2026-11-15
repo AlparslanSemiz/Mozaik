@@ -17,6 +17,8 @@ interface OpenPlanFile {
   notify: (text: string) => void;
   /** Opens Ayarlar → Hakkında, where the update button is. */
   goUpdate: () => void;
+  /** Opening a file empties the undo history, so a plan emptied by hand still asks. */
+  canUndo: boolean;
 }
 
 /** The file input's change handler, made for one render of App. */
@@ -28,6 +30,7 @@ export function openPlanFile({
   alert,
   notify,
   goUpdate,
+  canUndo,
 }: OpenPlanFile) {
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -101,7 +104,7 @@ export function openPlanFile({
     // Nothing to lose, nothing to ask: on a first run the question below
     // counted "Şu an: 0 öğretmen, 0 sınıf" in a red dialog, i.e. warned about
     // nothing at the one moment the reader is least sure of himself.
-    if (isEmptyPlan(state)) {
+    if (isEmptyPlan(state) && !canUndo) {
       loadState(read.state);
       notify(t('Plan dosyası açıldı.'));
       return;

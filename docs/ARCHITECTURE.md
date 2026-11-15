@@ -217,7 +217,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
 | `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
 | `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
-| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır |
+| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır; açık plan boşsa ve geri alınacak bir şey yoksa sormadan açar (`isEmptyPlan`) |
 
 ### Bileşenler
 
@@ -233,7 +233,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Commands.tsx` | paletin komut listesi |
 | `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
+| `ui/common/GoTo.tsx` | bir sekmeye, Okul adımına ya da Ayarlar bölümüne götüren context ve `GoButton` |
+| `ui/common/NextStep.tsx` | boş ekranların düğmesi: eksik ilk adım ve okul adı boşken zil ve günler |
+| `ui/common/wrongFile.ts` | Mozaik'in kaydetmediği bir dosyaya söylenen iki cümle, iki dosya kapısında aynı |
+| `ui/program/useWeekCut.ts` | ızgaranın haftası yana taşıyor mu; Program çubuğu Sığdır'ı söyler |
+| `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Çıktı'da Yazdır'a basıldı mı |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in dokuz adımı), `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |

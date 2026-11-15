@@ -21,7 +21,6 @@ export * from './availClock';
 export * from './motion';
 export * from './intro';
 export * from './checklist';
-export * from './checklist';
 export * from './printOptions';
 export * from './programColor';
 export * from './toolState';

@@ -5,6 +5,7 @@ import type { Id, State } from '../../leaf/model';
 import { countPlacedHours } from '../constraints';
 import { activePlacements } from '../grid';
 import { roomClasses } from './roster';
+import { emptyState } from './defaults';
 
 // --------------------------------------------------------------- deleting
 //
@@ -44,20 +45,37 @@ export function planSummary(d: State) {
 
 /**
  * Whether opening a file in place of this plan can lose anything: no list, no
- * closed hour, no card in any seçenek and no school name. "Dosyadan aç" asks
+ * closed hour, one seçenek with no card and no pin, and settings exactly as a
+ * new plan has them (a bell or a day set by hand is work too). "Dosyadan aç" asks
  * before it replaces the open plan, and on a first run that question was a red
  * dialog counting "0 öğretmen, 0 sınıf" — a warning about nothing.
  */
+/** Deep equality that ignores key order: a sanitized plan may write its keys in another order. */
+function sameValue(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const ka = Object.keys(a);
+  const kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  return ka.every((k) =>
+    sameValue((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]),
+  );
+}
+
 export function isEmptyPlan(d: State): boolean {
   return (
     d.rooms.length === 0 &&
     d.teachers.length === 0 &&
     d.classes.length === 0 &&
     d.lessons.length === 0 &&
-    d.settings.subjects.length === 0 &&
     d.settings.schoolName.trim() === '' &&
+    sameValue({ ...d.settings, schoolName: '' }, emptyState().settings) &&
     Object.keys(d.unavailable).length === 0 &&
-    d.programs.every((p) => Object.keys(p.placements).length === 0)
+    d.programs.length === 1 &&
+    d.programs.every(
+      (p) => Object.keys(p.placements).length === 0 && Object.keys(p.pinned).length === 0,
+    )
   );
 }
 

@@ -554,8 +554,6 @@ describe('makeShort ve duplicateShorts', () => {
   });
 });
 
-// The sentence decides whether he presses Enter or Escape, so it must COUNT
-// what is lost, not guess at it.
 describe('isEmptyPlan', () => {
   // "Dosyadan aç" skips its question on an empty plan, so every field that a
   // replaced plan would take with it has to count as not-empty.
@@ -569,8 +567,21 @@ describe('isEmptyPlan', () => {
     expect(isEmptyPlan({ ...closed, settings: { ...closed.settings, schoolName: '  ' } })).toBe(
       true,
     );
+    // A bell set by hand, or a second seçenek, is work too.
+    expect(
+      isEmptyPlan({
+        ...closed,
+        settings: { ...closed.settings, bell: { ...closed.settings.bell, start: '08:30' } },
+      }),
+    ).toBe(false);
+    expect(isEmptyPlan({ ...closed, programs: [...closed.programs, ...closed.programs] })).toBe(
+      false,
+    );
   });
 });
+
+// The sentence decides whether he presses Enter or Escape, so it must COUNT
+// what is lost, not guess at it.
 
 describe('deletionQuestion', () => {
   function loaded(): State {

@@ -221,6 +221,17 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
         client: main.clientHeight,
         pad: parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom),
         left: left === null ? 0 : Math.round(left.getBoundingClientRect().height),
+        // What stands above the two columns (Okul's Başlarken, one line on a
+        // plan with lessons): part of the page, not of either column.
+        above:
+          left === null
+            ? 0
+            : Math.round(
+                left.getBoundingClientRect().top -
+                  main.getBoundingClientRect().top +
+                  main.scrollTop -
+                  parseFloat(cs.paddingTop),
+              ),
         aside: aside === null ? 0 : Math.round(aside.getBoundingClientRect().height),
         asideNeeds: aside === null ? 0 : aside.scrollHeight,
       };
@@ -243,7 +254,7 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
       expect(
         m.scroll,
         `${step}: sayfa ${m.scroll}px, sol sütun ${m.left}px (yan sütun ${m.asideNeeds}px istiyordu)`,
-      ).toBeLessThanOrEqual(Math.max(m.client, m.left + m.pad) + 2);
+      ).toBeLessThanOrEqual(Math.max(m.client, m.above + m.left + m.pad) + 2);
     }
   });
 
