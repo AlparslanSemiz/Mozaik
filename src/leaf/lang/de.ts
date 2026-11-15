@@ -1768,22 +1768,20 @@ const DE: Sozluk = {
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
   "Müsaitlik'te aç":
     "In Verfügbarkeit öffnen",
-  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
-    "Diese Karte ist gerade nicht im Raster zu sehen; ihre Zeile ist vielleicht ausgeblendet.",
-  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
-    "Die Karte dieses Fachs ist im Ablagefach nicht zu sehen; das Ablagefach ist vielleicht geschlossen.",
+  "Kart ızgarada görünmüyor; satırı gizli olabilir.":
+    "Die Karte ist nicht im Raster; ihre Zeile ist vielleicht ausgeblendet.",
+  "Kart havuzda görünmüyor; havuz kapalı olabilir.":
+    "Die Karte ist im Ablagefach nicht zu sehen; es ist vielleicht geschlossen.",
   "{kim} için Müsaitlik'i açar":
     "Öffnet die Verfügbarkeit für {kim}",
-  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
-    "**{ders} {ders:Fach liegt|Fächer liegen} mit {saat} {saat:Stunde|Stunden} auf einer gesperrten Zeit.** Die Zeiten wurden gesperrt, nachdem die Stunden gelegt waren. **Anzeigen** unten findet die Karte im Stundenplan.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
-    "Diese Zeiten wurden **nach** dem Setzen der Stunden gesperrt; gelöscht wurde keine. Ziehen Sie die Karte in eine offene Stunde oder öffnen Sie die Stunde in Verfügbarkeit.",
-  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
-    "Diese Fächer haben Stunden im Ablagefach, aber keine Zelle ist mehr frei. Ein Klick auf den Namen zeigt die Karte im Ablagefach. Für Platz öffnen Sie Stunden in Verfügbarkeit oder verschieben eine Karte im Stundenplan.",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur.":
+    "**{ders} {ders:Fach liegt|Fächer liegen} mit {saat} {saat:Stunde|Stunden} auf einer gesperrten Zeit.** **Anzeigen** unten findet die Karte.",
+  "Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın.":
+    "Die Zeiten wurden **nach** dem Setzen gesperrt; nichts wurde gelöscht. Ziehen Sie die Karte in eine offene Stunde oder öffnen Sie die Stunde in Verfügbarkeit.",
+  "Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın.":
+    "Für diese Fächer ist keine Zelle mehr frei. Der Name zeigt die Karte im Ablagefach; für Platz öffnen Sie Stunden in Verfügbarkeit oder verschieben eine Karte.",
   "Sebep ve dersler":
     "Grund und Fächer",
-  "Kartı havuzda gösterir":
-    "Zeigt die Karte im Ablagefach",
   "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
     "Alle offenen Stunden der Klasse {sinif} sind mit anderen Fächern belegt.",
   "{kim} {n} saatinde müsait değil":

@@ -158,7 +158,7 @@ export default function Check({ state, view, ui }: Props) {
   const show = (cell: Cell) => {
     ui.setTab('program');
     revealCell([cell.classId, cell.teacherId], cell.day, cell.hour, (found) => {
-      if (!found) notify(t('Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.'));
+      if (!found) notify(t('Kart ızgarada görünmüyor; satırı gizli olabilir.'));
     });
   };
   const showInPool = (lessonId: Id) => {
@@ -166,7 +166,7 @@ export default function Check({ state, view, ui }: Props) {
     ui.setPoolFilter('');
     ui.setTab('program');
     revealPoolCard(lessonId, (found) => {
-      if (!found) notify(t('Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.'));
+      if (!found) notify(t('Kart havuzda görünmüyor; havuz kapalı olabilir.'));
     });
   };
   const openAvailability = (who: Target) => {
@@ -225,7 +225,7 @@ export default function Check({ state, view, ui }: Props) {
             {stranded.length > 0 && (
               <div>
                 <T
-                  k="**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur."
+                  k="**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur."
                   vars={{ ders: stranded.length, saat: strandedHours }}
                 />
               </div>
@@ -297,7 +297,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-kapali">
               <h2>{t('Kapalı saatte ders ({n})', { n: stranded.length })}</h2>
               <p className="hint">
-                <T k="Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın." />
+                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın." />
               </p>
               <table className="list">
                 <thead>
@@ -391,7 +391,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-yerlesemeyen">
               <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
               <p className="hint">
-                <T k="Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın." />
+                <T k="Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın." />
               </p>
               <table className="list">
                 <thead>
@@ -412,7 +412,6 @@ export default function Check({ state, view, ui }: Props) {
                               type="button"
                               className="chip lesson-chip"
                               onClick={() => showInPool(u.lessonId)}
-                              title={t('Kartı havuzda gösterir')}
                             >
                               {u.name}
                               <span className="chip-count">

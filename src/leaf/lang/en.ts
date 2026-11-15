@@ -1751,22 +1751,20 @@ const EN: Sozluk = {
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
   "Müsaitlik'te aç":
     "Open in Availability",
-  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
-    "This card is not on the grid right now; its row may be hidden.",
-  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
-    "This lesson’s card is not visible in the tray; the tray may be closed.",
+  "Kart ızgarada görünmüyor; satırı gizli olabilir.":
+    "The card is not on the grid; its row may be hidden.",
+  "Kart havuzda görünmüyor; havuz kapalı olabilir.":
+    "The card is not visible in the tray; the tray may be closed.",
   "{kim} için Müsaitlik'i açar":
     "Opens Availability for {kim}",
-  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
-    "**{ders} {ders:lesson has|lessons have} {saat} {saat:hour|hours} on a closed hour.** Those hours were closed after the lessons were placed. **Show** below finds the card in the Timetable.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
-    "These hours were closed **after** the lessons were placed; none was deleted. Drag the card to an open hour, or open that hour in Availability.",
-  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
-    "These lessons have hours waiting in the tray, but no cell is left to put them in. Press a lesson’s name to see its card in the tray. To make room, open hours in Availability or move a card in the Timetable.",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur.":
+    "**{ders} {ders:lesson has|lessons have} {saat} {saat:hour|hours} on a closed hour.** **Show** below finds the card.",
+  "Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın.":
+    "The hours were closed **after** the lessons were placed; nothing was deleted. Drag the card to an open hour, or open the hour in Availability.",
+  "Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın.":
+    "No cell is left for these lessons. A lesson’s name shows its card in the tray; to make room, open hours in Availability or move a card.",
   "Sebep ve dersler":
     "Reason and lessons",
-  "Kartı havuzda gösterir":
-    "Shows the card in the tray",
   "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
     "Every open hour of class {sinif} is taken by other lessons.",
   "{kim} {n} saatinde müsait değil":

@@ -1776,22 +1776,20 @@ const FR: Sozluk = {
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Les heures placées sont revenues dans la réserve ; {n} {n:heure épinglée reste|heures épinglées restent} en place.",
   "Müsaitlik'te aç":
     "Ouvrir dans Disponibilité",
-  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
-    "Cette carte n’est pas visible dans la grille ; sa ligne est peut-être masquée.",
-  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
-    "La carte de ce cours n’est pas visible dans le bac ; le bac est peut-être fermé.",
+  "Kart ızgarada görünmüyor; satırı gizli olabilir.":
+    "La carte n’est pas dans la grille ; sa ligne est peut-être masquée.",
+  "Kart havuzda görünmüyor; havuz kapalı olabilir.":
+    "La carte n’est pas visible dans le bac ; il est peut-être fermé.",
   "{kim} için Müsaitlik'i açar":
     "Ouvre la disponibilité de {kim}",
-  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
-    "**{ders} {ders:cours a|cours ont} {saat} {saat:heure|heures} sur une heure fermée.** Ces heures ont été fermées après le placement des cours. **Afficher** ci-dessous trouve la carte dans l’emploi du temps.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
-    "Ces heures ont été fermées **après** le placement des cours ; aucun n’a été supprimé. Faites glisser la carte vers une heure ouverte, ou ouvrez cette heure dans Disponibilité.",
-  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
-    "Ces cours ont des heures qui attendent dans le bac, mais il ne reste aucune cellule où les mettre. Cliquez sur le nom d’un cours pour voir sa carte dans le bac. Pour faire de la place, ouvrez des heures dans Disponibilité ou déplacez une carte dans l’emploi du temps.",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur.":
+    "**{ders} {ders:cours a|cours ont} {saat} {saat:heure|heures} sur une heure fermée.** **Afficher** ci-dessous trouve la carte.",
+  "Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın.":
+    "Les heures ont été fermées **après** le placement ; rien n’a été supprimé. Faites glisser la carte vers une heure ouverte, ou ouvrez l’heure dans Disponibilité.",
+  "Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın.":
+    "Il ne reste aucune cellule pour ces cours. Le nom d’un cours montre sa carte dans le bac ; pour faire de la place, ouvrez des heures dans Disponibilité ou déplacez une carte.",
   "Sebep ve dersler":
     "Raison et cours",
-  "Kartı havuzda gösterir":
-    "Montre la carte dans le bac",
   "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
     "Toutes les heures ouvertes de la classe {sinif} sont prises par d’autres cours.",
   "{kim} {n} saatinde müsait değil":
