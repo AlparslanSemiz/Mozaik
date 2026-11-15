@@ -80,8 +80,8 @@
    renk.spec.ts:
      paper luminance      1.000 light / 0.017 dark   (contract: >0.9 / <0.1)
      text on paper        17.47  / 13.26
-     muted on paper        7.28  /  7.28
-     muted on closed       5.09  /  4.69
+     muted on paper        8.53  /  9.39
+     muted on closed       5.97  /  6.52
      accent on accent-bg   6.59  /  6.47
      on-accent on accent   7.70  /  9.48
      section min AA        5.63  /  4.89
@@ -105,10 +105,14 @@
      instead of 78 columns. Far below the 14 that separates two functional
      colours, or it would read as a state (pitfall 40). */
   --band:        #f8fafd;
-  /* Every second row of a list (table.list, table.stat): the reader asked for
-     rows one after another on slightly different grounds, the same in every
-     list. Light borrows the input recess rather than adding a twelfth grey. */
-  --zebra:       var(--paper-sunk);
+  /* Every second row of a list: the reader asked for rows one after another
+     on slightly different grounds, the same in every list. The same value as
+     --chrome-2, written out rather than borrowed so the two cannot drift into
+     each other: one is a plane of the shell, the other a row of data. Measured
+     against --paper: ΔL* -5.34, ΔE 6.31, ratio 1.14, i.e. seen at once and
+     still far below anything that reads as a state. The dark twin moves the
+     same ΔL* the other way (+5.43). */
+  --zebra:       #ecf0f6;
 
   /* Three rules, three jobs: --hairline shell, --line control edge and table
      head, --line-dark the loudest there is (day separator, row head). */
@@ -120,7 +124,11 @@
   --day-edge:    #5b6572;
 
   --text:        #131a25;
-  --muted:       #505763;
+  /* One step darker than the ramp's first pick (#505763) since the zebra:
+     on --zebra that one measured 6.65 and the rows a low-vision reader scans
+     hold their numbers and hints in this ink. Now 8.53 on --paper, 7.46 on
+     --zebra, and still well behind --text (17.47), so it stays secondary. */
+  --muted:       #464d58;
 
   /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
      ink blue on the grounds that 36 identity colours plus three functional
@@ -534,8 +542,9 @@
   --paper-sunk: #0b0e12;
   --band: #1a1e23;
   /* Not --paper-sunk: in this theme the recess is darker than the paper.
-     The zebra row is one step LIGHTER than it instead. */
-  --zebra: #1d2127;
+     The zebra row is one step LIGHTER than it instead, by the light theme's
+     ΔL* (+5.43 against -5.34): the same load in both. --muted on it 8.30. */
+  --zebra: #20242b;
 
   --hairline: #242930;
   --line: #39404a;
@@ -545,7 +554,11 @@
   --day-edge: #a3adbb;
 
   --text: #e8edf5;
-  --muted: #aab2bd;
+  /* A step lighter since the zebra, for the light theme's reason: on the
+     lighter --zebra the old #aab2bd measured 7.28, below its 8.23 on paper,
+     and the reader asked for the stripe without losing contrast. Now 9.39 on
+     --paper, 8.30 on --zebra, 6.52 on --closed; --text is 14.99. */
+  --muted: #b6bec9;
 
   /* The same hue, as saturated as sRGB has at this lightness: hue 268 runs the
      blue channel to 255, so the conversion clips there by a hair and the hex
@@ -3608,6 +3621,14 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   max-height: 160px;
   overflow: auto;
   font-size: var(--fs-sm);
+  /* Rows, not bullets: with the browser's marker and 40 px indent the
+     zebra began after the bullet and left both on bare paper. */
+  list-style: none;
+  padding-left: 0;
+}
+
+.paste-preview > li {
+  padding: 2px var(--space-2);
 }
 
 /* The strip above the grid: same furniture as the top bar, no second border. */
@@ -3763,7 +3784,11 @@ select:focus-visible,
 textarea:focus-visible,
 .card:focus-visible,
 .card-pin:focus-visible,
-.pool-card:focus-visible {
+.pool-card:focus-visible,
+.row-grip:focus-visible,
+.color-pick:focus-visible,
+.split-pick:focus-visible,
+.entity:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
      a lesson card, a swatch — and that is precisely where somebody navigating
@@ -4043,25 +4068,77 @@ table.list td > .form-row {
   justify-content: flex-end;
 }
 
-/* ZEBRA. Every second row on --zebra, in every list and every stat table.
-   It sits ABOVE the hover rule on purpose: both are (0,2,3), so source order
-   is the whole tie-break, and the row under the pointer has to win on a
-   zebra row as on any other. `renk.spec.ts` 93 hovers an even row for that.
-   A grid is not a list: table.grid and table.availability keep their ground,
-   because there it carries a state. */
-table.list tbody tr:nth-child(even),
-table.stat tbody tr:nth-child(even) {
+/* ZEBRA. Every second row on --zebra, in every list: a stack of records of
+   one shape, read across. The tables (list, stat, the sheet's lessons), the
+   paste preview, and the picking list beside Müsaitlik and Dersler (its rule
+   sits with `.entity`, below, for the reason given there). A grid is not a
+   list: table.grid, table.availability and the sheet's week keep their
+   ground, because there it carries a state. Nor is a menu, the palette or a
+   picker, where the one highlight belongs to the keyboard.
+
+   ZERO SPECIFICITY, through :where(), so that every state wins over the
+   stripe whatever its selector and wherever it is written: the hover, the
+   selected entity, a drop mark. Pitfall 40 closed by construction instead of
+   by source order. The count is the DOM's, i.e. the rows on screen: a search,
+   a sort, a group chip or a delete takes rows out, and the stripe follows
+   what is seen (`e2e/zebra.spec.ts` 94). */
+:where(table.list, table.stat, table.sheet-lessons) > tbody > tr:where(:nth-child(even)),
+:where(ul.paste-preview > li:nth-child(even)) {
   background: var(--zebra);
 }
 
-table.list tbody tr:hover,
-table.stat tbody tr:hover {
-  background: var(--bg);
+/* The bell preview's lunch row is not a record. Counted, it put lessons 5, 6
+   and 7 all on paper with two lunch rows between them; skipped, they
+   alternate. Two rules of their own, because `nth-child(… of S)` is the
+   newest selector in the file (Chromium 111): an engine that does not know it
+   drops these two and falls back to the count above, not every list's stripe. */
+:where(table.bell-preview) > tbody > tr:where(:nth-child(even of :not(.break-row))) {
+  background: var(--zebra);
 }
 
-/* A field in a list row gives up its recess. In the light theme --zebra IS
-   --paper-sunk, so on every second row a sunk box would vanish into the row
-   it sits in. It goes to paper, and with the recess gone its edge is its only
+:where(table.bell-preview) > tbody > tr:where(:nth-child(odd of :not(.break-row))) {
+  background: none;
+}
+
+/* Branşlar's second <tbody>, the subjects teachers hold that are not on the
+   list, is a group of its own and :nth-child starts again inside it. Two rows
+   on one ground where the groups meet was the result; a rule over the first
+   row says a new group starts, which is what the restart then means. Not
+   under an empty first group: there the rule would sit under the heading
+   with no group above it. */
+table.list > tbody:not(:empty) + tbody > tr:first-child > td {
+  border-top: 2px solid var(--line-dark);
+}
+
+/* THE ROW UNDER THE POINTER: a ring, not a ground. A ground of its own had
+   to beat both stripes, and it took the row's ink down with it (--muted on
+   --bg measured 5.06 in the light theme); a ring leaves the row's contrast
+   what it is on either stripe. Outline and not box-shadow, because
+   forced-colors keeps an outline and drops a shadow. Grey and inside the row,
+   so it cannot be taken for the keyboard's ring, which is the accent, outside
+   the control, with a paper gap. Off while a row is in the air: the drop mark
+   is the one thing that speaks then. */
+table.list tbody tr:hover,
+table.stat tbody tr:hover,
+table.sheet-lessons tbody tr:hover {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
+}
+
+body.row-dragging table.list tbody tr:hover {
+  outline: none;
+}
+
+/* The open plan, on its own row (Planlar): the accent edge the suggestion
+   list uses for "this one", so the reader does not have to find "· açık
+   olan" at the end of a name. */
+table.list tbody tr[aria-current='true'] > td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* A field in a list row gives up its recess. In the light theme --zebra is a
+   hair from --paper-sunk (ΔE 1.7), so on every second row a sunk box would
+   vanish into the row it sits in. It goes to paper, and with the recess gone its edge is its only
    boundary, which is the button's case: --line, not --hairline. The split
    picker is a bare <button> and was on the browser's own grey (4.53 for its
    text in the dark theme); in a list it is a field like its neighbours. */
@@ -4071,7 +4148,8 @@ table.list td select,
 table.list td .split-pick,
 table.stat td input[type='text'],
 table.stat td input[type='number'],
-table.stat td select {
+table.stat td select,
+table.sheet-lessons td select {
   background: var(--paper);
   border: 1px solid var(--line);
 }
@@ -4090,7 +4168,8 @@ table.list td select:hover:not(:disabled),
 table.list td .split-pick:hover,
 table.stat td input[type='text']:hover:not(:disabled),
 table.stat td input[type='number']:hover:not(:disabled),
-table.stat td select:hover:not(:disabled) {
+table.stat td select:hover:not(:disabled),
+table.sheet-lessons td select:hover:not(:disabled) {
   border-color: var(--line-dark);
 }
 
@@ -4301,7 +4380,7 @@ table.sheet-lessons select.transfer-pick {
   gap: var(--space-4);
   min-width: 8.5rem;
   max-width: 100%;
-  color: var(--ink);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   white-space: nowrap;
@@ -4318,7 +4397,7 @@ table.sheet-lessons select.transfer-pick {
   border: 1px solid var(--line-dark);
   border-radius: var(--r-lg);
   background: var(--paper);
-  color: var(--ink);
+  color: var(--text);
   box-shadow: 0 12px 32px var(--shadow-shell);
 }
 
@@ -4347,7 +4426,7 @@ table.sheet-lessons select.transfer-pick {
   border: 0;
   border-radius: var(--r-md);
   background: transparent;
-  color: var(--ink);
+  color: var(--text);
   text-align: left;
   font: inherit;
   cursor: pointer;
@@ -4797,14 +4876,25 @@ table.sheet-lessons select.transfer-pick {
   font-size: var(--fs-sm);
 }
 
-.entity:hover {
-  background: var(--bg);
+/* The zebra, here rather than in its block: `.entity` above writes
+   `background: none` at (0,1,0), and a :where() stripe would lose to it. At
+   (0,1,0) and after it, the stripe wins over the button's own reset and
+   loses to the hover and the selected row below (both (0,2,0)). */
+.entity:where(:nth-child(even)) {
+  background: var(--zebra);
+}
+
+.entity:hover:not([aria-current='true']) {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
 }
 
 .entity[aria-current="true"] {
   background: var(--accent-bg);
   border-color: var(--accent);
-  color: var(--accent);
+  /* --text, not the accent: the accent on its own ground is 6.28 / 6.70, and
+     the ground and the edge already say "this one". */
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -5372,7 +5462,8 @@ table.print td .p-bottom {
 tr.break-row th,
 tr.break-row td {
   background: var(--bg);
-  color: var(--muted);
+  /* --text: --muted on --bg measured 5.06, in the smallest type on screen. */
+  color: var(--text);
   font-size: var(--fs-xs);
   font-weight: 600;
 }
@@ -6578,7 +6669,7 @@ table.list td.row-no {
 }
 
 .row-grip:hover:not(:disabled) {
-  color: var(--ink);
+  color: var(--text);
   background: var(--paper-sunk);
   border-color: var(--hairline);
 }

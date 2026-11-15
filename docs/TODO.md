@@ -33,8 +33,11 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    [ROBODERS.md](ROBODERS.md)'de açık soru.
 3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
    listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
-   bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`): DESIGN.md Renk'te kural,
-   `e2e/renk.spec.ts` 93.
+   bozmamalı. → Yapıldı (2026-10-10, `ozellik/zebra`), 2026-10-24'te yeniden açıldı ve
+   `zebra-liste`'de bitti: açık temada soluk yazı zebrada 6,65'e düşmüştü, dört liste
+   zebrasızdı, iki yerde şerit sırası bozuktu. Şimdi her listede, iki temada aynı yükte,
+   satırda yazı her zeminde ve durumda 7:1 (DESIGN Renk ve Erişilebilirlik,
+   `e2e/zebra.spec.ts` 94). İki istisna E1'de (§8e). Windows ve WebView2'de görülmedi.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -1365,6 +1368,17 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       Ciddi seviye. Fareyle kaydırılan ama klavyeyle odaklanamayan bir kutu, yani
       içeriğinin bir kısmına klavyeyle hiç ulaşılamıyor. Çare `tabindex="0"`, ve
       havuzda bunun sürükleme ile etkileşimi ölçülmeden dokunulmaz (tuzak 13).
+- [ ] **E1 · Açık temada rozetler ve "Sil" düğmesi 7:1'e (2026-10-24, kullanıcı kararı).**
+      Liste satırında yazı her zeminde ve durumda en az 7:1 ([DESIGN.md](DESIGN.md),
+      Erişilebilirlik), ve açık temada iki mürekkep bunu henüz tutmuyor. Ölçülen, boyanan
+      renkten (`zebra-liste`): rozetler kendi zeminlerinde `ok` 4,84, `tight` 4,89,
+      `impossible` 5,33; tehlikeli "Sil" (`--bad` kâğıtta) 6,84. Aynı kökten bir üçüncüsü:
+      dağılım seçicisinin gerekçe satırı (`--warn` kâğıtta) 5,54. Koyu temada hepsi 7'nin
+      üstünde (7,15 ile 8,92 arası). Bu renkler kısıt altında arandı ve işlevsel kanal zevk
+      meselesi değil (`styles.css`), yani çare yeniden aramak: `--ok`, `--warn` ve `--bad`
+      ya da rozet mürekkebi için 7:1 ve işlevsel renkler arası ΔE kısıtıyla,
+      `scripts/bolum-renk.mjs` gibi bir betikle. Bitince `e2e/zebra.spec.ts` 94'teki
+      istisna (`.badge`, `.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
 
 ### 8f · Test stratejisinden sıraya konanlar (2026-09-12)
 

@@ -18,7 +18,7 @@ Her birinin neyi koruduğu ve onu ölçen testler:
 | Ne | Neyi koruyor | Nerede ölçülüyor |
 |---|---|---|
 | İşlevsel renk kanalı: yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | aracın çalışma biçimi bu dört renk | `palette.test.ts`, `e2e/renk.spec.ts` |
-| Erişilebilirlik: AA kontrast, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban | hedef kullanıcı zor görüyor | `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
+| Erişilebilirlik: liste satırında yazı her zeminde ve durumda 7:1, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban | hedef kullanıcı zor görüyor | `e2e/zebra.spec.ts`, `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
 | Kâğıt: A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | ekran ne olursa olsun yazıcı aynı yazıcı | `e2e/yazdir.spec.ts` |
 | Açılış ağa bağlı değil: bugün çalışma anında ağa hiç çıkılmıyor | çift tıkla çalışır ilkesi, babanın makinesinde ağ olup olmadığı bilinmiyor | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
 
@@ -37,7 +37,7 @@ bir karar değil, tuzak 52.
 
 ### Erişilebilirlik
 
-Kontrast AA. Çözücü ilerlemesi, sonuç satırı ve hata mesajları
+Liste satırında yazı her zeminde (iki şerit) ve her durumda (üstüne gelme, seçili satır, odak) en az 7:1, çünkü babanın en çok okuduğu yer satırlar. `e2e/zebra.spec.ts` 94 bunu iki temada, her listede, boyanan renkten ölçer. Bugün bunu tutmayan iki mürekkep adıyla istisna ve ikisi de [TODO.md](TODO.md) E1'de: açık temada işlevsel rozetler ve tehlikeli "Sil". O iş bitene kadar öteki yüzeylerin ölçülen eşiği 4,5:1 (`e2e/renk.spec.ts`). Çözücü ilerlemesi, sonuç satırı ve hata mesajları
 `aria-live="polite"` (`.reason-bar` `role="status"` taşıyor), geri alınamaz
 uyarılar `role="alertdialog"`. Renk tek başına bir durum taşımaz. Klavyeyle
 gidilen her yerde odak görünür.
@@ -81,9 +81,9 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 - **Palet üstündeki mürekkep temayla dönmez** (`--on-color`), çünkü `color: inherit` koyu temada açık metni pastel zemine düşürür (tuzak 15 ve 35).
 - **Hücreyi hangi renk boyar.** Program ızgarasında öntanımlı olarak öğretmen rengi, şeritteki Renk menüsünden sınıf, derslik ya da branş rengi. Kâğıtta öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar ([LAYOUT.md](LAYOUT.md)).
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.
-- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor. Listede girdi o gömük yüzeyi bırakır, çünkü zebra satırı açık temada aynı `--paper-sunk`'ta: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli ve `--line` kenarlı, düğme gibi.
+- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor. Listede girdi o gömük yüzeyi bırakır, çünkü zebra satırı açık temada gömük yüzeyle neredeyse aynı: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli ve `--line` kenarlı, düğme gibi.
 - **Düğme durumları:** birincil, sade, tehlikeli, basılı. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
-- **Listelerde zebra.** `table.list` ve `table.stat`'ın çift satırları `--zebra` zeminli: açık temada `--paper-sunk`, koyu temada kâğıttan bir adım açık kendi tonu. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural üzerine gelme kuralıyla aynı özgüllükte ve ondan önce yazılı, yani üstüne gelinen satır zebrayı ezer. Metin iki zeminde de AA tutar, ve `e2e/renk.spec.ts` bunu, kuralın varlığını, sırasını ve tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
+- **Listelerde zebra.** Liste, aynı biçimde kayıtların satır satır okunan yığını, ve her listenin çift satırı `--zebra` zeminli: `table.list`, `table.stat`, varlık panelinin ders satırları (`table.sheet-lessons`), Müsaitlik'in ve Dersler'in seçme listesi (`.entity-list`) ve Excel'den yapıştırma önizlemesi. Zebra açık temada kâğıttan bir adım koyu, koyu temada bir adım açık, ikisinde de aynı yükte. Bir durum gibi okunmayacak kadar hafif, ilk bakışta seçilecek kadar belirgin: ölçüsü tokenin yanında yazılı ve `e2e/renk.spec.ts` 93 her koşuda yeniden ölçüyor. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural `:where()` ile olabilecek en düşük özgüllükte, yani her durum (üstüne gelme, seçili satır, bırakma işareti) onu nerede yazılmış olursa olsun ezer (tuzak 40). `:nth-child` DOM'u sayar, yani arama, sıralama, grup çipi ya da silme satırı DOM'dan çıkarınca şerit görüneni izler. Menü, palet ve seçiciler liste değil: orada tek vurgu klavyenin. Üstüne gelinen satır bir zemin değil bir halka alır (2 px `--muted`, satırın içinde): satırın kontrastı iki şeritte neyse o kalır, halka `forced-colors`'ta da kalır, ve klavyenin odak halkasıyla karışmaz, çünkü o accent, kontrolün dışında ve kâğıt boşluklu. Seçili satır `--accent-bg` zeminli ve accent kenarlı, yazısı `--text`. Açık plan satırın başında accent bir kenarla söylenir. Satırdaki yazı iki zeminde ve her durumda 7:1 tutar (Erişilebilirlik): `e2e/zebra.spec.ts` 94 bunu ve şeridin görünen sırayı izlediğini, `e2e/renk.spec.ts` 93 tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
 - **Gün bandı** tek indeksli günlere çok hafif bir zemin verir. Bir durum gibi okunmadığı ve iki temada aynı yükte olduğu ölçülür, ve altındaki kapalı saat taramasını ezmemesi gerekir (tuzak 40).
 - **Nötr rampa türetilmiş:** tek bir ton (258), seçilen OKLCH açıklığı ve chroma'sı, çevrimdışı sRGB'ye çevrilmiş. Dosyaya hex yazılıyor, çünkü `getComputedStyle` bir `oklch()` rengini `oklch()` olarak döndürür ve süitteki ölçümler `rgb()` ayrıştırır (tuzak 81).
 
@@ -224,7 +224,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.field` `.field-label` `.form-row` (+`.nowrap`) | etiketli kontrol · bir satırda duranlar |
 | `.num` `.text-sm` `.clock-pick` `.sort-pick` | boyutlanmış girdiler |
 | `.color-pick` + `dialog.color-dialog` `.swatches` `.swatch` | renk seçici ve 36 renklik diyaloğu |
-| `table.list` + `th.num` `td.num` | veri tablosu, çift satırı `--zebra` (`table.stat` da) |
+| `table.list` + `th.num` `td.num` | veri tablosu, çift satırı `--zebra` (`table.stat`, `table.sheet-lessons`, `.entity-list`, `.paste-preview` da) |
 | `.chip` `.chip-count` `.chips` | grup süzgeci, sayısı üstünde yazan |
 | `.search` `.search-box` `.search-clear` | arama kutusu |
 | `.list-tools` `.list-count` | listenin üstündeki şerit |
