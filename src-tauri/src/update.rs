@@ -160,6 +160,19 @@ pub struct Manifest {
     /// required to DOWNLOAD (`karar`, `verify`).
     #[serde(default)]
     pub sha256: Option<String>,
+    /// The installer (`Mozaik-Kurulum.exe`), from the release that started
+    /// shipping one (DECISIONS 2026-11-15). Optional, and that is the bridge:
+    /// copies built before it never heard of the field, serde skips it, and they
+    /// go on swapping in the standalone `exe` above -- which is the new version
+    /// and offers the installer the next time somebody presses the button.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kurulum: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kurulum_boyut: Option<u64>,
+    /// The installer's SHA-256, like `sha256` for the standalone one. All three
+    /// installer fields or none: `karar` offers the installer only with all.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kurulum_sha256: Option<String>,
 }
 
 /// The answer the settings panel draws.
@@ -172,6 +185,10 @@ pub struct Cevap {
     pub exe: String,
     pub boyut: u64,
     pub sha256: Option<String>,
+    /// `exe` is the installer, not the standalone program. The page does not
+    /// need to know -- `download_update` reads the same thing off the address --
+    /// but the About panel may say it.
+    pub kurulum: bool,
 }
 
 // --------------------------------------------------------------- pure parts
@@ -215,9 +232,31 @@ pub fn is_newer(aday: &str, simdiki: &str) -> bool {
 }
 
 /// Nothing is fetched from outside our own releases.
+///
+/// The prefix is checked on the address as the HTTP client will send it, not
+/// as written: `.../releases/../../other/repo/...` and its `%2e%2e` spelling
+/// start with our prefix and resolve to somebody else's files (security
+/// review, 2026-11-15). Parsing normalises the dot segments first.
 pub fn safe_url(url: &str) -> Result<(), String> {
-    if !kokler().iter().any(|kok| url.starts_with(kok)) {
-        return Err(format!("Beklenmeyen adres: {url}"));
+    let hata = || format!("Beklenmeyen adres: {url}");
+    // Normalised first: `.../releases/../../other/repo/...` and its `%2e%2e`
+    // spelling start with our prefix and resolve to somebody else's files
+    // (security review, 2026-11-15).
+    let parsed = reqwest::Url::parse(url).map_err(|_| hata())?;
+    let normal = parsed.as_str();
+    if !kokler().iter().any(|kok| normal.starts_with(kok)) {
+        return Err(hata());
+    }
+    // The published copy: GitHub over TLS and nothing else. The test copy's
+    // root (TEST_KOKU) is a loopback server and is checked by the prefix alone.
+    if TEST_KOKU.is_none()
+        && (parsed.scheme() != "https"
+            || parsed.host_str() != Some("github.com")
+            || parsed.port().is_some()
+            || !parsed.username().is_empty()
+            || parsed.password().is_some())
+    {
+        return Err(hata());
     }
     Ok(())
 }
@@ -256,15 +295,103 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
             releases_sayfasi()
         ));
     }
+    // The installer when the release has one this copy may fetch, otherwise the
+    // standalone program exactly as before. A manifest whose installer address
+    // is not ours is not an error: the standalone one still updates the copy.
+    let (exe, boyut, sha256, kurulum) = match (m.kurulum, m.kurulum_boyut, m.kurulum_sha256) {
+        (Some(url), Some(boyut), Some(ozet)) if kurulum_mu(&url) && safe_url(&url).is_ok() => {
+            (url, boyut, Some(ozet), true)
+        }
+        _ => (m.exe, m.boyut, m.sha256, false),
+    };
     Ok(Cevap {
         yeni_var,
         version: m.version,
         date: m.date,
-        exe: m.exe,
-        boyut: m.boyut,
-        sha256: m.sha256,
+        exe,
+        boyut,
+        sha256,
+        kurulum,
     })
 }
+
+// ------------------------------------------------------------- the installer
+//
+// From 2026-11-15 a release carries an installer beside the standalone exe
+// (DECISIONS: the CP-SAT libraries are files next to the program, and a
+// wizard puts files in place the way Windows expects). The data does NOT move:
+// WebView2 keeps it under %LOCALAPPDATA%\<identifier>, which is the same for
+// both (DATA.md, "Değişmeyen kimlikler"), and the uninstaller's "delete app
+// data" box is switched off in nsis/kancalar.nsh.
+
+/// The installer's published file name. `surum.yml` publishes it under exactly
+/// this name, and the address is how `download_update` tells the two apart.
+pub const KURULUM_ADI: &str = "Mozaik-Kurulum.exe";
+
+/// Is this address the installer rather than the standalone program?
+pub fn kurulum_mu(url: &str) -> bool {
+    url.rsplit('/').next() == Some(KURULUM_ADI)
+}
+
+/// Was this program put here by the installer? The installer writes its
+/// uninstaller into the same folder, and nothing else does.
+pub fn kurulu_mu(exe: &Path) -> bool {
+    exe.parent()
+        .map(|d| d.join("uninstall.exe").is_file())
+        .unwrap_or(false)
+}
+
+/// The note a standalone copy leaves when it hands over to the installer: its
+/// own path, so the installed program can remove it once it is gone. A file
+/// rather than a command-line argument because the path may hold spaces and
+/// the installer's `/ARGS` would have to quote them twice.
+pub const ESKI_KOPYA_NOTU: &str = "eski-kopya.txt";
+
+/// What the note may make the installed program delete: only a different
+/// `.exe` than the one running, and only from an installed program, so that a
+/// standalone copy can never be talked into removing itself or a sibling.
+pub fn silinecek_eski(not: &str, simdiki: &Path) -> Option<PathBuf> {
+    if !kurulu_mu(simdiki) {
+        return None;
+    }
+    let yol = PathBuf::from(not.trim());
+    let exe_mi = yol
+        .extension()
+        .map(|e| e.eq_ignore_ascii_case("exe"))
+        .unwrap_or(false);
+    if !exe_mi || !yol.is_absolute() || yol == simdiki {
+        return None;
+    }
+    if let (Ok(a), Ok(b)) = (yol.canonicalize(), simdiki.canonicalize()) {
+        if a == b {
+            return None;
+        }
+    }
+    Some(yol)
+}
+
+/// Removes the old standalone copy once the process that ran it has exited.
+/// Retries, because that process is at most a few seconds from gone; gives up
+/// quietly, because a leftover file is untidy and nothing worse.
+pub fn eski_kopyayi_kaldir(eski: PathBuf, not: PathBuf) {
+    std::thread::spawn(move || {
+        for _ in 0..40 {
+            if !eski.exists() || fs::remove_file(&eski).is_ok() {
+                let _ = fs::remove_file(yan(&eski, ESKI));
+                let _ = fs::remove_file(yan(&eski, YENI));
+                let _ = fs::remove_file(&not);
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(500));
+        }
+    });
+}
+
+/// The installer downloaded in this session, waiting for "Şimdi yeniden başlat".
+/// With the digest it was checked against: `apply_update` checks it again.
+#[allow(clippy::type_complexity)]
+static INDIRILEN_KURULUM: std::sync::Mutex<Option<(PathBuf, String)>> =
+    std::sync::Mutex::new(None);
 
 /// Is what came down the wire a Windows program, and the one we were promised?
 ///
@@ -440,6 +567,7 @@ pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<
     self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
+    let kurulum = kurulum_mu(&url);
 
     let bytes = istemci(300)?
         .get(&url)
@@ -453,6 +581,18 @@ pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<
         .map_err(|e| ag_hatasi(&e))?;
 
     verify(&bytes, boyut, &sha256)?;
+    if kurulum {
+        // The temporary folder, not next to the program: an installed program
+        // lives in a folder the installer owns, and the wizard is run once and
+        // never kept. Its digest goes with it: `apply_update` checks the file
+        // again right before running it, since the folder is not ours alone.
+        let hedef = std::env::temp_dir().join(KURULUM_ADI);
+        fs::write(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
+        *INDIRILEN_KURULUM
+            .lock()
+            .map_err(|_| "Kurulum kaydı okunamadı.")? = Some((hedef, sha256.to_ascii_lowercase()));
+        return Ok(bytes.len() as u64);
+    }
     fs::write(yan(&exe, YENI), &bytes).map_err(|e| {
         format!(
             "Yeni sürüm diske yazılamadı: {e}\n\
@@ -466,6 +606,20 @@ pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<
 pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
     self_update_here()?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
+    let kurulum = INDIRILEN_KURULUM
+        .lock()
+        .map_err(|_| "Kurulum kaydı okunamadı.")?
+        .clone()
+        .filter(|(p, _)| p.is_file());
+    if let Some((kurulum, beklenen)) = kurulum {
+        // The temporary folder is shared with every other program of this
+        // user: the file run is the file that was checked, or nothing runs.
+        let bytes = fs::read(&kurulum).map_err(|e| format!("Kurulum okunamadı: {e}"))?;
+        if ozet(&bytes) != beklenen {
+            return Err("İndirilen kurulum değişmiş: özeti tutmuyor. Tekrar indirin.".into());
+        }
+        return kurulumu_baslat(&app, &exe, &kurulum);
+    }
     swap(&exe)?;
     // The pipe is the hand-over (`eskisi_gitsin` says why). Its writing end
     // stays open in this process until the process ends.
@@ -475,6 +629,37 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
         .spawn()
         .map_err(|e| format!("Yeni sürüm başlatılamadı: {e}"))?;
     std::mem::forget(yeni);
+    app.exit(0);
+    Ok(())
+}
+
+/// Hands over to the downloaded installer and exits.
+///
+/// `/S` silent (per-user, so no UAC prompt), `/R` start the program again when
+/// it is done. `/UPDATE` only when this IS the installed program: it keeps the
+/// shortcuts the first install made. The installer closes a copy that is still
+/// running (Restart Manager), so exiting right after starting it is the order
+/// Tauri's own updater uses.
+fn kurulumu_baslat(app: &tauri::AppHandle, exe: &Path, kurulum: &Path) -> Result<(), String> {
+    let kurulu = kurulu_mu(exe);
+    if !kurulu {
+        // A standalone copy: leave the note that lets the installed program
+        // remove this file, so the machine is not left with two programs.
+        use tauri::Manager;
+        if let Ok(dir) = app.path().app_local_data_dir() {
+            let _ = fs::create_dir_all(&dir);
+            let _ = fs::write(dir.join(ESKI_KOPYA_NOTU), exe.to_string_lossy().as_bytes());
+        }
+    }
+    let mut komut = std::process::Command::new(kurulum);
+    komut.args(["/S", "/R"]);
+    if kurulu {
+        komut.arg("/UPDATE");
+    }
+    let calisan = komut
+        .spawn()
+        .map_err(|e| format!("Kurulum başlatılamadı: {e}"))?;
+    std::mem::forget(calisan);
     app.exit(0);
     Ok(())
 }
@@ -572,6 +757,25 @@ mod tests {
     // ----------------------------------------------------------------- gates
 
     #[test]
+    fn dot_segments_cannot_leave_our_releases() {
+        for kotu in [
+            "https://github.com/AlparslanSemiz/Mozaik/releases/../../baska/depo/releases/x.exe",
+            "https://github.com/AlparslanSemiz/Mozaik/releases/%2e%2e/%2E%2E/baska/depo/x.exe",
+            "https://github.com/AlparslanSemiz/Mozaik/releases/./../../../baska/x.exe",
+            "http://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "https://github.com:8443/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "https://kim@github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe",
+            "kot\u{0}u",
+        ] {
+            assert!(safe_url(kotu).is_err(), "{kotu}");
+        }
+        assert!(safe_url(
+            "https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-Kurulum.exe"
+        )
+        .is_ok());
+    }
+
+    #[test]
     fn the_manifest_is_under_a_pinned_prefix() {
         // Two literals that must agree; this is the only thing that says so.
         assert!(RELEASE_KOKLERI.iter().any(|k| MANIFEST_URL.starts_with(k)));
@@ -616,7 +820,110 @@ mod tests {
             exe: exe.into(),
             boyut: 3_757_568,
             sha256: Some(ozet(b"MZ")),
+            kurulum: None,
+            kurulum_boyut: None,
+            kurulum_sha256: None,
         }
+    }
+
+    // ---------------------------------------------------------- the installer
+
+    const KURULUM: &str =
+        "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Kurulum.exe";
+    const TEK: &str =
+        "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe";
+
+    #[test]
+    fn a_release_with_an_installer_offers_the_installer() {
+        let mut m = manifest("9.0.0", TEK);
+        m.kurulum = Some(KURULUM.into());
+        m.kurulum_boyut = Some(31_000_000);
+        m.kurulum_sha256 = Some("ab".repeat(32));
+        let c = karar(m, "2.2.0").unwrap();
+        assert!(c.kurulum);
+        assert_eq!(c.exe, KURULUM);
+        assert_eq!(c.boyut, 31_000_000);
+        assert_eq!(c.sha256.as_deref(), Some("ab".repeat(32).as_str()));
+    }
+
+    #[test]
+    fn an_installer_without_its_digest_is_not_offered() {
+        let mut m = manifest("9.0.0", TEK);
+        m.kurulum = Some(KURULUM.into());
+        m.kurulum_boyut = Some(31_000_000);
+        let c = karar(m, "2.2.0").unwrap();
+        assert!(!c.kurulum);
+        assert_eq!(c.exe, TEK);
+    }
+
+    #[test]
+    fn a_release_without_one_is_the_old_standalone_swap() {
+        let c = karar(manifest("9.0.0", TEK), "2.2.0").unwrap();
+        assert!(!c.kurulum);
+        assert_eq!(c.exe, TEK);
+    }
+
+    #[test]
+    fn an_installer_somewhere_else_falls_back_to_the_standalone_one() {
+        let mut m = manifest("9.0.0", TEK);
+        m.kurulum = Some("https://baska-yer.example/Mozaik-Kurulum.exe".into());
+        m.kurulum_boyut = Some(1);
+        m.kurulum_sha256 = Some("ab".repeat(32));
+        let c = karar(m, "2.2.0").unwrap();
+        assert!(!c.kurulum);
+        assert_eq!(c.exe, TEK);
+    }
+
+    #[test]
+    fn an_old_copy_reads_the_new_manifest() {
+        // What 2.2.0 out in the field will parse: its struct has no installer
+        // fields, and serde must ignore them rather than refuse the manifest.
+        #[derive(serde::Deserialize)]
+        #[allow(dead_code)]
+        struct Eski {
+            version: String,
+            date: String,
+            exe: String,
+            boyut: u64,
+        }
+        let json = format!(
+            r#"{{"version":"9.0.0","date":"2026-11-15","exe":"{TEK}","boyut":5,"kurulum":"{KURULUM}","kurulum_boyut":7}}"#
+        );
+        let eski: Eski = serde_json::from_str(&json).unwrap();
+        assert_eq!(eski.exe, TEK);
+    }
+
+    #[test]
+    fn only_the_installer_address_is_the_installer() {
+        assert!(kurulum_mu(KURULUM));
+        assert!(!kurulum_mu(TEK));
+        assert!(!kurulum_mu("https://x/Mozaik-Kurulum.exe.html"));
+    }
+
+    #[test]
+    fn a_standalone_copy_never_deletes_anything() {
+        let tmp = Scratch::new("tek-silmez");
+        let simdiki = tmp.exe();
+        let eski = tmp.0.join("Ders-Programi.exe");
+        fs::write(&eski, b"MZ").unwrap();
+        assert_eq!(silinecek_eski(&eski.to_string_lossy(), &simdiki), None);
+    }
+
+    #[test]
+    fn the_installed_copy_removes_only_another_exe() {
+        let tmp = Scratch::new("kurulu-siler");
+        let simdiki = tmp.exe();
+        fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
+        let eski = tmp.0.join("eski yer").join("Ders Programi.exe");
+        assert_eq!(
+            silinecek_eski(&format!("{}\n", eski.to_string_lossy()), &simdiki),
+            Some(eski)
+        );
+        // Itself, a relative path, or something that is not a program: no.
+        assert_eq!(silinecek_eski(&simdiki.to_string_lossy(), &simdiki), None);
+        assert_eq!(silinecek_eski("Ders-Programi.exe", &simdiki), None);
+        let belge = tmp.0.join("plan.json");
+        assert_eq!(silinecek_eski(&belge.to_string_lossy(), &simdiki), None);
     }
 
     #[test]

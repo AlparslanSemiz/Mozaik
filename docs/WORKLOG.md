@@ -616,7 +616,7 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ## 2026-11-15 · Test ve CI bakımı (`bakim/test-ci`)
 
-Denetimin test ve CI bulguları (TODO B7.38–B7.40).
+Denetimin test ve CI bulguları (TODO B7.39–B7.41).
 
 - **Node 26.** Node 25'ten beri `globalThis.localStorage` bir getter ve `--localstorage-file`
   verilmeyince `undefined`; vitest 3'ün jsdom ortamı global'de zaten olan anahtarı kopyalamıyor.
@@ -630,12 +630,23 @@ Denetimin test ve CI bulguları (TODO B7.38–B7.40).
 - **CI.** `e2e`, `e2e-arama` ve `e2e-ek` işleri `~/.cache/ms-playwright`'ı `actions/cache@v6` ile
   önbellekliyor, anahtar `@playwright/test`'in kurulu sürümü. `playwright install` duruyor,
   isabette indirmeden dönüyor. Kazanç beklentisi iş başına 8–9 s; ilk koşu önbelleği yazar.
-- **`otomatik.spec.ts:254`** ölçüldü, değiştirilmedi (TODO B7.40): bugünün 24 koşusunda 2,4–5,8
+- **`otomatik.spec.ts:254`** ölçüldü, değiştirilmedi (TODO B7.41): bugünün 24 koşusunda 2,4–5,8
   dk; `hiz/sat-yayilim`'den sonra medyan 2,8 dk, en yavaşı 420 s sınırının %66'sı (önce %83).
 
 Doğrulama (bu Mac, Node 26.13.1): `tsc --noEmit` 0, `eslint src` 0, `npm run sinir` 0 ihlal,
 `npm run hizli` 1521 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
 Koşulmayan: E2E ve CI'ın önbellek isabeti (dalın CI'ında).
+
+## 2026-11-15 · Açılışta plan dizini ezilmiyor (`fix/kutuphane-acilis`)
+
+Güvenlik ve veri denetiminin bulgusu, doğrulandı: `useStore.ts`'in `initialBox`'ı dizini
+(`ders-programi-planlar`) okuyup koşulsuz geri yazıyordu, ve anahtar boş ya da bozuk okununca
+`parseLibrary` tek planlı varsayılanı veriyordu. Öteki planlar anahtarlarında kalıyor ama
+hiçbir girdi onları göstermiyor, günün yedekleri de tek planla yazılıyordu (TRAPS 108'in boş
+okuması, dizin yarısı). Düzeltme: açılışta `readLibraryAtStart`, deponun `ders-programi-plan-*`
+anahtarlarından dizinde olmayanları "Geri gelen plan N" diye geri koyuyor (`adoptOrphans`).
+Yalnız açılışta: silinmekte olan bir plan bir an ikisinde de yok. Gerileme testi
+`okunamayan.test.tsx`; düzeltme geri alınınca kırmızı (elle mutasyon).
 
 ## 2026-11-15 · Zincir `main`'e: boyut eşiği (`rk2-bozuk-iliski`, PR #22)
 

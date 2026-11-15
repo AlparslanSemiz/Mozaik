@@ -59,7 +59,8 @@ serde = { version = "1", features = ["derive"] }
 sha2 = "0.10"
 
 [dev-dependencies]
-# A recorded manifest read back in update.rs's tests. Already in Cargo.lock.
+# update.rs's tests: a recorded manifest read back, and a 2.2.0 copy still
+# reading the new one. Already in the lock (tauri depends on it); tests only.
 serde_json = "1"
 
 [profile.release]

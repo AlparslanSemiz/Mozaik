@@ -260,6 +260,20 @@ pub fn run() {
                 let _ = pencere.set_focus();
             }
         }))
+        // A standalone copy that just handed over to the installer left its own
+        // path behind (update.rs, `ESKI_KOPYA_NOTU`). Only the installed
+        // program acts on it, and only on a different .exe (`silinecek_eski`).
+        .setup(|app| {
+            if let (Ok(dir), Ok(exe)) = (app.path().app_local_data_dir(), std::env::current_exe()) {
+                let not = dir.join(update::ESKI_KOPYA_NOTU);
+                if let Ok(icerik) = fs::read_to_string(&not) {
+                    if let Some(eski) = update::silinecek_eski(&icerik, &exe) {
+                        update::eski_kopyayi_kaldir(eski, not);
+                    }
+                }
+            }
+            Ok(())
+        })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 kapanis_istendi(window, api);

@@ -150,6 +150,21 @@ describe('okunamayan plan · açılış', () => {
     expect(JSON.parse(localStorage.getItem(BASE_KEY)!).settings.schoolName).toBe('Yeni');
   });
 
+  it('dizin boş okunursa öteki planlar gizlenmiyor: dizin geri kuruluyor, hiçbir plan ezilmiyor', async () => {
+    // TRAPS 108's empty read, the directory half (security review 2026-11-15):
+    // the plans are in their keys, the directory key is gone. The default
+    // one-plan directory used to be written over it, and every other plan was
+    // left in a key nothing pointed at.
+    twoPlans(FULL);
+    localStorage.removeItem(LIBRARY_KEY);
+    const { get, settle } = await mount();
+    settle();
+    const dir = JSON.parse(localStorage.getItem(LIBRARY_KEY)!) as { plans: Array<{ id: string }> };
+    expect(dir.plans.map((p) => p.id)).toEqual(['1', 'zz']);
+    expect(get().plans.library.plans.map((p) => p.id)).toEqual(['1', 'zz']);
+    expect(localStorage.getItem(planKey('zz'))).toBe(FULL);
+  });
+
   it('kontrol: hiç kaydı olmayan ilk açılış şeritsiz, ilk kullanım yazılıyor', async () => {
     const { get, settle } = await mount();
     settle();

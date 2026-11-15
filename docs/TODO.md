@@ -845,6 +845,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [~] **B7.38 Kurulum paketi ve CP-SAT (2026-11-15, DECISIONS).** Yazıldı:
+      `teslim/kurulum-paketi` (NSIS, veri silmeyen kaldırıcı, köprü). Kalan, sırayla:
+      (1) `surum.yml`'i yayınlamadan koşup kurulumun üretildiğini ve kancaların girdiğini
+      görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
+      (3) OR-Tools DLL'leri kuruluma (`bundle.resources`, sabit SHA256), Rust'ta C API
+      (`libloading`), sayfada CP-SAT modeli; CP-SAT yüklenemezse bugünkü arama.
 - [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
       Numarası B7.33–B7.36'dan sonra, çünkü o numaralar `tb8-eksik-plan` ve
       `tb1-dosyadan-ac` dallarında; yeri B7.30'un yanı, çünkü aynı ailenin devamı. Denetimin
@@ -933,20 +939,20 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       tekrarlanan kimlik taşıyan dosyayı "okunamadı" diye reddediyor, paket yolu da aynı kuralla.
       `fuzz.test.ts`'in `wholeness`'ı kimlikleri soruyor (fuzz boş kimliği kendiliğinden buldu)
       ve dört elle yazılmış durum; `fixtures.test.ts`'in fikstürleri hâlâ açılıyor.
-- [x] **B7.38 Bu Mac'te `npm run hizli` kırmızı (2026-11-15, test ve CI denetimi).** Node 26'da
+- [x] **B7.39 Bu Mac'te `npm run hizli` kırmızı (2026-11-15, test ve CI denetimi).** Node 26'da
       depolama testleri ve `rowOrder` jsdom'un `localStorage`'ını görmüyordu (Node 25+ kendi
       global'ini tanımlıyor), `src/agir.test.ts` ise `flock`, `/proc` ve `setsid` istiyor.
       **Yapıldı (2026-11-15, `bakim/test-ci`):** `vite.config.ts` Node 25 ve sonrasında test
       süreçlerine `--no-experimental-webstorage` veriyor, `.nvmrc` 22; `agir.test.ts` Linux dışında
       atlanıyor (CI'da koşuyor). Bu Mac'te `hizli` 1521 geçti, 4 atlandı.
-- [x] **B7.39 Depo hijyeni ve Playwright önbelleği (2026-11-15).** `.gitignore`'da
+- [x] **B7.40 Depo hijyeni ve Playwright önbelleği (2026-11-15).** `.gitignore`'da
       `.claude/worktrees/` ve `.playwright-mcp/` yoktu, `.playwright-mcp/`'nin 2026-08-30'dan kalan
       üç dökümü izleniyordu; CI'ın her E2E işi tarayıcıları baştan indiriyordu (8–9 s).
       **Yapıldı (2026-11-15, `bakim/test-ci`):** ikisi `.gitignore`'da, dökümler izlemeden çıktı
       (diskte duruyor); `ci.yml`'in üç E2E işi `~/.cache/ms-playwright`'ı `@playwright/test`
       sürümü anahtarıyla önbellekliyor. Önbelleğin isabeti dalın ikinci CI koşusunda görülür,
       yazıldı, doğrulanmadı.
-- [ ] **B7.40 `e2e/otomatik.spec.ts:254` en olası kararsız test (2026-11-15).** "Kurulamayan
+- [ ] **B7.41 `e2e/otomatik.spec.ts:254` en olası kararsız test (2026-11-15).** "Kurulamayan
       haftada yolları söylüyor" (`@arama`), kendi sınırı `test.setTimeout(420_000)`. CI'ın
       `e2e-arama` günlüklerinden ölçüldü, 2026-11-15'in 24 koşusu: `hiz/sat-yayilim`'den
       (12:12 UTC) önceki 9 koşuda 2,7–5,8 dk (medyan 5,1, en yavaşı sınırın %83'ü), sonraki 15
