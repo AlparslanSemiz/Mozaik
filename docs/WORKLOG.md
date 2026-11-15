@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
+Son güncelleme: 2026-11-15 (`kullanim/sadelik`, sade ekranın ilk dilimi); öncesi 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -87,7 +87,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
-   KS ve Ö maddelerinin önünde.
+   KS ve Ö maddelerinin önünde. İlk dilimi `kullanim/sadelik`'te (2026-11-15, aşağıdaki girdi);
+   karar isteyen kalanı TODO §8m (SD1–SD6).
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel; rpm 2026-10-10'da bırakıldı, B7.28). B7.22 (Sığdır'ın gün
@@ -250,6 +251,71 @@ e2e/gorunum.spec.ts e2e/izgara.spec.ts` 46/46 (45b'nin sürükleme yerleşim ora
 (`agir.test.ts`: `flock` yok; `linuxKur.test.ts`: zaman aşımı; `emptyStart.test.ts`,
 `otherWindow.test.ts`, `rowOrder.test.tsx`: `localStorage` tanımsız, Node 26) ve aynı beş
 dosya `origin/main`'de de aynı biçimde kırmızı, yani bu makinenin ortamı, değişiklik değil.
+
+## 2026-11-15 · Sade ekranın ilk dilimi (`kullanim/sadelik`)
+
+`main` db869d2'den. **Neden bu iş.** Babanın 1 numaralı isteği (daha az yazı, daha az soru) için
+tam dolu kursla (`src/fixtures/tam-dolu-kurs-dizili.json`) bir kullanılabilirlik ölçümü yapıldı
+(dalın dışında, oturumun scratch'inde). Önerilerinden karar istemeyenler bu dalda, her biri kendi
+commit'inde; kalanı TODO §8m.
+
+**Yapılan.**
+- Çıktı, koyu tema: önizleme kâğıdı koyu `--paper`'ı alıyordu ve kart yazısı (miras `--text`) pastel
+  zeminde 1,91:1'di. `.print-sheet` koyu temada açık paletin değerlerini yeniden tanımlıyor; koyu
+  temanın `--print-line` ve `--print-head-bg` geçersizlemesi kalktı. `yazdir.spec.ts`'in koyu tema
+  testi artık kâğıdın kendisini ölçüyor (açık, çizgi 3:1, en kötü kart 4,5:1, en az bir kart).
+  Basılan kâğıt değişmedi (PDF ve `print` medyasıyla bakıldı).
+- Çıktı, kâğıt: basılan kâğıda açık bir bildirim çıkıyordu ("Yedek yüklendi.", `position: fixed`,
+  her sayfada). `.toasts` `@media print`'te gizli; gerileme testi `yazdir.spec.ts`'te, önce kırmızı.
+- Öneri paneli: yalnız sırada bulunan ilk yol açık, ötekiler "Başka yollar (N)" düğmesinin altında
+  `hidden`. Tek liste, satırlar ailesiyle anahtarlı: arama sürerken sırada daha önde bir yol bulununca
+  eski ilk satır yeniden çizilmeden aşağı iner (açık soruları ve klavye odağı kalır). Katın
+  açıklığı panelin durumunda, her cevap aramayı yeniden başlatınca kapanmıyor. Arama sürerken
+  her yol için bir "aranıyor" satırı yerine saniyeli tek cümle ve bir `<progress>`. Tam dolu kursta
+  bitmiş panel 54 görünen kelime ve 5 düğme, `Kapat` ve kat dahil (rapor: ~195 kelime, 19 düğme);
+  arama 25–35 s.
+  `otomatik.spec.ts`'in uzun testine yalnız katı açan bir adım eklendi.
+- Erişim: Dersler satırındaki haftalık saat kutusu ve bütün `LimitBox`'lar `aria-label` taşıyor
+  (Dersler'de satırın adıyla). `.chip-count` opaklığı kalktı (3,69:1 idi). Tam dolu kursta axe:
+  Dersler · Genel `label` 146 → 0, `label-title-only` 146 → 0, `color-contrast` 16 → 0;
+  Öğretmenler `label-title-only` 54 → 0, `color-contrast` 2 → 0, `label` 36 kaldı (SD6).
+  `erisim.spec.ts`'in `BILINEN`'inde Dersler'in iki satırı silindi.
+- Kontrol · Danışman: aynı türden notlar tek satırda ("5 ders bloklara bölünmüş …: adlar"), tek kalan
+  kendi cümlesiyle. `Advice`'a `who` eklendi (DENETIM KS22, Ö38).
+
+**Yapılmayan.** "Geri al" bildirimi (SD1: `Toasts.tsx` bilerek eylemsiz, geri al yığınına kimlik
+gerekiyor), sınıflarda "Sıkışık" (SD2, karar), plan ve program (SD3, karar), Yerleşemeyen dersler
+(SD4), raporun öteki önerileri (SD5).
+
+**Ölçüm.** `dist/index.html` 1 207 760 bayt, brotli 289,75 kB, `main` (355481a) birleştikten sonra
+(eşikler 1 210 000 ve 290 000, ikisi de altında ama brotli payı 250 B; bir sonraki dal eşiği
+aşabilir).
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`). Düzelen: katın dışından içine geçen
+satır yeniden çiziliyordu (yukarıda), koyu temanın kâğıt kuralı basılan kâğıtta da geçerliydi ve
+`@media print`'in sabitlerini birkaç hex eziyordu (artık `@media screen`), dört bayat yorum ve belge
+cümlesi, `gercek-exe.spec.ts`'te ölü `.suggestion-pending` seçicisi. Bırakılan: Danışman başlığının not
+sayısını sayması (satır değil; not sayısı doğru bilgi), toplanan cümlede kişiye özel sayının
+kaybolması (Ö38'in bilinçli bedeli), `exe.spec.ts` farkı (`main`'den gelen birleştirme, bu dalın değil).
+
+**Koşulan.** `tsc`, `eslint src`, `npm run sinir` yeşil; `npm run hizli` 1525 testin 1514'ü geçti, 11
+kırmızı dört dosyada (`agir.test.ts`: bu Mac'te `flock` yok; `emptyStart`, `otherWindow`, `rowOrder`:
+aynı 11'i `origin/main`'in temiz kopyasında da kırmızı, Node 26'nın `localStorage`'ı ile ilgili gibi,
+ölçülmedi); `size-limit` yeşil; Playwright `yazdir`, `kontrol`, `liste`, `erisim`, `metin` 78/78,
+`otomatik` 15/15 (uzun test 2,3 dk). `scripts/agir.sh` bu makinede koşmuyor (`flock` yok), Playwright
+doğrudan ve tek oturumda koşuldu. **Koşulmayan.** Ana E2E'nin geri kalanı, WebKit, gerçek exe (CI'da).
+
+## 2026-11-15 · Güvenlik sertleştirmesi (`guvenlik/sertlestirme`, B7.39)
+
+`teslim/kurulum-paketi`'nden (PR #20) açıldı, ondan sonra birleşir. Güvenlik ve veri
+denetiminin küçük maddeleri, her biri kendi commit'inde ve testiyle: klasör yazımında
+`sync_all` (V2), boyut 0'ın reddi (G4), `.eski`'nin sayfa yüklenince silinmesi (V9;
+kaynaktan okuyan test, çağrı `run`'ın başına geri taşınınca kırmızı ölçüldü), `remove_file`'ın
+yalnız günlük yedek adı (G7), `.yeni` ve kurulumun atomik yazımı (V10), `eski-kopya.txt`
+sınırının testleri (V8), action'ların SHA ile sabitlenmesi (G5) ve Dependabot'ta cargo.
+Capability ve CSP değiştirilmedi, gerekçe ve öneri TODO B7.39'da. Koşulan: `cargo test`
+(macOS), `cargo clippy` (iki eski uyarı, bu dalın değil), `tsc --noEmit`, `kontrat`, `surum`
+ve `docs` testleri. Windows'ta ve gerçek exe'de koşulmadı.
 
 ---
 
@@ -674,6 +740,29 @@ Konsol hatası yok.
 kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde (CI'da).
 
 ---
+
+## 2026-11-15 · Test ve CI bakımı (`bakim/test-ci`)
+
+Denetimin test ve CI bulguları (TODO B7.39–B7.41).
+
+- **Node 26.** Node 25'ten beri `globalThis.localStorage` bir getter ve `--localstorage-file`
+  verilmeyince `undefined`; vitest 3'ün jsdom ortamı global'de zaten olan anahtarı kopyalamıyor.
+  `emptyStart`, `otherWindow` ve `rowOrder` bu yüzden kırmızıydı (veri kaybı sınıfının gerileme
+  testleri dahil). `vite.config.ts` Node ≥ 25'te `execArgv`'ye
+  `--no-experimental-webstorage` veriyor, Node 22'de (CI, `.nvmrc`) hiçbir şey değişmiyor.
+- **`agir.test.ts`** `describe.skipIf(process.platform !== 'linux')`: betik `flock`, `/proc`,
+  `setsid` istiyor, macOS'ta test aracın eksikliğini ölçüyordu. CI Linux, orada koşmaya devam.
+- **Hijyen.** `.gitignore`'a `.claude/worktrees/` ve `.playwright-mcp/`; üç eski döküm
+  `git rm --cached` ile izlemeden çıktı.
+- **CI.** `e2e`, `e2e-arama` ve `e2e-ek` işleri `~/.cache/ms-playwright`'ı `actions/cache@v6` ile
+  önbellekliyor, anahtar `@playwright/test`'in kurulu sürümü. `playwright install` duruyor,
+  isabette indirmeden dönüyor. Kazanç beklentisi iş başına 8–9 s; ilk koşu önbelleği yazar.
+- **`otomatik.spec.ts:254`** ölçüldü, değiştirilmedi (TODO B7.41): bugünün 24 koşusunda 2,4–5,8
+  dk; `hiz/sat-yayilim`'den sonra medyan 2,8 dk, en yavaşı 420 s sınırının %66'sı (önce %83).
+
+Doğrulama (bu Mac, Node 26.13.1): `tsc --noEmit` 0, `eslint src` 0, `npm run sinir` 0 ihlal,
+`npm run hizli` 1525 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
+Koşulmayan: E2E ve CI'ın önbellek isabeti (dalın CI'ında).
 
 ## 2026-11-15 · Açılışta plan dizini ezilmiyor (`fix/kutuphane-acilis`)
 

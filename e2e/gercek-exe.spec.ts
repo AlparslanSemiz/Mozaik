@@ -448,7 +448,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       .poll(
         () =>
           exe.oturum.js<number>(
-            `return document.querySelectorAll('.suggestion-pending, .suggestion-title .hint').length;`,
+            `return document.querySelectorAll('.suggestion-title .hint').length;`,
           ),
         { timeout: 240_000, intervals: [2_000] },
       )

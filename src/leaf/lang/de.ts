@@ -1046,6 +1046,12 @@ const DE: Sozluk = {
     "{kim} ist nur an {acik} Tagen verfügbar, aber ein Fach muss {n} Mal pro Woche gelegt werden; es kann an einem Tag zweimal landen.",
   "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.":
     "{ders} ist in {n} eigenständige Blöcke aufgeteilt und lässt keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann.",
+  "{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:":
+    "{n} Fächer müssen öfter pro Woche gelegt werden, als es Tage gibt; jedes erscheint an mindestens einem Tag zweimal:",
+  "{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:":
+    "{n} Lehrkräfte haben weniger freie Tage, als eines ihrer Fächer braucht; es kann an einem Tag zweimal landen:",
+  "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:":
+    "{n} Fächer sind in Blöcke aufgeteilt und lassen keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann:",
 
   // src/import.ts
   '{n}. satır: "{ad}" iki kez geçiyor, biri alındı.':
@@ -1186,8 +1192,6 @@ const DE: Sozluk = {
     "Blockform",
   "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
     "Wählen Sie einen Weg; jeder reicht für sich allein, die Stunden der Klassen bleiben unberührt.",
-  "{yol}: aranıyor…":
-    "{yol}: wird gesucht…",
   "Uygula":
     "Anwenden",
   "Uygula, baştan diz":
@@ -1198,6 +1202,12 @@ const DE: Sozluk = {
     "Zurücknehmen: {ne}",
   "(daha iyisi aranıyor)":
     "(eine bessere wird gesucht)",
+  "Başka yollar da aranıyor… {sure} sn":
+    "Es wird auch nach anderen Wegen gesucht… {sure} s",
+  "Aramanın ilerlemesi":
+    "Fortschritt der Suche",
+  "Başka yollar ({n})":
+    "Andere Wege ({n})",
   "(inceltilmedi)":
     "(nicht verfeinert)",
   "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":

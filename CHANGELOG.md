@@ -25,12 +25,17 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- When "Fill automatically" gets stuck, the panel shows only the first way the week can be built; the others fold under "Other ways (N)". While it searches, one line with the seconds and a progress bar replaces the row per way.
+- Check → Advisor says a repeated note once, with the lessons or teachers it is about listed after it, instead of the same sentence for each.
+- The weekly-hours and daily-limit boxes in the lists now have names for screen readers, and the counts on the filter chips are easier to read.
 - The notes in Settings are now as large as the body text.
 - A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
 - Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
 
 ### Fixed
 
+- In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.
+- A notice that happened to be on screen ("Backup loaded.") no longer comes out on every printed page.
 - If the list of plans read empty when the program opened, it used to be replaced by a single "1. plan", and every other plan, though still saved, could no longer be opened. The program now finds those plans and lists them again as "Recovered plan 1, 2, …".
 - When two lessons that must not share a day are both pinned on the same day, "Fill automatically" no longer searches for a minute and then shows an empty list of ways: the panel says at once which two lessons are pinned and that one of them has to move, and Check says it too.
 - The program now checks that a downloaded update is exactly the published file (its SHA-256 digest), not only that it is a whole Windows program of the right size. A published version without a digest is not downloaded; the program says where to get it by hand.

@@ -578,16 +578,6 @@
   --can-warn-bg: #443a23;
   --can-no-bg: #3f2728;
 
-  /* PRINT PREVIEW, on screen. These two are the pair the dark block once
-     forgot: the grid line stayed #444 and the header fill #eee while the ink
-     above inherited --text, i.e. white on near-white, about 1.1:1. It printed
-     correctly the whole time, which is why it survived. `@media print` pins
-     the paper values so this override cannot reach the printer.
-     The line was raised with the darkening: a table rule is non-text, so 3:1
-     is its floor, and against the old paper it measured 2.02. It is 3.01. */
-  --print-line: #5a6673;
-  --print-head-bg: #20262d;
-
   /* NOT re-searched with the light six, and that is a measurement rather than
      an omission: the dark set's worst pair is already 20.7 (the light one's
      was 16.0), and its hues — 225, 263, 289, 321 — land on the new light hues
@@ -1878,6 +1868,31 @@ table.list tbody tr {
 .suggestion-title {
   font-weight: 600;
   min-width: 16em;
+}
+
+/* Only the first way is open; the rest are `hidden` under "Başka yollar (N)".
+   The toggle's row is a block, not a list item, so it takes no number and the
+   ways keep theirs (1, 2, 3 …). */
+.suggestion-more {
+  display: block;
+}
+
+.suggestion-more-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+}
+
+/* The search in one line: the sentence with its seconds and this bar,
+   rather than a row per way still being looked for. */
+.suggestion-progress {
+  width: 10em;
+  height: .6em;
+  accent-color: var(--accent);
 }
 
 .suggestion-detail {
@@ -5027,6 +5042,26 @@ table.availability td.closed {
   grid-template: 1fr / 1fr;
 }
 
+/* THE SHEET IS LIGHT IN BOTH THEMES (LAYOUT: "Kâğıt fiziksel. Açık palet
+   kullanır"). It used to take the dark --paper, and the cards' ink, which is
+   inherited --text, landed light grey on the pastel palette: 1.91:1 at the
+   fixture's size (2026-11-15). The values are the light theme's own, so the
+   dark preview is the same sheet as the light one. `color` is restated here
+   because an inherited colour arrives already computed from <body>. Screen
+   only: on paper the `@media print` pins below speak alone. */
+@media screen {
+:root[data-theme="dark"] .print-sheet {
+  color-scheme: light;
+  --paper: #ffffff;
+  --text: #131a25;
+  --muted: #505763;
+  --line: #c6cdd7;
+  --print-line: #444;
+  --print-head-bg: #eee;
+  color: var(--text);
+}
+}
+
 /* ONE TIMETABLE. Not renamed to `.print-plan` even though that is what it is:
    the tick lists, "3 sınıf = 3 sayfa" and half the print suite count
    `.print-page`, and a page IS one timetable at the setting they all run at.
@@ -5402,11 +5437,10 @@ table.bell-preview td {
     --band: #ffffff;
     --zebra: #ffffff;
 
-    /* Pinned here for the same reason as everything above, and this pair is
-       not optional: the dark theme now overrides them so the PREVIEW is
-       readable on a dark screen, and without these two lines that override
-       would follow the sheet into the printer — a grey header band and a pale
-       grid on paper. The two values are the light theme's own. */
+    /* Pinned here for the same reason as everything above. The dark theme
+       sets them only on the preview `.print-sheet`, on screen and to the light
+       values; a pin keeps the paper's grid the light theme's own whatever a
+       future theme does. */
     --print-line: #444;
     --print-head-bg: #eee;
 
@@ -5423,6 +5457,10 @@ table.bell-preview td {
   .topbar,
   .pool,
   .reason-bar,
+  /* A toast is fixed, so Chrome prints it on EVERY sheet. "Yedek yüklendi"
+     stays six seconds, and a print started inside them carried it onto the
+     paper (seen 2026-11-15 while checking the dark-theme sheet). */
+  .toasts,
   .no-print {
     display: none !important;
   }
@@ -6203,13 +6241,13 @@ input.search-box:focus-visible {
   font-weight: 600;
 }
 
+/* The count is set apart by weight, not by fading it: at opacity .75 the
+   chip's --muted came out 3.69:1 on --paper-sunk (13 px, under AA's 4.5),
+   measured on the full course 2026-11-15. Full ink is the chip's own colour,
+   which holds AA on both the resting and the pressed chip. */
 .chip-count {
   font-variant-numeric: tabular-nums;
-  opacity: .75;
-}
-
-.chip[aria-pressed='true'] .chip-count {
-  opacity: .85;
+  font-weight: 400;
 }
 
 /* The sort picker sizes itself from its own longest option, not from the

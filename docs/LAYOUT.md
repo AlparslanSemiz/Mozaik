@@ -210,11 +210,15 @@ B5.10): hafta hangi yollarla kurulur. Arama kendiliğinden başlar, sürerken pa
 olmaması istenen iki ders aynı güne sabitlenmişse arama başlamaz: panel bunu tek
 cümleyle, gövde yazı boyunda söyler, Kontrol'ün kural ihlalleri paneli de bir cümleyle
 (TODO RK2). Bir yol
-seçilmez, hepsi gösterilir ve seçen babadır. Yolların yeri sabittir, sırası
+seçilmez, seçen babadır, ama okunacak yazı az olsun diye yalnız ilki açık durur:
+öteki yollar "Başka yollar (N)" altında katlıdır ve bir tıklamayla açılır
+(2026-11-15, babanın "daha az yazı" isteği). Yolların sırası sabittir ve
 kullanıcının kendi listesi: öğretmenin zaten geldiği güne saat, en az saat (yan
 yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi başka
-öğretmene vermek, blok şekli, haftalık saat. Aranan yol satırını "…: aranıyor…"
-diye tutar, bulunan onun yerine oturur; bir şey bulamayan yolun satırı kalkar.
+öğretmene vermek, blok şekli, haftalık saat; açık duran, bu sırada bulunan ilk
+yoldur. Arama sürerken panel her yol için bir "aranıyor" satırı değil, saniyesiyle
+tek bir cümle ("Nasıl kurulacağı aranıyor…", bir yol bulununca "Başka yollar da
+aranıyor…") ve bir ilerleme çubuğu gösterir; bir şey bulamayan yol hiç görünmez.
 Bulunan her yol tek satırdır: babanın bir öğretmene söyleyeceği cümle ("KY
 Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Izgarada göster`,
 `Uygula` ve `Sorular`. Bir yol ilk bulduğunu hemen gösterir ve arama sürerken

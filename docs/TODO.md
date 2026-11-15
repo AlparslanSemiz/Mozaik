@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu), kullanılabilirlik raporunun bıraktıkları (§8m) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -855,6 +855,33 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
       (3) OR-Tools DLL'leri kuruluma (`bundle.resources`, sabit SHA256), Rust'ta C API
       (`libloading`), sayfada CP-SAT modeli; CP-SAT yüklenemezse bugünkü arama.
+- [~] **B7.39 Güvenlik sertleştirmesi (2026-11-15, `guvenlik/sertlestirme`, #20'nin üstünde).**
+      Güvenlik ve veri denetiminin küçük maddeleri. **Yapılan:** `write_in` geçici dosyayı
+      `sync_all` ile diske yazıp yeniden adlandırıyor, Unix'te klasörü de (V2); `verify`
+      `boyut == 0`'ı reddediyor (G4); `.eski` yeni sürümün sayfası yüklenince siliniyor (V9);
+      `remove_file` yalnız `ders-programi-YYYY-AA-GG.json` siliyor (G7); `.yeni` ve kurulum
+      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun (`ESKI_KOPYA_NOTU`) sınırının testleri (V8); üçüncü
+      taraf action'lar SHA ile sabit (G5); Dependabot'ta cargo. Hepsi `cargo test`'te, Windows'ta
+      koşulmadı. **Kalan, karar ya da ölçüm isteyen:**
+      (1) **Capability (G6).** `core:default` yerine yalnız `core:event:allow-listen` ve
+      `core:event:allow-unlisten` yeter gibi görünüyor (sayfa yalnız `core.invoke` ve
+      `event.listen` kullanıyor, özel komutlar capability'ye bağlı değil). Değiştirilmedi:
+      yanlışsa kapanış el sıkışması (`kapaniyor`) sessizce düşer ve pencere 5 s sonra son
+      düzenlemeyi yazmadan kapanır, bunu ölçen bir CI testi yok. Önce gerçek exe'de (`gercek-exe`
+      süiti, kapanış testiyle) denenmeli; sonra `build.rs`'e `AppManifest::commands` ve
+      capability'ye yalnız kullanılan `allow-*` izinleri.
+      (2) **CSP (G4).** `tauri.conf.json` `csp: null` bilerek kaldı. Öneri:
+      `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'
+      data: blob:; worker-src blob:; connect-src ipc: http://ipc.localhost; object-src 'none';
+      base-uri 'none'; form-action 'none'`. Risk: tek dosyalı derleme betiği satır içi
+      koyuyor; Tauri yalnız kendi eklediklerine hash basıyorsa sayfa açılmaz. Exe'de bir kez
+      açılıp konsolda CSP ihlali aranmalı, gerekiyorsa satır içi betiğin hash'i derlemede
+      üretilmeli.
+      (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
+      Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
+      (4) `apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).
+      (5) G1 (imza), G2 (iş akışı izinleri, CLI sabitleme), V1, V3–V7 denetim raporunda, bu dala
+      girmedi.
 - [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
       Numarası B7.33–B7.36'dan sonra, çünkü o numaralar `tb8-eksik-plan` ve
       `tb1-dosyadan-ac` dallarında; yeri B7.30'un yanı, çünkü aynı ailenin devamı. Denetimin
@@ -943,6 +970,27 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       tekrarlanan kimlik taşıyan dosyayı "okunamadı" diye reddediyor, paket yolu da aynı kuralla.
       `fuzz.test.ts`'in `wholeness`'ı kimlikleri soruyor (fuzz boş kimliği kendiliğinden buldu)
       ve dört elle yazılmış durum; `fixtures.test.ts`'in fikstürleri hâlâ açılıyor.
+- [x] **B7.39 Bu Mac'te `npm run hizli` kırmızı (2026-11-15, test ve CI denetimi).** Node 26'da
+      depolama testleri ve `rowOrder` jsdom'un `localStorage`'ını görmüyordu (Node 25+ kendi
+      global'ini tanımlıyor), `src/agir.test.ts` ise `flock`, `/proc` ve `setsid` istiyor.
+      **Yapıldı (2026-11-15, `bakim/test-ci`):** `vite.config.ts` Node 25 ve sonrasında test
+      süreçlerine `--no-experimental-webstorage` veriyor, `.nvmrc` 22; `agir.test.ts` Linux dışında
+      atlanıyor (CI'da koşuyor). Bu Mac'te `hizli` 1525 geçti, 4 atlandı.
+- [x] **B7.40 Depo hijyeni ve Playwright önbelleği (2026-11-15).** `.gitignore`'da
+      `.claude/worktrees/` ve `.playwright-mcp/` yoktu, `.playwright-mcp/`'nin 2026-08-30'dan kalan
+      üç dökümü izleniyordu; CI'ın her E2E işi tarayıcıları baştan indiriyordu (8–9 s).
+      **Yapıldı (2026-11-15, `bakim/test-ci`):** ikisi `.gitignore`'da, dökümler izlemeden çıktı
+      (diskte duruyor); `ci.yml`'in üç E2E işi `~/.cache/ms-playwright`'ı `@playwright/test`
+      sürümü anahtarıyla önbellekliyor. Önbelleğin isabeti dalın ikinci CI koşusunda görülür,
+      yazıldı, doğrulanmadı.
+- [ ] **B7.41 `e2e/otomatik.spec.ts:254` en olası kararsız test (2026-11-15).** "Kurulamayan
+      haftada yolları söylüyor" (`@arama`), kendi sınırı `test.setTimeout(420_000)`. CI'ın
+      `e2e-arama` günlüklerinden ölçüldü, 2026-11-15'in 24 koşusu: `hiz/sat-yayilim`'den
+      (12:12 UTC) önceki 9 koşuda 2,7–5,8 dk (medyan 5,1, en yavaşı sınırın %83'ü), sonraki 15
+      koşuda 2,4–4,6 dk (medyan 2,8, ortalama 2,95, en yavaşı %66). Hız dalı payı açtı ama
+      süre hâlâ iki kat oynuyor. Test değiştirilmedi. Sıradaki: birkaç gün daha ölç; en yavaşı
+      %75'i geçerse senaryo küçük bir dünyaya iner ya da test `haftalik.yml`'e gider ve push'ta
+      küçük bir ikizi koşar; `setTimeout` büyütülmez.
 
 ---
 
@@ -1267,7 +1315,10 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       için etiketsiz. Muhtemel çare `aria-label` ya da `aria-labelledby` ile sütun
       başlığına bağlamak. Ölçülmeden yazılmaz: bu kadar çok kutuya etiket eklemek
       `metin.spec.ts`'in taradığı metni de değiştirebilir.
-- [ ] **`label-title-only` · Dersler'de 6 kutu.** Etiketi yalnız `title`'da. Ciddi
+      **Dersler yapıldı (2026-11-15, `kullanim/sadelik`):** haftalık saat kutusu satırın adıyla
+      adlı, `metin.spec.ts` yeşil. Okul'daki ve Kurallar'daki kutular açık (§8m SD6).
+- [x] **`label-title-only` · Dersler'de 6 kutu.** Yapıldı (2026-11-15, `kullanim/sadelik`): her
+      `LimitBox` bir `aria-label` taşıyor (verilmezse `title`'ı), Dersler'de satırın adıyla. Ciddi
       seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
       için görünür.
 - [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
@@ -1875,6 +1926,49 @@ testi o commit'te sıradan bir teste döner.
       `src/pure/io/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
       delik daha buldu ve aynı dalda kapandı: `state`'i nesne olmayan girdi okunamayan sayılıyor,
       depo doluyken hiçbir plan yazılamazsa buradaki planlar silinmiyor; B7.34–B7.36 açık.
+
+### 8m · Kullanılabilirlik raporunun bıraktıkları (2026-11-15)
+
+Babanın 1 numaralı isteği (§0: daha az yazı, daha az soru) için tam dolu kursla
+(`src/fixtures/tam-dolu-kurs-dizili.json`) yapılan ölçüm. Kararsız beşi `kullanim/sadelik`'te
+yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâğıda çıkması, öneri
+panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
+`.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
+
+- [ ] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Ders silme
+      (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
+      sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
+      `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın
+      başka bir düzenlemede ilerler; yanlış değişikliği sessizce geri alan bir düğme hiç
+      olmamasından kötü"). Önce yığının bir adımını kimlikle bilmek (bildirimin düğmesi yalnız
+      o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
+      (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
+      Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
+- [ ] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Tam dolu kursta 20
+      sınıfın 20'si sarı "Sıkışık" (`capacityLevel`, eşik yükün açık saate oranı 0,85). Dershanede
+      eşitlik olağan. Rapor: yalnız aşan satır rozet alsın, Kontrol'deki "Haftanın doluluğu %23"
+      ve "Boş kalan sınıf saati 1110" kalksın. Yapılmadı, çünkü bir karar: eşik Kontrol'ün
+      hükmünü, listelerin "Yük durumu" süzgecini ve renkleri birlikte değiştiriyor, ve
+      öğretmen ile derslik satırlarında aynı kural mı kalacak, ayrı mı, söylenmedi.
+      Öneri: sınıflarda "Sıkışık" hiç çıkmasın (yalnız aşınca "İmkânsız"), öğretmen ve
+      derslikte bugünkü gibi kalsın.
+- [ ] **SD3 · Plan ve program iki kavram (rapor öneri 4).** Üst çubukta "1. plan", şeritte
+      "Program 1". Babaya tek kavram görünsün mü, LAYOUT bunun tersini gerekçeli seçmiş. Karar
+      sende.
+- [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
+      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
+      ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama
+      "örnek sebep"in ne söyleyeceği bir karar (bugün ilk kapalı hücre, bilgi taşımıyor).
+- [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
+      yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
+      Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
+      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
+      klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
+- [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
+      kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
+      e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
+      36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).
+
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.

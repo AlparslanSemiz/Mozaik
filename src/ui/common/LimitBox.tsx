@@ -13,11 +13,15 @@ export default function LimitBox({
   fallback,
   onSet,
   title,
+  label,
 }: {
   value: number | null;
   fallback: number;
   onSet: (next: number | null) => void;
   title: string;
+  /** The box's name for a screen reader; the title when not given. A title
+   *  alone names it for the mouse only (axe `label-title-only`). */
+  label?: string;
 }) {
   const t = useT();
   return (
@@ -27,6 +31,7 @@ export default function LimitBox({
       max={16}
       className="num"
       title={title}
+      aria-label={label ?? title}
       placeholder={fallback > 0 ? String(fallback) : t('yok')}
       defaultValue={value ?? ''}
       onBlur={(e) => {

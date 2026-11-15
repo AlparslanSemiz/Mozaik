@@ -90,6 +90,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
           min={1}
           max={40}
           className="num"
+          aria-label={`${rowName} · ${t('Haftalık saat')}`}
           defaultValue={x.weeklyHours}
           onBlur={(e) =>
             change((d) =>
@@ -114,6 +115,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
           value={x.maxPerDay}
           fallback={group?.maxSameLessonPerDay ?? state.settings.limits.maxSameLessonPerDay}
           title={t('Bu ders bir günde en fazla kaç saat')}
+          label={`${rowName} · ${t('Bu ders bir günde en fazla kaç saat')}`}
           onSet={(v) => change((d) => updateLesson(d, x.id, { maxPerDay: v }))}
         />
       </td>
