@@ -430,7 +430,9 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
 
       // A row goes from the middle, and comes back to the same place.
       await rows.nth(2).getByRole('button', { name: 'Sil', exact: true }).click();
-      await answerDialog(page);
+      // Teachers and lessons go at once with a "Geri al" notice (SD1); a class
+      // or a room still asks first.
+      if (l.ad === 'Sınıflar' || l.ad === 'Derslikler') await answerDialog(page);
       await expect(rows).toHaveCount(total - 1);
       await check('silmeden sonra');
       await page.locator('body').press('Control+z');

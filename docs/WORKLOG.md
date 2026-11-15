@@ -54,8 +54,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    durdurur (bilerek). Anahtarın gizli yarısı yalnız `~/.config/mozaik-imza/` (600); yedeklenmeli,
    kaybolursa dağıtılmış kopyalar yeni sürümü reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
 2. SD3: plan ve program tek kavram mı (TODO §8m).
-3. PR'sız eski dallar: `zebra-liste` (12 commit), `dal-temizlik` (11), `ruflo/kurulum` (11,
-   Alp'in deny testi), `birlesme-sonrasi` (3), `ozellik/belge-temizlik` (3); birleşsin mi silinsin mi.
+3. Eski dallardan yalnız `ruflo/kurulum` kaldı (11 commit): kalıcı Claude hook'ları kuruyor ve
+   `.mcp.json`'ı değiştiriyor, Alp onaylamadan birleşmez. Öteki dördü `eski/birlestirme`'de
+   `main`'e girdi (aşağıda).
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
 
@@ -69,6 +70,23 @@ weeklyHours) eski formülle ve ikinci bakışa girmiyor.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Eski dallar birleşti (`eski/birlestirme`)
+
+`birlesme-sonrasi` ve `ozellik/belge-temizlik` (yalnız belgeler, `main`'in hâli korunarak),
+`dal-temizlik` (`npm run dal-temizle`, `scripts/dal-plan.mjs`, 13 test) ve `zebra-liste`
+(her listede zebra, 7:1, üstüne gelme halkası) tek dalda. Çakışmalar: `dal-temizlik`'in
+tuzakları 153 ve 154 `main`'in 153'üyle çakıştı, 154 ve 155 oldu; B7.38'in test yolları taşınmış
+yerlerine; `e2e/helpers.ts` yeni `leaf/model` ve `pure/worlds` yollarıyla. `zebra.spec.ts`'in
+iki varsayımı `main`'de değişmişti: öğretmen ve ders artık sormadan siliniyor ("Geri al"
+bildirimi), sınıf ve derslik hâlâ soruyor; Danışman aynı türden notları tek satırda topladığı
+için `listWorld`'e üçüncü bir tür (tekli saati olmayan blok ders) eklendi.
+
+**Koşulan.** `tsc` (uygulama ve e2e), `npm run hizli` (1561 geçti, 4 atlandı), eslint,
+`src/docs.test.ts`, `npx vite build`, `boyut` (brotli 287,19 kB, sınır 292), `zebra.spec.ts`
+67/67. Bütün E2E CI'da.
+
+---
 
 ## 2026-11-15 · Önceki 'Şu an' (2026-11-15 akşamına kadarki hâli, olduğu gibi)
 

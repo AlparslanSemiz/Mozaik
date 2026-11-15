@@ -478,6 +478,11 @@ export function listWorld(): State {
   for (let i = 0; i < 4; i++) {
     lessons.push({ id: `gun${i}`, classId: 's506', teacherId: `o${short[i]}`, weeklyHours: 3 });
   }
+  // A third kind of advice, since the advisor folds notes of one kind into one
+  // row: a block lesson that leaves no single hour to move.
+  teachers.push({ id: 'oHH', short: 'HH' });
+  classes.push({ id: 's507', name: '507', roomId: 'dC' });
+  lessons.push({ id: 'blok', classId: 's507', teacherId: 'oHH', weeklyHours: 6, blockSize: 3 });
   const world = makeWorld({
     days: 2,
     hours: 4,
