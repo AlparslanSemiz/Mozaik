@@ -24,8 +24,25 @@ updates:
       prefix: 'Bağımlılık'
     labels: ['bağımlılık']
 
+  # Exe'nin Rust bağımlılıkları (tauri, reqwest, sha2...). Yayınlanan programa
+  # giren kod bu, yani npm'deki geliştirme araçlarından daha önemli; aylık, tek
+  # PR'da gruplu, ana sürümler ayrı (güvenlik denetimi 2026-11-15, B1).
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      kucuk-surumler:
+        patterns: ['*']
+        update-types: [minor, patch]
+    commit-message:
+      prefix: 'Bağımlılık'
+    labels: ['bağımlılık']
+
   # İş akışlarının kendi eylemleri de bağımlılık: `actions/checkout@v4` bir gün
-  # eskir ve bunu kimse fark etmez.
+  # eskir ve bunu kimse fark etmez. Üçüncü taraf eylemler tam commit SHA'sıyla
+  # sabit (yanında sürüm yorumu); Dependabot SHA'yı ve yorumu birlikte günceller.
   - package-ecosystem: github-actions
     directory: /
     schedule:
