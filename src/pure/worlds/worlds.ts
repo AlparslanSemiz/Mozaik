@@ -952,7 +952,7 @@ export const WORLDS: SolverWorld[] = [
     name: 'ogretmen-hafta-kapali',
     note: 'Bir öğretmenin bütün haftası kapalı; ötekinin dersleri yine dizilir.',
     state: ogretmenHaftaKapali(),
-    want: { solved: false, reasonLike: /müsait değil/ },
+    want: { solved: false, reasonLike: /\d+ saat ders, 0 müsait saat; \d+ saat açılmalı/ },
   },
   {
     name: 'sinif-kapali-saatler',

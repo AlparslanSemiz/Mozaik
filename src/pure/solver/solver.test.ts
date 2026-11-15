@@ -286,7 +286,7 @@ describe('solve — yerleşmişleri koruma', () => {
 });
 
 describe('solve — tıkanma', () => {
-  it('sığmayan yükte tıkanıyor ve sebebini blocker cümlesiyle söylüyor', () => {
+  it('sığmayan yükte tıkanıyor ve sebebini açığın kendisiyle söylüyor', () => {
     let d = build();
     // AV cannot come at all: x2 has nowhere to go.
     for (let g = 0; g < 2; g++) {
@@ -299,7 +299,9 @@ describe('solve — tıkanma', () => {
     const stuck = result.stuck.find((x) => x.lessonId === 'x2')!;
     expect(stuck.missing).toBe(2);
     expect(stuck.name).toContain('511');
-    expect(stuck.reason).toBe('AV Pazartesi 1 saatinde müsait değil');
+    // The shortfall, not one closed hour of it (audit 2026-11-16): opening
+    // "Pazartesi 1" alone would not be enough.
+    expect(stuck.reason).toBe('AV: 2 saat ders, 0 müsait saat; 2 saat açılmalı');
 
     // What DID fit is still there and still legal.
     expectLegal(result.state);
@@ -634,3 +636,92 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
   }
 });
 import { activeProgram, blankProgram, replaceActiveGrid } from '../grid/programs';
+
+// ---------------------------------------------------------------------------
+// The improvement pass on the real weeks (improve.ts, 2026-11-16), judged by
+// the independent oracle. The small and random weeks are in improve.test.ts.
+
+function roboders(): State {
+  const d = kurs();
+  const unavailable = { ...d.unavailable };
+  for (const short of ['Ö6', 'Ö15']) {
+    for (let h = 0; h < 12; h++) delete unavailable[`${teacherId(d, short)}|4|${h}`];
+  }
+  for (const h of [0, 1]) delete unavailable[`${teacherId(d, 'Ö1')}|5|${h}`];
+  const teachers = d.teachers.map((x) =>
+    x.short === 'Ö1' ? { ...x, limits: { ...x.limits, maxPerDay: 9 } } : x,
+  );
+  return { ...d, unavailable, teachers };
+}
+
+function emptied(d: State): State {
+  return replaceActiveGrid(d, { placements: {}, pinned: {} });
+}
+
+describe('iyileştirme — gerçek haftalar', () => {
+  for (const [name, make] of [
+    ['babanın haftası', () => emptied(roboders())],
+    ['örnek okul', () => emptied(sampleState())],
+  ] as const) {
+    it(`${name}: kural çiğnemeden öğretmen boşluğunu azaltıyor`, () => {
+      const d = make();
+      const before = solve(d, { keepPlaced: false, improve: false });
+      const after = solve(d, { keepPlaced: false });
+      const qb = quality(before.state);
+      const qa = quality(after.state);
+      console.log(`[ölçüm] ${name}: önce ${JSON.stringify(qb)}, sonra ${JSON.stringify(qa)}`);
+      expect(after.placedBlocks).toBe(before.placedBlocks);
+      expect(hardBreaches(after.state)).toEqual([]);
+      expect(compareQuality(qa, qb)).toBeLessThan(0);
+      // [uyarı, yığılma, öğretmen boşluğu, ...]: measured 151 → 114 and 271 → 61.
+      expect(qa[2]!).toBeLessThan(qb[2]!);
+    }, 60_000);
+  }
+
+  it('Başka bir dizilim: her tohum başka, aynı tohum aynı hafta', () => {
+    const d = emptied(sampleState());
+    const weeks = [0, 1, 2].map((seed) => solve(d, { keepPlaced: false, seed }).state);
+    for (const w of weeks) expect(hardBreaches(w)).toEqual([]);
+    expect(cellsChanged(weeks[0]!, weeks[1]!)).toBeGreaterThan(100);
+    expect(cellsChanged(weeks[1]!, weeks[2]!)).toBeGreaterThan(100);
+    const again = solve(d, { keepPlaced: false, seed: 1 }).state;
+    expect(cellsChanged(again, weeks[1]!)).toBe(0);
+  }, 60_000);
+
+  it('bir ders değişince Otomatik diz haftanın çoğunu yerinde bırakıyor', () => {
+    // The lesson's split changes, so its hours go back to the pool and the
+    // kept week has no room for a double: "Otomatik diz" lays the unpinned week
+    // out again with itself as the hint.
+    const week = solve(emptied(sampleState()), { keepPlaced: false }).state;
+    const edited = updateLesson(week, 'd1', { blocks: [2] });
+    const strict = solve(edited, { keepPlaced: true });
+    const relaid = solve(edited, { keepPlaced: true, relay: true });
+    const fresh = solve(edited, { keepPlaced: false });
+    const total = Object.keys(activeProgram(week).placements).length;
+    console.log(
+      `[ölçüm] tek ders değişince: katı ${strict.phase}, yeniden dizince ` +
+        `${cellsChanged(week, relaid.state)}/${total} hücre ` +
+        `(${relaid.relaid ?? 0} saat yer değişti), baştan dizince ${cellsChanged(week, fresh.state)}`,
+    );
+    expect(strict.phase).toBe('stuck');
+    expect(relaid.phase).toBe('solved');
+    expect(hardBreaches(relaid.state)).toEqual([]);
+    expect(relaid.relaid ?? 0).toBeGreaterThan(0);
+    expect(cellsChanged(week, relaid.state)).toBeLessThan(total / 10);
+    expect(cellsChanged(week, relaid.state) * 5).toBeLessThan(cellsChanged(week, fresh.state));
+  }, 60_000);
+
+  it('yeniden dizmek yetmeyince katı koşunun cevabı kalıyor', () => {
+    // A load that cannot fit anywhere: the second run is not even started.
+    let d = build();
+    for (let g = 0; g < 2; g++) {
+      for (let h = 0; h < 4; h++)
+        d = { ...d, unavailable: { ...d.unavailable, [`oAV|${g}|${h}`]: 1 } };
+    }
+    const r = solve(d, { relay: true });
+    expect(r.phase).toBe('stuck');
+    expect(r.relaid ?? 0).toBe(0);
+  });
+});
+import { updateLesson } from '../entities';
+import { cellsChanged, compareQuality, hardBreaches, quality } from './oracle';

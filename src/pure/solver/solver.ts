@@ -39,6 +39,8 @@ import {
 import { commonestBlock, holeReason, lessonName } from '../feasibility';
 import { lessonExcluded, type SolverExclusions } from '../program';
 import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
+import { createImprover, rng, type Improver } from './improve';
+import { bindingPair, shortfalls } from './shortfall';
 
 export interface SolverOptions {
   /** Keep what is already on the grid and fill in around it (default true). */
@@ -47,13 +49,54 @@ export interface SolverOptions {
   budgetMs: number;
   /** Session-only rows/days that this run must leave untouched. */
   exclusions: SolverExclusions;
+  /**
+   * Which of the many legal weeks to look for. 0 is the week this data has
+   * always given; "Başka bir dizilim" asks for another number on every press.
+   */
+  seed: number;
+  /**
+   * A week to stay close to: each block tries its cell in it first, and the
+   * improvement pass keeps to it when nothing else is at stake. The week on
+   * the grid, when "Otomatik diz" has to lay it out again (`relay`).
+   */
+  hint: Record<string, Id> | undefined;
+  /** Run the improvement pass after the search (improve.ts). */
+  improve: boolean;
+  /**
+   * With `keepPlaced`: when the kept week leaves cards with nowhere to go, lay
+   * the unpinned week out again with it as the hint, and take that week if it
+   * places every card. "Otomatik diz" asks for this; tests mostly do not.
+   */
+  relay: boolean;
 }
 
 const DEFAULTS: SolverOptions = {
   keepPlaced: true,
   budgetMs: 15_000,
   exclusions: { teacherIds: [], classIds: [], dayNames: [] },
+  seed: 0,
+  hint: undefined,
+  improve: true,
+  relay: false,
 };
+
+/**
+ * The improvement pass's own wall-clock cap, on top of the search's budget.
+ * Its real limit is a step count (improve.ts), so a seed gives the same week
+ * on any machine; this only keeps a very slow machine from waiting long.
+ */
+const IMPROVE_CAP_MS = 4_000;
+
+/** The second run's budget when "Otomatik diz" lays the week out again. */
+const RELAY_BUDGET_MS = 15_000;
+
+/**
+ * The second run's repair gives up sooner than a first run's: it is there to
+ * find a week NEAR the old one, which it does early or not at all, and the
+ * father's own week, which no order of the cards can build, waits for the
+ * suggestions behind it. MEASURED (WORKLOG 2026-11-16).
+ */
+const RELAY_STALL_PER_BLOCK = 50;
 
 /**
  * How many nodes may pass without the grid getting any better before the search
@@ -80,17 +123,6 @@ const TABU_TENURE = 12;
  * seconds a whole school is allowed.
  */
 const REPAIR_STALL_PER_BLOCK = 500;
-
-/** A small seeded generator: the same input has to give the same timetable. */
-function rng(seed: number): () => number {
-  let x = seed >>> 0 || 1;
-  return () => {
-    x ^= x << 13;
-    x ^= x >>> 17;
-    x ^= x << 5;
-    return (x >>> 0) / 4_294_967_296;
-  };
-}
 
 export type SolverPhase = 'solved' | 'stuck' | 'cancelled';
 
@@ -119,6 +151,11 @@ export interface SolverProgress {
 
 export interface SolverResult extends SolverProgress {
   phase: SolverPhase;
+  /**
+   * How many hours that were on the grid before the run sit somewhere else
+   * now. Absent or 0 unless "Otomatik diz" had to lay the week out again (`relay`).
+   */
+  relaid?: number;
   /**
    * The state to hand to `change()`. When nothing at all was placed this is
    * `base` ITSELF, by reference — the store drops a change that returns the
@@ -257,8 +294,12 @@ export function fixedCells(
   return keepPlaced ? { ...activePlacements(base) } : preservedPlacements(base, exclusions);
 }
 
-export function createSolver(base: State, options?: Partial<SolverOptions>): Solver {
-  const opts: SolverOptions = { ...DEFAULTS, ...options };
+function createSearch(
+  base: State,
+  opts: SolverOptions,
+  /** The repair's patience; the second run of `relay` is given less (`RELAY_STALL_PER_BLOCK`). */
+  repairStallPerBlock = REPAIR_STALL_PER_BLOCK,
+): Solver {
   const excludedDays = new Set(opts.exclusions.dayNames);
   const isExcludedDay = (day: number) => {
     const name = base.settings.days[day]?.name;
@@ -290,6 +331,20 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   const wideWindow = rulesBite(base) || base.relations.length > 0;
   const preferNoWarning = warningsPossible(base);
 
+  // Another seed, another week: the order of the lessons the search looks at
+  // first among equals, and the order of the days it tries among equals. Seed
+  // 0 shuffles nothing and gives the week this data has always given.
+  const seeded = opts.seed !== 0;
+  const shuffler = rng(opts.seed * 7_919 + 13);
+  const shuffle = <T>(list: T[]): void => {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(shuffler() * (i + 1));
+      [list[i], list[j]] = [list[j]!, list[i]!];
+    }
+  };
+  const dayRank = Array.from({ length: dayCount }, (_, i) => i);
+  if (seeded) shuffle(dayRank);
+
   // ---- the items -----------------------------------------------------------
   const items: Item[] = [];
   for (const lesson of base.lessons) {
@@ -320,6 +375,8 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       });
     }
   }
+
+  if (seeded) shuffle(items);
 
   const totalBlocks = items.reduce((sum, x) => sum + x.need, 0);
   const excludedBlocks = base.lessons.reduce((sum, lesson) => {
@@ -633,8 +690,21 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     return best;
   }
 
+  /** Does the hint week hold this lesson on every hour of this block? */
+  function hintedAt(item: Item, cell: number): boolean {
+    const hint = opts.hint;
+    if (hint === undefined) return false;
+    const day = Math.floor(cell / hourCount);
+    const hour = cell % hourCount;
+    for (let i = 0; i < item.block; i++) {
+      if (hint[placementKey(item.lesson.classId, day, hour + i)] !== item.lesson.id) return false;
+    }
+    return true;
+  }
+
   /**
    * The order to try cells in, best first:
+   *   0. the cell the hint week has this lesson in (only with a hint)
    *   1. days where this CLASS has least of this lesson already — spread the
    *      week rather than stacking six hours of maths on Tuesday
    *   2. days where the TEACHER is least loaded
@@ -664,6 +734,13 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     const out: number[] = [];
     for (let cell = 0; cell < cellCount; cell++) {
       if (item.domain[cell] === 1) out.push(cell);
+    }
+
+    // 0. The hint week's own cell for this lesson, before anything else: a
+    //    week laid out again after one edit should look like the week before.
+    const away = new Uint8Array(cellCount);
+    if (opts.hint !== undefined) {
+      for (const cell of out) away[cell] = hintedAt(item, cell) ? 0 : 1;
     }
 
     const warn = new Map<number, number>();
@@ -699,10 +776,12 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       const da = Math.floor(a / hourCount);
       const db = Math.floor(b / hourCount);
       return (
+        away[a]! - away[b]! ||
         classOnDay[da]! - classOnDay[db]! ||
         teacherOnDay[da]! - teacherOnDay[db]! ||
         abuts(a) - abuts(b) ||
         (warn.get(a) ?? 0) - (warn.get(b) ?? 0) ||
+        (seeded ? dayRank[da]! - dayRank[db]! : 0) ||
         a - b
       );
     });
@@ -770,7 +849,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   let repairing = false;
   let moves = 0;
-  const random = rng(base.lessons.length * 7919 + cellCount);
+  const random = rng(base.lessons.length * 7919 + cellCount + opts.seed * 104_729);
   /** One entry per block still without a place: the item it belongs to. */
   const queue: number[] = [];
 
@@ -1197,6 +1276,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       for (const rec of out) {
         cost += weight[rec.item]! * (moves - rec.since < TABU_TENURE ? 4 : 1);
       }
+      // Among cells that push out as much, the hint week's own (costs are
+      // whole numbers, so a half only ever breaks a tie).
+      if (opts.hint !== undefined && !hintedAt(item, cell)) cost += 0.5;
       if (cost < bestCost) {
         bestCost = cost;
         best = out;
@@ -1239,6 +1321,18 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     remember();
   }
 
+  /** Is any lesson of this run short of hours on the best week? */
+  function stuckAny(): boolean {
+    const counts = new Map<Id, number>();
+    for (const key in bestPlacements) {
+      const id = bestPlacements[key]!;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return base.lessons.some(
+      (l) => !lessonExcluded(l, opts.exclusions) && (counts.get(l.id) ?? 0) < l.weeklyHours,
+    );
+  }
+
   function report(phase: SolverPhase): SolverResult {
     const best = bestPlacements;
     const basePlacements = activePlacements(base);
@@ -1251,6 +1345,12 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     // search stopped — that is the grid the user is about to look at.
     const finalIx = buildIndex(state);
     const stuck: StuckLesson[] = [];
+    // The causes no order of the cards can get round come first, and are the
+    // sentence of every lesson they hold up: somebody's lessons outnumber
+    // their open hours, or a pair of lessons that may not share a day needs
+    // more days than the week has.
+    const short = stuckAny() ? shortfalls(base, opts.exclusions) : new Map<Id, string>();
+    const binding = new Set<Id>();
     for (const lesson of base.lessons) {
       if (lessonExcluded(lesson, opts.exclusions)) continue;
       const missing = lesson.weeklyHours - (finalIx.placedHours.get(lesson.id) ?? 0);
@@ -1269,21 +1369,39 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
           ? 0
           : list.reduce((sum, x) => sum + x.need * x.block, 0) + list[0]!.placedAtStart;
       const capped = list.some((x) => x.askedBlocks > x.need) && fits > 0;
+      const roomId = finalIx.classById.get(lesson.classId)?.roomId ?? null;
+      const cause =
+        short.get(lesson.teacherId) ??
+        short.get(lesson.classId) ??
+        (roomId === null ? undefined : short.get(roomId));
+      const pair =
+        cause === undefined ? bindingPair(base, finalIx, lesson.id, opts.exclusions) : null;
+      if (cause !== undefined || pair !== null) binding.add(lesson.id);
 
       stuck.push({
         lessonId: lesson.id,
         name: lessonName(finalIx, lesson.id),
         missing,
-        reason: capped
-          ? t(
-              'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
-              { istenen: lesson.weeklyHours, olabilen: fits },
-            )
-          : (holeReason(state, finalIx, lesson.id, isExcludedDay) ??
-            commonestBlock(state, finalIx, lesson.id).reason),
+        reason:
+          cause !== undefined
+            ? cause
+            : pair !== null
+              ? pair
+              : capped
+                ? t(
+                    'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
+                    { istenen: lesson.weeklyHours, olabilen: fits },
+                  )
+                : (holeReason(state, finalIx, lesson.id, isExcludedDay) ??
+                  commonestBlock(state, finalIx, lesson.id).reason),
       });
     }
-    stuck.sort((a, b) => b.missing - a.missing || a.name.localeCompare(b.name, 'tr'));
+    stuck.sort(
+      (a, b) =>
+        Number(binding.has(b.lessonId)) - Number(binding.has(a.lessonId)) ||
+        b.missing - a.missing ||
+        a.name.localeCompare(b.name, 'tr'),
+    );
 
     // `phase` used to be handed straight back, so a run that placed every BLOCK
     // it counted said 'solved' while `stuck` listed the hours a block size could
@@ -1294,6 +1412,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
     return {
       phase: truth,
+      relaid: 0,
       state,
       placedBlocks: bestBlocks,
       totalBlocks,
@@ -1304,13 +1423,70 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     };
   }
 
+  // ---- improvement -----------------------------------------------------------
+  //
+  // Once the search has placed every card, the week is handed to the
+  // improvement pass (improve.ts) before it is reported: same blocks, same
+  // rules, fewer gaps. Only the blocks this run put down move.
+
+  let improver: Improver | null = null;
+  let improvePhase: SolverPhase = 'solved';
+  let improveMs = 0;
+
+  /**
+   * True when the pass has taken over and the run goes on in the next slice.
+   *
+   * Only for a week the search FINISHED. A stuck week is the suggestion
+   * search's first guess (useSolver), and a week tidied for gaps is a worse
+   * one: on the father's file the fewest-hours way came back 5 hours instead
+   * of CP-SAT's 4 (relaxFullCourse.test.ts, 2026-11-16).
+   */
+  function startImprove(phase: SolverPhase): boolean {
+    if (!opts.improve || improver !== null || phase !== 'solved') return false;
+    for (const key of Object.keys(placements)) delete placements[key];
+    Object.assign(placements, bestPlacements);
+    ix = buildIndex(work);
+    placedBlocks = bestBlocks;
+    repairing = false;
+    improvePhase = phase;
+    improver = createImprover({
+      work,
+      placements,
+      ix,
+      fixed: fixedAtStart,
+      lessonIds: [...itemsByLesson.keys()],
+      isExcludedDay,
+      seed: opts.seed,
+      hint: opts.hint,
+    });
+    return true;
+  }
+
+  /** The pass's week is the week: it is never worse than the one it was given. */
+  function endImprove(): void {
+    bestPlacements = { ...placements };
+    improver = null;
+  }
+
   return {
     step(sliceMs: number): SolverResult | null {
       if (finished !== null) return finished;
       const t0 = performance.now();
+      if (improver !== null) {
+        const left = Math.max(1, Math.min(sliceMs, IMPROVE_CAP_MS - improveMs));
+        const over = improver.step(left);
+        const spent = performance.now() - t0;
+        elapsedMs += spent;
+        improveMs += spent;
+        if (!over && improveMs < IMPROVE_CAP_MS) return null;
+        endImprove();
+        finished = report(improvePhase);
+        return finished;
+      }
       const stop = (phase: SolverPhase | null): SolverResult | null => {
         elapsedMs += performance.now() - t0;
         if (phase === null) return null;
+        if (startImprove(phase)) return null;
         finished = report(phase);
         return finished;
       };
@@ -1321,7 +1497,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
           if (performance.now() - t0 >= sliceMs) return stop(null);
           if (elapsedMs + (performance.now() - t0) >= opts.budgetMs) return stop('stuck');
           nodes++;
-          if (++sinceGain > REPAIR_STALL_PER_BLOCK * totalBlocks) return stop('stuck');
+          if (++sinceGain > repairStallPerBlock * totalBlocks) return stop('stuck');
           repairMove();
           continue;
         }
@@ -1393,7 +1569,80 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     },
 
     cancel(): SolverResult {
-      if (finished === null) finished = report('cancelled');
+      if (finished === null) {
+        if (improver !== null) endImprove();
+        finished = report('cancelled');
+      }
+      return finished;
+    },
+  };
+}
+
+/**
+ * The search, and for "Otomatik diz" (`relay`) a second one after it: when
+ * the kept week leaves cards with nowhere to go, the unpinned week is laid out
+ * again with itself as the hint, so one edited lesson moves a few hours and
+ * not the whole week. The second week is taken only when it places every
+ * card; otherwise the first run's answer stands, suggestions and all.
+ */
+export function createSolver(base: State, options?: Partial<SolverOptions>): Solver {
+  const opts: SolverOptions = { ...DEFAULTS, ...options };
+  let active = createSearch(base, opts);
+  let first: SolverResult | null = null;
+  let finished: SolverResult | null = null;
+
+  const relayable = () => {
+    if (!opts.relay || !opts.keepPlaced) return false;
+    const kept = Object.keys(fixedCells(base, false, opts.exclusions)).length;
+    if (kept >= Object.keys(activePlacements(base)).length) return false;
+    // A week whose loads do not fit its open hours cannot be laid out by any
+    // order of the cards; the second run would only spend the time.
+    return shortfalls(base, opts.exclusions).size === 0;
+  };
+
+  const settle = (second: SolverResult): SolverResult => {
+    const kept = first!;
+    const elapsedMs = kept.elapsedMs + second.elapsedMs;
+    if (second.stuck.length > 0) return { ...kept, elapsedMs };
+    const before = activePlacements(base);
+    const after = activePlacements(second.state);
+    let relaid = 0;
+    for (const key in before) if (after[key] !== before[key]) relaid++;
+    return { ...second, elapsedMs, relaid };
+  };
+
+  return {
+    step(sliceMs: number): SolverResult | null {
+      if (finished !== null) return finished;
+      const done = active.step(sliceMs);
+      if (done === null) return null;
+      if (first === null && done.phase === 'stuck' && relayable()) {
+        first = done;
+        active = createSearch(
+          base,
+          {
+            ...opts,
+            keepPlaced: false,
+            hint: activePlacements(base),
+            budgetMs: Math.max(0, Math.min(RELAY_BUDGET_MS, opts.budgetMs - done.elapsedMs)),
+          },
+          RELAY_STALL_PER_BLOCK,
+        );
+        return null;
+      }
+      finished = first === null ? done : settle(done);
+      return finished;
+    },
+    progress(): SolverProgress {
+      const p = active.progress();
+      return first === null ? p : { ...p, elapsedMs: p.elapsedMs + first.elapsedMs };
+    },
+    cancel(): SolverResult {
+      if (finished !== null) return finished;
+      // Stopped while laying the week out again: the kept week stands, as
+      // stopped, and nothing on the grid it did not place has moved.
+      const done = active.cancel();
+      finished = first === null ? done : { ...first, phase: 'cancelled' };
       return finished;
     },
   };
