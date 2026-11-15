@@ -2280,6 +2280,57 @@ test.describe('86. Sabitleme', () => {
     await expect(cards).toHaveCount(0);
   });
 
+  test('seçenek sormadan siliniyor ve Geri al onu yerleşimiyle getiriyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator('table.grid .card');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
+    await answerDialog(page);
+    await expect(programs).toContainText('Seçenek 2');
+
+    // SD1: no question. The notice counts the hours and never the pins.
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Seçeneği sil' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(programs).toContainText('Seçenek 1');
+    const notice = page.locator('.toast', { hasText: 'seçeneği silindi' });
+    await expect(notice).toContainText(/yerleşmiş \d+ saati de gitti/);
+    await expect(notice).not.toContainText('sabitleme');
+
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(programs).toContainText('Seçenek 2');
+    await expect(cards).toHaveCount(1);
+  });
+
+  test('seçenek değiştirmek geri al geçmişini silmiyor, Ctrl+Z doğru seçeneğe dönüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator('table.grid .card');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
+    await answerDialog(page);
+
+    // On Seçenek 2: take the card off, then go to Seçenek 1.
+    await cards.first().focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(0);
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
+    await expect(cards).toHaveCount(1);
+
+    // Looking at Seçenek 1 is not a step. Ctrl+Z takes back the last change,
+    // and that change was made in Seçenek 2: it comes back on screen, card and all.
+    await page.locator('body').press('Control+z');
+    await expect(programs).toContainText('Seçenek 2');
+    await expect(cards).toHaveCount(1);
+    await expect(page.locator('.sr-only[role=status]')).toContainText('Geri alındı');
+  });
+
   test('menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor', async ({ page }) => {
     const card = await pinFirst(page);
     // The mark, not a colour: the grid's four colours already mean droppable,
@@ -2344,15 +2395,15 @@ test.describe('86. Sabitleme', () => {
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
   });
 
-  test('"Baştan diz" sabitlenmişi YERİNDE bırakıyor, sorusu da onu sayıyor', async ({ page }) => {
+  test('"Baştan diz" sormadan sabitlenmişi YERİNDE bırakıyor', async ({ page }) => {
     const card = await filledWithOnePin(page);
     const where = (await card.boundingBox())!;
     const text = (await card.textContent())!;
 
+    // No question since SD1. The run may land on the week it started from,
+    // and then nothing changes and no notice comes: the bar is the sign.
     await page.getByRole('button', { name: 'Baştan diz' }).click();
-    const dialog = page.getByRole('alertdialog');
-    await expect(dialog).toContainText('Sabitlenen');
-    await dialog.getByRole('button', { name: 'Baştan diz' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 30_000,
     });

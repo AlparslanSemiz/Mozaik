@@ -15,7 +15,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
-  answerDialog,
   contrast,
   listWorld,
   loadWorld,
@@ -430,9 +429,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
 
       // A row goes from the middle, and comes back to the same place.
       await rows.nth(2).getByRole('button', { name: 'Sil', exact: true }).click();
-      // Teachers and lessons go at once with a "Geri al" notice (SD1); a class
-      // or a room still asks first.
-      if (l.ad === 'Sınıflar' || l.ad === 'Derslikler') await answerDialog(page);
+      // Every list's deletion goes at once with a "Geri al" notice (SD1).
       await expect(rows).toHaveCount(total - 1);
       await check('silmeden sonra');
       await page.locator('body').press('Control+z');
@@ -641,7 +638,6 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
       .first()
       .getByRole('button', { name: 'Sil', exact: true })
       .click();
-    await answerDialog(page);
     await park(page);
     await expect(bodies).toHaveCount(2);
     await expect(bodies.nth(0).locator('tr')).toHaveCount(0);
