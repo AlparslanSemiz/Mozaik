@@ -208,10 +208,13 @@ commit'inde; kalanı TODO §8m.
   Basılan kâğıt değişmedi (PDF ve `print` medyasıyla bakıldı).
 - Çıktı, kâğıt: basılan kâğıda açık bir bildirim çıkıyordu ("Yedek yüklendi.", `position: fixed`,
   her sayfada). `.toasts` `@media print`'te gizli; gerileme testi `yazdir.spec.ts`'te, önce kırmızı.
-- Öneri paneli: yalnız sırada bulunan ilk yol açık, ötekiler `<details>` "Başka yollar (N)" altında,
-  katın açıklığı panelin durumunda (her cevap aramayı yeniden başlatınca kapanmasın). Arama sürerken
+- Öneri paneli: yalnız sırada bulunan ilk yol açık, ötekiler "Başka yollar (N)" düğmesinin altında
+  `hidden`. Tek liste, satırlar ailesiyle anahtarlı: arama sürerken sırada daha önde bir yol bulununca
+  eski ilk satır yeniden çizilmeden aşağı iner (açık soruları ve klavye odağı kalır). Katın
+  açıklığı panelin durumunda, her cevap aramayı yeniden başlatınca kapanmıyor. Arama sürerken
   her yol için bir "aranıyor" satırı yerine saniyeli tek cümle ve bir `<progress>`. Tam dolu kursta
-  bitmiş panel 53 görünen kelime ve 4 düğme (rapor: ~195 kelime, 19 düğme); arama 25 s.
+  bitmiş panel 54 görünen kelime ve 5 düğme, `Kapat` ve kat dahil (rapor: ~195 kelime, 19 düğme);
+  arama 25–35 s.
   `otomatik.spec.ts`'in uzun testine yalnız katı açan bir adım eklendi.
 - Erişim: Dersler satırındaki haftalık saat kutusu ve bütün `LimitBox`'lar `aria-label` taşıyor
   (Dersler'de satırın adıyla). `.chip-count` opaklığı kalktı (3,69:1 idi). Tam dolu kursta axe:
@@ -225,8 +228,16 @@ commit'inde; kalanı TODO §8m.
 gerekiyor), sınıflarda "Sıkışık" (SD2, karar), plan ve program (SD3, karar), Yerleşemeyen dersler
 (SD4), raporun öteki önerileri (SD5).
 
-**Ölçüm.** `dist/index.html` 1 207 180 bayt, brotli 289,5 kB (eşikler 1 210 000 ve 290 000, ikisi de
-altında ama brotli payı 500 B).
+**Ölçüm.** `dist/index.html` 1 207 760 bayt, brotli 289,75 kB, `main` (355481a) birleştikten sonra
+(eşikler 1 210 000 ve 290 000, ikisi de altında ama brotli payı 250 B; bir sonraki dal eşiği
+aşabilir).
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`). Düzelen: katın dışından içine geçen
+satır yeniden çiziliyordu (yukarıda), koyu temanın kâğıt kuralı basılan kâğıtta da geçerliydi ve
+`@media print`'in sabitlerini birkaç hex eziyordu (artık `@media screen`), dört bayat yorum ve belge
+cümlesi, `gercek-exe.spec.ts`'te ölü `.suggestion-pending` seçicisi. Bırakılan: Danışman başlığının not
+sayısını sayması (satır değil; not sayısı doğru bilgi), toplanan cümlede kişiye özel sayının
+kaybolması (Ö38'in bilinçli bedeli), `exe.spec.ts` farkı (`main`'den gelen birleştirme, bu dalın değil).
 
 **Koşulan.** `tsc`, `eslint src`, `npm run sinir` yeşil; `npm run hizli` 1525 testin 1514'ü geçti, 11
 kırmızı dört dosyada (`agir.test.ts`: bu Mac'te `flock` yok; `emptyStart`, `otherWindow`, `rowOrder`:

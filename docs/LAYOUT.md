@@ -217,7 +217,8 @@ kullanıcının kendi listesi: öğretmenin zaten geldiği güne saat, en az saa
 yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi başka
 öğretmene vermek, blok şekli, haftalık saat; açık duran, bu sırada bulunan ilk
 yoldur. Arama sürerken panel her yol için bir "aranıyor" satırı değil, saniyesiyle
-tek bir cümle ve bir ilerleme çubuğu gösterir; bir şey bulamayan yol hiç görünmez.
+tek bir cümle ("Nasıl kurulacağı aranıyor…", bir yol bulununca "Başka yollar da
+aranıyor…") ve bir ilerleme çubuğu gösterir; bir şey bulamayan yol hiç görünmez.
 Bulunan her yol tek satırdır: babanın bir öğretmene söyleyeceği cümle ("KY
 Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Izgarada göster`,
 `Uygula` ve `Sorular`. Bir yol ilk bulduğunu hemen gösterir ve arama sürerken

@@ -1266,7 +1266,7 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       **Dersler yapıldı (2026-11-15, `kullanim/sadelik`):** haftalık saat kutusu satırın adıyla
       adlı, `metin.spec.ts` yeşil. Okul'daki ve Kurallar'daki kutular açık (§8m SD6).
 - [x] **`label-title-only` · Dersler'de 6 kutu.** Yapıldı (2026-11-15, `kullanim/sadelik`): her
-      `LimitBox` bir `aria-label` taşıyor (verilmezse `title`'ı), Dersler'de satırın adıyla. Etiketi yalnız `title`'da. Ciddi
+      `LimitBox` bir `aria-label` taşıyor (verilmezse `title`'ı), Dersler'de satırın adıyla. Ciddi
       seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
       için görünür.
 - [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
