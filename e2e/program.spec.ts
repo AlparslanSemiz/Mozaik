@@ -2370,9 +2370,8 @@ test.describe('86. Sabitleme', () => {
     await filledWithOnePin(page);
     await openGridMenu(page);
     await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
-    const dialog = page.getByRole('alertdialog');
-    await expect(dialog).toContainText('Sabitlenen');
-    await dialog.getByRole('button', { name: 'Programı boşalt' }).click();
+    // SD1: no question; the notice names the pinned hours that stayed.
+    await expect(page.locator('.toast', { hasText: 'sabitlenen' })).toBeVisible();
 
     // Everything else went; the pin is what is left.
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);

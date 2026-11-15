@@ -24,7 +24,6 @@ import {
   chooseScale,
   savedText,
   settledText,
-  answerDialog,
   openGridMenu,
   PDF_YALNIZ_CHROMIUM,
 } from './helpers';
@@ -1057,16 +1056,17 @@ test.describe('51. Program: programı boşalt', () => {
     await openGridMenu(page);
     await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
     // Not the same thing as "Baştan diz": that one refills the grid. This one
-    // clears it, which is what the reader asked for by name.
-    const asked = await answerDialog(page);
-    expect(asked).toContain('havuza dönecek');
+    // clears it, which is what the reader asked for by name. No question since
+    // SD1: it happens, and the notice says so and offers "Geri al".
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(page.locator('.toast', { hasText: 'havuza döndü' })).toBeVisible();
     await expect(page.locator('table.grid .card')).toHaveCount(0);
 
     // The lessons themselves are untouched — they are back in the pool.
     expect(await page.locator('.pool-card').count()).toBeGreaterThan(0);
 
     // And it is one undo step.
-    await page.getByRole('button', { name: 'Geri al', exact: true }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(placed);
   });
 

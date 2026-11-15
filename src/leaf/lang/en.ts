@@ -1763,6 +1763,13 @@ const EN: Sozluk = {
     "{ad} · Weekly timetable",
   "{n}. ders":
     "Lesson {n}",
+  "Ders silindi.": "Lesson deleted.",
+  "{ne} silindi.": "{ne} deleted.",
+  "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne} deleted, with its {n} placed {n:hour|hours}.",
+  "{ne} silindi, {n} dersi de gitti.": "{ne} deleted, with {n} {n:lesson|lessons}.",
+  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} deleted, with {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours}.",
+  "Dizilmiş {n} saat havuza döndü.": "{n} placed {n:hour|hours} went back to the pool.",
+  "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
 };
 
 registerSozluk("en", EN);

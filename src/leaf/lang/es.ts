@@ -1779,6 +1779,13 @@ const ES: Sozluk = {
     "{ad} · Horario semanal",
   "{n}. ders":
     "Clase {n}",
+  "Ders silindi.": "Clase eliminada.",
+  "{ne} silindi.": "{ne}: eliminado.",
+  "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne}: eliminado, con {n} {n:hora colocada|horas colocadas}.",
+  "{ne} silindi, {n} dersi de gitti.": "{ne}: eliminado, con {n} {n:clase|clases}.",
+  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne}: eliminado, con {ders} {ders:clase|clases} y {saat} {saat:hora colocada|horas colocadas}.",
+  "Dizilmiş {n} saat havuza döndü.": "{n} {n:hora colocada volvió|horas colocadas volvieron} a la reserva.",
+  "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Las horas colocadas volvieron a la reserva; {n} {n:hora fijada sigue|horas fijadas siguen} en su sitio.",
 };
 
 registerSozluk("es", ES);

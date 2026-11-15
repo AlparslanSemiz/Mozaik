@@ -92,7 +92,13 @@ export {
 export { setAvailability, openHours, setWholeWeek } from './availability';
 export { addTeachersFromRows, addClassesFromRows, addLessonsFromRows } from './rows';
 export { weeklyLoad, hourLabels, extraNames, duplicateShorts } from './counting';
-export { planSummary, deletionQuestion, type EntityKind, type DeletionQuestion } from './deleting';
+export {
+  planSummary,
+  deletionQuestion,
+  deletionNotice,
+  type EntityKind,
+  type DeletionQuestion,
+} from './deleting';
 export {
   entityWeek,
   entityFacts,

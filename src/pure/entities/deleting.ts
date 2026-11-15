@@ -117,3 +117,36 @@ export function deletionQuestion(d: State, kind: EntityKind, id: Id): DeletionQu
     }),
   };
 }
+
+/**
+ * The notice after a deletion that no longer asks first (TODO SD1): what went,
+ * in the past tense, from the same facts the question used to state. Called on
+ * the state BEFORE the deletion, like `deletionQuestion`.
+ */
+export function deletionNotice(d: State, kind: 'teacher' | 'lesson', id: Id): string {
+  if (kind === 'lesson') {
+    const lesson = d.lessons.find((x) => x.id === id);
+    if (lesson === undefined) return t('Ders silindi.');
+    const group = d.classes.find((c) => c.id === lesson.classId);
+    const teacher = d.teachers.find((x) => x.id === lesson.teacherId);
+    const who = t('{sinif} sınıfının {kim} dersi', {
+      sinif: group?.name ?? '?',
+      kim: teacher?.short ?? '?',
+    });
+    const placed = countPlacedHours(d, id);
+    return placed === 0
+      ? t('{ne} silindi.', { ne: who })
+      : t('{ne} silindi, yerleşmiş {n} saati de kalktı.', { ne: who, n: placed });
+  }
+  const x = d.teachers.find((y) => y.id === id);
+  const who = x === undefined ? t('Öğretmen') : x.short;
+  const lessons = d.lessons.filter((l) => l.teacherId === id);
+  const placed = lessons.reduce((sum, l) => sum + countPlacedHours(d, l.id), 0);
+  if (lessons.length === 0) return t('{ne} silindi.', { ne: who });
+  if (placed === 0) return t('{ne} silindi, {n} dersi de gitti.', { ne: who, n: lessons.length });
+  return t('{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.', {
+    ne: who,
+    ders: lessons.length,
+    saat: placed,
+  });
+}

@@ -401,7 +401,9 @@ test.describe('5. Yedek ve şema göçü', () => {
 test.describe('28. Geri al / ileri al', () => {
   test('açılışta ikisi de kapalı', async ({ page }) => {
     await open(page);
-    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeDisabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
+    ).toBeDisabled();
     await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
   });
 
@@ -415,7 +417,7 @@ test.describe('28. Geri al / ileri al', () => {
     }
     await expect(mainList(page).locator('tbody tr')).toHaveCount(3);
 
-    const back = page.getByRole('button', { name: 'Geri al', exact: true });
+    const back = page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true });
     const forward = page.getByRole('button', { name: 'İleri al', exact: true });
     for (const expected of [2, 1, 0]) {
       await back.click();
@@ -439,7 +441,7 @@ test.describe('28. Geri al / ileri al', () => {
     await box.fill('B');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await page.getByRole('button', { name: 'Geri al', exact: true }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }).click();
     await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeEnabled();
 
     await box.fill('C');
@@ -468,7 +470,9 @@ test.describe('28. Geri al / ileri al', () => {
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeEnabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
+    ).toBeEnabled();
 
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-25-1200.json',
@@ -477,7 +481,9 @@ test.describe('28. Geri al / ileri al', () => {
     });
     await answerDialog(page);
 
-    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeDisabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
+    ).toBeDisabled();
   });
 });
 

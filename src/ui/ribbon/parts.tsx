@@ -14,7 +14,8 @@ import type { SolverRun } from '../../platform/search';
 import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
 import type { ProgramMask, StripCounts } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
-import { type useDialogs, useT } from '../common';
+import { type useDialogs, type useToast, useT } from '../common';
+import type { State as PlanState } from '../../leaf/model';
 
 export interface RibbonProps {
   ui: ToolState;
@@ -54,6 +55,9 @@ export interface RibbonProps {
 export interface StripContext extends RibbonProps {
   t: ReturnType<typeof useT>;
   dialogs: ReturnType<typeof useDialogs>;
+  /** A notice, and the undo its "Geri al" button runs (SD1). */
+  notify: ReturnType<typeof useToast>;
+  undoIf: (expected: PlanState) => void;
   /** The Program strip's counts, memoised in `index.tsx`; null on every other tab. */
   strip: StripCounts | null;
 }

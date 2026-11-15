@@ -3,7 +3,8 @@
 import type { ReactNode } from 'react';
 import { type Lesson, type State, paletteColor } from '../../leaf/model';
 import {
-  useDialogs,
+  useToast,
+  useUndoIf,
   LimitBox,
   BlockPatternPicker as BlockCounts,
   blockCeiling,
@@ -11,7 +12,7 @@ import {
 } from '../common';
 import {
   deleteLesson,
-  deletionQuestion,
+  deletionNotice,
   hasTwoSubjects,
   lessonSubject,
   subjectLabel,
@@ -31,7 +32,8 @@ interface Props {
 
 export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
   const t = useT();
-  const { confirm } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const group = state.classes.find((c) => c.id === x.classId);
   const teacher = state.teachers.find((t) => t.id === x.teacherId);
   return (
@@ -130,18 +132,15 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
         <div className="form-row nowrap">
           <button
             className="btn danger"
-            onClick={async () => {
-              const q = deletionQuestion(state, 'lesson', x.id);
-              if (
-                !(await confirm({
-                  title: q.title,
-                  body: q.cost,
-                  confirmLabel: 'Sil',
-                  danger: true,
-                }))
-              )
-                return;
-              change((d) => deleteLesson(d, x.id));
+            onClick={() => {
+              // No question since SD1: the deletion happens, and its notice
+              // says what went with it and offers "Geri al".
+              const next = deleteLesson(state, x.id);
+              change((d) => (d === state ? next : deleteLesson(d, x.id)));
+              notify(deletionNotice(state, 'lesson', x.id), 'info', {
+                label: t('Geri al'),
+                run: () => undoIf(next),
+              });
             }}
           >
             {t('Sil')}

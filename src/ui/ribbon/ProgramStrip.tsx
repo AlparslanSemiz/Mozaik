@@ -98,6 +98,8 @@ export function programStrip({
   setProgramColor,
   t,
   dialogs: { confirm, prompt, alert },
+  notify,
+  undoIf,
   strip,
 }: StripContext): React.ReactElement {
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
@@ -476,28 +478,23 @@ export function programStrip({
               <DropdownMenu.Item
                 className="menu-item danger"
                 disabled={placed === 0}
-                onSelect={async () => {
-                  if (
-                    await confirm({
-                      title: t('Dizilmiş {n} saatin tamamı havuza dönecek', { n: placed }),
-                      body:
-                        pinnedHours === 0
-                          ? t(
-                              'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                            )
-                          : t(
-                              'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                              { n: pinnedHours },
-                            ),
-                      confirmLabel: t('Programı boşalt'),
-                      danger: true,
-                    })
-                  ) {
-                    // The pinned cells stay, and so do their pins. One rule
-                    // with no exceptions: nothing takes a pinned block down
-                    // but unpinning it.
-                    change(keepPinnedOnly);
-                  }
+                onSelect={() => {
+                  // No question since SD1 (2026-11-15): it is undone with one
+                  // click, so it happens and the notice offers that click.
+                  // The pinned cells stay, and so do their pins. One rule
+                  // with no exceptions: nothing takes a pinned block down
+                  // but unpinning it.
+                  const next = keepPinnedOnly(state);
+                  change((d) => (d === state ? next : keepPinnedOnly(d)));
+                  notify(
+                    pinnedHours === 0
+                      ? t('Dizilmiş {n} saat havuza döndü.', { n: placed })
+                      : t('Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.', {
+                          n: pinnedHours,
+                        }),
+                    'info',
+                    { label: t('Geri al'), run: () => undoIf(next) },
+                  );
                 }}
               >
                 <Eraser size={15} aria-hidden="true" />

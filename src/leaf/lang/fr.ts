@@ -1788,6 +1788,13 @@ const FR: Sozluk = {
     "{ad} · Emploi du temps de la semaine",
   "{n}. ders":
     "Cours {n}",
+  "Ders silindi.": "Cours supprimé.",
+  "{ne} silindi.": "{ne} : supprimé.",
+  "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne} : supprimé, avec {n} {n:heure placée|heures placées}.",
+  "{ne} silindi, {n} dersi de gitti.": "{ne} : supprimé, avec {n} {n:cours|cours}.",
+  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} : supprimé, avec {ders} {ders:cours|cours} et {saat} {saat:heure placée|heures placées}.",
+  "Dizilmiş {n} saat havuza döndü.": "{n} {n:heure placée est revenue|heures placées sont revenues} dans la réserve.",
+  "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Les heures placées sont revenues dans la réserve ; {n} {n:heure épinglée reste|heures épinglées restent} en place.",
 };
 
 registerSozluk("fr", FR);

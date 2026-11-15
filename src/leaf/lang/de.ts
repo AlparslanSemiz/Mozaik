@@ -1780,6 +1780,13 @@ const DE: Sozluk = {
     "{ad} · Wochenstundenplan",
   "{n}. ders":
     "{n}. Stunde",
+  "Ders silindi.": "Fach gelöscht.",
+  "{ne} silindi.": "{ne} gelöscht.",
+  "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
+  "{ne} silindi, {n} dersi de gitti.": "{ne} gelöscht, mit {n} {n:Fach|Fächern}.",
+  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
+  "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
+  "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
 };
 
 registerSozluk("de", DE);

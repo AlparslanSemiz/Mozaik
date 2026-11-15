@@ -25,6 +25,7 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- Deleting a lesson or a teacher, and "Programı boşalt", no longer ask first: the change happens and a notice says what went, with a "Geri al" (undo) button for 8 seconds. The button only undoes that change; after any other edit it does nothing. Ctrl+Z works as before.
 - Kontrol no longer marks a class "Sıkışık" (tight) just because its lessons fill its open hours, which a full course does on purpose; a class is flagged only when its lessons do not fit. Teachers and rooms keep the warning.
 - When "Fill automatically" gets stuck, the panel shows only the first way the week can be built; the others fold under "Other ways (N)". While it searches, one line with the seconds and a progress bar replaces the row per way.
 - Check → Advisor says a repeated note once, with the lessons or teachers it is about listed after it, instead of the same sentence for each.

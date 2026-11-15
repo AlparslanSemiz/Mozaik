@@ -429,14 +429,39 @@ test.describe('30. Kurulum — düzenleme', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
   });
 
-  test('yerleşimi olan dersi silmek ne kaybedileceğini sayıyor', async ({ page }) => {
+  test('yerleşimi olan ders sorulmadan siliniyor, bildirim kaybı sayıyor ve Geri al geri getiriyor', async ({
+    page,
+  }) => {
+    // SD1 (2026-11-15): a deletion Ctrl+Z can reverse no longer asks first.
     await openWithSample(page);
     const { dragAndDrop } = await import('./helpers');
     await dragAndDrop(page);
 
     await openLessons(page);
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    expect(await answerDialog(page, 'cancel')).toContain('silinecek');
+    const rows = mainList(page).locator('tbody tr');
+    const before = await rows.count();
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(rows).toHaveCount(before - 1);
+    const notice = page.locator('.toast', { hasText: 'silindi' });
+    await expect(notice).toContainText(/yerleşmiş \d+ saati de kalktı/);
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(rows).toHaveCount(before);
+  });
+
+  test('bildirimin Geri al düğmesi araya giren düzenlemeyi geri almıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page);
+    const rows = mainList(page).locator('tbody tr');
+    const before = await rows.count();
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    const first = page.locator('.toast', { hasText: 'silindi' }).first();
+    // A second deletion moves the stack on: the first notice's button now
+    // names a state that is no longer the present, and does nothing.
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await expect(rows).toHaveCount(before - 2);
+    await first.getByRole('button', { name: 'Geri al' }).click();
+    await expect(rows).toHaveCount(before - 2);
   });
 });
 

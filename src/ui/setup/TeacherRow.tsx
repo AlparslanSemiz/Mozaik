@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import {
   deleteTeacher,
-  deletionQuestion,
+  deletionNotice,
   genderCell,
   setTeacherLimit,
   subjectKey,
@@ -21,7 +21,7 @@ import {
 } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { useDialogs, ColorPick, LimitBox, useT } from '../common';
+import { ColorPick, LimitBox, useT, useToast, useUndoIf } from '../common';
 import { GENDERS } from './genders';
 
 interface Props {
@@ -39,7 +39,8 @@ interface Props {
 
 export function TeacherRow({ state, change, teacher, grip, subjects, opening, setOpening }: Props) {
   const t = useT();
-  const { confirm } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const inspect = useInspect();
   return (
     <tr data-row-name={teacher.name}>
@@ -254,18 +255,15 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
           </button>
           <button
             className="btn danger"
-            onClick={async () => {
-              const q = deletionQuestion(state, 'teacher', teacher.id);
-              if (
-                !(await confirm({
-                  title: q.title,
-                  body: q.cost,
-                  confirmLabel: 'Sil',
-                  danger: true,
-                }))
-              )
-                return;
-              change((d) => deleteTeacher(d, teacher.id));
+            onClick={() => {
+              // No question since SD1: the deletion happens, and its notice
+              // says what went with it and offers "Geri al".
+              const next = deleteTeacher(state, teacher.id);
+              change((d) => (d === state ? next : deleteTeacher(d, teacher.id)));
+              notify(deletionNotice(state, 'teacher', teacher.id), 'info', {
+                label: t('Geri al'),
+                run: () => undoIf(next),
+              });
             }}
           >
             {t('Sil')}

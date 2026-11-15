@@ -93,8 +93,8 @@ test.describe('6. Gün ve ders saatleri', () => {
  */
 async function makeColourGap(page: Page) {
   await openSetup(page, 'Öğretmenler');
+  // No question since SD1: the deletion happens and a notice offers "Geri al".
   await page.locator('table.list tbody tr').nth(1).getByRole('button', { name: 'Sil' }).click();
-  await answerDialog(page);
   await expect(page.locator('.cols aside')).toContainText('Renkler');
 }
 

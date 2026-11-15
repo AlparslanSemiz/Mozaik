@@ -194,6 +194,17 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · Silmede soru yerine "Geri al" (`kullanim/geri-al`, TODO SD1)
+
+Babanın 1 numaralı isteği (daha az soru) ve kullanılabilirlik ölçümünün önerisi. Ders silme,
+öğretmen silme ve `Programı boşalt` artık sormuyor: değişiklik oluyor, bildirim ne gittiğini
+söylüyor (`deletionNotice`) ve 8 s bir "Geri al" düğmesi taşıyor. Toasts.tsx'in eski gerekçesi
+("yığın ilerler, düğme yanlış değişikliği geri alır") yığına kimlik eklemeden karşılandı:
+`undo-if` yalnız düğmenin adını verdiği durum hâlâ şimdiki durumsa geri alıyor (`undo.test.ts`,
+ve E2E'de araya giren silmeyle). `Baştan diz` soruyor (sonucu çözücüden ayrı bir adım). E2E'de
+altı test bildirimle güncellendi, üst çubuğun "Geri al"ını arayan seçiciler `.topbar`'a
+daraltıldı; `kurulum`, `gorunum`, `program`, `ayarlar`, `musaitlik`, `yazdir`, `temel` 338/338.
+
 ## 2026-11-15 · cpModel ve ikinci bakış, `main` ile birleşti (`ozellik/cpsat`)
 
 Ajan haftalık kullanım sınırına takılıp `main`'in birleştirmesinde durdu; birleştirme (yalnız

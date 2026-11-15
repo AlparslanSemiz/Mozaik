@@ -1940,7 +1940,10 @@ yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâ�
 panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
 `.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
 
-- [ ] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Ders silme
+- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Yapıldı (2026-11-15,
+      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt` sormuyor,
+      bildirim 8 s ve "Geri al" (`undo-if`: yalnız kendi adımı tepedeyken). Kalan: `Baştan diz`
+      hâlâ soruyor, çünkü sonucu çözücü bitince ayrı bir adım; KS26 (30 adımlık tavan) açık. Ders silme
       (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
       sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
       `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın

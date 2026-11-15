@@ -11,7 +11,6 @@ import {
   chooseScale,
   revealRibbon,
   settledMotion as settled,
-  answerDialog,
   mainList,
   onScreen,
   openLessons,
@@ -32,7 +31,6 @@ test.describe('Çıktı: ders listesi sekme açıkken doluyor', () => {
     await loadWorld(page, world, 'Dersler');
     await openLessons(page, 'all');
     await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await answerDialog(page);
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
