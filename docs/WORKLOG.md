@@ -84,6 +84,19 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+
+## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
+
+Yedi dal (okunurluk, geri al, anlambilim, Kontrol, klavye, tepki, ilk açılış) her biri kendi
+sınırını yükseltmişti; sınır dal başına değil zincirin ucunda bir kez konuyor. `dist/index.html`
+`main`'de (81c5b42) 1 228 582 B, uçta 1 302 114 B (+73,5 kB, %6), brotli 287 → 301,86 kB;
+büyümenin çoğu dört sözlüğe giren yeni cümleler. `file://` açılışı, işlemci 4× yavaş, 9 koşu
+dönüşümlü, makine yüklü (yük 22–34): `main` medyan 545 ms, uç 575 ms (+30 ms). Eşikler
+1 320 000 B ve 306 000 B (brotli); ölçüm betiği oturumun scratch'inde (`olcum/ac.cjs`).
+Sözlükleri ilk açılışta yüklememek bir sonraki küçültme adayı (yalnız Türkçe açılışta gerekir).
+
+---
+
 ## 2026-11-15 · İlk açılış, giriş korumaları ve mesajlar (`kullanim/ilk-acilis`, TODO SD7)
 
 `metin/tek-ad` (PR #44) üstünde, birleşmedi. Denetimin akış bulguları (1366×768 ve 1920×1080,
