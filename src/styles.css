@@ -3352,6 +3352,8 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 .pool-pick select {
   font-size: var(--fs-xs);
   padding: 2px var(--space-2);
+  /* 23px tall without it: under the 24px pointer target (WCAG 2.5.8). */
+  min-height: 24px;
 }
 
 /* Along the bottom the count sits BESIDE its subtitle, not above it: the strip
@@ -3900,6 +3902,13 @@ textarea:hover:not(:disabled) {
   border-color: var(--muted);
 }
 
+input[type="text"]:hover:not(:disabled),
+input[type="number"]:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
 /* A checkbox is a pointer target with nothing around it to click: the day
    switches in Zil ve günler and the draft mark in Planlar stand alone in a
    table cell. The browser draws 13x13, under the 24px floor (WCAG 2.5.8).
@@ -3920,13 +3929,6 @@ input[type='checkbox'] {
 ::placeholder {
   color: var(--muted);
   opacity: 1;
-}
-
-input[type="text"]:hover:not(:disabled),
-input[type="number"]:hover:not(:disabled),
-select:hover:not(:disabled),
-textarea:hover:not(:disabled) {
-  border-color: var(--muted);
 }
 
 /* Buttons had no focus style at all: tabbing through the top bar was invisible.
@@ -6066,8 +6068,10 @@ table.availability.heat td.closed {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  /* 1.5rem is 19.5px at %100: the 24px target floor (WCAG 2.5.8) is in px
+     because it is about a pointer, not about type. */
+  width: max(24px, 1.5rem);
+  height: max(24px, 1.5rem);
   padding: 0;
   border: none;
   border-radius: var(--r-sm);
@@ -6331,7 +6335,13 @@ table.availability.heat td.closed {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0;
+  /* The name is the target, and a short one ("MÇ") was 15x16px: under the
+     24px floor (WCAG 2.5.8). The box grows by padding and gives the same
+     amount back as negative margin, so the row head it sits in — measured to
+     the pixel in Sığdır — keeps its height and nothing beside it moves. */
+  min-width: 24px;
+  padding: 4.5px 0;
+  margin-block: -4.5px;
   border: none;
   background: none;
   color: inherit;
@@ -6811,8 +6821,9 @@ table.list td.row-no {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  /* 1.75rem is 22.75px at %100, a hair under the 24px target floor. */
+  width: max(24px, 1.75rem);
+  height: max(24px, 1.75rem);
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--r-sm);
@@ -7094,5 +7105,58 @@ body.row-dragging {
     min-width: 30ch;
     max-width: 60ch;
     padding-inline-end: calc(var(--space-3) + 0.5ch);
+  }
+}
+
+/* ------------------------------------------------------- forced colours
+   Windows' contrast themes (Ayarlar > Erişilebilirlik > Karşıtlık temaları)
+   replace every colour on the page with a handful of system colours. Until
+   2026-11-15 nothing here answered that, and three things went missing,
+   measured with Chromium's `forcedColors: 'active'` on the sample school:
+
+     - a lesson card has no border (`border: none`), only a palette ground,
+       and the ground is the thing that goes: 374 cards became text floating
+       in empty cells, a filled hour and an empty one told apart by text only;
+     - a pressed button and the lit tab are a GROUND too (the section colour,
+       the accent), so "which one is on" was lost on every strip and the bar;
+     - the focus ring is half a box-shadow, which the mode drops.
+
+   System colours are not overridden by the mode, so naming them is enough;
+   `forced-color-adjust` is switched off only where the label sits on
+   Highlight (see the note there). `!important` because each
+   of these states is written in several places at several specificities
+   (`.ribbon .btn[aria-pressed]`, `.btn.icon[aria-pressed]`, `.segmented > …`)
+   and this block has to answer for all of them, whichever wins on screen.
+   The hover ring on list rows is an outline and already survives
+   (zebra.spec.ts, "forced-colors: şerit Canvas olur"); nothing here touches it. */
+@media (forced-colors: active) {
+  .card,
+  .pool-card {
+    border: 1px solid CanvasText !important;
+  }
+
+  .btn[aria-pressed='true'],
+  .chip[aria-pressed='true'],
+  .swatch[aria-pressed='true'],
+  .card-pin[aria-pressed='true'],
+  .tab[aria-current='true'] {
+    background: Highlight !important;
+    color: HighlightText !important;
+    border-color: Highlight !important;
+    /* Without this the mode paints its Canvas backplate behind the label, and
+       HighlightText on that backplate is white on white — measured, the word
+       vanished from every pressed control. Inherited, so the label and the
+       icon inside are covered too. */
+    forced-color-adjust: none;
+  }
+
+  .btn[aria-pressed='true'] svg,
+  .tab[aria-current='true'] svg {
+    color: HighlightText !important;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 2px;
   }
 }
