@@ -1031,6 +1031,12 @@ const EN: Sozluk = {
     "{kim} is only available on {acik} days but one lesson needs placing {n} times a week; it may land twice on one day.",
   "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.":
     "{ders} is split into {n} separate blocks with no single hour left over; that is the only shape the solver can try.",
+  "{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:":
+    "{n} lessons need placing more times a week than there are days; each will land twice on at least one day:",
+  "{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:":
+    "{n} teachers have fewer open days than one of their lessons needs; it may land twice on one day:",
+  "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:":
+    "{n} lessons are split into blocks with no single hour left over; that is the only shape the solver can try:",
 
   // src/import.ts
   '{n}. satır: "{ad}" iki kez geçiyor, biri alındı.':
@@ -1171,8 +1177,6 @@ const EN: Sozluk = {
     "Block shape",
   "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
     "Pick one way; each is enough on its own, and the classes' hours are never touched.",
-  "{yol}: aranıyor…":
-    "{yol}: looking…",
   "Uygula":
     "Apply",
   "Uygula, baştan diz":
@@ -1183,6 +1187,12 @@ const EN: Sozluk = {
     "Take back: {ne}",
   "(daha iyisi aranıyor)":
     "(looking for a better one)",
+  "Başka yollar da aranıyor… {sure} sn":
+    "Looking for other ways too… {sure} s",
+  "Aramanın ilerlemesi":
+    "Search progress",
+  "Başka yollar ({n})":
+    "Other ways ({n})",
   "(inceltilmedi)":
     "(not refined)",
   "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":

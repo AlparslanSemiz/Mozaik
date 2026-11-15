@@ -1,4 +1,4 @@
-import { type ReportRow, type LoadStatus, loadStatus } from '../feasibility';
+import { type ReportRow, type LoadStatus } from '../feasibility';
 import type { Facet } from '../listview';
 import type { Id } from '../../leaf/model';
 import type { Vars } from '../../leaf/i18n';
@@ -25,7 +25,8 @@ export function loadStatusFacet<T extends { id: Id }>(rows: ReportRow[], t: Tran
     label: t('Yük durumu'),
     of: (item) => {
       const row = byId.get(item.id);
-      return row === undefined ? '' : t(STATUS_KEYS[loadStatus(row.capacity, row.load)]);
+      // The row's own level, so a list and Kontrol cannot disagree (a class has no "tight").
+      return row === undefined ? '' : t(STATUS_KEYS[row.load === 0 ? 'empty' : row.level]);
     },
     order: (label) => {
       const rank = labels.indexOf(label);

@@ -7,9 +7,11 @@
 // reads the suggestion with the timetable still in view, and it stays open while
 // the search goes on to the next way.
 //
-// The ways keep their places (FAMILY_ORDER, the user's own list first): one
-// still being looked for holds its row with "aranıyor…", so a way found later
-// fills its row instead of pushing the others down.
+// The ways keep their order (FAMILY_ORDER, the user's own list first), and
+// only the first of the found ways in that order is open: the others fold under "Başka yollar (N)"
+// (2026-11-15, the father's "less to read": six ways were ~195 words and 19
+// buttons). While the search runs the panel says so in one line with a
+// progress bar, not a row per way still being looked for.
 //
 // A way's details are its questions ("cevap defteri", 2026-09-25): what the
 // father asks each teacher, answered "Olur" or "Olmaz" in one of four
@@ -33,7 +35,7 @@ import { type Translate, useT } from '../common';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnswerBook, QuestionSheet } from './AnswerBook';
 
-/** What each way asks for, in a few words: the row's name while it is looked for. */
+/** What each way asks for, in a few words: the heading of its questions and of the preview bar. */
 export function wayName(t: Translate, family: RelaxFamily): string {
   switch (family) {
     case 'teacherDays':
@@ -93,6 +95,9 @@ export default function Suggestions({
   const first = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState<ReadonlySet<RelaxFamily>>(new Set());
   const [printing, setPrinting] = useState<Suggestion | null>(null);
+  // Whether "Başka yollar" is open. Kept while the search runs again after an
+  // answer, so an opened fold stays open.
+  const [more, setMore] = useState(false);
   const { suggestions, searching, stopped, progress } = advice;
   const as = suggestions.find((s) => s.changes.length === 0);
   // Two pinned lessons that break a relation: the search was not run, and
@@ -189,25 +194,90 @@ export default function Suggestions({
     );
   }
 
-  // One row per way, in the fixed order; two ways that ask for the same thing
-  // are one row, in the first one's place, and a hand-over way outdone by the
-  // other on both counts is not shown.
-  const rows: Array<{ family: RelaxFamily; found: Suggestion | null }> = [];
+  // One row per way found, in the fixed order; two ways that ask for the same
+  // thing are one row, in the first one's place, and a hand-over way outdone
+  // by the other on both counts is not shown.
+  const rows: Array<{ family: RelaxFamily; found: Suggestion }> = [];
   const finished = new Set(progress?.finished ?? []);
   for (const family of FAMILY_ORDER) {
-    const found = suggestions.find((s) => s.family === family) ?? null;
-    if (found !== null) {
-      if (rows.some((r) => r.found !== null && sameChanges(r.found, found))) continue;
-      if (suggestions.some((s) => s !== found && outdone(found, s))) continue;
-      rows.push({ family, found });
-    } else if (searching && !finished.has(family)) {
-      rows.push({ family, found: null });
-    }
+    const found = suggestions.find((s) => s.family === family);
+    if (found === undefined) continue;
+    if (rows.some((r) => sameChanges(r.found, found))) continue;
+    if (suggestions.some((s) => s !== found && outdone(found, s))) continue;
+    rows.push({ family, found });
   }
-  const firstFound = rows.find((r) => r.found !== null)?.family;
+  const sure = Math.round((progress?.elapsedMs ?? 0) / 1000);
   // Not once the plan moved: the stale note below then speaks alone.
   const why =
     !stale && !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
+
+  const way = ({ family, found }: { family: RelaxFamily; found: Suggestion }, folded: boolean) => {
+    const shown = open.has(family);
+    const detailId = `suggestion-${family}`;
+    const previewed = preview?.family === family;
+    return (
+      <li
+        key={family}
+        data-family={family}
+        hidden={folded}
+        className={previewed ? 'previewed' : undefined}
+      >
+        <div className="suggestion-row">
+          <span className="suggestion-title">
+            {suggestionSentence(state, found)}
+            {searching && !finished.has(family) && (
+              <span className="hint inline"> {t('(daha iyisi aranıyor)')}</span>
+            )}
+            {stopped && !finished.has(family) && (
+              <span className="hint inline"> {t('(inceltilmedi)')}</span>
+            )}
+          </span>
+          <button
+            className="btn"
+            aria-pressed={previewed}
+            onClick={() => onPreview(previewed ? null : { family, show: 'after' })}
+          >
+            {t('Izgarada göster')}
+          </button>
+          <button
+            ref={family === rows[0]?.family ? first : undefined}
+            className="btn primary"
+            disabled={stale}
+            onClick={() => onApply(found)}
+          >
+            {found.relaid ? t('Uygula, baştan diz') : t('Uygula')}
+          </button>
+          <button
+            className="btn"
+            aria-expanded={shown}
+            aria-controls={detailId}
+            onClick={() =>
+              setOpen((prev) => {
+                const next = new Set(prev);
+                if (shown) next.delete(family);
+                else next.add(family);
+                return next;
+              })
+            }
+          >
+            {shown ? t('Soruları gizle') : t('Sorular')}
+          </button>
+        </div>
+        {shown && (
+          <div id={detailId} className="suggestion-detail">
+            <p className="hint">{wayName(t, family)}</p>
+            <AnswerBook
+              found={found}
+              state={state}
+              unfinished={stopped && !finished.has(family)}
+              onAnswer={onAnswer}
+              onPrint={setPrinting}
+            />
+          </div>
+        )}
+      </li>
+    );
+  };
 
   return (
     <section className="panel suggestions" aria-labelledby="suggestions-title">
@@ -219,10 +289,10 @@ export default function Suggestions({
           <span className="suggestion-title">{why}</span>
         ) : (
           <span className="hint inline">
-            {searching && suggestions.length === 0
-              ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
-                  sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
-                })
+            {searching
+              ? rows.length === 0
+                ? t('Nasıl kurulacağı aranıyor… {sure} sn', { sure })
+                : t('Başka yollar da aranıyor… {sure} sn', { sure })
               : stopped
                 ? rows.length === 0
                   ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
@@ -233,6 +303,14 @@ export default function Suggestions({
                       'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
                     )}
           </span>
+        )}
+        {searching && (
+          <progress
+            className="suggestion-progress"
+            max={FAMILY_ORDER.length}
+            value={finished.size}
+            aria-label={t('Aramanın ilerlemesi')}
+          />
         )}
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">
@@ -251,78 +329,28 @@ export default function Suggestions({
         </button>
       </div>
       {answerLine}
+      {/* ONE list, every way keyed by its family, and the fold is only
+          `hidden`: when a way earlier in the order turns up mid-search, the
+          old first row moves down without being redrawn, so its open
+          questions and the keyboard's place in it survive. */}
       {rows.length > 0 && (
         <ol className="suggestion-list">
-          {rows.map(({ family, found }) => {
-            if (found === null) {
-              return (
-                <li key={family} className="suggestion-pending" data-family={family}>
-                  <span className="hint inline">
-                    {t('{yol}: aranıyor…', { yol: wayName(t, family) })}
-                  </span>
-                </li>
-              );
-            }
-            const shown = open.has(family);
-            const detailId = `suggestion-${family}`;
-            const previewed = preview?.family === family;
-            return (
-              <li key={family} data-family={family} className={previewed ? 'previewed' : undefined}>
-                <div className="suggestion-row">
-                  <span className="suggestion-title">
-                    {suggestionSentence(state, found)}
-                    {searching && !finished.has(family) && (
-                      <span className="hint inline"> {t('(daha iyisi aranıyor)')}</span>
-                    )}
-                    {stopped && !finished.has(family) && (
-                      <span className="hint inline"> {t('(inceltilmedi)')}</span>
-                    )}
-                  </span>
-                  <button
-                    className="btn"
-                    aria-pressed={previewed}
-                    onClick={() => onPreview(previewed ? null : { family, show: 'after' })}
-                  >
-                    {t('Izgarada göster')}
-                  </button>
-                  <button
-                    ref={family === firstFound ? first : undefined}
-                    className="btn primary"
-                    disabled={stale}
-                    onClick={() => onApply(found)}
-                  >
-                    {found.relaid ? t('Uygula, baştan diz') : t('Uygula')}
-                  </button>
-                  <button
-                    className="btn"
-                    aria-expanded={shown}
-                    aria-controls={detailId}
-                    onClick={() =>
-                      setOpen((prev) => {
-                        const next = new Set(prev);
-                        if (shown) next.delete(family);
-                        else next.add(family);
-                        return next;
-                      })
-                    }
-                  >
-                    {shown ? t('Soruları gizle') : t('Sorular')}
-                  </button>
-                </div>
-                {shown && (
-                  <div id={detailId} className="suggestion-detail">
-                    <p className="hint">{wayName(t, family)}</p>
-                    <AnswerBook
-                      found={found}
-                      state={state}
-                      unfinished={stopped && !finished.has(family)}
-                      onAnswer={onAnswer}
-                      onPrint={setPrinting}
-                    />
-                  </div>
-                )}
-              </li>
-            );
+          {rows.flatMap((row, i) => {
+            const li = way(row, i > 0 && !more);
+            return i === 0 && rows.length > 1
+              ? [
+                  li,
+                  <li key="more" className="suggestion-more">
+                    <button
+                      className="suggestion-more-toggle"
+                      aria-expanded={more}
+                      onClick={() => setMore((m) => !m)}
+                    >
+                      {more ? '▾' : '▸'} {t('Başka yollar ({n})', { n: rows.length - 1 })}
+                    </button>
+                  </li>,
+                ]
+              : [li];
           })}
         </ol>
       )}

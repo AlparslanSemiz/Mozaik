@@ -8,6 +8,7 @@
  */
 export {
   capacityLevel,
+  classCapacityLevel,
   loadStatus,
   type Level,
   type LoadStatus,

@@ -43,7 +43,9 @@ const BILINEN: Record<string, Record<string, number>> = {
   'Boş proje': { region: 1 },
   Okul: { region: 1, label: 8, 'empty-table-header': 2 },
   Müsaitlik: { region: 1, 'empty-table-header': 2 },
-  Dersler: { region: 1, label: 6, 'label-title-only': 6, 'empty-table-header': 2 },
+  // Dersler's weekly-hours box and every LimitBox carry an aria-label now
+  // (2026-11-15, `kullanim/sadelik`).
+  Dersler: { region: 1, 'empty-table-header': 2 },
   Program: {
     region: 1,
     'empty-table-header': 6,

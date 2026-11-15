@@ -115,6 +115,14 @@ function fit(table: HTMLElement, fitted: Fitted) {
 export function attachGridFit(wrap: HTMLElement): () => void {
   let fitted: Fitted = new WeakMap();
   let frame = 0;
+  // Has the box a width of its own yet: written by an earlier attach (the tab
+  // came back), or the observer below has answered once.
+  let observed = false;
+  const measured = () => observed || wrap.style.getPropertyValue('--wrap-w') !== '';
+  const run = () => {
+    const table = wrap.querySelector<HTMLElement>('table.grid');
+    if (table !== null) fit(table, fitted);
+  };
   // `fresh`: the size every ratio multiplies has changed (density, scale, the
   // font), so no line's last fit says anything any more.
   const schedule = (fresh = false) => {
@@ -122,8 +130,10 @@ export function attachGridFit(wrap: HTMLElement): () => void {
     if (frame !== 0) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      const table = wrap.querySelector<HTMLElement>('table.grid');
-      if (table !== null) fit(table, fitted);
+      // Not before the box has a width of its own: on the very first attach
+      // the first fit is the observer's, below. When the tab comes back the
+      // width from before is still on the box and this one runs, as it did.
+      if (measured()) run();
     });
   };
 
@@ -135,10 +145,23 @@ export function attachGridFit(wrap: HTMLElement): () => void {
   // cell, and on the father's week each of those was 53ms, not Rahat's 1.8;
   // 22% of frames dropped at x1. The same value as a px number: 2554ms of
   // layout in a sweep down to 185, and none dropped (2026-09-26).
+  //
+  // Until that first write the column is still `100cqw`, and so is the cost:
+  // a fit then, writing `--fit` and reading it back, re-laid the whole table
+  // against the container (60ms at x1 on the father's week, the first time
+  // Program opens in Sığdır). So the first fit waits for the width and runs
+  // here, in the same frame, before it is painted: the layout it forces is
+  // the one the new width needed anyway, and its read-back is a few ms.
   const resize = new ResizeObserver(([entry]) => {
+    const first = !measured();
+    observed = true;
     const width = entry?.contentBoxSize[0]?.inlineSize;
     if (width !== undefined) wrap.style.setProperty('--wrap-w', `${width}px`);
-    schedule();
+    if (first) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      run();
+    } else schedule();
   });
   resize.observe(wrap);
   // Text and rows, not attributes: a drag toggles classes on every move, and

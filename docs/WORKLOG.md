@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
+Son güncelleme: 2026-11-15 (`kullanim/sadelik`, sade ekranın ilk dilimi); öncesi 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -87,7 +87,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
-   KS ve Ö maddelerinin önünde.
+   KS ve Ö maddelerinin önünde. İlk dilimi `kullanim/sadelik`'te (2026-11-15, aşağıdaki girdi);
+   karar isteyen kalanı TODO §8m (SD1–SD6).
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel; rpm 2026-10-10'da bırakıldı, B7.28). B7.22 (Sığdır'ın gün
@@ -181,6 +182,7 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 | Güncelleme kapısı | gerçek `update.rs` akışıyla 1 geçti (2026-10-24 gece, `tp7-windows-exe`); önceki biçimi (yalnız dosya takası) iki koşuda yeşildi (`ogretmene-eposta`) | `guncelleme-windows.yml` 40128285002; 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
+| Program'ın ilk açılışı, Sığdır, babanın haftası | 103,5–118,1 ms medyan x1, 327,1–504,6 ms x4; öncesi 155,5–157,9 ve 548,3–746,8 (2026-11-15, `hiz/sigdir`, KİRLİ: yük ortalaması 16–107) | `scratch/olc-ab.mjs`, 7 koşu, iç içe A/B |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/pure/solver/solver.test.ts`, "gerçek ölçek" |
@@ -279,6 +281,145 @@ Sonuç: ikinci bakış kapalı (`CP_SECOND_LOOK`), sıradaki iş CP-SAT'a kendi 
 **Ders.** `git switch`, commit'lenmemiş değişikliği yeni dala taşır ve `commit -a` onu oraya
 yazar: CP-SAT'ın dört dosyası bir kez kurulum dalına girdi, geri alındı (9fa2586). Dal
 değiştirmeden önce commit.
+
+## 2026-11-15 · Sınıfta "Sıkışık" yok (`kullanim/sikisik`, TODO SD2)
+
+Kullanılabilirlik ölçümünün bulgusu: tam dolu kursta 20 sınıfın 20'si sarı "Sıkışık", çünkü
+eşik yükün açık saate oranı 0,85 ve dershanede eşitlik olağan. Sınıf satırı artık
+`classCapacityLevel` ile: aşınca "İmkânsız", yoksa "Uygun". Öğretmen ve derslik değişmedi.
+Listelerin "Yük durumu" süzgeci satırın kendi seviyesini okuyor (Kontrol'le ayrışamaz).
+Babanın verisinde Kontrol → Sınıflar: 0 sıkışık (önce 20), Öğretmenler 1. `feasibility` ve
+`lists` birim testleri, `kontrol.spec.ts` ve `liste.spec.ts` 33/33.
+
+## 2026-11-15 · vite 8 ve size-limit 14 (`bagimlilik/vite8`, Dependabot #7 ve #8)
+
+vite 8.3.8 (Rolldown), @vitejs/plugin-react 6.3, size-limit ve @size-limit/file 14.3; vitest 4.1
+yerinde. `dist/` yine tek `index.html` (vite-plugin-singlefile 2.3.3), ve küçüldü: ham eşiğin
+5,45 kB, brotli eşiğinin 10,82 kB altında (önce 2,12 kB ve 1,98 kB). `tsc` (iki config),
+`build:site`, `hizli` (1525 yeşil, 4 atlandı), ve Playwright `temel`, `yazdir`, `otomatik`
+87/87 bu makinede; ana E2E'nin gerisi CI'da.
+
+## 2026-11-15 · Bağımlılıklar: Dependabot'un açık PR'ları (`bagimlilik/actions`)
+
+Tek dalda: setup-node 7, download-artifact 8 (#12, #11), Rust'ın küçükleri, `sha2` 0.11 ve
+`minisign-verify` 0.3 (#30–#32; `cargo test` 56 yeşil, imza testleri dahil), ve npm'in
+geliştirme paketleri (#33'ün yarısı). **#33'ün çalışma zamanı yarısı alınmadı:** React 19.3 ham
+dosyaya 29,6 kB, lucide 1.72 ve Radix'in küçükleri ~4 kB daha ekliyor (her biri tek tek geri
+alınarak ölçüldü: hepsi yeni 1 244 741 B, React eski 1 215 168, lucide eski 1 241 314, Radix eski
+1 240 873); karşılığında bir şey kazanılmıyor. Brotli eşiği 292 000 B: #28 ve #29'dan sonra CI'da
+104 B, bu makinede −17 B pay kalmıştı. `file://` açılışı, CPU 4× yavaş, 7 koşu medyanı (kirli):
+sabahki `main` (1 178 508 B) 188 ms, bugünkü (1 207 882 B) 190 ms.
+
+## 2026-11-15 · Sığdır'ın ilk açılışı: ilk oran `--wrap-w` yazılmadan ölçülmüyor (`hiz/sigdir`, B4.9)
+
+**Başlangıç.** Arayüz performansı raporu (2026-11-15, `84a72b8`): Sığdır'da Okul → Program
+ilk geçiş x1 323 ms, x4 640–960 ms, ve fazlası `gridFit.ts`'te: `--fit` yazılıp
+`overflows()` ile geri okununca neredeyse tam ikinci bir tablo yerleşimi. Öneri, oranı
+`canvas.measureText` ile yerleşimsiz hesaplamaktı.
+
+**Sebep ölçüldü ve başka çıktı (tuzak 101).** Yerleşmiş bir Sığdır'da 79 küçülmüş satırın
+`--fit`'ini değiştirip bir kez okumak x1'de 4,2 ms (`scratch/olc-yazoku.mjs`), yani yazıp
+okumanın kendisi pahalı değil. Pahalı olan ilk açılışta tablonun hâlâ `100cqw`'den
+yerleşmesi: Activity gizliyken efekt yok, `attachGridFit` ilk görünüşte bağlanıyor, ve
+`ResizeObserver`'ın ilk çağrısı (`--wrap-w`'nin ilk yazılışı) aynı karede `fit`'in rAF'ından
+SONRA geliyor. O rAF'taki ilk geri okuma tabloyu konteynere karşı yeniden yerleştiriyordu
+(x1 59,8 ms, tuzak 141'in sürükleme kasmasındaki aynı maliyet). Kanıt: sayfaya
+`.grid-wrap { --wrap-w: 1920px }` enjekte edilince ilk açılış x1 153 → 51, x4 645 → 224 ms
+(3 koşu, kirli). `contain: size layout` satırlarda işe yaramadı (167 → 209, x4 703 → 745).
+
+**Çare.** `gridFit.ts`: rAF, `--wrap-w` yazılmadan oranı ölçmüyor; ilk ölçüm
+`ResizeObserver`'ın ilk çağrısında, genişlik yazıldıktan hemen sonra, aynı karede ve
+boyamadan önce koşuyor. Ölçüm yöntemi (Range ile `getBoundingClientRect`, tuzak 140) ve
+oranın hesabı değişmedi; canvas'a gerek kalmadı. Kalan büyük parça commit'teki ilk
+yerleşim (LessonPool'un `useLayoutEffect`'i), o hâlâ `100cqw` ile ve x1 65–73 ms; onu
+kaldırmak `--wrap-w`'yi ilk yerleşimden önce bilmeyi ister, ve havuzun ölçümü tablonun o
+yerleşimine bakıyor (tuzak 121), yani ayrı bir iş.
+
+**Ölçüm (KİRLİ: `agir.sh` macOS'ta `flock` olmadan çalışmıyor, kilitsiz koşuldu; yük
+ortalaması 16–94, 8 çekirdek).** Babanın haftası (`tam-dolu-kurs-dizili.json`), 1920×1080,
+`file://`, `scratch/olc-ab.mjs` 7 koşu iç içe ve karışık sırayla, medyan, tıklamadan iki rAF'a:
+
+| Sığdır, Okul → Program | önce (`origin/main` db869d2) | sonra |
+|---|---|---|
+| ilk, x1, 1. koşu · 2. koşu | 155,5 · 157,9 ms | 118,1 · 103,5 ms (−%24 · −%34) |
+| ilk, x4, 1. koşu · 2. koşu | 746,8 · 548,3 ms | 504,6 · 327,1 ms (−%32 · −%40) |
+| sıcak, x1 · x4 (1. koşu) | 29,8 · 137,2 | 29,2 · 134,2 |
+| Rahat ilk, x1 · x4 (5 koşu) | 52,2 · 173,4 | 49,3 · 142,9 (gürültü) |
+| Açılış Sığdır, ızgara + 2 rAF, x1 (7 koşu, A-B-A) | 174,7 · 177,7 | 144,2 |
+
+İki koşu arasında kod bir kez değişti, Chromium'da davranışı aynı: `contentBoxSize`'ı
+vermeyen eski bir motorda ilk oran hiç ölçülmesin diye, gözlemcinin ilk cevabı genişlik
+yazılmasa da ölçümü başlatıyor. Ölçülen kazancın üst sınırı (`fit` kapalı) ile karşılaştırma:
+bu çare x1'de en az onun kadar hızlı (aynı gün, ayrı A/B koşularında fit kapalı 115–119 ms, kirli aralıklar örtüşüyor), çünkü kaldırılan yerleşim
+`fit`'in kendi işi değil `100cqw`'nin bedeliydi.
+
+**Görüntü birebir aynı.** `scratch/olc-goruntu.mjs`: iki veri (babanın haftası ve `v17.json`),
+iki kutu (1920×1080 ve 1536×864 DPR 1,25), iki yol (Okul → Program ilk geçiş, Program'a
+yeniden yükleme), iki glif ölçüsü (bu makinenin ve `--font-render-hinting=none`, tuzak 146):
+16 karşılaştırmanın 16'sında piksel farkı 0, 228 satırın `--fit` dizisi, `--wrap-w`, tablo
+kutusu ve kırpılan satır sayısı aynı. Aletin farkı görebildiği kanıtlandı: `fit` kapalı
+derleme 14 143 piksel farklı çıkıyor. İlk boyanan karede oranlar yazılı (ikinci rAF'ta 79/79,
+öncesiyle aynı), yani "…" ile bir kare görünüp küçülme yok.
+
+**Koşulanlar.** `npx tsc --noEmit` 0, `npx eslint src` 0, `npx playwright test
+e2e/gorunum.spec.ts e2e/izgara.spec.ts` 46/46 (45b'nin sürükleme yerleşim oranı dahil;
+`agir.sh` olmadan). `npm run hizli`: 59 dosyanın 55'i geçti, kırmızılar beş dosyada
+(`agir.test.ts`: `flock` yok; `linuxKur.test.ts`: zaman aşımı; `emptyStart.test.ts`,
+`otherWindow.test.ts`, `rowOrder.test.tsx`: `localStorage` tanımsız, Node 26) ve aynı beş
+dosya `origin/main`'de de aynı biçimde kırmızı, yani bu makinenin ortamı, değişiklik değil.
+
+## 2026-11-15 · Sade ekranın ilk dilimi (`kullanim/sadelik`)
+
+`main` db869d2'den. **Neden bu iş.** Babanın 1 numaralı isteği (daha az yazı, daha az soru) için
+tam dolu kursla (`src/fixtures/tam-dolu-kurs-dizili.json`) bir kullanılabilirlik ölçümü yapıldı
+(dalın dışında, oturumun scratch'inde). Önerilerinden karar istemeyenler bu dalda, her biri kendi
+commit'inde; kalanı TODO §8m.
+
+**Yapılan.**
+- Çıktı, koyu tema: önizleme kâğıdı koyu `--paper`'ı alıyordu ve kart yazısı (miras `--text`) pastel
+  zeminde 1,91:1'di. `.print-sheet` koyu temada açık paletin değerlerini yeniden tanımlıyor; koyu
+  temanın `--print-line` ve `--print-head-bg` geçersizlemesi kalktı. `yazdir.spec.ts`'in koyu tema
+  testi artık kâğıdın kendisini ölçüyor (açık, çizgi 3:1, en kötü kart 4,5:1, en az bir kart).
+  Basılan kâğıt değişmedi (PDF ve `print` medyasıyla bakıldı).
+- Çıktı, kâğıt: basılan kâğıda açık bir bildirim çıkıyordu ("Yedek yüklendi.", `position: fixed`,
+  her sayfada). `.toasts` `@media print`'te gizli; gerileme testi `yazdir.spec.ts`'te, önce kırmızı.
+- Öneri paneli: yalnız sırada bulunan ilk yol açık, ötekiler "Başka yollar (N)" düğmesinin altında
+  `hidden`. Tek liste, satırlar ailesiyle anahtarlı: arama sürerken sırada daha önde bir yol bulununca
+  eski ilk satır yeniden çizilmeden aşağı iner (açık soruları ve klavye odağı kalır). Katın
+  açıklığı panelin durumunda, her cevap aramayı yeniden başlatınca kapanmıyor. Arama sürerken
+  her yol için bir "aranıyor" satırı yerine saniyeli tek cümle ve bir `<progress>`. Tam dolu kursta
+  bitmiş panel 54 görünen kelime ve 5 düğme, `Kapat` ve kat dahil (rapor: ~195 kelime, 19 düğme);
+  arama 25–35 s.
+  `otomatik.spec.ts`'in uzun testine yalnız katı açan bir adım eklendi.
+- Erişim: Dersler satırındaki haftalık saat kutusu ve bütün `LimitBox`'lar `aria-label` taşıyor
+  (Dersler'de satırın adıyla). `.chip-count` opaklığı kalktı (3,69:1 idi). Tam dolu kursta axe:
+  Dersler · Genel `label` 146 → 0, `label-title-only` 146 → 0, `color-contrast` 16 → 0;
+  Öğretmenler `label-title-only` 54 → 0, `color-contrast` 2 → 0, `label` 36 kaldı (SD6).
+  `erisim.spec.ts`'in `BILINEN`'inde Dersler'in iki satırı silindi.
+- Kontrol · Danışman: aynı türden notlar tek satırda ("5 ders bloklara bölünmüş …: adlar"), tek kalan
+  kendi cümlesiyle. `Advice`'a `who` eklendi (DENETIM KS22, Ö38).
+
+**Yapılmayan.** "Geri al" bildirimi (SD1: `Toasts.tsx` bilerek eylemsiz, geri al yığınına kimlik
+gerekiyor), sınıflarda "Sıkışık" (SD2, karar), plan ve program (SD3, karar), Yerleşemeyen dersler
+(SD4), raporun öteki önerileri (SD5).
+
+**Ölçüm.** `dist/index.html` 1 207 760 bayt, brotli 289,75 kB, `main` (355481a) birleştikten sonra
+(eşikler 1 210 000 ve 290 000, ikisi de altında ama brotli payı 250 B; bir sonraki dal eşiği
+aşabilir).
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`). Düzelen: katın dışından içine geçen
+satır yeniden çiziliyordu (yukarıda), koyu temanın kâğıt kuralı basılan kâğıtta da geçerliydi ve
+`@media print`'in sabitlerini birkaç hex eziyordu (artık `@media screen`), dört bayat yorum ve belge
+cümlesi, `gercek-exe.spec.ts`'te ölü `.suggestion-pending` seçicisi. Bırakılan: Danışman başlığının not
+sayısını sayması (satır değil; not sayısı doğru bilgi), toplanan cümlede kişiye özel sayının
+kaybolması (Ö38'in bilinçli bedeli), `exe.spec.ts` farkı (`main`'den gelen birleştirme, bu dalın değil).
+
+**Koşulan.** `tsc`, `eslint src`, `npm run sinir` yeşil; `npm run hizli` 1525 testin 1514'ü geçti, 11
+kırmızı dört dosyada (`agir.test.ts`: bu Mac'te `flock` yok; `emptyStart`, `otherWindow`, `rowOrder`:
+aynı 11'i `origin/main`'in temiz kopyasında da kırmızı, Node 26'nın `localStorage`'ı ile ilgili gibi,
+ölçülmedi); `size-limit` yeşil; Playwright `yazdir`, `kontrol`, `liste`, `erisim`, `metin` 78/78,
+`otomatik` 15/15 (uzun test 2,3 dk). `scripts/agir.sh` bu makinede koşmuyor (`flock` yok), Playwright
+doğrudan ve tek oturumda koşuldu. **Koşulmayan.** Ana E2E'nin geri kalanı, WebKit, gerçek exe (CI'da).
 
 ## 2026-11-15 · Güvenlik sertleştirmesi (`guvenlik/sertlestirme`, B7.39)
 

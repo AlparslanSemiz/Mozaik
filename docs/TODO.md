@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu), kullanılabilirlik raporunun bıraktıkları (§8m) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -503,6 +503,10 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       alındı ([PRINCIPLES.md](PRINCIPLES.md), "Hedef makine"). Aynı desen B4.7'de
       de yaşandı, birinci tur yanlış yeri ölçtü ve şikayet ikinci kez geldi, yani
       bu maddenin üçüncü kez gelmemesi ölçümün doğru yere bakmasına bağlı.
+      2026-11-15 (`hiz/sigdir`): Sığdır'ın ilk açılışındaki ikinci yerleşim kalktı, x1
+      156–158 → 104–118 ms, x4 548–747 → 327–505 (kirli), görüntü piksel piksel aynı ([WORKLOG.md](WORKLOG.md)).
+      Kalan: ilk yerleşimin kendisi hâlâ `100cqw` ile (x1 65–73 ms), ve babanın Sığdır'da
+      olup olmadığı sorulmadı.
 - [ ] **B4.10 "Programı boşalt" zaten kırmızı, görünen ağırlığı ölçülmedi.**
       Senin satırın: *"Program kısmında sağ üstteki işlemlerde programı boşalt
       kırmızı olmalı ya da işte önemli bir işlem."* Ölçüldü ve renk yerinde:
@@ -1316,7 +1320,10 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       için etiketsiz. Muhtemel çare `aria-label` ya da `aria-labelledby` ile sütun
       başlığına bağlamak. Ölçülmeden yazılmaz: bu kadar çok kutuya etiket eklemek
       `metin.spec.ts`'in taradığı metni de değiştirebilir.
-- [ ] **`label-title-only` · Dersler'de 6 kutu.** Etiketi yalnız `title`'da. Ciddi
+      **Dersler yapıldı (2026-11-15, `kullanim/sadelik`):** haftalık saat kutusu satırın adıyla
+      adlı, `metin.spec.ts` yeşil. Okul'daki ve Kurallar'daki kutular açık (§8m SD6).
+- [x] **`label-title-only` · Dersler'de 6 kutu.** Yapıldı (2026-11-15, `kullanim/sadelik`): her
+      `LimitBox` bir `aria-label` taşıyor (verilmezse `title`'ı), Dersler'de satırın adıyla. Ciddi
       seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
       için görünür.
 - [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
@@ -1924,6 +1931,51 @@ testi o commit'te sıradan bir teste döner.
       `src/pure/io/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
       delik daha buldu ve aynı dalda kapandı: `state`'i nesne olmayan girdi okunamayan sayılıyor,
       depo doluyken hiçbir plan yazılamazsa buradaki planlar silinmiyor; B7.34–B7.36 açık.
+
+### 8m · Kullanılabilirlik raporunun bıraktıkları (2026-11-15)
+
+Babanın 1 numaralı isteği (§0: daha az yazı, daha az soru) için tam dolu kursla
+(`src/fixtures/tam-dolu-kurs-dizili.json`) yapılan ölçüm. Kararsız beşi `kullanim/sadelik`'te
+yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâğıda çıkması, öneri
+panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
+`.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
+
+- [ ] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Ders silme
+      (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
+      sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
+      `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın
+      başka bir düzenlemede ilerler; yanlış değişikliği sessizce geri alan bir düğme hiç
+      olmamasından kötü"). Önce yığının bir adımını kimlikle bilmek (bildirimin düğmesi yalnız
+      o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
+      (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
+      Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
+- [x] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Bitti (2026-11-15,
+      `kullanim/sikisik`, Alp: "her düzeltmeyi yap"): öneri uygulandı, sınıfta `classCapacityLevel`,
+      liste süzgeci satırın kendi seviyesini okuyor. "Haftanın doluluğu" satırları duruyor (ayrı karar). Tam dolu kursta 20
+      sınıfın 20'si sarı "Sıkışık" (`capacityLevel`, eşik yükün açık saate oranı 0,85). Dershanede
+      eşitlik olağan. Rapor: yalnız aşan satır rozet alsın, Kontrol'deki "Haftanın doluluğu %23"
+      ve "Boş kalan sınıf saati 1110" kalksın. Yapılmadı, çünkü bir karar: eşik Kontrol'ün
+      hükmünü, listelerin "Yük durumu" süzgecini ve renkleri birlikte değiştiriyor, ve
+      öğretmen ile derslik satırlarında aynı kural mı kalacak, ayrı mı, söylenmedi.
+      Öneri: sınıflarda "Sıkışık" hiç çıkmasın (yalnız aşınca "İmkânsız"), öğretmen ve
+      derslikte bugünkü gibi kalsın.
+- [ ] **SD3 · Plan ve program iki kavram (rapor öneri 4).** Üst çubukta "1. plan", şeritte
+      "Program 1". Babaya tek kavram görünsün mü, LAYOUT bunun tersini gerekçeli seçmiş. Karar
+      sende.
+- [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
+      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
+      ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama
+      "örnek sebep"in ne söyleyeceği bir karar (bugün ilk kapalı hücre, bilgi taşımıyor).
+- [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
+      yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
+      Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
+      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
+      klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
+- [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
+      kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
+      e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
+      36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).
+
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.

@@ -273,6 +273,9 @@ test.describe('22. Otomatik dizme', () => {
       });
       // The rules way is there too, in its own words.
       await expect(panel.locator('li[data-family="rules"]')).toContainText('olabilirse');
+      // Only the first way is open; the others fold under "Başka yollar (N)"
+      // (2026-11-15). Open the fold when the fewest-hours way is in it.
+      if (await fewest.isHidden()) await panel.locator('.suggestion-more button').click();
 
       // "Olmaz" on the first question of the fewest-hours way, meant as "that
       // day not at all": the search runs again, the answer is listed, and no

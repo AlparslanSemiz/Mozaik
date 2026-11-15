@@ -17,6 +17,17 @@ export function capacityLevel(capacity: number, load: number): Level {
   return 'ok';
 }
 
+/**
+ * The ladder for a CLASS: no "tight". A course fills a class's open hours on
+ * purpose (open hours equal lesson hours is the father's normal), so 0.85 of
+ * them marked every class of a full course yellow, a warning that said nothing
+ * (usability review, TODO SD2, 2026-11-15). Over the open hours is still
+ * "impossible". Teachers and rooms keep the full ladder.
+ */
+export function classCapacityLevel(capacity: number, load: number): Level {
+  return load > capacity ? 'impossible' : 'ok';
+}
+
 /** Zero load is useful to filter separately even though it is feasible. */
 export function loadStatus(capacity: number, load: number): LoadStatus {
   return load === 0 ? 'empty' : capacityLevel(capacity, load);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  classCapacityLevel,
   buildAdvice,
   buildCapacity,
   buildReport,
@@ -87,6 +88,19 @@ function build(): State {
     relations: [],
   };
 }
+
+describe('sınıfın yük durumu: sıkışık yok (SD2)', () => {
+  it.each([
+    [100, 'ok'],
+    [90, 'ok'],
+    [101, 'impossible'],
+  ] as const)('100 açık saatte %s saat ders, sınıf için %s', (load, level) => {
+    expect(classCapacityLevel(100, load)).toBe(level);
+  });
+  it('öğretmende aynı yük hâlâ sıkışık', () => {
+    expect(capacityLevel(100, 90)).toBe('tight');
+  });
+});
 
 describe('yük durumu sınırları', () => {
   it.each([
