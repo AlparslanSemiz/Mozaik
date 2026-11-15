@@ -71,27 +71,37 @@ export function useReturnFocus(open: boolean): (event: Event) => void {
   const opener = useRef<HTMLElement | null>(null);
 
   // A LAYOUT effect: it runs before Radix's focus scope (a passive effect)
-  // moves focus into the dialog, so `activeElement` is still the opener.
+  // moves focus into the dialog, so `activeElement` is still the opener. It
+  // also runs before an `autoFocus` inside the dialog only because Radix's
+  // Portal renders nothing until its own layout effect has run; if that ever
+  // changes, the opener read here becomes the dialog's own input.
   useLayoutEffect(() => {
     listen();
     if (!open) return;
     const active = document.activeElement;
-    opener.current =
-      active instanceof HTMLElement && active !== document.body && !insideMenu(active)
-        ? active
-        : lastFocused;
+    if (active instanceof HTMLElement && active !== document.body && !insideMenu(active)) {
+      opener.current = active;
+    } else if (usable(lastFocused)) {
+      opener.current = lastFocused;
+    }
+    // Otherwise the opener of the dialog before this one stays: one question
+    // straight after another (two `confirm()`s) opens the second while focus
+    // is on <body> and the first one's button is gone, and the keyboard
+    // should still end up where the first was asked from.
   }, [open]);
 
   return useCallback((event: Event) => {
     event.preventDefault();
     const target = opener.current;
-    opener.current = null;
     const now = document.activeElement;
-    // Something already took focus on purpose: leave it there.
+    // Something already took focus on purpose: leave it there. The opener is
+    // kept for a dialog that may open next (see above).
     if (now instanceof HTMLElement && now !== document.body && now.isConnected) return;
+    opener.current = null;
     const next = usable(target) ? target : fallback();
-    // The fallback is a scroll box the size of the screen: scrolling it into
-    // view would only jump the page.
-    next?.focus({ preventScroll: next !== target });
+    // <main> is a scroll box the size of the screen: scrolling it into view
+    // would only jump the page. It is also what a click on empty content
+    // focuses, so it can be the opener itself.
+    next?.focus({ preventScroll: next === null || next.tagName === 'MAIN' });
   }, []);
 }

@@ -461,16 +461,19 @@ function Program({
 
           The live region is the FIRST span only, not the whole bar: the run's
           counter (`barCounter`) changes many times a second and sits beside
-          it, outside, so the start is said once and the result once. The bar
-          is `aria-busy` while the run lasts. */}
-      <div
-        className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
-        aria-busy={solver.running}
-      >
+          it, outside, so the start is said once and the result once. The
+          COUNTER is `aria-busy`, not the bar: a busy ancestor tells a screen
+          reader to hold back the live region inside it, and the start would
+          never be heard. */}
+      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
         <span role="status" aria-live="polite">
           {barText}
         </span>
-        {barCounter !== undefined && <span className="reason-count">{barCounter}</span>}
+        {barCounter !== undefined && (
+          <span className="reason-count" aria-busy="true">
+            {barCounter}
+          </span>
+        )}
         {((solver.result !== null && current.result) ||
           (solver.applied !== null && current.applied)) &&
           !solver.running && (

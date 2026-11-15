@@ -119,15 +119,16 @@ test.describe('90. Erişilebilirlik taraması', () => {
 
   // Every Okul step, not only the one the tab opens on: the teacher and class
   // rows, where most of the unnamed boxes were, are two steps away from the
-  // default and a scan of the default step never saw them.
-  test('Okul, her adımı ayrı, dolu veriyle', async ({ page }) => {
-    await openWithSample(page);
-
-    for (const adim of ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar']) {
+  // default and a scan of the default step never saw them. One test per step,
+  // like the screens above (TP22): four scans in one test took 36 s on an idle
+  // Mac and went over the budget on a loaded one.
+  for (const adim of ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar']) {
+    test(`Okul · ${adim}, dolu veriyle`, async ({ page }) => {
+      await openWithSample(page);
       await openSetup(page, adim);
       karsilastir(`Okul · ${adim}`, await tara(page));
-    }
-  });
+    });
+  }
 
   test('Müsaitlik ve Dersler, dolu veriyle', async ({ page }) => {
     await openWithSample(page);

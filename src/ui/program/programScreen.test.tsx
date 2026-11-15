@@ -354,7 +354,7 @@ function bar(): string {
   const el = container.querySelector('.reason-bar');
   const count = el?.querySelector('.reason-count');
   return (
-    `${el?.className ?? ''}${el?.getAttribute('aria-busy') === 'true' ? ' [busy]' : ''} :: ` +
+    `${el?.className ?? ''}${el?.getAttribute('aria-busy') === 'true' ? ' [bar busy]' : ''} :: ` +
     `${text(el?.querySelector('[role="status"]'))}${count ? ` | ${text(count)}` : ''}`
   );
 }
@@ -685,7 +685,7 @@ describe('araç çubuğunun altındaki satır', () => {
       [
         "reason-bar :: Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
         "reason-bar :: Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
-        "reason-bar busy [busy] :: Otomatik diziliyor… | 3/9 kart · 1,2 sn · 2 kart geçici kapsam dışında",
+        "reason-bar busy :: Otomatik diziliyor… | 3/9 kart · 1,2 sn · 2 kart geçici kapsam dışında",
         "reason-bar ok :: Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.",
         "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
         "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz. 2 kart geçici kapsam dışında kaldı.",

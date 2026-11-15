@@ -303,7 +303,9 @@ function LessonPool({
       {/* The pool's place in the outline: the screen's h1 is the school, the
           grid and the pool are its two h2s, the groups below are h3s. Seen,
           the drawer needs no title; heard, the groups had no parent. */}
-      <h2 className="visually-hidden">{t('Havuz')}</h2>
+      <h2 className="visually-hidden" id="havuz-baslik">
+        {t('Havuz')}
+      </h2>
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
       <div
@@ -423,7 +425,7 @@ function LessonPool({
             ref={list}
             tabIndex={0}
             role="group"
-            aria-label={t('Yerleşmeyi bekleyen kartlar')}
+            aria-labelledby="havuz-baslik"
           >
             {groups.map((g) => (
               <div className="pool-group" key={g.key} role="group" aria-label={g.label}>
