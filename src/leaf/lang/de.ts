@@ -1794,8 +1794,8 @@ const DE: Sozluk = {
     "Ganze Woche öffnen",
   "Bütün haftayı kapat":
     "Ganze Woche sperren",
-  "**Art arda**: üst üste en fazla kaç saat. **Günde ↑**: bir günde en fazla, **Günde ↓**: geldiği gün en az kaç saat. Boş kutuda Ayarlar → Kurallar’daki sayı geçerli.":
-    "**Am Stück**: höchstens wie viele Stunden hintereinander. **Pro Tag ↑**: höchstens an einem Tag, **Pro Tag ↓**: mindestens an einem Tag, an dem die Lehrkraft kommt. Ein leeres Feld nimmt die Zahl aus Einstellungen → Regeln.",
+  "**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli.":
+    "**Am Stück**: höchstens so viele Stunden hintereinander. **Pro Tag ↑**: höchstens, **Pro Tag ↓**: mindestens pro Tag. Leer heißt: die Zahl aus Regeln.",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "Wenn die Farben nicht gedruckt werden: Öffnen Sie im Druckfenster **Weitere Einstellungen** und aktivieren Sie **Hintergrundgrafiken**.",
   "Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.":

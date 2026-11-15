@@ -156,7 +156,7 @@ export default function Teachers({ state, change }: PanelProps) {
             mean is said once, under it, not only in a tooltip. */}
         {shown.length > 0 && (
           <p className="hint">
-            <T k="**Art arda**: üst üste en fazla kaç saat. **Günde ↑**: bir günde en fazla, **Günde ↓**: geldiği gün en az kaç saat. Boş kutuda Ayarlar → Kurallar’daki sayı geçerli." />
+            <T k="**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli." />
           </p>
         )}
       </div>

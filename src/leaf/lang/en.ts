@@ -1778,8 +1778,8 @@ const EN: Sozluk = {
     "Open the whole week",
   "Bütün haftayı kapat":
     "Close the whole week",
-  "**Art arda**: üst üste en fazla kaç saat. **Günde ↑**: bir günde en fazla, **Günde ↓**: geldiği gün en az kaç saat. Boş kutuda Ayarlar → Kurallar’daki sayı geçerli.":
-    "**In a row**: at most how many hours back to back. **Per day ↑**: at most in a day, **Per day ↓**: at least on a day the teacher comes. An empty box takes the number in Settings → Rules.",
+  "**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli.":
+    "**In a row**: at most how many hours back to back. **Per day ↑**: most in a day, **Per day ↓**: least on a day they come. Empty takes Rules.",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "If the colours do not print: in the print window, open **More settings** and tick **Background graphics**.",
   "Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.":
