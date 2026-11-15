@@ -1764,8 +1764,6 @@ const DE: Sozluk = {
   "Ders silindi.": "Fach gelöscht.",
   "{ne} silindi.": "{ne} gelöscht.",
   "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
-  "{ne} silindi, {n} dersi de gitti.": "{ne} gelöscht, mit {n} {n:Fach|Fächern}.",
-  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
   "Müsaitlik'te aç":
@@ -1806,6 +1804,12 @@ const DE: Sozluk = {
     "{n} {n:fasst|fassen} die {boy}-stündige Karte nicht",
   "{n} sorun":
     "{n} {n:Problem|Probleme}",
+  "{sinif} sınıfının {brans} dersi de gitti.":
+    "Die Klasse {sinif} hat ihr Fach {brans} verloren.",
+  "{n} sınıfın {brans} dersi de gitti: {siniflar}.":
+    "{n} {n:Klasse hat|Klassen haben} das Fach {brans} verloren: {siniflar}.",
+  "Programdan {n} saat kalktı.":
+    "{n} gesetzte {n:Stunde wurde|Stunden wurden} aus dem Stundenplan entfernt.",
 };
 
 registerSozluk("de", DE);

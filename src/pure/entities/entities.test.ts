@@ -20,6 +20,7 @@ import {
   defaultSubjectShort,
   deleteSubject,
   deleteTeacher,
+  deletionNotice,
   deletionQuestion,
   entityFacts,
   entityWeek,
@@ -639,6 +640,28 @@ describe('deletionQuestion', () => {
     for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
       expect(() => deletionQuestion(d, kind, 'yok')).not.toThrow();
     }
+  });
+
+  // After the delete nothing else can tell: the lessons go with the teacher,
+  // so the pool is no fuller and the chip said "Sorun yok" while four classes
+  // had lost English (usability review, 2026-11-15).
+  it('öğretmen silinince bildirim hangi sınıfların hangi dersi kaybettiğini söyler', () => {
+    const d = loaded();
+    expect(deletionNotice(d, 'teacher', d.teachers[0]!.id)).toBe(
+      'MÇ silindi. 2 sınıfın Matematik dersi de gitti: 510, 511. Programdan 2 saat kalktı.',
+    );
+    let one = emptyState();
+    one = addTeacher(one, { name: 'Ayşe Yılmaz', short: 'AY', subject: 'İngilizce' });
+    one = addClass(one, '410', null);
+    one = addLesson(one, {
+      classId: one.classes[0]!.id,
+      teacherId: one.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    expect(deletionNotice(one, 'teacher', one.teachers[0]!.id)).toBe(
+      'AY silindi. 410 sınıfının İngilizce dersi de gitti.',
+    );
   });
 
   // The dialog wants the two halves separately: a heading and a cost line.

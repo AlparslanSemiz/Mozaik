@@ -1,7 +1,8 @@
 // What a deletion takes with it, asked before it happens (pitfall 4).
 
 import { t } from '../../leaf/i18n';
-import type { Id, State } from '../../leaf/model';
+import { subjectLabel } from '../../leaf/lang';
+import { type Id, type State, lessonSubject } from '../../leaf/model';
 import { countPlacedHours } from '../constraints';
 import { activePlacements } from '../grid';
 import { roomClasses } from './roster';
@@ -142,11 +143,27 @@ export function deletionNotice(d: State, kind: 'teacher' | 'lesson', id: Id): st
   const who = x === undefined ? t('Öğretmen') : x.short;
   const lessons = d.lessons.filter((l) => l.teacherId === id);
   const placed = lessons.reduce((sum, l) => sum + countPlacedHours(d, l.id), 0);
-  if (lessons.length === 0) return t('{ne} silindi.', { ne: who });
-  if (placed === 0) return t('{ne} silindi, {n} dersi de gitti.', { ne: who, n: lessons.length });
-  return t('{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.', {
-    ne: who,
-    ders: lessons.length,
-    saat: placed,
-  });
+  const gone = t('{ne} silindi.', { ne: who });
+  if (lessons.length === 0) return gone;
+
+  // WHICH classes lost WHICH subject. "MB silindi, 4 dersi de gitti" was all
+  // it said, and nothing after it did: the lessons go with the teacher, so no
+  // hour is left in the pool, Kontrol has nothing to count and the chip said
+  // "Sorun yok" while four classes had no English (usability review,
+  // 2026-11-15). This notice, with its "Geri al", is the one moment the loss is
+  // known; a class without a subject is not an error in general.
+  const classes = [
+    ...new Set(lessons.map((l) => d.classes.find((c) => c.id === l.classId)?.name ?? '?')),
+  ];
+  const subjects = [...new Set(lessons.map((l) => subjectLabel(lessonSubject(d, l))))].join(', ');
+  const what =
+    classes.length === 1
+      ? t('{sinif} sınıfının {brans} dersi de gitti.', { sinif: classes[0]!, brans: subjects })
+      : t('{n} sınıfın {brans} dersi de gitti: {siniflar}.', {
+          n: classes.length,
+          brans: subjects,
+          siniflar: classes.join(', '),
+        });
+  const hours = placed === 0 ? '' : ' ' + t('Programdan {n} saat kalktı.', { n: placed });
+  return `${gone} ${what}${hours}`;
 }

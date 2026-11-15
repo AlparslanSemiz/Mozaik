@@ -1763,8 +1763,6 @@ const ES: Sozluk = {
   "Ders silindi.": "Clase eliminada.",
   "{ne} silindi.": "{ne}: eliminado.",
   "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne}: eliminado, con {n} {n:hora colocada|horas colocadas}.",
-  "{ne} silindi, {n} dersi de gitti.": "{ne}: eliminado, con {n} {n:clase|clases}.",
-  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne}: eliminado, con {ders} {ders:clase|clases} y {saat} {saat:hora colocada|horas colocadas}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} {n:hora colocada volvió|horas colocadas volvieron} a la reserva.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Las horas colocadas volvieron a la reserva; {n} {n:hora fijada sigue|horas fijadas siguen} en su sitio.",
   "Müsaitlik'te aç":
@@ -1805,6 +1803,12 @@ const ES: Sozluk = {
     "{n} {n:no admite|no admiten} su tarjeta de {boy} horas",
   "{n} sorun":
     "{n} {n:problema|problemas}",
+  "{sinif} sınıfının {brans} dersi de gitti.":
+    "La clase {sinif} perdió su clase de {brans}.",
+  "{n} sınıfın {brans} dersi de gitti: {siniflar}.":
+    "{n} {n:clase perdió|clases perdieron} la clase de {brans}: {siniflar}.",
+  "Programdan {n} saat kalktı.":
+    "Se {n:quitó|quitaron} {n} {n:hora colocada|horas colocadas} del horario.",
 };
 
 registerSozluk("es", ES);
