@@ -32,7 +32,14 @@
 // list and refuses the writes. The user lifts it: opening a file over the
 // plan, deleting it, or opening a whole library over it (`explicitly`).
 
-import { LIBRARY_KEY, adoptOrphans, parseLibrary, planKey, type Library } from '../../pure/io';
+import {
+  BEFORE_DELETE_KEY,
+  LIBRARY_KEY,
+  adoptOrphans,
+  parseLibrary,
+  planKey,
+  type Library,
+} from '../../pure/io';
 import { safely } from '../../leaf/preference';
 import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
@@ -61,9 +68,37 @@ export function readLibraryAtStart(): Library {
   return adoptOrphans(readLibrary(), keys);
 }
 
+/**
+ * Writes the directory, keeping every field this copy does not know: on the
+ * directory itself and on each plan's entry, matched by id. `normalizeLibrary`
+ * reads only `activeId`, `id`, `name` and `draft`, and writing its answer back
+ * as it was stripped what a newer copy had put there, at every start (the
+ * audit of 2026-11-16). Nothing is written when the text would not change.
+ */
 export function writeLibrary(lib: Library): void {
   if (writesClosed()) return;
-  safely(() => localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib)));
+  const before = safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null;
+  let raw: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = before === null ? null : JSON.parse(before);
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      raw = parsed as Record<string, unknown>;
+    }
+  } catch {
+    // Not JSON: nothing in it to keep.
+  }
+  const extra = new Map<string, Record<string, unknown>>();
+  for (const item of Array.isArray(raw.plans) ? (raw.plans as unknown[]) : []) {
+    const id = (item as { id?: unknown } | null)?.id;
+    if (typeof id === 'string' && !extra.has(id)) extra.set(id, item as Record<string, unknown>);
+  }
+  const text = JSON.stringify({
+    ...raw,
+    activeId: lib.activeId,
+    plans: lib.plans.map((p) => ({ ...extra.get(p.id), id: p.id, name: p.name, draft: p.draft })),
+  });
+  if (text === before) return;
+  safely(() => localStorage.setItem(LIBRARY_KEY, text));
 }
 
 export function readPlanText(id: Id): string | null {
@@ -151,12 +186,21 @@ function mayOverwrite(id: Id): boolean {
  */
 export function writePlanText(id: Id, text: string): boolean {
   if (writesClosed() || !mayWritePlan(id) || !mayOverwrite(id)) return false;
-  return (
+  const put = () =>
     safely(() => {
       localStorage.setItem(planKey(id), text);
       return true;
-    }) === true
-  );
+    }) === true;
+  if (put()) return true;
+  // Full: the copy from before the last deletion gives its room to the plan
+  // itself, which always comes first (`BEFORE_DELETE_KEY`).
+  const dropped =
+    safely(() => {
+      if (localStorage.getItem(BEFORE_DELETE_KEY) === null) return false;
+      localStorage.removeItem(BEFORE_DELETE_KEY);
+      return true;
+    }) === true;
+  return dropped && put();
 }
 
 export function dropPlanText(id: Id): void {

@@ -66,6 +66,12 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- If the app opens empty while the folder (Belgelerim\Ders Programı in the .exe) holds a fuller plan file, a strip says so, with "Belgelerim'deki son kaydı aç" (open it) and "Boş başla" (start empty); nothing is written to the folder until one is pressed. Before this, a wiped app profile opened empty, the first teacher typed in went over the whole school in the folder's main file and today's backup, and on each following day one more real daily backup was pruned.
+- A change that would leave the plan with under half the rooms, teachers, classes and lessons of the folder's last file no longer goes over it: it is written to that day's rescue file (`ders-programi-kurtarma-YYYY-MM-DD.json`) and a strip says so, with buttons to open the folder's copy or, after a question, keep the smaller plan. The daily backup with the most work in it is never pruned.
+- Deletions that ask no question (class, room, subject, option, teacher, lesson, "Empty the timetable", "Lay out again"), "Delete everything", the sample school over a plan and "Open from file" now keep the plan as it was before them. After a reload, if the plan has not changed since, a strip offers it once: "Son silmeyi geri almak için: Geri getir". Before this their undo lived only in memory and a reload lost it. In a folder the copy is also written as that day's `ders-programi-silmeden-once-YYYY-MM-DD.json`.
+- When a plan's saved text is not even JSON, the folder line now turns red and names the plan instead of the folder silently not being written.
+- "Open all from file" names the plans it skips because they have no id or repeat an earlier one's, instead of dropping them without a word.
+- The plan list is no longer rewritten at every start, and fields a newer copy of Mozaik put in it are kept.
 - Check counted a lesson on closed hours once per hour, so one two-hour lesson read "2 lessons" in the heading and in the top bar.
 - Closing a dialog (search, keyboard shortcuts, a question, a teacher's or class's panel, a lesson's window) with Esc or a button puts the keyboard back where it was, on the button or card that opened it, instead of at the top of the page. If that is gone, the keyboard lands in the screen's content.
 - In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.

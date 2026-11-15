@@ -1902,6 +1902,19 @@ const ES: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} borrada, con {n} {n:hora colocada|horas colocadas}.",
   "Program baştan dizildi.": "El horario se montó desde cero.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "El horario se montó desde cero; {n} {n:hora fijada siguió|horas fijadas siguieron} en su sitio.",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "El plan «{plan}» no se puede leer, así que no se escribe ningún plan en la carpeta.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**El plan se abrió vacío en este ordenador, pero la carpeta {klasor} tiene un archivo de plan más completo:** {dosya}, {ogretmen} {ogretmen:profesor|profesores} y {ders} {ders:clase|clases}. No se escribe nada en la carpeta hasta que elija.",
+  "Belgelerim'deki son kaydı aç": "Abrir la última copia de Documentos",
+  "Boş başla": "Empezar vacío",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**El plan se ha reducido mucho:** quedan {ogretmen} {ogretmen:profesor|profesores} y {ders} {ders:clase|clases}, y el último archivo de plan de la carpeta tiene {eskiOgretmen} {eskiOgretmen:profesor|profesores} y {eskiDers} {eskiDers:clase|clases}. Ese archivo se conservó; el nuevo estado se guardó aparte como **{dosya}**.",
+  "Yeni hâlini asıl dosya yap": "Convertir el nuevo estado en el archivo principal",
+  "{ne} Son silmeyi geri almak için:": "{ne} Para deshacer la última eliminación:",
+  "Geri getir": "Recuperar",
+  "Son silme geri alındı.": "Se deshizo la última eliminación.",
+  "son silmeden önceki hâl": "estado antes de la última eliminación",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan con identificador ausente o repetido: {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "No se escribe nada en la carpeta hasta que elija.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Este plan más pequeño sustituye al último archivo de plan de la carpeta. El estado anterior queda en las copias diarias.",
 };
 
 registerSozluk("es", ES);

@@ -31,6 +31,7 @@ import {
   writeRefused,
 } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
+import { keepBeforeDelete, noteAfter, offerAtStart, type Offer } from './beforeDelete';
 import type { Id, State } from '../../leaf/model';
 import { t } from '../../leaf/i18n';
 
@@ -52,6 +53,9 @@ export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
  * the session's one line (TB1). Set once, by `initialBox`.
  */
 let setAsideAtStart: string[] = [];
+
+/** The state from before the last deletion, offered once at this start (SD1). */
+let lastDeleteAtStart: Offer | null = null;
 
 function initialBox(): Box {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
@@ -87,6 +91,7 @@ function initialBox(): Box {
     }
   }
   if (planId === library.activeId) rotateBackups(planKey(planId));
+  lastDeleteAtStart = present === null ? null : offerAtStart(planId, present);
   return {
     present: present ?? emptyState(),
     past: [],
@@ -173,6 +178,14 @@ export function useStore(announce: (text: string) => void = () => undefined) {
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
   /** The present as of the last render, for a callback that must not act on a stale one. */
   const peek = useCallback(() => current.current.present, []);
+  /**
+   * Before a deletion that asks no question, "Her şeyi sil", the sample over a
+   * plan, "Baştan diz" and "Dosyadan aç": `state`, the open plan as the caller
+   * sees it, goes to the one slot a reload can still reach (beforeDelete.ts).
+   */
+  const keepBefore = useCallback((state: State, label: string, quiet = false) => {
+    keepBeforeDelete(current.current.planId, state, label, quiet);
+  }, []);
   // A load is "Dosyadan aç" or "Her şeyi sil", each behind its own question:
   // the user has put something in this plan's place, so a plan this copy
   // could not read may be written over now (libraryStore.ts, A1). A plain
@@ -215,6 +228,7 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     // the stand-in is never saved: the strip says so instead (A1).
     if (writesClosed() || frozenPlan(id) !== null) return;
     const landed = savePlan(id, d);
+    if (landed) noteAfter(id, d);
     setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');
   }, []);
 
@@ -341,6 +355,15 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     unreadable: frozenPlan(box.planId),
     /** The plans the opening read could not read and did not open, by name (TB1). */
     setAside: setAsideAtStart,
+    /** The open plan before the last deletion of an earlier session, offered once (SD1). */
+    lastDelete: lastDeleteAtStart,
+    keepBefore,
+    /**
+     * The folder's copy, after an empty start (useFolder's `bulundu`): the
+     * bundle import WITHOUT `explicitly`, so a plan this copy could not read
+     * stays frozen in its key rather than be written over by the button.
+     */
+    openFolderCopy: plans.replaceLibrary,
     state: box.present,
     change,
     manageProgram,
