@@ -237,6 +237,7 @@ test.describe('55. Durum çipi — boş proje', () => {
     await open(page);
     const chip = page.locator('.health');
     await expect(chip).toHaveClass(/ok/);
-    await expect(chip).toHaveText('Henüz ders girilmedi');
+    // The chip also carries its narrow-bar words (`.health-short`, hidden here).
+    await expect(chip.locator('.health-text')).toHaveText('Henüz ders girilmedi');
   });
 });

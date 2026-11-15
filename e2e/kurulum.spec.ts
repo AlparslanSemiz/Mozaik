@@ -832,9 +832,10 @@ test.describe('63. Öğretmende cinsiyet', () => {
       .getByRole('button', { name: /^Matematik/ })
       .first()
       .click();
-    const both = await rows.count();
-    expect(both).toBeGreaterThan(0);
-    expect(both).toBeLessThan(11);
+    // Polled: the list narrows on a deferred render (hiz/tepki), so the count
+    // read right after the click can still be the women's eleven.
+    await expect.poll(() => rows.count()).toBeLessThan(11);
+    expect(await rows.count()).toBeGreaterThan(0);
 
     await page.getByRole('button', { name: 'Süzmeyi kaldır' }).click();
     await expect(rows).toHaveCount(25);

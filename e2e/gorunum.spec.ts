@@ -914,15 +914,16 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
   });
 
   // The full name is not lost: it is what the card SAYS to a screen reader,
-  // and every other density still draws it.
+  // and every other density still draws it. Since erisim/anlam the name opens
+  // with the day and hour ("Çarşamba 10–11. saat, Ö1, 411A SAY, A").
   test('kart sınıfın tam adını söylüyor, Rahat onu çiziyor', async ({ page }) => {
     await loadWorld(page, dizili());
     const card = page.locator('table.grid .card', { hasText: '411A' }).first();
-    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
+    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
     await expect(card.locator('.card-top')).toHaveText('411A SAY');
     await chooseDensity(page, 'Sığdır');
     await expect(card.locator('.card-top')).toHaveJSProperty('innerText', '411A');
-    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
+    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
   });
 });
 
