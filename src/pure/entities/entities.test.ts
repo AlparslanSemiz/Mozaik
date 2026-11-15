@@ -91,6 +91,7 @@ function build(): State {
         short: 'MÇ',
         subject: 'Matematik',
         subject2: '',
+        email: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -509,6 +510,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: 'mç',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 0,
           limits: NO_TEACHER_LIMITS,
@@ -519,6 +521,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: 'MÇ',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 1,
           limits: NO_TEACHER_LIMITS,
@@ -529,6 +532,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: '',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 2,
           limits: NO_TEACHER_LIMITS,
@@ -539,6 +543,7 @@ describe('makeShort ve duplicateShorts', () => {
           short: '',
           subject: '',
           subject2: '',
+          email: '',
           gender: '',
           color: 3,
           limits: NO_TEACHER_LIMITS,
@@ -1305,6 +1310,7 @@ describe('subjectRank ve teacherRank', () => {
     gender: '' as const,
     color: 0,
     limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    email: '',
   });
 
   it('sıra AYARLARDAKİ listeden geliyor, alfabeden değil', () => {
@@ -1359,11 +1365,20 @@ describe('addTeachersFromRows', () => {
     let d = emptyState();
     d = deleteSubject(d, 'Matematik'); // the school does not teach it any more
     d = addTeachersFromRows(d, [
-      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' },
-      { name: 'Ayşe Yıldız', short: 'AY', subject: 'Robotik', subject2: '', gender: '' },
+      {
+        name: 'Mehmet Çelik',
+        short: 'MÇ',
+        subject: 'Matematik',
+        subject2: '',
+        gender: '',
+        email: 'mc@okul.com',
+      },
+      { name: 'Ayşe Yıldız', short: 'AY', subject: 'Robotik', subject2: '', gender: '', email: '' },
     ]);
 
     expect(d.teachers.map((t) => t.subject)).toEqual(['Matematik', 'Robotik']);
+    // The pasted address reaches the teacher (schema v17).
+    expect(d.teachers.map((t) => t.email)).toEqual(['mc@okul.com', '']);
     // Both are selectable afterwards; a pasted branch is not a dead end.
     expect(d.settings.subjects).toContain('Matematik');
     expect(d.settings.subjects).toContain('Robotik');
@@ -1373,8 +1388,8 @@ describe('addTeachersFromRows', () => {
     let d = emptyState();
     const before = d.settings.subjects.length;
     d = addTeachersFromRows(d, [
-      { name: 'A A', short: '', subject: 'Robotik', subject2: '', gender: '' },
-      { name: 'B B', short: '', subject: 'robotik', subject2: '', gender: '' },
+      { name: 'A A', short: '', subject: 'Robotik', subject2: '', gender: '', email: '' },
+      { name: 'B B', short: '', subject: 'robotik', subject2: '', gender: '', email: '' },
     ]);
     expect(d.settings.subjects.length).toBe(before + 1);
   });

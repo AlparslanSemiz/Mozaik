@@ -58,6 +58,11 @@ concurrency:
 # the Azure mirror) while its tests took three to six. A missing library fails
 # the browser launch loudly, it does not pass quietly. `kanarya.yml` keeps
 # `--with-deps`, because asking the NEXT image for its packages is its job.
+#
+# The browsers are cached (2026-11-15): `~/.cache/ms-playwright`, keyed by the
+# installed `@playwright/test` version, so a new Playwright gets new browsers.
+# Every job downloaded Chrome for Testing, Headless Shell and FFmpeg afresh,
+# 8-9 s each. `playwright install` stays: on a hit it finds them and returns.
 
 jobs:
   denetim:
@@ -102,6 +107,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - id: pw
+        run: echo "surum=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.surum }}
       - run: npx playwright install chromium
       - run: npx vite build
       - name: E2E ${{ matrix.parca }}/3
@@ -134,6 +145,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - id: pw
+        run: echo "surum=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.surum }}
       - run: npx playwright install chromium
       - run: npx vite build
       - name: E2E, öneri aramasının testleri, ${{ matrix.parca }}/3
@@ -163,6 +180,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - id: pw
+        run: echo "surum=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.surum }}
       - run: npx playwright install chromium
       - name: Site, sunucu, klasör
         run: npm run test:site -- --trace=retain-on-failure

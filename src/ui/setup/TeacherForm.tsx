@@ -13,7 +13,7 @@ import {
   subjectOption,
   subjectOptions,
 } from '../../pure/entities';
-import type { Gender } from '../../leaf/model';
+import { type Gender, cleanEmail, looksLikeEmail } from '../../leaf/model';
 import { type PanelProps, T, useT } from '../common';
 import { parseTeachers } from '../../pure/io';
 import { Paste, AddPanel } from '../lists';
@@ -34,12 +34,14 @@ export function TeacherForm({ state, change }: PanelProps) {
     subject: string;
     gender: Gender;
     subject2: string;
+    email: string;
   }>({
     name: '',
     short: '',
     subject: '',
     gender: '',
     subject2: '',
+    email: '',
   });
   // Whether the second-subject question has been answered "yes" on THIS form.
   // A box that is always there would be a fifth thing to read past on a row
@@ -75,6 +77,7 @@ export function TeacherForm({ state, change }: PanelProps) {
       subject: '',
       gender: '',
       subject2: '',
+      email: '',
     });
     setFreshSubject(null);
     setAskSecond(false);
@@ -211,6 +214,33 @@ export function TeacherForm({ state, change }: PanelProps) {
               </option>
             ))}
           </select>
+          {/* Optional like the gender, and wide from the first letter: the
+              table's own box is six letters until it is clicked, and an
+              address typed blind is one wrong letter nobody sees. A box that
+              does not hold one address is marked here and kept as typed, the
+              way the table keeps it. */}
+          <input
+            type="text"
+            inputMode="email"
+            autoComplete="off"
+            spellCheck={false}
+            className="email-box"
+            placeholder={t('E-posta')}
+            aria-label={t('E-posta')}
+            value={newTeacher.email}
+            aria-invalid={
+              newTeacher.email.trim() !== '' && !looksLikeEmail(cleanEmail(newTeacher.email))
+            }
+            title={
+              newTeacher.email.trim() !== '' && !looksLikeEmail(cleanEmail(newTeacher.email))
+                ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
+                : undefined
+            }
+            onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') addNew();
+            }}
+          />
           <button
             className="btn"
             disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
@@ -224,12 +254,13 @@ export function TeacherForm({ state, change }: PanelProps) {
           open={pasteOpen}
           close={() => setPasteOpen(false)}
           title={t('Öğretmenleri yapıştır')}
-          example={t('Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş')}
+          example={t('Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta')}
           parse={parseTeachers}
           rowText={(x) =>
             `${x.name} (${x.short}) · ${subjectLabel(x.subject)}` +
             (x.subject2 === '' ? '' : ` + ${subjectLabel(x.subject2)}`) +
-            (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
+            (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`) +
+            (x.email === '' ? '' : ` · ${x.email}`)
           }
           onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
         />

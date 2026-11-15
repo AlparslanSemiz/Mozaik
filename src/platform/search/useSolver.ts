@@ -28,6 +28,7 @@ import {
   type Suggestion,
 } from '../../pure/relax';
 import { activePlacements } from '../../pure/grid';
+import { buildIndex, pinnedRelationBreaches } from '../../pure/constraints';
 import { startRelax } from './relaxPool';
 import type { Answers, Id, State } from '../../leaf/model';
 
@@ -149,9 +150,28 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       setProgress(null);
       setResult(done);
 
+      // Stuck, but two pinned lessons break a relation: every way the search
+      // could build keeps them, so it would only come back empty, a minute
+      // later (TODO RK2). It is not started; the panel says why at once.
+      if (
+        done.phase === 'stuck' &&
+        from !== null &&
+        pinnedRelationBreaches(from, buildIndex(from)).length > 0
+      ) {
+        job.current = null;
+        kept.current = [];
+        setAdvice({
+          forState: done.state,
+          searching: false,
+          stopped: false,
+          progress: null,
+          suggestions: [],
+          answers: from.answers,
+        });
+      }
       // Stuck, not stopped: ask what would have to change. It starts from the
       // data the run started from, with the stuck week as its first guess.
-      if (done.phase === 'stuck' && from !== null) {
+      else if (done.phase === 'stuck' && from !== null) {
         job.current = {
           from,
           hint: activePlacements(done.state),

@@ -96,7 +96,9 @@ Kök yazı boyu `calc(13px * var(--ui-scale))`, ekran merdiveni `rem` cinsinden 
 basamak. Kâğıt merdiveni `pt` cinsinden, ekran ölçeğinden etkilenmez, ve kâğıttaki
 yazı ayarının çarpanı merdivenle aynı öğede tanımlıdır (tuzak 63). Sütun
 genişlikleri `ch` cinsinden, ve ölçekler arasında korunan şey piksel değil `ch`
-sayısı (tuzak 39).
+sayısı (tuzak 39). `.hint` her yerde `--fs-sm` (13 px), Ayarlar'da ise gövde boyu
+`--fs-base` (15 px, `.settings-pane`, 2026-10-24, TODO B7.36): oradaki notlar bir
+tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil okunarak bakılıyor.
 
 ---
 

@@ -18,14 +18,14 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../../pure/undo';
-import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
+import { loadFallbackAtStart, loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../../pure/entities';
-import { LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
+import { findPlan, LIBRARY_KEY, parseLibrary, planKey, parseState } from '../../pure/io';
 import {
   explicitly,
   frozenPlan,
-  readLibrary,
+  readLibraryAtStart,
   thawPlan,
   writeLibrary,
   writeRefused,
@@ -46,18 +46,51 @@ export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
 
 // -------------------------------------------------------------------- hook
 
+/**
+ * The plans the opening read found unreadable and did not open, by name, for
+ * the session's one line (TB1). Set once, by `initialBox`.
+ */
+let setAsideAtStart: string[] = [];
+
 function initialBox(): Box {
   // First run: the directory does not exist yet, so `readLibrary()` hands back
   // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
   // timetable is already sitting in. Adoption therefore copies NOTHING.
-  const library = readLibrary();
+  const library = readLibraryAtStart();
   writeLibrary(library);
-  rotateBackups(planKey(library.activeId));
+  let planId = library.activeId;
+  let present = loadPlanAtStart(planId);
+  setAsideAtStart = [];
+  // The plan open last time cannot be read (frozen, A1): the first plan that
+  // can opens instead of an empty stand-in, and the unreadable one stays
+  // frozen in its key and in the directory (TB1, the user's decision,
+  // 2026-10-24). With none readable, A1's stand-in and its strip.
+  //
+  // The switch is NOT saved, and the session chain is not rotated: the
+  // directory keeps pointing at the unreadable plan, so every start falls
+  // back again and says so again, and its last good copy in the chain is not
+  // pushed out by the plan opened in its place (review, 2026-10-24: saved,
+  // that copy was gone by the third start, without a word after the first).
+  if (present === null && frozenPlan(planId) !== null) {
+    const unreadable = [findPlan(library, planId)?.name ?? planId];
+    for (const plan of library.plans) {
+      if (plan.id === library.activeId) continue;
+      const other = loadFallbackAtStart(plan.id);
+      if (other !== null) {
+        planId = plan.id;
+        present = other;
+        setAsideAtStart = unreadable;
+        break;
+      }
+      if (frozenPlan(plan.id) !== null) unreadable.push(plan.name);
+    }
+  }
+  if (planId === library.activeId) rotateBackups(planKey(planId));
   return {
-    present: loadPlanAtStart(library.activeId) ?? emptyState(),
+    present: present ?? emptyState(),
     past: [],
     future: [],
-    planId: library.activeId,
+    planId,
   };
 }
 
@@ -161,29 +194,11 @@ export function useStore() {
     write(box.planId, box.present);
   }, [box.planId, box.present, write]);
 
-  // Cancels the pending write WITHOUT performing it. The only caller is the
-  // bundle import in `usePlans.ts`, and the two are opposites that look alike:
-  // park writes then cancels (pitfall 28), this one only cancels (pitfall 27
-  // mirrored). The comment at the head of `usePlans.ts` says the same thing
-  // from the other side.
-  //
-  // Measured while splitting the file, because the old comment claimed more
-  // than it could show: taking this call away does NOT resurrect the outgoing
-  // plan, and neither does taking away the effect's cleanup. What actually
-  // cancels the pending write is the FIRST LINE of the autosave effect below —
-  // it clears the previous handle every time the box changes. This call is
-  // what makes the intent survive a rewrite of that effect, not what enforces
-  // it today.
-  const discardPendingSave = useCallback(() => {
-    window.clearTimeout(timer.current);
-    pending.current = false;
-  }, []);
-
   const openPlan = useCallback((id: Id, state: State) => {
     dispatch({ type: 'switch', id, state });
   }, []);
 
-  const plans = usePlans({ planId: box.planId, park, discardPendingSave, openPlan });
+  const plans = usePlans({ planId: box.planId, park, openPlan });
 
   // Another window changed our data: this one stops writing, and says so.
   // What this window holds is read through a ref, so the listener is set once.
@@ -250,14 +265,17 @@ export function useStore() {
   return {
     /** The open plan's key holds text this copy cannot read, and why: the strip. */
     unreadable: frozenPlan(box.planId),
+    /** The plans the opening read could not read and did not open, by name (TB1). */
+    setAside: setAsideAtStart,
     state: box.present,
     change,
     manageProgram,
     undo,
     redo,
     loadState,
-    // Exposed for the one caller that leaves the page without unloading it:
-    // the exe restarting onto a new version. `beforeunload` covers a closing
+    // Exposed for the two callers that leave the page without unloading it:
+    // the exe restarting onto a new version, and the exe's window closing
+    // (App.tsx, TB7). `beforeunload` covers a closing
     // tab, but a WebView2 window torn down by `app.exit(0)` is not a closing
     // tab, and the 400 ms debounce is exactly long enough to eat the edit
     // somebody made right before pressing the button (pitfall 28).

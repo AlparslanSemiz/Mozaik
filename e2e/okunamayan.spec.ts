@@ -19,9 +19,11 @@ import { resolve } from 'node:path';
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { open } from './helpers';
+import { SCHEMA_VERSION } from '../src/leaf/model';
 
 const DOLU = JSON.parse(readFileSync(resolve('src/fixtures/tam-dolu-kurs-dizili.json'), 'utf8'));
-const YENI = JSON.stringify({ ...DOLU, schemaVersion: 17 });
+// One past whatever this build writes: a fixed 17 stopped being newer on schema v17.
+const YENI = JSON.stringify({ ...DOLU, schemaVersion: SCHEMA_VERSION + 1 });
 
 const strip = (page: Page) => page.locator('.save-warning[role=alert]');
 

@@ -7,7 +7,7 @@
 //
 // This module follows library.ts's arrangement to the letter: it knows the
 // ENVELOPE and nothing about what a State is. It hands back raw `unknown` for
-// each plan and `store.ts` is the only place that parses one. Dependencies are
+// each plan and `readBundlePlans` (parseState.ts) is the only place that parses one. Dependencies are
 // library.ts (a leaf, so no cycle) and a type-only import from types.ts.
 //
 // Nothing here writes to storage and nothing here reads a key: a bundle is a
@@ -26,8 +26,11 @@ export interface Bundle {
   /** Already through normalizeLibrary: the rules for a broken directory are
       written once, in library.ts, and are not repeated here. */
   library: Library;
-  /** plan id -> the raw state as it sat in the file. Parsed by store.ts. */
+  /** plan id -> the raw state as it sat in the file. Parsed by readBundlePlans. */
   states: Record<Id, unknown>;
+  /** Ids of entries dropped because their `state` was not an object. They are
+      unreadable plans all the same, and the plan here with that id stays. */
+  skipped?: Id[];
 }
 
 interface RawEntry {
@@ -84,7 +87,8 @@ export function bundleVersionOf(text: string): number | null {
  * read, and the caller then falls back to the single-plan path.
  *
  * An entry without an object `state` is dropped BEFORE normalizeLibrary sees
- * it, so it can never become a directory row with no data behind it.
+ * it, so it can never become a directory row with no data behind it. Its id
+ * is kept in `skipped`, so the import still counts it as a plan it could not read.
  */
 export function parseBundle(text: string): Bundle | null {
   let raw: unknown;
@@ -98,7 +102,8 @@ export function parseBundle(text: string): Bundle | null {
   const g = raw as { bundleVersion?: unknown; activeId?: unknown; plans?: unknown };
   if (g.bundleVersion !== BUNDLE_VERSION) return null; // not a bundle, or a newer one
 
-  const entries = (Array.isArray(g.plans) ? g.plans : []).filter(
+  const list: unknown[] = Array.isArray(g.plans) ? g.plans : [];
+  const entries = list.filter(
     (item): item is RawEntry =>
       typeof item === 'object' &&
       item !== null &&
@@ -119,5 +124,11 @@ export function parseBundle(text: string): Bundle | null {
   }
   if (Object.keys(states).length === 0) return null;
 
-  return { library, states };
+  const skipped = list.flatMap((item) => {
+    const id = typeof item === 'object' && item !== null ? (item as RawEntry).id : undefined;
+    return typeof id === 'string' && !Object.prototype.hasOwnProperty.call(states, id) ? [id] : [];
+  });
+  return skipped.length > 0
+    ? { library, states, skipped: [...new Set(skipped)] }
+    : { library, states };
 }

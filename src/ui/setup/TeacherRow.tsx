@@ -11,7 +11,14 @@ import {
   updateTeacher,
   weeklyLoad,
 } from '../../pure/entities';
-import type { Gender, Id, State, Teacher } from '../../leaf/model';
+import {
+  type Gender,
+  type Id,
+  type State,
+  type Teacher,
+  cleanEmail,
+  looksLikeEmail,
+} from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { useDialogs, ColorPick, LimitBox, useT } from '../common';
@@ -169,6 +176,37 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
             </option>
           ))}
         </select>
+      </td>
+      {/* `email-cell`: the box widens over its neighbours while
+        it is typed in (styles.css), and the column stays put. */}
+      <td className="email-cell">
+        {/* Kept as typed (trimmed, control characters dropped:
+          cleanEmail); a box that does not hold one address says
+          so here, where it is fixed, and Çıktı does not offer to
+          send. Keyed by its value, so Ctrl+Z or "Dosyadan aç"
+          redraws it rather than leaving a draft that the next
+          blur would write back. */}
+        <input
+          key={`e-${teacher.id}-${teacher.email}`}
+          type="text"
+          inputMode="email"
+          autoComplete="off"
+          spellCheck={false}
+          aria-label={t('{kim} e-postası', { kim: teacher.short })}
+          defaultValue={teacher.email}
+          aria-invalid={teacher.email !== '' && !looksLikeEmail(teacher.email)}
+          title={
+            teacher.email !== '' && !looksLikeEmail(teacher.email)
+              ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
+              : teacher.email || undefined
+          }
+          onBlur={(e) => {
+            const email = cleanEmail(e.target.value);
+            // Tabbing through is not an edit, and not an undo step.
+            if (email === teacher.email) return;
+            change((d) => updateTeacher(d, teacher.id, { email }));
+          }}
+        />
       </td>
       <td>
         <LimitBox

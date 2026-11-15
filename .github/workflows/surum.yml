@@ -48,8 +48,10 @@ on:
         type: string
         default: ''
 
+# Okuma, yalnız yayınlayan iş yazar (aşağıda, `publish`): derleme adımları
+# (`npm ci`, Tauri CLI) yazma yetkili bir token görmesin (güvenlik denetimi 2026-11-15).
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # ------------------------------------------------------------ 1 · package
@@ -57,6 +59,8 @@ jobs:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
@@ -111,12 +115,16 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: src-tauri -> target
 
@@ -130,7 +138,11 @@ jobs:
       # hapseden kapı. `cargo test` onu yargılayabilen tek yer.
       - run: cargo test --manifest-path src-tauri/Cargo.toml
 
-      - run: npx --yes @tauri-apps/cli@^2 build --no-bundle
+      # Bundle ile: aynı derleme hem tek başına `Mozaik.exe`'yi
+      # (target/release) hem kurulum sihirbazını (bundle/nsis) üretir
+      # (DECISIONS 2026-11-15). Eski kopyalar tek dosyayla güncellenmeye devam
+      # eder, yenileri kurulumu indirir (update.rs, `karar`).
+      - run: npx --yes @tauri-apps/cli@2.12.4 build
 
       # İKİ ADA DA BAKIYOR, ve sebebi ölçülmüş bir kırıklık: v2.0.3 koşusu tam
       # burada düştü (`tauri build` başarılı, bu adım başarısız) ve o yüzden
@@ -161,6 +173,32 @@ jobs:
           New-Item -ItemType Directory -Force -Path teslim | Out-Null
           Copy-Item $exe "teslim/Mozaik.exe"
 
+      # Kurulumun kendisi, ve içine bizim iki kancamızın girdiği. Kanca
+      # girmezse kaldırıcının "uygulama verilerini sil" kutusu babanın bütün
+      # planlarını siler (src-tauri/nsis/kancalar.nsh): bu adım o kurulumu
+      # yayına sokmaz. Tauri'nin ürettiği betik `target/release/nsis/x64/`'te.
+      - name: Installer, with our hooks in it
+        shell: pwsh
+        run: |
+          $nsi = Get-ChildItem src-tauri/target/release/nsis -Recurse -Filter installer.nsi | Select-Object -First 1
+          if (-not $nsi) { throw "installer.nsi bulunamadı" }
+          # Tauri kanca dosyasını kopyalamaz, `!include` ile bağlar: önce
+          # betiğin onu içeri aldığı, sonra dosyanın iki kuralı taşıdığı.
+          $metin = Get-Content $nsi.FullName -Raw
+          if ($metin -notmatch '!include\s+"[^"]*kancalar\.nsh"') {
+            Write-Host ($metin -split "`n" | Select-String -Pattern 'include' | Out-String)
+            throw "kurulum betiği kancalar.nsh'i içeri almıyor"
+          }
+          $kanca = Get-Content src-tauri/nsis/kancalar.nsh -Raw
+          foreach ($iz in @('StrCpy $DeleteAppDataCheckboxState 0', '$LOCALAPPDATA\Programs\${PRODUCTNAME}')) {
+            if (-not $kanca.Contains($iz)) { throw "kanca dosyasında yok: $iz" }
+          }
+          $kur = Get-ChildItem src-tauri/target/release/bundle/nsis -Filter *-setup.exe | Select-Object -First 1
+          if (-not $kur) { throw "kurulum üretilmedi" }
+          $mb = [math]::Round($kur.Length / 1MB, 2)
+          Write-Host "$($kur.Name)  ->  Mozaik-Kurulum.exe  $mb MB"
+          Copy-Item $kur.FullName "teslim/Mozaik-Kurulum.exe"
+
       # WHAT IS ACTUALLY IN THE BINARY, and this step exists because a sentence
       # in WORKLOG.md said it was ASSUMED. `bundle.icon` is supposed to embed
       # kurulum/icon.ico even under `--no-bundle`, and my father's "the taskbar
@@ -183,6 +221,8 @@ jobs:
   # ------------------------------------------------------------- 3 · publish
   publish:
     needs: [package, exe]
+    permissions:
+      contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
@@ -194,7 +234,7 @@ jobs:
         run: |
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
-          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe; do
+          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe; do
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
 
@@ -215,6 +255,29 @@ jobs:
       # `__SURUM__` odur (scripts/surum.mjs), yani exe kendini o numarayla
       # tanıtır. Etiket ondan başkaysa iş burada durur — yayınlanmış ama
       # kendini asla güncel sayamayan bir exe, hiç yayınlamamaktan kötüdür.
+      # İMZA (güvenlik denetimi 2026-11-15). Özet aynı Release'ten geliyor, yani
+      # dosyanın eksiksiz indiğini söylüyor ama bizim olduğunu söylemiyor; imza
+      # söylüyor. Anahtarın gizli yarısı depo sırrı MOZAIK_IMZA_ANAHTARI, açık
+      # yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
+      # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
+      - name: Sign the two programs
+        env:
+          ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
+        run: |
+          test -n "$ANAHTAR" || { echo "MOZAIK_IMZA_ANAHTARI sırrı tanımlı değil" >&2; exit 1; }
+          sudo apt-get install -y -qq minisign >/dev/null
+          gizli=$(mktemp -d); chmod 700 "$gizli"
+          umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
+          # Güvenilen yorum sürümü ve dosyayı bağlıyor (update.rs, `imza_yorumu`):
+          # eski imzalı bir sürüm yenisi diye, ya da bir dosya ötekinin yerine
+          # sunulamaz.
+          surum=$(node -p "require('./depo/package.json').version")
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig \
+            -t "mozaik $surum Mozaik.exe"
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
+            -t "mozaik $surum Mozaik-Kurulum.exe"
+          rm -rf "$gizli"
+
       - name: Build surum.json
         env:
           ETIKET: ${{ inputs.tag || github.ref_name }}
@@ -227,6 +290,11 @@ jobs:
             exit 1
           fi
           boyut=$(stat -c%s teslim/Mozaik.exe)
+          # The digest update.rs holds the download against (2026-10-24): the
+          # same file, the same sha256sum line SHA256SUMS.txt carries.
+          ozet=$(sha256sum teslim/Mozaik.exe | cut -d' ' -f1)
+          kurulum_boyut=$(stat -c%s teslim/Mozaik-Kurulum.exe)
+          kurulum_ozet=$(sha256sum teslim/Mozaik-Kurulum.exe | cut -d' ' -f1)
           # ADRES DEPONUN BUGÜNKÜ ADINDAN GELMEZ, ve bu bilerek.
           #
           # `update.rs`'in kabul ettiği adres önekleri, dağıtılmış her exe'nin
@@ -244,6 +312,9 @@ jobs:
           #
           # Bunu yeni ada çevirmenin şartı: babanın makinesindeki exe >= 2.0.4.
           adres="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe"
+          # Kurulum aynı önekte. Eski kopyalar bu iki alanı tanımaz ve
+          # yukarıdaki tek dosyayı indirmeye devam eder (köprü, update.rs).
+          kurulum="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Kurulum.exe"
           node -e "
             const fs = require('fs');
             fs.writeFileSync('teslim/surum.json', JSON.stringify({
@@ -251,8 +322,14 @@ jobs:
               date: new Date().toISOString().slice(0, 10),
               exe: process.argv[2],
               boyut: Number(process.argv[3]),
+              sha256: process.argv[4],
+              kurulum: process.argv[5],
+              kurulum_boyut: Number(process.argv[6]),
+              kurulum_sha256: process.argv[7],
+              imza: fs.readFileSync('imza-exe.minisig', 'utf8'),
+              kurulum_imza: fs.readFileSync('imza-kurulum.minisig', 'utf8'),
             }, null, 2) + '\n');
-          " "$surum" "$adres" "$boyut"
+          " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
 
       # WHAT WAS DOWNLOADED, in a form somebody can check. The .exe is unsigned
@@ -265,7 +342,7 @@ jobs:
         run: |
           set -o pipefail
           cd teslim
-          sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe surum.json > SHA256SUMS.txt
+          sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe surum.json > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       # WHAT IS NEW, on the Release page itself: the Turkish lines Ayarlar →
@@ -300,5 +377,6 @@ jobs:
             teslim/Mozaik.html \
             teslim/Mozaik-Windows-kurulum.zip \
             teslim/Mozaik.exe \
+            teslim/Mozaik-Kurulum.exe \
             teslim/surum.json \
             teslim/SHA256SUMS.txt

@@ -8,6 +8,7 @@ import {
   type State,
   type Teacher,
   firstFreeColor,
+  cleanEmail,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { NO_TEACHER_LIMITS } from './defaults';
@@ -71,13 +72,14 @@ export function deleteRoom(d: State, id: Id): State {
 
 export function addTeacher(
   d: State,
-  // `gender` and `subject2` are OPTIONAL rather than part of the Omit: every
-  // caller that predates them — the add form, the paste rows, a dozen tests —
-  // still hands over three fields, and a required fourth would have made a
-  // listing question into a compile error everywhere.
-  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender' | 'subject2'> & {
+  // `gender`, `subject2` and `email` are OPTIONAL rather than part of the
+  // Omit: every caller that predates them — the add form, the paste rows, a
+  // dozen tests — still hands over three fields, and each required newcomer
+  // would have made a listing question into a compile error everywhere.
+  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender' | 'subject2' | 'email'> & {
     gender?: Gender;
     subject2?: string;
+    email?: string;
   },
 ): State {
   // An empty short form would leave a nameless row in the grid: derive one.
@@ -91,6 +93,7 @@ export function addTeacher(
     gender: fields.gender ?? '',
     color: firstFreeColor(d.teachers.map((x) => x.color)),
     limits: { ...NO_TEACHER_LIMITS },
+    email: cleanEmail(fields.email),
   };
   return { ...d, teachers: [...d.teachers, created] };
 }

@@ -21,6 +21,15 @@ import { surumBilgisi } from './scripts/surum.mjs';
 // shipped file the sourcemap method is still the only honest one.
 const ANALIZ = process.env.ANALIZ === '1';
 
+// Node 25+ defines its own `localStorage` on globalThis, and without
+// `--localstorage-file` its value is undefined. Vitest 3's jsdom environment
+// does not copy a key the global already has, so jsdom's storage never
+// arrives and every storage test fails on a missing object, not on our code.
+// The flag turns Node's copy off. Only from 25 up: CI runs Node 22
+// (`.nvmrc`), where the global does not exist and the flag is not needed.
+const NODE_MAJOR = Number(process.versions.node.split('.')[0]);
+const NODE_ARGS = NODE_MAJOR >= 25 ? ['--no-experimental-webstorage'] : [];
+
 // Cikti TEK bir dist/index.html olmali: babama giden sey o dosya, baska hicbir sey degil.
 // Cift tiklayinca, internet olmadan, sunucu olmadan calisir.
 export default defineConfig({
@@ -70,6 +79,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // `forks` is Vitest 3's default pool. Stryker's runner forces `threads`,
+    // so a local `npm run mutasyon` on Node 25+ still lacks jsdom's storage;
+    // `haftalik.yml` runs it on Node 22, where nothing is missing.
+    poolOptions: { forks: { execArgv: NODE_ARGS } },
     include: ['src/**/*.test.{ts,tsx}'],
     // Vitest hands every stylesheet over as an empty string, `?raw` included,
     // unless it is named here. `preferences.test.ts` reads the order of the

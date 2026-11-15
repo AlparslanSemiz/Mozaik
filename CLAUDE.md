@@ -42,8 +42,10 @@ Tuzaklar işe başlarken okunur: [docs/TRAPS.md](docs/TRAPS.md)'nin başındaki 
 ## Çalışma düzeni
 
 - Tek kalıcı checkout, `~/GitHub/Mozaikler/Mozaik`, sürekli worktree yok. Her iş `main`'den açılan kısa ömürlü bir dalda yürür. Checkout aynı anda tek dalda durduğu için orada aynı anda tek oturum yazar; paralel çalışan her oturum ya da ajan geçici bir worktree alır (`git worktree add ~/GitHub/Mozaikler/Mozaik-<iş> -b <dal> main`), dalı birleşince worktree kaldırılır (`git worktree remove`).
+- Bir TODO maddesine başlamadan önce `git worktree list`'e ve dal adlarına (`git branch -a`) bakılır; o madde için bir dal varsa madde alınmıştır: başlanmaz, raporda söylenir.
 - Commit'ten önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yok. Taşıma, içerik ve biçim değişikliği ayrı commit'lerde.
 - Push SSH ile ve yalnız kendi dalı: `git push origin <dal>`. Zorla push, etiket ve `main`'e push yok. CI'ın sonucu beklenmez, `gh run view` ile okunur, dalın CI'ı kırmızıysa önce o düzeltilir.
+- Hazır diye bildirilen dallar her zaman birleşme sırasıyla tek bir doğrusal zincir kurar: her dal bir öncekinin ucunu içerir (`git merge <önceki>`), kullanıcı bir döngüde sırayla `--ff-only` ile alır. Raporda zincirin sırası ve her dalın ucu yazılır.
 - Birleştirmeyi Alp yapar ya da onaylar, `--ff-only` ile: önce `git merge main`, yerelde `npm run hizli` yeşil, dalın CI'ı yeşil. "Şu an" ve tuzak numarası dalın birleşmeden önceki son commit'inde yazılır, önce birleşen numarayı alır. Belgelere yalnız `main`'deki commit hash'i yazılır.
 
 ## Ağır komutlar
@@ -61,11 +63,21 @@ Riske göre, ayrıntısı [docs/TESTPLAN.md](docs/TESTPLAN.md)'nin "Test politik
 - Bulunan hata aynı dalda, kendi commit'inde, gerileme testiyle düzeltilir. Refactor dalı düzeltmez, TODO §8k'ye yazar. Veri kaybı sınıfında bir hata: durulur ve bildirilir.
 - Belge kapısı (`src/docs.test.ts`) yalnız yapıyı ölçer: bağlantı, yol, tuzak numarası, zorunlu bölüm. Kırmızıysa belge düzeltilir, kapı susturulmaz.
 
+## Bitti kontrolü
+
+Her kod değişikliğinden sonra, "bitti" demeden önce. Yalnız belge değişen dalda ikisi de yok. Ayrıntı [.claude/skills/paket-turu/SKILL.md](.claude/skills/paket-turu/SKILL.md)'nin "Bitti kontrolü"nde, her dal için geçerli.
+
+- **İnceleme.** Taze bağlamlı bir alt ajan `git diff main...HEAD`'i doğruluk, veri riski (depo adları, şema, yedekler), sadelik ve bayatlayan belge cümlesi için okur, düzeltmez. Geçerli bulgular ayrı commit'lerde düzeltilir, reddedilenler tek cümlelik gerekçeyle raporda.
+- **Tıklama testi**, değişiklik kullanıcıya görünüyorsa: derlenmiş `dist/index.html` `file://` ile Playwright Chromium'da 1920×1080'de, yalnız sahte veriyle (Alp'in Chrome'u, gerçek veri ve Roboders asla). Değişen akış ve komşu bir akış kullanıcı gibi tıklanır, her adımdan sonra ekran görüntüsüne bakılır, az gören biri için yazı boyu ve kontrast. Betik ve görüntüler `scratch/`'te kalır, commit'lenmez, yeni test süiti olmaz.
+- Raporda "İnceleme ve tıklama testi" bölümü: bulgular (düzeldi, ya da düzelmedi ve neden), tıklama yolu, iki üç ekran görüntüsünün yolu.
+
 ## Ne zaman durulur
 
 Yalnız beş durumda durulur ve sorulur: veri kaybı riski, Roboders'e ya da gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış bir eylem, kullanıcının parası ya da hesapları.
 
 Gerisinde öncelik sırasıyla (babaya ve verisine risk yok, sağlamlık, basitlik, ileriye dönüklük, hız) karar verilir ve raporda "Aldığım kararlar" altında tek cümleyle yazılır: kapsam dışı bir değişiklik, planı çürüten bir ölçüm, dışarıdan gelen bir CI kırmızısı, `dist`'e giren yeni bir paket. Yeni paket WORKLOG'a not düşer: neden, alternatifler, boyut ve `file://` açılış süresi.
+
+Ham `dist/index.html` 1,2 MB'ı aşarsa boyut eşiği yükseltilmeden önce `file://` açılış süresi 4× yavaşlatılmış işlemcili bir profilde (Chromium, CPU throttling) ölçülür; sayılar WORKLOG'a.
 
 ## Sürüm
 
@@ -73,7 +85,7 @@ Etiketi yalnız `npm run yayinla` atar, ana klasörde ve `main`'de, ve `ci.yml` 
 
 ## Rapor
 
-Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları, (2) durdum çünkü: yukarıdaki beşten biri ya da "durmadım", (3) aldığım kararlar, (4) karar gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir, (5) not edilenler, (6) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`. Uzun tablolar `scratch/`'te bir dosyaya yazılır, mesaj ona işaret eder.
+Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrulamaları, (2) durdum çünkü: yukarıdaki beşten biri ya da "durmadım", (3) aldığım kararlar, (4) karar gerekiyor: her soru seçenekleri ve öneriyle, "evet" ya da bir harfle cevaplanabilir, (5) not edilenler, (6) koşulan ve koşulmayan komutlar, çıkış kodlarıyla, ve `git status`, (7) kod değiştiyse "İnceleme ve tıklama testi" (yukarıda). Uzun tablolar `scratch/`'te bir dosyaya yazılır, mesaj ona işaret eder.
 
 ## Oturum sonu
 

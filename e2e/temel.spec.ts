@@ -17,6 +17,7 @@ import {
   dragAndDrop,
   mainList,
   answerDialog,
+  savedText,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -350,6 +351,45 @@ test.describe('5. Yedek ve şema göçü', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
   });
+
+  test('v16 biçimli yedek (öğretmen e-postası yokken) açılıyor, yazılan adres v17 olarak duruyor', async ({
+    page,
+  }) => {
+    // The v16 -> v17 migration on the real path: the example file the schema
+    // recipe writes (scripts/sema-ornek.mjs), picked through the file dialog.
+    await open(page);
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-10-24-1900.json',
+      mimeType: 'application/json',
+      buffer: readFileSync(resolve('src/fixtures/v16.json')),
+    });
+    await answerDialog(page);
+
+    await openSetup(page, 'Öğretmenler');
+    const kutu = page.getByRole('textbox', { name: 'MÇ e-postası' });
+    await expect(kutu).toHaveValue('');
+    await expect(page.getByRole('textbox', { name: 'AV e-postası' })).toHaveValue('');
+
+    await kutu.fill('  mehmet.celik@example.com ');
+    await kutu.press('Tab');
+    // On the address itself: the load already wrote the plan as v17, before
+    // the address was typed, and the store writes 400 ms after a change.
+    const kayit = async () =>
+      JSON.parse((await savedText(page)) || '{}') as {
+        schemaVersion?: number;
+        teachers?: Array<{ email: string }>;
+      };
+    await expect
+      .poll(async () => (await kayit()).teachers?.map((t) => t.email))
+      .toEqual(['mehmet.celik@example.com', '']);
+    expect((await kayit()).schemaVersion).toBe(17);
+
+    await reopen(page);
+    await openSetup(page, 'Öğretmenler');
+    await expect(page.getByRole('textbox', { name: 'MÇ e-postası' })).toHaveValue(
+      'mehmet.celik@example.com',
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -460,6 +500,26 @@ test.describe('29. Hata yolları', () => {
     expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  // TB1: a file whose lesson list holds a null row threw out of the reader,
+  // and the top bar said nothing at all.
+  test('bozuk satırlı dosya okunamadı diye reddediliyor, kayıtlı plan aynı kalıyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const saved = await savedText(page);
+    const broken = structuredClone(FIXTURE) as unknown as { lessons: unknown[] };
+    broken.lessons[0] = null;
+
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'bozuk-satir.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(broken)),
+    });
+
+    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
+    expect(await savedText(page)).toBe(saved);
   });
 
   test('bilinmeyen (ileri) şema sürümü tahmin edilmiyor', async ({ page }) => {
@@ -786,8 +846,12 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
     }));
 
     expect(facts.secure, 'file:// güvenli bağlam DEĞİL — iddia değişti').toBe(true);
+    // Brave switches the File System Access API off by default
+    // (playwright.brave.config.ts, measured 2026-10-10): there the folder
+    // panel has no picker to offer, and that is Brave's answer, not ours.
+    const brave = test.info().project.name === 'brave';
     expect(facts.picker, 'showDirectoryPicker file:// altında yok — iddia değişti').toBe(
-      'function',
+      brave ? 'undefined' : 'function',
     );
     expect(facts.idb).toBe('object');
   });

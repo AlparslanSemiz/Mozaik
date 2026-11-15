@@ -120,6 +120,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 - **Branşlar da elle sıralanır**, ve Öğretmenler'deki branş seçimi bu sırada gelir. `settings.subjects` bir seviye derinde olduğu için `reorderList`'te kendi dalı var. Branş tablosunda iki gövde var: okulun kendi listesi (tutamaklı) ve yalnız bir öğretmende duran, listede olmayan branşlar (tutamaksız), çünkü satır sürükleme hedefi gövde içindeki indisle buluyor.
 - **Listelerde ara, sırala ve süz** (`ListTools`, `listview.ts`): Türkçe katlama ve Türk alfabesi sırası.
 - **Branş yazılmaz, seçilir**, ve "Yeni branş…" ile oracıkta eklenir. Serbest metin "Matemtik"i sessizce ikinci bir branş yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Kullanılan bir branş silinemez, mesaj kimin kullandığını sayar.
+- **Öğretmenin e-postası Öğretmenler tablosunda bir sütun**, Cinsiyet'ten sonra, kural kutularından önce. Yazıldığı gibi durur; tek bir adrese benzemiyorsa kenarı kırmızı ve üstüne gelince ne yazılacağı söylenir. Sütun dar kalır, ama kutuya tıklanınca kutu satırın üstünde adresin boyunda açılır, gövde yazı boyunda; sütun ve komşuları yerinden oynamaz. Ekleme formunda da bir E-posta kutusu var (isteğe bağlı, ilk harften geniş), Excel'den yapıştırmada altıncı sütun; adres biçimindeki bir hücre hangi sütunda olursa olsun e-posta sayılır.
 - **Renk bir sayı olarak değil renk olarak seçilir.** Satır başındaki düğme rengin kendisini gösterir, tıklayınca 36 rengin tamamı 6×6 bir `<dialog>`'da açılır ve seçili renk çerçevelidir.
 - **Başlarken.** Hiç öğretmen ve sınıf yokken bir panel hazır bir okul yüklemeyi teklif eder (`Örnek veriyle doldur`, `Bir daha gösterme`), taslak varsa `Taslaktan başla`. Görüldü işareti ilk çizimde değil bir eylemde yazılır, okunmamış bir teklif bir yenilemeyi atlatsın diye. Örnek verinin kalıcı yeri Ayarlar → Hakkında: orada düğme hep durur, proje doluyken sorusu ne kaybedileceğini sayar ve kırmızıdır.
 
@@ -205,7 +206,10 @@ taşındı." cümlesi de aynı kuralla susar. Geçici görünümle gizlenmiş ya
 Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
 altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9,
 B5.10): hafta hangi yollarla kurulur. Arama kendiliğinden başlar, sürerken panel
-"Nasıl kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Bir yol
+"Nasıl kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Aynı gün
+olmaması istenen iki ders aynı güne sabitlenmişse arama başlamaz: panel bunu tek
+cümleyle, gövde yazı boyunda söyler, Kontrol'ün kural ihlalleri paneli de bir cümleyle
+(TODO RK2). Bir yol
 seçilmez, hepsi gösterilir ve seçen babadır. Yolların yeri sabittir, sırası
 kullanıcının kendi listesi: öğretmenin zaten geldiği güne saat, en az saat (yan
 yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi başka
@@ -292,6 +296,7 @@ yokken de bir cevap verir. Kapasite tablosu Okul'un Özet'iyle aynı çizim
 - **Öğle arası** satırdan satıra değiştiği için o satırın hücresine kalın bir kenarlık.
 - **Öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar**, çünkü sayfada değişen ve okuyanın aradığı şey o.
 - **Kapalı saat işareti kâğıda çıkmaz.** Duvara asılan bir kâğıt "saat 10:40'ta neredeyim" sorusuna cevap verir. Bilgi Müsaitlik'te düzenleniyor ve Kontrol'de sayılıyor.
+- **E-postayla gönder**, Yazdır panelinin hemen altında: her öğretmen için kısa adı, adresi ve "E-postada aç", ya da neden olmadığı (adres yok, adres hatalı, programı boş, e-postaya sığmıyor). Düğme öğretmenin haftasını düz metin olarak kullanıcının kendi e-posta programında yeni bir ileti hâlinde açar; gönderen kullanıcıdır. Exe'de seçili bir e-posta programı yoksa panelin altında tek satır bunu söyler; tarayıcıda sayfa bunu bilemez, tıklamadan sonra tek satır açılmadıysa ne demek olduğunu söyler. Onay listeleri bu paneli etkilemez: bir öğretmene haftasını göndermek bir baskı işi değil.
 - **Kâğıt fiziksel.** Açık palet kullanır, `--ui-scale` kâğıda geçmez, sayfa 205 mm'lik sabit yükseklikli bir kutu ve plan onun içinde dikey ortalanır, kenar boşluğu sayfanın kendi dolgusu (tuzak 31).
 
 ## Ayarlar

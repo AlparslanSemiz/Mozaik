@@ -94,7 +94,13 @@ async function sonrakiOturum(kilit: string, etiket: string): Promise<number> {
   return Number(r.cikti.trim() || '0');
 }
 
-describe('agir.sh · kilit, komutun bütün ağacı bitince boşalıyor', () => {
+// Linux only, like the script itself (its header: "flock and /proc are
+// Linux"). The fake and the checks also need `setsid`, `timeout` and
+// `pgrep -c`. On macOS the suite would fail on the missing tools, not on the
+// lock, so it is skipped there; CI is Linux and runs it on every push.
+const linuxta = describe.skipIf(process.platform !== 'linux');
+
+linuxta('agir.sh · kilit, komutun bütün ağacı bitince boşalıyor', () => {
   it('--sure dolunca ağaç kapanıyor, çıkış 124, kilidi alan hiçbir şey görmüyor', async () => {
     const o = ortam();
     const calisan = kos(AGIR, ['--sure', '2', 'bash', '-c', sahte(o.etiket)], o.env);

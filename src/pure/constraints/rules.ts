@@ -23,13 +23,14 @@ import {
   type ClassGroup,
   type Id,
   type Lesson,
+  type Relation,
   type RuleLevel,
   type RuleName,
   type State,
   type Teacher,
 } from '../../leaf/model';
 import type { Index } from './occupancy';
-import { activePlacements } from '../grid';
+import { activePinned, activePlacements } from '../grid';
 
 export interface Violation {
   key: string; // stable-ish key for React lists
@@ -153,6 +154,50 @@ export function lessonDayCount(d: State, lesson: Lesson, day: number, hourCount:
     if (placements[placementKey(lesson.classId, day, h)] === lesson.id) n++;
   }
   return n;
+}
+
+/**
+ * The relation breaches no search can mend: both lessons PINNED on one day
+ * (TODO RK2). Every week the suggestion search builds keeps the pins, and
+ * `verifySuggestion` turns down any week with the breach still in it, so with
+ * one of these the search could only ever come back empty, and it used to,
+ * after a minute and without a word. It is not mended here either: the pins
+ * are the father's, and so is the choice of which lesson moves (the user's
+ * decision). The suggestion panel and Kontrol say it in one sentence instead.
+ */
+export function pinnedRelationBreaches(
+  d: State,
+  ix: Index,
+): Array<{ relation: Relation; day: number; message: string }> {
+  const placements = activePlacements(d);
+  const pinned = activePinned(d);
+  const hourCount = d.settings.hours.length;
+  const pinnedOn = (lesson: Lesson, day: number) => {
+    for (let h = 0; h < hourCount; h++) {
+      const key = placementKey(lesson.classId, day, h);
+      if (placements[key] === lesson.id && pinned[key] === 1) return true;
+    }
+    return false;
+  };
+  const out: Array<{ relation: Relation; day: number; message: string }> = [];
+  for (const relation of d.relations) {
+    if (relation.kind !== 'notSameDay') continue;
+    const a = ix.lessonById.get(relation.lessonIds[0]);
+    const b = ix.lessonById.get(relation.lessonIds[1]);
+    if (a === undefined || b === undefined) continue;
+    for (const [day, dayInfo] of d.settings.days.entries()) {
+      if (!pinnedOn(a, day) || !pinnedOn(b, day)) continue;
+      out.push({
+        relation,
+        day,
+        message: t(
+          '{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.',
+          { bir: relatedName(d, ix, a), iki: relatedName(d, ix, b), gun: dayLabel(dayInfo.name) },
+        ),
+      });
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------- gaps

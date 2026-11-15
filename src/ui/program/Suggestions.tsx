@@ -18,6 +18,7 @@
 
 import type { State } from '../../leaf/model';
 import type { Advice } from '../../platform/search';
+import { buildIndex, pinnedRelationBreaches } from '../../pure/constraints';
 import { dropAnswer } from '../../pure/entities';
 import {
   FAMILY_ORDER,
@@ -29,7 +30,7 @@ import {
   suggestionSentence,
 } from '../../pure/relax';
 import { type Translate, useT } from '../common';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnswerBook, QuestionSheet } from './AnswerBook';
 
 /** What each way asks for, in a few words: the row's name while it is looked for. */
@@ -94,6 +95,12 @@ export default function Suggestions({
   const [printing, setPrinting] = useState<Suggestion | null>(null);
   const { suggestions, searching, stopped, progress } = advice;
   const as = suggestions.find((s) => s.changes.length === 0);
+  // Two pinned lessons that break a relation: the search was not run, and
+  // the empty panel says why instead of "no way was found" (TODO RK2).
+  const pinnedBreach = useMemo(
+    () => pinnedRelationBreaches(advice.forState, buildIndex(advice.forState))[0],
+    [advice.forState],
+  );
 
   // Focus goes to the first way once the search is over: sooner, and it would
   // pull the keyboard away from whatever the reader was doing meanwhile.
@@ -198,26 +205,35 @@ export default function Suggestions({
     }
   }
   const firstFound = rows.find((r) => r.found !== null)?.family;
+  // Not once the plan moved: the stale note below then speaks alone.
+  const why =
+    !stale && !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
 
   return (
     <section className="panel suggestions" aria-labelledby="suggestions-title">
       <div className="suggestion-row">
         <h2 id="suggestions-title">{t('Kurulması için')}</h2>
-        <span className="hint inline">
-          {searching && suggestions.length === 0
-            ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
-                sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
-              })
-            : stopped
-              ? rows.length === 0
-                ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
-                : t('Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.')
-              : rows.length === 0
-                ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
-                : t(
-                    'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
-                  )}
-        </span>
+        {/* The pinned breach is the panel's whole answer, so it is read at the
+            size a way's own sentence is, not as a muted hint. */}
+        {why !== undefined ? (
+          <span className="suggestion-title">{why}</span>
+        ) : (
+          <span className="hint inline">
+            {searching && suggestions.length === 0
+              ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
+                  sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
+                })
+              : stopped
+                ? rows.length === 0
+                  ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
+                  : t('Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.')
+                : rows.length === 0
+                  ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
+                  : t(
+                      'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
+                    )}
+          </span>
+        )}
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">
             {t(

@@ -75,8 +75,10 @@ export default function Settings({
   update,
   onChangelogSeen,
 }: Props) {
+  // `settings-pane` is `display: contents`: it lays nothing out, it only lets
+  // the notes of every Ayarlar section be the body's size (TODO B7.36).
   return (
-    <>
+    <div className="settings-pane">
       {section === 'school' && <School state={state} change={change} />}
       {section === 'rules' && <Rules state={state} change={change} />}
       {section === 'appearance' && (
@@ -108,6 +110,6 @@ export default function Settings({
           part={section}
         />
       )}
-    </>
+    </div>
   );
 }

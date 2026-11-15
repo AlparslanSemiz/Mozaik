@@ -19,15 +19,29 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- Each teacher's week can be sent by e-mail from Çıktı: "Open in e-mail" opens a new message in your own mail program with the teacher's address and the week as plain text, and you press Send; Mozaik sends nothing itself. The address is a new column in Okul → Öğretmenler (plan file version 17; older backups open with no addresses); the box opens to the whole address while you type in it, and an address can also be typed in the add form or pasted from Excel as a sixth column. If no mail program is chosen, one line says so.
+
 - Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
 
 ### Changed
 
+- The notes in Settings are now as large as the body text.
 - A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
 - Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
 
 ### Fixed
 
+- If the list of plans read empty when the program opened, it used to be replaced by a single "1. plan", and every other plan, though still saved, could no longer be opened. The program now finds those plans and lists them again as "Recovered plan 1, 2, …".
+- When two lessons that must not share a day are both pinned on the same day, "Fill automatically" no longer searches for a minute and then shows an empty list of ways: the panel says at once which two lessons are pinned and that one of them has to move, and Check says it too.
+- The program now checks that a downloaded update is exactly the published file (its SHA-256 digest), not only that it is a whole Windows program of the right size. A published version without a digest is not downloaded; the program says where to get it by hand.
+- When the plan open last time can no longer be read, the first plan that can be read opens instead of an empty one, every time the program starts; the unreadable plan is kept exactly as it was, and one line says which plan it was. In Settings → Plans and backup such a plan now reads "unreadable" instead of "no data", shows no counts, and deleting it says that its text goes too.
+- "Open from file" no longer opens a plan in which two lessons, or a teacher, class or room and another one, share an id, or one has none; such a file is refused as unreadable. "Open all from file" leaves such a plan out and counts it with the broken ones.
+- "Open all from file" given a file that was cut short now says the file cannot be read, instead of sending you to the top bar's "Open from file".
+- "Open all from file" now says that a plan written by a newer version of the program needs the program updated, instead of calling it incomplete or broken.
+- "Open all from file" no longer opens a plan whose teacher, class, lesson or room list is missing as an empty plan, and no longer deletes the plan on this computer to make room for it. Such a plan is left out, the question before replacing says how many are left out, and the plan on this computer that it would have replaced stays. A file in which no plan can be read changes nothing and asks nothing.
+- "Open all from file" with the browser's storage full no longer deletes the plans on this computer when not one plan from the file could be saved, and no longer says that nothing changed. The plans here stay and the note says that storage may be full.
+- "Open from file" in the top bar no longer does nothing, silently, with a file that has a broken row in it. It says the file cannot be read, and the open plan stays as it was.
+- In the desktop program, closing the window within two seconds of a change no longer leaves the copy in Documents\Ders Programı one change behind. The window now waits until the change is written, and closes on its own after five seconds if the page does not answer.
 - A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
 - When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.

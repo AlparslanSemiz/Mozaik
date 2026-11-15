@@ -32,6 +32,7 @@ import {
 } from '../../platform/prefs';
 import Sheet from './Sheet';
 import { T, useT } from '../common';
+import MailPanel from './MailPanel';
 
 interface Props {
   state: State;
@@ -289,6 +290,11 @@ export default function Print({
             <div className="warn-box">{t('Hiçbir sayfa seçili değil, basılacak bir şey yok.')}</div>
           )}
         </div>
+
+        {/* Right under the printer: the other way a teacher's page leaves
+            this screen. Every teacher, whatever the tick lists say: sending
+            one teacher's week is not a print job. */}
+        <MailPanel state={state} ix={ix} spans={spans} />
 
         {/* HOW THE SHEET IS LAID OUT — two questions, and they are not the
             same question as "what is on it", so they are not in the same

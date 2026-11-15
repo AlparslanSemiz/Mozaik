@@ -36,6 +36,67 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-15 · Güvenlik sertleştirmesi: küçük kapılar Rust'ta, capability ve CSP sonraya (`guvenlik/sertlestirme`)
+
+**Karar.** Güvenlik denetiminin küçük maddeleri kodda kapandı (TODO B7.39). Üç seçim:
+- **`boyut == 0` artık "bilinmiyor" değil, ret.** İstisna yalnız sayfanın boyut denetimini
+  kapatmasına yarıyordu; yayınlanan her manifest gerçek boyutu taşıyor ve `verify`'ın başka
+  çağıranı yok, yani eski bir yol ona muhtaç değil.
+- **`.eski` sayfa yüklenince siliniyor** (`on_page_load`, `Finished`, süreçte bir kez), açılışın
+  ilk satırında değil. Pencere açamayan bir yeni sürüm geri dönülecek kopyayı bırakır; sonraki
+  takas onu zaten siler. Bir sonraki açılışa ertelemek seçilmedi: bu sürüm de pencere açtıysa
+  çalışıyor demektir.
+- **Silme kuralı iki yerde.** `remove_file` yalnız günlük yedek adını siliyor. Bu, "kural tek
+  yerde" ilkesinin bilinçli bir istisnası: `prunable()` hangisinin gideceğine karar veriyor,
+  Rust neyin hiç gidemeyeceğine. Liste yine her şeyi gösteriyor.
+
+**Bırakılan.** `core:default`'u daraltmak ve CSP yazmak bu dala girmedi: ikisi de exe'de
+ölçülmeden yanlışsa sessizce kırılıyor (kapanışta son düzenleme, ya da açılmayan sayfa).
+
+### 2026-11-15 · Güncellemeler imzalı (`guvenlik/imza`)
+
+**Karar (Alp: "her düzeltmeyi yap").** Güvenlik denetiminin bulgusu: indirilen exe ve kurulum
+yalnız boyut, `MZ` ve aynı Release'ten gelen SHA-256 ile denetleniyordu, sonra kurulum `/S`
+ile sessiz çalışıyordu. Özet dosyanın eksiksiz geldiğini söyler, bizim olduğunu söylemez. Artık
+`surum.yml` iki programı minisign (ed25519) ile imzalıyor, imzalar `surum.json`'da (`imza`,
+`kurulum_imza`), ve yayınlanan kopya imzası bizim anahtarımızla tutmayan hiçbir şeyi kurmuyor
+(`update.rs`, `imza_dogru`; doğrulayıcı `minisign-verify`, bağımlılıksız). Anahtarın açık yarısı
+`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı depo sırrı `MOZAIK_IMZA_ANAHTARI` ve Alp'in makinesinde
+`~/.config/mozaik-imza/` (600). Sır yoksa yayın durur. Test kopyası (`TEST_KOKU`) yerel sunucudan
+beslendiği için imza istemez. **Bedel:** anahtar değişirse dağıtılmış her kopya yeni sürümü
+reddeder; gizli yarı kaybolursa aynı. Yedeği Alp'te.
+
+### 2026-11-15 · Exe bir kurulum paketiyle de teslim ediliyor (`teslim/kurulum-paketi`)
+
+**Karar (Alp).** Yayın, tek başına `Mozaik.exe`'nin yanında bir kurulum sihirbazı
+(`Mozaik-Kurulum.exe`, Tauri'nin NSIS hedefi, kullanıcı başına, yönetici izni yok) da
+taşıyor. Sebep öneri aramasının hızı: OR-Tools CP-SAT babanın verisinde en küçük
+değişikliği 8 çekirdekte 7,9 s'de kanıtlıyor, bizim SAT araması ~26 s'de kanıtsız
+buluyor, ve CP-SAT'ın kütüphaneleri exe'nin yanında duran dosyalar (~71 MB, 10 DLL).
+Seçenekler: (a) DLL'leri exe'nin içine gömüp ilk açılışta çıkarmak, (b) kurulum.
+Alp'in sorusu "hangisi daha temiz ve ileride sorun çıkarmaz": (b). (a) kendi
+yazdığımız bir çıkarma, sürüm ve onarım katmanı demekti, ve imzasız bir exe'nin
+AppData'ya DLL çıkarıp yüklemesi virüs tarayıcılarının şüphelendiği desen.
+
+**Veri yerinde kalıyor.** WebView2 profili exe'nin yerine değil `identifier`'a bağlı
+(`%LOCALAPPDATA%\com.dersprogrami.arac`, DATA.md, "Değişmeyen kimlikler"), yani kurulan
+program aynı planları görür. Tauri'nin kaldırıcısındaki "uygulama verilerini sil" kutusu
+tam o klasörü `RmDir /r` ile siliyordu; `src-tauri/nsis/kancalar.nsh` kutunun değerini
+kaldırma bölümünün başında sıfırlıyor ve `surum.yml` kancanın üretilen betikte olduğunu
+ölçmeden kurulumu yayına sokmuyor.
+
+**Köprü.** Manifeste iki isteğe bağlı alan girdi (`kurulum`, `kurulum_boyut`). Sahadaki
+2.2.0 onları tanımaz ve tek dosyayı takas etmeye devam eder; o yeni exe bir sonraki
+"Denetle"de kurulumu önerir, kurulumu `/S /R` ile çalıştırır ve kendi yolunu
+`eski-kopya.txt`'ye yazar; kurulan program açılışta o eski dosyayı siler
+(`update.rs`, `silinecek_eski`: yalnız kurulu bir program, yalnız başka bir `.exe`).
+
+**Klasör.** Tauri'nin varsayılanı `%LOCALAPPDATA%\Mozaik`, `Kur.cmd`'nin tarayıcı
+kurulumunun klasörü. Kanca yalnız varsayılanı `%LOCALAPPDATA%\Programs\Mozaik`'e çeviriyor.
+
+**Açık kalan.** Gerçek Windows'ta eski sürümden yenisine güncelleme (CLAUDE.md, "Sürüm")
+ve kurulumun antivirüs ve SmartScreen davranışı ölçülmedi; TODO B7.38.
+
 ### 2026-10-24 · Modül modül yapısal refactor: her kaynak dosya bir alanda (`refactor/moduller`)
 
 **Ne.** Kullanıcının açıkça istediği bir tur (yapıştırılan görev ve aynı günün ek talimatı):
@@ -209,6 +270,12 @@ bekliyor") öbür yanda.
 
 **Gerekçe.** Etiket babanın exe'sine ulaşıyor, Windows onun gerçek ortamı. Push ve
 birleştirme babaya ulaşmıyor, onlar beklemez.
+
+**Aynı gün, TP7.** Gerçek exe'nin Windows süiti (`exe-windows.yml`) ayrı bir iş akışı:
+haftada bir ve exe'ye dokunan bir `main` push'unda koşar, push'u beklemez. `yayinla` onu
+da bekliyor, istisnanın içinde: sürüm commit'i `package.json`'u ve `Cargo.toml`'u
+değiştirdiği için süzgeç onu tetikliyor, tetiklemediği yerde (yalnız etiket, `--kuru`)
+`yayinla` iş akışını elle başlatıyor. `surum.yml`'e dokunulmadı.
 
 ### 2026-10-10 · Refactor adım 4: `programView` pure'un kökünde, teneffüs kesmesi birleşmedi
 

@@ -13,21 +13,30 @@
 //
 //   push main   -> ci.yml (green) -> site.yml -> GitHub Pages  (the site route)
 //               -> windows.yml (Windows E2E; the site does not wait for it)
+//               -> exe-windows.yml (the real exe on Windows, when the push
+//                  touches the exe; the version commit always does)
+//               -> guncelleme-windows.yml (the last released exe's data,
+//                  and update.rs's own update into this build; waited for
+//                  before every release, started here if it did not run)
 //   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
-// So the order is: commit, push main ALONE, wait for that commit's ci.yml run
-// AND its windows.yml run, and only when both are green tag it and push the
-// tag. The tag used to go in the same push as the commit, i.e. before any test
-// had looked at it (2026-10-08); the Windows run joined on 2026-10-09, because
-// the tag is what reaches my father's exe and his machine is Windows. A red
+// So the order is: commit, push main ALONE, wait for that commit's ci.yml,
+// windows.yml, exe-windows.yml and guncelleme-windows.yml runs, and only when
+// all four are green tag it and push the tag. The upgrade gate waits for every
+// release, whatever it changed (the user's decision, 2026-10-24). The tag used to go in the same push as the commit, i.e.
+// before any test had looked at it (2026-10-08); the Windows run joined on
+// 2026-10-09 and the real exe on 2026-10-10, because the tag is what reaches
+// my father's exe and his machine is Windows. Those Windows waits are the one
+// exception to "slow suites hold nothing up" (DECISIONS 2026-10-10). A red
 // run stops here with the commit pushed and no tag. The site may already have
 // changed then (it waits for ci.yml alone), the exe has not. Fix, push, and
 // give the same command again; package.json already at the version means "tag
 // only".
 //
-// `--kuru` (dry run) changes nothing: it takes HEAD, which must already be
-// pushed, finds and waits for its ci.yml and windows.yml runs, says the
-// result, and stops where the tag would be cut.
+// `--kuru` (dry run) changes nothing in the repository: it takes HEAD, which
+// must already be pushed, finds and waits for its runs, says the result,
+// and stops where the tag would be cut. It may START two: exe-windows.yml and
+// guncelleme-windows.yml when HEAD has none (below).
 //
 // Refuses outside the main checkout or off `main`, on a dirty tree, on a tag
 // that exists, and without a logged-in `gh`. Every one of those has a right
@@ -39,6 +48,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
+import { kilitSurumunuYaz } from './kilit-surumu.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -121,11 +131,40 @@ async function kosuYesilMi(is, sha, kirmizidaNe) {
   console.log(`  ${kisa}'in ${is} koşusu yeşil.\n`);
 }
 
-// The two runs a tag waits for. ci.yml first: it is the shorter one, and the
-// Windows run is started by the same push, so it is already under way.
+// The two Windows exe workflows do not run on every push: their paths filters
+// take the version commit (package.json, Cargo.toml) but not a tag-only
+// release, or `--kuru` on a commit that never touched the exe. Then the run is started here, on main, which has to BE this
+// commit or the run would judge another one.
+async function kosuVarMi(is, sha) {
+  const kisa = sha.slice(0, 7);
+  for (let i = 0; i < 6; i++) {
+    if (i > 0) await bekle(10_000);
+    const r = gh(['run', 'list', '--workflow', is, '--commit', sha, '--json', 'databaseId']);
+    if (r.status !== 0) dur('gh run list olmadı.', ...girintili(r.stderr.trim()));
+    if (JSON.parse(r.stdout).length > 0) return;
+  }
+  git('fetch', '--quiet', 'origin', 'main');
+  if (git('rev-parse', 'origin/main') !== sha) {
+    dur(
+      `${kisa} için ${is} koşusu yok, ve ${kisa} main'in ucu değil: başlatılamaz.`,
+      `gh workflow run ${is} --ref main`,
+    );
+  }
+  const r = gh(['workflow', 'run', is, '--ref', 'main']);
+  if (r.status !== 0) dur(`${is} başlatılamadı.`, ...girintili(r.stderr.trim()));
+  console.log(`\n  ${kisa} için ${is} koşusu yoktu, başlatıldı.\n`);
+}
+
+// The runs a tag waits for. The two exe runs are started first, so their two
+// Rust builds overlap with each other and with the wait for ci.yml, the
+// shortest; the Windows runs were started by the same push anyway.
 async function ciYesilMi(sha, kirmizidaNe) {
+  await kosuVarMi('exe-windows.yml', sha);
+  await kosuVarMi('guncelleme-windows.yml', sha);
   await kosuYesilMi('ci.yml', sha, kirmizidaNe);
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
+  await kosuYesilMi('exe-windows.yml', sha, kirmizidaNe);
+  await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
 }
 
 // The first gate, before the arguments are even read: a release run from a
@@ -247,12 +286,22 @@ function changelogKapat() {
 }
 
 // ------------------------------------------------------------------ yaz
+// Every new text is worked out BEFORE the first file is written. A stop half
+// way (a line not found, a lock file in a shape this will not reformat) used
+// to leave package.json written and the rest not, and the clean-tree gate
+// above then refused the next run (TODO B7.32's review).
 const yol = resolve(KOK, 'package.json');
 const metin = readFileSync(yol, 'utf8');
 const pkg = JSON.parse(metin);
 const onceki = pkg.version;
+// Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
+// reformat a file nobody asked to reformat, and the diff of a release
+// should be one line.
+const pkgYeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
+if (onceki !== surum && pkgYeni === metin)
+  dur('package.json içindeki "version" satırı bulunamadı.');
 
-// The SECOND copy of the number, and the only one left.
+// The SECOND copy of the number.
 //
 // tauri.conf.json used to hold a third; it now reads `../package.json`, which
 // Tauri resolves itself. Cargo.toml cannot do that — cargo will not read a
@@ -260,25 +309,39 @@ const onceki = pkg.version;
 // to drift. Drifting mattered the day the exe learned to update itself: the
 // number it compares against a release is the number it was built with, and a
 // stale one means the program either never offers an update or offers one
-// forever. `surum.test.ts` fails if the two ever disagree.
+// forever. `surum.test.ts` fails if package.json, Cargo.toml and the lock file
+// ever disagree.
 const cargoYol = resolve(KOK, 'src-tauri', 'Cargo.toml');
+const cargoEski = readFileSync(cargoYol, 'utf8');
+// Anchored to the line: `Cargo.toml` also carries `rust-version` and a
+// `version` under every `[dependencies]` entry, and a loose replace would
+// pick whichever came first.
+const cargoSatiri = /^version = "\d+\.\d+\.\d+"$/m;
+// "The line is missing" and "the line already says this" are DIFFERENT
+// answers, and collapsing them into one `yeni === eski` stopped a release
+// dead on the very path this branch exists to serve: package.json bumped by
+// hand, so Cargo.toml is usually already in step, so the replace changes
+// nothing — which is CORRECT, not a missing line.
+if (!cargoSatiri.test(cargoEski)) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
+const cargoYeni = cargoEski.replace(cargoSatiri, `version = "${surum}"`);
 
-function cargoSurumuYaz(hedef) {
-  const eski = readFileSync(cargoYol, 'utf8');
-  // Anchored to the line: `Cargo.toml` also carries `rust-version` and a
-  // `version` under every `[dependencies]` entry, and a loose replace would
-  // pick whichever came first.
-  const satir = /^version = "\d+\.\d+\.\d+"$/m;
-  // "The line is missing" and "the line already says this" are DIFFERENT
-  // answers, and collapsing them into one `yeni === eski` stopped a release
-  // dead on the very path this branch exists to serve: package.json bumped by
-  // hand, so Cargo.toml is usually already in step, so the replace changes
-  // nothing — which is CORRECT, not a missing line.
-  if (!satir.test(eski)) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
-  const yeni = eski.replace(satir, `version = "${hedef}"`);
-  // Written only when something changed: a no-op write dirties the tree, and
-  // the gate at the top of this file refuses a dirty tree.
-  if (yeni !== eski) writeFileSync(cargoYol, yeni, 'utf8');
+// The THIRD copy, and not one anybody reads: package-lock.json's root. It is
+// written for the tree's sake (TODO B7.32): left behind, the next
+// `npm install` rewrites it and the clean-tree gate above stops the release
+// after this one.
+const kilitYol = resolve(KOK, 'package-lock.json');
+const kilitEski = readFileSync(kilitYol, 'utf8');
+let kilitYeni = kilitEski;
+try {
+  kilitYeni = kilitSurumunuYaz(kilitEski, surum);
+} catch (e) {
+  dur(e.message, 'npm install', 'git add package-lock.json && git commit');
+}
+
+// Written only when something changed: a no-op write dirties the tree, and
+// the gate at the top of this file refuses a dirty tree.
+function yazDegistiyse(dosya, eski, yeni) {
+  if (yeni !== eski) writeFileSync(dosya, yeni, 'utf8');
 }
 
 // package.json ALREADY at this version is not an error, and refusing was
@@ -287,27 +350,26 @@ function cargoSurumuYaz(hedef) {
 // step it exists to stop anybody forgetting.
 if (onceki === surum) {
   console.log(`\n  package.json zaten ${surum}; yalnız etiket atılıyor.\n`);
-  // ...but Cargo.toml may still be behind, because bumping package.json by
-  // hand is exactly the path that leaves it behind.
-  cargoSurumuYaz(surum);
+  // ...but Cargo.toml and the lock file may still be behind, because bumping
+  // package.json by hand is exactly the path that leaves them behind.
+  yazDegistiyse(cargoYol, cargoEski, cargoYeni);
+  yazDegistiyse(kilitYol, kilitEski, kilitYeni);
   changelogKapat();
   if (git('status', '--porcelain') !== '') {
-    console.log('  src-tauri/Cargo.toml ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n');
-    git('add', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+    console.log(
+      '  src-tauri/Cargo.toml, package-lock.json ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n',
+    );
+    git('add', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
     git('commit', '-m', `Sürüm ${etiket}`);
   }
 } else {
-  // Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
-  // reformat a file nobody asked to reformat, and the diff of a release
-  // should be one line.
-  const yeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
-  if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
-  writeFileSync(yol, yeni, 'utf8');
-  cargoSurumuYaz(surum);
+  writeFileSync(yol, pkgYeni, 'utf8');
+  yazDegistiyse(cargoYol, cargoEski, cargoYeni);
+  yazDegistiyse(kilitYol, kilitEski, kilitYeni);
   changelogKapat();
 
   console.log(`\n  ${onceki} → ${surum}\n`);
-  git('add', 'package.json', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
+  git('add', 'package.json', 'src-tauri/Cargo.toml', 'package-lock.json', 'CHANGELOG.md');
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 
