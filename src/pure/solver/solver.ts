@@ -773,18 +773,145 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   const random = rng(base.lessons.length * 7919 + cellCount);
   /** One entry per block still without a place: the item it belongs to. */
   const queue: number[] = [];
-  /** Class cell -> the movable block that covers it. Fixed cells are absent. */
-  const owner = new Map<string, Rec>();
-  /** `${item}|${cell}` -> the move until which that block may not return there. */
-  const tabu = new Map<string, number>();
+
+  // ---- the repair's integer mirror of the grid ------------------------------
+  //
+  // The repair asks "who is on this class / teacher / room cell, and may it
+  // move" a few hundred million times on a school-sized week, and every one of
+  // those questions used to build a `${id}|${day}|${hour}` string and hash it.
+  // MEASURED (2026-11-15, tam-dolu-kurs, keepPlaced false): 9.1 s, ~70% of it in
+  // `evictions`, `movableAt` and `trim`. So the repair reads typed arrays
+  // indexed by entity * cellCount + cell instead. They mirror `placements` and
+  // `ix` exactly: built from them in `startRepair`, and changed only by `claim`
+  // and `release`, the repair's only two writers. `blocker()` still has the
+  // last word on every move, through the dictionary, so a drift here can only
+  // make the repair try a cell blocker() then refuses, never place a wrong one.
+
+  /** A cell nobody is on. */
+  const EMPTY = -1;
+  /** A cell holding a lesson id that is not in `base.lessons` (sanitize's job). */
+  const ORPHAN = -2;
+
+  const lessonIndex = new Map<Id, number>();
+  base.lessons.forEach((lesson, i) => lessonIndex.set(lesson.id, i));
+  const indexer = () => {
+    const map = new Map<Id, number>();
+    return {
+      map,
+      of(id: Id): number {
+        let at = map.get(id);
+        if (at === undefined) {
+          at = map.size;
+          map.set(id, at);
+        }
+        return at;
+      },
+    };
+  };
+  const classes = indexer();
+  const teachers = indexer();
+  const rooms = indexer();
+  for (const group of base.classes) {
+    classes.of(group.id);
+    if (group.roomId != null) rooms.of(group.roomId);
+  }
+  const lessonClass = new Int32Array(base.lessons.length);
+  const lessonTeacher = new Int32Array(base.lessons.length);
+  const lessonRoom = new Int32Array(base.lessons.length);
+  base.lessons.forEach((lesson, i) => {
+    lessonClass[i] = classes.of(lesson.classId);
+    lessonTeacher[i] = teachers.of(lesson.teacherId);
+    const roomId = ix.classById.get(lesson.classId)?.roomId;
+    lessonRoom[i] = roomId == null ? -1 : rooms.of(roomId);
+  });
+  const classCell = new Int32Array(classes.map.size * cellCount).fill(EMPTY);
+  const teacherCell = new Int32Array(teachers.map.size * cellCount).fill(EMPTY);
+  const roomCell = new Int32Array(rooms.map.size * cellCount).fill(EMPTY);
+  /** Class cell -> the movable block that covers it. Fixed cells hold null. */
+  const owner: Array<Rec | null> = new Array<Rec | null>(classes.map.size * cellCount).fill(null);
+
+  /** `placements` and the index, read into the arrays above. */
+  function mirrorGrid(): void {
+    classCell.fill(EMPTY);
+    teacherCell.fill(EMPTY);
+    roomCell.fill(EMPTY);
+    owner.fill(null);
+    for (const key in placements) {
+      const lessonId = placements[key];
+      if (lessonId === undefined) continue;
+      // Cut the same way buildIndex() does: the class id is everything before
+      // the last two separators.
+      const sep = key.lastIndexOf('|');
+      const prevSep = key.lastIndexOf('|', sep - 1);
+      const cell = Number(key.slice(prevSep + 1, sep)) * hourCount + Number(key.slice(sep + 1));
+      const classAt = classes.map.get(key.slice(0, prevSep));
+      const li = lessonIndex.get(lessonId);
+      if (classAt !== undefined) classCell[classAt * cellCount + cell] = li ?? ORPHAN;
+      if (li === undefined) continue; // buildIndex() skips it too
+      teacherCell[lessonTeacher[li]! * cellCount + cell] = li;
+      const room = lessonRoom[li]!;
+      if (room >= 0) roomCell[room * cellCount + cell] = li;
+    }
+  }
+
+  /** item -> its lesson's index in `base.lessons`. */
+  const itemLesson = items.map((item) => lessonIndex.get(item.lesson.id)!);
+
+  /**
+   * item -> cell -> 1 when a block of this item can never start there, whatever
+   * moves: past the end of the day, on an excluded day, or over an hour the
+   * class, the teacher or the room has closed. None of that changes during a
+   * run, so it is read once instead of on every move.
+   */
+  const neverStarts = items.map((item) => {
+    const out = new Uint8Array(cellCount);
+    const { lesson, block, roomId } = item;
+    for (let cell = 0; cell < cellCount; cell++) {
+      const day = Math.floor(cell / hourCount);
+      const hour = cell % hourCount;
+      if (hour + block > hourCount || isExcludedDay(day)) {
+        out[cell] = 1;
+        continue;
+      }
+      for (let i = 0; i < block; i++) {
+        const h = hour + i;
+        if (
+          base.unavailable[closedKey(lesson.classId, day, h)] !== undefined ||
+          base.unavailable[closedKey(lesson.teacherId, day, h)] !== undefined ||
+          (roomId != null && base.unavailable[closedKey(roomId, day, h)] !== undefined)
+        ) {
+          out[cell] = 1;
+          break;
+        }
+      }
+    }
+    return out;
+  });
+
+  /** lesson index -> the lessons (by index) it may not share a day with (B5.3). */
+  const apart = base.lessons.map((lesson) =>
+    (ix.notSameDay.get(lesson.id) ?? [])
+      .map((id) => lessonIndex.get(id))
+      .filter((at): at is number => at !== undefined),
+  );
+
+  /** `${item}|${cell}` as item * cellCount + cell -> the move until which that block may not return there. */
+  const tabu = new Float64Array(items.length * cellCount);
   /** item -> how often it has been the homeless block picked for a move. */
   const weight = items.map(() => 1);
 
   function claim(rec: Rec): void {
     const item = items[rec.item]!;
+    const li = itemLesson[rec.item]!;
     occupy(placements, ix, item.lesson, item.roomId, rec.day, rec.hour, item.block);
+    const start = rec.day * hourCount + rec.hour;
+    const room = lessonRoom[li]!;
     for (let i = 0; i < item.block; i++) {
-      owner.set(placementKey(item.lesson.classId, rec.day, rec.hour + i), rec);
+      const cell = start + i;
+      classCell[lessonClass[li]! * cellCount + cell] = li;
+      teacherCell[lessonTeacher[li]! * cellCount + cell] = li;
+      if (room >= 0) roomCell[room * cellCount + cell] = li;
+      owner[lessonClass[li]! * cellCount + cell] = rec;
     }
     item.done++;
     placedBlocks++;
@@ -792,19 +919,28 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   function release(rec: Rec): void {
     const item = items[rec.item]!;
+    const li = itemLesson[rec.item]!;
     vacate(placements, ix, item.lesson, item.roomId, rec.day, rec.hour, item.block);
+    const start = rec.day * hourCount + rec.hour;
+    const room = lessonRoom[li]!;
     for (let i = 0; i < item.block; i++) {
-      owner.delete(placementKey(item.lesson.classId, rec.day, rec.hour + i));
+      const cell = start + i;
+      classCell[lessonClass[li]! * cellCount + cell] = EMPTY;
+      teacherCell[lessonTeacher[li]! * cellCount + cell] = EMPTY;
+      if (room >= 0) roomCell[room * cellCount + cell] = EMPTY;
+      owner[lessonClass[li]! * cellCount + cell] = null;
     }
     item.done--;
     placedBlocks--;
   }
 
-  /** The movable block on a class cell a lesson occupies, or null if it is fixed. */
-  function movableAt(lessonId: Id, day: number, hour: number): Rec | null {
-    const lesson = ix.lessonById.get(lessonId);
-    if (lesson === undefined) return null;
-    return owner.get(placementKey(lesson.classId, day, hour)) ?? null;
+  /**
+   * The movable block on the class cell a lesson (by index) occupies, or null
+   * if it is fixed or not a lesson of this plan.
+   */
+  function movableAt(li: number, cell: number): Rec | null {
+    if (li < 0) return null;
+    return owner[lessonClass[li]! * cellCount + cell] ?? null;
   }
 
   /**
@@ -815,9 +951,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     for (const key of Object.keys(placements)) delete placements[key];
     Object.assign(placements, bestPlacements);
     ix = buildIndex(work);
+    mirrorGrid();
     trail.length = 0;
     stack.length = 0;
-    owner.clear();
     queue.length = 0;
     sinceGain = 0;
 
@@ -837,8 +973,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
         if (fixed || at < 0) continue;
         const rec: Rec = { item: at, day: b.day, hour: b.hour, since: 0 };
         items[at]!.done++;
+        const classAt = lessonClass[itemLesson[at]!]!;
         for (let i = 0; i < b.size; i++) {
-          owner.set(placementKey(lesson.classId, b.day, b.hour + i), rec);
+          owner[classAt * cellCount + b.day * hourCount + b.hour + i] = rec;
         }
       }
     }
@@ -865,18 +1002,89 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     return true;
   }
 
-  /** Per-lesson and per-teacher daily limits that BLOCK, resolved once. 0 = none. */
-  const sameLimit = new Map<Id, number>();
-  for (const lesson of base.lessons) {
-    const limit = lessonLimit(base, lesson);
+  /** Per-lesson and per-teacher daily limits that BLOCK, resolved once per item. 0 = none. */
+  const sameLimit = items.map((item) => {
+    const limit = lessonLimit(base, item.lesson);
     const bites = ruleLevel(base, 'maxSameLessonPerDay') === 'block';
-    sameLimit.set(lesson.id, bites && ruleActive(base, 'maxSameLessonPerDay', limit) ? limit : 0);
-  }
-  const dayLimit = new Map<Id, number>();
-  for (const teacher of base.teachers) {
+    return bites && ruleActive(base, 'maxSameLessonPerDay', limit) ? limit : 0;
+  });
+  const dayLimit = items.map((item) => {
+    const teacher = ix.teacherById.get(item.lesson.teacherId);
+    if (teacher === undefined) return 0;
     const limit = limitFor(base, teacher, 'maxPerDay');
     const bites = ruleLevel(base, 'maxPerDay') === 'block';
-    dayLimit.set(teacher.id, bites && ruleActive(base, 'maxPerDay', limit) ? limit : 0);
+    return bites && ruleActive(base, 'maxPerDay', limit) ? limit : 0;
+  });
+
+  /**
+   * Hours on `day` that a limit counts and that are not already moving, and
+   * the movable blocks to push out until `block` more hours fit under `limit`.
+   * `row` is the start of the class's or the teacher's day in its array;
+   * `only` keeps just one lesson's hours (the same-lesson limit), -1 keeps all.
+   * False when even pushing every movable block out leaves no room.
+   */
+  function trim(
+    out: Set<Rec>,
+    limit: number,
+    block: number,
+    cells: Int32Array,
+    row: number,
+    day: number,
+    only: number,
+    /** The same count with nothing moving, read once per move (`dayCounts`). */
+    whole: number,
+  ): boolean {
+    if (limit <= 0) return true;
+    // Count first: on most cells the limit is nowhere near, and then nothing
+    // has to be listed, sorted or pushed out. The day's count does not depend
+    // on the cell, so it comes in whole and only the hours of the blocks
+    // already moving are taken off: each counted hour has exactly one owner,
+    // so walking the owners' own hours finds every hour to drop, once.
+    let count = whole;
+    for (const rec of out) {
+      if (rec.day !== day) continue;
+      const size = items[rec.item]!.block;
+      for (let h = rec.hour; h < rec.hour + size; h++) {
+        const id = cells[row + h]!;
+        if (id === EMPTY || (only >= 0 && id !== only)) continue;
+        if (movableAt(id, day * hourCount + h) === rec) count--;
+      }
+    }
+    if (count + block <= limit) return true;
+    const movable: Rec[] = [];
+    for (let h = 0; h < hourCount; h++) {
+      const id = cells[row + h]!;
+      if (id === EMPTY || (only >= 0 && id !== only)) continue;
+      const rec = movableAt(id, day * hourCount + h);
+      if (rec !== null && !out.has(rec) && rec.hour === h) movable.push(rec);
+    }
+    movable.sort((a, b) => items[b.item]!.block - items[a.item]!.block);
+    for (const rec of movable) {
+      if (count + block <= limit) break;
+      out.add(rec);
+      count -= items[rec.item]!.block;
+    }
+    return count + block <= limit;
+  }
+
+  /** Per day, this move's lesson hours on its class row and its teacher's busy hours. */
+  const sameOnDay = new Int32Array(dayCount);
+  const teacherOnDay = new Int32Array(dayCount);
+  function dayCounts(index: number): void {
+    const li = itemLesson[index]!;
+    const classRow = lessonClass[li]! * cellCount;
+    const teacherRow = lessonTeacher[li]! * cellCount;
+    for (let day = 0; day < dayCount; day++) {
+      let same = 0;
+      let busy = 0;
+      for (let h = 0; h < hourCount; h++) {
+        const cell = day * hourCount + h;
+        if (classCell[classRow + cell] === li) same++;
+        if (teacherCell[teacherRow + cell] !== EMPTY) busy++;
+      }
+      sameOnDay[day] = same;
+      teacherOnDay[day] = busy;
+    }
   }
 
   /**
@@ -889,81 +1097,72 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
    * touches leaves the walk nowhere to go. So those blocks are candidates to
    * move too, the biggest first because one move is cheaper than two.
    */
-  function evictions(item: Item, cell: number): Set<Rec> | null {
-    const { lesson, block, roomId } = item;
+  function evictions(index: number, cell: number): Set<Rec> | null {
+    if (neverStarts[index]![cell] === 1) return null;
+    const { block } = items[index]!;
+    const li = itemLesson[index]!;
     const day = Math.floor(cell / hourCount);
-    const hour = cell % hourCount;
-    if (hour + block > hourCount || isExcludedDay(day)) return null;
+    const classRow = lessonClass[li]! * cellCount;
+    const teacherRow = lessonTeacher[li]! * cellCount;
+    const room = lessonRoom[li]!;
 
     const out = new Set<Rec>();
     for (let i = 0; i < block; i++) {
-      const h = hour + i;
-      if (
-        base.unavailable[closedKey(lesson.classId, day, h)] !== undefined ||
-        base.unavailable[closedKey(lesson.teacherId, day, h)] !== undefined ||
-        (roomId != null && base.unavailable[closedKey(roomId, day, h)] !== undefined)
-      ) {
-        return null;
-      }
-      const busy = [
-        placements[placementKey(lesson.classId, day, h)],
-        ix.teacherBusy.get(closedKey(lesson.teacherId, day, h)),
-        roomId == null ? undefined : ix.roomBusy.get(closedKey(roomId, day, h)),
-      ];
-      for (const other of busy) {
-        if (other === undefined) continue;
-        const rec = movableAt(other, day, h);
+      const at = cell + i;
+      // Class, then teacher, then room: the order the blocks join `out` in is
+      // the order they are released and queued, and the walk is seeded.
+      const onClass = classCell[classRow + at]!;
+      if (onClass !== EMPTY) {
+        const rec = movableAt(onClass, at);
         if (rec === null) return null;
         out.add(rec);
       }
+      const onTeacher = teacherCell[teacherRow + at]!;
+      if (onTeacher !== EMPTY) {
+        const rec = movableAt(onTeacher, at);
+        if (rec === null) return null;
+        out.add(rec);
+      }
+      if (room >= 0) {
+        const onRoom = roomCell[room * cellCount + at]!;
+        if (onRoom !== EMPTY) {
+          const rec = movableAt(onRoom, at);
+          if (rec === null) return null;
+          out.add(rec);
+        }
+      }
     }
 
-    /** Hours on this day that `belongs` claims and that are not already moving. */
-    const trim = (
-      limit: number,
-      cells: (h: number) => Id | undefined,
-      belongs: (id: Id) => boolean,
-    ) => {
-      if (limit <= 0) return true;
-      let count = 0;
-      const movable: Rec[] = [];
-      for (let h = 0; h < hourCount; h++) {
-        const id = cells(h);
-        if (id === undefined || !belongs(id)) continue;
-        const rec = movableAt(id, day, h);
-        if (rec !== null && out.has(rec)) continue;
-        count++;
-        if (rec !== null && rec.hour === h) movable.push(rec);
-      }
-      movable.sort((a, b) => items[b.item]!.block - items[a.item]!.block);
-      for (const rec of movable) {
-        if (count + block <= limit) break;
-        out.add(rec);
-        count -= items[rec.item]!.block;
-      }
-      return count + block <= limit;
-    };
-
+    const dayStart = day * hourCount;
     const ok =
       trim(
-        sameLimit.get(lesson.id) ?? 0,
-        (h) => placements[placementKey(lesson.classId, day, h)],
-        (id) => id === lesson.id,
+        out,
+        sameLimit[index]!,
+        block,
+        classCell,
+        classRow + dayStart,
+        day,
+        li,
+        sameOnDay[day]!,
       ) &&
       trim(
-        dayLimit.get(lesson.teacherId) ?? 0,
-        (h) => ix.teacherBusy.get(closedKey(lesson.teacherId, day, h)),
-        () => true,
+        out,
+        dayLimit[index]!,
+        block,
+        teacherCell,
+        teacherRow + dayStart,
+        day,
+        -1,
+        teacherOnDay[day]!,
       );
     if (!ok) return null;
     // A lesson this one may not share a day with (B5.3): all of its blocks on
     // this day go too, or the cell is closed if one of them may not move.
-    for (const otherId of ix.notSameDay.get(lesson.id) ?? []) {
-      const other = ix.lessonById.get(otherId);
-      if (other === undefined) continue;
+    for (const other of apart[li]!) {
+      const otherRow = lessonClass[other]! * cellCount + dayStart;
       for (let h = 0; h < hourCount; h++) {
-        if (placements[placementKey(other.classId, day, h)] !== otherId) continue;
-        const rec = movableAt(otherId, day, h);
+        if (classCell[otherRow + h] !== other) continue;
+        const rec = movableAt(other, dayStart + h);
         if (rec === null) return null;
         out.add(rec);
       }
@@ -986,12 +1185,14 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     let bestCost = Infinity;
     let ties = 0;
     let anyRoom = false;
+    const tabuRow = index * cellCount;
+    dayCounts(index);
 
     for (let cell = 0; cell < cellCount; cell++) {
-      const out = evictions(item, cell);
+      const out = evictions(index, cell);
       if (out === null) continue;
       anyRoom = true;
-      if (out.size > 0 && (tabu.get(`${index}|${cell}`) ?? 0) > moves) continue;
+      if (out.size > 0 && tabu[tabuRow + cell]! > moves) continue;
       let cost = 0;
       for (const rec of out) {
         cost += weight[rec.item]! * (moves - rec.since < TABU_TENURE ? 4 : 1);
@@ -1031,7 +1232,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     queue[at] = queue[queue.length - 1]!;
     queue.pop();
     for (const rec of best) {
-      tabu.set(`${rec.item}|${rec.day * hourCount + rec.hour}`, moves + TABU_TENURE);
+      tabu[rec.item * cellCount + rec.day * hourCount + rec.hour] = moves + TABU_TENURE;
       queue.push(rec.item);
     }
     claim({ item: index, day, hour, since: moves });

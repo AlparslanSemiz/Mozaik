@@ -12,6 +12,7 @@ interface Props {
   canSave: boolean;
   saveTrouble: SaveTrouble;
   unreadable: ReturnType<typeof useStore>['unreadable'];
+  setAside: ReturnType<typeof useStore>['setAside'];
   update: ReturnType<typeof useUpdate>;
   updateHidden: boolean;
   setUpdateHidden: (hidden: boolean) => void;
@@ -24,6 +25,7 @@ export default function Notices({
   canSave,
   saveTrouble,
   unreadable,
+  setAside,
   update,
   updateHidden,
   setUpdateHidden,
@@ -81,6 +83,16 @@ export default function Notices({
       that is never saved over it; opening a file in its place, or
       deleting the plan, is what lifts that (libraryStore.ts). No reload
       button: a reload reads the same text. */}
+      {/* A PLAN WHOSE TEXT CANNOT BE READ WAS SET ASIDE AT STARTUP (TB1):
+      another plan opened instead, and this one stays frozen in its key and
+      in Ayarlar → Planlar ve yedek. One line, for the whole session, because
+      a toast would be gone before a reader who has trouble seeing found it. */}
+      {setAside.length > 0 && (
+        <div className="save-warning" role="status">
+          ⚠ {t('Okunamayan plan açılmadı: {adlar}.', { adlar: setAside.join(', ') })}
+        </div>
+      )}
+
       {unreadable !== null && (
         <div className="save-warning" role="alert">
           ⚠{' '}

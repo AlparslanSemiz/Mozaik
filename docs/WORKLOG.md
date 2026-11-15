@@ -19,21 +19,25 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24.
+Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
 denetimin on üç kusuru).
 
-**`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
-okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
-sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
-siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
+**Zincir `main`'e bağlandı (2026-10-24 gece).** `main`'e `fix/okunamayan-plan` ve
+`refactor/moduller` girdi; zincirin her dalı bir öncekini (ilki `main`'i) birleştirdi, refactor'un
+taşıdığı dosyalara dalların değişiklikleri yeni yerlerinde. İlk sürüm `bitti-kontrolu` →
+`tb8-eksik-plan` → `tb1-dosyadan-ac` → `tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` →
+`okunabilirlik` → `tb1-acilis` → `tp7-windows-exe`; `ogretmene-eposta` (şema v17) ve
+`rk2-bozuk-iliski` sonra. Okunamayan plan için `main`'in dondurması kaldı, `tb1-acilis` üstüne
+yalnız açılışta okunabilen ilk planı açıyor (kullanıcının kararı).
 
-**`refactor/moduller` `main`'de (2026-10-24)**, `fix/okunamayan-plan`'dan sonra. Açık her dal
-birleşmeden önce `git merge main` yapar; eski yol → yeni yol tablosu ve her dalın çakışan
-dosyaları `~/GitHub/Mozaikler/Mozaik-refactor/scratch/refactor/` altında, `yol-haritasi.md` ve
-`merge-tree.txt` (o worktree o dallar birleşene kadar kalır).
+**Güncelleme kapısı her sürümde (2026-10-24, kullanıcının kararı).** `guncelleme-windows.yml`
+`tp7-windows-exe`'de: yayınlanmış son exe veri üretir, bu commit'in 0.0.1 numaralı test kopyası
+`update.rs`'in kendisiyle yerel sunucudaki yeni sürümü bulur, indirir, özetini doğrular, kendini
+değiştirir; veri eksiksiz. `yayinla` onu koşulsuz bekler. `update.rs` artık indirdiği exe'nin
+SHA-256'sını manifesttekiyle karşılaştırıyor (`surum.json`'a `sha256`).
 
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
@@ -58,14 +62,13 @@ kaynak dosyayı `src/<katman>/<alan>/`'a koydu; RF1, RF5, RF6, RF8, RF9 ve RF10 
 kalanlar RF11, RF12, RF20, RF2'nin kalanı, RF3 ve RF18, RF4 park ([TODO.md](TODO.md) §8k).
 Sıradaki üç bileşen bölmesi (Teachers, Dersler'in formu, Program'ın sağ tık menüleri) her
 biri kendi dalında, TODO RF24–RF26. Test programı (2026-10-09, [TODO.md](TODO.md) §8l,
-2026-10-23'te donduruldu): Faz 0 ve Faz 1'in çoğu bitti, kalanı TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir
-dalda gerileme testiyle.
+2026-10-23'te donduruldu): Faz 0 ve Faz 1'in çoğu bitti, kalanı TP-B birikim maddesi. TB7 ve TB8 zincirde düzeldi.
 
-**Sıradaki iş.** Önce TB8 (veri kaybı sınıfı, TODO §8l): "Tümünü dosyadan aç" eksik planı
-boş plan olarak açıyor. Düzeltmesi gerileme testiyle `tb8-eksik-plan` dalında
-(`~/GitHub/Mozaikler/Mozaik-tb8`), henüz `main`'de değil. Birleşmeyi bekleyen öteki dal:
-`ruflo/kurulum` (Alp'in deny testi). Onun TODO B7.33'ünü `ozellik/asil-ikon` önce birleşerek
-maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır.
+**Sıradaki iş.** Zincir sırayla `--ff-only` ile alınır; ilk sürüm `tp7-windows-exe`'ye kadar.
+Birleşince ana klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması; dört Windows/CI
+koşusunu, güncelleme kapısı dahil, bekler). TB1, TB7, TB8 ve dosya okumanın üç deliği zincirde
+düzeldi. Açık: RK17 (bir planın metni JSON bile değilse klasöre yazılmıyor, `main`'den gelen
+davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny testi).
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -113,8 +116,8 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
    saatte iki sınıfı) özellik dalının işi.
 10. Birleştirme turunun açık işleri (2026-10-23, aşağıdaki girdi): 2026-10-23 yönünün
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
-   silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7 Windows'ta
-   kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
+   silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7, `tp7-windows-exe`
+   ile geliyor), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
    (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
 11. Yeni işaret `main`'de (2026-10-23, `ozellik/asil-ikon`): kullanıcının seçtiği resimden
@@ -142,22 +145,22 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 - Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
 - Veri kaybı VK1 ve VK2 düzeldi (TODO B7.27): iki sekmede bayat olan yazmayı bırakıyor,
-  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
-  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7 (kapanan sekmenin son
-  değişikliği klasöre inmiyor) açık.
+  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya gerçek exe süitinde yeşil (2026-10-24);
+  boyut, açılış süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7: exe'nin penceresi
+  kapanmadan sayfanın son yazımını bekliyor, Linux'ta ve Windows'ta gerçek exe süitinde yeşil; tarayıcı sekmesinde klasör bir
+  değişiklik geride kalabiliyor, depo tutuyor ve sonraki açılış yazıyor (veri kaybı değil).
 - Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
   açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
   üretilemedi; açılıştaki plan listesi yazımı ve klasör kapısının testi açık.
-- Test programının bulguları (TODO §8l): "Tümünü dosyadan aç" eksik planı boş plan olarak
-  açıyor (TB8, veri kaybı sınıfı, ikinci düzeltme dalında); `readPlanFile` bozuk dosyada
-  istisna atıyor (TB1); eksi ve sınırsız haftalık saat kabul ediliyor (TB6, TB9);
-  `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
+- Test programının bulguları (TODO §8l): açılışta depodan okunan bozuk bir plan
+  `parseState`'i düşürebilir (TB1'in açık yarısı, ölçülmedi); eksi ve sınırsız haftalık saat
+  kabul ediliyor (TB6, TB9); `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 16 (2026-09-26) | `src/leaf/model/types.ts` |
+| Şema sürümü | 16 (2026-09-26) `main`'de; 17 `ogretmene-eposta`'da (2026-10-24) | `src/leaf/model/types.ts` |
 | Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
@@ -174,7 +177,8 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 198 108 bayt, brotli 287,3 kB (2026-10-24 gece, zincirin ucu `rk2-bozuk-iliski`, `main`'e bağlandıktan sonra); `tp7-windows-exe`'de yaklaşık 1 183 500; eşikler ucunda 1 200 000 (CLAUDE.md'nin ölçüm çizgisi) ve 289 000 | `npx vite build`, `npm run boyut` |
+| Güncelleme kapısı | gerçek `update.rs` akışıyla 1 geçti (2026-10-24 gece, `tp7-windows-exe`); önceki biçimi (yalnız dosya takası) iki koşuda yeşildi (`ogretmene-eposta`) | `guncelleme-windows.yml` 40128285002; 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
@@ -183,7 +187,531 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/pure/relax/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
+
+
+
 ---
+
+## 2026-10-24 gece · Zincir `main`'e bağlandı, (A) ve gerçek güncelleme akışı
+
+**Bağlama.** `main` iki kez ilerledi (`fix/okunamayan-plan`, sonra 44 commit'lik refactor). Her dal
+bir öncekini birleştirdi, yalnız kendi farkını çözerek: çoğu import yolu (refactor), `App.tsx`'in
+bölünen yerlerine TB1'in dosya okuması ve TB7'nin kapanış bekleyişi, boyut eşikleri (iki eşikten
+büyüğü), taşınan testlerin fikstür yolları, belgelerdeki eski dosya yolları (refactor'un yeniden
+adlandırma listesiyle). `tp7`'nin kontrat testi `read_file`'ın `Option<String>`'ini tanıdı.
+
+**(A), `tb1-acilis`.** Çakışan kodda `main`'in dondurması kaldı, `tb1-acilis`'in yinelenen kodu
+bırakıldı. Üstüne, önce kırmızı testle: açılışta açık plan okunamıyorsa okunabilen ilk plan
+açılıyor, okunamayan bayt bayt yerinde, şeritte tek satır. İnceleme veri kaybı buldu: geçiş dizine
+yazılınca sonraki açılışlar açılan planı yedek zincirine döndürüyor, okunamayan planın sağlam
+kopyası üçüncü açılışta düşüyordu. Çare: geçiş yazılmıyor, geri dönülen oturum zinciri
+döndürmüyor (çok oturumlu test önce kırmızı). Planlar listesi okunamayan planı "okunamadı" ve "—"
+diye gösteriyor, silme sorusu metnin gideceğini söylüyor; taslakta da. RK17 TODO'da.
+
+**Güncelleme kapısı `tp7`'de, her sürümde.** `ogretmene-eposta`'daki kapı ilk sürüme taşındı, şema
+koşulu kalktı. Gerçek akış: 0.0.1 numaralı, kökü derleme anında yerel sunucuda test kopyası
+Hakkında'nın üç düğmesiyle yeni sürümü buluyor, indiriyor, doğruluyor, takası yapıp başlatıyor.
+`update.rs` artık özeti doğruluyor (`sha256`, surum.yml yazıyor; özeti olmayan yeni sürüm
+indirilmiyor). Test kökü yalnız `http://127.0.0.1:<port>/` olabilir, yoksa derleme düşer; kontrat
+surum.yml'in onu anmadığını soruyor ve bozulmuş bir surum.yml'de kırmızı. İnceleme bir hata
+buldu: gerçek exe süitinin elle `download_update` çağrılarında `sha256` yoktu; düzeldi ve kontrat
+artık e2e'deki elle köprü çağrılarını da soruyor (kırmızıya döndüğü sınandı).
+
+**Windows koşuları.** `exe-windows` 40127508723 yeşil (14 geçti). İlk koşuda `main`'in iki A2
+testi Windows'ta ilk kez koştu ve düştü: dil adımının yeniden yüklemesi boş klasöre boş paket
+yazdırıyor, zorla öldürülen WebView2 depoyu diske yazmadan gidiyor (testler buna göre). Güncelleme
+kapısı: 40126620642 yeniden başlatma tıklamasının yarışında, 40127506755 sürümün "v" önekinde
+düştü; 40128285002 yeşil (1 geçti).
+
+**Koşulan.** Her uçta `hizli`, `tsc`, `lint`, `sinir`, `knip`, `prettier`, belge kapısı; `cargo test`
+34/34; `tb1-acilis`'in tıklama testi (`scratch/tb1-acilis-a/`) üç kez; `okunamayan.spec.ts` yerelde
+8/8 (`ogretmene-eposta`). **Koşulmayan.** Tam E2E yerelde (CI'da).
+## 2026-10-24 gece · RK2: sabitlenmiş iki ders bozuk bir ilişkide (`rk2-bozuk-iliski`)
+
+`ogretmene-eposta`'nın ucundan. **Neden bu iş.** ROADMAP'te sıradaki sürüm v2, tek açık işi B5.3; onun
+sıradaki ilişki türü R6'nın Roboders verisine bağlanmış (TODO §8b, 2026-10-09). Kanıta bağlı olmayan
+ve dalı olmayan B5.3 işi ilk dilimin kusuru RK2, çaresine karar verilmişti (analiz
+`scratch/siradaki/analiz.md`, `ogretmene-eposta` worktree'sinde).
+
+**Çare.** `pinnedRelationBreaches` (`rules.ts`): aynı güne sabitlenmiş ilişkili iki ders. O durumda
+aramanın her haftası sabitleri tuttuğu ve doğrulama ihlali reddettiği için arama yalnız boş dönebilir;
+`useSolver` aramayı başlatmıyor, panel sebebi gövde yazı boyunda tek cümleyle söylüyor, Kontrol'ün kural
+ihlalleri panelinde bir cümle. Yalnız yerleşmiş iki ders için arama sürüyor (baştan dizen yol taşıyor).
+
+**Tıklama testi** (`scratch/rk2/`, rk2 worktree'sinde; örnek okul, ilişki, iki sabit ve bir öğretmenin
+kapalı günleri deponun kendisine yazılıp sayfa yenilendi). Otomatik diz → panel 1,5 s'de "310 · MÇ
+Matematik ile 311 · YM Biyoloji Salı günü sabitlenmiş…", 15 px; Kontrol'de cümle; komşu akış: bir sabit
+kalkınca Kontrol cümlesi gidiyor ve arama başlıyor. Konsol hatası yok.
+
+**İnceleme** (taze bağlamlı alt ajan): hata yok; "arama yalnız boş dönebilir" iddiası kodda doğrulandı.
+Düzelen: plan değişince panelin bayat cümlesi, Kontrol'de düğmenin adı, atlamanın gerekçesini ölçen test
+(sabitsiz yol var, sabitliyken yok). Bırakılan: gizli satır ve günde aynı belirti (TODO RK2b), panelin
+yalnız ilk ihlali söylemesi (Kontrol hepsini listeliyor), noktalı virgül.
+
+**Koşulan.** `hizli` (1462 geçti, 1 atlandı), `relations`, `useSolver`, `i18n`, `docs`, `tsc`, `eslint`,
+`prettier`, `boyut`, tıklama testi üç kez. **Koşulmayan.** E2E yerelde (CI'da).
+
+---
+
+## 2026-10-24 gece · E-posta girişi okunur, güncelleme kapısı (`ogretmene-eposta`)
+
+**E-posta girişi.** Tablodaki kutu 54 px'ti, adres altı harf okunuyordu. Sütun büyüyemiyor (125 %'te
+tablo taşar), bu yüzden odaklanan kutu satırın üstüne çıkıyor: `position: absolute`, Chromium'da
+`field-sizing: content`, en az 24 ch, en çok 60 ch, gövde yazı boyunda; sütun ve komşuları yerinde.
+Ekleme formunda isteğe bağlı E-posta kutusu (30 ch'ten büyüyor, yarım adres kırmızı kenarlı);
+yapıştırmada altıncı sütun, adres biçimindeki her hücre o sütunun değeri sayılmıyor, ilki e-posta,
+"Ad Soyad" başlığı atlanıyor. Tıklama testi `scratch/eposta-okunur/` (worktree'de): 48 harflik adres
+formda ve tabloda 100 %'te 390 px'lik kutuda tam görünüyor, 125 %'te 489 px'te; komşu sütun 1092 px'te
+kaldı, tablo taşması 0; yapıştırmanın önizlemesi ve Çıktı'nın satırı adresi gösteriyor; koyu tema;
+konsol hatası yok. 1 px'lik `scrollWidth` farkı kesirli genişliğin yuvarlanması, sonda yarım ch pay var.
+
+**Güncelleme kapısı.** Yayınlanmış exe'de port yok ve dışarıdan verilemiyor, ama UI Automation'a cevap
+veriyor (TESTFINDINGS). İlk koşuda yeşil. `yayinla` şema son etiketten beri değiştiyse kapıyı da
+bekliyor; şemaya, itmeden önce ve yalnız yerel etiketlerle bakıyor (eksik etiket en kötü bir kez fazla
+bekletir). v2.2.0 → bu dal: şema 16 → 17, bekleniyor.
+
+**Zincir.** `main` bu oturumda ilerledi (`fix/okunamayan-plan`); bağlama çakışması "Şu an"da.
+
+**İnceleme** (taze bağlamlı alt ajan, 9 bulgu). Düzelen: odaktaki kutunun tabanı 6 ch'lik kurala
+yeniliyordu (özgüllük); ikinci adres hücresi branş olarak kaydoluyordu; "Ad Soyad" başlığı öğretmen
+oluyordu; testin kendi yazdığı adres v17'den sonra kayıp sayılacaktı; kaybolan UI öğesi betiği
+düşürebilirdi; `yayinla`'nın `fetch --tags`'i `--kuru`'da bile ağa çıkıyordu ve şemaya itmeden sonra
+bakılıyordu; `constraints.ts` (sanitize) yol süzgecinde yoktu. Reddedilen: kapının her sürümde
+beklenmesi (kullanıcının tarifi "şema değişince"; soru raporda); 150 %'te odaktaki kutunun tabloyu
+yazarken yana kaydırması (yalnız odakta, kabul).
+
+**Koşulan.** `hizli` (1459 geçti, 1 atlandı), dokunulan E2E dosyaları 169/169 (`kurulum`, `liste`,
+`sira`, `temel`, `yazdir`), `tsc`, `lint`, `knip`, `prettier`, `boyut`, iki tıklama testi; CI: `ci`
+40117527749 ve 40118278546 yeşil, `exe-windows` 40117527763 yeşil (2783f36; sonraki commit'ler
+exe yollarına dokunmuyor), `guncelleme-windows` iki koşuda yeşil. **Koşulmayan.** Tam E2E yerelde.
+
+---
+
+## 2026-10-24 gece · TB1'in açılış yarısı (`tb1-acilis`)
+
+Dal zincirin ucundan (`okunabilirlik`), çünkü TB1'in öbür yarısı ve TB8'in okuyucuları orada.
+
+**Önce kırmızı** (`src/storeContract.test.ts`, dört test): açık planın metninde `parseState`'in
+düştüğü bir satır varken bağlama `TypeError` ile çöktü; JSON olmayan metin boş plan olarak açıldı
+ve ilk değişiklik onu ezdi; okunamayan plana geçildi; `loadPlan` istisna attı.
+
+**Çare.** `planStore`'da `storedPlan` (durum, yok, okunamıyor) ve `setAside`: okunabilen ilk plan,
+yoksa yeni boş bir plan açılıyor; okunamayan plan dizinde ve anahtarında kalıyor, seçilemiyor,
+silinen açık planın yerine de açılmıyor. Ekranda kalıcı tek satır (adıyla), dört sözlükte.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen, üçü önce kırmızı testle: açılıştaki yedek
+döndürme bozuk metni yedek zincirine kopyalıyordu ve `listBackups` onu korumasız okuyup Ayarlar →
+Planlar ve yedek'i düşürüyordu (tıklama testi de bu ekranda takılmıştı); "Tümünü dosyadan aç"
+okunamayan yerel planı siliyordu; başka pencere bekçisi `parseState`'in istisnasında düşebiliyordu;
+Planlar listesi ve taslak düğmesi okunamayan planı "verisi yok"/"anahtarı boş" diye söylüyordu;
+şeridin cümlesi silmeden sonra yanlış kalıyordu; üç yerde aynı seçim tek yardımcıya (`openable`).
+Reddedilen: "Tümünü dosyaya kaydet"in notunun okunamayan planı "verisi bulunamayan" sayması (plan
+pakete giremiyor, ayrı bir cümle için yeni metin gerekmez; DATA'da yazılı).
+
+**Tıklama testi** (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul;
+`scratch/tb1-acilis/tiklama/`). Örnek okul → Ayarlar → Planlar ve yedek → Boş plan → 1. plana geç;
+kurulum adımında 1. planın metnine bozuk bir satır (yalnız bu adım depoya doğrudan yazıyor) →
+yenile: şerit "Okunamayan plan açılmadı: 1. plan.", Boş plan açık; Planlar listesinde "· okunamadı";
+ona geçilemiyor, metni bayt bayt aynı. Komşu: Okul → Derslikler → "Yeni" ekle → yenile → listede,
+bozuk metin hâlâ aynı. Konsol hatası yok.
+
+**Koşulan.** `hizli` (1366 geçti), `storeContract` (42), `tsc`, `eslint`, `sinir`, `prettier`,
+tıklama testi iki kez (ilki incelemenin bulduğu çökmeye takıldı). **Koşulmayan.** Tam E2E yerelde
+(CI'da).
+
+---
+
+## 2026-10-24 gece · Öğretmene e-postayla, yalnız `mailto:` (`ogretmene-eposta`, B3.4)
+
+`tp7-windows-exe`'nin ucundan. **Şema v17:** `Teacher.email` (`''` yokken), v16'dan göç, okuyucuda
+ve `sanitize()`'da satır sonu, denetim karakteri ve eksik vekil karakter düşüyor (`cleanEmail`);
+örnek dosya reçetesine v17, v1–v16 bayt bayt aynı; birim (fixtures, storageNames, constraints,
+store, email) ve E2E (`temel.spec.ts`: v16 yedeği gerçek dosya penceresinden açılıyor, yazılan
+adres v17 olarak kaydediliyor ve yenilemede yerinde). **Arayüz:** Okul → Öğretmenler'de E-posta
+sütunu (8ch, kutunun tabanı 6ch; tablo `max-content` ve sütunu kutuların tabanı belirliyor, bir 10ch sütun daha %125'te 14 px taşıyordu), tek adrese benzemeyen kırmızı kenarlı;
+Çıktı'da Yazdır'ın altında "E-postayla gönder": öğretmen başına "E-postada aç" ya da neden yok
+(adres yok, adres hatalı, programı boş, e-postaya sığmıyor). **Gövde** düz metin,
+`teacherSheet`'ten (`pure/paper/mail.ts`): zil saati ve derslikle; sığmazsa onlarsız; sonra
+günde bir satır; sonra gövdede başlık ve okul adı olmadan (konu satırı adı taşıyor). Hiçbiri
+sığmazsa gönderilmiyor, kesilmiyor. **Exe:** `mail.rs`'in `eposta_ac`'ı; yeni paket yok, shell32,
+shlwapi ve ole32'ye doğrudan FFI. **Tarayıcı:** düz `mailto:` bağlantısı.
+
+**Ölçüm** (geçici `mailto-olcum.yml`, Windows runner, TESTFINDINGS): kayıtlı program yokken
+`AssocQueryStringW` 0x80070483, `ShellExecuteW` 42 ve OpenWith açılıyor; `ShellExecuteW`
+`mailto:`'yu 32 760 karaktere kadar kabuğa veriyor ve kendi şemamızda metni 32 000'e kadar bayt
+bayt iletiyor; Chromium 32 700'e kadar; Edge ölçülemedi (dış program sorusu, politikayla da);
+Linux Chromium da ölçülemedi (önce kendi "xdg-open açılsın mı?" sorusunu soruyor).
+Gerçek bir e-posta programının sınırı ölçülemedi: Windows `mailto` işleyicisini yalnız
+kullanıcının seçiminden (UserChoice) alıyor. **Sınır 2000** (`MAILTO_SINIRI` = `EN_UZUN`): taşıma
+değil e-posta programları, çünkü uzun `mailto:`'yu sessizce kesenler onlar ve son günü eksik bir
+hafta hiç gelmeyenden kötü. Tam dolu kursta (18 öğretmen) en uzun adres 1827 karakter, hepsi en
+dolu biçimde; her saati dolu sentetik bir hafta (7 gün × 12 ders) en kısa biçimde 1906 karakter,
+kesilen: zil saatleri, derslikler, gün başına satırlar ve gövdedeki başlık ile okul adı, hiçbir ders.
+
+**Veri nereye gidiyor:** yalnız kullanıcının kendi e-posta programına ve hesabına; Mozaik ağa
+çıkmıyor, bir şey göndermiyor, gönderen kullanıcı. Adres plan dosyasında ve her yedekte duruyor.
+
+**İnceleme** (taze bağlamlı alt ajan, `tp7-windows-exe...HEAD`). Düzelen: eksik vekil karakter
+`encodeURIComponent`'i atıp Çıktı'yı düşürüyordu (önce kırmızı test); Rust'un kapısı yazdırılabilir
+her ASCII'yi geçiriyordu, bir `"` programın komut satırına girebilirdi (şimdi yalnız
+`encodeURIComponent`'in karakterleri, önce kırmızı Rust testi); paketli uygulama (yeni Outlook,
+Posta) komut satırı vermiyorsa "yok" sayılabilirdi (şimdi COM işleyicisi ya da ProgID de sayılıyor,
+ölçülmedi); tarayıcıdaki 2 s'lik odak tahmini iki yaygın durumda da yanlıştı (yerine tıklamadan
+sonra koşullu tek satır); geri almadan sonra kutu eski taslağı gösterip geri yazabiliyordu
+(değere bağlı `key`, değişmeyen değer kaydedilmiyor); komut bekleyen havuzda; cümle "seçili bir
+e-posta programı yok" (kurulu ama varsayılan olmayan program için de doğru); Prettier; bayat
+yorumlar. Bırakılan: yetim bir sürücünün gerçek `xdg-open`'ı çağırması (süit her testten önce
+artıkları öldürüyor). CI'ın ilk koşusu ayrıca iki testin ad kutusu seçicisinin e-posta kutusunu
+saydığını ve v16 testinin bir yarışını buldu, düzeldi.
+
+**Tıklama testi** (`dist/index.html`, `file://`, Playwright Chromium, 1920×1080, örnek okul,
+sahte adresler; `scratch/eposta/tiklama/`): Otomatik diz → Okul → Öğretmenler: bir öğretmene
+adres, birine `ali@` (kenar kırmızı, üstünde ne yazılacağı) → Çıktı: adresli öğretmende adres ve
+"E-postada aç", yarım adreslide "adres hatalı", ötekilerde "adres yok" → bağlantı 1663 karakter,
+gövde 30 satır, tam biçim. Linux Chromium mailto'yu `xdg-open`'a vermeden kendi sorusunu sordu,
+o yüzden e-posta programına kadar giden yol exe'de koşuldu: Linux ikilisi, sahte ev, sahte
+`xdg-open` adresi (1831 karakter) aldı, satır yok. Komşu akış: Yazdır sayfa sayısı, yenilemeden
+sonra adres yerinde ve kayıt v17; %150'de panel. Konsol hatası yok. Görülen ve düzelen: kutu 8ch'te
+adresin beş harfini gösteriyordu (adres kutunun `title`'ında ve Çıktı satırında yazıyor),
+bağlantı düğmesinin yazısı altı çiziliydi.
+
+**Koşulan.** `hizli`; dokunulan birim testleri; `cargo test --lib mail` (3); E2E `temel.spec.ts`
+ve `yazdir.spec.ts`'in yeni iki testi; Linux'ta gerçek exe süiti (15 geçti, 1 atlandı, e-posta
+testi dahil); Windows'ta gerçek exe süiti (exe-windows 40107833319, 14 geçti, program yok satırı
+ve OpenWith açılmıyor); CI (1eb9382 yeşil); geçici ölçüm iş akışının dört koşusu. **Koşulmayan.**
+Gerçek bir e-posta programıyla açılış (runner'da kurulamıyor, bu makinede açılmadı ki bir hesaba
+dokunmasın); Edge ve Linux Chromium'da bağlantı (kendi soruları).
+
+**Boyut eşiği:** `dist/index.html` 1 174 099 → 1 183 782 bayt (+9 683: panel, metin kurucu,
+16 metnin dört çevirisi), brotli 284,87 kB; ham eşiğe (1 184 000) 218 bayt kaldı. Aşılmadı,
+ama bir sonraki dal aşardı: ham eşik BUILD'in kuralıyla on iki buçuk kilobayt kadar pay
+bırakacak yere çekildi, 1 196 000; brotli eşiği (289 000) yerinde.
+
+## 2026-10-24 gece · TP7: Windows'ta gerçek exe süiti yeşil (`tp7-windows-exe`)
+
+`test/gercek-ortam`'dan açıldı, zincirin ucu (`okunabilirlik`) alındı; `main` zincir
+birleşmediği için hâlâ c41223c, `git merge main` birleşmeden sonra. Kırmızının sebebi iki
+teşhis koşusuyla bulundu (TESTFINDINGS): wry tarayıcı argümanlarını kendisi veriyor ve
+msedgedriver'ın `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`'ı yok sayılıyor, yani `tauri-driver`
+Windows'ta hiçbir oturum açamıyordu. Çare: test exe'si pencereye
+`--remote-debugging-port=9222` eklenerek derleniyor (`windowsTestAyari`, `tauri build
+--config`; yayınlanan exe `surum.yml`'de portsuz), exe'yi süit açıyor, msedgedriver ona
+`ms:edgeOptions.debuggerAddress` ile bağlanıyor, oturum kapanınca exe süreç ağacıyla
+öldürülüyor ve port kapanana kadar bekleniyor. Sonra iki kırmızı daha: arayüz İngilizce
+(dil kaydı `tr` ve yeniden yükleme) ve runner'ın 1024×768 ekranında sekme yazıları gizli
+(iş akışında `Set-DisplayResolution` 1920×1080). İlk yeşil 40099384214 (f98f20b).
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: fikstürün temizliği ölü oturumun ekran
+görüntüsünde düşüp exe'yi ve sürücüyü açık bırakabiliyordu; süresi dolan bir testin açtığı exe
+kimsesiz kalıyordu (her testten önce artık program, WebView2 ve msedgedriver öldürülüyor,
+`windowsTemizle` runner kapısını kendisi soruyor); `kapat` iki kez çağrılınca çıkmış bir pid'i
+öldürebiliyordu; dil yeniden yüklemesi oturum döngüsünün içindeydi ve eski sayfayı yenisinden
+ayıramıyordu; yayınlanan exe'ye port sızarsa hiçbir test görmüyordu (şimdi `kontrat.test.ts`,
+porta açılan `tauri.conf.json`'a karşı kırmızı görüldü); test exe'si yayınınkinden başka bir
+CLI ile derleniyordu; süzgeç depolama kodunu ve fikstürleri kaçırıyordu; eşzamanlılık
+`yayinla`'nın beklediği koşuyu iptal edebiliyordu (artık commit başına); bayat yorumlar.
+Ardından bir kırmızı (TESTFINDINGS, 6): oturumdan önce programın sayfası beklenir, sayfasız
+açılış bir kez yeniden. Son koşu 40101538104 (46db31f) 13 geçti, 2 platform atlaması, X ile
+kapanış 6,1 s. Bulunup bırakılan: ilk açılış İngilizce yükleniyor ve sonra yeniden yükleniyor;
+ilk planın adı sabit ("1. plan"), dile bağlı kayıt yok. `tauri-driver` kurulumu, iki teşhis
+adımı ve dalın geçici push tetiği kalktı. `yayinla` zaten `exe-windows.yml`'i bekliyordu
+(2026-10-10); BUILD'in "etiketten önce elle" adımı silindi.
+
+Koşulanlar: Linux'ta gerçek exe süiti tb7'nin ikilisine karşı, sürücünün ilk ve son hâliyle,
+iki kez 14 geçti, 1 atlandı; `npm run hizli` her commit'ten önce yeşil; `kontrat.test.ts`'in
+yeni testi porta açılan `tauri.conf.json`'a karşı kırmızı. Koşulmayan: Windows'ta düzeltmesiz ikiliye karşı
+kapanış testi (mutasyon), ve süitin babanınki gibi Türkçe bir Windows'ta koşusu.
+
+**Zincire katıldı (kullanıcının kararı).** `git merge tb1-acilis` çakışmasız; ucun CI'ı ve
+`exe-windows.yml`'i (40103570404, 13 geçti) yeşil, bunun için geçici dal tetiği bir commit
+boyunca geri geldi. `dist/index.html` 1 174 099 bayt, brotli 282,28 kB, iki eşiğin altında.
+CLAUDE.md'ye kural: hazır dallar birleşme sırasıyla tek doğrusal zincir.
+
+## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
+
+Dal `tb1-dosyadan-ac`'in ucundan (TODO'nun B7.36'sı TB8'in dalında doğdu).
+
+**B7.36.** Ayarlar'ın çıktısı `.settings-pane`'de (düz blok), notlar 15 px (gövde). Beş bölümde
+ölçüldü (`scratch/okunabilirlik/tiklama/ayarlar-sonra/`), yatay kaydırma yok. İnceleme
+`display: contents`'in kaydırma solmasını kör ettiğini buldu, düz bloğa döndü.
+
+**Zebra ayrı dalda, karar Alp'te.** Zebra işi (her listeye yayılma, zil önizlemesinin ve
+Branşlar'ın sırası, `--muted` iki temada bir adım; analizi mozaik-ed'in `zebra-liste`'sinden,
+inceleme bulguları düzeltilmiş, `renk`/`erisim`/`panel` 51/51, önce/sonra ölçüm
+`scratch/zebra-olc/karsilastirma.md`) cc039a6'da yazıldı. Ardından mozaik-ed, Alp'in kendi
+oturumunda zebrayı ona verdiğini ve bu dalın zebraya dokunmayacağını söylediğini aktardı; iki dal
+aynı bloğa ve `--muted`'a yazıyordu. Bu dal zebrayı geri aldı (yalnız B7.36 kalıyor), zebra
+işi kaybolmasın diye `okunabilirlik-zebra` dalında (95cecfd) duruyor ve birleştirmeye sunulmuyor.
+Kullanıcının kararı (aynı gün): zebra `zebra-liste`'de; `zebra-liste`'de olmayanlar
+`scratch/zebra-devir.md`'de mozaik-ed'e verildi, `okunabilirlik-zebra` alındığı teyit edilince
+silinir. CLAUDE.md'ye kural: dalı olan TODO maddesi alınmıştır.
+
+**Koşulan.** `hizli` (1347 geçti), Ayarlar betiği, zebra için yukarıdakiler. **Koşulmayan.** Tam
+E2E yerelde (CI'da).
+
+---
+
+## 2026-10-24 akşam · Dosya okuma: B7.37, B7.35, B7.34 (`dosya-okuma-b7`)
+
+Dal `tb1-dosyadan-ac`'in ucundan açıldı (B7.34 ve B7.35 TB8'in henüz `main`'de olmayan koduna
+dokunuyor); zincir birleşince `git merge main` boş geçer.
+
+**Önce kırmızı.** `fuzz.test.ts`: `wholeness` kimlikleri soruyor (fuzz boş kimliği kendiliğinden
+buldu, beş özellik kırmızı) ve B7.37'nin elle yazılmış durumları; `bundle.test.ts`: daha yeni
+sürümün planı `newer`'da; `planlar.spec.ts`: yarım paket ve daha yeni sürümün paketi, ikisi de
+düzeltmesiz derlemeye karşı kırmızı.
+
+**Çare.** `readPlanFile` boş ya da tekrarlanan kimlik taşıyan dosyayı reddediyor (derslik,
+öğretmen ve sınıf birlikte tek, dersler ayrı); `readBundlePlans` `newer`'ı döndürüyor; "Tümünü
+dosyadan aç" yarım dosyada "okunamadı", yeni sürümün planında "programı güncelleyin" diyor. İki
+yeni cümle dört sözlükte.
+
+**İnceleme** (taze bağlamlı alt ajan; ilki oturum yeniden başlarken yarıda kaldı, yeniden koşuldu).
+Düzelen: kimliklerin kapalı saat anahtarında çakışması (önce kırmızı test), iki gereksiz değişken,
+CHANGELOG, DATA, TESTPLAN ve bir yorum. Reddedilen: eksik ya da yeni tek planın üst çubuğa
+yollanması (üst çubuk kendi gerekçesini söylüyor), eski zarf sürümünün de "güncelleyin" demesi
+ve depo dolu iken bozuk sayısının düşmesi (ikisi de bu daldan eski), yalnız yeni ve bozuk
+planlı pakette notun yalnız güncellemeyi söylemesi (güncelledikten sonra bozuklar kendi notunu
+alır), `ok === 0 && failed === 0` dalı (`replaceLibrary` güvenliğini çağırana bırakmıyor, dal
+koruma olarak kalıyor), karışık paketin E2E'si (arayüz metni, tıklama testinde görüldü).
+
+**Tıklama testi** (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul;
+`scratch/dosya-okuma-b7/tiklama/`): yarım paket → "Bu dosya okunamadı…"; bütün planları yeni
+paket → "…daha yeni bir sürümüyle yazılmış. Programı güncelleyin."; bir planı yeni paket → onay
+ve not güncellemeyi söylüyor, "bozuk" demiyor; üst çubukta aynı kimlikli iki dersli dosya →
+"Bu dosya okunamadı", 25 öğretmen yerinde; komşu: geçerli dosya açılıyor. Konsol hatası yok.
+
+**Boyut eşiği.** Zincirin üstüne oturunca (`b7-32-kilit` birleşti) CI'ın `denetim`'i kırmızı:
+çift tıklanan dosya 1 171 145 bayt, eşik 1 171 000 (40092506405). Büyüme 2026-09-27'den beri
+yedi dalın toplamı (1 158 660 → 1 171 212 bayt, `okunabilirlik` ucunda), tek bir dalın değil.
+Ham eşik on iki buçuk kilobayt pay bırakacak yere çekildi, 1 184 000 (BUILD, "Doğrulama
+komutları"); brotli 281,8 kB, eşik 289 kB, yerinde.
+
+**Koşulan.** `hizli`, `fuzz`, `bundle`, `fixtures`, `storeContract`, `tsc`, `eslint`,
+`planlar.spec.ts` (24/24), iki E2E'nin düzeltmesiz kırmızısı, tıklama testi, üç uçta `npm run
+build` ve boyut. **Koşulmayan.** Tam E2E yerelde (CI'da).
+
+---
+
+## 2026-10-24 akşam · Zincir ve kullanıcının dört cevabı
+
+**Zincir.** Kullanıcının cevabı (a: evet, b: şartlı evet) ve isteği: beş dal sırayla ileri
+sarılabilsin diye birbirini içeriyor. `bitti-kontrolu` `main`'i (c41223c) aldı; `tb8-eksik-plan`
+onu, `tb1-dosyadan-ac` tb8'i, `tb7-sekme-kapanis` tb1'i, `b7-32-kilit` tb7'yi. Çatışmalar
+TODO, WORKLOG, CHANGELOG ve TESTPLAN'da; B7 numaraları tb8'de B7.34–36, tb1'de B7.37. tb1'e
+tb8 girince `readBundlePlans`'ın `try/catch`'i gereksiz kaldı, ayrı commit'te kalktı.
+
+**B7.32.** Kilidin iki kök alanı (`version`, `packages[""].version`) yazılıyor ve test ikisini de
+soruyor. "Yazıldı, doğrulanmadı": `main`'de `--kuru` geçene kadar.
+
+**TB7'nin tarayıcı yarısı.** Ölçüldü (site E2E, beş koşunun beşi): kapanan sekmenin son
+değişikliği depoda, klasör bir değişiklik geride, sonraki açılış klasöre yazıyor. Veri kaybı
+değil; BİLİNEN KUSUR sıradan teste döndü, deponun kapanış flush'ı kalkınca kırmızı
+(`mutasyon-kaniti.sh`, kontrol yeşil, ağaç aynı). Yeni çare denenmedi.
+
+**Etiket kapısı.** `gercek-exe.spec.ts`'e "X ile hemen kapanan pencere…" testi; kapatma
+`scripts/pencere-kapat.mjs` ile (Linux'ta X11 WM_DELETE_WINDOW, Windows'ta WM_CLOSE). Süit
+Wayland masaüstünde XWayland'de koşuyor. `npm run exe:e2e` 14/14; yeni test 9 Ekim ikilisine
+karşı kırmızı. Windows yarısı yazıldı, koşulmadı (TP7); BUILD'de etiketten önce elle adım.
+
+**Koşulan.** Her birleştirmeden sonra `hizli` (son: 1357 geçti), `docs`, `surum`, site E2E'nin
+TB7 testi beş kez, mutasyon kanıtı, `npm run exe:e2e`, eski ikiliyle tek test, dalların CI'ı.
+**Koşulmayan.** Windows'ta gerçek exe, tam E2E yerelde (CI'da).
+
+---
+
+## 2026-10-24 · B7.32: `yayinla` kilit dosyasının kök sürümünü de yazıyor (`b7-32-kilit`)
+
+**Önce kırmızı.** `src/surum.test.ts`'e beş test: kilidin iki kök sürümü `package.json`'daki
+sürüm (bugün de yeşil, el ile eşitlendiği için), `yayinla` kilidi sürüm commit'ine katıyor,
+yalnız iki satır değişiyor, zaten o sürümdeyse metin aynı, npm'in biçiminde olmayan dosya
+yeniden biçimlenmiyor. Dördü kırmızıydı (modül yoktu, `git add` listelerinde kilit yoktu).
+
+**Çare.** `scripts/kilit-surumu.mjs` iki kök sürümü JSON'dan geçirerek yazıyor, yalnız
+`JSON.stringify(…, null, 2)` dosyayı birebir geri veriyorsa (npm'in biçimi); başka biçimde
+duruyor. `npm install --package-lock-only` değil: ağa çıkabilir. İnceleme (taze bağlamlı alt
+ajan) bir yarım yazım buldu: kilidin reddi `package.json` yazıldıktan sonra düşerse ağaç kirli
+kalıyordu; artık üç yeni metin de ilk yazımdan önce hesaplanıyor, Cargo.toml'un "satır yok"
+durması da öne geldi. Düzelen bayat yorumlar ve TRAPS 77. Reddedilen: CRLF'li kilidin reddi
+(ana klasör Linux'ta, ret ağaca dokunmuyor), `npm version --no-git-tag-version` (yeniden
+biçimler, yaşam döngüsü kancaları koşar), `cargoSurumuYaz` ile ortak yardımcı (iki satır).
+
+**Doğrulama.** `npm run yayinla -- --kuru` worktree'de yer kapısında durdu (çıkış 1): yeni
+modül yüklendi, sürüm yazma yolu koşmadı. Ana klasördeki kuru koşu birleşmeden sonra; etiket
+ve gerçek sürüm yok. Koşulan: `hizli` (1344 geçti), `surum`, `docs`, `gitKomut` testleri,
+`eslint`, `tsc`, `knip`, `node --check`. Koşulmayan: E2E (dokunulmadı).
+
+---
+
+## 2026-10-24 · TB7'nin exe yarısı (`tb7-sekme-kapanis`)
+
+**Önce kırmızı, tarayıcıda.** `klasor.spec.ts`'in BİLİNEN KUSUR testi çevrilince (klasör
+"Kapanış2"yi taşımalı) kırmızı. Deneme: bekleyen klasör yazımında `beforeunload`'ın
+"ayrılınsın mı?" sordurması; soru 1,5 s sonra cevaplansa da kırmızı, çünkü Chromium soru
+açıkken sayfayı durduruyor. Tarayıcı yarısı düzelmez, test yerinde, yorumu bunu söylüyor.
+
+**Önce kırmızı, exe'de** (Linux ikilisi, sahte HOME `scratch/tb7-sekme-kapanis/ev`, betik
+`exe-olcum.mjs`, kilit altında). WebDriver'ın pencere kapatmasıyla 9 Ekim ikilisi 0/3, 3 s
+bekleyen denetim 2/2. WebDriver'ın kapatması Tauri'nin kapanma isteğinden geçmiyor
+(düzeltmeyle de 0/5); gerçek kapatma için `GDK_BACKEND=x11` ve pencereye ctypes ile
+WM_DELETE_WINDOW (`x11-kapat.py`, başlık çubuğundaki X'in yolu): eski ikili 0/3.
+
+**Çare.** `lib.rs` `CloseRequested`'i tutup sayfaya `kapaniyor` diyor, 5 s sonra yine kapatıyor;
+`App.tsx` `park()` ve `useFolder`'ın yeni `flush`'ını bekleyip `kapanabilir` diyor
+(`desktop.ts`'in `onDesktopClose`'u). Düzeltilmiş ikili 5/5 ve 3/3 (pencere 0,17–0,26 s),
+incelemeden sonra 3/3 (0,16–0,72 s). Windows'ta (WebView2) ölçülmedi.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: hiç sıfırlanmayan kapanış bayrağı (kapanmayan
+pencerenin tek yolu), hiç düşmeyen `emit` dalı, `useStore` ve `App`'in iki bayat yorumu,
+CHANGELOG'un Windows'ta ölçülmemiş "saniyenin bir kesri"si, TESTFINDINGS'in TB7 kaydı.
+Reddedilen: kapanış sırasında ikinci açılış (tek kopya ilkini öne getirir, sonra pencere
+kapanır; veri kaybı yok); açık bir `alert` varken 5 s'lik düşüş (bu dalın öncesiyle aynı);
+Rust yarısının otomatik testi (cargo testinde Tauri penceresi yok, WebDriver bu yoldan
+geçmiyor; TESTPLAN'da yazılı); kapanışta `park`'ın koşulsuz yazması (tek kopya, `writesClosed`
+ve `mayWritePlan` kapıları tutuyor, inceleyici eski bir hâlin yenisinin üstüne yazıldığı bir
+senaryo bulmadı); güncelleme yolunun klasörü de beklemesi (sonraki açılış yazar).
+
+**Tıklama testi.** Değişen akış exe'de: yukarıdaki gerçek kapatma ölçümü. Tarayıcıda komşu
+akış (`dist/index.html`, `file://`, Chromium, 1920×1080, örnek okul,
+`scratch/tb7-sekme-kapanis/tiklama/`): Okul → Derslikler → "Kapanış" ekle → yenile → listede;
+Ayarlar → Planlar ve yedek'in klasör paneli `file://`'de "yalnızca bu bilgisayarın
+tarayıcısında". Konsol hatası yok.
+
+**Koşulan.** `hizli` (1344 geçti), `desktop.test.ts` (9), `docs`, `tsc`, `eslint`, `sinir`,
+`npm run exe:test` (Rust 28 geçti), `npm run exe:linux` iki kez, exe ölçümleri, site E2E'nin
+TB7 testi (deneme), tıklama testi. **Koşulmayan.** Tam E2E yerelde, gerçek exe süiti
+(`exe:e2e`), Windows.
+
+---
+
+## 2026-10-24 · TB1'in üst çubuk yarısı (`tb1-dosyadan-ac`)
+
+**Önce kırmızı.** `src/fuzz.test.ts`: TB1'in "BİLİNEN KUSUR" testi sıradan bir teste döndü
+(`lessons[0] = null` → `{ problem: 'okunamadi' }`), iki özellik istisnanın etrafından geçmeyi
+bıraktı; altısı kırmızıydı (`TypeError: reading 'trim'`). `e2e/temel.spec.ts` 29'a bozuk
+satırlı dosyanın E2E'si: `mutasyon-kaniti.sh --derle` ile düzeltme geri alınınca kırmızı
+(`kapan.ts`'in yakaladığı işlenmemiş istisna, uyarı yok), kontrol koşusu yeşil, ağaç aynı.
+
+**Çare.** `readPlanFile` `parseState`'in attığı istisnayı "okunamadı"ya çeviriyor;
+`fileChosen`'da `file.text()`'in reddi de aynı uyarıya gidiyor. `parseState`'in kendisi
+değişmedi, açılıştaki okuması TB1'in açık yarısı.
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: `file.text()` reddi, `parseState`'in yorumu,
+TODO ve TESTPLAN'ın iki bayat cümlesi. Reddedilen: `readPlanFile`'ın `catch`'inde
+`console.error` (296 fikstürlük `fixtures.test.ts` `sanitize`'in bir gerilemesini zaten
+yakalar, ekrana yeni bir şey gelmez). TODO'ya: boş ya da aynı kimlikli ders açılıyor (B7.37,
+TB1'den eski). TB8'in dalına giden bulgu: aşağıdaki "TB8, ikinci inceleme".
+
+**Tıklama testi** (`dist/index.html`, `file://`, Chromium, 1920×1080, `tr-TR`, boş profil,
+örnek okul; `scratch/tb1-dosyadan-ac/tiklama/`). Örnek okul → üst çubuk Dosyaya kaydet →
+Dosyadan aç: bozuk satırlı, yarıya kesik ve öğretmensiz dosya; ilk ikisi "Bu dosya okunamadı",
+üçüncüsü "Bu dosya eksik", üçünde de Okul → Öğretmenler 25. Komşu akış: geçerli dosya →
+sayılı soru → Vazgeç, sonra Yedeği yükle → Program. Uyarı gövdesi 15 px, kontrast 17,5.
+Konsol hatası yok.
+
+**Koşulan.** `hizli` (1339 geçti), `fuzz`, `docs`, `tsc`, `eslint`, `prettier`, mutasyon
+kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde (CI'da).
+
+---
+
+## 2026-11-15 · Zincir `main`'e: boyut eşiği (`rk2-bozuk-iliski`, PR #22)
+
+Bugünkü `main` (#16–#19) alındı; tek çakışma `Teachers.tsx`: zincirin e-posta alanı #18'in
+bölmesine, `TeacherForm.tsx`, `TeacherRow.tsx` ve `Teachers.tsx`'in başlığına taşındı. CI'ın
+boyut kapısı kırmızı: ham `dist/index.html` 1 202 626 B, eşik 1 200 000 B (brotli 288,81 kB,
+eşiğin 190 B altında). CLAUDE.md'nin kuralıyla eşik yükseltilmeden önce `file://` açılışı,
+Chromium, CPU 4× yavaşlatılmış, 1920×1080, 7 koşu, `loadEventEnd` medyanı (bu Mac, kirli
+ölçüm):
+
+| Derleme | Bayt | Medyan |
+|---|---|---|
+| `main` (#16–#19) | 1 178 508 | 216 ms |
+| zincir + `main` | 1 202 626 | 217 ms |
+
+Fark yok; eşikler 1 210 000 B ve 290 000 B (brotli).
+
+## 2026-11-15 · Teachers ve Dersler bileşenlere (`refactor/rf24-rf25`)
+
+RF24 ve RF25 (TODO §8k). Kod taşındı, değiştirilmedi; ekran ve davranış aynı.
+
+- `ui/setup/Teachers.tsx` 560 → 136 satır: ekleme bloğu ve taslağı `TeacherForm.tsx`, listenin
+  satırı `TeacherRow.tsx`, ikisinin cinsiyet seçenekleri `genders.ts`. "İkinci branş sorulan
+  satırlar" (`opening`) listede kaldı, satırlara iniyor.
+- `ui/lessons/index.tsx` 684 → 241 satır: `LessonForm.tsx` (ekleme bloğu, taslak, yapıştırma),
+  `LessonRow.tsx`, `LessonPicker.tsx` (odaklı kipte sağ sütun). Kipe göre süzgeci temizleyen
+  `useEffect` ekranda kaldı.
+
+Doğrulama: `tsc`, `eslint src`, `npm run sinir` (0 ihlal), `knip` (çıkış 0), belge kapısı yeşil.
+`npm run hizli` 11 kırmızı, `main`'dekiyle aynı 11 (bu Mac'te `flock` yok, depolama testleri,
+`rowOrder`). Playwright: `dersler`, `kurulum` ve `liste` spec'leri 94/94 yeşil (Chromium). `dist/index.html`
+1 173 991 → 1 174 664 bayt (+673, yeni bileşenlerin prop'ları), sınırın 11,8 kB altında;
+brotli'li hâli sınırın 6,5 kB altında.
+
+## 2026-11-15 · Program'ın menüleri ve şeridin tekrarları (`refactor/rf26-ro`)
+
+RF26: ızgaranın ve havuzun sağ tık menüleri `Program.tsx`'ten (879 satır) kendi dosyalarına
+taşındı, `GridMenu.tsx` (302) ve `PoolMenu.tsx` (113); Program 564 satır. JSX değişmeden
+taşındı, yalnız `solver.running` ve `menuPortalRef.current` prop olarak geliyor. Taşıma ile
+içerik ayrı commit'lerde.
+
+RO1 ve RO2, ölçülerek (babanın dizili haftası, `tam-dolu-kurs-dizili.json`, 50 çağrının
+ortalaması, bu makine, kirli ölçüm): `health` 15,5 ms, `describeStrip` 4,5 ms. `health` artık
+yalnız App'te hesaplanıyor ve şeride `status` olarak veriliyor, yani her düzenlemede bir
+hesap eksik. `describeStrip` `Ribbon`'da `useMemo` ile, yalnız Program sekmesinde ve `state`
+ya da maske değişince; App çözücü koşarken her dilimde çizildiği için kazanç o sırada her
+karede.
+
+Doğrulama: `tsc`, `eslint src`, `npm run sinir`, `knip`, `src/ui/program` ve `src/pure/program`
+testleri yeşil; `npm run hizli`'de 11 kırmızı, `main`'de de aynı 11 (bu Mac'te `flock` yok,
+depolama ve `rowOrder` testleri), yenisi yok. Ekran görüntüsü alınmadı.
+
+## 2026-11-15 · SAT çözücünün yayılımı tamponlarla (`hiz/sat-yayilim`)
+
+Öneri aramasının süresinin %71'i `sat.ts`'in `propagate`'indeydi (babanın verisi). Arama
+aynı kaldı, yalnız veri yapıları değişti: `propagate` alanları yerelde tutuyor ve
+`enqueue`'yu satır içi yazıyor; izleme listeleri `Int32Array` ve ayrı bir sayaç (her
+ziyarette `length = j` ile kesilip `push` ile yeniden büyüyen dizi yerine); `trail`
+değişken sayısıyla boyutlanmış bir `Int32Array` ve `trailTop`; klozlar tek bir düz havuzda
+(`pool`, `cStart`, `cLen`), `reduce` atılanların yarıyı geçtiği yerde havuzu sıkıştırıyor,
+kloz numaraları değişmiyor.
+
+Aynılık: babanın verisinde üç ailenin (`teacherHours`, `fewTeachers`, `rules`) önerilerinin
+JSON'u, toplam çatışma (346 924) ve karar (1 111 873) sayısı her adımda öncekiyle bayt bayt
+aynı. Süreler (bu makine, kirli ölçüm):
+
+| Adım | Süre |
+|---|---|
+| Önce | 56,9 s |
+| Yerel alanlar, satır içi `enqueue` | 49,1 s |
+| Düz kloz havuzu | 49,7 s (gürültü içinde) |
+| İzleme listeleri `Int32Array` + sayaç | 32,5 s |
+| `trail` `Int32Array` + `trailTop` | 26,0 s |
+
+Kazancın çoğu dizilerin kesilip yeniden büyümesinin kalkmasından. `sat.test.ts`,
+`relax.test.ts`, `invariants.test.ts`, `relaxFullCourse.test.ts` ve `solver.test.ts` (142)
+yeşil.
+
+## 2026-11-15 · Çözücünün onarımı tamsayı dizileriyle (`hiz/onarim-dizileri`)
+
+Onarım aşaması her "bu hücrede kim var, oynayabilir mi" sorusu için `sınıf|gün|saat`
+metni kurup sözlükte arıyordu. Profil (tam-dolu-kurs, `keepPlaced: false`): 9,1 s'nin
+yaklaşık %70'i `evictions`, `movableAt` ve `trim`'de. Onarım artık sınıf, öğretmen ve
+derslik hücrelerini `Int32Array` aynalarından okuyor; aynalar `startRepair`'de sözlükten
+kuruluyor ve yalnız `claim` ile `release` değiştiriyor. Hiç değişmeyen kapalı saatler
+öğe başına bir kez okunuyor, tabu `Float64Array`. Son sözü yine `blocker()` söylüyor.
+
+Sonuç birebir aynı: 29 girdide (iki fikstür × iki kip ve `WORLDS`'ün hepsi) faz, blok,
+düğüm sayısı ve ızgaranın parmak izi değişmedi. Süreler (bu makine, temiz koşul değil,
+kirli ölçüm):
+
+| Girdi | Önce | Sonra |
+|---|---|---|
+| tam-dolu-kurs, baştan | 10,8 s | 1,6 – 2,4 s |
+| gercek-olcek-sikisik | 70 s | 5,8 – 6,8 s |
+| gercek-olcek-imkansiz | 112 s | 10 – 13 s |
+
+Öneri araması bu daldan etkilenmiyor: profilde sürenin %71'i `sat.ts`'in `propagate`'inde
+(babanın verisinde ~52 s).
 
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
@@ -351,6 +879,63 @@ değil.
 
 **Koşulmayan.** Stryker (haftalık), Windows ve WebKit süitleri, site süiti (`test:site`),
 `cozucu` stres süiti; dalın CI'ı push edilmediği için okunmadı.
+## 2026-10-24 · TB8'in bitti kontrolü (`tb8-eksik-plan`)
+
+**`main` alındı** (bfa6099, `surec-sadelestirme`): çatışma TODO §8l'de (dondurulan bölümde
+`main`'in hâli kaldı, TP-B'ye "paket yolu fuzz'u geldi" işlendi) ve "Şu an"da.
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`, düzeltmedi). Düzelen, önce
+kırmızı testle (`src/storeContract.test.ts`, üç test): `state`'i nesne olmayan girdi
+okunamayan sayılmıyordu ve buradaki aynı kimlikli plan siliniyordu (`parseBundle`'ın
+`skipped`'i); depo doluyken hiçbir plan yazılamazsa dosyada olmayan yerel planlar yine
+siliniyor, not "hiçbir şey değişmedi" diyordu (TB8'den eski, veri kaybı sınıfı); yazılamayan
+yeni plan dizinde verisiz satır kalıyordu. CHANGELOG'un "aynı adlı plan" cümlesi "aynı
+kimlik"e, `bundle.ts`'in `store.ts`'e işaret eden yorumları, TESTFINDINGS'in TB8 girdisi.
+Reddedilen: depo dolu ve okunamayan plan birlikteyken notun yalnız depoyu söylemesi (ikisi
+birden nadir, depo cümlesi zaten "dosyayı saklayın" diyor); dosyanın açık planı buradaki
+kalan plansa açılışın ilk okunan plana geçmesi (veri kaybı yok); karışık paketin onay sayısına
+birim testi (arayüz metni, tıklama testinde görüldü); `readBundlePlans`'ın iki kez koşması
+(`replaceLibrary` kendi güvenlik gerekçesini çağırana bırakmamalı, maliyeti yok); onay
+başlığının "bütün planlar" demesi (gövde sayıları doğru söylüyor). Daha yeni planın cümlesi
+B7.34'e.
+
+**Tıklama testi** (`dist/index.html`, `file://`, Playwright Chromium, 1920×1080, `tr-TR`, boş
+profil, örnek okul; betik ve görüntüler `scratch/tb8-eksik-plan/tiklama/`'da). Örnek okul →
+Ayarlar → Planlar ve yedek → Boş plan → Tümünü dosyaya kaydet → (A) geçerli paket: "Buradaki
+2 plan silinip dosyadaki 2 plan açılacak", "2 plan açıldı."; (B) öğretmen listesi silinmiş
+paket: onay "Dosyadaki 1 plan eksik ya da bozuk, açılmayacak.", sonra "1 plan açıldı, 1 plan
+eksik ya da bozuk olduğu için açılmadı.", "1. plan" 25 öğretmeniyle yerinde; (C) bütün planları
+bozuk paket: soru yok, "Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi."; kesik JSON:
+"bütün planları içeren bir dosya değil" (B7.35). Komşu akış: üst çubuğun plan seçicisiyle iki
+plan arasında, Okul → Öğretmenler (25 ve 0), Program. Konsol hatası yok. Onay gövdesi 15 px,
+kontrast 17,5; Ayarlar'daki durum notu 13 px (B7.36). Düzeltmeden sonra yeniden koşuldu, aynı.
+
+**İkinci inceleme** (TB1'in dalındaki inceleyicinin bulgusu, bu dalın yolunda):
+`replaceLibrary` bekleyen kaydı yazmadan iptal ediyordu (`discardPendingSave`); bir plan
+yüklemeden sonra yerinde kalınca onun 400 ms dolmamış değişikliği depoya inmiyordu. Artık önce
+`park()`; `discardPendingSave` kalktı. Önce kırmızı test `storeContract.test.ts`'te. B7
+numaraları `main`'e giren B7.33'ten (maskable ikon) sonra B7.34–B7.36 oldu.
+
+**Koşulan.** `hizli` (1346 geçti), `storeContract`, `bundle`, `fuzz`, `docs` testleri, `tsc`,
+`eslint`, `prettier`, `npm run build`, tıklama testi iki kez (`agir.sh`). **Koşulmayan.** E2E
+yerelde (CI'da), mutasyon. İkinci incelemeden sonra `hizli` 1347 geçti.
+
+---
+
+## 2026-10-24 · Bitti kontrolü (`bitti-kontrolu`)
+
+Kullanıcının isteği: kodu değiştiren her işin "bitti"den önceki standart kontrolü. CLAUDE.md'de
+kısa "Bitti kontrolü" bölümü, ayrıntısı `paket-turu` becerisinde, her dal için geçerli: taze
+bağlamlı bir alt ajanın `git diff main...HEAD` incelemesi (doğruluk, veri riski, sadelik,
+bayat belge; inceleyen düzeltmez), kullanıcıya görünen değişiklikte `dist/index.html`'in
+`file://` ile Playwright Chromium'da, 1920×1080'de, sahte veriyle tıklama testi, ve raporda
+"İnceleme ve tıklama testi" bölümü. Yalnız belge değişen dalda ikisi de yok. Dal
+`surec-sadelestirme`'nin üstünden açıldı, çünkü o dal açıldığı an `main`'e henüz girmemişti
+(origin/main be3ff75) ve değişiklik onun 80 satırlık CLAUDE.md'sine yazılıyordu; dakikalar sonra
+girdi, dal `main`'i aldı. Koşulan: `npm run hizli`.
+Koşulmayan: E2E, `kontrol` (yalnız belge).
+
+---
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 
@@ -483,6 +1068,39 @@ geçici worktree'sinde yazıldı.
 birleştirir. `ikon`'un TODO numarası B7.32, `main`'deki B7.32 `surec`'in (`yayinla` kilit
 dosyası); `ikon` birleşirken ilk boş numarayı alır. `ruflo/kurulum`: Alp'in deny testini
 bekliyor; birleşirken CLAUDE.md'deki çakışma bu kuralın ve sadeleşen sürecin lehine çözülür.
+
+---
+
+## 2026-10-23 gece · TB8: "Tümünü dosyadan aç" eksik planı açmıyor (`tb8-eksik-plan`)
+
+**Önce kırmızı.** `src/storeContract.test.ts`'e iki test (v16 fikstüründen bir liste
+silinmiş plan): eksik plan `ok: 1` ile açıldı; eksik ve tam plan yan yana `ok: 2`.
+`e2e/planlar.spec.ts`'e bir E2E: indirilen paketin öğretmen listesi silinip verilince
+"1 plan açıldı.". Gerçek veri yok, yalnız fikstür ve Playwright'ın geçici profili.
+
+**Çare.** `readBundlePlans` (`parseState.ts`): her plan `readPlanFile`'ın kuralıyla, istisna
+atan plan (TB1) okunamayan sayılıyor. `replaceLibrary` eksik ya da bozuk planı açmıyor ve
+buradaki aynı kimlikli planı silmiyor. `Data.tsx` onaydan önce okuyor: hiçbir plan
+okunamıyorsa soru yok ve hiçbir şey değişmiyor; onay ve sonuç cümlesi açılmayan planları
+sayıyor, dört sözlükte. Şema değişmedi, göç gerekmedi.
+
+**Kanıtlar.** İki testin ve E2E'nin yeşili; `fuzz.test.ts`'e paket yolu (TP4'ün kalanı).
+`mutasyon-kaniti.sh`: okuyucu çıplak `parseState`'e dönünce üç test kırmızı, buradaki planı
+koruyan koşul kalkınca bir test kırmızı, ağaç ikisinde de aynı. Eski yedekler:
+`fixtures.test.ts` 296/296, `linux-tasima.spec.ts` (site, paket gidiş-dönüşü) yeşil, `planlar.spec.ts`
+22/22. Ekran görüntüsü 1920×1080: onay sorusu ve sonuç notu `scratch/tb8-ekran/`'de,
+"1. plan" 25 öğretmeniyle yerinde kaldı. CI 40029577387 yeşil, 6 dk 56 sn.
+
+**Yorum kararı.** "Eksik plan her geçerli parçasını tutar" plan düzeyinde okundu: paketteki
+her okunabilir plan bütün parçalarıyla açılıyor; listesi eksik bir plan yarım açılmıyor,
+çünkü `sanitize` eksik öğretmen listesinde dersleri ve yerleşimleri de düşürüyor, yani
+yarım açmak dosyanın geçerli parçalarını da kaybederdi.
+
+**Koşulan.** `hizli`, `tipler`, `lint`, `knip`, `sinir`, biçim, beş birim dosyası, iki E2E
+spec'i ve ekran betiği kilit altında, iki mutasyon, CI. **Koşulmayan.** Tam E2E yerelde,
+exe (köprü değişmedi; politika: CI'da).
+
+---
 
 ## 2026-10-23 gece · Süreç sadeleşti (`surec-sadelestirme`)
 

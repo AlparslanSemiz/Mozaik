@@ -2,7 +2,18 @@
 // script stays plain .mjs so `node` runs it, and e2e/gercek-exe.spec.ts is
 // type-checked.
 
+export const WINDOWS: boolean;
+export const WINDOWS_PORTU: number;
+export function windowsTestAyari(): { app: { windows: Record<string, unknown>[] } };
 export function varsayilanIkili(): string;
+export interface WindowsYerleri {
+  klasor: string;
+  profil: string;
+  indirilenler: string;
+}
+export function windowsYerleri(): WindowsYerleri;
+export function windowsTemizle(yerler: WindowsYerleri): void;
+export function surucuyuKapat(pid: number): void;
 export function evHazirla(ev: string, secenek?: { koru?: boolean }): Record<string, string>;
 export function basizMumkun(): boolean;
 export function suruculuBaslat(secenek: {
@@ -16,7 +27,11 @@ export function suruculuBaslat(secenek: {
 export class Oturum {
   port: number;
   id: string;
+  program: import('node:child_process').ChildProcess | undefined;
   static ac(secenek: { port?: number; ikili: string; bekleMs?: number }): Promise<Oturum>;
+  /** Windows: attaches to a program the suite did not start (the one an update restarted). */
+  static windowsBaglan(secenek: { port?: number; bekleMs?: number }): Promise<Oturum>;
+  turkceYap(son: number): Promise<void>;
   bul(secici: string): Promise<string>;
   tikla(secici: string): Promise<void>;
   yaz(secici: string, metin: string): Promise<void>;

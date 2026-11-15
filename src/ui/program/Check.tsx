@@ -7,6 +7,7 @@ import { buildIndex, closedConflicts, placementKey } from '../../pure/constraint
 import { buildReport, type ReportRow } from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
+import { pinnedRelationBreaches } from '../../pure/constraints';
 import type { CheckView } from '../../platform/prefs';
 import { T, useT } from '../common';
 
@@ -66,6 +67,7 @@ export default function Check({ state, view }: Props) {
   const placed = Object.keys(activePlacements(state)).length;
   const totalWanted = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
   const ix = useMemo(() => buildIndex(state), [state]);
+  const pinnedBreaks = useMemo(() => pinnedRelationBreaches(state, ix).length, [state, ix]);
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
   ).length;
@@ -218,6 +220,14 @@ export default function Check({ state, view }: Props) {
               {report.violations.some((v) => v.rule === 'notSameDay') && (
                 <p className="hint">
                   <T k="Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir." />
+                </p>
+              )}
+              {/* TODO RK2: with both of them pinned, Otomatik diz has no
+                  suggestion to offer until one moves; said here as well as
+                  in the panel, in one sentence. */}
+              {pinnedBreaks > 0 && (
+                <p className="hint">
+                  <T k="İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
                 </p>
               )}
               <table className="list">

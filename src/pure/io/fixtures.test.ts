@@ -31,6 +31,7 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parseBundle } from './bundle';
 import { defaultSubjects, emptyState } from '../entities';
 import { parseState, readPlanFile } from './parseState';
 import { activeProgram } from '../grid/programs';
@@ -455,6 +456,26 @@ describe('şema örnekleri — ilişkiler (v16)', () => {
   });
 });
 
+describe('şema örnekleri — öğretmenin e-postası (v17)', () => {
+  it.each(VERSIONS)('v%i dosyasının adresleri doğru geliyor', (version) => {
+    const emails = parse(version).teachers.map((t) => t.email);
+    // v17 brought them. A file below it has none, and '' is what none means.
+    expect(emails).toEqual(version >= 17 ? ['mehmet.celik@example.com', ''] : ['', '']);
+  });
+
+  it('adresteki satır sonu ve denetim karakteri düşüyor, metin olmayan adres boş', () => {
+    const state = edited<{ teachers: Array<Record<string, unknown>> }>(SCHEMA_VERSION, (raw) => {
+      raw.teachers[0]!['email'] = ' ali@example.com\r\nBcc: zarar@example.com\u0000 ';
+      raw.teachers[1]!['email'] = 42;
+    });
+    expect(state).not.toBeNull();
+    expect(state!.teachers.map((t) => t.email)).toEqual([
+      'ali@example.comBcc: zarar@example.com',
+      '',
+    ]);
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**
@@ -627,5 +648,72 @@ describe('şema örnekleri — eksik ve bozuk alanlar', () => {
     });
 
     expect(state!.settings.days.map((d) => d.name)).toEqual(['Salı', 'Çarşamba']);
+  });
+});
+
+// THE ENVELOPE A REAL BACKUP ARRIVES IN (TP6, K2). Every file above is made up,
+// and the two real plans next to them are bare plans. What "Tümünü dosyadan
+// aç" reads is a bundle: `savedAt`, `activeId`, a named plan with its `draft`
+// flag, and inside it a v14 plan. This is the newest real one, the
+// 2026-09-04 bundle, with its names taken from `tam-dolu-kurs.json` by
+// `scripts/adsiz-paket.mjs` (same school, same ids). The numbers below are
+// read off the file once and written out, not computed.
+describe('gerçek paket, adsız', () => {
+  const text = readFileSync(join(DIR, 'gercek-paket-v1.json'), 'utf8');
+
+  function plan(): State {
+    const bundle = parseBundle(text);
+    if (bundle === null) throw new Error('gercek-paket-v1.json paket olarak okunamadı');
+    const state = parseState(JSON.stringify(bundle.states['1']));
+    if (state === null) throw new Error('paketin planı okunamadı');
+    return state;
+  }
+
+  it('zarf okunuyor: tek plan, adı, taslak değil, açık olan o', () => {
+    expect(parseBundle(text)?.library).toEqual({
+      activeId: '1',
+      plans: [{ id: '1', name: 'Plan 1', draft: false }],
+    });
+  });
+
+  it('içindeki v14 plan bugünkü sürüme göçüyor', () => {
+    expect(JSON.parse(text).plans[0].state.schemaVersion).toBe(14);
+    expect(plan().schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it('okul kayıpsız geliyor: 18 öğretmen, 20 sınıf, 146 ders, 348 saat, 8 derslik', () => {
+    const state = plan();
+    expect(state.teachers).toHaveLength(18);
+    expect(state.classes).toHaveLength(20);
+    expect(state.lessons).toHaveLength(146);
+    expect(state.lessons.reduce((sum, lesson) => sum + lesson.weeklyHours, 0)).toBe(348);
+    expect(state.rooms).toHaveLength(8);
+    expect(state.settings.days.map((day) => day.name)).toEqual([
+      'Salı',
+      'Çarşamba',
+      'Perşembe',
+      'Cuma',
+      'Cumartesi',
+      'Pazar',
+    ]);
+    expect(state.settings.hours).toHaveLength(12);
+    expect(state.settings.bell).toEqual({
+      start: '09:00',
+      lessonMinutes: 40,
+      breakMinutes: 10,
+      longBreakMinutes: 30,
+    });
+    expect(Object.keys(state.unavailable)).toHaveLength(1761);
+  });
+
+  // The 330 hours my father laid out himself. `tam-dolu-kurs-dizili.json` is
+  // the same week taken out of this same file as a bare plan, so the two must
+  // agree cell for cell; a bundle path that dropped or moved one would not.
+  it('babanın dizdiği 330 saat hücre hücre yerinde', () => {
+    const laidOut = parseState(readFileSync(join(DIR, 'tam-dolu-kurs-dizili.json'), 'utf8'));
+    const placements = activeProgram(plan()).placements;
+
+    expect(Object.keys(placements)).toHaveLength(330);
+    expect(placements).toEqual(activeProgram(laidOut!).placements);
   });
 });

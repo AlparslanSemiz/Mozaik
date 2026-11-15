@@ -82,6 +82,14 @@ const DE: Sozluk = {
   "Bu dosya bütün planları içeriyor": "Diese Datei enthält alle Pläne",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "Diese Datei wurde mit einer neueren Version geschrieben",
+  "Okunamayan plan açılmadı: {adlar}.":
+    "Ein Plan, der nicht gelesen werden konnte, wurde nicht geöffnet: {adlar}.",
+  "· okunamadı": "· nicht lesbar",
+  "Kayıtlı metni okunamadı; açılmıyor, silinmedi.":
+    "Der gespeicherte Text konnte nicht gelesen werden; er wird nicht geöffnet und wurde nicht gelöscht.",
+  "Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.":
+    "Der gespeicherte Text dieses Plans konnte nicht gelesen werden; wird der Plan gelöscht, ist auch dieser Text weg. Das lässt sich nicht rückgängig machen.",
+  "Bu taslak okunamadı": "Dieser Entwurf konnte nicht gelesen werden",
   "Bu dosya okunamadı": "Diese Datei konnte nicht gelesen werden",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     "Sie ersetzt nicht einen einzelnen Plan, sondern alle Pläne auf diesem Computer. Verwenden Sie „Alle aus Datei öffnen“ unter Einstellungen → Pläne und Sicherung.",
@@ -610,6 +618,14 @@ const DE: Sozluk = {
     "Kein einziger Plan in der Datei konnte gelesen werden; nichts hat sich geändert.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:Plan|Pläne} geöffnet, {yazilamayan} konnten nicht geschrieben werden. Der Speicher könnte voll sein. Bewahren Sie die Datei auf.",
+  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
+    "{yeni} {yeni:Plan|Pläne} in der Datei {yeni:wurde|wurden} mit einer neueren Version des Programms geschrieben und {yeni:wird|werden} nicht geöffnet. Aktualisieren Sie das Programm.",
+  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
+    "{yeni} {yeni:Plan wurde|Pläne wurden} mit einer neueren Version des Programms geschrieben und nicht geöffnet. Aktualisieren Sie das Programm.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:Plan|Pläne} in der Datei {eksik:ist|sind} unvollständig oder beschädigt und {eksik:wird|werden} nicht geöffnet.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:Plan|Pläne} geöffnet; {eksik} {eksik:war|waren} unvollständig oder beschädigt und {eksik:wurde|wurden} nicht geöffnet.",
   "{acilan} plan açıldı.": "{acilan} {acilan:Plan|Pläne} geöffnet.",
   "Bütün planlar tek dosyada": "Alle Pläne in einer Datei",
   "Tümünü dosyaya kaydet ({n} plan)":
@@ -860,8 +876,8 @@ const DE: Sozluk = {
   "İkinci branş": "Zweites Fach",
   "İkinci branş yok": "Kein zweites Fach",
   "Öğretmenleri yapıştır": "Lehrkräfte einfügen",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Vor- und Nachname · Kürzel · Fach · Geschlecht · Zweites Fach",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Vor- und Nachname · Kürzel · Fach · Geschlecht · Zweites Fach · E-Mail",
   "Bu aramaya uyan öğretmen yok.": "Keine Lehrkraft passt zu dieser Suche.",
   "2. branş": "2. Fach",
   "Art arda en fazla kaç saat": "Höchstens wie viele Stunden am Stück",
@@ -948,6 +964,10 @@ const DE: Sozluk = {
     "{bir} und {iki} liegen beide am {gun}; sie dürfen nicht auf denselben Tag.",
   "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
     "Liegen zwei Fächer, die nicht auf denselben Tag dürfen, am selben Tag, zeigt die Zeile **Nicht am selben Tag** auf der Seite des Fachs sie an.",
+  "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
+    "{bir} und {iki} sind am {gun} beide angeheftet; sie dürfen nicht am selben Tag liegen, also gibt es keinen Weg, bis eines verschoben wird.",
+  "İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Sind beide **angeheftet**, kann **Automatisch legen** keine Vorschläge suchen; lösen Sie eines oder verschieben Sie es auf einen anderen Tag.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} darf am {gun} höchstens {sinir} Stunden unterrichten; hier wären es {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -1717,6 +1737,38 @@ const DE: Sozluk = {
     "Inhalt: Räume, Lehrkräfte, Klassen, Stunden, gesetzter Plan, Name und Entwurfsmarke jedes Plans. Einstellungen dieses Rechners wie das Design und die Sitzungssicherungen sind nicht dabei.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Was abgewählt ist, kommt nicht aufs Papier.",
+  "E-posta":
+    "E-Mail",
+  "{kim} e-postası":
+    "E-Mail von {kim}",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "Hier steht genau eine E-Mail-Adresse: name@beispiel.de",
+  "E-postayla gönder":
+    "Per E-Mail senden",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "Die Woche der Lehrkraft öffnet sich als neue Nachricht in Ihrem E-Mail-Programm. Auf Senden drücken Sie selbst.",
+  "adres yok":
+    "keine Adresse",
+  "adres hatalı":
+    "Adresse fehlerhaft",
+  "programı boş":
+    "Plan ist leer",
+  "e-postaya sığmıyor":
+    "zu lang für eine E-Mail",
+  "{kim} için e-postayı aç":
+    "E-Mail an {kim} öffnen",
+  "E-postada aç":
+    "In E-Mail öffnen",
+  "Bu bilgisayarda seçili bir e-posta programı yok.":
+    "Auf diesem Computer ist kein E-Mail-Programm ausgewählt.",
+  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
+    "Wenn sich kein E-Mail-Programm geöffnet hat, ist auf diesem Computer keines ausgewählt.",
+  "E-posta programı açılamadı.":
+    "Das E-Mail-Programm ließ sich nicht öffnen.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Wochenstundenplan",
+  "{n}. ders":
+    "{n}. Stunde",
 };
 
 registerSozluk("de", DE);

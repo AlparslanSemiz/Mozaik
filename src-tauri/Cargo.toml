@@ -54,9 +54,13 @@ reqwest = { version = "0.13", default-features = false, features = ["native-tls"
 # it); listed here because `derive` is used directly.
 serde = { version = "1", features = ["derive"] }
 
+# The digest update.rs holds a download against (the manifest's `sha256`).
+# Already in Cargo.lock: tauri depends on it, so nothing new is compiled.
+sha2 = "0.10"
+
 [dev-dependencies]
-# update.rs's test that a 2.2.0 copy still reads the new manifest. Already in
-# the lock (tauri depends on it); tests only, nothing reaches the exe.
+# update.rs's tests: a recorded manifest read back, and a 2.2.0 copy still
+# reading the new one. Already in the lock (tauri depends on it); tests only.
 serde_json = "1"
 
 [profile.release]

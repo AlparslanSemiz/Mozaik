@@ -47,6 +47,7 @@ function build(): State {
         short: 'MÇ',
         subject: 'Matematik',
         subject2: '',
+        email: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },

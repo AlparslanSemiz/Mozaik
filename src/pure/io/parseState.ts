@@ -31,10 +31,12 @@ import {
   type State,
   type Teacher,
   SCHEMA_VERSION,
+  cleanEmail,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../entities';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../grid';
+import type { Bundle } from './bundle';
 
 /** v1 shape: Turkish field names. Kept only so old backups can still be opened. */
 interface LegacyV1 {
@@ -283,17 +285,19 @@ function migrateV2toV3(raw: LegacyV2): State {
       ),
     },
     rooms: asArray<Room>(raw.rooms, []),
-    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2'>>(raw.teachers, []).map(
-      (x) => ({
-        ...x,
-        // Neither of these can be in a v1/v2 file, and neither is guessed: a
-        // gender is not read off a name, and a second subject nobody wrote down
-        // is a subject nobody teaches.
-        gender: '',
-        subject2: '',
-        limits: { ...NO_TEACHER_LIMITS },
-      }),
-    ),
+    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2' | 'email'>>(
+      raw.teachers,
+      [],
+    ).map((x) => ({
+      ...x,
+      // None of these can be in a v1/v2 file, and none is guessed: a gender
+      // is not read off a name, a second subject nobody wrote down is a
+      // subject nobody teaches, and an address is only ever typed.
+      gender: '',
+      subject2: '',
+      email: '',
+      limits: { ...NO_TEACHER_LIMITS },
+    })),
     // The same two readers the v3+ path runs over this list. A bare `asArray`
     // here once left the class box `undefined` and every class uncoloured
     // (TODO §8g).
@@ -393,7 +397,9 @@ function readDays(x: unknown, fallback: Day[]): Day[] {
 
 /**
  * Turns outside text into a State. Tolerates broken/missing fields; returns
- * null if it cannot be converted. ALWAYS ends with sanitize().
+ * null if it cannot be converted. ALWAYS ends with sanitize(). It can still
+ * THROW on a row that is not an object (a null lesson, TODO TB1): a reader of
+ * outside files goes through `readPlanFile`, which turns that into a refusal.
  */
 export function parseState(text: string): State | null {
   let raw: unknown;
@@ -429,6 +435,7 @@ export function parseState(text: string): State | null {
     version === 13 ||
     version === 14 ||
     version === 15 ||
+    version === 16 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -507,6 +514,8 @@ export function parseState(text: string): State | null {
           ...t,
           gender: asGender(t.gender),
           subject2: asText(t.subject2, ''),
+          // v17. Below it there is no address, and '' is what none means.
+          email: cleanEmail(t.email),
           limits: {
             maxConsecutive: asBox(t.limits?.maxConsecutive),
             maxPerDay: asBox(t.limits?.maxPerDay),
@@ -577,9 +586,24 @@ const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
  * bar that empties the open plan after one "Yedeği yükle" (DENETIM DK11), so
  * here it is refused. An empty list is not a missing one: a school with no
  * lessons yet is a real plan.
+ *
+ * It never throws. `parseState` trusts the shape of each row it is handed, and
+ * a file with a null lesson row made it throw a TypeError that the top bar did
+ * not catch (TODO TB1): nothing changed, and nobody was told. Such a file is
+ * an unreadable one. `parseState` itself is not changed here: it also reads
+ * this computer's storage at startup, and that half of TB1 is still open.
+ *
+ * Nor does it open a file whose rooms, teachers, classes or lessons carry an
+ * empty id or one id twice (TODO B7.37): a placement points at a lesson by id,
+ * and with two lessons under one id nobody can say which one sits in the cell.
  */
 export function readPlanFile(text: string): PlanFile {
-  const state = parseState(text);
+  let state: State | null;
+  try {
+    state = parseState(text);
+  } catch {
+    return { problem: 'okunamadi' };
+  }
   // A version past this program's is the program's own file from a newer
   // copy, not a broken one; "okunamadı" sent the reader after a bad backup
   // (DENETIM DK10). It is still not guessed at.
@@ -587,7 +611,54 @@ export function readPlanFile(text: string): PlanFile {
   const raw = JSON.parse(text) as Record<string, unknown>;
   const lists = (raw.schemaVersion ?? raw.semaSurumu) === 1 ? LISTS_V1 : LISTS;
   if (lists.some((field) => !Array.isArray(raw[field]))) return { problem: 'eksik' };
+  if (!idsWhole(state)) return { problem: 'okunamadi' };
   return { state };
+}
+
+/**
+ * Every row has an id of its own: not empty, not shared. Rooms, teachers and
+ * classes count as ONE list here, because a closed hour is keyed by the id
+ * alone (`closedKey`): a teacher and a class under one id would close each
+ * other's hours. Lessons are their own list.
+ */
+function idsWhole(state: State): boolean {
+  return [[...state.rooms, ...state.teachers, ...state.classes], state.lessons].every((list) => {
+    const ids = list.map((row) => row.id);
+    return (
+      ids.every((id) => typeof id === 'string' && id !== '') && new Set(ids).size === ids.length
+    );
+  });
+}
+
+/**
+ * What "Tümünü dosyadan aç" makes of each plan in a bundle: the top bar's rule,
+ * one plan at a time. Until 2026-10-23 the bundle path read each plan with the
+ * tolerant `parseState`, so a plan with its teacher or lesson list missing
+ * opened as an empty one and took the plan this computer had with it (TODO
+ * TB8). A plan that is missing a list, unreadable or newer is not opened; the
+ * readable ones are, every part of them, in the file's order. A plan the reader
+ * refuses for any reason, a row that used to make it throw included (TB1), is
+ * an unreadable plan here, and so is an entry parseBundle skipped because its
+ * state was not an object. `newer` names the unreadable ones that a newer
+ * program wrote (TODO B7.34): those need the program updated, not a better file.
+ */
+export function readBundlePlans(bundle: Bundle): {
+  plans: Array<{ id: Id; state: State }>;
+  unreadable: Id[];
+  newer: Id[];
+} {
+  const plans: Array<{ id: Id; state: State }> = [];
+  const unreadable: Id[] = [];
+  const newer: Id[] = [];
+  for (const plan of bundle.library.plans) {
+    const raw = bundle.states[plan.id];
+    const read = raw === undefined ? null : readPlanFile(JSON.stringify(raw));
+    if (read !== null && 'state' in read) plans.push({ id: plan.id, state: read.state });
+    else unreadable.push(plan.id);
+    if (read !== null && 'problem' in read && read.problem === 'yeni') newer.push(plan.id);
+  }
+  for (const id of bundle.skipped ?? []) if (!unreadable.includes(id)) unreadable.push(id);
+  return { plans, unreadable, newer };
 }
 
 function newerVersion(text: string): boolean {

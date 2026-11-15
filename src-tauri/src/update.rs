@@ -56,6 +56,59 @@ const RELEASE_KOKLERI: [&str; 2] = [
 const MANIFEST_URL: &str =
     "https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/surum.json";
 
+/// THE UPGRADE GATE'S TEST EXE ONLY: a local server in place of both of the
+/// above, given at COMPILE time (`MOZAIK_TEST_GUNCELLEME_KOKU`, e.g.
+/// `http://127.0.0.1:8765/`). `.github/workflows/guncelleme-windows.yml`
+/// builds the old copy with it, so that copy finds, downloads, checks and
+/// swaps in the new one through this very file, from a machine with no
+/// release. The released exe is built without it, and `kontrat.test.ts`
+/// asks surum.yml never to set it: with it, a copy would fetch from wherever
+/// the variable said.
+const TEST_KOKU: Option<&str> = option_env!("MOZAIK_TEST_GUNCELLEME_KOKU");
+
+/// A test root is loopback and a directory, or the build fails: an empty
+/// value would make `safe_url` accept any address, a missing `/` would glue
+/// `surum.json` onto the port. So even a value that leaked into a build could
+/// only ever fetch from this machine.
+const fn yerel_kok_mu(b: &[u8]) -> bool {
+    let on = b"http://127.0.0.1:";
+    if b.len() <= on.len() || b[b.len() - 1] != b'/' {
+        return false;
+    }
+    let mut i = 0;
+    while i < on.len() {
+        if b[i] != on[i] {
+            return false;
+        }
+        i += 1;
+    }
+    b[on.len()].is_ascii_digit()
+}
+
+const _: () = match TEST_KOKU {
+    Some(kok) => assert!(
+        yerel_kok_mu(kok.as_bytes()),
+        "MOZAIK_TEST_GUNCELLEME_KOKU http://127.0.0.1:<port>/ biçiminde olmalı"
+    ),
+    None => {}
+};
+
+/// The prefixes this build fetches from: the two releases, or the gate's
+/// local server and nothing else.
+fn kokler() -> Vec<&'static str> {
+    match TEST_KOKU {
+        Some(kok) => vec![kok],
+        None => RELEASE_KOKLERI.to_vec(),
+    }
+}
+
+fn manifest_url() -> String {
+    match TEST_KOKU {
+        Some(kok) => format!("{kok}surum.json"),
+        None => MANIFEST_URL.to_string(),
+    }
+}
+
 /// Suffixes hung on the running program's own file name. Appended rather than
 /// swapped into the extension: `Mozaik.exe.yeni` cannot be double-clicked by
 /// accident, `Mozaik.yeni.exe` can.
@@ -101,6 +154,12 @@ pub struct Manifest {
     pub date: String,
     pub exe: String,
     pub boyut: u64,
+    /// The exe's SHA-256, lowercase hex (surum.yml, from the same file it
+    /// publishes). Optional to READ, because every manifest published before
+    /// 2026-10-24 lacks it and a copy must still be told it is up to date;
+    /// required to DOWNLOAD (`karar`, `verify`).
+    #[serde(default)]
+    pub sha256: Option<String>,
     /// The installer (`Mozaik-Kurulum.exe`), from the release that started
     /// shipping one (DECISIONS 2026-11-15). Optional, and that is the bridge:
     /// copies built before it never heard of the field, serde skips it, and they
@@ -110,6 +169,10 @@ pub struct Manifest {
     pub kurulum: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kurulum_boyut: Option<u64>,
+    /// The installer's SHA-256, like `sha256` for the standalone one. All three
+    /// installer fields or none: `karar` offers the installer only with all.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kurulum_sha256: Option<String>,
 }
 
 /// The answer the settings panel draws.
@@ -121,6 +184,7 @@ pub struct Cevap {
     pub date: String,
     pub exe: String,
     pub boyut: u64,
+    pub sha256: Option<String>,
     /// `exe` is the installer, not the standalone program. The page does not
     /// need to know -- `download_update` reads the same thing off the address --
     /// but the About panel may say it.
@@ -175,17 +239,23 @@ pub fn is_newer(aday: &str, simdiki: &str) -> bool {
 /// review, 2026-11-15). Parsing normalises the dot segments first.
 pub fn safe_url(url: &str) -> Result<(), String> {
     let hata = || format!("Beklenmeyen adres: {url}");
+    // Normalised first: `.../releases/../../other/repo/...` and its `%2e%2e`
+    // spelling start with our prefix and resolve to somebody else's files
+    // (security review, 2026-11-15).
     let parsed = reqwest::Url::parse(url).map_err(|_| hata())?;
-    if parsed.scheme() != "https"
-        || parsed.host_str() != Some("github.com")
-        || parsed.port().is_some()
-        || !parsed.username().is_empty()
-        || parsed.password().is_some()
-    {
+    let normal = parsed.as_str();
+    if !kokler().iter().any(|kok| normal.starts_with(kok)) {
         return Err(hata());
     }
-    let normal = parsed.as_str();
-    if !RELEASE_KOKLERI.iter().any(|kok| normal.starts_with(kok)) {
+    // The published copy: GitHub over TLS and nothing else. The test copy's
+    // root (TEST_KOKU) is a loopback server and is checked by the prefix alone.
+    if TEST_KOKU.is_none()
+        && (parsed.scheme() != "https"
+            || parsed.host_str() != Some("github.com")
+            || parsed.port().is_some()
+            || !parsed.username().is_empty()
+            || parsed.password().is_some())
+    {
         return Err(hata());
     }
     Ok(())
@@ -215,7 +285,9 @@ fn releases_sayfasi() -> String {
 /// by hand, and `Beklenmeyen adres: https://...` never told anybody that.
 pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
     let yeni_var = is_newer(&m.version, current);
-    if yeni_var && safe_url(&m.exe).is_err() {
+    // A download this copy cannot check is not offered either: no address of
+    // ours, or no digest to hold the file against.
+    if yeni_var && (safe_url(&m.exe).is_err() || m.sha256.is_none()) {
         return Err(format!(
             "Yeni sürüm ({}) yayımlandı, ama bu kopya onu kendi indiremiyor.\n\
              Şu adresten indirip eskisinin üzerine koyabilirsiniz:\n{}",
@@ -226,11 +298,11 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
     // The installer when the release has one this copy may fetch, otherwise the
     // standalone program exactly as before. A manifest whose installer address
     // is not ours is not an error: the standalone one still updates the copy.
-    let (exe, boyut, kurulum) = match (m.kurulum, m.kurulum_boyut) {
-        (Some(url), Some(boyut)) if kurulum_mu(&url) && safe_url(&url).is_ok() => {
-            (url, boyut, true)
+    let (exe, boyut, sha256, kurulum) = match (m.kurulum, m.kurulum_boyut, m.kurulum_sha256) {
+        (Some(url), Some(boyut), Some(ozet)) if kurulum_mu(&url) && safe_url(&url).is_ok() => {
+            (url, boyut, Some(ozet), true)
         }
-        _ => (m.exe, m.boyut, false),
+        _ => (m.exe, m.boyut, m.sha256, false),
     };
     Ok(Cevap {
         yeni_var,
@@ -238,6 +310,7 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
         date: m.date,
         exe,
         boyut,
+        sha256,
         kurulum,
     })
 }
@@ -315,15 +388,20 @@ pub fn eski_kopyayi_kaldir(eski: PathBuf, not: PathBuf) {
 }
 
 /// The installer downloaded in this session, waiting for "Şimdi yeniden başlat".
-static INDIRILEN_KURULUM: std::sync::Mutex<Option<PathBuf>> = std::sync::Mutex::new(None);
+/// With the digest it was checked against: `apply_update` checks it again.
+#[allow(clippy::type_complexity)]
+static INDIRILEN_KURULUM: std::sync::Mutex<Option<(PathBuf, String)>> =
+    std::sync::Mutex::new(None);
 
 /// Is what came down the wire a Windows program, and the one we were promised?
 ///
 /// The size check is what makes a truncated download loud. Without it a
 /// connection that dies halfway leaves a half file that renames over the
 /// working program perfectly happily, and the next launch does nothing at all
-/// -- with the old copy already moved aside.
-pub fn verify(bytes: &[u8], boyut: u64) -> Result<(), String> {
+/// -- with the old copy already moved aside. The digest is the manifest's
+/// own word for exactly which file: the size and `MZ` say a whole Windows
+/// program arrived, the digest says it is the one published.
+pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
     if bytes.is_empty() {
         return Err("İnen dosya boş.".into());
     }
@@ -340,7 +418,16 @@ pub fn verify(bytes: &[u8], boyut: u64) -> Result<(), String> {
     if !bytes.starts_with(b"MZ") {
         return Err("İnen dosya bir Windows programı değil.".into());
     }
+    if ozet(bytes) != sha256.to_ascii_lowercase() {
+        return Err("İnen dosya yayımlanan dosya değil: özeti tutmuyor.".into());
+    }
     Ok(())
+}
+
+/// SHA-256 of `bytes`, lowercase hex, as `sha256sum` writes it.
+fn ozet(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
 /// `<program>.exe` -> `<program>.exe.<ek>`
@@ -458,7 +545,7 @@ fn ag_hatasi(e: &reqwest::Error) -> String {
 #[tauri::command]
 pub async fn check_update(current: String) -> Result<Cevap, String> {
     let yanit = istemci(20)?
-        .get(MANIFEST_URL)
+        .get(manifest_url())
         .send()
         .await
         .map_err(|e| ag_hatasi(&e))?
@@ -476,7 +563,7 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
 /// Downloads next to the running program and stops there. Nothing is replaced
 /// until `apply_update`, which is a second button.
 #[tauri::command]
-pub async fn download_update(url: String, boyut: u64) -> Result<u64, String> {
+pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<u64, String> {
     self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
@@ -493,16 +580,17 @@ pub async fn download_update(url: String, boyut: u64) -> Result<u64, String> {
         .await
         .map_err(|e| ag_hatasi(&e))?;
 
-    verify(&bytes, boyut)?;
+    verify(&bytes, boyut, &sha256)?;
     if kurulum {
         // The temporary folder, not next to the program: an installed program
         // lives in a folder the installer owns, and the wizard is run once and
-        // never kept.
+        // never kept. Its digest goes with it: `apply_update` checks the file
+        // again right before running it, since the folder is not ours alone.
         let hedef = std::env::temp_dir().join(KURULUM_ADI);
         fs::write(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
         *INDIRILEN_KURULUM
             .lock()
-            .map_err(|_| "Kurulum kaydı okunamadı.")? = Some(hedef);
+            .map_err(|_| "Kurulum kaydı okunamadı.")? = Some((hedef, sha256.to_ascii_lowercase()));
         return Ok(bytes.len() as u64);
     }
     fs::write(yan(&exe, YENI), &bytes).map_err(|e| {
@@ -522,8 +610,14 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
         .lock()
         .map_err(|_| "Kurulum kaydı okunamadı.")?
         .clone()
-        .filter(|p| p.is_file());
-    if let Some(kurulum) = kurulum {
+        .filter(|(p, _)| p.is_file());
+    if let Some((kurulum, beklenen)) = kurulum {
+        // The temporary folder is shared with every other program of this
+        // user: the file run is the file that was checked, or nothing runs.
+        let bytes = fs::read(&kurulum).map_err(|e| format!("Kurulum okunamadı: {e}"))?;
+        if ozet(&bytes) != beklenen {
+            return Err("İndirilen kurulum değişmiş: özeti tutmuyor. Tekrar indirin.".into());
+        }
         return kurulumu_baslat(&app, &exe, &kurulum);
     }
     swap(&exe)?;
@@ -725,8 +819,10 @@ mod tests {
             date: "2026-08-31".into(),
             exe: exe.into(),
             boyut: 3_757_568,
+            sha256: Some(ozet(b"MZ")),
             kurulum: None,
             kurulum_boyut: None,
+            kurulum_sha256: None,
         }
     }
 
@@ -742,10 +838,22 @@ mod tests {
         let mut m = manifest("9.0.0", TEK);
         m.kurulum = Some(KURULUM.into());
         m.kurulum_boyut = Some(31_000_000);
+        m.kurulum_sha256 = Some("ab".repeat(32));
         let c = karar(m, "2.2.0").unwrap();
         assert!(c.kurulum);
         assert_eq!(c.exe, KURULUM);
         assert_eq!(c.boyut, 31_000_000);
+        assert_eq!(c.sha256.as_deref(), Some("ab".repeat(32).as_str()));
+    }
+
+    #[test]
+    fn an_installer_without_its_digest_is_not_offered() {
+        let mut m = manifest("9.0.0", TEK);
+        m.kurulum = Some(KURULUM.into());
+        m.kurulum_boyut = Some(31_000_000);
+        let c = karar(m, "2.2.0").unwrap();
+        assert!(!c.kurulum);
+        assert_eq!(c.exe, TEK);
     }
 
     #[test]
@@ -760,6 +868,7 @@ mod tests {
         let mut m = manifest("9.0.0", TEK);
         m.kurulum = Some("https://baska-yer.example/Mozaik-Kurulum.exe".into());
         m.kurulum_boyut = Some(1);
+        m.kurulum_sha256 = Some("ab".repeat(32));
         let c = karar(m, "2.2.0").unwrap();
         assert!(!c.kurulum);
         assert_eq!(c.exe, TEK);
@@ -818,6 +927,52 @@ mod tests {
     }
 
     #[test]
+    fn a_new_version_without_a_digest_is_not_offered_for_download() {
+        let mut m = manifest("9.0.0", &format!("{}latest/download/Mozaik.exe", RELEASE_KOKLERI[0]));
+        m.sha256 = None;
+        let e = karar(m, "2.0.2").unwrap_err();
+        assert!(e.contains(&releases_sayfasi()), "adres yazmıyor: {e}");
+    }
+
+    #[test]
+    fn a_manifest_from_before_the_digest_still_reads_and_says_up_to_date() {
+        // Every surum.json published up to 2.2.0 has four fields.
+        let m: Manifest = serde_json::from_str(
+            r#"{"version":"2.2.0","date":"2026-09-26","exe":"https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe","boyut":5}"#,
+        )
+        .unwrap();
+        assert!(m.sha256.is_none());
+        assert!(!karar(m, "2.2.0").unwrap().yeni_var);
+    }
+
+    #[test]
+    fn a_test_root_is_only_ever_loopback_and_a_directory() {
+        assert!(yerel_kok_mu(b"http://127.0.0.1:8765/"));
+        for kotu in [
+            "",
+            "/",
+            "http://127.0.0.1:8765",
+            "http://127.0.0.1:/x",
+            "http://127.0.0.1:/",
+            "https://github.com/",
+            "http://127.0.0.1.example.com:80/",
+            "http://localhost:8765/",
+        ] {
+            assert!(!yerel_kok_mu(kotu.as_bytes()), "kabul edildi: {kotu}");
+        }
+    }
+
+    #[test]
+    fn a_build_without_the_test_root_fetches_only_from_our_releases() {
+        // `cargo test` runs without MOZAIK_TEST_GUNCELLEME_KOKU, as surum.yml
+        // builds the released exe; a loopback server is then not ours.
+        assert!(TEST_KOKU.is_none());
+        assert_eq!(kokler(), RELEASE_KOKLERI.to_vec());
+        assert_eq!(manifest_url(), MANIFEST_URL);
+        assert!(safe_url("http://127.0.0.1:8765/Mozaik.exe").is_err());
+    }
+
+    #[test]
     fn an_up_to_date_copy_is_told_so_whatever_the_address_says() {
         // THE BUG, as my father met it: the repository was renamed, the
         // manifest started carrying the new name, and a copy that had nothing
@@ -852,12 +1007,27 @@ mod tests {
 
     #[test]
     fn a_download_has_to_be_a_windows_program_of_the_promised_size() {
-        assert!(verify(b"MZ\x90\x00", 4).is_ok());
-        assert!(verify(b"", 0).is_err());
+        let ok = b"MZ\x90\x00";
+        assert!(verify(ok, 4, &ozet(ok)).is_ok());
+        assert!(verify(b"", 0, &ozet(b"")).is_err());
         // A captive portal's HTML page: the realistic failure.
-        assert!(verify(b"<!doctype html>", 15).is_err());
+        assert!(verify(b"<!doctype html>", 15, &ozet(b"<!doctype html>")).is_err());
         // Truncated: right shape, wrong length.
-        assert!(verify(b"MZ", 4).is_err());
+        assert!(verify(b"MZ", 4, &ozet(b"MZ")).is_err());
+    }
+
+    #[test]
+    fn a_download_has_to_be_the_published_file() {
+        let ok = b"MZ\x90\x00";
+        // Same size, same shape, another file.
+        assert!(verify(b"MZ\x90\x01", 4, &ozet(ok)).is_err());
+        // The digest is compared as sha256sum writes it, in either case.
+        assert!(verify(ok, 4, &ozet(ok).to_uppercase()).is_ok());
+        // Known value: SHA-256 of "abc".
+        assert_eq!(
+            ozet(b"abc"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
     }
 
     #[test]

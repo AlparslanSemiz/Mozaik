@@ -26,6 +26,8 @@ import surumYml from '../.github/workflows/surum.yml?raw';
 import changelogMd from '../CHANGELOG.md?raw';
 import surumNotu from '../.github/surum-notu.md?raw';
 import yayinlaMjs from '../scripts/yayinla.mjs?raw';
+import lockText from '../package-lock.json?raw';
+import { kilitSurumunuYaz } from '../scripts/kilit-surumu.mjs';
 import { SITE_ADRESI } from './platform/update';
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
@@ -238,5 +240,52 @@ describe('site adresi — dışarıda yazılı her kopya SITE_ADRESI', () => {
     const adresler = metin.match(SAYFA) ?? [];
     expect(adresler.length, `${ad} site adresini hiç yazmıyor`).toBeGreaterThan(0);
     for (const adres of adresler) expect(adres, ad).toBe(SITE_ADRESI);
+  });
+});
+
+// TODO B7.32 (2026-10-23). `npm run yayinla` wrote package.json and Cargo.toml
+// but not package-lock.json, whose root carries the version twice. 2.2.0 left
+// it at 2.1.1; the next `npm install` rewrote it and dirtied the tree, and the
+// release script's clean-tree gate then stopped the release after that.
+describe('package-lock.json — kökün sürümü package.json ile aynı', () => {
+  const lock = JSON.parse(lockText) as {
+    version: string;
+    packages: Record<string, { version?: string }>;
+  };
+
+  it('kilit dosyasının iki kök sürümü package.json’daki sürüm', () => {
+    expect(lock.version).toBe(pkg.version);
+    expect(lock.packages['']?.version).toBe(pkg.version);
+  });
+
+  it('yayinla kilit dosyasını yazıyor ve sürüm commit’ine katıyor', () => {
+    // Worked out before the first write, so a refusal leaves the tree clean.
+    const hesap = yayinlaMjs.indexOf('kilitSurumunuYaz(kilitEski');
+    expect(hesap).toBeGreaterThan(-1);
+    expect(hesap).toBeLessThan(yayinlaMjs.indexOf('if (onceki === surum) {'));
+    expect(yayinlaMjs.match(/yazDegistiyse\(kilitYol/g)).toHaveLength(2);
+    const adds = [...yayinlaMjs.matchAll(/git\('add', ([^)]*)\)/g)].map((m) => m[1] ?? '');
+    expect(adds.length).toBeGreaterThan(0);
+    for (const add of adds) expect(add, add).toContain("'package-lock.json'");
+  });
+
+  it('yalnız iki kök sürüm satırı değişiyor', () => {
+    const yeni = kilitSurumunuYaz(lockText, '9.9.9');
+    const once = lockText.split('\n');
+    const sonra = yeni.split('\n');
+    expect(sonra).toHaveLength(once.length);
+    const farkli = once.flatMap((satir, i) => (satir === sonra[i] ? [] : [sonra[i]]));
+    expect(farkli).toEqual(['  "version": "9.9.9",', '      "version": "9.9.9",']);
+    const j = JSON.parse(yeni) as typeof lock;
+    expect([j.version, j.packages['']?.version]).toEqual(['9.9.9', '9.9.9']);
+  });
+
+  it('zaten o sürümdeyse metin aynen dönüyor', () => {
+    expect(kilitSurumunuYaz(lockText, pkg.version)).toBe(lockText);
+  });
+
+  it('npm’in biçiminde olmayan bir kilit dosyasını yeniden biçimlemiyor, duruyor', () => {
+    const tek = JSON.stringify(JSON.parse(lockText));
+    expect(() => kilitSurumunuYaz(tek, '9.9.9')).toThrow(/biçim/);
   });
 });

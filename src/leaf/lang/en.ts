@@ -82,6 +82,14 @@ const EN: Sozluk = {
   "Bu dosya bütün planları içeriyor": "This file holds every plan",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "This file was written by a newer version",
+  "Okunamayan plan açılmadı: {adlar}.":
+    "A plan that could not be read was not opened: {adlar}.",
+  "· okunamadı": "· unreadable",
+  "Kayıtlı metni okunamadı; açılmıyor, silinmedi.":
+    "Its saved text could not be read; it is not opened and was not deleted.",
+  "Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.":
+    "Its saved text could not be read; deleting the plan deletes that text too. This cannot be undone.",
+  "Bu taslak okunamadı": "This draft could not be read",
   "Bu dosya okunamadı": "This file could not be read",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     'It replaces every plan on this computer, not a single one. Use the "Open all from file" button in Settings → Plans and backup.',
@@ -603,6 +611,14 @@ const EN: Sozluk = {
     "Not one plan in the file could be read; nothing has changed.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:plan|plans} opened, {yazilamayan} could not be written. Storage may be full. Keep the file.",
+  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
+    "{yeni} {yeni:plan|plans} in the file {yeni:was|were} written by a newer version of the program and will not be opened. Update the program.",
+  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
+    "{yeni} {yeni:plan was|plans were} written by a newer version of the program and not opened. Update the program.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:plan|plans} in the file {eksik:is|are} incomplete or broken and will not be opened.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:plan|plans} opened; {eksik} {eksik:was|were} incomplete or broken and not opened.",
   "{acilan} plan açıldı.": "{acilan} {acilan:plan|plans} opened.",
   "Bütün planlar tek dosyada": "Every plan in one file",
   "Tümünü dosyaya kaydet ({n} plan)": "Save all to file ({n} {n:plan|plans})",
@@ -850,8 +866,8 @@ const EN: Sozluk = {
   "İkinci branş": "Second subject",
   "İkinci branş yok": "No second subject",
   "Öğretmenleri yapıştır": "Paste teachers",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Full name · Short form · Subject · Gender · Second subject",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Full name · Short form · Subject · Gender · Second subject · E-mail",
   "Bu aramaya uyan öğretmen yok.": "No teacher matches this search.",
   "2. branş": "2nd subject",
   "Art arda en fazla kaç saat": "At most how many hours in a row",
@@ -935,6 +951,10 @@ const EN: Sozluk = {
     "{bir} and {iki} are both on {gun}; they must not share a day.",
   "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
     "When two lessons that must not share a day are on the same day, the **Not on the same day** row on the lesson's sheet shows them.",
+  "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
+    "{bir} and {iki} are both pinned on {gun}; they must not share a day, so no way can be found until one of them moves.",
+  "İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "If both are **pinned**, **Fill automatically** cannot look for suggestions; unpin one or move it to another day.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} may teach at most {sinir} hours on {gun}; this would make {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -1700,6 +1720,38 @@ const EN: Sozluk = {
     "What is inside: every plan's rooms, teachers, classes, lessons, placed timetable, name and draft mark. Preferences belonging to this computer, such as the theme, and the session backups are not included.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Anything unticked is left off the paper.",
+  "E-posta":
+    "E-mail",
+  "{kim} e-postası":
+    "{kim}'s e-mail",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "One e-mail address goes here: name@example.com",
+  "E-postayla gönder":
+    "Send by e-mail",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "The teacher's week opens as a new message in your mail program. You press Send.",
+  "adres yok":
+    "no address",
+  "adres hatalı":
+    "address is wrong",
+  "programı boş":
+    "timetable is empty",
+  "e-postaya sığmıyor":
+    "too long for an e-mail",
+  "{kim} için e-postayı aç":
+    "Open the e-mail for {kim}",
+  "E-postada aç":
+    "Open in e-mail",
+  "Bu bilgisayarda seçili bir e-posta programı yok.":
+    "No mail program is chosen on this computer.",
+  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
+    "If no mail program opened, none is chosen on this computer.",
+  "E-posta programı açılamadı.":
+    "The mail program could not be opened.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Weekly timetable",
+  "{n}. ders":
+    "Lesson {n}",
 };
 
 registerSozluk("en", EN);

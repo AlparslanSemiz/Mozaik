@@ -82,6 +82,14 @@ const FR: Sozluk = {
   "Bu dosya bütün planları içeriyor": "Ce fichier contient tous les plans",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "Ce fichier a été écrit par une version plus récente",
+  "Okunamayan plan açılmadı: {adlar}.":
+    "Un plan illisible n’a pas été ouvert : {adlar}.",
+  "· okunamadı": "· illisible",
+  "Kayıtlı metni okunamadı; açılmıyor, silinmedi.":
+    "Son texte enregistré n’a pas pu être lu ; il n’est pas ouvert et n’a pas été supprimé.",
+  "Bu planın kayıtlı metni okunamadı; silinirse o metin de gider. Bu işlem geri alınamaz.":
+    "Le texte enregistré de ce plan n’a pas pu être lu ; le supprimer supprime aussi ce texte. Cette action est irréversible.",
+  "Bu taslak okunamadı": "Ce brouillon n’a pas pu être lu",
   "Bu dosya okunamadı": "Ce fichier n’a pas pu être lu",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     "Il remplace tous les plans de cet ordinateur, pas un seul. Utilisez « Tout ouvrir depuis un fichier » dans Réglages → Plans et sauvegarde.",
@@ -611,6 +619,14 @@ const FR: Sozluk = {
     "Aucun plan du fichier n’a pu être lu ; rien n’a changé.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:plan ouvert|plans ouverts}, {yazilamayan} n’ont pas pu être écrits. Le stockage est peut-être plein. Conservez le fichier.",
+  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
+    "{yeni} {yeni:plan du fichier a été écrit|plans du fichier ont été écrits} avec une version plus récente du programme et ne {yeni:sera pas ouvert|seront pas ouverts}. Mettez le programme à jour.",
+  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
+    "{yeni} {yeni:plan a été écrit|plans ont été écrits} avec une version plus récente du programme et n’{yeni:a|ont} pas été {yeni:ouvert|ouverts}. Mettez le programme à jour.",
+  "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
+    "{eksik} {eksik:plan du fichier est incomplet ou endommagé et ne sera pas ouvert|plans du fichier sont incomplets ou endommagés et ne seront pas ouverts}.",
+  "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
+    "{acilan} {acilan:plan ouvert|plans ouverts} ; {eksik} {eksik:était incomplet ou endommagé et n’a pas été ouvert|étaient incomplets ou endommagés et n’ont pas été ouverts}.",
   "{acilan} plan açıldı.": "{acilan} {acilan:plan ouvert|plans ouverts}.",
   "Bütün planlar tek dosyada": "Tous les plans dans un fichier",
   "Tümünü dosyaya kaydet ({n} plan)":
@@ -865,8 +881,8 @@ const FR: Sozluk = {
   "İkinci branş": "Deuxième matière",
   "İkinci branş yok": "Pas de deuxième matière",
   "Öğretmenleri yapıştır": "Coller des enseignants",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş":
-    "Nom et prénom · Abréviation · Matière · Genre · Deuxième matière",
+  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Nom et prénom · Abréviation · Matière · Genre · Deuxième matière · E-mail",
   "Bu aramaya uyan öğretmen yok.":
     "Aucun enseignant ne correspond à cette recherche.",
   "2. branş": "2e matière",
@@ -954,6 +970,10 @@ const FR: Sozluk = {
     "{bir} et {iki} ont tous deux lieu le {gun} ; ils ne doivent pas tomber le même jour.",
   "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
     "Quand deux cours qui ne doivent pas tomber le même jour sont le même jour, la ligne **Pas le même jour** de la fiche du cours les montre.",
+  "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
+    "{bir} et {iki} sont épinglés le {gun} ; ils ne doivent pas tomber le même jour, donc aucune solution n’existe tant que l’un ne bouge pas.",
+  "İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Si les deux sont **épinglés**, **Placer automatiquement** ne peut pas chercher de suggestions ; détachez-en un ou déplacez-le à un autre jour.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} peut faire au plus {sinir} heures le {gun} ; ici cela ferait {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -1725,6 +1745,38 @@ const FR: Sozluk = {
     "Contenu : salles, enseignants, classes, cours, emploi du temps placé, nom et marque de brouillon de chaque plan. Les préférences propres à cet ordinateur, comme le thème, et les sauvegardes de session n’y sont pas.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Ce qui est décoché ne va pas sur le papier.",
+  "E-posta":
+    "E-mail",
+  "{kim} e-postası":
+    "E-mail de {kim}",
+  "Tek bir e-posta adresi yazılır: ad@ornek.com":
+    "Une seule adresse e-mail ici : nom@exemple.fr",
+  "E-postayla gönder":
+    "Envoyer par e-mail",
+  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "La semaine de l'enseignant s'ouvre comme un nouveau message dans votre messagerie. C'est vous qui cliquez sur Envoyer.",
+  "adres yok":
+    "pas d'adresse",
+  "adres hatalı":
+    "adresse erronée",
+  "programı boş":
+    "emploi du temps vide",
+  "e-postaya sığmıyor":
+    "trop long pour un e-mail",
+  "{kim} için e-postayı aç":
+    "Ouvrir l'e-mail pour {kim}",
+  "E-postada aç":
+    "Ouvrir dans la messagerie",
+  "Bu bilgisayarda seçili bir e-posta programı yok.":
+    "Aucune messagerie n'est choisie sur cet ordinateur.",
+  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
+    "Si aucune messagerie ne s'est ouverte, aucune n'est choisie sur cet ordinateur.",
+  "E-posta programı açılamadı.":
+    "La messagerie n'a pas pu s'ouvrir.",
+  "{ad} · Haftalık ders programı":
+    "{ad} · Emploi du temps de la semaine",
+  "{n}. ders":
+    "Cours {n}",
 };
 
 registerSozluk("fr", FR);
