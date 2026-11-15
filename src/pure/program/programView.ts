@@ -724,18 +724,25 @@ export interface BarRun {
 /**
  * The single line under the toolbar. Returns the text and the class that
  * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
+ *
+ * `text` is what the line ANNOUNCES (it sits in a live region) and `counter`
+ * is what it only shows. They are apart because the run's counter changes
+ * many times a second: in the live region it was a screen reader reading
+ * "12/40 kart" over itself until the run ended. Now the start is said once,
+ * the result once, and the counter ticks beside them in silence.
  */
 export function describeBar(
   solver: BarRun,
   view: View,
   t: Translate,
   current: { applied: boolean; result: boolean },
-): { text: string; level: string } {
+): { text: string; level: string; counter?: string } {
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
-      text:
-        t('Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn', {
+      text: t('Otomatik diziliyor…'),
+      counter:
+        t('{yerlesen}/{toplam} kart · {sure} sn', {
           yerlesen: p.placedBlocks,
           toplam: p.totalBlocks,
           sure: seconds(p.elapsedMs),

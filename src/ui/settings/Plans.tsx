@@ -136,7 +136,9 @@ export default function Plans({ state, plans }: Props) {
                 its own box. */}
             <th>{t('İçerik')}</th>
             <th className="num">{t('Yerleşmiş saat')}</th>
-            <th className="w-col-xl" />
+            <th className="w-col-xl">
+              <span className="visually-hidden">{t('İşlemler')}</span>
+            </th>
           </tr>
         </thead>
         <tbody>

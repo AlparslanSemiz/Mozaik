@@ -45,6 +45,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Kullanım: öneri paneli tek yol + "Başka yollar"; koyu temada Çıktı okunur; 146 etiketsiz kutu;
   sınıfta sahte "Sıkışık" yok (SD2); ders/öğretmen silme ve "Programı boşalt" sormuyor, "Geri al"
   bildirimi (`undo-if`, SD1).
+- Dalda, birleşmedi: `erisim/geri-al` (`metin/tek-ad`'ın üstünde) SD1'in kalanını yapıyor: sınıf,
+  derslik, branş, seçenek silme ve `Baştan diz` sormuyor, `Her şeyi sil` tek soru; bildirim 10 s
+  ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -56,16 +59,20 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
 2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz.
    Harita uygulandı, `metin/tek-ad` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO SD3).
+   `kullanim/kontrol` onun üstünde: Kontrol'ün `Göster`i ve SD4 (tarihli girdi), birleşmedi;
+   ham boyut eşiğini 1 245 000 B'a çıkarıyor.
    Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
 
-**Açık teknik işler (TODO):** `Baştan diz` hâlâ soruyor (SD1'in kalanı); capability daraltma ve
+**Açık teknik işler (TODO):** capability daraltma ve
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
-weeklyHours) eski formülle ve ikinci bakışa girmiyor.
+weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
+diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
+bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 
 **Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
@@ -125,6 +132,187 @@ izgara, program, musaitlik, hareket, kayma, temel, palet, renk, dil, metin ve ye
 
 ---
 
+
+---
+
+## 2026-11-15 · Kontrol tıklanır oldu (`kullanim/kontrol`, TODO SD4)
+
+`metin/tek-ad`'ın üstünde (PR #44'ün adları). Üç ayrı denetim aynı şeyi buldu: Kontrol
+neyin yanlış olduğunu söylüyor, tıklanacak bir şey ve ne yapılacağını vermiyordu.
+
+- **Kapalı saatte ders** ders başına tek satır (`groupStranded`, `feasibility/stuck.ts`):
+  dersin adı, saatleri ve kimin kapattığı ("Ö18 Salı 10, 11 saatlerinde müsait değil"),
+  `Göster` ve `Müsaitlik'te aç`. İki saatlik bir ders iki aynı satırdı ve başlık, uyarı
+  kutusu ve çip saat sayıp "2 ders" diyordu; `Report.stranded` artık ders sayıyor.
+  `ClosedConflict.closedBy` kapatanı taşıyor.
+- **Göster** (`ui/program/reveal.ts`): sekmeyi Program'a alır, Program Activity'de canlı
+  durduğu için kart DOM'da hazır, görünür olunca hücreyi ortaya kaydırır, kartı odaklar ve
+  `data-reveal` ile 2,4 s işaretler. Izgara bileşenlerine dokunulmadı (koordinasyon:
+  Grid/GridRow/LessonPool başka dalda); hücre `data-row/day/hour/span`, havuz kartı
+  `data-lesson` ile bulunuyor. Kart gizli bir satırdaysa bir bildirim söylüyor.
+  `Müsaitlik'te aç` yalnız `setKind`/`setChosen`/`setTab`; Müsaitlik'in işaretlemesi
+  değişmedi.
+- **Kural ihlali**: `Violation.at` (kimin, hangi gün), `violationCell` o günün ilk kartı.
+- **Yerleşemeyenler** bağlayan sebebe göre gruplu (`stuckReason`): önce aşan kapasite
+  satırının kendi cümlesi, sonra "sınıfın açık saatlerinin hepsi dolu", sonra sınıfın boş
+  saatlerinin her birini bu dersten neyin tuttuğu sayılarak (öğretmen müsait değil, başka
+  sınıfta, derslik dolu, kural, kart sığmıyor). Gün ve saat yok, ki aynı sebep gruplansın.
+  `holeReason` (çözücünün cümlesi) değişmedi. Dersler havuzdaki kartı işaretleyen düğmeler.
+- **Durum çipi** 1500 pikselin altında "3 sorun", "2 uyarı" ya da "45 saat havuzda" diyor
+  (`Health.short`, sorun sayısı şeritteki "Sorunlar (N)" ile aynı); yalnız nokta kalan hap
+  aç kapa düğmesi gibi okunuyordu.
+
+İnceleme (taze bağlamlı alt ajan): veri riski yok, hook sırası doğru, çeviri yuvaları tutuyor.
+Düzeltilen: çipin kısa sayısı şeritten farklıydı (kapasite satırlarını da sayıyordu); "başka
+sınıfta" öğretmeni adlandırmıyordu ve iki öğretmenin dersleri tek cümlede toplanabiliyordu;
+`Müsaitlik'te aç` bir kural bağlıyorken de öneriliyordu; iki hızlı `Göster` iki işaret ve geç
+gelen bir "bulunamadı" bildirimi bırakabiliyordu; `violationCell` her render'da koşuyordu.
+Bırakılan: `Check.tsx` dizini iki kez kuruyor (perf dalının işi, ona dokunulmadı);
+İspanyolcada "ders" ile "sınıf" ikisi de "clase" (SD3'ün sözlüğü, ayrı karar).
+- **Bulgu 4 için karar:** öğretmen silinince "4 sınıf İngilizcesiz kaldı" ne bir hata ne bir
+  Danışman notu olabiliyor: bir sınıfta bir dersin olmaması genelde hata değil, ve silinen
+  tek İngilizce öğretmeniyse "kardeş sınıflarda olan ders" karşılaştırması da hiçbir şey
+  bulmazdı. Kaybın bilindiği tek an silme bildirimi; o artık sınıfları ve dersi adıyla
+  sayıyor ("MÇ silindi. 2 sınıfın Matematik dersi de gitti: 510, 511. Programdan 2 saat
+  kalktı.") ve "Geri al" yanında. Çip "Sorun yok" demeye devam ediyor, çünkü program
+  gerçekten tutarlı.
+
+Boyut: ham `dist/index.html` 1 228 580 → 1 242 360 B (dört dildeki yeni cümleler ve
+`stuck.ts`), eşik 1 230 000 B'tı. Cümleler kısaltıldıktan sonra (1,7 kB) eşik 1 245 000 B'a
+çıktı, önce ölçüldü: `file://` açılışı, CPU 4× yavaş, 9 koşu medyanı, kirli: taban 457 ms,
+bu dal 469 ms (`scratch/kontrol/acilis.mjs`). Brotli 289,6 kB, eşik değişmedi.
+
+Ekran görüntüleri (1920×1080, tam dolu kurs, bir öğretmenin iki saati sonradan kapatılmış
+ve bir öğretmen haftanın çoğunda kapalı): önce `scratch/kontrol/once-kontrol.png`, sonra
+`sonra-kontrol.png`, `sonra-kontrol-alt.png`, `sonra-goster.png`, `sonra-havuz.png`,
+`sonra-ust-1280.png`.
+
+Koşulan: `tsc` (uygulama ve e2e) 0, `eslint .` 0, `npm run hizli` yeşil (1571 geçti, 4
+atlandı; yük altındaki bir koşuda `linuxKur`, `App.test` ve `relax.test` zaman aşımına
+düştü, tek başına ve sonraki koşuda yeşil), `npx vite build`, `npm run boyut` 0, Playwright
+`--workers=2`: `kontrol` 26/26, `zebra` + `musaitlik` + `dil` + `kontrol` 117/117, `program`
++ `temel` 112/112. Koşulmayan: bütün E2E süiti, Stryker. Kilit yok (`flock` bu Mac'te
+yok), ölçümler kirli.
+
+---
+
+## 2026-11-15 · Ekran okuyucu ve diyalog odağı (`erisim/anlam`, TODO §8e, SD6, KS27)
+
+`metin/tek-ad`'ın üstünde (PR #44'ün adları). Denetimin `aria` ve `klavye` bulguları.
+
+- **Diyalog odağı.** Radix'in modal diyaloğu odağı `Dialog.Trigger`'a verir, ve programın
+  hiçbir diyaloğunun Trigger'ı yok: palet, kısayollar, `Dialogs.tsx`'in soruları, bilgi
+  sayfası ve ders penceresi kapanınca odak `body`'ye düşüyordu. `useReturnFocus`
+  (`src/ui/common/returnFocus.ts`) açılış anında odaktakini tutar (bir menü öğesiyse menünün
+  açıldığı kartı, `body`'yse son odaklananı), kapanınca ona döner, açan gitmişse `<main>`'e
+  (`tabIndex=-1`); kapanış odağı bilerek bir yere koyduysa dokunmaz.
+- **Adlar.** Okul'un öğretmen, sınıf ve derslik satırlarındaki ad ve kısa ad kutuları
+  (`{ad} adı`, `{ad} kısa adı`), yeni sınıfın derslik seçicisi, Kurallar'ın sayı kutuları
+  (`aria-labelledby` kuralın adına). `kurulum.spec`'in `Kısa ad` sorgusu `exact` (tuzak 49).
+- **Otomatik diz.** Canlı bölge satırın yalnız ilk parçası: başlarken "Otomatik diziliyor…",
+  bitince sonuç; sayaç (`describeBar`'ın yeni `counter`'ı) görünür ama bölgenin dışında,
+  `aria-busy` sayacın kendisinde (satıra konunca içindeki canlı bölgeyi susturuyordu,
+  inceleme bulgusu).
+- **Taslak ve bölgeler.** Program'da ızgara ve havuz için görünmez h2, havuzun 25 `section`'ı
+  `div role="group"`, kâğıdın başlığı h2, boş Program/Kontrol/Çıktı'nın başlığı. Şerit
+  "Araç şeridi" adlı bir `<section>`'da (`display: contents`). İlk Tab durağı "İçeriğe geç".
+  Kaydırılan kutular (havuz, Özet'in tabloları, Hakkında'nın yan paneli) Tab durağı ve adlı.
+  Boş `<th>`'ler görünmez bir adla. Bildirim kapatma, sağlık çipi ve `.inspect` uygulamanın
+  halkasıyla.
+- **Tarama.** `erisim.spec.ts` artık Okul'un dört adımını ve boş Program/Kontrol/Çıktı'yı da
+  tarıyor (on bir ekrandan on sekize); yeni "91. Odak" bölümü odağın dönüşünü ölçüyor.
+
+axe düğümleri, önce → sonra (aynı genişletilmiş taramayla, örnek okul): Okul · Derslikler
+11 → 0, Branşlar 3 → 0, Öğretmenler 54 → 0, Sınıflar 24 → 0, Dersler 3 → 0, Müsaitlik 3 → 2,
+Program 9 → 6, Kontrol 1 → 0, Çıktı 2 → 0, Ayarlar'ın beş bölümü 9 → 0, boş proje ve boş
+üç sekme 4 → 0; toplam 128 → 8. Kalan 8'i `empty-table-header`: `Grid.tsx`'in köşesi ve gün
+ayraçları (6) ve Müsaitlik'in iki köşesi (2), o dosyalar başka dalların.
+
+Boyut: ham `dist/index.html` 1 228 582 → 1 233 459 B (+4,9 kB: çeviriler, görünmez başlıklar,
+`returnFocus`), eşik 1 230 000 → 1 235 000 B. `file://` açılışı, CPU 4× yavaş, 7 koşu
+medyanı: `metin/tek-ad` 510 ms, bu dal 534 ms (kirli: yük ortalaması 32–60, başka ajanlar
+koşuyordu; fark gürültünün içinde).
+
+Koşulan: `npx tsc --noEmit` ve `-p e2e` 0, `npx eslint src` 0, prettier dokunulan dosyalarda
+temiz, `npx vite build` 0, `npm run boyut` yeni eşikle yeşil, E2E `erisim palet temel ayarlar
+liste kontrol yazdir kabuk kurulum panel` (`--workers=2`) 266/266 yeşil. `npm run hizli`
+yüklü makinede 7 test 5 s zaman aşımına düştü (`linuxKur`, `emptyStart`, `App`, `sentences`,
+`programScreen`'in tam dolu kurs testi); aynı beş dosya `--testTimeout=60000` ile 45/45 yeşil,
+yani zaman aşımı yükün. Koşulmayan: tam E2E süiti, Stryker, `kontrol`.
+
+Açık: `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları (§8e), şeritten içeriğe dönüş
+kısayolu (Ö47'nin F6'sı), havuz listesinin Tab durağının sürüklemeyle etkileşimi elle
+ölçülmedi, ve şeridin bölgesi `display: contents` taşıyor: eski WebKit (Safari 17 öncesi, belki
+exe'nin WebKitGTK'sı) böyle bir öğenin bölgesini düşürür, Chromium ve WebView2 düşürmüyor.
+
+İnceleme (taze bağlamlı alt ajan): `aria-busy` satırdan sayaca alındı; art arda iki soruda
+açan kayboluyordu (ikinci açılış `body`'den, ilk sorunun düğmesi gitmiş), artık önceki açan
+kalıyor; havuz listesinin adı aside'ınkinin aynısıydı, artık görünmez "Havuz" başlığına
+bağlı; açan `<main>` olunca kaydırmadan odaklanıyor; TESTPLAN'daki ekran sayısı 18. Kabul
+edilip yalnız not edilen: `display: contents` (yukarıda) ve açılan anı yakalamanın Radix
+Portal'ın bir yerleşim efekti sonra çizmesine dayanması (yorumda).
+
+---
+
+## 2026-11-15 · Geri al ve bildirim, klavye ve okuma denetiminin bulguları (`erisim/geri-al`, TODO SD1)
+
+`metin/tek-ad`'ın üstünde (o önce birleşecek). Denetimin dokuz bulgusu (sondaları scratch
+`denetim/mesaj/` ve `denetim/klavye/`):
+
+- Bildirimin süresi fare üstündeyken ve odak içindeyken duruyor (odaktaki "Geri al" 8,5 s'de
+  kayboluyordu); eylemli bildirim 10 s (SD1'in açık bıraktığı 8 ile 10 arasında 10).
+- `Sil`'den sonra odak `<body>`'ye düşüyordu ve bildirimin düğmesi 301 Tab uzaktaydı. Odak artık
+  silinmeden önce sonraki satırın `Sil`'ine (son satırda öncekine, liste boşalınca ekleme
+  kutusuna) geçiyor (`ui/common/deleteFocus.ts`); bildirim ekran okuyucuya "Geri almak için
+  Ctrl+Z" diyor, Ctrl+Z boş bir tek satırlık kutuda da çalışıyor. Program ızgarasının silmesine
+  dokunulmadı.
+- Eski bildirimin "Geri al"ı hiçbir şey yapmadan kapanıyordu (`undo-if`). Yalnız en yeni eylemli
+  bildirim düğme taşıyor; o da geri alamazsa (arada başka değişiklik) bunu söylüyor.
+- Seçenek değiştirmek geri al geçmişini siliyordu (`program-change` `past: []`). Geçmiş bütün
+  durumları tuttuğu için güvenli: seçenek eklemek, adlandırmak, silmek sıradan bir adım,
+  seçeneğe geçmek adım değil (`view`, yalnız bakmak 30 adımı doldurmasın ve ileri alı silmesin
+  diye), geri almak değişikliğin yapıldığı seçeneği geri getiriyor (`undo.test.ts`). Plan
+  değiştirmek ve `Dosyadan aç` hâlâ siliyor.
+- Seçenek silme, sınıf, derslik ve kullanılmayan branş silme ve `Baştan diz` sormuyor; bildirim
+  ne gittiğini sayıyor (`deletionNotice` dört türü de söylüyor, `deletionQuestion` kalktı).
+  Derslik cümlesi "derslik çakışması artık kontrol edilmeyecek" yerine "Bu sınıflar artık aynı
+  saate konabilir."; seçenek cümlesi "0 sabitleme" demiyor. `Baştan diz`'in sonucu zaten tek adım,
+  bildirim çözücü bitince (`useSolver` `start`'ın üçüncü argümanı), yalnız sonuç gerçekten
+  yerine konduysa: aynı haftaya varan koşu hiçbir şey değiştirmiyor ve bildirim vermiyor,
+  durdurulan koşu da vermiyor (sonuç çubuğu söylüyor).
+- `Her şeyi sil` tek soru ("Son kez soruyorum" gitti) ve geri alınabilen bir adım
+  (`replaceState`: `thawPlan` + sıradan değişiklik); dolu planın yerine örnek okul hep geri
+  alınabiliyordu, sorusu "Geri alınamaz" diyordu, artık bildirim "Geri al" taşıyor. Okunamayan
+  (donmuş) bir planda `Her şeyi sil` eskisi gibi yükleme kalıyor: geri alma boş yer tutucuyu
+  çözülmüş hâlde geri getirir ve otomatik kayıt onu okunamayan metnin üstüne yazardı.
+- "Geri al"a basınca odak bildirimden önce olduğu yere dönüyor.
+- Ctrl+Z ve bildirimin düğmesi ekran okuyucuya "Geri alındı: …" diyor; değişikliğin adı
+  `undo.ts`'te durumun kendisine bağlı bir `WeakMap`'te (`undoLabel`), adı olmayanda "Geri alındı."
+
+İnceleme (taze bağlamlı alt ajan) yedi bulgu verdi, altısı ayrı commit'te düzeldi: donmuş
+planda `Her şeyi sil` geri alınabilir olursa okunamayan metnin üstüne boş yer tutucu yazılırdı
+(veri kaybı sınıfı, düzeltildi: orada yükleme kalıyor); kaldırılan bildirim fareyi "üstünde"
+bırakıp süreyi sonsuza durduruyordu; `Baştan diz` bildirimi sonuç yerine konmasa da çıkıyordu;
+Ctrl+Z her boş kutuda planı geri alıyordu (artık yalnız ekleme kutusunda); `Geri al`dan sonra
+odak kayboluyordu; Branşlar'da boş listenin ekleme kutusu yanlış panelde aranabiliyordu.
+Yedincisi (seçeneğe bakmak geçmişi dolduruyor) de alındı: `view`.
+
+Koşulan: `npx tsc --noEmit -p .` ve `-p e2e/tsconfig.json` 0, `npx eslint src` 0, prettier,
+`npx vite build` 1 228,97 kB, `npm run boyut` sınırın 1,03 kB altında, Playwright
+(`--workers=2`) `liste`, `kurulum`, `ayarlar`, `otomatik`, `program`, `temel`, `serit`,
+`zebra`, `iki-kopya`, `musaitlik`, `yazdir` 402/402. `npm run hizli`: makinenin yükü 50–70
+iken yedi test süre aşımına düştü (`linuxKur`, `relax` küçük dünyalar, `App`, `sentences`,
+`programScreen`); `--testTimeout=120000` ile yeniden koşunca `App`, `sentences`,
+`programScreen` yeşil, `relax.test.ts`'in "derslik darboğazı" kendi 30 s sınırında hâlâ
+düşüyor ve bu dal `pure/relax`'a dokunmuyor; dokunulan birim testleri (`undo`, `entities`,
+`storeContract`, `i18n`) yeşil. Tıklama testi: `dist/index.html` `file://`, 1920×1080, örnek
+okul; derslik silme, fare üstünde 11 s, `Her şeyi sil` (scratch `geri-al/`, dört görüntü).
+Kilit yok (`flock` bu Mac'te yok), ölçümler kirli. Koşulmayan: tam süit, Stryker, exe.
+
+Kalan: Okul → Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol
+edilmez" diyor (bu işin dışında kaldı); aynı haftaya varan `Baştan diz` bir şey değiştirmiyor
+ve yalnız sonuç çubuğu konuşuyor; KS26.
+
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 
 Alp'in SD3 kararı (bir ad iki kavramı taşımaz) arayüzün bütün metnine uygulandı; harita
@@ -154,6 +342,67 @@ yeniden koşuldu), `--config playwright.site.config.ts` 24/24. Kırmızı kalan 
 yerde kırmızı, macOS'un üstte duran kaydırma çubuğu, bu dalın değil. Koşulmayan:
 `gercek-exe` ve `guncelleme-exe` (exe derlemesi ister; metinleri güncellendi), Stryker,
 `kontrol`. Kilit yok (`flock` bu Mac'te yok), ölçümler kirli.
+
+---
+
+## 2026-11-15 · Okunurluk turu (`erisim/gorsel`)
+
+Okunurluk denetiminin on bulgusu, yalnız `src/styles.css`, belgeler ve dokunduğu testler
+(metinlere ve `src/leaf/lang/*`'a dokunulmadı; başka bir dal adları değiştiriyor). Ölçüm betikleri
+`scratch/olc/` (`olc.js` kontrast ve ızgara, `nav.js` dar kutular, `forced.js` karşıtlık teması),
+`file://` derlemesi, örnek okul, `Otomatik diz` sonrası, iki temada. Önce → sonra:
+
+- Saat başlığı 12 px, iki saat arası 1,0 px ("09:0009:50") → 13 px, 4,25 px ve `--line` bir çizgi;
+  %100, %125 (1536) ve %200 (960) aynı. Rahat'ın haftası 2516 → 2946 px (saat sütunun tabanı,
+  tuzak 37), Ferah 3,5rem'e çıktı ki Rahat'tan geniş kalsın (2793 → 3378 px). Sığdır değişmedi (1919).
+- Kart 12/12 px, alt satır `--on-color-sub` en kötü 4,71 → 14/13 px (iki saatlik blokta 15), iki
+  satır `--on-color` en kötü 7,36. Satır kutusu 18 px'te tutuldu: satır 40,5 → 38 px değil, aynı.
+  Sığdır 12 px tabanında kaldı (sığdırma sözü), 0/374 kart kırpık, üç yoğunlukta.
+- Seçili sekme gradyanı: açık üst durak 4,51–4,56, koyu alt durak 3,76–3,89 → düz dolgu, açık en
+  kötü 7,75, koyu 7,19. Yorumdaki "5,63" durakların değil düz rengin sayısıydı, düzeltildi.
+- `forced-colors`: kart kenarsız, basılı düğme ve sekme ayırt edilmiyordu → kart 1 px `CanvasText`,
+  basılı/seçili `Highlight`/`HighlightText` (`forced-color-adjust: none`, yoksa arka plaka yazıyı
+  siliyordu), odak 3 px `Highlight`. Zebra'nın halkası dokunulmadı.
+- Kontrol kenarı: girdi 1,16, düğme 1,11 (koyu 1,2 ve 1,49) → `--border-strong`, açık en kötü 3,16
+  (masa zemininde), koyu 3,59.
+- Yer tutucu #757575: 4,21 / koyu 3,82 → `--muted`: 7,79 / 9,39.
+- Rozet, sağlık çipi, sebep çubuğu `ok` 4,84 → `--ok-ink` 7,47 (`warn` 7,63, `bad` 7,20; koyu
+  temada değişmedi, 8,78). `zebra.spec.ts`'in `.badge` istisnası kalktı; E1'de "Sil" kaldı.
+- Dar kutu: %100'de 1280 px'te sekme etiketi gizli, 1100'de şerit sözcüğü 0 px → etiket simgenin
+  altında 12 px, şerit sözcüğü 12 px; üst bar sığmazsa iki satır (1024 ve 960). Programın %150'si
+  1440 / 1024 px'te sayfa 366 / 169 px yana taşıyordu → 0. En dar kutularda (%100 960, %150 1280
+  ve 1024) şeritte 2 ile 6 uzun sözcük üç noktayla kısalıyor.
+- Hedefler: `.inspect` 15–19×16, `.toast-close` 19,5, onay kutuları 13, `.row-grip` 22,8, havuz
+  seçicisi 23 → hepsi en az 24 px; `.inspect`'in yüksekliği negatif kenar boşluğuyla, satır başı
+  kıpırdamadı. Kalan tek <24 öğe `.pool-split` (1920×11, sürükleme ayracı).
+- Kapalı saat çarpısı ızgarada kırmızı 25 px kalın → `--muted` 17 px 600; tarama durum taşıyor.
+  Müsaitlik'inki aynı kaldı (DECISIONS).
+
+Ekranda 12 px kalanlar DESIGN'da (Tipografi); `.hint` 13 px ve SD5 Alp'in kararı.
+
+**İnceleme** (taze bağlamlı alt ajan, `git diff main...HEAD`): düzeltilen — LAYOUT ve
+`kabuk.spec.ts` eşiği 1250 diyordu, doğrusu 1320 px'lik bar; panelin haftasındaki
+`.sheet-cell-bottom` hâlâ `--on-color-sub`'dı (artık `--on-color`); `.inspect`'in uzantısı bir
+üstteki yapışkan satır başına taşıyordu (artık yalnız aşağı, kendi ikinci satırına; isabet
+`elementFromPoint` ile ölçüldü); saat 13 px Müsaitlik'e de geçmişti (artık yalnız ızgarada);
+`forced-colors`'ta seçili sekmenin noktası ve gölgesi; bayat yorumlar (`styles.css`, `serit.spec.ts`,
+`exe-windows.yml`, DESIGN). Bırakılan — Sığdır'da `.inspect` 17-19 px genişlikte kalıyor (satır başı
+`min-width: 0` ile daralıyor, 24 px'lik genişlik ölçülen pencereyi bozar); Çıktı'nın kenar sütunu
+24 px'lik kutularla %150'de yeniden ölçülmedi; `forced-colors`, hedefler ve yer tutucu için süitte
+test yok (CLAUDE.md: düzen için yeni test yazılmaz).
+
+**Boyut.** Ham `dist/index.html` 1 229 155 → 1 230 657 B (+1,5 kB CSS), eşik 1 230 000'i 657 B
+aştı; brotli 287,49 kB (eşik 292). Eşik 1 232 000 B oldu. Önce `file://` açılışı, Chromium,
+CPU 4× yavaş, 1920×1080, 7 koşu `loadEventEnd` medyanı, iki tur (kirli, yük ortalaması ~40):
+`main` 248 / 232 ms, bu dal 234 / 230 ms, yani fark yok (`scratch/olc/acilis.js`).
+
+**Koşulan.** `tsc --noEmit -p .`, eslint, prettier (dokunulan e2e dosyaları), `npx vite build`,
+`npm run boyut` (eşik yükseltildikten sonra yeşil). `npm run hizli`: bu Mac'in yükünde (ortalama
+~40, başka ajanlar) 10 test 5 s'lik süreye takıldı; aynı beş dosya `--testTimeout=120000` ile
+74/74 yeşil, hiçbiri CSS okumuyor. E2E (`--workers=4`, `scripts/agir.sh` çalışmıyor, `flock` yok):
+renk, zebra, izgara, gorunum, kayma, ekran, erisim, temel, kabuk, serit — 223/225, sonra serit
+26/26; kalan `kayma.spec.ts:129` `main`'in derlemesinde de kırmızı (macOS'un kaydırma çubuğu yer
+kaplamıyor, testin kendi bekçisi).
 
 ## 2026-11-15 · Eski dallar birleşti (`eski/birlestirme`)
 

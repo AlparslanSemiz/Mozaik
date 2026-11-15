@@ -1,4 +1,4 @@
-// Automatic accessibility scan: axe-core over all seven screens.
+// Automatic accessibility scan: axe-core over every screen, step and section.
 //
 // WHAT THIS IS NOT. Colour contrast and colour separation are already measured
 // by hand in renk.spec.ts, computing the WCAG ratio and the CIE Lab ΔE, and
@@ -19,7 +19,7 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from './kapan';
-import { open, openSettings, openWithSample } from './helpers';
+import { open, openSettings, openSetup, openWithSample } from './helpers';
 
 /** Rules switched off, each with the reason it is off. */
 const KAPALI = [
@@ -28,38 +28,22 @@ const KAPALI = [
 ];
 
 /**
- * Known violations, by screen and rule. Counted on 2026-09-12 against the build
- * of `a81c79a` — the commit matters, because a number with no commit beside it
- * cannot be compared to anything later. A number here means "this many nodes,
- * already seen".
+ * Known violations, by screen and rule. First counted on 2026-09-12 against the
+ * build of `a81c79a`, recounted on 2026-11-15 on `erisim/anlam` once every Okul
+ * step and the empty Program, Kontrol and Çıktı were scanned too — the commit
+ * matters, because a number with no commit beside it cannot be compared to
+ * anything later. A number here means "this many nodes, already seen".
  *
  * Reading the list: an entry is not an excuse. It is a finding waiting for a
  * decision, and the decision goes in docs/TODO.md before the entry leaves.
+ *
+ * What is left is the empty corner and divider headers of two grids whose
+ * markup belongs to other work (TODO §8e): the Program grid (`Grid.tsx`, the
+ * corner and the five day bands' dividers) and Müsaitlik's two corners.
  */
 const BILINEN: Record<string, Record<string, number>> = {
-  // `region` is on every one of the eleven screens and it is ONE node every
-  // time, always `.ribbon`: the toolbar sits outside `<main>`, `<nav>` and
-  // `<header>`. One decision closes all eleven.
-  'Boş proje': { region: 1 },
-  Okul: { region: 1, label: 8, 'empty-table-header': 2 },
-  Müsaitlik: { region: 1, 'empty-table-header': 2 },
-  // Dersler's weekly-hours box and every LimitBox carry an aria-label now
-  // (2026-11-15, `kullanim/sadelik`).
-  Dersler: { region: 1, 'empty-table-header': 2 },
-  // The grid's scroll box is its one Tab stop now (2026-11-15, KS8), so
-  // `scrollable-region-focusable` left the list.
-  Program: {
-    region: 1,
-    'empty-table-header': 6,
-    'heading-order': 1,
-  },
-  Kontrol: { region: 1 },
-  Çıktı: { region: 1, 'heading-order': 1 },
-  'Ayarlar · Görünüm': { region: 1 },
-  'Ayarlar · Zil ve günler': { region: 1, 'empty-table-header': 1 },
-  'Ayarlar · Kurallar': { region: 1, label: 6 },
-  'Ayarlar · Planlar ve yedek': { region: 1, 'empty-table-header': 1 },
-  'Ayarlar · Hakkında': { region: 1, 'scrollable-region-focusable': 1 },
+  Müsaitlik: { 'empty-table-header': 2 },
+  Program: { 'empty-table-header': 6 },
 };
 
 interface Bulgu {
@@ -133,10 +117,23 @@ test.describe('90. Erişilebilirlik taraması', () => {
     });
   }
 
-  test('Okul, Müsaitlik ve Dersler, dolu veriyle', async ({ page }) => {
+  // Every Okul step, not only the one the tab opens on: the teacher and class
+  // rows, where most of the unnamed boxes were, are two steps away from the
+  // default and a scan of the default step never saw them. One test per step,
+  // like the screens above (TP22): four scans in one test took 36 s on an idle
+  // Mac and went over the budget on a loaded one.
+  for (const adim of ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar']) {
+    test(`Okul · ${adim}, dolu veriyle`, async ({ page }) => {
+      await openWithSample(page);
+      await openSetup(page, adim);
+      karsilastir(`Okul · ${adim}`, await tara(page));
+    });
+  }
+
+  test('Müsaitlik ve Dersler, dolu veriyle', async ({ page }) => {
     await openWithSample(page);
 
-    for (const sekme of ['Okul', 'Müsaitlik', 'Dersler']) {
+    for (const sekme of ['Müsaitlik', 'Dersler']) {
       await page.getByRole('button', { name: sekme, exact: true }).click();
       await expect(page.locator('.main')).toBeVisible();
       karsilastir(sekme, await tara(page));
@@ -157,5 +154,83 @@ test.describe('90. Erişilebilirlik taraması', () => {
     // hide a missing label behind.
     await open(page);
     karsilastir('Boş proje', await tara(page));
+  });
+
+  // The three screens that have nothing to show on a new project still owe
+  // the reader a heading for what will be there.
+  test('boş proje: Program, Kontrol ve Çıktı', async ({ page }) => {
+    await open(page);
+    for (const sekme of ['Program', 'Kontrol', 'Çıktı']) {
+      await page.getByRole('button', { name: sekme, exact: true }).click();
+      await expect(page.locator('.main')).toBeVisible();
+      karsilastir(`Boş ${sekme}`, await tara(page));
+    }
+  });
+});
+
+// What a scanner cannot see: where the keyboard IS. Every dialog used to drop
+// focus on <body> when it closed (Radix returns it to a Dialog.Trigger, and
+// none of ours has one), so the next Tab started from the top of the page.
+test.describe('91. Odak: diyalog kapanınca ve içeriğe geçerken', () => {
+  /** Says which element has focus, by its accessible-ish name. */
+  const odakta = (page: import('@playwright/test').Page) =>
+    page.evaluate(() => {
+      const el = document.activeElement;
+      if (el === null || el === document.body) return 'BODY';
+      return `${el.tagName}:${el.getAttribute('aria-label') ?? el.id ?? ''}`;
+    });
+
+  test('ilk Tab "İçeriğe geç", Enter içerik alanına götürür', async ({ page }) => {
+    await open(page);
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'İçeriğe geç' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('main')).toBeFocused();
+    // And the next Tab is IN the content, not back in the top bar.
+    await page.keyboard.press('Tab');
+    expect(
+      await page.evaluate(() => document.querySelector('main')!.contains(document.activeElement)),
+    ).toBe(true);
+  });
+
+  for (const ad of ['Klavye kısayolları', 'Ara ve git']) {
+    test(`"${ad}" Esc ile kapanınca odak düğmesine döner`, async ({ page }) => {
+      await open(page);
+      const button = page.getByRole('button', { name: ad, exact: true });
+      await button.focus();
+      await page.keyboard.press('Enter');
+      await expect(page.getByRole('dialog')).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toHaveCount(0);
+      await expect.poll(() => odakta(page)).toBe(`BUTTON:${ad}`);
+    });
+  }
+
+  test('kart menüsünden açılan ders penceresi kapanınca odak karta döner', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+
+    const card = page.locator('table.grid .card').first();
+    await card.focus();
+    await page.keyboard.press('Enter');
+    // The menu item is gone a moment after it is chosen: the opener is the
+    // card the menu was opened on, not the item.
+    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expect(card).toBeFocused();
+  });
+
+  test('sorulan soru kapanınca odak soran düğmeye döner', async ({ page }) => {
+    await open(page);
+    const button = page.getByRole('button', { name: /Örnek okulu yükle/ });
+    await button.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.dlg')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(button).toBeFocused();
   });
 });

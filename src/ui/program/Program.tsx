@@ -204,7 +204,11 @@ function Program({
     applied: useStillSaid(solver.applied, state),
     result: useStillSaid(solver.result, state),
   };
-  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
+  const {
+    text: barText,
+    level: barLevel,
+    counter: barCounter,
+  } = describeBar(solver, view, t, current);
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -497,6 +501,9 @@ function Program({
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings: the
+              sentence below says what is missing, the heading says where. */}
+          <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
           <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
@@ -524,13 +531,23 @@ function Program({
           that never got it. `polite` and not `assertive`: it must not cut into
           a dialog, and the DRAG reason updates several times a second while the
           pointer moves — the region is on the wrapper so those coalesce into
-          one announcement per settled state rather than one per frame. */}
-      <div
-        className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span>{barText}</span>
+          one announcement per settled state rather than one per frame.
+
+          The live region is the FIRST span only, not the whole bar: the run's
+          counter (`barCounter`) changes many times a second and sits beside
+          it, outside, so the start is said once and the result once. The
+          COUNTER is `aria-busy`, not the bar: a busy ancestor tells a screen
+          reader to hold back the live region inside it, and the start would
+          never be heard. */}
+      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
+        <span role="status" aria-live="polite">
+          {barText}
+        </span>
+        {barCounter !== undefined && (
+          <span className="reason-count" aria-busy="true">
+            {barCounter}
+          </span>
+        )}
         {((solver.result !== null && current.result) ||
           (solver.applied !== null && current.applied)) &&
           !solver.running && (
@@ -574,6 +591,10 @@ function Program({
           while down the right; it came back under the grid once it could
           open into the room the timetable does not use and be closed. */}
       <div className={shown === null ? 'program-body' : 'program-body previewing'}>
+        {/* The grid's place in the outline: h1 the school, h2 the grid and
+            the pool (LessonPool), h3 the pool's groups. It had no h2, so the
+            pool's groups hung straight off the school name. */}
+        <h2 className="visually-hidden">{t('Program')}</h2>
         <Grid
           settings={state.settings}
           rows={rows}

@@ -25,9 +25,38 @@ export interface Box {
   planId: Id;
 }
 
+/**
+ * What each change was, by the state it produced, for the "Geri alındı: …" a
+ * screen reader hears after Ctrl+Z (`undoLabel`). A side table rather than a
+ * field of `Box`: states are never mutated, so the state object itself is the
+ * key, nothing has to travel beside `past` and `future`, and a state that falls
+ * off the history is forgotten with it. Writing the same label for the same
+ * state twice (React runs a reducer twice in development) changes nothing.
+ */
+const labels = new WeakMap<State, string>();
+
+/** What undoing now would take back, if the change that made it said. */
+export function undoLabel(box: Box): string | undefined {
+  return box.past.length === 0 ? undefined : labels.get(box.present);
+}
+
 export type Action =
-  | { type: 'change'; apply: (d: State) => State }
-  | { type: 'program-change'; apply: (d: State) => State }
+  | { type: 'change'; apply: (d: State) => State; label?: string }
+  /**
+   * A change to the seçenek list (switch, add, rename, delete): sanitized,
+   * and since 2026-11-15 an ordinary step of the history. Every entry in
+   * `past` is a whole State, the active seçenek included, so undoing an edit
+   * made in another seçenek brings that seçenek back on screen with the edit
+   * taken back; nothing is ever replayed into the one being looked at.
+   */
+  | { type: 'program-change'; apply: (d: State) => State; label?: string }
+  /**
+   * Looking at another seçenek: the present changes, the history does not.
+   * Switching just to look used to fill the 30 steps and wipe redo (review,
+   * 2026-11-15). Undo after it is still right: the step it takes back is a
+   * whole State, with the seçenek that was active when it was made.
+   */
+  | { type: 'view'; apply: (d: State) => State }
   | { type: 'undo' }
   /**
    * Undo, but only while `expected` is still the present: the "Geri al" of a
@@ -47,6 +76,7 @@ export function reduce(box: Box, action: Action): Box {
     case 'change': {
       const next = action.apply(box.present);
       if (next === box.present) return box; // no real change -> do not pollute history
+      if (action.label !== undefined) labels.set(next, action.label);
       return {
         ...box,
         present: next,
@@ -54,12 +84,28 @@ export function reduce(box: Box, action: Action): Box {
         future: [],
       };
     }
-    // A program boundary is also an undo boundary: an action created while
-    // looking at one alternative must never be replayed into another.
+    // It used to empty the history ("an action created while looking at one
+    // alternative must never be replayed into another"), so a seçenek switch
+    // silently threw away every Ctrl+Z. Nothing is replayed: the history holds
+    // whole states, and undo puts one back as it was, seçenek and all.
     case 'program-change': {
       const next = sanitize(action.apply(box.present));
       if (next === box.present) return box;
-      return { ...box, present: next, past: [], future: [] };
+      if (action.label !== undefined) labels.set(next, action.label);
+      return {
+        ...box,
+        present: next,
+        past: [...box.past, box.present].slice(-HISTORY_LIMIT),
+        future: [],
+      };
+    }
+    case 'view': {
+      const next = sanitize(action.apply(box.present));
+      if (next === box.present) return box;
+      // What undo would take back has not changed, so neither has its name.
+      const label = labels.get(box.present);
+      if (label !== undefined) labels.set(next, label);
+      return { ...box, present: next };
     }
     case 'undo-if':
       if (box.present !== action.expected) return box;

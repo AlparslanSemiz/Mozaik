@@ -107,8 +107,12 @@ export function useRowOrder({ kind, count, items, query, change }: Options): Row
         #
       </th>
       {/* The handle gets a column of its own: squeezed in beside something
-          else, half of it belongs to the neighbour (pitfall 47). */}
-      <th className="grip-col" />
+          else, half of it belongs to the neighbour (pitfall 47). Its name is
+          for the screen reader only: an empty header is a column nobody can
+          ask about. */}
+      <th className="grip-col">
+        <span className="visually-hidden">{t('Taşı')}</span>
+      </th>
     </>
   );
 

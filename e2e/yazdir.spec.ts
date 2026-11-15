@@ -233,7 +233,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
-    const head = page.locator('.print-page').first().locator('h3');
+    const head = page.locator('.print-page').first().locator('h2');
     await expect(head).toHaveCSS('text-align', 'center');
 
     const main = head.locator('.p-title-main');
@@ -290,7 +290,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
       .first()
       .evaluate((el) => {
         const page_ = el.getBoundingClientRect();
-        const title = el.querySelector('h3')!.getBoundingClientRect();
+        const title = el.querySelector('h2')!.getBoundingClientRect();
         const table = el.querySelector('table.print')!.getBoundingClientRect();
         return { above: title.top - page_.top, below: page_.bottom - table.bottom };
       });
@@ -366,8 +366,8 @@ test.describe('21. Yazdırmada seçim', () => {
     // words stop meaning the same thing, and the number beside the button is
     // the number of pieces of paper the printer will produce.
     await expect(page.getByRole('button', { name: 'Yazdır (2 kâğıt)' })).toBeEnabled();
-    await expect(pages.first().locator('h3')).toContainText('510');
-    await expect(pages.nth(1).locator('h3')).toContainText('511');
+    await expect(pages.first().locator('h2')).toContainText('510');
+    await expect(pages.nth(1).locator('h2')).toContainText('511');
   });
 
   test('öğretmen sayfaları ayrı seçiliyor', async ({ page }) => {
@@ -403,7 +403,7 @@ test.describe('21. Yazdırmada seçim', () => {
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(2);
-    await expect(page.locator('.print-page').nth(1).locator('h3')).toContainText('999');
+    await expect(page.locator('.print-page').nth(1).locator('h2')).toContainText('999');
   });
 
   test('seçim yazdırma çıktısına da yansıyor', async ({ page, browserName }) => {

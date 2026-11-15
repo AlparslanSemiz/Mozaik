@@ -138,7 +138,12 @@ export default function Summary({
                 {t('Hepsini ekle')}
               </button>
             </div>
-            <div className="stat-scroll">
+            <div
+              className="stat-scroll focus-scroll"
+              tabIndex={0}
+              role="group"
+              aria-label={t('Hazır branşlar ({n})', { n: ready.length })}
+            >
               <table className="stat">
                 <tbody>
                   {ready.map((name) => (
@@ -202,7 +207,12 @@ export default function Summary({
         <p className="hint">
           <T k="Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı." />
         </p>
-        <CapacityRows rows={capacity.rooms} empty={t('Henüz derslik yok.')} problemsFirst />
+        <CapacityRows
+          rows={capacity.rooms}
+          label={t('Derslik yükü')}
+          empty={t('Henüz derslik yok.')}
+          problemsFirst
+        />
         {state.rooms.length > 0 && (
           <>
             <h3>{t('Hangi sınıflar')}</h3>
@@ -263,6 +273,7 @@ export default function Summary({
         )}
         <CapacityRows
           rows={capacity.teachers}
+          label={t('Öğretmen yükü')}
           empty={t('Henüz öğretmen yok.')}
           problemsFirst
           openLabel="Müsait"
@@ -308,7 +319,12 @@ export default function Summary({
         <p className="hint">
           <T k="Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı." />
         </p>
-        <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} problemsFirst />
+        <CapacityRows
+          rows={capacity.classes}
+          label={t('Sınıf yükü')}
+          empty={t('Henüz sınıf yok.')}
+          problemsFirst
+        />
         {/* The one number that decides whether any of this can be laid out at
             all. It outlived the "Kurulum durumu" panel it used to sit in. */}
         {state.classes.length > 0 && (
@@ -348,7 +364,12 @@ export default function Summary({
       <p className="hint">
         <T k="**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz." />
       </p>
-      <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} problemsFirst />
+      <CapacityRows
+        rows={capacity.classes}
+        label={t('Ders yükü')}
+        empty={t('Henüz sınıf yok.')}
+        problemsFirst
+      />
       {idleTeachers.length > 0 && (
         <p className="hint data-hint">
           {t('Hiç dersi olmayan öğretmen: {kimler}.', {
