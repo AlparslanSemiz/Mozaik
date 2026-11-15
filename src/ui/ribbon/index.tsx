@@ -54,8 +54,8 @@
 // the strips are functions and not components.
 
 import { useMemo } from 'react';
-import { health } from '../../pure/feasibility';
-import { useDialogs, useLang, useT } from '../common';
+import { describeStrip } from '../../pure/program';
+import { useDialogs, useT } from '../common';
 import type { RibbonProps, StripContext } from './parts';
 import { availabilityStrip } from './AvailabilityStrip';
 import { checkStrip } from './CheckStrip';
@@ -66,24 +66,24 @@ import { settingsStrip } from './SettingsStrip';
 import { setupStrip } from './SetupStrip';
 
 export default function Ribbon(props: RibbonProps) {
-  const { ui, open, state } = props;
+  const { ui, open, state, programMask } = props;
   const t = useT();
   const dialogs = useDialogs();
-  // `dil` although `health` does not take it: its sentences are translated
-  // inside, so after a live language switch the memo would keep the old words
-  // until the next edit (e2e/dil.spec.ts).
-  const { dil } = useLang();
-  const status = useMemo(() => {
-    void dil;
-    return health(state);
-  }, [state, dil]);
+  // The Program strip's counts walk every lesson's blocks (~4.5 ms on the
+  // father's week), and App draws the ribbon on every solver slice. Only the
+  // Program tab reads them, and they change only with the plan or the mask
+  // (TODO RO2). Above the early return: a hook may not sit behind one.
+  const strip = useMemo(
+    () => (ui.tab === 'program' ? describeStrip(state, programMask) : null),
+    [ui.tab, state, programMask],
+  );
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold
   // its own chevron gives back a third of what it costs, and folding is worth
   // having only if it gives the row back whole. The way back is in the top bar.
   if (!open) return null;
 
-  const c: StripContext = { ...props, t, dialogs, status };
+  const c: StripContext = { ...props, t, dialogs, strip };
   if (ui.tab === 'setup') return setupStrip(c);
   if (ui.tab === 'lessons') return lessonsStrip(c);
   if (ui.tab === 'availability') return availabilityStrip(c);

@@ -245,6 +245,7 @@ export default function App() {
         setProgramColor={setProgramColor}
         changelogUnseen={changelogUnseen}
         planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
+        status={status}
       />
 
       <InspectorProvider state={state} change={change}>
