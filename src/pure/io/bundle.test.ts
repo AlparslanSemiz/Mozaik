@@ -179,3 +179,31 @@ describe('readBundlePlans — daha yeni sürümün planı ayrı sayılıyor', ()
     expect(read.newer).toEqual(['a']);
   });
 });
+
+describe('parseBundle · kimliksiz ve tekrarlanan planlar adıyla sayılıyor (denetim 2026-11-16)', () => {
+  it('ilk kimlikli plan kalıyor, öteki üçü `dropped`ta adıyla', () => {
+    const state = { schemaVersion: 1 };
+    const b = parseBundle(
+      JSON.stringify({
+        bundleVersion: BUNDLE_VERSION,
+        activeId: 'a',
+        plans: [
+          { id: 'a', name: 'A', state },
+          { id: 'a', name: 'A ikinci', state },
+          { name: 'Kimliksiz', state },
+          { name: 'Kimliksiz bozuk', state: 'yok' },
+        ],
+      }),
+    )!;
+    expect(Object.keys(b.states)).toEqual(['a']);
+    expect(b.library.plans.map((p) => p.name)).toEqual(['A']);
+    expect(b.dropped).toEqual(['A ikinci', 'Kimliksiz', 'Kimliksiz bozuk']);
+  });
+
+  it('düşen plan yoksa alan da yok', () => {
+    const b = parseBundle(
+      JSON.stringify({ bundleVersion: BUNDLE_VERSION, plans: [{ id: 'a', name: 'A', state: {} }] }),
+    )!;
+    expect(b.dropped).toBeUndefined();
+  });
+});

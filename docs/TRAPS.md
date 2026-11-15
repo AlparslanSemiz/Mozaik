@@ -122,6 +122,31 @@ yere yazar ve budama yalnız iş taşıyan günlükleri sayar. Bir savunma katma
 "yok"u ayırmıyorsa, kendi yedeğini silen katman o olur. `src/platform/storage/okunamayan.test.tsx`,
 `src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts`.
 
+### 159 · "Boş değil" "dolu" demek değil: tek öğretmen bir okulun yedeğini siler
+Tuzak 153'ün çaresi klasörü yalnız boş pakete karşı korudu. Exe'nin WebView2 deposu silinince
+Mozaik boş açılıyor, ilk öğretmen (ya da örnek okul) yazılınca paket "iş taşıyor" sayılıyor ve
+canlı dosyanın ve günün yedeğinin üstüne gidiyordu; sonraki her gün o küçük günlük de "dolu"
+sayıldığı için budama her gün bir gerçek yedek daha sildi: on gerçek günlük ve on bir gün tek
+öğretmenle sıfır büyük kopya kaldı (denetim 2026-11-16, sonda). Açılışta uyarı da yoktu. Sebep:
+"boş mu" sorusu sıfırla sıfır olmayanı ayırıyor, ölçeği değil. Çare üç katmanlı: boş ya da
+okunamayan açılış klasöre yazmadan önce oradaki kaydı okur ve daha doluysa şeritle önerir,
+seçilene kadar hiçbir şey yazmaz; dört liste satırının yarısının altına düşüren yazım canlı
+dosyaya değil günün kurtarma dosyasına gider ve ekranda söylenir; budama en dolu günlüğü hiç
+silmez. Bir koruma "var mı"yı soruyorsa, "ne kadar"ı soran bir koruma daha gerekir.
+`src/platform/storage/useFolder.test.tsx`, `src/platform/storage/folder.test.ts`,
+`e2e/okunamayan.spec.ts`.
+
+### 160 · Bellekteki geri al yenilemeden sağ çıkmaz
+SD1 soruları kaldırıp her silmeye "Geri al" verdi. Geri al reducer'ın belleğinde yaşıyor; sayfa
+yenilenince ya da exe penceresi kapanıp açılınca silmeden önceki hâl hiçbir yerde değildi:
+otomatik kayıt silinmiş hâli 400 ms'de yazmıştı, oturum zinciri ise oturumun BAŞINDAKİ hâli
+tutuyor (denetim 2026-11-16: sınıf silindi, sayfa yenilendi, sınıf hiçbir anahtarda yok). "Geri
+alınabilir" diye sorusu kaldırılan bir eylem, geri almanın yaşadığı yer kadar geri alınabilir.
+Çare: her sorusuz silmeden, `Her şeyi sil`den, dolu planın yerine örnek okuldan, `Baştan diz`den ve
+`Dosyadan aç`tan önce açık plan tek bir depo yuvasına (`ders-programi-silmeden-once`) ve klasörde
+günün dosyasına yazılır, sonraki açılış bir kez "Geri getir" der. `src/platform/storage/beforeDelete.test.ts`,
+`e2e/okunamayan.spec.ts`.
+
 ---
 
 ## Dağıtım kimlikleri, tek kaynak ve sürüm
@@ -289,6 +314,25 @@ etiket hiçbir şey tetiklemez. Karşı önlem: arşiv etiketleri `arsiv/<dal>` 
 `git push --tags` bu depoda verilmez. Bir dalın adı `v` ile başlıyorsa (`v1.0-teslim`)
 o adda bir etiket itilmez: `surum.yml` derler, numara `package.json`'la uyuşmadığı için
 yayın adımında durur, ama iki derleme boşa koşar.
+
+### 157 · Bir arşivin adındaki işletim sistemi sürümü, en düşük sürümü değildir
+OR-Tools v9.15'in Mac arşivleri `or-tools_arm64_macOS-26.2_cpp_v9.15.6755.tar.gz` adını
+taşıyor. Ad okunarak Mac sürümünün en düşük macOS'u 26.2 yazılacaktı, yani babanın ya da bir
+öğretmenin birkaç yıllık Mac'i dışarıda kalacaktı. Ölçüldü 2026-11-15: arşivdeki 241 dylib'in
+hepsi `LC_BUILD_VERSION minos 11.0` (`otool -l`), 26.2 yalnız derlendiği SDK. Karşı önlem: en
+düşük sürüm adından değil ikilinin kendisinden okunur: `scripts/ortools-mac.sh` her dylib'in
+`minos`'unu okuyup 11.0 değilse durur, `tauri.macos.conf.json` 11.0 diyor ve `surum.yml`'in mac işi
+paketin `LSMinimumSystemVersion`'ına bakıyor. OR-Tools yükseltilip `minos` yükselirse betik kırmızı
+olur ve karar yeniden verilir.
+
+### 158 · Notarize edilmemiş 99 dylib'in ilk yüklenişi saniyeler sürer
+Ölçüldü 2026-11-15, bu Mac'te: `cpsat.rs`'in küçük model testi CP-SAT'ı ilk kez yüklediğinde
+15,4 s sürdü, aynı dosyalarla ikinci koşuda 0,5 s. Çapraz derlenen Intel kopyası Rosetta'da ilk
+yüklemede 78,8 s. macOS her yeni dylib'i ilk açılışta denetliyor (Rosetta'da bir de çeviriyor),
+ve kütüphane 99 dosya, 53 MB. `cpsat_var` eş zamanlı bir komuttu, yani Tauri onu ana iş
+parçacığında koşturuyordu: ilk öneri aramasında pencere bu süre boyunca donardı. Karşı önlem:
+`cpsat_var` async ve yüklemeyi bekleme havuzunda yapıyor (`cpsat.rs`). Bir sonraki adım ölçmek:
+babanın türünden bir Mac'te ilk aramanın süresi (TODO B7.42).
 
 ## Çözücü ve kısıt motoru
 
@@ -1464,8 +1508,8 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 
 | Grup | Tuzaklar |
 |---|---|
-| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155 |
+| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1480,6 +1524,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 156, yeni bir tuzak 157'den devam eder. Test stratejisi
+büyük kullanılan numara 160, yeni bir tuzak 161'den devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

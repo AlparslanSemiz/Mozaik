@@ -12,7 +12,7 @@
 // 2026-11-15 it says what is true, and the notice offers "Geri al" (TODO SD1).
 
 import { useCallback } from 'react';
-import { useDialogs, useT, useToast, useUndoIf } from '../common';
+import { useDialogs, useKeepBefore, useT, useToast, useUndoIf } from '../common';
 import { markIntroSeen } from '../../platform/prefs';
 import { sampleState } from '../../pure/io';
 import type { State } from '../../leaf/model';
@@ -26,6 +26,7 @@ export function useLoadSample(): LoadSample {
   const { confirm } = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const t = useT();
 
   return useCallback(
@@ -57,6 +58,8 @@ export function useLoadSample(): LoadSample {
       }
       const said = t('Örnek okul yüklendi.');
       const next = sampleState();
+      // Over a plan that holds work: what a reload can still bring back.
+      if (holds) keepBefore(state, said);
       change(() => next, said);
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
@@ -64,6 +67,6 @@ export function useLoadSample(): LoadSample {
       notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
       return true;
     },
-    [confirm, notify, t, undoIf],
+    [confirm, notify, t, undoIf, keepBefore],
   );
 }

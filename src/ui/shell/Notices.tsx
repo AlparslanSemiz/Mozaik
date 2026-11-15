@@ -17,6 +17,14 @@ interface Props {
   updateHidden: boolean;
   setUpdateHidden: (hidden: boolean) => void;
   folder: FolderRun;
+  /** The folder's fuller copy, after an empty start ('bulundu'). */
+  openFolderCopy: () => void;
+  /** The shrink strip's "keep the small one", behind a question (App). */
+  acceptShrink: () => void;
+  /** The open plan before the last deletion of an earlier session (SD1). */
+  lastDelete: ReturnType<typeof useStore>['lastDelete'];
+  restoreLastDelete: () => void;
+  closeLastDelete: () => void;
   goTab: (tab: Tab) => void;
   ui: { setSection: (section: SectionId) => void };
 }
@@ -30,6 +38,11 @@ export default function Notices({
   updateHidden,
   setUpdateHidden,
   folder,
+  openFolderCopy,
+  acceptShrink,
+  lastDelete,
+  restoreLastDelete,
+  closeLastDelete,
   goTab,
   ui,
 }: Props) {
@@ -114,6 +127,69 @@ export default function Notices({
           ) : (
             <T k="**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Plan dosyanızı **Dosyadan aç** ile açabilirsiniz." />
           )}
+        </div>
+      )}
+
+      {/* THE START READ NOTHING, AND THE FOLDER HOLDS A PLAN (the audit of
+      2026-11-16). A wiped WebView2 profile opens Mozaik empty while
+      Belgelerim\Ders Programı holds the school; nothing goes to the folder
+      until one of the two buttons is pressed (useFolder's `bulundu`). */}
+      {folder.status.kind === 'bulundu' && (
+        <div className="save-warning" role="status">
+          ⚠{' '}
+          <T
+            k="**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor."
+            vars={{
+              klasor: folder.status.name,
+              dosya: folder.status.copy.name,
+              ogretmen: folder.status.copy.work.teachers,
+              ders: folder.status.copy.work.lessons,
+            }}
+          />{' '}
+          <button className="btn primary" onClick={openFolderCopy}>
+            {t("Belgelerim'deki son kaydı aç")}
+          </button>{' '}
+          <button className="btn" onClick={folder.release}>
+            {t('Boş başla')}
+          </button>
+        </div>
+      )}
+
+      {/* THE PLAN SHRANK SHARPLY: the live file in the folder was kept and
+      the new state went to the day's rescue file (folder.ts, `shrinks`). */}
+      {folder.shrunk !== null && (
+        <div className="save-warning" role="status">
+          ⚠{' '}
+          <T
+            k="**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı."
+            vars={{
+              ogretmen: folder.shrunk.now.teachers,
+              ders: folder.shrunk.now.lessons,
+              eskiOgretmen: folder.shrunk.before.teachers,
+              eskiDers: folder.shrunk.before.lessons,
+              dosya: folder.shrunk.file,
+            }}
+          />{' '}
+          <button className="btn primary" onClick={openFolderCopy}>
+            {t("Belgelerim'deki son kaydı aç")}
+          </button>{' '}
+          <button className="btn" onClick={acceptShrink}>
+            {t('Yeni hâlini asıl dosya yap')}
+          </button>
+        </div>
+      )}
+
+      {/* THE LAST DELETION OF AN EARLIER SESSION, ONCE (TODO SD1). Its undo
+      lived in memory; the state before it waited in one slot. */}
+      {lastDelete !== null && (
+        <div className="save-warning" role="status">
+          {t('{ne} Son silmeyi geri almak için:', { ne: lastDelete.label })}{' '}
+          <button className="btn primary" onClick={restoreLastDelete}>
+            {t('Geri getir')}
+          </button>{' '}
+          <button className="btn" onClick={closeLastDelete}>
+            {t('Kapat')}
+          </button>
         </div>
       )}
 

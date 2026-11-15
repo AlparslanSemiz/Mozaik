@@ -112,6 +112,7 @@ export function programStrip({
   dialogs: { prompt, alert },
   notify,
   undoIf,
+  keepBefore,
   strip,
 }: StripContext): React.ReactElement {
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
@@ -187,6 +188,7 @@ export function programStrip({
             n: hours,
           });
     const next = sanitize(removeProgram(state, currentProgram.id));
+    keepBefore(state, said);
     manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
@@ -247,6 +249,12 @@ export function programStrip({
                   let moved = 0;
                   for (const key in before) if (after[key] !== before[key]) moved++;
                   if (moved === 0) return;
+                  // Cards the reader had placed moved: the week before is kept
+                  // where a reload finds it, as before "Baştan diz".
+                  keepBefore(
+                    state,
+                    t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
+                  );
                   notify(
                     t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
                     'info',
@@ -271,6 +279,7 @@ export function programStrip({
                 // its notice can offer "Geri al" for the whole of it. Nothing
                 // on the grid moves until the run ends, and "Durdur" is on
                 // this same spot while it runs.
+                keepBefore(state, t('Program baştan dizildi.'));
                 solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
               }}
             >
@@ -285,6 +294,7 @@ export function programStrip({
               disabled={placed === 0 && pending === 0}
               onClick={() => {
                 anotherSeed++;
+                keepBefore(state, t('Program baştan dizildi.'));
                 solver.start(
                   state,
                   { keepPlaced: false, exclusions, seed: anotherSeed },
@@ -536,6 +546,7 @@ export function programStrip({
                   // with no exceptions: nothing takes a pinned block down
                   // but unpinning it.
                   const next = keepPinnedOnly(state);
+                  keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
                   change((d) => (d === state ? next : keepPinnedOnly(d)));
                   notify(
                     pinnedHours === 0

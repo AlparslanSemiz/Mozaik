@@ -1,0 +1,107 @@
+# Mac'te Mozaik.app (DECISIONS 2026-11-15, "Mac sürümü"): yayından önce, yalnız
+# Apple Silicon. surum.yml'in mac işinin hafif ikizi: aynı OR-Tools adımı,
+# Rust testleri CP-SAT'ın küçük modeliyle, aynı `tauri build`, paketin
+# içine bakılması, ve programın gerçekten açılıp ayakta kaldığı. x86_64 yalnız
+# yayında derlenir; Rust'ın kodu iki mimaride aynı, farkı OR-Tools arşivi.
+#
+# exe-windows.yml gibi YAVAŞ SÜİT: birleştirmeyi beklemez (CLAUDE.md). Mac'e
+# dokunan bir PR'da ve main push'unda kendiliğinden, ve elle.
+name: mac
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src-tauri/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/ortools-mac.sh'
+      - '.github/workflows/mac.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src-tauri/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/ortools-mac.sh'
+      - '.github/workflows/mac.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: OR-Tools CP-SAT for the .app
+        run: scripts/ortools-mac.sh arm64
+
+      # `the_library_answers_a_tiny_model` yalnız MOZAIK_ORTOOLS varken koşar.
+      - name: cargo test, with the CP-SAT tiny model
+        run: |
+          MOZAIK_ORTOOLS="$PWD/src-tauri/ortools/libortools.9.dylib" \
+            cargo test --manifest-path src-tauri/Cargo.toml
+
+      # Sırsız: ad-hoc imza, yayındakiyle aynı yol (surum.yml, "mac").
+      - run: npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
+
+      - name: Is the .app whole
+        run: |
+          set -euo pipefail
+          app=src-tauri/target/release/bundle/macos/Mozaik.app
+          codesign --verify --deep --strict --verbose=2 "$app"
+          test -f "$app/Contents/Frameworks/libortools.9.dylib"
+          test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
+          [ "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = "11.0" ]
+          /usr/libexec/PlistBuddy -c 'Print :NSDocumentsFolderUsageDescription' "$app/Contents/Info.plist"
+          ls -l src-tauri/target/release/bundle/dmg/
+
+      # Açılıyor mu: program yirmi saniye ayakta kalmalı. Pencerenin içine
+      # bakılmaz (runner'da WebDriver yok); ekran görüntüsü artefakta.
+      - name: Does it start and stay up
+        run: |
+          set -euo pipefail
+          app=src-tauri/target/release/bundle/macos/Mozaik.app
+          program="$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")"
+          "$program" > acilis.log 2>&1 &
+          pid=$!
+          sleep 20
+          screencapture -x acilis.png || true
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "Mozaik yirmi saniye içinde kapandı" >&2
+            cat acilis.log >&2
+            exit 1
+          fi
+          kill "$pid"
+          cat acilis.log
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: mac-acilis
+          path: |
+            acilis.png
+            acilis.log
+          if-no-files-found: ignore

@@ -8,8 +8,10 @@
 //! (`verifySuggestion`) refuses, never a wrong week.
 //!
 //! THE LIBRARY IS OPTIONAL. The installer puts `ortools.dll` and the DLLs it
-//! needs next to the program (tauri.conf.json, `bundle.resources`); the
-//! standalone exe, the Linux development build and a broken install have none.
+//! needs next to the program (tauri.conf.json, `bundle.resources`), and the Mac
+//! .app carries `libortools.9.dylib` and the dylibs it loads in
+//! `Contents/Frameworks` (scripts/ortools-mac.sh); the standalone exe, the
+//! Linux development build and a broken install have none.
 //! `cpsat_var` says which, and the page falls back to its own search.
 //!
 //! The five functions are the ones `ortools/sat/c_api/cp_solver_c.h` declares
@@ -42,8 +44,8 @@ struct Cpsat {
     stop: EnvFn,
 }
 
-/// The library's file name on each platform. Windows is the one delivered;
-/// the other two are how the Rust side is tested on a development machine.
+/// The library's file name on each platform. Windows and the Mac are
+/// delivered; Linux is how the Rust side is tested on a development machine.
 const AD: &str = if cfg!(windows) {
     "ortools.dll"
 } else if cfg!(target_os = "macos") {
@@ -53,12 +55,26 @@ const AD: &str = if cfg!(windows) {
 };
 
 /// Where the library is looked for: next to the program, where the installer
-/// puts it, or where `MOZAIK_ORTOOLS` says (tests and development only).
+/// puts it; on the Mac in the bundle's `Contents/Frameworks`, beside
+/// `Contents/MacOS` where the program is; or where `MOZAIK_ORTOOLS` says
+/// (tests and development only).
 fn yol() -> Option<PathBuf> {
     if let Some(p) = std::env::var_os("MOZAIK_ORTOOLS") {
         return Some(PathBuf::from(p));
     }
-    std::env::current_exe().ok()?.parent().map(|d| d.join(AD))
+    let klasor = std::env::current_exe().ok()?.parent()?.to_path_buf();
+    Some(kutuphane_yeri(&klasor))
+}
+
+/// The library's path, given the folder the program runs from. The Mac's
+/// dylibs find one another through their own `LC_RPATH @loader_path`, so the
+/// first one only has to be opened by its full path.
+fn kutuphane_yeri(program_klasoru: &std::path::Path) -> PathBuf {
+    if cfg!(target_os = "macos") {
+        program_klasoru.join("../Frameworks").join(AD)
+    } else {
+        program_klasoru.join(AD)
+    }
 }
 
 fn yukle() -> Result<Cpsat, String> {
@@ -168,9 +184,16 @@ pub fn ayir(body: &[u8]) -> Result<(&[u8], &[u8]), String> {
 // -------------------------------------------------------------- the commands
 
 /// Whether this copy can answer with CP-SAT at all.
+///
+/// Async, on the blocking pool: the first call LOADS the library, and on the
+/// Mac that is 99 dylibs (53 MB) that macOS checks before it maps them. A
+/// synchronous command runs on the main thread, where that wait would freeze
+/// the window.
 #[tauri::command]
-pub fn cpsat_var() -> bool {
-    cpsat().is_ok()
+pub async fn cpsat_var() -> bool {
+    tauri::async_runtime::spawn_blocking(|| cpsat().is_ok())
+        .await
+        .unwrap_or(false)
 }
 
 /// One question. Raw bytes both ways: the model is hundreds of kilobytes and
@@ -200,6 +223,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn the_library_is_looked_for_where_the_bundle_puts_it() {
+        let yer = kutuphane_yeri(std::path::Path::new(
+            "/Applications/Mozaik.app/Contents/MacOS",
+        ));
+        if cfg!(target_os = "macos") {
+            assert_eq!(
+                yer,
+                PathBuf::from(
+                    "/Applications/Mozaik.app/Contents/MacOS/../Frameworks/libortools.9.dylib"
+                )
+            );
+        } else {
+            assert_eq!(
+                yer,
+                PathBuf::from("/Applications/Mozaik.app/Contents/MacOS").join(AD)
+            );
+        }
+    }
+
+    #[test]
     fn the_body_splits_into_params_and_model() {
         let mut body = 3u32.to_le_bytes().to_vec();
         body.extend_from_slice(&[1, 2, 3, 9, 9]);
@@ -225,6 +268,6 @@ mod tests {
         let cevap = coz(&model, &[]).unwrap();
         // status (field 1) OPTIMAL = 4
         assert_eq!(&cevap[..2], &[0x08, 0x04]);
-        assert!(cpsat_var());
+        assert!(cpsat().is_ok());
     }
 }

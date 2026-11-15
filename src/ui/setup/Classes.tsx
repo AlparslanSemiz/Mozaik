@@ -21,6 +21,7 @@ import {
   T,
   useT,
   useToast,
+  useKeepBefore,
   useUndoIf,
 } from '../common';
 import { parseClasses } from '../../pure/io';
@@ -31,6 +32,7 @@ export default function Classes({ state, change }: PanelProps) {
   const t = useT();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
@@ -267,6 +269,7 @@ export default function Classes({ state, change }: PanelProps) {
                             const said = deletionNotice(state, 'class', c.id);
                             const next = deleteClass(state, c.id);
                             moveFocusFromDeleted(e.currentTarget);
+                            keepBefore(state, said);
                             change((d) => (d === state ? next : deleteClass(d, c.id)), said);
                             notify(said, 'info', {
                               label: t('Geri al'),

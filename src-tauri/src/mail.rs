@@ -181,9 +181,29 @@ mod kabuk {
     }
 }
 
+/// The Mac: `/usr/bin/open`, which is what a click on a `mailto:` link in
+/// Finder does. Every Mac has Mail.app registered, so "no program" is rare;
+/// when LaunchServices has nothing for the scheme, `open` prints so and exits
+/// 1, and that is the only failure it reports, so any non-zero exit reads as
+/// "no mail program". The absolute path keeps a `PATH` from choosing another
+/// `open`.
+#[cfg(target_os = "macos")]
+mod kabuk {
+    use super::ISTEMCI_YOK;
+    use std::process::Command;
+
+    pub fn ac(adres: &str) -> Result<(), String> {
+        match Command::new("/usr/bin/open").arg(adres).status() {
+            Ok(s) if s.success() => Ok(()),
+            Ok(_) => Err(ISTEMCI_YOK.into()),
+            Err(e) => Err(format!("acilamadi: {e}")),
+        }
+    }
+}
+
 /// The Linux copy, for development only: `xdg-open`, whose exit code 3 is
 /// "no program for this".
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "macos")))]
 mod kabuk {
     use super::ISTEMCI_YOK;
     use std::process::Command;

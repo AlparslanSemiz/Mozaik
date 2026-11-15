@@ -917,9 +917,17 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       **Yayın kapısı (2026-10-24, Alp; İÇİNDEKİLER'in altı):** bu kalan ve TP7 yeşil olmadan
       etiket yok. **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
       `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
-      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
-      değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
-      olsa, dolu ana dosyanın ve günün yedeğinin üstüne yazar (dünkü yedekler kalır).
+      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor.
+      ~~Okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile değilse) bunu ekranda
+      söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile olsa, dolu ana dosyanın ve
+      günün yedeğinin üstüne yazar.~~ **Yazıldı (2026-11-16, `veri/koruma`, birleşmedi; sahte köprüde
+      doğrulandı, gerçek Windows exe'de koşulmadı):** JSON olmayan plan klasör satırını kırmızı
+      yapıyor, planın adıyla; boş ya da okunamayan açılış klasördeki daha dolu kaydı şeritle
+      öneriyor ("Belgelerim'deki son kaydı aç" / "Boş başla") ve seçilene kadar klasöre yazmıyor;
+      yarının altına küçülten yazım günün kurtarma dosyasına gidiyor ve şerit söylüyor; budama en
+      dolu günlüğü silmiyor (DATA "Dosya biçimleri", tuzak 159). Kalan: kurtarma ve silmeden-önce
+      dosyaları exe'de budanmıyor (`remove_in` yalnız günlüğü siliyor), gün başına bir dosya
+      birikiyor; yeni şeritlerin dört dilde çevirisi.
       **Birleşmede:** `tb7-sekme-kapanis`'in yeni gerçek exe testi ("X ile hemen kapanan
       pencere…") taze profilde klasörün kendiliğinden yazılmasını bekleyerek başlıyor; o satır
       1,5 s beklemeyle değişir (ölçüldü: birleşik kopyada gerçek Linux exe'de yeşil).
@@ -1026,6 +1034,24 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - ızgara: `continues` 1+1+1'de hiçbir hücrede yok, günün son saatinden ertesi güne geçmiyor;
       - ızgara: dersi silinmiş (yetim) bir yerleşim sınıf ekseninde `?` ile çiziliyor, çökertmiyor;
       - havuz: hiçbir branşa uymayan süzgeç boş tepsi veriyor, toplam aynı kalıyor.
+
+- [~] **B7.42 Mac sürümü (2026-11-15, `platform/mac`, DECISIONS "Mac sürümü").** Yazıldı ve bu
+  Mac'te doğrulandı: `Mozaik.app` ve dmg (arm64), CP-SAT Frameworks'ten (küçük model), Türkçe
+  menü, Belgeler klasörü, Cmd+Q ile kapanış, yerel sunucudan uçtan uca güncelleme (indir,
+  doğrula, takas, yeniden başlat, gizli klasör silindi) ve dmg'den çalışan kopyanın reddi.
+  Kalanlar:
+      - gerçek bir Release'le uçtan uca (imzalı arşiv, `releases/latest`), ilk sürümde;
+      - `mac.yml` ve `surum.yml`'in mac işi hiç koşmadı (ilk koşu dalın CI'ında);
+      - Cmd+C/V metin kutusunda: elle denendi, çalışıyor (Alp, 2026-11-16);
+      - arayüz metinleri Windows diyor: Hakkında "Uygulama (.exe)", "Belgelerim'deki",
+        ipuçlarında "Ctrl+Z" (src/ui, bu dalın dışında);
+      - Dock'tan "Çık" ve oturum kapatma `CloseRequested`'sız bitiyor (son iki saniye);
+      - ad-hoc imzada her güncelleme yeni bir kimlik: Belgeler izni yeniden sorulabilir,
+        macOS 13+ Uygulama Yönetimi `/Applications`'taki takası durdurabilir; temiz bir
+        kullanıcıda `/Applications`'tan bir güncelleme denenmeli;
+      - Mac işi kırmızıysa Windows sürümü çıkmaz mıydı: düzeldi (2026-11-16), Mac yayını
+        engellemiyor, eksik mimari uyarıyla atlanıyor (DECISIONS 2026-11-16);
+      - Apple Developer üyeliği alınırsa: `APPLE_*` sırları, iş akışı hazır.
 
 ---
 
@@ -2015,7 +2041,12 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       sonra odak sonraki (son satırda önceki, liste boşsa ekleme kutusuna) satırın `Sil`'ine
       gidiyor, bildirim ekran okuyucuya "Geri almak için Ctrl+Z" diyor, Ctrl+Z "Geri alındı: …"
       diyor. Seçenek değiştirmek geri al geçmişini artık silmiyor ve kendisi bir adım değil (geçmiş
-      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
+      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor).
+      **Yenilemeden sonra (2026-11-16, `veri/koruma`, birleşmedi):** geri al bellekteydi, yenileme
+      silmeden önceki hâli hiçbir yerde bırakmıyordu (tuzak 160). Artık her sorusuz silmeden,
+      `Her şeyi sil`, örnek okul, `Baştan diz` ve `Dosyadan aç`tan önce açık plan
+      `ders-programi-silmeden-once` yuvasına (klasörde günün `silmeden-once` dosyasına) yazılıyor ve
+      sonraki açılış bir kez "Son silmeyi geri almak için: Geri getir" diyor (DATA). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
       `Dosyadan aç` geçmişi hâlâ siliyor (bilerek, soru soruyor); bildirime klavyeyle doğrudan
       gidecek bir kısayol yok (F6 tarayıcının; odak `Geri al`dan sonra geldiği yere dönüyor);
       Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol edilmez" diyor.
