@@ -1910,6 +1910,19 @@ const FR: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} supprimée, avec {n} {n:heure placée|heures placées}.",
   "Program baştan dizildi.": "L’emploi du temps a été reconstruit de zéro.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "L’emploi du temps a été reconstruit de zéro ; {n} {n:heure épinglée est restée|heures épinglées sont restées} en place.",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "Le plan « {plan} » est illisible, donc aucun plan n’est écrit dans le dossier.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**Le plan s’est ouvert vide sur cet ordinateur, mais le dossier {klasor} contient un fichier de plan plus complet :** {dosya}, {ogretmen} {ogretmen:enseignant|enseignants} et {ders} {ders:cours|cours}. Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
+  "Belgelerim'deki son kaydı aç": "Ouvrir la dernière sauvegarde dans Documents",
+  "Boş başla": "Commencer vide",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**Le plan a beaucoup diminué :** il reste {ogretmen} {ogretmen:enseignant|enseignants} et {ders} {ders:cours|cours}, et le dernier fichier de plan du dossier en a {eskiOgretmen} {eskiOgretmen:enseignant|enseignants} et {eskiDers} {eskiDers:cours|cours}. Ce fichier a été gardé ; le nouvel état a été écrit à part sous **{dosya}**.",
+  "Yeni hâlini asıl dosya yap": "Faire du nouvel état le fichier principal",
+  "{ne} Son silmeyi geri almak için:": "{ne} Pour annuler la dernière suppression :",
+  "Geri getir": "Récupérer",
+  "Son silme geri alındı.": "La dernière suppression a été annulée.",
+  "son silmeden önceki hâl": "état avant la dernière suppression",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan à l’identifiant manquant ou répété : {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Ce plan plus petit remplace le dernier fichier de plan du dossier. L’ancien état reste dans les sauvegardes quotidiennes.",
 };
 
 registerSozluk("fr", FR);

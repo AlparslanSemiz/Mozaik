@@ -1902,6 +1902,19 @@ const DE: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
   "Program baştan dizildi.": "Der Stundenplan wurde von vorn gelegt.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "Der Stundenplan wurde von vorn gelegt; {n} fixierte {n:Stunde blieb|Stunden blieben}.",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "Der Plan „{plan}“ kann nicht gelesen werden, daher wird kein Plan in den Ordner geschrieben.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**Der Plan wurde auf diesem Computer leer geöffnet, aber im Ordner {klasor} liegt eine vollere Plandatei:** {dosya}, {ogretmen} {ogretmen:Lehrkraft|Lehrkräfte} und {ders} {ders:Unterricht|Unterrichte}. Bis Sie wählen, wird nichts in den Ordner geschrieben.",
+  "Belgelerim'deki son kaydı aç": "Letzte Sicherung in Dokumente öffnen",
+  "Boş başla": "Leer beginnen",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**Der Plan ist stark geschrumpft:** {ogretmen} {ogretmen:Lehrkraft|Lehrkräfte} und {ders} {ders:Unterricht|Unterrichte} sind übrig, die letzte Plandatei im Ordner hat {eskiOgretmen} {eskiOgretmen:Lehrkraft|Lehrkräfte} und {eskiDers} {eskiDers:Unterricht|Unterrichte}. Diese Datei bleibt erhalten; der neue Stand wurde getrennt als **{dosya}** gespeichert.",
+  "Yeni hâlini asıl dosya yap": "Neuen Stand zur Hauptdatei machen",
+  "{ne} Son silmeyi geri almak için:": "{ne} Um das letzte Löschen rückgängig zu machen:",
+  "Geri getir": "Zurückholen",
+  "Son silme geri alındı.": "Das letzte Löschen wurde rückgängig gemacht.",
+  "son silmeden önceki hâl": "Stand vor dem letzten Löschen",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan mit fehlender oder doppelter Kennung: {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Bis Sie wählen, wird nichts in den Ordner geschrieben.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Dieser kleinere Plan ersetzt die letzte Plandatei im Ordner. Der alte Stand bleibt in den täglichen Sicherungen.",
 };
 
 registerSozluk("de", DE);
