@@ -410,7 +410,8 @@ derleme, `rustup target add x86_64-apple-darwin`). Universal paket yok: iki mima
 **CP-SAT.** `scripts/ortools-mac.sh` resmi arşivi indirir, SHA-256'sını betikteki sabitle
 karşılaştırır ve `libortools.9.dylib`'in `@rpath` kapanışını (`otool -L`, 99 dylib, 53 MB)
 `src-tauri/ortools/`'a kopyalar; `tauri.ortools.json` onları `bundle.macOS.frameworks` olarak
-verir, Tauri `Contents/Frameworks`'e koyup tek tek ad-hoc imzalar. `cpsat.rs` kütüphaneyi
+verir, Tauri `Contents/Frameworks`'e koyup tek tek imzalar (sır yoksa ad-hoc, varsa Developer ID).
+Betik her dylib'in en düşük macOS'unu da okur ve 11.0 değilse durur. `cpsat.rs` kütüphaneyi
 `Contents/MacOS/../Frameworks/` altında arar. Arşivin adındaki `macOS-26.2` derlendiği makine,
 en düşük sürüm değil (tuzak 157).
 

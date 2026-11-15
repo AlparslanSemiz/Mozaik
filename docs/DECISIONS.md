@@ -53,8 +53,14 @@ Apple'ınki "bu geliştirici", bizimki "bu sürüm, bu dosya" der.
 (`Mozaik.app`), tek dosya değil. İndirme arşivi paketin yanındaki gizli `.Mozaik.app.yeni`
 klasörüne yazar; "Şimdi yeniden başlat" arşivi yeniden özetler, sistemin `tar`'ıyla açar, içine
 bakar (tek `Mozaik.app`, programı ve `Info.plist`'i var) ve çalışan paketle `renamex_np(RENAME_SWAP)`
-ile tek adımda yer değiştirir: hiçbir an o yolda Mozaik'siz geçmez. Yeni sürüm başlatılamazsa
-takas geri alınır. Eski paket gizli klasörde kalır, yeni sürümün sayfası yüklenince silinir
+ile tek adımda yer değiştirir: hiçbir an o yolda Mozaik'siz geçmez. Yeni süreç hiç başlatılamazsa
+takas geri alınır; başlayıp penceresini açamayan bir sürümün geri dönüşü yok, eski paket o zaman
+gizli `.Mozaik.app.yeni/acilan/` altında durur (elle ya da dmg'den yeniden kurulur).
+
+**Bilinen risk, denenmedi.** Ad-hoc imzanın kimliği ikilinin özeti, yani her güncelleme macOS'a
+yeni bir program: Belgeler izni güncellemeden sonra yeniden sorulabilir, ve macOS 13+'ın "Uygulama
+Yönetimi" `/Applications`'taki takası durdurabilir. Bu yerel deneme `/Applications`'ta değil, sahte
+bir klasörde yapıldı; ilk gerçek sürümde temiz bir kullanıcıda bakılır (TODO B7.42). Eski paket gizli klasörde kalır, yeni sürümün sayfası yüklenince silinir
 (`sweep_old`, Windows'taki `.eski` ile aynı an). `/tmp` değil paketin yanı, çünkü rename yalnız
 aynı birimde atomik. Paketin klasörü yazılamıyorsa (dmg'den ya da App Translocation'dan
 çalışıyorsa) indirmeden önce tek cümle: "Mozaik'i Uygulamalar klasörüne taşıyın".

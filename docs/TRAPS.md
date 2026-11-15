@@ -295,9 +295,10 @@ OR-Tools v9.15'in Mac arşivleri `or-tools_arm64_macOS-26.2_cpp_v9.15.6755.tar.g
 taşıyor. Ad okunarak Mac sürümünün en düşük macOS'u 26.2 yazılacaktı, yani babanın ya da bir
 öğretmenin birkaç yıllık Mac'i dışarıda kalacaktı. Ölçüldü 2026-11-15: arşivdeki 241 dylib'in
 hepsi `LC_BUILD_VERSION minos 11.0` (`otool -l`), 26.2 yalnız derlendiği SDK. Karşı önlem: en
-düşük sürüm adından değil ikilinin kendisinden okunur; `tauri.macos.conf.json` 11.0 diyor ve
-`surum.yml`'in mac işi paketin `LSMinimumSystemVersion`'ını ölçüyor. OR-Tools yükseltilince
-`otool -l <dylib> | grep minos` yeniden bakılır.
+düşük sürüm adından değil ikilinin kendisinden okunur: `scripts/ortools-mac.sh` her dylib'in
+`minos`'unu okuyup 11.0 değilse durur, `tauri.macos.conf.json` 11.0 diyor ve `surum.yml`'in mac işi
+paketin `LSMinimumSystemVersion`'ına bakıyor. OR-Tools yükseltilip `minos` yükselirse betik kırmızı
+olur ve karar yeniden verilir.
 
 ### 158 · Notarize edilmemiş 99 dylib'in ilk yüklenişi saniyeler sürer
 Ölçüldü 2026-11-15, bu Mac'te: `cpsat.rs`'in küçük model testi CP-SAT'ı ilk kez yüklediğinde

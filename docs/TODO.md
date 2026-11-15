@@ -1039,6 +1039,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - arayüz metinleri Windows diyor: Hakkında "Uygulama (.exe)", "Belgelerim'deki",
         ipuçlarında "Ctrl+Z" (src/ui, bu dalın dışında);
       - Dock'tan "Çık" ve oturum kapatma `CloseRequested`'sız bitiyor (son iki saniye);
+      - ad-hoc imzada her güncelleme yeni bir kimlik: Belgeler izni yeniden sorulabilir,
+        macOS 13+ Uygulama Yönetimi `/Applications`'taki takası durdurabilir; temiz bir
+        kullanıcıda `/Applications`'tan bir güncelleme denenmeli;
+      - `surum.yml`'in `publish`'i artık mac işini de bekliyor: mac işi kırmızıysa Windows
+        sürümü de çıkmaz; ilk etiketten önce `mac.yml` bir kez yeşil görülmeli;
       - Apple Developer üyeliği alınırsa: `APPLE_*` sırları, iş akışı hazır.
 
 ---
