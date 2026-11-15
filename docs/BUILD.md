@@ -391,7 +391,9 @@ siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 Aynı `src-tauri/`, macOS'ta derlenince `Mozaik.app` ve bir `.dmg` (DECISIONS 2026-11-15, "Mac
 sürümü"). Mac'e özgü ayarların hepsi `src-tauri/tauri.macos.conf.json`'da; Tauri onu yalnız
 macOS'ta `tauri.conf.json`'ın üstüne katar, Windows ayarı değişmez. İçinde: paket hedefleri
-(`app`, `dmg`), en düşük macOS 11, ad-hoc imza (`signingIdentity: "-"`), program adı `Mozaik`
+(`app`, `dmg`), en düşük macOS 11, ad-hoc imza (`signingIdentity: "-"`), sertleştirilmiş çalışma
+zamanı her zaman açık (`hardenedRuntime`, DECISIONS 2026-11-16) ve onun tek istisnası
+`src-tauri/macos/Mozaik.entitlements` (aşağıda, "CP-SAT"), program adı `Mozaik`
 (`mainBinaryName`), `src-tauri/icons/Mozaik.icns` (`scripts/ikon-mac.mjs` üretir: çizim
 1024'lük tuvalde 824 piksel, macOS 11'in ızgarası) ve Belgeler izninin cümlesi
 (`src-tauri/macos/Info.plist`).
@@ -412,7 +414,13 @@ karşılaştırır ve `libortools.9.dylib`'in `@rpath` kapanışını (`otool -L
 `src-tauri/ortools/`'a kopyalar; ürettiği `src-tauri/tauri.ortools.json` (depoya girmez) onları `bundle.macOS.frameworks` olarak
 verir, Tauri `Contents/Frameworks`'e koyup tek tek imzalar (sır yoksa ad-hoc, varsa Developer ID).
 Betik her dylib'in en düşük macOS'unu da okur ve 11.0 değilse durur. `cpsat.rs` kütüphaneyi
-`Contents/MacOS/../Frameworks/` altında arar. Arşivin adındaki `macOS-26.2` derlendiği makine,
+`Contents/MacOS/../Frameworks/` altında arar. Sertleştirilmiş çalışma zamanının kütüphane
+doğrulaması yalnız aynı ekip kimliğiyle imzalı dylib'i yükler; ad-hoc imzada ekip kimliği yok ve
+CP-SAT "different Team IDs" ile reddedildi (ölçüldü 2026-11-16). Ad-hoc pakete bu yüzden
+`com.apple.security.cs.disable-library-validation` girer; Developer ID ile imzalanınca
+`surum.yml` onu çıkarır (`entitlements: null`) ve doğrulama açık kalır. `DYLD_*` ile kütüphane
+sokmak iki durumda da kapalı. Açılan güncelleme paketinde her bağ paketin içinde kalmalı
+(`update_mac.rs`, `icerde_mi`). Arşivin adındaki `macOS-26.2` derlendiği makine,
 en düşük sürüm değil (tuzak 157).
 
 **Veri ve pencere.** Klasör `~/Documents/Ders Programı`; Tauri'nin `document_dir`'i `$HOME`'u

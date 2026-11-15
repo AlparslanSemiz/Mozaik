@@ -339,11 +339,14 @@ jobs:
           done
           if [ -n "${APPLE_CERTIFICATE:-}" ]; then
             echo "Developer ID ile imzalanıyor"
-            # Notarize için sertleştirilmiş çalışma zamanı şart.
+            # Sertleştirilmiş çalışma zamanı her durumda açık (tauri.macos.conf.json).
+            # Aynı ekip kimliğiyle imzalanan dylib'ler kütüphane doğrulamasından
+            # geçer, yani ad-hoc'un ihtiyacı olan istisna burada çıkarılır
+            # (`null` birleştirmede anahtarı siler).
             node -e '
               const fs = require("fs"), y = "src-tauri/tauri.ortools.json";
               const c = JSON.parse(fs.readFileSync(y, "utf8"));
-              c.bundle.macOS.hardenedRuntime = true;
+              c.bundle.macOS.entitlements = null;
               fs.writeFileSync(y, JSON.stringify(c, null, 2));'
             # Notarization üçü birden ister; eksik bir üçlü hiç verilmez.
             if [ -z "${APPLE_ID:-}" ] || [ -z "${APPLE_PASSWORD:-}" ] || [ -z "${APPLE_TEAM_ID:-}" ]; then
@@ -367,6 +370,8 @@ jobs:
           app="$kok/macos/Mozaik.app"
           test -d "$app" || { echo "Mozaik.app üretilmedi" >&2; ls -R "$kok" | head -50; exit 1; }
           codesign --verify --deep --strict --verbose=2 "$app"
+          # Sertleştirilmiş çalışma zamanı (DECISIONS 2026-11-16).
+          codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime'
           test -f "$app/Contents/Frameworks/libortools.9.dylib"
           test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
           [ "$(ls "$app/Contents/Frameworks" | wc -l | tr -d ' ')" = "$(ls src-tauri/ortools/*.dylib | wc -l | tr -d ' ')" ]

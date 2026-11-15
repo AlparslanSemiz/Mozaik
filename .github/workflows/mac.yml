@@ -72,6 +72,7 @@ jobs:
           set -euo pipefail
           app=src-tauri/target/release/bundle/macos/Mozaik.app
           codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime'
           test -f "$app/Contents/Frameworks/libortools.9.dylib"
           test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
           [ "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = "11.0" ]

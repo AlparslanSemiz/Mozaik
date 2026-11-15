@@ -63,6 +63,14 @@ Aynı dalda dört küçük kapı:
   `MOZAIK_ORTOOLS` yalnız debug derlemede.
 - **İndirme sınırlı, kurulum kendi klasöründe.** `boyut`'u aşan ilk parçada durulur (en çok 256
   MB), kurulum her seferinde `%TEMP%` altında yeni ve tahmin edilemez adlı bir klasöre yazılır.
+- **Mac (main'e birleştikten sonra).** Mac arşivlerini de `sign` imzalıyor, `publish`'le aynı
+  kuralla (iki dosyası da gelen mimari); Mac işi de betiksiz, önbelleksiz ve SHA'ya sabit; Mac
+  indirmesi de sınırlı. Sertleştirilmiş çalışma zamanı her zaman açık. Seçenekler: (a) dylib'leri
+  "aynı kimlikle" imzalamak, ad-hoc'ta ekip kimliği olmadığı için imkânsız; (b)
+  `disable-library-validation` yalnız ad-hoc pakette. (b) seçildi, ölçerek: ad-hoc ve
+  `--options runtime` imzalı bir süreç paketin dylib'ini "different Team IDs" ile reddetti, istisnayla
+  CP-SAT'ın küçük modeli geçti; paket açıldı ve 20 s ayakta kaldı. Açılan güncelleme paketindeki
+  her bağ paketin içinde kalmalı (`icerde_mi`).
 
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 

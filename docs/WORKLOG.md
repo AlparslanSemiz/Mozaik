@@ -171,6 +171,15 @@ açıldı, birleşmedi. Ayrıntı ve gerekçe DECISIONS 2026-11-16, ayarlar BUIL
   her seferinde `%TEMP%` altında yeni bir klasöre (Unix'te 0700), öncekiler silinerek. `kurulumu_baslat`'a ve karar
   mantığına dokunulmadı (`guncelleme/windows-yolu` orada çalışıyor).
 
+- **Mac, main'le birleşince (78f1062):** Mac imzası `sign`'da, Mac işi betiksiz ve önbelleksiz,
+  `mac.yml` SHA'ya sabit, Mac indirmesi sınırlı, `icerde_mi`, sertleştirilmiş çalışma zamanı ve
+  ad-hoc pakete `disable-library-validation`. Bu Mac'te: `scripts/ortools-mac.sh arm64`, `tauri
+  build` (`Mozaik.app` 57 MB, `codesign --verify --deep --strict` temiz, `flags=adhoc,runtime`),
+  paket sahte ev dizininde açıldı ve 20 s ayakta kaldı, sayfa CSP altında WKWebView'de çizildi.
+  CP-SAT'ın küçük modeli, paketin `Contents/Frameworks/libortools.9.dylib`'iyle, aynı biçimde
+  imzalı (ad-hoc + runtime) bir test ikilisinde: istisnasız "different Team IDs", istisnayla geçti.
+  Paketin kendi sürecinde öneri araması tıklanmadı.
+
 Koşulanlar: `cargo test` (66), `npm run hizli`, `tsc`, `eslint`, `prettier`, `vite build`, `npm run
 boyut`, `actionlint` (yalnız `kanarya.yml`'in bilinen `ubuntu-26.04` etiketi), `e2e/csp.spec.ts`.
 Bu makinede `flock` yok, Playwright kilitsiz koştu.
