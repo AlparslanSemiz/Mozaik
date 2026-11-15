@@ -439,6 +439,24 @@ fn ozet(bytes: &[u8]) -> String {
     Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// Writes a downloaded program whole or not at all: `<yol>.tmp`, `sync_all`,
+/// rename. `fs::write` straight to `.yeni` left half a program behind when the
+/// disk filled up, and `swap` only asks whether the file is there (security
+/// review 2026-11-15, V10). A failed write removes its temporary.
+fn diske_yaz(yol: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    use std::io::Write;
+    let tmp = yan(yol, "tmp");
+    let yaz = || -> std::io::Result<()> {
+        let mut f = fs::File::create(&tmp)?;
+        f.write_all(bytes)?;
+        f.sync_all()?;
+        fs::rename(&tmp, yol)
+    };
+    yaz().inspect_err(|_| {
+        let _ = fs::remove_file(&tmp);
+    })
+}
+
 /// `<program>.exe` -> `<program>.exe.<ek>`
 fn yan(exe: &Path, ek: &str) -> PathBuf {
     let mut ad = exe.as_os_str().to_os_string();
@@ -598,13 +616,13 @@ pub async fn download_update(url: String, boyut: u64, sha256: String) -> Result<
         // never kept. Its digest goes with it: `apply_update` checks the file
         // again right before running it, since the folder is not ours alone.
         let hedef = std::env::temp_dir().join(KURULUM_ADI);
-        fs::write(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
+        diske_yaz(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
         *INDIRILEN_KURULUM
             .lock()
             .map_err(|_| "Kurulum kaydı okunamadı.")? = Some((hedef, sha256.to_ascii_lowercase()));
         return Ok(bytes.len() as u64);
     }
-    fs::write(yan(&exe, YENI), &bytes).map_err(|e| {
+    diske_yaz(&yan(&exe, YENI), &bytes).map_err(|e| {
         format!(
             "Yeni sürüm diske yazılamadı: {e}\n\
              Programı Belgelerim gibi yazılabilir bir klasöre taşıyıp tekrar deneyin."
@@ -1173,6 +1191,25 @@ mod tests {
         let sonraki = kod[kanca..].find(".on_window_event(").unwrap() + kanca;
         assert!(kanca < cagri[0] && cagri[0] < sonraki, "sweep_old sayfa yüklenince değil");
         assert!(kod[kanca..sonraki].contains("PageLoadEvent::Finished"));
+    }
+
+    #[test]
+    fn a_download_is_written_whole_or_not_at_all() {
+        let s = Scratch::new("diske-yaz");
+        let yeni = yan(&s.exe(), YENI);
+        diske_yaz(&yeni, b"MZ yeni").unwrap();
+        assert_eq!(fs::read(&yeni).unwrap(), b"MZ yeni");
+        assert!(!yan(&yeni, "tmp").exists());
+
+        // The rename cannot happen (a folder holds the name): no `.yeni` file
+        // appears, and the temporary does not stay either.
+        let s2 = Scratch::new("diske-yaz-dusen");
+        let yeni2 = yan(&s2.exe(), YENI);
+        fs::create_dir(&yeni2).unwrap();
+        fs::write(yeni2.join("dolu"), b"x").unwrap();
+        assert!(diske_yaz(&yeni2, b"MZ").is_err());
+        assert!(!yeni2.is_file());
+        assert!(!yan(&yeni2, "tmp").exists());
     }
 
     #[test]
