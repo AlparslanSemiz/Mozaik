@@ -4,7 +4,7 @@ import { t } from '../../leaf/i18n';
 import type { State } from '../../leaf/model';
 import { buildIndex } from '../constraints';
 import type { Level } from './levels';
-import { buildReport } from './report';
+import { sharedReport } from './report';
 
 // ------------------------------------------------------------------ health
 //
@@ -63,7 +63,7 @@ export interface Health {
 
 export function health(d: State): Health {
   const ix = buildIndex(d);
-  const report = buildReport(d);
+  const report = sharedReport(d, ix);
 
   let blocked = 0;
   let warnings = 0;

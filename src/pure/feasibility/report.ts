@@ -1,15 +1,14 @@
 // Kontrol's whole report: capacity, what cannot be placed, and advice.
 
-import { t } from '../../leaf/i18n';
+import { aktifDil, t } from '../../leaf/i18n';
 import type { State } from '../../leaf/model';
-import { buildIndex, closedConflicts, findViolations } from '../constraints';
+import { type Index, buildIndex, closedConflicts, findViolations } from '../constraints';
 import { buildAdvice } from './advice';
 import { buildCapacity } from './capacity';
 import type { Report, Unplaceable } from './levels';
 import { commonestBlock, lessonName } from './naming';
 
-export function buildReport(d: State): Report {
-  const ix = buildIndex(d);
+export function buildReport(d: State, ix: Index = buildIndex(d)): Report {
   const { teachers, classes, rooms } = buildCapacity(d);
 
   // Lessons that are still incomplete and have no valid slot left at all.
@@ -46,4 +45,19 @@ export function buildReport(d: State): Report {
   const tight = !hasProblem && rows.some((x) => x.level === 'tight');
 
   return { teachers, classes, rooms, unplaceable, violations, advice, stranded, hasProblem, tight };
+}
+
+/**
+ * The report of the plan on screen, built once per plan and language.
+ *
+ * Two readers ask for the same plan: the health chip after every change and
+ * Kontrol when its tab opens. Each built its own, and on the weak machine one
+ * of them is a frame and a half. One slot and not a map: only the plan on
+ * screen is ever asked about, and a State is never changed in place in the UI.
+ */
+let last: { d: State; dil: string; report: Report } | null = null;
+export function sharedReport(d: State, ix?: Index): Report {
+  const dil = aktifDil();
+  if (last?.d !== d || last.dil !== dil) last = { d, dil, report: buildReport(d, ix) };
+  return last.report;
 }

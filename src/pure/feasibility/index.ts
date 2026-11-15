@@ -21,5 +21,5 @@ export { lessonName, commonestBlock, type BlockSummary } from './naming';
 export { holeReason } from './hole';
 export { buildCapacity } from './capacity';
 export { buildAdvice, type Advice } from './advice';
-export { buildReport } from './report';
+export { buildReport, sharedReport } from './report';
 export { health, type Health } from './health';

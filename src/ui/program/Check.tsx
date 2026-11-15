@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { CapacityRows } from '../lists';
 import { buildIndex, closedConflicts, placementKey } from '../../pure/constraints';
-import { type Advice, buildReport, type ReportRow } from '../../pure/feasibility';
+import { type Advice, sharedReport, type ReportRow } from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { pinnedRelationBreaches } from '../../pure/constraints';
@@ -83,8 +83,11 @@ function Section({
 
 export default function Check({ state, view }: Props) {
   const t = useT();
-  const report = useMemo(() => buildReport(state), [state]);
-  const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
+  // One index for the whole tab, and the report the health chip already built
+  // for this plan (`sharedReport`): opening Kontrol built both again.
+  const ix = useMemo(() => buildIndex(state), [state]);
+  const report = useMemo(() => sharedReport(state, ix), [state, ix]);
+  const conflicts = useMemo(() => closedConflicts(state, ix), [state, ix]);
   // What blocks besides a lesson on a closed hour: those rows carry İmkânsız.
   const otherProblem =
     report.unplaceable.length > 0 ||
@@ -94,7 +97,6 @@ export default function Check({ state, view }: Props) {
   // Where the week stands, from the same numbers the pool and the grid use.
   const placed = Object.keys(activePlacements(state)).length;
   const totalWanted = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
-  const ix = useMemo(() => buildIndex(state), [state]);
   const pinnedBreaks = useMemo(() => pinnedRelationBreaches(state, ix).length, [state, ix]);
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
