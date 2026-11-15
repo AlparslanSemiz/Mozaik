@@ -42,19 +42,17 @@ export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
   const left = clampBlocks(lesson.weeklyHours, lesson.blocks);
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
+  const placements = activePlacements(d);
 
   for (let g = 0; g < dayCount; g++) {
     let h = 0;
     while (h < hourCount) {
-      if (activePlacements(d)[placementKey(lesson.classId, g, h)] !== lesson.id) {
+      if (placements[placementKey(lesson.classId, g, h)] !== lesson.id) {
         h++;
         continue;
       }
       let end = h;
-      while (
-        end < hourCount &&
-        activePlacements(d)[placementKey(lesson.classId, g, end)] === lesson.id
-      ) {
+      while (end < hourCount && placements[placementKey(lesson.classId, g, end)] === lesson.id) {
         end++;
       }
       for (let cur = h; cur < end;) {
