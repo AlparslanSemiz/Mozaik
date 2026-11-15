@@ -130,8 +130,9 @@ export function attachGridFit(wrap: HTMLElement): () => void {
     if (frame !== 0) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      // Not before the box has a width of its own: the first fit is the
-      // observer's, below.
+      // Not before the box has a width of its own: on the very first attach
+      // the first fit is the observer's, below. When the tab comes back the
+      // width from before is still on the box and this one runs, as it did.
       if (measured()) run();
     });
   };

@@ -233,7 +233,7 @@ ortalaması 16–94, 8 çekirdek).** Babanın haftası (`tam-dolu-kurs-dizili.js
 İki koşu arasında kod bir kez değişti, Chromium'da davranışı aynı: `contentBoxSize`'ı
 vermeyen eski bir motorda ilk oran hiç ölçülmesin diye, gözlemcinin ilk cevabı genişlik
 yazılmasa da ölçümü başlatıyor. Ölçülen kazancın üst sınırı (`fit` kapalı) ile karşılaştırma:
-bu çare x1'de ondan da hızlı (aynı gün, ayrı A/B koşularında fit kapalı 115–119 ms), çünkü kaldırılan yerleşim
+bu çare x1'de en az onun kadar hızlı (aynı gün, ayrı A/B koşularında fit kapalı 115–119 ms, kirli aralıklar örtüşüyor), çünkü kaldırılan yerleşim
 `fit`'in kendi işi değil `100cqw`'nin bedeliydi.
 
 **Görüntü birebir aynı.** `scratch/olc-goruntu.mjs`: iki veri (babanın haftası ve `v17.json`),
