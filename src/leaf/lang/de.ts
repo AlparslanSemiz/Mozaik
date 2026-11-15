@@ -1046,6 +1046,12 @@ const DE: Sozluk = {
     "{kim} ist nur an {acik} Tagen verfügbar, aber ein Fach muss {n} Mal pro Woche gelegt werden; es kann an einem Tag zweimal landen.",
   "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.":
     "{ders} ist in {n} eigenständige Blöcke aufgeteilt und lässt keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann.",
+  "{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:":
+    "{n} Fächer müssen öfter pro Woche gelegt werden, als es Tage gibt; jedes erscheint an mindestens einem Tag zweimal:",
+  "{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:":
+    "{n} Lehrkräfte haben weniger freie Tage, als eines ihrer Fächer braucht; es kann an einem Tag zweimal landen:",
+  "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:":
+    "{n} Fächer sind in Blöcke aufgeteilt und lassen keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann:",
 
   // src/import.ts
   '{n}. satır: "{ad}" iki kez geçiyor, biri alındı.':

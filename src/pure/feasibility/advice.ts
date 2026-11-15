@@ -18,6 +18,9 @@ export interface Advice {
   key: string;
   /** WHICH aSc Advisor category this is — a code, not the sentence (pitfall 22). */
   code: 'lessonNeedsMoreDays' | 'teacherManyBlockedDays' | 'lessonManyBlocks';
+  /** Whom it is about, as the message names it: Kontrol lists the names under
+   *  one sentence when a code repeats, rather than the sentence N times. */
+  who: string;
   message: string;
 }
 
@@ -47,12 +50,14 @@ export function buildAdvice(d: State, ix: Index): Advice[] {
   for (const lesson of d.lessons) {
     const plan = blockPlan(lesson);
     if (plan.length <= dayCount) continue;
+    const who = lessonName(ix, lesson.id);
     out.push({
       key: `lessonNeedsMoreDays|${lesson.id}`,
       code: 'lessonNeedsMoreDays',
+      who,
       message: t(
         '{ders} haftada {n} kez konacak ama yalnızca {gun} gün var; en az bir günde iki kez görülecek.',
-        { ders: lessonName(ix, lesson.id), n: plan.length, gun: dayCount },
+        { ders: who, n: plan.length, gun: dayCount },
       ),
     });
   }
@@ -71,6 +76,7 @@ export function buildAdvice(d: State, ix: Index): Advice[] {
     out.push({
       key: `teacherManyBlockedDays|${teacher.id}`,
       code: 'teacherManyBlockedDays',
+      who: teacher.short,
       message: t(
         '{kim} yalnızca {acik} günde müsait ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.',
         { kim: teacher.short, acik: openDays, n: maxNeeded },
@@ -84,12 +90,14 @@ export function buildAdvice(d: State, ix: Index): Advice[] {
   for (const lesson of d.lessons) {
     const sum = lesson.blocks.reduce((a, b) => a + b, 0);
     if (lesson.blocks.length < 2 || sum !== lesson.weeklyHours) continue;
+    const who = lessonName(ix, lesson.id);
     out.push({
       key: `lessonManyBlocks|${lesson.id}`,
       code: 'lessonManyBlocks',
+      who,
       message: t(
         '{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.',
-        { ders: lessonName(ix, lesson.id), n: lesson.blocks.length },
+        { ders: who, n: lesson.blocks.length },
       ),
     });
   }

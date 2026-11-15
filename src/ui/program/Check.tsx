@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { CapacityRows } from '../lists';
 import { buildIndex, closedConflicts, placementKey } from '../../pure/constraints';
-import { buildReport, type ReportRow } from '../../pure/feasibility';
+import { type Advice, buildReport, type ReportRow } from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { pinnedRelationBreaches } from '../../pure/constraints';
@@ -16,6 +16,31 @@ interface Props {
   /** Which part of the report the strip has chosen. */
   view: CheckView;
 }
+
+/**
+ * The Danışman's notes, one row per kind (DENETIM KS22, Ö38). On the full
+ * course the same sentence stood five times with only the lesson's name
+ * changing; now a kind that repeats is one sentence with the names under it,
+ * and a kind that occurs once keeps its own full sentence.
+ */
+function adviceRows(advice: Advice[]): Advice[][] {
+  const byCode = new Map<Advice['code'], Advice[]>();
+  for (const a of advice) {
+    const group = byCode.get(a.code);
+    if (group === undefined) byCode.set(a.code, [a]);
+    else group.push(a);
+  }
+  return [...byCode.values()];
+}
+
+const GROUPED: Record<Advice['code'], string> = {
+  lessonNeedsMoreDays:
+    '{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:',
+  teacherManyBlockedDays:
+    '{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
+  lessonManyBlocks:
+    '{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:',
+};
 
 /**
  * One capacity panel, drawn FULL WIDTH as the whole page.
@@ -314,12 +339,23 @@ export default function Check({ state, view }: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {report.advice.map((a) => (
-                    <tr key={a.key}>
+                  {adviceRows(report.advice).map((group) => (
+                    <tr key={group[0]!.key}>
                       <td>
                         <span className="badge tight">{t('Öneri')}</span>
                       </td>
-                      <td>{a.message}</td>
+                      <td>
+                        {group.length === 1 ? (
+                          group[0]!.message
+                        ) : (
+                          <>
+                            {t(GROUPED[group[0]!.code], { n: group.length })}{' '}
+                            <span className="hint inline">
+                              {group.map((a) => a.who).join(', ')}
+                            </span>
+                          </>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
