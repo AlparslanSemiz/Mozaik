@@ -138,14 +138,22 @@ describe('sözleşme · geri al yığını', () => {
     expect(cur.past[0]?.settings.schoolName).toBe(String(60 - cap));
   });
 
-  it('program değişikliği, yükleme ve plan geçişi geçmişi TEMİZLİYOR', () => {
+  it('yükleme ve plan geçişi geçmişi TEMİZLİYOR', () => {
     const one = reduce(box(emptyState()), { type: 'change', apply: () => named('A') });
-    expect(reduce(one, { type: 'program-change', apply: () => named('B') }).past).toEqual([]);
     expect(reduce(one, { type: 'load', state: named('C') }).past).toEqual([]);
     const switched = reduce(one, { type: 'switch', id: 'p2', state: named('D') });
     expect(switched.past).toEqual([]);
     expect(switched.future).toEqual([]);
     expect(switched.planId).toBe('p2');
+  });
+
+  // Since 2026-11-15: a seçenek change is an ordinary step. The history holds
+  // whole states, so nothing is replayed into another seçenek (undo.ts).
+  it('seçenek değişikliği geçmişi TUTUYOR ve bir adım ekliyor', () => {
+    const one = reduce(box(emptyState()), { type: 'change', apply: () => named('A') });
+    const two = reduce(one, { type: 'program-change', apply: () => named('B') });
+    expect(two.past).toHaveLength(2);
+    expect(reduce(two, { type: 'undo' }).present).toBe(one.present);
   });
 });
 
