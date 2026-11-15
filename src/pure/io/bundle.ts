@@ -31,6 +31,11 @@ export interface Bundle {
   /** Ids of entries dropped because their `state` was not an object. They are
       unreadable plans all the same, and the plan here with that id stays. */
   skipped?: Id[];
+  /** Names of entries dropped because they had no id, or the id of an entry
+      before them: there is no plan here they could stand for, so nothing
+      stays in their place, and the import names them rather than lose them
+      without a word (the audit of 2026-11-16). */
+  dropped?: string[];
 }
 
 interface RawEntry {
@@ -115,20 +120,41 @@ export function parseBundle(text: string): Bundle | null {
   const library = normalizeLibrary({ activeId: g.activeId, plans: entries });
 
   const states: Record<Id, unknown> = {};
+  const dropped: string[] = [];
   for (const entry of entries) {
     // normalizeLibrary decided which ids survive; anything it dropped (no id,
-    // duplicate id) must not leave a state behind either.
-    if (typeof entry.id === 'string' && library.plans.some((p) => p.id === entry.id)) {
-      states[entry.id] ??= entry.state;
+    // duplicate id) must not leave a state behind either. The first entry
+    // with an id is the plan, as it is in the directory.
+    if (
+      typeof entry.id === 'string' &&
+      library.plans.some((p) => p.id === entry.id) &&
+      !Object.prototype.hasOwnProperty.call(states, entry.id)
+    ) {
+      states[entry.id] = entry.state;
+    } else {
+      dropped.push(
+        typeof entry.name === 'string' && entry.name.trim() !== '' ? entry.name.trim() : '?',
+      );
     }
   }
   if (Object.keys(states).length === 0) return null;
+  // No id AND no object state: neither list above would name it.
+  for (const item of list) {
+    if (typeof item !== 'object' || item === null || entries.includes(item as RawEntry)) continue;
+    const { id, name } = item as RawEntry;
+    if (typeof id !== 'string') {
+      dropped.push(typeof name === 'string' && name.trim() !== '' ? name.trim() : '?');
+    }
+  }
 
   const skipped = list.flatMap((item) => {
     const id = typeof item === 'object' && item !== null ? (item as RawEntry).id : undefined;
     return typeof id === 'string' && !Object.prototype.hasOwnProperty.call(states, id) ? [id] : [];
   });
-  return skipped.length > 0
-    ? { library, states, skipped: [...new Set(skipped)] }
-    : { library, states };
+  return {
+    library,
+    states,
+    ...(skipped.length > 0 ? { skipped: [...new Set(skipped)] } : {}),
+    ...(dropped.length > 0 ? { dropped } : {}),
+  };
 }
