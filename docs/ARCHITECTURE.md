@@ -233,7 +233,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
-| `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menüsünü bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menülerini bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
+| `ui/program/GridMenu.tsx` | ızgaranın sağ tık menüsü (kart, satır ya da gün başlığı, sütun); okuduğunu `describeMenu` hesaplar, seçimleri Program'a döner |
+| `ui/program/PoolMenu.tsx` | havuz kartının sağ tık menüsü; okuduğunu `poolMenuFacts` hesaplar |
 | `ui/program/usePreview.ts` | önerinin önizlemesi: hangi yol, haftası hâlâ bu planın mı, farkı, "Önerilen"de hafta; Escape kapatır |
 | `ui/program/PreviewBar.tsx` | önizlenirken ızgaranın üstündeki çubuk |
 | `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |

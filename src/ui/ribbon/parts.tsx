@@ -12,7 +12,7 @@ import type React from 'react';
 import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
 import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
-import type { ProgramMask } from '../../pure/program';
+import type { ProgramMask, StripCounts } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
 import { type useDialogs, useT } from '../common';
 
@@ -44,13 +44,18 @@ export interface RibbonProps {
   /** Ayarlar → Planlar's strip STATES which plan is open. A name, not the
       library: everything that creates, renames and deletes stays in the panel. */
   planName: string;
+  /** `health(state)`, computed once by App for the top bar's line and handed
+      down: it costs ~15 ms on the father's week, and the strip used to compute
+      the same thing again on every edit (TODO RO1). */
+  status: ReturnType<typeof health>;
 }
 
 /** Everything a strip draws from: the ribbon's props and what `index.tsx` computed. */
 export interface StripContext extends RibbonProps {
   t: ReturnType<typeof useT>;
   dialogs: ReturnType<typeof useDialogs>;
-  status: ReturnType<typeof health>;
+  /** The Program strip's counts, memoised in `index.tsx`; null on every other tab. */
+  strip: StripCounts | null;
 }
 
 /** Every lucide symbol in the strip is drawn at the size the hand-drawn four are. */

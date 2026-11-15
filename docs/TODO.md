@@ -1605,17 +1605,17 @@ değişmez, ekran 0 piksel.
       kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
       Bitti (2026-11-15, `refactor/rf24-rf25`): `LessonForm.tsx`, `LessonRow.tsx` ve
       `LessonPicker.tsx`; `index.tsx` 241 satır.
-- [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
+- [x] **RF26 Program'ın sağ tık menüleri bileşenlere.** Bitti (2026-11-15, `refactor/rf26-ro`): `ui/program/GridMenu.tsx` ve `PoolMenu.tsx`. Izgaranın ve havuzun menüleri
       `ui/program/Program.tsx`'in içinde; hesapları (`describeMenu`, `poolMenuFacts`) zaten
       `pure/program/`'da.
 
 **Optimizasyon fırsatları** (refactor turu hiçbirini yapmadı; her biri önce ölçülür, tuzak
 105 ve 117):
 
-- [ ] **RO1 `health(state)` iki kez hesaplanıyor.** App üst çubuğun durum satırı için, şerit
+- [x] **RO1 `health(state)` iki kez hesaplanıyor.** Bitti (2026-11-15): App hesaplıyor, şerit `status` prop'unu alıyor; babanın dizili haftasında bir çağrı 15,5 ms, her düzenlemede bir kez kazanılıyor. App üst çubuğun durum satırı için, şerit
       Kontrol'ün sayıları için, her biri kendi `useMemo`'suyla aynı `state` ve `dil` üstünde.
       Biri hesaplayıp öbürüne verebilir. Kazanç ölçülmedi.
-- [ ] **RO2 Program şeridinin sayıları her çizimde baştan.** `describeStrip` (eskiden şeridin
+- [x] **RO2 Program şeridinin sayıları her çizimde baştan.** Bitti (2026-11-15): `Ribbon` `describeStrip`'i yalnız Program sekmesinde ve `state` ile maske değişince hesaplıyor; bir çağrı 4,5 ms, çözücü koşarken her dilimde kazanılıyor. `describeStrip` (eskiden şeridin
       gövdesinde) her ders için `pendingBlocks`'u ve bütün programın `pinScopeCells`'ini
       memo'suz koşuyor, şerit her `App` çiziminde yeniden çiziliyor. Babanın tam haftasında
       ölçülür, sonra `useMemo`.
