@@ -1061,6 +1061,7 @@ const DE: Sozluk = {
 
   // src/library.ts
   "Adsız plan": "Plan ohne Namen",
+  "Geri gelen plan {n}": "Wiedergefundener Plan {n}",
   "Uygulama (.exe)": "Anwendung (.exe)",
   "Dosya (çift tıklanan .html)": "Datei (doppelt angeklickte .html)",
   "Windows kurulumu": "Windows-Installation",

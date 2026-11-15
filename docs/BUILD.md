@@ -304,11 +304,13 @@ getirebiliyor.
 
 ### Exe
 
-`npm run exe` `--no-bundle` ile derler: Tauri'nin NSIS hedefi bir kurulum
-sihirbazı üretir, teslim edilen şey ise tek bir `Mozaik.exe`. Bunun ilk gerekçesi
-2026-08-30'a kadar geçerli olan "kurulum yok" kuralıydı ve o kural gevşedi.
-Bugünkü gerekçe kurulmadan çalışan yolun korunması, ve bir kurulum sihirbazı artık
-bir seçenek olarak tartışılabilir ([DECISIONS.md](DECISIONS.md)).
+`npm run exe` `--no-bundle` ile derler, geliştirme için. Yayın (`surum.yml`) bundle
+ile derler ve iki şey teslim eder: tek başına `Mozaik.exe` ve kurulum sihirbazı
+`Mozaik-Kurulum.exe` (NSIS, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`).
+Kurulumun gerekçesi CP-SAT'ın exe'nin yanında duran kütüphaneleri; tek dosya, eski
+kopyaların güncellenebilmesi için yayında kalıyor (DECISIONS 2026-11-15). Kaldırıcı
+veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz. İki program da
+minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, DECISIONS 2026-11-15), exe imzasız hiçbir şey kurmaz.
 
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
@@ -530,7 +532,10 @@ Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek 
 Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi onu
 kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
-koyar: dosya adı eski kalır, içindeki program yenidir.
+koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
+taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir ve `/S /R` ile
+çalıştırır; tek dosyalık bir kopya geçerken yolunu bir not dosyasına (`update.rs`, `ESKI_KOPYA_NOTU`) yazar ve kurulan
+program onu açılışta siler (`update.rs`).
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
 sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:

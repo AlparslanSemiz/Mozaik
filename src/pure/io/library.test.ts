@@ -7,6 +7,7 @@
 import { newId } from '../entities';
 import {
   addPlan,
+  adoptOrphans,
   BACKUP_COUNT,
   backupFileName,
   backupKey,
@@ -666,5 +667,34 @@ describe('katman sınırları', () => {
     expect(kodu(bundle!), 'bundle.ts dizini normalizeLibrary’ye vermiyor').toMatch(
       /normalizeLibrary\(\{\s*activeId:\s*g\.activeId/,
     );
+  });
+});
+
+describe('adoptOrphans — kaybolan dizin planları gizlemiyor', () => {
+  const A = 'abcdefgh';
+  const B = 'k2m3n4p5';
+  it('dizinde olmayan her plan anahtarı geri geliyor, var olanlar dokunulmadan', () => {
+    const lib = adoptOrphans(parseLibrary(null), [
+      planKey(B),
+      'ders-programi',
+      planKey(A),
+      'ders-programi-planlar',
+    ]);
+    expect(lib.activeId).toBe('1');
+    expect(lib.plans.map((p) => p.id)).toEqual(['1', A, B]);
+    expect(lib.plans.every((p) => !p.draft && p.name.length > 0)).toBe(true);
+  });
+  it('yedekler, tercihler ve kimlik olamayacak anahtarlar plan sayılmıyor', () => {
+    const lib = adoptOrphans(parseLibrary(null), [
+      backupKey(0),
+      'ders-programi-havuz',
+      'ders-programi-plan-',
+      `${planKey(A)}-eski`,
+    ]);
+    expect(lib.plans.map((p) => p.id)).toEqual(['1']);
+  });
+  it('dizinde zaten olan plan ikinci kez eklenmiyor ve adı korunuyor', () => {
+    const base = addPlan(parseLibrary(null), { id: A, name: 'Güz', draft: true });
+    expect(adoptOrphans(base, [planKey(A)])).toEqual(base);
   });
 });

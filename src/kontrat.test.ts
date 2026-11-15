@@ -366,17 +366,25 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     return [...block.matchAll(/teslim\/(\S+)/g)].map((m) => m[1]!);
   }
 
-  it('Manifest beş alan okuyor, surum.yml beşini yazıyor', () => {
-    expect(MANIFEST.length).toBe(5);
+  /** Read as `Option` with `serde(default)`: a manifest published before each was added still parses. */
+  const OPTIONAL = ['sha256', 'kurulum', 'kurulum_boyut', 'kurulum_sha256', 'imza', 'kurulum_imza'];
+
+  it('Manifest on alan okuyor, surum.yml onunu yazıyor', () => {
+    expect(MANIFEST.length).toBe(10);
     expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
   });
 
   // v2.2.0's file predates the digest (2026-10-24); update.rs reads it as
   // `Option`, so every manifest already published still tells a copy it is
   // up to date. Only `sha256` may be missing.
-  it('kayıtlı surum.json Manifest’in alanlarını, Rust’ın tipleriyle taşıyor (özet öncesi)', () => {
-    expect(Object.keys(manifest).sort()).toEqual(MANIFEST.filter((k) => k !== 'sha256').sort());
+  it('kayıtlı surum.json Manifest’in alanlarını, Rust’ın tipleriyle taşıyor (özet ve kurulum öncesi)', () => {
+    expect(Object.keys(manifest).sort()).toEqual(
+      MANIFEST.filter((k) => !OPTIONAL.includes(k)).sort(),
+    );
     expect(updateRs).toMatch(/#\[serde\(default\)\]\s*pub sha256: Option<String>/);
+    for (const k of OPTIONAL.slice(1)) {
+      expect(updateRs).toMatch(new RegExp(`#\\[serde\\(default[^\\]]*\\)\\]\\s*pub ${k}: Option<`));
+    }
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(manifest.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(typeof manifest.exe).toBe('string');
@@ -395,6 +403,13 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     expect(measured).toBeDefined();
     expect(measured).toBe(address);
     expect(hashed).toBe(address);
+    // The installer's size and digest are its own file's, and its address names it.
+    const kMeasured = /kurulum_boyut=\$\(stat -c%s teslim\/(\S+)\)/.exec(surumYml)?.[1];
+    const kHashed = /kurulum_ozet=\$\(sha256sum teslim\/(\S+) /.exec(surumYml)?.[1];
+    const kAddress = /^\s*kurulum="[^"]*\/([^/"]+)"/m.exec(surumYml)?.[1];
+    expect(kMeasured).toBe('Mozaik-Kurulum.exe');
+    expect(kHashed).toBe(kMeasured);
+    expect(kAddress).toBe(kMeasured);
   });
 
   it('sürüm etiketin numarası, boyut Release’teki exe’nin boyutu', () => {
@@ -410,8 +425,14 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     expect([...assets.keys()]).toContain(name);
   });
 
-  it('Release’in dosyaları surum.yml’in yayınladıkları', () => {
-    expect([...assets.keys()].sort()).toEqual([...publishedFiles()].sort());
+  // The recorded release is v2.2.0; the installer is published from 2026-11-15
+  // on, so a release now carries exactly that one file more.
+  it('Release’in dosyaları surum.yml’in yayınladıkları, artı 2026-11-15’ten beri kurulum', () => {
+    const published = publishedFiles();
+    expect(published).toContain('Mozaik-Kurulum.exe');
+    expect(published.filter((n) => n !== 'Mozaik-Kurulum.exe').sort()).toEqual(
+      [...assets.keys()].sort(),
+    );
   });
 
   it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {

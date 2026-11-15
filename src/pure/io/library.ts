@@ -110,6 +110,37 @@ export function parseLibrary(text: string | null): Library {
   }
 }
 
+/**
+ * `ders-programi-plan-<id>`: any id without a dash, since a plan from an older
+ * version or a file need not have one `newId()` made. Backups and preferences
+ * have other names (`-yedek-N`, `-havuz`), and nothing else ends `-plan-x`.
+ */
+const PLAN_KEY = new RegExp(`^${BASE_KEY}-plan-([^-]+)$`);
+
+/**
+ * The directory, with every plan that is in storage but in no entry put back.
+ *
+ * The directory and the plans live in different keys, and the directory can
+ * read empty or broken while the plans are whole (TRAPS 108: a reload once
+ * read storage empty). `parseLibrary` then answers with the one-plan default,
+ * and writing that back made every other plan unreachable, its key whole and
+ * nothing pointing at it, and the day's backups in Belgelerim were written
+ * from that one plan (security review, 2026-11-15). A plan found this way
+ * comes back as an ordinary plan under a name that says so; nothing is
+ * dropped and no key is touched. Plan "1" is always in the default.
+ */
+export function adoptOrphans(lib: Library, keys: readonly string[]): Library {
+  let out = lib;
+  let n = 0;
+  for (const key of [...keys].sort()) {
+    const id = PLAN_KEY.exec(key)?.[1];
+    if (id === undefined || findPlan(out, id) !== undefined) continue;
+    n++;
+    out = addPlan(out, { id, name: t('Geri gelen plan {n}', { n }), draft: false });
+  }
+  return out;
+}
+
 export function findPlan(lib: Library, id: Id): PlanInfo | undefined {
   return lib.plans.find((p) => p.id === id);
 }
