@@ -36,6 +36,37 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-15 · Exe bir kurulum paketiyle de teslim ediliyor (`teslim/kurulum-paketi`)
+
+**Karar (Alp).** Yayın, tek başına `Mozaik.exe`'nin yanında bir kurulum sihirbazı
+(`Mozaik-Kurulum.exe`, Tauri'nin NSIS hedefi, kullanıcı başına, yönetici izni yok) da
+taşıyor. Sebep öneri aramasının hızı: OR-Tools CP-SAT babanın verisinde en küçük
+değişikliği 8 çekirdekte 7,9 s'de kanıtlıyor, bizim SAT araması ~26 s'de kanıtsız
+buluyor, ve CP-SAT'ın kütüphaneleri exe'nin yanında duran dosyalar (~71 MB, 10 DLL).
+Seçenekler: (a) DLL'leri exe'nin içine gömüp ilk açılışta çıkarmak, (b) kurulum.
+Alp'in sorusu "hangisi daha temiz ve ileride sorun çıkarmaz": (b). (a) kendi
+yazdığımız bir çıkarma, sürüm ve onarım katmanı demekti, ve imzasız bir exe'nin
+AppData'ya DLL çıkarıp yüklemesi virüs tarayıcılarının şüphelendiği desen.
+
+**Veri yerinde kalıyor.** WebView2 profili exe'nin yerine değil `identifier`'a bağlı
+(`%LOCALAPPDATA%\com.dersprogrami.arac`, DATA.md, "Değişmeyen kimlikler"), yani kurulan
+program aynı planları görür. Tauri'nin kaldırıcısındaki "uygulama verilerini sil" kutusu
+tam o klasörü `RmDir /r` ile siliyordu; `src-tauri/nsis/kancalar.nsh` kutunun değerini
+kaldırma bölümünün başında sıfırlıyor ve `surum.yml` kancanın üretilen betikte olduğunu
+ölçmeden kurulumu yayına sokmuyor.
+
+**Köprü.** Manifeste iki isteğe bağlı alan girdi (`kurulum`, `kurulum_boyut`). Sahadaki
+2.2.0 onları tanımaz ve tek dosyayı takas etmeye devam eder; o yeni exe bir sonraki
+"Denetle"de kurulumu önerir, kurulumu `/S /R` ile çalıştırır ve kendi yolunu
+`eski-kopya.txt`'ye yazar; kurulan program açılışta o eski dosyayı siler
+(`update.rs`, `silinecek_eski`: yalnız kurulu bir program, yalnız başka bir `.exe`).
+
+**Klasör.** Tauri'nin varsayılanı `%LOCALAPPDATA%\Mozaik`, `Kur.cmd`'nin tarayıcı
+kurulumunun klasörü. Kanca yalnız varsayılanı `%LOCALAPPDATA%\Programs\Mozaik`'e çeviriyor.
+
+**Açık kalan.** Gerçek Windows'ta eski sürümden yenisine güncelleme (CLAUDE.md, "Sürüm")
+ve kurulumun antivirüs ve SmartScreen davranışı ölçülmedi; TODO B7.38.
+
 ### 2026-10-24 · Modül modül yapısal refactor: her kaynak dosya bir alanda (`refactor/moduller`)
 
 **Ne.** Kullanıcının açıkça istediği bir tur (yapıştırılan görev ve aynı günün ek talimatı):
