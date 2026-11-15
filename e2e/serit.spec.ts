@@ -355,6 +355,10 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
         const btn = bar.querySelector<HTMLElement>('.btn')!;
         const tokenPx = (name: string) => {
           const probe = document.createElement('div');
+          // Out of the flow: as a flex item of a full strip the probe was
+          // SHRUNK, and read 3.125px for a 4.875px token at %150 once the
+          // narrowest step kept its words (2026-11-15).
+          probe.style.position = 'absolute';
           probe.style.width = `var(${name})`;
           bar.appendChild(probe);
           const w = probe.getBoundingClientRect().width;
@@ -376,6 +380,15 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
           // that node is the button's accessible name. innerText staying
           // non-empty here is the assertion, not the bug.
           yaziBoyu: parseFloat(getComputedStyle(btn).fontSize),
+          // The strip's own size for a button word, read off the token.
+          normal: (() => {
+            const probe = document.createElement('span');
+            probe.style.fontSize = 'var(--fs-sm)';
+            bar.appendChild(probe);
+            const px = parseFloat(getComputedStyle(probe).fontSize);
+            probe.remove();
+            return px;
+          })(),
           metin: btn.innerText.trim(),
           ad: (btn.getAttribute('aria-label') ?? '').trim() || btn.innerText.trim(),
         };
@@ -396,10 +409,14 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       }
       // Step 3, and rule 4 of the contract underneath it: the drawing may go,
       // the name may not (pitfall 56).
+      // Since 2026-11-15 the last step no longer takes the word away: it takes
+      // it one step down the ladder. So the word is drawn in every state, and
+      // in the narrowest it is smaller than the strip's own size.
+      expect(m.yaziBoyu, `${d.ad}: düğme kelimesi çizilmiyor`).toBeGreaterThan(0);
       if (d.kelime) {
-        expect(m.yaziBoyu, `${d.ad}: düğme kelimesi erken feda edildi`).toBeGreaterThan(0);
+        expect(m.yaziBoyu, `${d.ad}: düğme kelimesi erken küçüldü`).toBeCloseTo(m.normal, 1);
       } else {
-        expect(m.yaziBoyu, `${d.ad}: düğme kelimesi hâlâ çiziliyor`).toBe(0);
+        expect(m.yaziBoyu, `${d.ad}: son adım kelimeyi küçültmedi`).toBeLessThan(m.normal);
       }
       // In every state, including the one where the word is not drawn: the text
       // node is still in the tree and the button still answers to a name.
