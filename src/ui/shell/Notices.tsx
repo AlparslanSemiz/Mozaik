@@ -162,6 +162,8 @@ export default function Notices({
             <button
               className="btn primary"
               onClick={() => {
+                // Said once: from here Hakkında carries it.
+                setKurulumGizli(true);
                 guncellemeyeBak();
                 update.check();
               }}
