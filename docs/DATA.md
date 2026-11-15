@@ -146,8 +146,11 @@ plana uygulanamaz, ve geçişten önce bekleyen kayıt hemen yazılır (tuzak 28
 
 Bir planın içinde program alternatifleri var (v12): aynı okulu, öğretmenleri ve
 dersleri paylaşan ayrı ızgaralar. Yerleşimler ve sabitlemeler alternatife ait,
-ve ekranda, Kontrol'de ve kâğıtta olan `activeProgramId`. Bir alternatife geçmek,
-alternatif eklemek ya da silmek de geri al geçmişini temizler.
+ve ekranda, Kontrol'de ve kâğıtta olan `activeProgramId`. Alternatif eklemek, adlandırmak
+ya da silmek geri al geçmişinde sıradan bir adımdır, bir alternatife geçmek adım değildir ama
+geçmişi de silmez (2026-11-15'e kadar üçü de geçmişi temizliyordu): geçmiş bütün durumları
+tuttuğu için geri almak bir hamleyi başka bir alternatife uygulamaz, o alternatifi
+değişikliğiyle birlikte geri getirir.
 
 Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler, `programMask.ts`)
 plan başına ve yalnız bellekte tutulur. Yedeğe ve depoya yazılmıyor, aynı planın
@@ -191,6 +194,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-musaitlik-saat` | müsaitlikte saatlerin gösterilmesi |
 | `ders-programi-hareket` | hareket (`tam`, `az`, `kapali`) |
 | `ders-programi-tanitim` | örnek veri teklifi görüldü mü |
+| `ders-programi-ilk-adimlar` | Okul'daki Başlarken listesi açık mı, daraltılmış mı, kapatılmış mı, ve Yazdır'a basıldı mı; tek bir JSON kaydı |
 | `ders-programi-baski` | kâğıt seçenekleri, tek bir JSON kaydı |
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 | `ders-programi-oneri-olcum` | bu makinedeki son 20 öneri aramasının ölçümü (`relaxLog.ts`) |

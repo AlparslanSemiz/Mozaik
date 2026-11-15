@@ -12,6 +12,7 @@ import {
   onScreen,
   openSetup,
   openSettings,
+  openWithSample,
   savedText,
 } from './helpers';
 
@@ -19,7 +20,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
     await open(page);
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Okul');
-    await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
+    await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('Derslikler');
   });
 
   // The sample school is offered ONCE here and lives in Ayarlar → Hakkında. Before
@@ -38,7 +39,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await line.getByRole('button', { name: 'Bir daha gösterme' }).click();
       await expect(page.locator('.intro-line')).toHaveCount(0);
       // The panel around it stays: it is the "what do I do first" answer.
-      await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
+      await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('Derslikler');
 
       await reopen(page);
       await expect(page.locator('.panel', { hasText: 'Başlarken' })).toBeVisible();
@@ -87,6 +88,103 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await expect(page.locator('.dlg')).toContainText('25 öğretmen, 20 sınıf ve 99 ders');
       await answerDialog(page, 'cancel');
     });
+  });
+
+  // BAŞLARKEN TICKS ITSELF. It used to be one sentence that skipped the
+  // school's name, days and bell (the last tab) and vanished with the first
+  // teacher. Now: nine steps read from the plan, each with its way there,
+  // folded or closed only when the reader says so.
+  test('Başlarken dokuz adım, plandan işaretleniyor, her adımın düğmesi oraya götürüyor', async ({
+    page,
+  }) => {
+    await open(page);
+    const list = page.locator('section.checklist');
+    await expect(list.locator('li[data-step]')).toHaveCount(9);
+    await expect(list.locator('li.done')).toHaveCount(0);
+    await expect(list).toContainText('0 / 9 adım');
+    // The first step names the default week, so a wrong one is seen.
+    await expect(list.locator('li[data-step="school"]')).toContainText('Salı–Pazar, günde 12 ders');
+
+    await list.getByRole('button', { name: 'Okul adını ve zili gir' }).click();
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Ayarlar',
+    );
+    await expect(
+      page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
+    ).toContainText('Zil ve günler');
+    await page.getByPlaceholder('örn. Semiz Kurs').fill('Deneme Kurs');
+
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await expect(list.locator('li[data-step="school"]')).toHaveClass(/done/);
+    await expect(list).toContainText('1 / 9 adım');
+
+    await list.getByRole('button', { name: 'Derslik ekle' }).click();
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Derslikler');
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(list.locator('li[data-step="rooms"]')).toHaveClass(/done/);
+
+    // The teacher step does not make it go away any more.
+    await list.getByRole('button', { name: 'Öğretmen ekle' }).click();
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Öğretmenler');
+    await expect(list).toBeVisible();
+  });
+
+  test('Başlarken daraltılınca sıradaki adım kalıyor, kapatılınca yenilense de gelmiyor', async ({
+    page,
+  }) => {
+    await open(page);
+    const list = page.locator('section.checklist');
+    await list.getByRole('button', { name: 'Listeyi daralt' }).click();
+    await expect(list.locator('li[data-step]')).toHaveCount(0);
+    await expect(list).toContainText('Sıradaki: Okul adı ve saatler');
+    await expect(list.getByRole('button', { name: 'Okul adını ve zili gir' })).toBeVisible();
+
+    await reopen(page);
+    await expect(list.locator('li[data-step]')).toHaveCount(0);
+    await list.getByRole('button', { name: 'Listeyi göster' }).click();
+    await expect(list.locator('li[data-step]')).toHaveCount(9);
+
+    await list.getByRole('button', { name: 'Listeyi kapat' }).click();
+    await expect(list).toHaveCount(0);
+    // The sample-school offer outlives the list: closing it declined nothing.
+    await expect(page.locator('.intro-line')).toBeVisible();
+    await reopen(page);
+    await expect(page.locator('section.checklist')).toHaveCount(0);
+  });
+
+  test('dersleri olan bir planda Başlarken tek satır', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+    const list = page.locator('section.checklist');
+    // The sample has everything up to the timetable itself.
+    await expect(list).toContainText('7 / 9 adım');
+    await expect(list).toContainText('Sıradaki: Otomatik diz');
+    await expect(list.locator('li[data-step]')).toHaveCount(0);
+  });
+
+  test('boş ekranların düğmesi eksik adıma götürüyor', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await onScreen(page, '.empty-screen').getByRole('button', { name: 'Öğretmen ekle' }).click();
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Okul');
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Öğretmenler');
+
+    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
+    await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
+    await onScreen(page, '.empty-screen').getByRole('button', { name: 'Sınıf ekle' }).click();
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
+
+    // And the school's name and bell, which no empty screen used to mention.
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await onScreen(page, '.empty-screen')
+      .getByRole('button', { name: 'Okul adını ve zili gir' })
+      .click();
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Ayarlar',
+    );
   });
 
   test('Program: ne yapılacağını sırayla söylüyor', async ({ page }) => {
@@ -156,8 +254,11 @@ test.describe('36. Klavye', () => {
   test('Tab ile yedi sekmeye de ulaşılıyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
+    // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
+    await expect(page.locator(':focus')).toHaveText('İçeriğe geç');
+    await page.keyboard.press('Tab');
 
-    // The rail is first in the DOM, so the first stop is the first section.
+    // Then the sections, in the order they are drawn.
     const names: string[] = [];
     for (let i = 0; i < 7; i++) {
       names.push(
@@ -179,7 +280,10 @@ test.describe('36. Klavye', () => {
   test('Enter ile sekme değiştirilebiliyor ve aria-current takip ediyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
-    // Four stops in: Kurulum, Müsaitlik, Dersler, Program.
+    // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
+    await expect(page.locator(':focus')).toHaveText('İçeriğe geç');
+    await page.keyboard.press('Tab');
+    // Four stops in: Okul, Müsaitlik, Dersler, Program.
     for (let i = 0; i < 3; i++) await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(

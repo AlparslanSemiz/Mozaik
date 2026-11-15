@@ -37,7 +37,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    `zebra-liste`'de bitti: açık temada soluk yazı zebrada 6,65'e düşmüştü, dört liste
    zebrasızdı, iki yerde şerit sırası bozuktu. Şimdi her listede, iki temada aynı yükte,
    satırda yazı her zeminde ve durumda 7:1 (DESIGN Renk ve Erişilebilirlik,
-   `e2e/zebra.spec.ts` 94). İki istisna E1'de (§8e). Windows ve WebView2'de görülmedi.
+   `e2e/zebra.spec.ts` 94). Kalan tek istisna ("Sil") E1'de (§8e). Windows ve WebView2'de görülmedi.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -1357,12 +1357,18 @@ listeledi, çünkü bir kısmı bilerek olabilir. Her madde bir karar bekliyor, 
 karar verilip düzeltilince testteki `BILINEN` tablosundan da çıkar. Renk kontrastı
 bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
 
-- [ ] **`region` · on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı: `.ribbon`.**
+- [x] **`region` · on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı: `.ribbon`.**
+      Yapıldı (2026-11-15, `erisim/anlam`): şerit "Araç şeridi" adlı bir `<section>`'da
+      (`display: contents`, ekranda bir şey değişmedi); bütün ekranlarda 1 → 0.
       Araç şeridi `<main>`, `<nav>` ve `<header>`'ın dışında duruyor, yani ekran
       okuyucunun bölge listesinde bir yeri yok. Tek bir karar on bir satırı birden
       kapatıyor: şeridi bir `<header>` ya da `role="toolbar"` taşıyan bir bölgeye
       almak. Etkisi: şerit klavyeyle zaten geziliyor, eksik olan "burası ne" cevabı.
-- [ ] **`label` · Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu.**
+- [x] **`label` · Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu.**
+      Yapıldı (2026-11-15, `erisim/anlam`): tarama artık Okul'un dört adımını ayrı tarıyor ve
+      gerçek sayı Derslikler 8, Öğretmenler 50, Sınıflar 20 (+1 `select-name`) idi; hepsi 0.
+      Satır kutuları satırın adıyla (`{ad} adı`, `{ad} kısa adı`), Kurallar'ın sayı kutuları
+      kuralın adına `aria-labelledby` ile bağlı.
       Kritik seviye. Kutular tablo satırlarının içinde ve başlıkları sütun
       başlığından okunuyor, yani gören bir kullanıcı için etiketli, ekran okuyucu
       için etiketsiz. Muhtemel çare `aria-label` ya da `aria-labelledby` ile sütun
@@ -1375,14 +1381,24 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
       için görünür.
 - [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
+      Kısmen (2026-11-15, `erisim/anlam`): listelerin tutamak ve işlem sütunları ile Zil ve
+      günler'in onay sütunu ekran okuyucuya adlı ("Taşı", "İşlemler", "Ders günü"), Okul,
+      Dersler ve Ayarlar 0. Kalan Program 6 (`Grid.tsx`'in köşesi ve gün bantlarının ayraçları)
+      ve Müsaitlik 2 (iki tablonun köşesi): o dosyalar başka dalların işi.
       Küçük seviye. Boş başlık hücreleri: tutamak sütunu (`.grip-col`), ızgaranın
       köşesi ve gün bandının ayraçları. Bunların çoğu **bilerek boş**, çünkü bir
       başlıkları yok. Karar: `scope` kaldırmak mı, `aria-hidden` mı, yoksa gerçekten
       bir ad vermek mi.
-- [ ] **`heading-order` · Program'da 1, Çıktı'da 1.** Kart panelinin ve baskı
+- [x] **`heading-order` · Program'da 1, Çıktı'da 1.** Yapıldı (2026-11-15, `erisim/anlam`):
+      Program'da ızgara ve havuz için görünmez birer h2, kâğıdın başlığı h2, boş Program, Kontrol
+      ve Çıktı'nın da başlığı var. Havuzun 25 `section` bölgesi `div role="group"`. Kart panelinin ve baskı
       sayfasının başlığı `h3`, ondan önce gelen bir `h2` yok. Baskı sayfasında
       `h3`'ün bir gerekçesi olabilir (kâğıtta punto), ama düzey ile punto ayrı şeyler.
-- [ ] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+- [x] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+      Yapıldı (2026-11-15): Program'da havuz ve ızgara birer Tab durağı, oklar içinde (`erisim/klavye-izgara`); havuz listesi, Özet'in yük tabloları ve hazır
+      branşlar, Hakkında'nın yan paneli `tabIndex=0` ve adlı; halka kutunun içinde. Sürükleme
+      E2E'si (`temel`, `panel`) yeşil, ama bir Tab durağının sürüklemeyle etkileşimi ayrıca
+      ölçülmedi (tuzak 13).
       Ciddi seviye. Fareyle kaydırılan ama klavyeyle odaklanamayan bir kutu, yani
       içeriğinin bir kısmına klavyeyle hiç ulaşılamıyor. Çare `tabindex="0"`, ve
       havuzda bunun sürükleme ile etkileşimi ölçülmeden dokunulmaz (tuzak 13).
@@ -1396,7 +1412,11 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       meselesi değil (`styles.css`), yani çare yeniden aramak: `--ok`, `--warn` ve `--bad`
       ya da rozet mürekkebi için 7:1 ve işlevsel renkler arası ΔE kısıtıyla,
       `scripts/bolum-renk.mjs` gibi bir betikle. Bitince `e2e/zebra.spec.ts` 94'teki
-      istisna (`.badge`, `.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      istisna (`.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      → Rozetler yapıldı (2026-11-15, `erisim/gorsel`): işlevsel renkler aynı kaldı, kendi
+      zeminlerindeki yazı için ayrı mürekkep (`--ok-ink`, `--warn-ink`, `--bad-ink`, açık
+      temada 7,47 · 7,63 · 7,20), rozet, sağlık çipi ve sebep çubuğunda; `.badge` istisnası
+      kalktı. Kalan: "Sil" (6,84) ve dağılım seçicisinin gerekçe satırı (5,54).
 
 ### 8f · Test stratejisinden sıraya konanlar (2026-09-12)
 
@@ -1473,6 +1493,9 @@ ve yerini doğru davranışı soran bir teste bıraktı.
 **2026-09-27: on üçü de kapandı**, her biri kendi commit'inde, kullanıcının DK8, DK9,
 DK11, DK5, DK12 ve DK6 için verdiği kararlarla (DECISIONS 2026-09-27). Kullanım
 kolaylığı sorunları (KS) ve öneriler (Ö) DENETIM.md'de açık, TODO'ya henüz taşınmadı.
+**2026-11-15: KS8, KS9 ve KS19 kapandı** (`erisim/klavye-izgara`, WORKLOG): ızgara ve
+Müsaitlik tek Tab durağı ve oklar, kart klavyeyle alınıp bırakılıyor, Delete'ten sonra odak
+hücrede; Ö12 ve Ö33 yapıldı (`e2e/klavye.spec.ts`).
 
 Elle denetimin ürettiği kusurlar. Her birinin tekrar üreten adımları, beklenen ve olan,
 ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı bölümde.
@@ -1999,18 +2022,21 @@ yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâ�
 panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
 `.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
 
-- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Yapıldı (2026-11-15,
-      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt` sormuyor,
-      bildirim 8 s ve "Geri al" (`undo-if`: yalnız kendi adımı tepedeyken). Kalan: `Baştan diz`
-      hâlâ soruyor, çünkü sonucu çözücü bitince ayrı bir adım; KS26 (30 adımlık tavan) açık. Ders silme
-      (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
-      sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
-      `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın
-      başka bir düzenlemede ilerler; yanlış değişikliği sessizce geri alan bir düğme hiç
-      olmamasından kötü"). Önce yığının bir adımını kimlikle bilmek (bildirimin düğmesi yalnız
-      o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
-      (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
-      Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
+- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** İlk dilim (2026-11-15,
+      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt`
+      sormuyor, bildirim "Geri al" taşıyor (`undo-if`: yalnız kendi adımı tepedeyken). İkinci
+      dilim (2026-11-15, `erisim/geri-al`, birleşmedi, klavye ve okuma denetimi): sınıf, derslik,
+      kullanılmayan branş ve seçenek silme, `Baştan diz` sormuyor; `Her şeyi sil` tek soru sorup
+      geri alınabilen bir adım oluyor ("Son kez soruyorum" gitti), dolu planın yerine örnek okul
+      da öyle. Bildirim 10 s, fare üstünde ya da odak içindeyken süresi duruyor; yalnız en yeni
+      bildirim "Geri al" taşıyor, o da arada başka bir değişiklik olduysa bunu söylüyor. `Sil`'den
+      sonra odak sonraki (son satırda önceki, liste boşsa ekleme kutusuna) satırın `Sil`'ine
+      gidiyor, bildirim ekran okuyucuya "Geri almak için Ctrl+Z" diyor, Ctrl+Z "Geri alındı: …"
+      diyor. Seçenek değiştirmek geri al geçmişini artık silmiyor ve kendisi bir adım değil (geçmiş
+      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
+      `Dosyadan aç` geçmişi hâlâ siliyor (bilerek, soru soruyor); bildirime klavyeyle doğrudan
+      gidecek bir kısayol yok (F6 tarayıcının; odak `Geri al`dan sonra geldiği yere dönüyor);
+      Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol edilmez" diyor.
 - [x] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Bitti (2026-11-15,
       `kullanim/sikisik`, Alp: "her düzeltmeyi yap"): öneri uygulandı, sınıfta `classCapacityLevel`,
       liste süzgeci satırın kendi seviyesini okuyor. "Haftanın doluluğu" satırları duruyor (ayrı karar). Tam dolu kursta 20
@@ -2039,16 +2065,51 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       grubu, Açık/Kapalı tema, Sığdır/Ferah/Rahat, "Okul" sekmesi ile okul, "Genel",
       pano anlamında "kopya", Program şeridindeki "Izgara" grubu (içinde programı sabitleme
       ve boşaltma da var), öneri cümlesindeki "açık saatler ve kurallar".
-- [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
-      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
-      ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama
-      "örnek sebep"in ne söyleyeceği bir karar (bugün ilk kapalı hücre, bilgi taşımıyor).
+- [x] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
+      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Yazıldı (2026-11-15,
+      `kullanim/kontrol`, `metin/tek-ad` üstünde), birim testleri ve `kontrol`, `program`,
+      `temel`, `musaitlik`, `zebra` E2E yeşil, birleşmedi. Üç denetimin ortak bulgusuyla
+      birlikte (Kontrol neyin yanlış olduğunu söylüyor, tıklanacak bir şey vermiyordu):
+      yerleşemeyenler SEBEBE göre tek satır, dersler havuzdaki kartı işaretleyen düğmeler;
+      sebep artık bağlayan kısıt (`feasibility/stuck.ts`: önce aşan kapasite satırının kendi
+      cümlesi, sonra "sınıfın açık saatlerinin hepsi dolu", sonra sınıfın boş saatlerini
+      neyin tuttuğu sayılarak), gün ve saat içermiyor ki gruplansın. Kapalı saatte ders ders
+      başına tek satır ("1 dersin 2 saati", çip de ders sayıyor), `Göster` kartı Program'da
+      işaretleyip odaklıyor, `Müsaitlik'te aç` kapatanın satırını açıyor; kural ihlalinde de
+      `Göster`. Üst çubuktaki durum dar ekranda "3 sorun" diyor, şeritle aynı sayı. Öğretmen silme bildirimi
+      hangi sınıfın hangi dersi kaybettiğini söylüyor (Danışman notu değil: bir sınıfta bir
+      dersin olmaması genelde hata değil, ve silinen öğretmen tek İngilizce öğretmeniyse
+      "kardeş sınıflarda olan ders" kuralı da hiçbir şey bulmazdı).
+      **Kalan:** `Göster` gizli satırdaki kartı bulamayınca yalnız bir bildirim veriyor,
+      gizlemeyi kaldırmıyor; `Müsaitlik'te aç` satırı açıyor ama o saati işaretlemiyor
+      (Müsaitlik'in klavye dalı bitince); Kontrol'ün sorun listeleri sınırsız uzuyor (tam
+      dolu kursta bir öğretmen haftanın çoğunda kapatılınca 16 yerleşemeyen ders 9 satır,
+      eskiden 16).
 - [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
       yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
       Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
-      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
-      klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
-- [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
+      ızgara ekseni ve rengin hatırlanması, şerit için `region` ve "İçeriğe geç" (ikisi yapıldı,
+      2026-11-15, `erisim/anlam`, KS27), ~~havuz kartına
+      klavye yolu~~ (yapıldı 2026-11-15, `erisim/klavye-izgara`), en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
+- [~] **SD7 · İlk açılış, giriş korumaları ve mesajlar** (denetim akışı, 2026-11-15,
+      `kullanim/ilk-acilis`, `metin/tek-ad` üstünde). Yazıldı, birim testleri ve dokunulan E2E
+      yeşil, birleşmedi (WORKLOG 2026-11-15). Yapılan: Başlarken dokuz adımlık, plandan
+      işaretlenen, daraltılıp kapatılabilen bir liste; boş ekranlarda eksik adıma götüren düğme;
+      Dersler'de açık saati aşan sınıf ve öğretmen girerken söyleniyor ve sağdaki listede kırmızı;
+      Ekle'den sonra haftalık saat 4'e dönüyor; branşsız öğretmen "Önce bir branş seçin" diyor;
+      boş plana dosya açmak sormuyor; "güncelleyin" diyen her yerde `Güncellemeye bak`; yanlış
+      dosya, iki pencere, açılışta okunamayan plan, boş taslak ve güncellemenin Rust hataları düz
+      cümle; "= haftada N saat", Müsaitlik sayacı ve `Bütün haftayı aç/kapat`, öğretmen
+      tablosunun kural başlıkları, `Otomatik diz (N kart)`, yazdırma ipucu; 1366'da öğretmen
+      tablosu ve baskı önizlemesi sığıyor, Program sığmayan haftada Sığdır'ı söylüyor.
+      **Kalan:** (1) kapatılan Başlarken'i geri açmanın yolu yok (yeni bir planda da kapalı kalır;
+      Ayarlar → Hakkında'ya bir `Başlarken'i göster` düğmesi önerilir); (2) Yazdır adımı yalnız
+      Çıktı'daki düğmeyle işaretlenir, Ctrl+P'yi görmez; (3) varsayılan hafta Salı–Pazar × 12
+      bilerek kaldı (dershane, DATA "Varsayılanlar", `bell.test.ts`), yalnız Başlarken'in ilk
+      adımı onu yazıyor; (4) boyut eşiği 1 230 000 → 1 260 000 B (sözlükler, ölçüm WORKLOG'da); brotli eşiğe 476 B kaldı;
+      (5) `hiz/tepki` zinciriyle birleşti (`Check.tsx`, `Availability.tsx`, `App.tsx` iki tarafın davranışıyla).
+- [x] **SD6 · Okul'daki etiketsiz kutular.** Yapıldı (2026-11-15, `erisim/anlam`, §8e'nin
+      `label` maddesi). Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
       e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
       36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).

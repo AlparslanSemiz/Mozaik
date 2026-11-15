@@ -20,6 +20,7 @@ export const RIBBON_AUTO_KEY = 'ders-programi-serit-gizle';
 export const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
 export const MOTION_KEY = 'ders-programi-hareket';
 export const INTRO_KEY = 'ders-programi-tanitim';
+export const CHECKLIST_KEY = 'ders-programi-ilk-adimlar';
 export const PRINT_OPTIONS_KEY = 'ders-programi-baski';
 export const CHANGELOG_SEEN_KEY = 'ders-programi-yenilik-gorulen';
 export const RELAX_LOG_KEY = 'ders-programi-oneri-olcum';
@@ -46,6 +47,7 @@ export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: AVAIL_CLOCK_KEY, label: 'müsaitlikte saat gösterimi' },
   { key: MOTION_KEY, label: 'hareket (animasyon) tercihi' },
   { key: INTRO_KEY, label: 'örnek okul satırı görüldü mü' },
+  { key: CHECKLIST_KEY, label: 'Başlarken listesi açık mı' },
   { key: PRINT_OPTIONS_KEY, label: 'kâğıt seçenekleri' },
   { key: CHANGELOG_SEEN_KEY, label: 'görülen sürüm notu' },
   { key: RELAX_LOG_KEY, label: 'öneri aramasının ölçümleri' },

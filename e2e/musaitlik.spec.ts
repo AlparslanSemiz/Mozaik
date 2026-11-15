@@ -57,7 +57,7 @@ test.describe('10. Müsaitlik çizelgesi', () => {
 
     const table = page.locator('table.availability:not(.heat)');
     // The sample teacher already has a whole day closed; start from a clean slate
-    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
     // 6 day rows, 12 lesson columns
     await expect(table.locator('tbody tr')).toHaveCount(6);
     await expect(table.locator('tbody tr').first().locator('td')).toHaveCount(12);
@@ -81,7 +81,7 @@ test.describe('10. Müsaitlik çizelgesi', () => {
   }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
     const table = page.locator('table.availability:not(.heat)');
 
     // Lessons 1-5 are the same on every day, so they carry a clock...
@@ -229,7 +229,7 @@ test.describe('67. Kapalı saatin işareti', () => {
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     // Clean slate: the sample's first teacher already has a whole day shut, so
     // clicking a cell blind would OPEN one rather than close one.
-    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
     const cell = page.locator('table.availability:not(.heat) tbody td').first();
     await cell.click();
     await expect(cell).toHaveClass(/closed/);

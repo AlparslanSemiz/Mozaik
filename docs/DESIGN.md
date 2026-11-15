@@ -18,14 +18,17 @@ Her birinin neyi koruduğu ve onu ölçen testler:
 | Ne | Neyi koruyor | Nerede ölçülüyor |
 |---|---|---|
 | İşlevsel renk kanalı: yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | aracın çalışma biçimi bu dört renk | `palette.test.ts`, `e2e/renk.spec.ts` |
-| Erişilebilirlik: liste satırında yazı her zeminde ve durumda 7:1, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban | hedef kullanıcı zor görüyor | `e2e/zebra.spec.ts`, `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
+| Erişilebilirlik: liste satırında ve kartta yazı 7:1, kontrol kenarı 3:1, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban; ayrıca `forced-colors` ve 24 px tıklama hedefi | hedef kullanıcı zor görüyor | `e2e/zebra.spec.ts`, `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts`; `forced-colors`, hedefler ve yer tutucu süitte değil, 2026-11-15'te betikle ölçüldü (WORKLOG) |
 | Kâğıt: A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | ekran ne olursa olsun yazıcı aynı yazıcı | `e2e/yazdir.spec.ts` |
 | Açılış ağa bağlı değil: bugün çalışma anında ağa hiç çıkılmıyor | çift tıkla çalışır ilkesi, babanın makinesinde ağ olup olmadığı bilinmiyor | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
 
 ### İşlevsel renk kanalı
 
 Yeşil bırakılabilir, sarı uyarı, kırmızı engel, gri taralı kapalı demek, ve kırmızı
-bir çerçeve kapalı saatte kalmış bir dersi işaretler. Kimlik paletinin renkleri bu
+bir çerçeve kapalı saatte kalmış bir dersi işaretler. Program ızgarasında kapalı saatin
+çarpısı bu yüzden gri (`--muted`, 17 px): kırmızı orada "reddedildi" demek ve 25 px'lik
+kırmızı çarpılar derslerden yüksek sesle konuşuyordu. Müsaitlik'in büyük kırmızı çarpısı
+duruyor, orada ret yok (DECISIONS). Kimlik paletinin renkleri bu
 anlamlara yaklaşmaz, `palette.test.ts` ve `e2e/renk.spec.ts` bunu her koşuda yeniden
 ölçer.
 
@@ -37,8 +40,17 @@ bir karar değil, tuzak 52.
 
 ### Erişilebilirlik
 
-Liste satırında yazı her zeminde (iki şerit) ve her durumda (üstüne gelme, seçili satır, odak) en az 7:1, çünkü babanın en çok okuduğu yer satırlar. `e2e/zebra.spec.ts` 94 bunu iki temada, her listede, boyanan renkten ölçer. Bugün bunu tutmayan iki mürekkep adıyla istisna ve ikisi de [TODO.md](TODO.md) E1'de: açık temada işlevsel rozetler ve tehlikeli "Sil". O iş bitene kadar öteki yüzeylerin ölçülen eşiği 4,5:1 (`e2e/renk.spec.ts`). Çözücü ilerlemesi, sonuç satırı ve hata mesajları
-`aria-live="polite"` (`.reason-bar` `role="status"` taşıyor), geri alınamaz
+Liste satırında yazı her zeminde (iki şerit) ve her durumda (üstüne gelme, seçili satır, odak) en az 7:1, çünkü babanın en çok okuduğu yer satırlar. `e2e/zebra.spec.ts` 94 bunu iki temada, her listede, boyanan renkten ölçer. Bugün bunu tutmayan tek mürekkep adıyla istisna ve [TODO.md](TODO.md) E1'de: açık temada tehlikeli "Sil". İşlevsel rozetler, sağlık çipi ve sebep çubuğu 2026-11-15'ten beri kendi zeminlerinde kendi mürekkepleriyle yazılır (`--ok-ink`, `--warn-ink`, `--bad-ink`: aynı renk Oklab'da siyaha doğru itilmiş, açık temada 7,47 · 7,63 · 7,20; koyu temada `--ok` ve kardeşleri zaten 7'nin üstünde). O iş bitene kadar öteki yüzeylerin ölçülen eşiği 4,5:1 (`e2e/renk.spec.ts`).
+
+Program ızgarasındaki kartın iki satırı da `--on-color` (36 renkte en kötü 7,3:1); alt satır eskiden `--on-color-sub`'dı ve 4,71'e iniyordu. Seçili sekme düz bir dolgu, gradyan değil: bölüm rengi açık temada %15 siyaha, koyu temada %25 beyaza itilmiş, etiketle en kötü 7,76 ve 7,18 (eski gradyanın durakları 4,51 ve 3,76'ydı).
+
+Bir kontrolün kenarı (girdi, seçici, düğme) `--border-strong` ve oturduğu her zeminde 3:1'in üstünde (WCAG 1.4.11); kıl çizgi ve `--line` 1,1 ile 1,4 arasındaydı. Boş bir kutunun ipucu `--muted` (açık 7,79, koyu 10,31 gömük zeminde), tarayıcının #757575'i değil. Tıklama hedefleri en az 24 px (WCAG 2.5.8): onay kutusu, bildirimin kapatma düğmesi, satır tutamacı, satır başındaki ad, havuzun seçicileri.
+
+Windows'un karşıtlık temalarında (`forced-colors: active`) kart `CanvasText` bir kenar alır, basılı düğme ve seçili sekme `Highlight` zemin ve `HighlightText` yazıyla çizilir, odak 3 px `Highlight` bir çizgidir. Bunlar `styles.css`'in sonundaki tek blokta. Çözücü ilerlemesi, sonuç satırı ve hata mesajları
+`aria-live="polite"` (`.reason-bar`'ın ilk parçası `role="status"` taşıyor; koşunun
+saniyede birkaç kez değişen sayacı onun dışında ve `aria-busy`; satırın kendisi busy
+değil, çünkü busy bir ata içindeki canlı bölgeyi susturur),
+kapanan her diyalog odağı açana verir (`useReturnFocus`), geri alınamaz
 uyarılar `role="alertdialog"`. Renk tek başına bir durum taşımaz. Klavyeyle
 gidilen her yerde odak görünür.
 
@@ -52,8 +64,15 @@ sabitlendiği için %100'de 12 px hâlâ 12 px.
 
 Tek istisna Sığdır ve kullanıcının kararı (2026-09-26): bu yoğunluğun işi haftanın
 tamamını kutuya sığdırmak, ve orada sığmayan bir kart satırı kesilmek yerine en çok
-9 px'e küçülür. Yalnız sığmayan satır küçülür, satır yüksekliği değişmez, öteki iki
-yoğunlukta taban 12 px ([LAYOUT.md](LAYOUT.md), [DECISIONS.md](DECISIONS.md)).
+9 px'e küçülür. Yalnız sığmayan satır küçülür, satır yüksekliği değişmez
+([LAYOUT.md](LAYOUT.md), [DECISIONS.md](DECISIONS.md)). Öteki iki yoğunlukta kartın
+üst satırı 14 px, alt satırı 13 px (2026-11-15); Sığdır'ın tabanı 12 px kaldı, çünkü
+14 px'lik bir ad sığdırma sözünü bozar.
+
+Dar kutuda (Windows %150'de 1920 piksel ekran 1280 CSS pikseli, %200'de 960) sözcükler
+gitmez, küçülür ya da yer değiştirir: sekmenin etiketi simgenin altına iner (12 px),
+şeritteki düğmenin sözcüğü bir basamak küçülür, üst bar sığmazsa ikinci bir satıra
+geçer. Sayfa yana kaymaz. Eskiden etiketler ve şerit sözcükleri hiç çizilmiyordu.
 
 ### Hareket
 
@@ -81,7 +100,7 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 - **Palet üstündeki mürekkep temayla dönmez** (`--on-color`), çünkü `color: inherit` koyu temada açık metni pastel zemine düşürür (tuzak 15 ve 35).
 - **Hücreyi hangi renk boyar.** Program ızgarasında öntanımlı olarak öğretmen rengi, şeritteki Renk menüsünden sınıf, derslik ya da branş rengi. Kâğıtta öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar ([LAYOUT.md](LAYOUT.md)).
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.
-- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor. Listede girdi o gömük yüzeyi bırakır, çünkü zebra satırı açık temada gömük yüzeyle neredeyse aynı: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli ve `--line` kenarlı, düğme gibi.
+- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin çizgisi, `--border-strong` bir kontrolün kenarı. Girdiler bir dönem kıl çizgiye inmişti (karşılığında gömük bir yüzey, `--paper-sunk`, kazanmışlardı) ve düğme `--line`'daydı; ikisi de kendi zemininde 1,1 ile 1,4 arasıydı, yani az gören biri için kenarsızdı. 2026-11-15'ten beri girdi, seçici, arama kutusu ve düğme `--border-strong` kenarlı: oturdukları her zeminde 3:1'in üstünde (WCAG 1.4.11) ve `--muted`'ın çok altında, yazı gibi okunmaz. Listede girdi gömük yüzeyi bırakır, çünkü zebra satırı açık temada gömük yüzeyle neredeyse aynı: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli, düğme gibi.
 - **Düğme durumları:** birincil, sade, tehlikeli, basılı. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
 - **Listelerde zebra.** Liste, aynı biçimde kayıtların satır satır okunan yığını, ve her listenin çift satırı `--zebra` zeminli: `table.list`, `table.stat`, varlık panelinin ders satırları (`table.sheet-lessons`), Müsaitlik'in ve Dersler'in seçme listesi (`.entity-list`) ve Excel'den yapıştırma önizlemesi. Zebra açık temada kâğıttan bir adım koyu, koyu temada bir adım açık, ikisinde de aynı yükte. Bir durum gibi okunmayacak kadar hafif, ilk bakışta seçilecek kadar belirgin: ölçüsü tokenin yanında yazılı ve `e2e/renk.spec.ts` 93 her koşuda yeniden ölçüyor. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural `:where()` ile olabilecek en düşük özgüllükte, yani her durum (üstüne gelme, seçili satır, bırakma işareti) onu nerede yazılmış olursa olsun ezer (tuzak 40). `:nth-child` DOM'u sayar, yani arama, sıralama, grup çipi ya da silme satırı DOM'dan çıkarınca şerit görüneni izler. Menü, palet ve seçiciler liste değil: orada tek vurgu klavyenin. Üstüne gelinen satır bir zemin değil bir halka alır (2 px `--muted`, satırın içinde): satırın kontrastı iki şeritte neyse o kalır, halka `forced-colors`'ta da kalır, ve klavyenin odak halkasıyla karışmaz, çünkü o accent, kontrolün dışında ve kâğıt boşluklu. Seçili satır `--accent-bg` zeminli ve accent kenarlı, yazısı `--text`. Açık plan satırın başında accent bir kenarla söylenir. Satırdaki yazı iki zeminde ve her durumda 7:1 tutar (Erişilebilirlik): `e2e/zebra.spec.ts` 94 bunu ve şeridin görünen sırayı izlediğini, `e2e/renk.spec.ts` 93 tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
 - **Gün bandı** tek indeksli günlere çok hafif bir zemin verir. Bir durum gibi okunmadığı ve iki temada aynı yükte olduğu ölçülür, ve altındaki kapalı saat taramasını ezmemesi gerekir (tuzak 40).
@@ -99,6 +118,11 @@ genişlikleri `ch` cinsinden, ve ölçekler arasında korunan şey piksel değil
 sayısı (tuzak 39). `.hint` her yerde `--fs-sm` (13 px), Ayarlar'da ise gövde boyu
 `--fs-base` (15 px, `.settings-pane`, 2026-10-24, TODO B7.36): oradaki notlar bir
 tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil okunarak bakılıyor.
+
+Ekranda 12 px'te kalan yerler (2026-11-15, varsayılan ölçek): şerit başlıkları, ızgara
+başlığındaki gün adı ve ders numarası, satır başının ikinci satırı, rozetler, havuzun
+seçicileri ve sayacı, sekme etiketi dar kutuda, şerit sözcüğü en dar adımda, ve Sığdır'ın
+kart satırları (sığmazsa 9 px'e kadar). `.hint` 13 px ve bu kararı TODO SD5 bekliyor.
 
 ---
 
@@ -165,10 +189,12 @@ ve açılış da; iki sayı da yeniden ölçüldü ve WORKLOG'da duruyor.
 yüzey        --bg masa · --chrome kabuk · --chrome-2 ikinci kabuk
              --chrome-lit üst barın gradyan durağı · --paper kâğıt
              --paper-sunk girdi · --band ızgara gün bandı · --zebra liste çift satırı
-çizgi        --hairline kabuk · --line denetim kenarı · --line-dark en yüksek ses
-mürekkep     --text · --muted · --on-color (temayla dönmez) · --on-color-sub
+çizgi        --hairline kabuk · --line veri çizgisi · --line-dark en yüksek ses
+mürekkep     --text · --muted · --on-color (temayla dönmez) · --on-color-sub (yalnız kâğıt)
+kontrol      --border-strong   (girdi, seçici, düğme kenarı; her zeminde >= 3:1)
 accent       --accent #373bdb · --accent-hover · --accent-bg · --on-accent
-işlevsel     --ok/-bg · --warn/-bg · --bad/-bg · --closed · --hatch
+işlevsel     --ok/-bg/-ink · --warn/-bg/-ink · --bad/-bg/-ink · --closed · --hatch
+             (-ink: kendi -bg zemininde yazı, >= 7:1)
 bırakma      --drop-ok-bg · --drop-warn-bg · --drop-bad-bg  (dinlenme renklerinden
              ayrı: biri bir jest boyu yaşar, öteki gün boyu)
 satır        --can-ok-bg · --can-warn-bg · --can-no-bg  (aynı üçünün zayıf hâli:

@@ -6,6 +6,7 @@
  */
 export {
   afterAdd,
+  DEFAULT_LESSON_HOURS,
   chooseSubject,
   chooseTeacher,
   lessonChoices,

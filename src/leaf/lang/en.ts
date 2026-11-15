@@ -93,10 +93,6 @@ const EN: Sozluk = {
   "Bu dosya okunamadı": "This file could not be read",
   "Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki \"Tümünü dosyadan aç\" düğmesini kullanın.":
     "It replaces every plan on this computer, not a single one. Use the \"Open all from file\" button in Settings → Plans and backup.",
-  "Mozaik'i güncelleyin, sonra tekrar deneyin.":
-    "Update Mozaik, then try again.",
-  "Mozaik'in kaydettiği bir .json plan dosyası seçin.":
-    "Choose a .json plan file saved by Mozaik.",
   "Açık olan planın yerine geçecek":
     "It will replace the plan that is open",
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
@@ -104,8 +100,6 @@ const EN: Sozluk = {
   "Planı aç": "Open the plan",
   "Bu dosya eksik":
     "This file is incomplete",
-  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Mozaik'in kaydettiği bir .json plan dosyası seçin.":
-    "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose a .json plan file saved by Mozaik.",
   "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
     "In the file: {ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes}, {ders} {ders:lesson|lessons}, {saat} {saat:hour|hours} placed.",
   "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
@@ -157,12 +151,6 @@ const EN: Sozluk = {
   "Klasörü düzelt": "Fix the folder",
   "**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın.":
     "**The last change could not be saved on this computer:** the storage is full. To keep your work, press **Save to file**.",
-  "**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor.":
-    "**This plan was changed in another window.** This window no longer saves.",
-  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
-    "**The saved plan could not be read at startup.** Nothing was written over it.",
-  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
-    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved.",
   "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Plan dosyanızı **Dosyadan aç** ile açabilirsiniz.":
     "**The saved plan could not be read.** Nothing was written over it; what you do here is not saved. You can open your plan file with **Open from file**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Mozaik kapanınca yaptığınız her şey kaybolur. Çalışırken ve bilgisayarı kapatmadan önce sık sık **Dosyaya kaydet** düğmesine basın.":
@@ -189,8 +177,6 @@ const EN: Sozluk = {
     "{gun}, hour {ders}: {kapali} of {toplam} closed",
   "Kimin saatleri": "Whose hours",
   "Müsaitlik listesi": "Availability list",
-  "Tümünü aç": "Open all",
-  "Tümünü kapat": "Close all",
   "{n} saat fazla, bu program dizilemez.":
     "{n} {n:hour|hours} too many; this timetable cannot be laid out.",
   ", {n} tanesi {kim} üzerinde": ", {n} of them on {kim}",
@@ -246,8 +232,6 @@ const EN: Sozluk = {
     "**There are things worth looking at.** In the lists below, rows marked",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "stop the timetable from being laid out. Resolve those first.",
-  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
-    "**{n} {n:lesson sits|lessons sit} on a closed hour.** The hours were closed after the lessons were placed; see the list below and move them.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
     "The remaining **{n}** hours are waiting in the tray. You can lay them out with **Fill automatically** in the **Timetable** tab.",
   "Danışman notları ({n})": "Advisor notes ({n})",
@@ -267,20 +251,16 @@ const EN: Sozluk = {
 
   // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı": "This draft's data could not be found",
-  'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
-    'It is in the plan list but its own key is empty. The "Where the data is" table in Settings → About shows how many bytes each key holds.',
   "{ad} kopyası": "copy of {ad}",
   '"{ad}" taslağından yeni bir plan açıldı.':
     'A new plan was opened from the "{ad}" draft.',
 
   // src/ui/program/Grid.tsx
   "Öğle arası": "Lunch break",
-  "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, press Delete to remove",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
     "Drag to move · right-click for options",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Drag to move, right-click for options",
-  "{ust} {alt}, sabitlenmiş": "{ust} {alt}, pinned",
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Pinned. Right-click to unpin",
 
@@ -301,8 +281,6 @@ const EN: Sozluk = {
     "Changing the split clears this lesson from the timetable, pinned cards included",
 
   // src/ui/Ribbon.tsx — what the two destructive questions promise
-  "Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.":
-    "The {n} pinned hours stay where they are; the rest is laid out from scratch. Ctrl+Z undoes it.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: details and weekly timetable",
 
   // src/ui/program/Inspector.tsx
@@ -380,8 +358,8 @@ const EN: Sozluk = {
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "It can be dropped here.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
-    "Filling automatically… {yerlesen}/{toplam} cards · {sure} s",
+  "Otomatik diziliyor…": "Filling automatically…",
+  "{yerlesen}/{toplam} kart · {sure} sn": "{yerlesen}/{toplam} cards · {sure} s",
   "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
     "Rows are teachers. A cell shows the class and the room. Drag a placed card to move it; right-click sends it back to the tray.",
   "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
@@ -410,13 +388,8 @@ const EN: Sozluk = {
   "Havuzda bekleyen kart yok": "No card is waiting in the tray",
   "Havuzdaki kartları kurallara uyarak dizer":
     "Lays out the cards in the tray while obeying the rules",
-  "Otomatik diz ({n})": "Fill automatically ({n})",
   "Dizilmiş programı silip baştan dizer":
     "Clears the timetable and lays it out from scratch",
-  "Dizilmiş {n} saatin tamamı silinecek":
-    "All {n} placed hours will be deleted",
-  "Program baştan dizilecek. Ctrl+Z ile geri alınabilir.":
-    "The timetable will be laid out from scratch. Ctrl+Z undoes it.",
   "Baştan diz": "Lay out from scratch",
   "Programı boşalt": "Empty the timetable",
   "Sorun yok": "No problems",
@@ -578,12 +551,7 @@ const EN: Sozluk = {
   "En son sürümü kullanıyorsunuz.": "You are on the latest version.",
   "Yeni sürüm iniyor…": "The new version is downloading…",
   "Her şey silinecek": "Everything will be deleted",
-  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.":
-    "Teachers, classes, lessons and the timetable as laid out. This plan will be left completely empty.",
   "Devam et": "Continue",
-  "Son kez soruyorum": "Asking one last time",
-  'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.':
-    'This cannot be undone. If you might change your mind, choose "Save to file" in the top bar first.',
   "{yazilan} plan dosyaya yazıldı; {eksik} planın verisi bulunamadı.":
     "{yazilan} {yazilan:plan|plans} written to the file; the data of {eksik} {eksik:plan|plans} could not be found.",
   "{yazilan} plan tek dosyaya yazıldı.":
@@ -737,8 +705,6 @@ const EN: Sozluk = {
   Ara: "Break",
   "Öğle arası, {dk} dk": "Lunch break, {dk} min",
   Bitiş: "End",
-  "Şu an **{gun} gün × {saat} saat** = {yer} hücre.":
-    "Right now **{gun} days × {saat} hours** = {yer} cells.",
 
   // src/ui/setup/Classes.tsx
   Derslik: "Room",
@@ -793,11 +759,6 @@ const EN: Sozluk = {
   '"{ad}" branşı kullanılıyor': 'The "{ad}" subject is in use',
   "{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.":
     "{n} {n:teacher holds|teachers hold} this subject ({kimler}). Change their subject first, then delete this one.",
-  '"{ad}" branşı listeden çıkarılacak':
-    'The "{ad}" subject will be removed from the list',
-  "Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.":
-    "No teacher holds this subject, so nothing else is affected.",
-  Çıkar: "Remove",
   "Branşlar ({n})": "Subjects ({n})",
   "Yeni branş (örn. Robotik)": "New subject (e.g. Robotics)",
   "Yeni branş": "New subject",
@@ -903,8 +864,6 @@ const EN: Sozluk = {
   "Bu plandaki her şeyin yerine örnek okul geçecek":
     "The sample school will replace everything in this plan",
   "Örnek okul verisi yüklenecek": "Sample school data will be loaded",
-  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce \"Dosyaya kaydet\" deyin.":
-    "{kayip} In their place comes a sample school of 25 teachers, 20 classes, 8 rooms and 99 lessons. The other plans are untouched. It cannot be undone, so choose \"Save to file\" first.",
   "25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → \"Her şeyi sil\" ile temizleyin.":
     "25 teachers, 20 classes, 8 rooms and 99 lessons. For seeing what Mozaik does; before you start entering your own data, clear it with Settings → About → \"Delete everything\".",
   "Yerine koy": "Replace",
@@ -964,21 +923,8 @@ const EN: Sozluk = {
   "Bu hücreye bırakılamaz": "It cannot be dropped in this cell",
 
   // src/entities.ts
-  "Bu derslik silinecek": "This room will be deleted",
-  "{ad} dersliği silinecek": "Room {ad} will be deleted",
-  "{n} sınıfın dersliği boşalacak ({hangileri}) ve derslik çakışması artık kontrol edilmeyecek.":
-    "{n} {n:class|classes} will be left without a room ({hangileri}) and room clashes will no longer be checked.",
-  "Bu ders silinecek": "This lesson will be deleted",
   "{sinif} sınıfının {kim} dersi": "class {sinif}'s {kim} lesson",
-  "{ne} silinecek ({n} saat)": "{ne} will be deleted ({n} {n:hour|hours})",
-  "{ne} silinecek": "{ne} will be deleted",
-  "Programa yerleşmiş {n} saati de kalkacak.":
-    "The {n} {n:hour|hours} already on the timetable will go too.",
-  "Bu öğretmen": "This teacher",
   "Bu sınıf": "This class",
-  "{n} dersi de gidecek.": "Its {n} {n:lesson|lessons} will go too.",
-  "{ders} dersi ve programa yerleşmiş {saat} saati de gidecek.":
-    "Its {ders} {ders:lesson|lessons} and the {saat} {saat:hour|hours} already on the timetable will go too.",
   "Haftalık ders yükü": "Weekly lesson load",
   "{n} saat": "{n} {n:hour|hours}",
   "Açık saat": "Open hours",
@@ -1009,8 +955,6 @@ const EN: Sozluk = {
     "Room {derslik} is shared by {n} classes ({hangileri}) with {yuk} hours in total. It is open for {acik} a week, which is {fazla} too few.",
   "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.":
     "Room {derslik} ({hangileri}): {yuk} of its {acik} open hours are full.",
-  "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}":
-    "{n} {n:hour|hours} unplaced and nowhere to put them. An example reason: {sebep}",
   "{n} kural ihlali": "{n} rule {n:breach|breaches}",
   "{n} ders kapalı saatte": "{n} {n:lesson|lessons} in a closed hour",
   "{n} ders sığmıyor": "{n} {n:lesson does|lessons do} not fit",
@@ -1273,10 +1217,6 @@ const EN: Sozluk = {
     "{n} teacher {n:hour opens|hours open}",
   "{n} ders yer değiştiriyor":
     "{n} {n:lesson moves|lessons move}",
-  "{ust} {alt}, açılan öğretmen saatinde":
-    "{ust} {alt}, in a teacher hour being opened",
-  "{ust} {alt}, yeri değişiyor":
-    "{ust} {alt}, moves",
   "Öneri araması":
     "Suggestion search",
   "Bu bilgisayarda henüz aranmadı":
@@ -1496,9 +1436,6 @@ const EN: Sozluk = {
   "Seçenek adı boş olamaz": "A variant needs a name",
   "Bu seçenek adı zaten kullanılıyor": "That variant name is already in use",
   Kaydet: "Save",
-  "{ad} seçeneği silinecek": "The variant {ad} will be deleted",
-  "{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.":
-    "{n} placed {n:hour|hours} and {s} {s:pin|pins} go with it. The shared school data stays.",
   "Öğretmeni düzenle": "Edit teacher",
   "Sınıfı düzenle": "Edit class",
   "Toplu sabitle": "Pin in bulk",
@@ -1577,8 +1514,6 @@ const EN: Sozluk = {
   // by its Turkish sentence anyway.
   "**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır.":
     "**Reduced.** Durations halve and anything that MOVES is switched off.",
-  "**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin.":
-    "**The open plan** is wiped and it **cannot be undone**; use **Save to file** first.",
   "**Mozaik burada kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:":
     "**Here Mozaik never updates itself** and connects nowhere. The latest version is at:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
@@ -1627,10 +1562,6 @@ const EN: Sozluk = {
     "It belongs to this computer and **does not affect printing**; paper type is under **Print**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
     "This store belongs to {adres} alone; Mozaik opened at another address has a **separate** one.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
-    "Those hours were closed **after** these lessons were placed; none was deleted.",
-  "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
-    "These lessons still have hours to place, but no empty cell is left for them.",
   "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "Here Mozaik can update itself, but connects nowhere **until you press the button**.",
   "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
@@ -1689,16 +1620,12 @@ const EN: Sozluk = {
     "The state at each of the last three openings is kept apart as an automatic backup; it belongs to **this computer** and the plan open at startup.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":
     "**{yer}** hours per class ({gun} days × {ders} lessons); the load entered is **{yuk}**.",
-  "Sırayla: **derslikler**, **branşlar**, **öğretmenler**, **sınıflar**, sonra **dersler**.":
-    "In order: **rooms**, **subjects**, **teachers**, **classes**, then **lessons**.",
   "Tarayıcının bu site için ayırdığı depoda duruyor.":
     "It sits in the store the browser keeps for this site.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** in total; the browser allows Mozaik about **5 MB**.",
   "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
     "Affects only the **Timetable** grid: cell size and how many days fit the screen.",
-  "Yazdırma penceresinde **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz.":
-    "In the print dialog turn **background graphics on**, or the colours will not print.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "A new plan opens straight away and the **undo** history is cleared.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1755,10 +1682,210 @@ const EN: Sozluk = {
   "Ders silindi.": "Lesson deleted.",
   "{ne} silindi.": "{ne} deleted.",
   "{ne} silindi, yerleşmiş {n} saati de kalktı.": "{ne} deleted, with its {n} placed {n:hour|hours}.",
-  "{ne} silindi, {n} dersi de gitti.": "{ne} deleted, with {n} {n:lesson|lessons}.",
-  "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} deleted, with {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} placed {n:hour|hours} went back to the pool.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
+  "{ilk}–{son}, günde {saat} ders":
+    "{ilk}–{son}, {saat} {saat:hour|hours} a day",
+  "Okul adı ve saatler":
+    "School name and hours",
+  "Okul adı boş. Şu an: {hafta}. Doğru değilse değiştirin.":
+    "No school name yet. Now: {hafta}. Change it if that is wrong.",
+  "Okul adını ve zili gir":
+    "Enter school name and bell",
+  "Derslik ekle":
+    "Add rooms",
+  "{n} branş":
+    "{n} {n:subject|subjects}",
+  "Branş ekle":
+    "Add subjects",
+  "Öğretmen ekle":
+    "Add teachers",
+  "Sınıf ekle":
+    "Add classes",
+  "Ders gir":
+    "Enter lessons",
+  "{n} kapalı saat":
+    "{n} closed {n:hour|hours}",
+  "Gelemeyen öğretmenin saatlerini kapatın. Herkes her saat gelebiliyorsa geçin.":
+    "Close the hours a teacher cannot come. If everyone can come at any hour, skip this.",
+  "Kapalı saat işaretle":
+    "Mark closed hours",
+  "{yer} / {toplam} saat yerleşmiş":
+    "{yer} / {toplam} hours placed",
+  "Programı diz":
+    "Fill the timetable",
+  "Bu bilgisayarda bir kez yazdırıldı":
+    "Printed once on this computer",
+  "Sınıflara ve öğretmenlere birer sayfa":
+    "One page per class and per teacher",
+  "Çıktıya geç":
+    "Go to printing",
+  "Liste bir daha çıkmaz. Her adım kendi sekmesinde durmaya devam eder.":
+    "The list will not come back. Every step stays in its own tab.",
+  "Listeyi kapat":
+    "Close the list",
+  "{n} / {toplam} adım":
+    "{n} / {toplam} steps",
+  "Sıradaki: {adim}":
+    "Next: {adim}",
+  "Listeyi göster":
+    "Show the list",
+  "Listeyi daralt":
+    "Fold the list",
+  "yapıldı":
+    "done",
+  "yapılmadı":
+    "not done",
+  "Başlarken listesi açık mı":
+    "whether the Getting started list is open",
+  "Bu Mozaik onu açamıyor. Önce Mozaik'i güncelleyin, sonra dosyayı yeniden açın.":
+    "This Mozaik cannot open it. Update Mozaik first, then open the file again.",
+  "Güncellemeye bak":
+    "See the update",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.":
+    "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose the file you saved with “Save to file”.",
+  "Bu, Mozaik'in kaydettiği bir dosya değil. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.":
+    "This is not a file Mozaik saved. Choose the file you saved with “Save to file”.",
+  "Excel'deki bir listeyi almak için Okul'daki listelerde Excel'den yapıştır düğmesini kullanın.":
+    "To bring in a list from Excel, use the “Paste from Excel” button in the School lists.",
+  "**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın.":
+    "**Mozaik is also open in another window, and the plan was changed there.** The last changes in this window were not saved. Press **Reload**.",
+  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın.":
+    "**The saved plan could not be read at startup.** Nothing was written over it. Press **Reload**; if the plan still does not come back, open your saved plan file with **Open from file**.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez. Mozaik'i güncelleyin.":
+    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved. Update Mozaik.",
+  "Bu taslağın içi boş. Silip yeniden oluşturabilirsiniz.":
+    "This draft is empty. You can delete it and create it again.",
+  "{ad}: {yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.":
+    "{ad}: {yuk} lesson hours, {acik} open hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{ad}: {yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.":
+    "{ad}: {yuk} lesson hours, {acik} available hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.":
+    "{yuk} lesson hours, {acik} open hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "{yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.":
+    "{yuk} lesson hours, {acik} available hours. {fazla} {fazla:hour does|hours do} not fit the week.",
+  "Bir dersin saatini azaltın ya da Müsaitlik sekmesinde kapalı saat açın.":
+    "Reduce the hours of a lesson, or open closed hours in the Availability tab.",
+  "Önce bir branş seçin.":
+    "Choose a subject first.",
+  "Şu an **{gun} gün × {saat} saat** = haftada {yer} saat.":
+    "Right now **{gun} days × {saat} hours** = {yer} hours a week.",
+  "Sağdaki sayılar: açık saat / ders saati.":
+    "The numbers on the right: open hours / lesson hours.",
+  "{acik} açık saat, {yuk} saat ders":
+    "{acik} open hours, {yuk} lesson hours",
+  "Bütün haftayı aç":
+    "Open the whole week",
+  "Bütün haftayı kapat":
+    "Close the whole week",
+  "**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli.":
+    "**In a row**: at most how many hours back to back. **Per day ↑**: most in a day, **Per day ↓**: least on a day they come. Empty takes Rules.",
+  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
+    "If the colours do not print: in the print window, open **More settings** and tick **Background graphics**.",
+  "Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.":
+    "The whole week does not fit; Fit in the strip shows every day.",
+  "Otomatik diz ({n} kart)":
+    "Fill automatically ({n} {n:card|cards})",
+
+  // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
+  "Haftalık dersler": "Weekly lessons",
+  "{gun} {n}. saat": "{gun}, hour {n}",
+  "açılan öğretmen saatinde": "in a teacher hour being opened",
+  "yeri değişiyor": "moves",
+  "müsait değil": "unavailable",
+  "müsait": "available",
+  "kapalı": "closed",
+  "açık": "open",
+  "boş": "empty",
+  "Bu dersin satırı ekranda değil.": "This lesson's row is not on screen.",
+  "{ders} havuza kaldırıldı.": "{ders} went back to the tray.",
+  "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} picked up. Choose the target cell with the arrow keys; Enter drops it, Esc cancels.",
+  "Taşımadan vazgeçildi.": "Move cancelled.",
+  "{ders} yerleşti: {yer}.": "{ders} placed: {yer}.",
+  "{acik} saat müsait, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} available, {yuk} {yuk:hour|hours} of lessons loaded",
+  "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} open, {yuk} {yuk:hour|hours} of lessons loaded",
+  "Izgaraya gir, bir daha basınca çık": "Enter the grid; press again to leave it",
+  "Hücreden hücreye git": "Move from cell to cell",
+  "Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra": "Go to the start or end of the row; with Ctrl, to the first or last row",
+  "Odaklı kartı taşımak için al": "Pick up the focused lesson to move it",
+  "Odaklı kartı sabitle veya sabitlemeyi kaldır": "Pin or unpin the focused lesson",
+  "Kartlar arasında git": "Move between cards",
+  "Odaklı kartı ızgaraya koymak için al": "Pick up the focused card to put it on the grid",
+  "Tutamakta: havuzun boyunu değiştir, Shift ile daha çok": "On the handle: resize the tray; with Shift, in bigger steps",
+  "Kart eldeyken": "While holding a lesson",
+  "Hedefi bir saat kaydır": "Move the target by one hour",
+  "Bırakılabilecek bir sonraki saate git": "Jump to the next hour it can be dropped on",
+  "Önceki veya sonraki güne git": "Go to the previous or next day",
+  "Buraya bırak": "Drop it here",
+  "Vazgeç, sürüklerken de": "Cancel, also while dragging",
+  "Saati aç veya kapat, başlıkta bütün günü veya saati": "Open or close the hour; on a heading, the whole day or hour",
+  "Müsaitlik'te aç":
+    "Open in Availability",
+  "Kart ızgarada görünmüyor; satırı gizli olabilir.":
+    "The card is not on the grid; its row may be hidden.",
+  "Kart havuzda görünmüyor; havuz kapalı olabilir.":
+    "The card is not visible in the tray; the tray may be closed.",
+  "{kim} için Müsaitlik'i açar":
+    "Opens Availability for {kim}",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur.":
+    "**{ders} {ders:lesson has|lessons have} {saat} {saat:hour|hours} on a closed hour.** **Show** below finds the card.",
+  "Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın.":
+    "The hours were closed **after** the lessons were placed; nothing was deleted. Drag the card to an open hour, or open the hour in Availability.",
+  "Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın.":
+    "No cell is left for these lessons. A lesson’s name shows its card in the tray; to make room, open hours in Availability or move a card.",
+  "Sebep ve dersler":
+    "Reason and lessons",
+  "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
+    "Every open hour of class {sinif} is taken by other lessons.",
+  "{kim} {n} saatinde müsait değil":
+    "{kim} is not available in {n} of them",
+  "{n} saatinde {kim} başka sınıfta":
+    "in {n} {kim} is in another class",
+  "{n} saatinde {derslik} dersliği dolu":
+    "in {n} room {derslik} is taken",
+  "{n} saatinde bir kural izin vermiyor":
+    "in {n} a rule does not allow it",
+  "{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.":
+    "Class {sinif} has {n} free {n:hour|hours}, but this lesson’s card does not fit {n:it|them}.",
+  "{sinif} sınıfının {n} boş saati var: {neden}.":
+    "Class {sinif} has {n} free {n:hour|hours}: {neden}.",
+  "{zaman} saatlerinde":
+    "in periods {zaman}",
+  "{n} saatine {boy} saatlik kart sığmıyor":
+    "{n} cannot hold its {boy}-hour card",
+  "{n} sorun":
+    "{n} {n:problem|problems}",
+  "{brans} dersi de gitti.": "Its {brans} lesson went with it.",
+  "{brans} dersleri de gitti.": "Its {brans} lessons went with it.",
+  "{sinif} sınıfının {brans} dersi de gitti.":
+    "Class {sinif} lost its {brans} lesson.",
+  "{n} sınıfın {brans} dersi de gitti: {siniflar}.":
+    "{n} {n:class|classes} lost {brans}: {siniflar}.",
+  "Programdan {n} saat kalktı.":
+    "{n} placed {n:hour was|hours were} removed from the timetable.",
+  "{ad} kısa adı": "short name of {ad}",
+  "Yeni sınıfın dersliği": "Room of the new class",
+  "İçeriğe geç": "Skip to content",
+  "Ders günü": "School day",
+  "Geri alındı.": "Undone.",
+  "Geri alındı: {ne}": "Undone: {ne}",
+  "Geri almak için Ctrl+Z.": "Press Ctrl+Z to undo.",
+  "Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.": "Something else changed in between. Press Ctrl+Z to undo step by step.",
+  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından \"Geri al\" ile geri gelir.": "Teachers, classes, lessons and the timetable as laid out. This plan will be left completely empty. \"Undo\" right afterwards brings it back.",
+  "Bu plandaki her şey silindi.": "Everything in this plan was deleted.",
+  "**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir.": "**The open plan** is wiped; **Undo** right afterwards brings it back.",
+  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından \"Geri al\" ile geri gelir.": "{kayip} In their place comes a sample school of 25 teachers, 20 classes, 8 rooms and 99 lessons. The other plans are untouched. \"Undo\" right afterwards brings yours back.",
+  "Derslik silindi.": "Room deleted.",
+  "{ad} dersliği silindi.": "Room {ad} deleted.",
+  "{ad} dersliği silindi, {sinif} sınıfının dersliği boşaldı.": "Room {ad} deleted; class {sinif} has no room now.",
+  "{ad} dersliği silindi, {n} sınıfın dersliği boşaldı ({hangileri}). Bu sınıflar artık aynı saate konabilir.": "Room {ad} deleted; {n} {n:class has|classes have} no room now ({hangileri}). These classes can now be placed at the same hour.",
+  "Öğretmen silindi.": "Teacher deleted.",
+  "Sınıf silindi.": "Class deleted.",
+  "\"{ad}\" branşı listeden çıkarıldı.": "\"{ad}\" was removed from the subject list.",
+  "{ad} seçeneği silindi.": "Variant {ad} deleted.",
+  "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variant {ad} deleted, with its {n} placed {n:hour|hours}.",
+  "Program baştan dizildi.": "The timetable was laid out from scratch.",
+  "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
 };
 
 registerSozluk("en", EN);

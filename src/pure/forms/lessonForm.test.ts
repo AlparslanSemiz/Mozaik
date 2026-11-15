@@ -64,9 +64,14 @@ describe('ders ekleme formu', () => {
     expect(lessonChoices(d, 'teacher', blank, ay).askSubject).toBe(false);
   });
 
-  it('eklemeden sonra yürünen eksen kalıyor, öteki temizleniyor', () => {
-    const draft = { classId: 's510', teacherId: 'oMC', subject: 'Matematik', hours: '3' };
-    expect(afterAdd(draft, 'teacher')).toEqual({ ...draft, classId: '' });
-    expect(afterAdd(draft, 'class')).toEqual({ ...draft, teacherId: '', subject: '' });
+  it('eklemeden sonra yürünen eksen kalıyor, öteki temizleniyor, saat varsayılana dönüyor', () => {
+    const draft = { classId: 's510', teacherId: 'oMC', subject: 'Matematik', hours: '6' };
+    expect(afterAdd(draft, 'teacher')).toEqual({ ...draft, classId: '', hours: '4' });
+    expect(afterAdd(draft, 'class')).toEqual({
+      ...draft,
+      teacherId: '',
+      subject: '',
+      hours: '4',
+    });
   });
 });

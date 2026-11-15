@@ -39,6 +39,13 @@ import type { Answers, Id, State } from '../../leaf/model';
  */
 const SLICE_MS = 10;
 
+/**
+ * How often a running search's numbers reach React: about four times a
+ * second. Every frame meant a render of App and the bar per frame, on a
+ * machine whose two cores the search already wants.
+ */
+const PROGRESS_MS = 250;
+
 /** The second search, after a stuck run: what to change so the week can be built. */
 export interface Advice {
   /**
@@ -106,7 +113,11 @@ export interface SolverRun {
   advice: Advice | null;
   /** A suggestion was just applied: the bar says so until the next run. */
   applied: Suggestion | null;
-  start: (base: State, options?: Partial<SolverOptions>) => void;
+  /**
+   * `placed` hears the state the run put in place, once it is in place: the
+   * notice that offers "Geri al" for "Baştan diz" needs it (TODO SD1).
+   */
+  start: (base: State, options?: Partial<SolverOptions>, placed?: (next: State) => void) => void;
   /** Stops the run, or the suggestion search after it. */
   stop: () => void;
   apply: (s: Suggestion) => void;
@@ -118,7 +129,11 @@ export interface SolverRun {
   clear: () => void;
 }
 
-export function useSolver(change: (apply: (d: State) => State) => void): SolverRun {
+/** `peek` reads the present as of the last render (useStore), for `start`'s `placed`. */
+export function useSolver(
+  change: (apply: (d: State) => State) => void,
+  peek?: () => State,
+): SolverRun {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState<SolverProgress | null>(null);
   const [result, setResult] = useState<SolverResult | null>(null);
@@ -130,73 +145,89 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
   /** The state the run started from, so a concurrent edit is not overwritten. */
   const base = useRef<State | null>(null);
   const options = useRef<Partial<SolverOptions>>({});
+  const onPlaced = useRef<((next: State) => void) | undefined>(undefined);
   const relaxer = useRef<Relaxer | null>(null);
   const job = useRef<RelaxJob | null>(null);
   /** The ways found before the search now running, still good under its refusals. */
   const kept = useRef<Suggestion[]>([]);
 
+  /**
+   * Work promised for the next frame: a stuck run's search, or a stopped
+   * run's result. Anything that starts, applies or clears moves this on, and
+   * the promised work then finds it changed and does nothing.
+   */
+  const turn = useRef(0);
+  /** A stuck run waiting for its result to be on screen before it searches. */
+  const queued = useRef<{ done: SolverResult; from: State } | null>(null);
+
   /** Ends the suggestion search, and with it any worker it holds. */
   const dropSearch = () => {
+    turn.current++;
+    queued.current = null;
     relaxer.current?.cancel();
     relaxer.current = null;
   };
 
+  /**
+   * A stuck run's second search: what would have to change. Started a frame
+   * after the run's result, because starting the workers and the first
+   * render of the panel in the same task as the week itself froze the
+   * screen for a quarter of a second at the end of every stuck run.
+   */
+  const advise = useCallback((done: SolverResult, from: State) => {
+    // Stuck, but two pinned lessons break a relation: every way the search
+    // could build keeps them, so it would only come back empty, a minute
+    // later (TODO RK2). It is not started; the panel says why at once.
+    if (pinnedRelationBreaches(from, buildIndex(from)).length > 0) {
+      job.current = null;
+      kept.current = [];
+      setAdvice({
+        forState: done.state,
+        searching: false,
+        stopped: false,
+        progress: null,
+        suggestions: [],
+        answers: from.answers,
+      });
+    }
+    // Stuck, not stopped: ask what would have to change. It starts from the
+    // data the run started from, with the stuck week as its first guess.
+    else {
+      job.current = {
+        from,
+        hint: activePlacements(done.state),
+        options: {
+          keepPlaced: options.current.keepPlaced ?? true,
+          ...(options.current.exclusions === undefined
+            ? {}
+            : { exclusions: options.current.exclusions }),
+        },
+      };
+      kept.current = [];
+      relaxer.current = startRelax(from, job.current.hint, {
+        ...job.current.options,
+        accepted: from.answers.accepted,
+        refused: from.answers.refused,
+      });
+      setAdvice({
+        forState: done.state,
+        searching: true,
+        stopped: false,
+        progress: relaxer.current.progress(),
+        suggestions: [],
+        answers: from.answers,
+      });
+    }
+  }, []);
+
   const finish = useCallback(
-    (done: SolverResult) => {
-      const from = base.current;
+    (done: SolverResult, from: State | null = base.current) => {
       solver.current = null;
       base.current = null;
       setRunning(false);
       setProgress(null);
       setResult(done);
-
-      // Stuck, but two pinned lessons break a relation: every way the search
-      // could build keeps them, so it would only come back empty, a minute
-      // later (TODO RK2). It is not started; the panel says why at once.
-      if (
-        done.phase === 'stuck' &&
-        from !== null &&
-        pinnedRelationBreaches(from, buildIndex(from)).length > 0
-      ) {
-        job.current = null;
-        kept.current = [];
-        setAdvice({
-          forState: done.state,
-          searching: false,
-          stopped: false,
-          progress: null,
-          suggestions: [],
-          answers: from.answers,
-        });
-      }
-      // Stuck, not stopped: ask what would have to change. It starts from the
-      // data the run started from, with the stuck week as its first guess.
-      else if (done.phase === 'stuck' && from !== null) {
-        job.current = {
-          from,
-          hint: activePlacements(done.state),
-          options: {
-            keepPlaced: options.current.keepPlaced ?? true,
-            ...(options.current.exclusions === undefined
-              ? {}
-              : { exclusions: options.current.exclusions }),
-          },
-        };
-        kept.current = [];
-        relaxer.current = startRelax(from, job.current.hint, {
-          ...job.current.options,
-          accepted: from.answers.accepted,
-          refused: from.answers.refused,
-        });
-        setAdvice({
-          forState: done.state,
-          searching: true,
-          stopped: false,
-          progress: relaxer.current.progress(),
-          suggestions: [],
-          answers: from.answers,
-        });
-      }
+      if (done.phase === 'stuck' && from !== null) queued.current = { done, from };
       if (done.state === from) return; // nothing was placed
 
       // `from` is read into a local FIRST: React runs the reducer's callback
@@ -206,10 +237,29 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       // What it guards: if the timetable moved while we were searching (an
       // undo, a drop, a loaded backup), the answer describes a world that no
       // longer exists and must not be pasted over the new one.
+      // Whether the answer will land, asked BEFORE the change: if the
+      // timetable moved meanwhile the change is a no-op, and a notice saying
+      // it was laid out again would be false (review, 2026-11-15). A stopped
+      // run's half week is not announced either; its own bar says it stopped.
+      const lands = peek === undefined || peek() === from;
       change((d) => (d === from ? done.state : d));
+      const placed = onPlaced.current;
+      onPlaced.current = undefined;
+      if (lands && done.phase !== 'cancelled') placed?.(done.state);
     },
-    [change],
+    [change, peek],
   );
+
+  // After the result is committed, and a frame later: the search.
+  useEffect(() => {
+    const next = queued.current;
+    if (next === null) return;
+    queued.current = null;
+    const mine = turn.current;
+    requestAnimationFrame(() => {
+      if (turn.current === mine) advise(next.done, next.from);
+    });
+  }, [result, advise]);
 
   useEffect(() => {
     if (!running) return;
@@ -224,10 +274,15 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
         finish(done);
         return;
       }
-      setProgress(active.progress());
+      const now = performance.now();
+      if (now - shown >= PROGRESS_MS) {
+        shown = now;
+        setProgress(active.progress());
+      }
       frame = requestAnimationFrame(tick);
     };
 
+    let shown = performance.now();
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [running, finish]);
@@ -249,37 +304,66 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       const progress = active.progress();
       // A new list only when a suggestion arrived or a way found a better week
       // (it takes the earlier one's place), so the panel under the bar
-      // re-renders for news and not for every frame of the clock.
-      setAdvice((a) => {
-        if (a === null) return a;
-        const suggestions = merge(kept.current, progress.suggestions);
-        const same =
-          suggestions.length === a.suggestions.length &&
-          suggestions.every((s, i) => s === a.suggestions[i]);
-        return { ...a, progress, suggestions: same ? a.suggestions : suggestions };
-      });
+      // re-renders for news and not for every frame of the clock. The clock
+      // itself (the seconds, the bar) moves about four times a second.
+      const now = performance.now();
+      const news =
+        progress.suggestions.length !== said.suggestions.length ||
+        progress.suggestions.some((s, i) => s !== said.suggestions[i]) ||
+        progress.finished.length !== said.finished.length;
+      if (news || now - shown >= PROGRESS_MS) {
+        shown = now;
+        said = progress;
+        setAdvice((a) => {
+          if (a === null) return a;
+          const suggestions = merge(kept.current, progress.suggestions);
+          const same =
+            suggestions.length === a.suggestions.length &&
+            suggestions.every((s, i) => s === a.suggestions[i]);
+          return { ...a, progress, suggestions: same ? a.suggestions : suggestions };
+        });
+      }
       frame = requestAnimationFrame(tick);
+    };
+    let shown = performance.now();
+    let said: { suggestions: Suggestion[]; finished: unknown[] } = {
+      suggestions: [],
+      finished: [],
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [searching]);
 
-  const start = useCallback((from: State, runOptions?: Partial<SolverOptions>) => {
-    base.current = from;
-    options.current = runOptions ?? {};
-    dropSearch();
-    solver.current = createSolver(from, runOptions);
-    setAdvice(null);
-    setApplied(null);
-    setResult(null);
-    setProgress(solver.current.progress());
-    setRunning(true);
-  }, []);
+  const start = useCallback(
+    (from: State, runOptions?: Partial<SolverOptions>, placed?: (next: State) => void) => {
+      base.current = from;
+      options.current = runOptions ?? {};
+      onPlaced.current = placed;
+      dropSearch();
+      solver.current = createSolver(from, runOptions);
+      setAdvice(null);
+      setApplied(null);
+      setResult(null);
+      setProgress(solver.current.progress());
+      setRunning(true);
+    },
+    [],
+  );
 
   const stop = useCallback(() => {
     const active = solver.current;
     if (active !== null) {
-      finish(active.cancel());
+      // Stopped on screen first, explained a frame later: `cancel` names why
+      // every lesson left over is stuck, and on the weak machine that was a
+      // third of a second between the click and Durdur going away.
+      const from = base.current;
+      solver.current = null;
+      setRunning(false);
+      setProgress(null);
+      const mine = ++turn.current;
+      requestAnimationFrame(() => {
+        if (turn.current === mine) finish(active.cancel(), from);
+      });
       return;
     }
     const search = relaxer.current;

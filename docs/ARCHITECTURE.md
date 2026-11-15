@@ -102,6 +102,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/feasibility/capacity.ts` | öğretmen, sınıf ve dersliğin açık saati ile istenen saati (`buildCapacity`) |
 | `pure/feasibility/advice.ts` | Danışman (`buildAdvice`) |
 | `pure/feasibility/report.ts` | Kontrol'ün bütün raporu (`buildReport`) |
+| `pure/feasibility/stuck.ts` | Kontrol satırlarının gruplanması: kapalı saatte ders ders başına (`groupStranded`), yerleşemeyenler bağlayan sebebe göre (`stuckReason`, `groupUnplaceable`), ihlalin kartı (`violationCell`) |
 | `pure/feasibility/health.ts` | her sekmedeki durum satırı (`health`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
@@ -187,8 +188,10 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | Dosya | Görevi |
 |---|---|
 | `platform/dom/index.ts` | doğrudan DOM'a yazan etkileşimler paketinin giriş noktası: yedisinin dışarıda kullanılan adları |
-| `platform/dom/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
+| `platform/dom/drag.ts` | sürükle bırak, Pointer Events ile, ve aynı taşımanın klavye eli (`startKeys`). Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
 | `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
+| `platform/dom/roving.ts` | bir kutuyu tek Tab durağı yapar, oklarla içinde gezdirir (`attachRoving`); Program ızgarası, havuz ve Müsaitlik kullanır |
+| `platform/dom/gridKeys.ts` | Program ızgarasının okları, boş hücrenin odakta aldığı ad, kaldırmadan sonra odağın döndüğü hücre (`focusCellSoon`) |
 | `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
 | `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `platform/dom/rowDrag.ts` | liste satırını sürükleyerek sıralama |
@@ -217,7 +220,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
 | `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
 | `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
-| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır |
+| `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır; açık plan boşsa ve geri alınacak bir şey yoksa sormadan açar (`isEmptyPlan`) |
 
 ### Bileşenler
 
@@ -233,7 +236,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Commands.tsx` | paletin komut listesi |
 | `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
+| `ui/common/GoTo.tsx` | bir sekmeye, Okul adımına ya da Ayarlar bölümüne götüren context ve `GoButton` |
+| `ui/common/NextStep.tsx` | boş ekranların düğmesi: eksik ilk adım ve okul adı boşken zil ve günler |
+| `ui/common/wrongFile.ts` | Mozaik'in kaydetmediği bir dosyaya söylenen iki cümle, iki dosya kapısında aynı |
+| `ui/program/useWeekCut.ts` | ızgaranın haftası yana taşıyor mu; Program çubuğu Sığdır'ı söyler |
+| `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Çıktı'da Yazdır'a basıldı mı |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in dokuz adımı), `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |
@@ -249,6 +257,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
+| `ui/program/reveal.ts` | Kontrol'ün `Göster`i: Program'daki kartı ya da havuzdaki kartı görünür yapıp işaretler (`data-reveal`) |
 | `ui/program/Inspector.tsx` | varlık panelini açan yol: bağlam, `useInspect()` ve paneli çizen provider |
 | `ui/program/InspectorSheet.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası, bilgileri ve düzenlenmesi |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |

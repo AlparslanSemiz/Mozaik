@@ -111,7 +111,7 @@ test.describe('53. Durum çipi', () => {
     });
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.locator(`.entity[data-id="${id}"]`).click();
-    await page.getByRole('button', { name: 'Tümünü kapat' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
 
     await expect(chip).toHaveClass(/impossible/);
     await expect(chip).toContainText('kapalı saatte');
@@ -237,6 +237,7 @@ test.describe('55. Durum çipi — boş proje', () => {
     await open(page);
     const chip = page.locator('.health');
     await expect(chip).toHaveClass(/ok/);
-    await expect(chip).toHaveText('Henüz ders girilmedi');
+    // The chip also carries its narrow-bar words (`.health-short`, hidden here).
+    await expect(chip.locator('.health-text')).toHaveText('Henüz ders girilmedi');
   });
 });

@@ -135,7 +135,7 @@ test.describe('61. Elle sıralama', () => {
   test('yerinde bırakılan satır GERİ ALINACAK bir şey bırakmıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    const undo = page.getByRole('button', { name: 'Geri al' });
+    const undo = page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true });
     const wasDisabled = await undo.isDisabled();
 
     await dragRow(page, 1, 1);

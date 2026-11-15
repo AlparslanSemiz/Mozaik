@@ -33,12 +33,19 @@ const RANK: Record<ReportRow['level'], number> = { impossible: 0, tight: 1, ok: 
 
 export default function CapacityRows({
   rows,
+  label,
   empty,
   problemsFirst = false,
   colorOf,
   openLabel = 'Açık',
 }: {
   rows: ReportRow[];
+  /**
+   * What the table is, for the keyboard: the box scrolls, so it takes a Tab
+   * stop (otherwise the rows below the fold are out of the keyboard's reach,
+   * axe `scrollable-region-focusable`), and a stop needs a name.
+   */
+  label: string;
   empty: string;
   /**
    * Kontrol sorts, Özet does not. On the setup screen the order is the order
@@ -63,7 +70,7 @@ export default function CapacityRows({
     // it is summarising, and a summary you have to scroll past to reach the
     // next summary is not one. Bounded and scrolled in place, the pattern
     // `.entity-list` already uses for the same reason.
-    <div className="stat-scroll">
+    <div className="stat-scroll focus-scroll" tabIndex={0} role="group" aria-label={label}>
       <table className="stat">
         <thead>
           <tr>

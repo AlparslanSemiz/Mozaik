@@ -2,7 +2,7 @@
 // The draft lives here, not in the list, because nothing else reads it; in a
 // focused mode the class or the teacher comes from the ribbon (`focused`).
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   blockPlan,
   clampBlocks,
@@ -18,10 +18,12 @@ import {
   BlockPatternPicker as BlockCounts,
   blockCeiling,
   Field,
+  NextStep,
   T,
   useT,
 } from '../common';
 import { parseLessons } from '../../pure/io';
+import { buildCapacity } from '../../pure/feasibility';
 import {
   addLesson,
   addLessonsFromRows,
@@ -32,6 +34,7 @@ import {
 import { Paste, AddPanel } from '../lists';
 import {
   afterAdd,
+  DEFAULT_LESSON_HOURS,
   chooseSubject as chooseSubjectIn,
   chooseTeacher as chooseTeacherIn,
   lessonChoices,
@@ -58,11 +61,18 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
     teacherId: '',
     // A NAME, for as long as the form lives (why: `LessonDraft.subject`).
     subject: '',
-    hours: '4',
+    hours: DEFAULT_LESSON_HOURS,
   });
   // The blocks longer than an hour, as the form has them so far. A list, so it
   // does not live in `newLesson` with the strings.
   const [newSplit, setNewSplit] = useState<number[]>([]);
+  // The class and teacher of the lesson added last: the form clears one of
+  // them, and the over-capacity line below must still be about that lesson.
+  const [lastAdded, setLastAdded] = useState<{
+    classId: Id;
+    teacherId: Id;
+    focus: Id;
+  } | null>(null);
   // In a focused mode the axis comes from the ribbon, not from the form: that
   // IS the shortening the reader asked for.
   const classId = mode === 'class' ? (focused?.id ?? '') : newLesson.classId;
@@ -108,7 +118,53 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
       }),
     );
     setNewLesson(afterAdd(newLesson, mode));
+    setNewSplit([]);
+    setLastAdded({ classId, teacherId, focus: focused?.id ?? '' });
   }
+
+  // OVER CAPACITY IS SAID WHERE IT IS TYPED. A class with 54 lesson hours and
+  // 48 open ones used to be accepted without a word, and the reader found out
+  // on Kontrol or when Otomatik diz left cards in the pool. The class and the
+  // teacher of the row being typed, and of the row just added (the form
+  // clears one of the two after Ekle), are measured against the same numbers
+  // Okul → Özet and Kontrol show (`buildCapacity`, O(lessons)).
+  const capacity = useMemo(() => buildCapacity(state), [state]);
+  const overloaded = (() => {
+    const lines: string[] = [];
+    // The lesson just added only while the screen is still on its axis: a
+    // warning about 9A must not follow the reader to 10B.
+    const last =
+      lastAdded !== null && (mode === 'all' || lastAdded.focus === (focused?.id ?? ''))
+        ? lastAdded
+        : null;
+    const classIds = new Set([classId, last?.classId ?? ''].filter((x) => x !== ''));
+    const teacherIds = new Set([teacherId, last?.teacherId ?? ''].filter((x) => x !== ''));
+    for (const r of capacity.classes) {
+      if (classIds.has(r.id) && r.load > r.capacity) {
+        lines.push(
+          t('{ad}: {yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.', {
+            ad: r.name,
+            yuk: r.load,
+            acik: r.capacity,
+            fazla: r.load - r.capacity,
+          }),
+        );
+      }
+    }
+    for (const r of capacity.teachers) {
+      if (teacherIds.has(r.id) && r.load > r.capacity) {
+        lines.push(
+          t('{ad}: {yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.', {
+            ad: r.name,
+            yuk: r.load,
+            acik: r.capacity,
+            fazla: r.load - r.capacity,
+          }),
+        );
+      }
+    }
+    return lines;
+  })();
 
   return (
     <>
@@ -140,6 +196,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
           state.classes.length === 0 || state.teachers.length === 0 ? (
             <div className="warn-box">
               <T k="Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin." />
+              <NextStep state={state} />
             </div>
           ) : mode !== 'all' && focused === undefined ? (
             <div className="warn-box">
@@ -274,6 +331,17 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
             {t('Ekle')}
           </button>
         </div>
+
+        {overloaded.length > 0 && (
+          <div className="error-box over-capacity" role="status">
+            {overloaded.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+            <p className="hint">
+              {t('Bir dersin saatini azaltın ya da Müsaitlik sekmesinde kapalı saat açın.')}
+            </p>
+          </div>
+        )}
 
         <Paste
           open={pasteOpen}

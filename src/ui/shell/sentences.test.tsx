@@ -217,7 +217,7 @@ describe('cümle · engelin sebebi', () => {
           "ok · 511 sınıfı: açık olan 6 saatin 4 saati dolu.",
         ],
         "yerlesemeyen": [
-          "4 saati yerleşmemiş ve koyacak yer yok. Örnek sebep: MÇ art arda 1 saatten fazla girmemeli, burada 2 saat olur",
+          "A dersliğini 2 sınıf paylaşıyor (510, 511) ve toplam 8 saat ders var. Haftada 6 saati açık, 2 saat fazla.",
         ],
       }
     `);
@@ -255,6 +255,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-musaitlik-saat · müsaitlikte saat gösterimi",
         "ders-programi-hareket · hareket (animasyon) tercihi",
         "ders-programi-tanitim · örnek okul satırı görüldü mü",
+        "ders-programi-ilk-adimlar · Başlarken listesi açık mı",
         "ders-programi-baski · kâğıt seçenekleri",
         "ders-programi-yenilik-gorulen · görülen sürüm notu",
         "ders-programi-oneri-olcum · öneri aramasının ölçümleri",
@@ -324,7 +325,7 @@ describe('cümle · basılan sayfanın iskeleti', () => {
 
     expect(skeleton(sheet!).join('\n')).toMatchInlineSnapshot(`
       "div.print-page
-        h3
+        h2
           span.p-title-main
             span.p-dot
           span.p-title-sub

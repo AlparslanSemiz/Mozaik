@@ -10,7 +10,7 @@
 // the round trip through a real input.
 
 import { expect, test } from './kapan';
-import { openSetup, openLessons, openWithSample, mainList, settledMotion } from './helpers';
+import { open, openSetup, openLessons, openWithSample, mainList, settledMotion } from './helpers';
 
 const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');
 
@@ -109,7 +109,7 @@ test.describe('49. Liste araçları', () => {
     // Bir öğretmeni bütünüyle kapatmak örnekteki uygun öğretmenlerin yanına
     // kesin bir “İmkânsız” sınır örneği koyar.
     await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
     await openSetup(page, 'Öğretmenler');
     await checkLoadFacet(page, await rows(page).count());
 
@@ -269,5 +269,85 @@ test.describe('84. Sıralama yönü işareti', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
     await expect(mainList(page).locator('.row-grip').first()).toHaveAttribute('title', /ok tuşlar/);
+  });
+});
+
+// The keyboard review (2026-11-15): after "Sil" the focus fell to <body>, the
+// next Tab started at the top of the page, and the notice's "Geri al" at its
+// end was 301 presses away. Its clock did not stop for a reader on it either.
+test.describe('Silmeden sonra klavye ve bildirim', () => {
+  const nameOfFocus = (page: import('@playwright/test').Page) =>
+    page.evaluate(() => {
+      const el = document.activeElement;
+      return el?.closest('tr')?.getAttribute('data-row-name') ?? el?.tagName ?? null;
+    });
+
+  test('odak sonraki satırın Sil’ine, son satırda öncekinin Sil’ine gidiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const names = await rows(page).evaluateAll((trs) =>
+      trs.map((tr) => tr.getAttribute('data-row-name')),
+    );
+
+    await rows(page).first().getByRole('button', { name: 'Sil', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(rows(page)).toHaveCount(names.length - 1);
+    expect(await nameOfFocus(page)).toBe(names[1]);
+    await expect(page.locator(':focus')).toHaveText('Sil');
+
+    await rows(page).last().getByRole('button', { name: 'Sil', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(rows(page)).toHaveCount(names.length - 2);
+    expect(await nameOfFocus(page)).toBe(names[names.length - 2]);
+
+    // The notice says how to undo without reaching it, and Ctrl+Z from the
+    // focused button does it and says what it took back.
+    await expect(page.locator('.toast .sr-only')).toContainText('Geri almak için Ctrl+Z');
+    await page.keyboard.press('Control+z');
+    await expect(rows(page)).toHaveCount(names.length - 1);
+    await expect(page.locator('.sr-only[role=status]')).toContainText('Geri alındı:');
+  });
+
+  test('liste boşalınca odak ekleme kutusuna gidiyor ve Ctrl+Z orada da çalışıyor', async ({
+    page,
+  }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    const box = page.getByPlaceholder('Derslik adı, örn. A');
+    await box.fill('A');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(rows(page)).toHaveCount(1);
+
+    await rows(page).first().getByRole('button', { name: 'Sil', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(rows(page)).toHaveCount(0);
+    await expect(box).toBeFocused();
+    await page.keyboard.press('Control+z');
+    await expect(rows(page)).toHaveCount(1);
+  });
+
+  test('bildirim odak ya da fare üstündeyken kapanmıyor, süresi 10 saniye', async ({ page }) => {
+    test.setTimeout(60_000);
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const total = await rows(page).count();
+
+    await rows(page).first().getByRole('button', { name: 'Sil', exact: true }).click();
+    const notice = page.locator('.toast', { hasText: 'silindi' });
+    const button = notice.getByRole('button', { name: 'Geri al' });
+    await button.focus();
+    // Past the 10 s an action notice lives: the focus holds it.
+    await page.waitForTimeout(11_000);
+    await expect(button).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(rows(page)).toHaveCount(total);
+    // The notice went with its button; the focus goes back to where it was.
+    await expect(page.locator(':focus')).toHaveText('Sil');
+
+    await rows(page).first().getByRole('button', { name: 'Sil', exact: true }).click();
+    const second = page.locator('.toast', { hasText: 'silindi' }).last();
+    await second.hover();
+    await page.waitForTimeout(11_000);
+    await expect(second.getByRole('button', { name: 'Geri al' })).toBeVisible();
   });
 });

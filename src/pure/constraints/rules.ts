@@ -45,6 +45,12 @@ export interface Violation {
    * caller that split that string would be parsing a React key.
    */
   rule: RuleName | 'notSameDay';
+  /**
+   * WHAT it is about and on which day: a teacher, a class, a lesson or a
+   * relation id (ids are unique across all four). Kontrol's "Göster" finds the
+   * first card of it on that day (feasibility/stuck.ts, `violationCell`).
+   */
+  at: { id: Id; day: number };
 }
 
 /** "510 · YM Matematik2": a related lesson, named the way the lesson sheet lists it. */
@@ -267,6 +273,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (ruleActive(d, 'maxPerDay', maxDay) && count > maxDay) {
         out.push({
           key: `${teacher.id}|${day}|maxPerDay`,
+          at: { id: teacher.id, day },
           rule: 'maxPerDay',
           level: ruleLevel(d, 'maxPerDay'),
           message: t('{kim_gun} {olan} saat ders veriyor, en fazla {sinir} saat isteniyor.', {
@@ -279,6 +286,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (ruleActive(d, 'minPerDay', minDay) && count < minDay) {
         out.push({
           key: `${teacher.id}|${day}|minPerDay`,
+          at: { id: teacher.id, day },
           rule: 'minPerDay',
           level: ruleLevel(d, 'minPerDay'),
           message: t('{kim_gun} sadece {olan} saat ders veriyor, en az {sinir} saat isteniyor.', {
@@ -293,6 +301,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
         if (run > maxRun) {
           out.push({
             key: `${teacher.id}|${day}|maxConsecutive`,
+            at: { id: teacher.id, day },
             rule: 'maxConsecutive',
             level: ruleLevel(d, 'maxConsecutive'),
             message: t(
@@ -316,6 +325,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (count <= limit) continue;
       out.push({
         key: `${lesson.id}|${day}|maxSameLessonPerDay`,
+        at: { id: lesson.id, day },
         rule: 'maxSameLessonPerDay',
         level: ruleLevel(d, 'maxSameLessonPerDay'),
         message: t(
@@ -345,6 +355,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (lessonDayCount(d, b, day, hourCount) === 0) continue;
       out.push({
         key: `${r.id}|${day}|notSameDay`,
+        at: { id: r.id, day },
         rule: 'notSameDay',
         level: 'block',
         message: t('{bir} ile {iki} {gun} günü ikisi de var, aynı gün olmamalı.', {
@@ -368,6 +379,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
         if (gaps <= limit) continue;
         out.push({
           key: `${teacher.id}|${day}|maxGapsTeacher`,
+          at: { id: teacher.id, day },
           rule: 'maxGapsTeacher',
           level: ruleLevel(d, 'maxGapsTeacher'),
           message: t(
@@ -392,6 +404,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
         if (gaps <= limit) continue;
         out.push({
           key: `${group.id}|${day}|maxGapsClass`,
+          at: { id: group.id, day },
           rule: 'maxGapsClass',
           level: ruleLevel(d, 'maxGapsClass'),
           message: t(

@@ -58,7 +58,8 @@ export default function Notices({
       other window's work is. Reloading reads that work. */}
       {saveTrouble === 'baska' && (
         <div className="save-warning" role="alert">
-          ⚠ <T k="**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor." />{' '}
+          ⚠{' '}
+          <T k="**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın." />{' '}
           <button className="btn" onClick={() => window.location.reload()}>
             {t('Yenile')}
           </button>
@@ -71,7 +72,8 @@ export default function Notices({
       reads it. */}
       {saveTrouble === 'okunamadi' && (
         <div className="save-warning" role="alert">
-          ⚠ <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı." />{' '}
+          ⚠{' '}
+          <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın." />{' '}
           <button className="btn" onClick={() => window.location.reload()}>
             {t('Yenile')}
           </button>
@@ -97,7 +99,18 @@ export default function Notices({
         <div className="save-warning" role="alert">
           ⚠{' '}
           {unreadable === 'yeni' ? (
-            <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez." />
+            <>
+              <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez. Mozaik'i güncelleyin." />{' '}
+              <button
+                className="btn"
+                onClick={() => {
+                  goTab('settings');
+                  ui.setSection('about');
+                }}
+              >
+                {t('Güncellemeye bak')}
+              </button>
+            </>
           ) : (
             <T k="**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Plan dosyanızı **Dosyadan aç** ile açabilirsiniz." />
           )}

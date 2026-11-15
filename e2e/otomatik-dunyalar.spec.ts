@@ -91,7 +91,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
     await loadWorld(page, world.state);
     await expect(page.locator('.empty-screen')).toContainText('Henüz dizilecek ders yok');
     const auto = page.getByRole('button', { name: /^Otomatik diz/ });
-    await expect(auto).toContainText('(0)');
+    await expect(auto).toContainText('(0 kart)');
     await expect(auto).toBeDisabled();
   });
 });

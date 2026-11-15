@@ -7,10 +7,11 @@
 import { createContext, useContext } from 'react';
 import type { State } from '../../leaf/model';
 
-const UndoIfContext = createContext<(expected: State) => void>(() => undefined);
+/** Answers whether it undid: `false` when another change came in between. */
+const UndoIfContext = createContext<(expected: State) => boolean>(() => false);
 
 export const UndoIfProvider = UndoIfContext.Provider;
 
-export function useUndoIf(): (expected: State) => void {
+export function useUndoIf(): (expected: State) => boolean {
   return useContext(UndoIfContext);
 }

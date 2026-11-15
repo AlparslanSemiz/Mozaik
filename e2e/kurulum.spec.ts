@@ -77,7 +77,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Öğretmenler');
 
     const name = page.getByPlaceholder('Ad Soyad');
-    const short = page.getByLabel('Kısa ad');
+    const short = page.getByLabel('Kısa ad', { exact: true });
     const branch = page.getByLabel('Branş', { exact: true });
 
     // The placeholder shows what will be derived, live
@@ -103,25 +103,38 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.warn-box', { hasText: 'Aynı kısa ad' })).toHaveCount(0);
   });
 
-  test('silmeden önce her zaman soruyor ve ne gideceğini sayıyor', async ({ page }) => {
+  test('derslik sormadan siliniyor, bildirim ne gittiğini sade sözle sayıyor', async ({ page }) => {
+    // SD1 (2026-11-15): a room went behind a question; now it goes at once and
+    // the notice names the classes that lost it, in plain words.
     await openWithSample(page);
     await openSetup(page, 'Derslikler');
 
-    // Deleting a room used to ask NOTHING at all
     const rows = mainList(page).locator('tbody tr');
     const before = await rows.count();
     await rows.first().getByRole('button', { name: 'Sil' }).click();
-    // Cancelled -> nothing may change, and the sentence has to have COUNTED.
-    const asked = await answerDialog(page, 'cancel');
-    expect(asked).toContain('dersliği silinecek');
-    expect(asked).toContain('sınıfın dersliği boşalacak');
-    expect(asked).toContain('çakışması artık kontrol edilmeyecek');
-    await expect(rows).toHaveCount(before);
-
-    // Confirmed, it goes
-    await rows.first().getByRole('button', { name: 'Sil' }).click();
-    await answerDialog(page);
+    await expect(page.locator('.dlg')).toHaveCount(0);
     await expect(rows).toHaveCount(before - 1);
+    const notice = page.locator('.toast', { hasText: 'dersliği silindi' });
+    await expect(notice).toContainText('sınıfın dersliği boşaldı');
+    await expect(notice).toContainText('Bu sınıflar artık aynı saate konabilir.');
+    await expect(notice).not.toContainText('çakışma');
+
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(rows).toHaveCount(before);
+  });
+
+  test('sınıf sormadan siliniyor ve dersleriyle geri geliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    const rows = mainList(page).locator('tbody tr');
+    const before = await rows.count();
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(rows).toHaveCount(before - 1);
+    const notice = page.locator('.toast', { hasText: 'sınıfı silindi' });
+    await expect(notice).toContainText(/(dersi|dersleri) de gitti/);
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(rows).toHaveCount(before);
   });
 });
 
@@ -226,9 +239,16 @@ test.describe('16. Branş seçimi', () => {
     await expect(branch).toHaveJSProperty('tagName', 'SELECT');
     await expect(page.getByPlaceholder('Branş')).toHaveCount(0);
 
-    // Branch is required: half a teacher record is not worth storing
+    // Branch is required: half a teacher record is not worth storing. The
+    // refusal is SAID, by Ekle and by Enter alike: a grey button and a dead
+    // Enter refused without a word.
     await page.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
-    await expect(page.getByRole('button', { name: 'Ekle', exact: true })).toBeDisabled();
+    await page.getByPlaceholder('Ad Soyad').press('Enter');
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Önce bir branş seçin.' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
     await branch.selectOption('Matematik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -279,7 +299,9 @@ test.describe('16. Branş seçimi', () => {
       .locator(`table.list tr[data-row-name="Fransızca"]`)
       .getByRole('button', { name: 'Sil' })
       .click();
-    await answerDialog(page);
+    // Nothing uses it: no question since SD1, a notice with "Geri al".
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(page.locator('.toast', { hasText: 'listeden çıkarıldı' })).toBeVisible();
     await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
@@ -449,19 +471,43 @@ test.describe('30. Kurulum — düzenleme', () => {
     await expect(rows).toHaveCount(before);
   });
 
-  test('bildirimin Geri al düğmesi araya giren düzenlemeyi geri almıyor', async ({ page }) => {
+  test('yalnız en yeni bildirim Geri al taşıyor, o da kendi adımını geri alıyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
     const rows = mainList(page).locator('tbody tr');
     const before = await rows.count();
     await rows.first().getByRole('button', { name: 'Sil' }).click();
     const first = page.locator('.toast', { hasText: 'silindi' }).first();
-    // A second deletion moves the stack on: the first notice's button now
-    // names a state that is no longer the present, and does nothing.
+    await expect(first.getByRole('button', { name: 'Geri al' })).toBeVisible();
+    // A second deletion moves the stack on. The first notice's button used to
+    // stay and do nothing (it named a state that was no longer the present);
+    // now it goes, and only the newest notice offers "Geri al".
     await rows.first().getByRole('button', { name: 'Sil' }).click();
     await expect(rows).toHaveCount(before - 2);
-    await first.getByRole('button', { name: 'Geri al' }).click();
-    await expect(rows).toHaveCount(before - 2);
+    await expect(first.getByRole('button', { name: 'Geri al' })).toHaveCount(0);
+    await expect(page.locator('.toast .toast-action')).toHaveCount(1);
+    await page.locator('.toast .toast-action').click();
+    await expect(rows).toHaveCount(before - 1);
+  });
+
+  test('arada başka bir düzenleme varsa Geri al bunu söylüyor, sessizce kapanmıyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openLessons(page);
+    const rows = mainList(page).locator('tbody tr');
+    const before = await rows.count();
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    const notice = page.locator('.toast', { hasText: 'silindi' });
+    // Another edit that leaves no notice: a weekly-hours box.
+    const hours = rows.first().locator('input[type=number]').first();
+    await hours.fill('9');
+    await hours.blur();
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(rows).toHaveCount(before - 1);
+    await expect(page.locator('.toast.warn')).toContainText('Ctrl+Z ile adım adım');
   });
 });
 
@@ -558,7 +604,7 @@ test.describe('31. Kurulum — sağ sütun', () => {
     // "CA · Cem Aslan (Mat)" on the availability row; the summary carries the
     // plain name. Split rather than strip — no regex to get subtly wrong.
     const who = label.split(' · ')[1]!.split(' (')[0]!;
-    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
 
     await openSetup(page, 'Öğretmenler');
     const first = page.locator('.cols > aside table.stat tbody tr').first();
@@ -786,9 +832,10 @@ test.describe('63. Öğretmende cinsiyet', () => {
       .getByRole('button', { name: /^Matematik/ })
       .first()
       .click();
-    const both = await rows.count();
-    expect(both).toBeGreaterThan(0);
-    expect(both).toBeLessThan(11);
+    // Polled: the list narrows on a deferred render (hiz/tepki), so the count
+    // read right after the click can still be the women's eleven.
+    await expect.poll(() => rows.count()).toBeLessThan(11);
+    expect(await rows.count()).toBeGreaterThan(0);
 
     await page.getByRole('button', { name: 'Süzmeyi kaldır' }).click();
     await expect(rows).toHaveCount(25);

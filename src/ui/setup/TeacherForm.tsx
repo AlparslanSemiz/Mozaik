@@ -49,6 +49,9 @@ export function TeacherForm({ state, change }: PanelProps) {
   const [askSecond, setAskSecond] = useState(false);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
+  // Enter or Ekle was tried with a name and no branch. The button used to go
+  // grey and Enter did nothing, i.e. the form refused without a word.
+  const [needSubject, setNeedSubject] = useState(false);
   const subjects = subjectOptions(state);
 
   // Left empty, the short form is derived — so show what it will be.
@@ -64,7 +67,9 @@ export function TeacherForm({ state, change }: PanelProps) {
   // check the mouse cannot.
   function addNew() {
     const subject = subjectOf();
+    if (newTeacher.name.trim() !== '' && subject === '') setNeedSubject(true);
     if (newTeacher.name.trim() === '' || subject === '') return;
+    setNeedSubject(false);
     change((d) =>
       addTeacher(addSubject(addSubject(d, newTeacher.subject2), subject), {
         ...newTeacher,
@@ -241,14 +246,18 @@ export function TeacherForm({ state, change }: PanelProps) {
               if (e.key === 'Enter') addNew();
             }}
           />
-          <button
-            className="btn"
-            disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
-            onClick={addNew}
-          >
+          {/* Not `disabled` for a missing branch: a grey button says no and
+              not why. Pressed, it says what is missing; the name is the one
+              thing that still locks it, because nothing at all is typed. */}
+          <button className="btn" disabled={newTeacher.name.trim() === ''} onClick={addNew}>
             {t('Ekle')}
           </button>
         </div>
+        {needSubject && subjectOf() === '' && (
+          <p className="hint bad" role="status">
+            {t('Önce bir branş seçin.')}
+          </p>
+        )}
 
         <Paste
           open={pasteOpen}

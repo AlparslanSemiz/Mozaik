@@ -4,9 +4,9 @@
 
 import type React from 'react';
 import type { State } from '../../leaf/model';
-import { planSummary } from '../../pure/entities';
+import { isEmptyPlan, planSummary } from '../../pure/entities';
 import { BUNDLE_VERSION, bundleVersionOf, readPlanFile } from '../../pure/io';
-import type { useDialogs, useT } from '../common';
+import { WRONG_FILE, type useDialogs, type useT } from '../common';
 
 interface OpenPlanFile {
   state: State;
@@ -15,10 +15,23 @@ interface OpenPlanFile {
   confirm: ReturnType<typeof useDialogs>['confirm'];
   alert: ReturnType<typeof useDialogs>['alert'];
   notify: (text: string) => void;
+  /** Opens Ayarlar → Hakkında, where the update button is. */
+  goUpdate: () => void;
+  /** Opening a file empties the undo history, so a plan emptied by hand still asks. */
+  canUndo: boolean;
 }
 
 /** The file input's change handler, made for one render of App. */
-export function openPlanFile({ state, loadState, t, confirm, alert, notify }: OpenPlanFile) {
+export function openPlanFile({
+  state,
+  loadState,
+  t,
+  confirm,
+  alert,
+  notify,
+  goUpdate,
+  canUndo,
+}: OpenPlanFile) {
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = ''; // so the same file can be picked again
@@ -44,7 +57,7 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
         title: t('Bu dosya eksik'),
         tone: 'warn',
         body: t(
-          "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Mozaik'in kaydettiği bir .json plan dosyası seçin.",
+          "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.",
         ),
       });
       return;
@@ -60,21 +73,40 @@ export function openPlanFile({ state, loadState, t, confirm, alert, notify }: Op
       const version = bundleVersionOf(text);
       const bundle = version === BUNDLE_VERSION;
       const newer = read.problem === 'yeni' || (version !== null && version > BUNDLE_VERSION);
+      // A newer file is the one refusal he can act on only elsewhere: the
+      // button takes him to the update instead of naming where it is.
+      if (newer && !bundle) {
+        if (
+          await confirm({
+            title: t('Bu dosya daha yeni bir sürümle yazılmış'),
+            body: t(
+              "Bu Mozaik onu açamıyor. Önce Mozaik'i güncelleyin, sonra dosyayı yeniden açın.",
+            ),
+            confirmLabel: t('Güncellemeye bak'),
+            cancelLabel: t('Kapat'),
+          })
+        ) {
+          goUpdate();
+        }
+        return;
+      }
       await alert({
-        title: bundle
-          ? t('Bu dosya bütün planları içeriyor')
-          : newer
-            ? t('Bu dosya daha yeni bir sürümle yazılmış')
-            : t('Bu dosya okunamadı'),
+        title: bundle ? t('Bu dosya bütün planları içeriyor') : t('Bu dosya okunamadı'),
         tone: 'warn',
         body: bundle
           ? t(
               'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
             )
-          : newer
-            ? t("Mozaik'i güncelleyin, sonra tekrar deneyin.")
-            : t("Mozaik'in kaydettiği bir .json plan dosyası seçin."),
+          : WRONG_FILE.map((k) => t(k)).join(' '),
       });
+      return;
+    }
+    // Nothing to lose, nothing to ask: on a first run the question below
+    // counted "Şu an: 0 öğretmen, 0 sınıf" in a red dialog, i.e. warned about
+    // nothing at the one moment the reader is least sure of himself.
+    if (isEmptyPlan(state) && !canUndo) {
+      loadState(read.state);
+      notify(t('Plan dosyası açıldı.'));
       return;
     }
     // Both plans counted side by side (DENETIM Ö43): a file that is empty, or

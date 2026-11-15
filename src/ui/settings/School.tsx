@@ -191,7 +191,9 @@ export default function School({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th className="w-col-xs" />
+                <th className="w-col-xs">
+                  <span className="visually-hidden">{t('Ders günü')}</span>
+                </th>
                 <th>{t('Gün')}</th>
                 <th className="w-col-2xl">{t('Öğle arası')}</th>
               </tr>
@@ -236,7 +238,7 @@ export default function School({ state, change }: PanelProps) {
 
           <p className="hint">
             <T
-              k="Şu an **{gun} gün × {saat} saat** = {yer} hücre."
+              k="Şu an **{gun} gün × {saat} saat** = haftada {yer} saat."
               vars={{ gun: dayCount, saat: hourCount, yer: dayCount * hourCount }}
             />
             {dayCount === 0 && ` ${t('En az bir gün seçmelisiniz.')}`}

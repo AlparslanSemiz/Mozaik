@@ -57,7 +57,10 @@ async function gridMetrics(page: import('@playwright/test').Page) {
     if (head !== null) {
       const klon = head.cloneNode(true) as HTMLElement;
       klon.style.cssText = 'position:absolute;left:-9999px;top:0;width:max-content';
-      document.body.appendChild(klon);
+      // In its own row, not in <body>: the clock's air (`table.grid
+      // .hour-clock`, 2026-11-15) is scoped to the grid, and a clone outside
+      // the table measured the heading 1.75px narrower than it is drawn.
+      head.parentElement!.appendChild(klon);
       headWants = klon.getBoundingClientRect().width;
       klon.remove();
     }
@@ -911,15 +914,16 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
   });
 
   // The full name is not lost: it is what the card SAYS to a screen reader,
-  // and every other density still draws it.
+  // and every other density still draws it. Since erisim/anlam the name opens
+  // with the day and hour ("Çarşamba 10–11. saat, Ö1, 411A SAY, A").
   test('kart sınıfın tam adını söylüyor, Rahat onu çiziyor', async ({ page }) => {
     await loadWorld(page, dizili());
     const card = page.locator('table.grid .card', { hasText: '411A' }).first();
-    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
+    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
     await expect(card.locator('.card-top')).toHaveText('411A SAY');
     await chooseDensity(page, 'Sığdır');
     await expect(card.locator('.card-top')).toHaveJSProperty('innerText', '411A');
-    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
+    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
   });
 });
 

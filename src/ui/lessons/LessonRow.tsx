@@ -5,6 +5,7 @@ import { type Lesson, type State, paletteColor } from '../../leaf/model';
 import {
   useToast,
   useUndoIf,
+  moveFocusFromDeleted,
   LimitBox,
   BlockPatternPicker as BlockCounts,
   blockCeiling,
@@ -22,7 +23,7 @@ import {
 
 interface Props {
   state: State;
-  change: (fn: (d: State) => State) => void;
+  change: (fn: (d: State) => State, label?: string) => void;
   lesson: Lesson;
   /** The name the row is dragged and announced by: "410A · MÇ". */
   rowName: string;
@@ -132,12 +133,14 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
         <div className="form-row nowrap">
           <button
             className="btn danger"
-            onClick={() => {
+            onClick={(e) => {
               // No question since SD1: the deletion happens, and its notice
               // says what went with it and offers "Geri al".
+              const said = deletionNotice(state, 'lesson', x.id);
               const next = deleteLesson(state, x.id);
-              change((d) => (d === state ? next : deleteLesson(d, x.id)));
-              notify(deletionNotice(state, 'lesson', x.id), 'info', {
+              moveFocusFromDeleted(e.currentTarget);
+              change((d) => (d === state ? next : deleteLesson(d, x.id)), said);
+              notify(said, 'info', {
                 label: t('Geri al'),
                 run: () => undoIf(next),
               });

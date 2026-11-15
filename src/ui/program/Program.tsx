@@ -1,11 +1,24 @@
 // The main screen. Wires the grid, the lesson pool and the dragging together.
 //
 // Performance contract (for the slow machine):
-//   - `rows` and `cards` are useMemo'd, recomputed only when the state changes.
+//   - `rows` are useMemo'd on the state; `cards` follow it a moment late
+//     (`useDeferredValue`), so a drop paints the grid before the tray.
+//   - A row that draws as before keeps its object (`keepSameRows`) and the
+//     cell handlers keep their identity (`useSteady`), so a drop redraws the
+//     one or two rows it touched and not ~2100 cells (pitfall 10).
 //   - Grid is React.memo; changing the reason bar does not redraw the grid.
 //   - No state changes at all during a drag (see drag.ts).
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type React from 'react';
 import {
   blockAt,
@@ -15,15 +28,17 @@ import {
   applyDrop,
   dropMap,
   removeBlock,
+  pendingBlocks,
   placementKey,
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
   type BlockRef,
+  type Index,
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { useToast, T, useT } from '../common';
+import { NextStep, useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -35,14 +50,18 @@ import {
   describeBar,
   describeMenu,
   dropNotice,
+  keepSameRows,
   poolMenuFacts,
   markPreview,
   roomLetter,
   visibleDays,
   waitingSubjects,
   type ColorOf,
+  type GridRow,
 } from '../../pure/program';
-import { useDrag, type DragData } from '../../platform/dom';
+import { focusCellSoon, useDrag, type DragData, type KeyMove } from '../../platform/dom';
+import { lessonName } from '../../pure/feasibility';
+import { dayLabel } from '../../leaf/lang';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
 import { activePinned, activePlacements } from '../../pure/grid';
@@ -60,6 +79,7 @@ import PreviewBar from './PreviewBar';
 import GridMenu from './GridMenu';
 import PoolMenu from './PoolMenu';
 import { usePreview } from './usePreview';
+import { useWeekCut } from './useWeekCut';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -96,6 +116,40 @@ function useStillSaid(said: unknown, state: State): boolean {
   return said === null || at === null || at.said !== said || samePlan(at.state, state);
 }
 
+/**
+ * A handler with one identity for the life of the screen that always calls
+ * the latest `fn`. The grid's rows are memoised, and a handler that closes
+ * over `state` is new after every change: passed straight down it redrew
+ * every row on every drop. Safe because these run from events, never during
+ * render, so the latest closure is the one an event should see.
+ */
+function useSteady<A extends unknown[]>(fn: (...args: A) => void): (...args: A) => void {
+  const latest = useRef(fn);
+  useLayoutEffect(() => {
+    latest.current = fn;
+  });
+  return useCallback((...args: A) => {
+    latest.current(...args);
+  }, []);
+}
+
+/**
+ * `buildIndex`, remembering the last two plans it was asked about: the grid
+ * reads the plan on screen and the tray (deferred) the one before it, and
+ * neither should build an index the other already has. Two slots, not a map
+ * keyed by plan: the undo stack keeps thirty plans alive.
+ */
+function useRecentIndex(): (d: State) => Index {
+  const recent = useRef<Array<{ d: State; ix: Index }>>([]);
+  return useCallback((d: State) => {
+    const hit = recent.current.find((x) => x.d === d);
+    if (hit !== undefined) return hit.ix;
+    const built = buildIndex(d);
+    recent.current = [{ d, ix: built }, ...recent.current].slice(0, 2);
+    return built;
+  }, []);
+}
+
 /** What a cell in the preview does when touched: nothing, it is not the timetable. */
 const still = () => {};
 
@@ -114,7 +168,8 @@ function Program({
   colorMode,
 }: Props) {
   const t = useT();
-  const ix = useMemo(() => buildIndex(state), [state]);
+  const indexOf = useRecentIndex();
+  const ix = useMemo(() => indexOf(state), [indexOf, state]);
   const notify = useToast();
   const editLesson = useLessonEdit();
   // "öğretmeni düzenleme ve sınıfı düzenlemede her şeyi düzenleyebilelim":
@@ -147,7 +202,7 @@ function Program({
     [change, ix, notify],
   );
 
-  const { start } = useDrag(drop);
+  const { start, startKeys } = useDrag(drop);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -158,24 +213,34 @@ function Program({
     (d, lesson) => programColorIndex(d, lesson, colorMode),
     [colorMode],
   );
-  const rows = useMemo(
-    () =>
-      shown !== null && diff !== null
-        ? markPreview(
-            buildRows(shown, buildIndex(shown), view, mask, colorOf, t),
-            shown,
-            diff,
-            view,
-          )
-        : buildRows(state, ix, view, mask, colorOf, t),
-    [shown, diff, state, ix, view, mask, colorOf, t],
-  );
+  // The preview's index, built once for the grid and the tray alike.
+  const shownIx = useMemo(() => (shown === null ? null : buildIndex(shown)), [shown]);
+  // The rows drawn last time, so an unchanged row keeps its object. Written
+  // inside the memo: it runs only when its inputs change, and an aborted render
+  // that wrote it can only make the next comparison start from newer rows.
+  const lastRows = useRef<GridRow[] | null>(null);
+  const rows = useMemo(() => {
+    const built =
+      shown !== null && shownIx !== null && diff !== null
+        ? markPreview(buildRows(shown, shownIx, view, mask, colorOf, t), shown, diff, view)
+        : buildRows(state, ix, view, mask, colorOf, t);
+    const kept = keepSameRows(lastRows.current, built);
+    lastRows.current = kept;
+    return kept;
+  }, [shown, shownIx, diff, state, ix, view, mask, colorOf, t]);
   // The plan's answers are the search's: an answer, or an undo that takes one
   // back, runs it again (useSolver checks whether anything changed).
   const { reconsider } = solver;
   useEffect(() => {
     if (advice !== null) reconsider(state.answers);
   }, [state.answers, advice, reconsider]);
+  // The tray follows the plan a moment late. A drop or an undo paints the
+  // grid first and the tray in a render React may interrupt: on the weak
+  // machine rebuilding both in one task was a quarter-second freeze with
+  // nothing on screen changing. `useDeferredValue` hands back the plan the
+  // tray last drew until that render runs, so the memos below hit their cache.
+  const trayState = useDeferredValue(state);
+  const trayIx = useMemo(() => indexOf(trayState), [indexOf, trayState]);
   const {
     cards,
     completed,
@@ -184,13 +249,13 @@ function Program({
     // In the preview the tray is the suggested week's too: what it leaves
     // waiting, which for a way that builds the week is nothing.
     () =>
-      shown === null
-        ? buildPool(state, ix, view, mask, poolSort, poolFilter, colorOf, t)
-        : buildPool(shown, buildIndex(shown), view, mask, poolSort, poolFilter, colorOf, t),
-    [shown, state, ix, view, mask, poolSort, poolFilter, colorOf, t],
+      shown === null || shownIx === null
+        ? buildPool(trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t)
+        : buildPool(shown, shownIx, view, mask, poolSort, poolFilter, colorOf, t),
+    [shown, shownIx, trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t],
   );
   // The branches with something still waiting (see `waitingSubjects`).
-  const poolSubjects = useMemo(() => waitingSubjects(state, mask), [state, mask]);
+  const poolSubjects = useMemo(() => waitingSubjects(trayState, mask), [trayState, mask]);
   const dayIndices = useMemo(
     () => visibleDays(state.settings.days, mask.days),
     [state.settings.days, mask.days],
@@ -202,7 +267,17 @@ function Program({
     applied: useStillSaid(solver.applied, state),
     result: useStillSaid(solver.result, state),
   };
-  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
+  const {
+    text: idleText,
+    level: barLevel,
+    counter: barCounter,
+  } = describeBar(solver, view, t, current);
+  // An idle bar also says when the week runs off the side (useWeekCut.ts).
+  const weekCut = useWeekCut(active && state.lessons.length > 0);
+  const barText =
+    barLevel === '' && weekCut
+      ? `${idleText} ${t('Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.')}`
+      : idleText;
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -222,12 +297,25 @@ function Program({
         notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
         return;
       }
+      const found = classId === null ? null : blockAt(state, classId, day, hour);
+      const removed =
+        classId === null ? undefined : activePlacements(state)[placementKey(classId, day, hour)];
       change((d) => {
         const fresh = classAt(d, rowId, day, hour);
         return fresh === null ? d : removeBlock(d, fresh, day, hour);
       });
+      if (found === null || removed === undefined) return;
+      // Said, and focus kept on the grid: the card that had it is gone, and
+      // focus used to fall to <body> with nothing heard (DENETIM KS9).
+      notify(t('{ders} havuza kaldırıldı.', { ders: lessonName(ix, removed) }));
+      // Only when focus was on the grid or in its menu, i.e. on the card being
+      // removed: a removal asked from anywhere else does not pull focus here.
+      const active = document.activeElement;
+      if (active?.closest('.grid-wrap, [role=menu]') != null) {
+        focusCellSoon(rowId, day, found.hour);
+      }
     },
-    [change, classAt, notify, state, t],
+    [change, classAt, notify, state, t, ix],
   );
 
   /**
@@ -341,10 +429,13 @@ function Program({
    * is busy) and 5 (the teacher is in another class) both see its own cells —
    * and it could not even be dropped back where it came from. Nothing is
    * removed for real here: the lift happens inside the drop's single change().
+   *
+   * Two hands as well: a pointer, or the keyboard (`hand.origin`, the element
+   * that had focus and gets it back). Same map, same painting, same drop.
    */
   const beginDrag = useCallback(
     (
-      e: React.PointerEvent,
+      hand: React.PointerEvent | { origin: HTMLElement | null },
       lessonId: Id,
       source: { classId: Id; day: number; hour: number } | null,
       size: number,
@@ -354,6 +445,11 @@ function Program({
 
       const lesson = ix.lessonById.get(lessonId);
       if (lesson === undefined) return;
+      // The tray follows the plan a moment late (`trayState`), so a card can
+      // still be on it for a block the plan no longer owes: the lesson was just
+      // completed, or its 2 went down and it owes a 1. Asked of the plan on
+      // screen, or the drop would place hours nobody asked for.
+      if (source === null && !pendingBlocks(state, lesson).includes(Math.max(1, size))) return;
 
       const sourceRef: BlockRef | null =
         source === null ? null : { ...source, lessonId, size: Math.max(1, size) };
@@ -368,27 +464,60 @@ function Program({
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
       const teacherView = view === 'teacher';
+      const rowId = teacherView ? lesson.teacherId : lesson.classId;
+      const data: DragData = {
+        lessonId,
+        rowId,
+        blockSize: Math.max(1, size),
+        hourCount: state.settings.hours.length,
+        map,
+        source: sourceRef,
+      };
 
-      start(
-        e,
-        {
-          lessonId,
-          rowId: teacherView ? lesson.teacherId : lesson.classId,
-          blockSize: Math.max(1, size),
-          hourCount: state.settings.hours.length,
-          map,
-          source: sourceRef,
-        },
-        {
-          top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
-          bottom: teacherView
-            ? roomLetter(ix, group?.roomId)
-            : subjectShort(state.settings, lessonSubject(state, lesson)),
-          color: programColorIndex(state, lesson, colorMode),
-        },
-      );
+      if ('origin' in hand) {
+        const { origin } = hand;
+        const name = lessonName(ix, lessonId);
+        const place = (day: number, hour: number) =>
+          t('{gun} {n}. saat', {
+            gun: dayLabel(state.settings.days[day]?.name ?? ''),
+            n: size > 1 ? `${hour + 1}–${hour + size}` : hour + 1,
+          });
+        const keys: KeyMove = {
+          at: source === null ? null : { day: source.day, hour: source.hour },
+          place,
+          intro: t('{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.', {
+            ders: name,
+          }),
+          onRefuse: notify,
+          onCancel: (byTab) => {
+            notify(t('Taşımadan vazgeçildi.'));
+            if (byTab) return;
+            if (origin?.isConnected === true && origin !== document.body) origin.focus();
+            else if (source !== null) focusCellSoon(rowId, source.day, source.hour);
+          },
+          onDrop: (day, hour) => {
+            notify(t('{ders} yerleşti: {yer}.', { ders: name, yer: place(day, hour) }));
+            // A moved block is followed to where it went. A card from the
+            // tray leaves focus on the tray, where the next one waits, unless
+            // that was the last of its pile.
+            requestAnimationFrame(() => {
+              if (source !== null || origin?.isConnected !== true) focusCellSoon(rowId, day, hour);
+            });
+          },
+        };
+        startKeys(data, keys);
+        return;
+      }
+
+      start(hand, data, {
+        top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
+        bottom: teacherView
+          ? roomLetter(ix, group?.roomId)
+          : subjectShort(state.settings, lessonSubject(state, lesson)),
+        color: programColorIndex(state, lesson, colorMode),
+      });
     },
-    [state, ix, view, start, solver.running, mask.days, colorMode, t],
+    [state, ix, view, start, startKeys, notify, solver.running, mask.days, colorMode, t],
   );
 
   const cardStart = useCallback(
@@ -396,9 +525,19 @@ function Program({
     [beginDrag],
   );
 
-  /** Left button on a placed block: pick it up and move it. */
+  /** Enter, Space or T on a pool card: pick it up from the keyboard. */
+  const cardPick = useCallback(
+    (origin: HTMLElement, lessonId: Id, size: number) =>
+      beginDrag({ origin }, lessonId, null, size),
+    [beginDrag],
+  );
+
+  /**
+   * Left button on a placed block: pick it up and move it. Or, with no
+   * pointer event, the keyboard's T and the menu's "Taşı" (`cellPick`).
+   */
   const cellMoveStart = useCallback(
-    (e: React.PointerEvent, rowId: string, day: number, hour: number) => {
+    (hand: React.PointerEvent | null, rowId: string, day: number, hour: number) => {
       const teacherView = view === 'teacher';
       const lessonId = teacherView
         ? ix.teacherBusy.get(closedKey(rowId, day, hour))
@@ -414,20 +553,42 @@ function Program({
       const found = blockAt(state, classId, day, hour);
       if (found === null) return;
 
-      beginDrag(e, lessonId, { classId, day, hour: found.hour }, found.size);
+      const origin = hand === null ? (document.activeElement as HTMLElement | null) : null;
+      beginDrag(hand ?? { origin }, lessonId, { classId, day, hour: found.hour }, found.size);
     },
     [state, ix, view, beginDrag],
   );
+
+  const cellPick = useCallback(
+    (rowId: string, day: number, hour: number) => {
+      const classId = classAt(state, rowId, day, hour);
+      if (classId !== null && blockPinned(state, classId, day, hour)) {
+        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        return;
+      }
+      cellMoveStart(null, rowId, day, hour);
+    },
+    [cellMoveStart, classAt, notify, state, t],
+  );
+  // What the grid's rows hold: one identity each (see `useSteady`).
+  const steadyRemove = useSteady(cellRemove);
+  const steadyMoveStart = useSteady(cellMoveStart);
+  const steadyPin = useSteady(pinCell);
+  const steadyPick = useSteady(cellPick);
 
   if (state.lessons.length === 0) {
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings: the
+              sentence below says what is missing, the heading says where. */}
+          <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
           <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.')}
+          <NextStep state={state} />
         </div>
       </>
     );
@@ -450,13 +611,23 @@ function Program({
           that never got it. `polite` and not `assertive`: it must not cut into
           a dialog, and the DRAG reason updates several times a second while the
           pointer moves — the region is on the wrapper so those coalesce into
-          one announcement per settled state rather than one per frame. */}
-      <div
-        className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span>{barText}</span>
+          one announcement per settled state rather than one per frame.
+
+          The live region is the FIRST span only, not the whole bar: the run's
+          counter (`barCounter`) changes many times a second and sits beside
+          it, outside, so the start is said once and the result once. The
+          COUNTER is `aria-busy`, not the bar: a busy ancestor tells a screen
+          reader to hold back the live region inside it, and the start would
+          never be heard. */}
+      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
+        <span role="status" aria-live="polite">
+          {barText}
+        </span>
+        {barCounter !== undefined && (
+          <span className="reason-count" aria-busy="true">
+            {barCounter}
+          </span>
+        )}
         {((solver.result !== null && current.result) ||
           (solver.applied !== null && current.applied)) &&
           !solver.running && (
@@ -500,15 +671,20 @@ function Program({
           while down the right; it came back under the grid once it could
           open into the room the timetable does not use and be closed. */}
       <div className={shown === null ? 'program-body' : 'program-body previewing'}>
+        {/* The grid's place in the outline: h1 the school, h2 the grid and
+            the pool (LessonPool), h3 the pool's groups. It had no h2, so the
+            pool's groups hung straight off the school name. */}
+        <h2 className="visually-hidden">{t('Program')}</h2>
         <Grid
           settings={state.settings}
           rows={rows}
           dayIndices={dayIndices}
           dayModes={mask.days}
           firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
-          onCellRemove={shown === null ? cellRemove : still}
-          onCellMoveStart={shown === null ? cellMoveStart : still}
-          onCellPin={shown === null ? pinCell : still}
+          onCellRemove={shown === null ? steadyRemove : still}
+          onCellMoveStart={shown === null ? steadyMoveStart : still}
+          onCellPin={shown === null ? steadyPin : still}
+          onCellPick={shown === null ? steadyPick : still}
           onMenu={shown === null ? setMenuTarget : still}
           menuOpen={active && menuOpen}
           onMenuOpenChange={setMenuOpen}
@@ -520,6 +696,7 @@ function Program({
               running={solver.running}
               container={menuPortalRef.current}
               cellRemove={cellRemove}
+              cellPick={cellPick}
               editLesson={editLesson}
               inspect={inspect}
               togglePin={togglePin}
@@ -540,6 +717,7 @@ function Program({
           setFilter={setPoolFilter}
           subjects={poolSubjects}
           onStart={cardStart}
+          onPick={shown === null ? cardPick : still}
           onMenu={setPoolMenuLessonId}
           menuOpen={active && poolMenuOpen}
           onMenuOpenChange={setPoolMenuOpen}

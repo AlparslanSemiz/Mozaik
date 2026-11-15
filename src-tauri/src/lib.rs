@@ -457,11 +457,17 @@ mod linux_tests {
     fn linux_renderer_sets_the_variable_and_respects_the_shell() {
         std::env::remove_var("WEBKIT_DISABLE_DMABUF_RENDERER");
         linux_renderer();
-        assert_eq!(std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(), Ok("1"));
+        assert_eq!(
+            std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(),
+            Ok("1")
+        );
 
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "0");
         linux_renderer();
-        assert_eq!(std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(), Ok("0"));
+        assert_eq!(
+            std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(),
+            Ok("0")
+        );
         std::env::remove_var("WEBKIT_DISABLE_DMABUF_RENDERER");
     }
 }
@@ -536,7 +542,10 @@ mod tests {
 
         let mut names = list_in(&s.0).unwrap();
         names.sort();
-        assert_eq!(names, ["ders-programi-2026-08-27.json", "ders-programi-tumu.json"]);
+        assert_eq!(
+            names,
+            ["ders-programi-2026-08-27.json", "ders-programi-tumu.json"]
+        );
 
         remove_in(&s.0, "ders-programi-2026-08-27.json").unwrap();
         assert_eq!(list_in(&s.0).unwrap(), ["ders-programi-tumu.json"]);
@@ -554,7 +563,10 @@ mod tests {
             Some("{\"bundleVersion\":1}")
         );
         // Not there is an answer, not an error: the page then may write.
-        assert_eq!(read_in(&s.0, "ders-programi-2026-08-27.json").unwrap(), None);
+        assert_eq!(
+            read_in(&s.0, "ders-programi-2026-08-27.json").unwrap(),
+            None
+        );
     }
 
     #[test]
@@ -580,7 +592,11 @@ mod tests {
         // behind, possibly empty. The next save must not append to it or trip
         // on it: the file read back is the new text, and no `.tmp` stays.
         let s = Scratch::new("crash-tmp");
-        fs::write(s.0.join("ders-programi-tumu.json.tmp"), "yarim kalmis cok daha uzun bir metin").unwrap();
+        fs::write(
+            s.0.join("ders-programi-tumu.json.tmp"),
+            "yarim kalmis cok daha uzun bir metin",
+        )
+        .unwrap();
         write_in(&s.0, "ders-programi-tumu.json", "{\"bundleVersion\":1}").unwrap();
 
         assert_eq!(list_in(&s.0).unwrap(), ["ders-programi-tumu.json"]);
@@ -598,7 +614,10 @@ mod tests {
         write_in(&s.0, "ders-programi-tumu.json", "eski").unwrap();
         fs::create_dir(s.0.join("ders-programi-tumu.json.tmp")).unwrap();
         assert!(write_in(&s.0, "ders-programi-tumu.json", "yeni").is_err());
-        assert_eq!(fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(), "eski");
+        assert_eq!(
+            fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(),
+            "eski"
+        );
     }
 
     #[test]

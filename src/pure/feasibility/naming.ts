@@ -3,7 +3,7 @@
 
 import { t } from '../../leaf/i18n';
 import type { Id, State } from '../../leaf/model';
-import { type BlockCode, type Index, blockerDetail } from '../constraints';
+import { type BlockCode, type Index, blockerDetail, pendingBlocks } from '../constraints';
 
 /** "412 — AV Fizik": how a lesson is named wherever the user is told about it. */
 export function lessonName(ix: Index, lessonId: Id): string {
@@ -41,10 +41,16 @@ export function commonestBlock(
 ): BlockSummary {
   const counts = new Map<BlockCode, { count: number; message: string }>();
   let anyValid = false;
+  // The block in question is the same for every cell, so it is read ONCE.
+  // Left to `blockerDetail` it is re-read off the whole grid per cell
+  // (`pendingBlocks` → `placedBlocks`), and that was most of the freeze after a
+  // drop: the top bar's health line asks this of every waiting lesson.
+  const lesson = ix.lessonById.get(lessonId);
+  const size = lesson === undefined ? undefined : (pendingBlocks(d, lesson)[0] ?? 1);
 
   outer: for (let g = 0; g < d.settings.days.length; g++) {
     for (let s = 0; s < d.settings.hours.length; s++) {
-      const found = blockerDetail(d, ix, lessonId, g, s);
+      const found = blockerDetail(d, ix, lessonId, g, s, size);
       if (found === null) {
         anyValid = true;
         if (stopAtFirstValid) break outer;

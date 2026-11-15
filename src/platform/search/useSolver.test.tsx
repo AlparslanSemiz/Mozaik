@@ -7,7 +7,8 @@
 //
 //   - a run writes its week only over the plan it started from,
 //   - a stuck run starts the search from that plan, with the stuck week as
-//     its first guess and the plan's answers,
+//     its first guess and the plan's answers, a frame after its result,
+//   - Durdur on a run stops it at once and writes what it had a frame later,
 //   - Durdur keeps what was found and says it stopped, and "go on" hands the
 //     found weeks back as first guesses,
 //   - a suggestion is applied only to the plan it was made for, its yeses
@@ -167,6 +168,10 @@ describe('useSolver', () => {
 
     act(() => run.start(base, { keepPlaced: false }));
     frame();
+    // The stuck week is drawn first; the search starts on the next frame.
+    expect(run.result?.state).toBe(left);
+    expect(startRelax).not.toHaveBeenCalled();
+    frame();
 
     expect(startRelax).toHaveBeenCalledTimes(1);
     expect(vi.mocked(startRelax).mock.calls[0]).toEqual([
@@ -208,11 +213,36 @@ describe('useSolver', () => {
 
     act(() => run.start(base));
     frame();
+    frame();
 
     expect(startRelax).not.toHaveBeenCalled();
     expect(run.advice?.searching).toBe(false);
     expect(run.advice?.suggestions).toEqual([]);
     expect(run.advice?.forState).toBe(base);
+  });
+
+  it('Durdur koşuyu hemen durdurur, sonucu ve sebepleri bir kare sonra yazar', () => {
+    const base = sampleState();
+    const built: State = { ...base, programs: base.programs.map((p) => ({ ...p })) };
+    const outcome = { phase: 'cancelled', state: built, stuck: [] } as unknown as SolverResult;
+    const cancel = vi.fn(() => outcome);
+    vi.mocked(createSolver).mockReturnValue({
+      step: () => null,
+      progress: () => SOLVER_PROGRESS,
+      cancel,
+    });
+
+    act(() => run.start(base));
+    act(() => run.stop());
+    expect(run.running).toBe(false);
+    expect(cancel).not.toHaveBeenCalled();
+    expect(changes).toHaveLength(0);
+
+    frame();
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(run.result).toBe(outcome);
+    expect(changes).toHaveLength(1);
+    expect(changes[0]!(base)).toBe(built);
   });
 
   it('Durdur aramayı keser, bulduğunu tutar ve durduğunu söyler; sürdür bulunanı ilk tahmin yapar', () => {
@@ -223,7 +253,8 @@ describe('useSolver', () => {
     vi.mocked(startRelax).mockReturnValue(first.relaxer);
 
     act(() => run.start(base));
-    frame(); // the run ends stuck, the search starts
+    frame(); // the run ends stuck
+    frame(); // and a frame later the search starts
     // Without a word from the reader, the search keeps what is placed.
     expect(vi.mocked(startRelax).mock.calls[0]![2].keepPlaced).toBe(true);
     frame(); // the search reports what it has so far
@@ -250,6 +281,7 @@ describe('useSolver', () => {
     const search = fakeRelaxer([], []);
     vi.mocked(startRelax).mockReturnValue(search.relaxer);
     act(() => run.start(base));
+    frame();
     frame();
     changes = [];
 
@@ -279,6 +311,7 @@ describe('useSolver', () => {
     const b = way('sinir', 'r2');
     vi.mocked(startRelax).mockReturnValue(fakeRelaxer([], [a, b]).relaxer);
     act(() => run.start(base));
+    frame();
     frame();
     act(() => run.stop());
     expect(run.advice?.suggestions).toEqual([a, b]);

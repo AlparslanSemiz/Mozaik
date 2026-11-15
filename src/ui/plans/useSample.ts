@@ -6,21 +6,26 @@
 // different ways is how a program stops being one program — and one of the two
 // asks it over a project that already holds a term's work, so the sentence has
 // to count what would be lost rather than assume there is nothing.
+//
+// Not irreversible, and it never was: the sample goes in as an ordinary step
+// of the history. The question used to say "Geri alınamaz" all the same; since
+// 2026-11-15 it says what is true, and the notice offers "Geri al" (TODO SD1).
 
 import { useCallback } from 'react';
-import { useDialogs, useT, useToast } from '../common';
+import { useDialogs, useT, useToast, useUndoIf } from '../common';
 import { markIntroSeen } from '../../platform/prefs';
 import { sampleState } from '../../pure/io';
 import type { State } from '../../leaf/model';
 
 export type LoadSample = (
   state: State,
-  change: (apply: (d: State) => State) => void,
+  change: (apply: (d: State) => State, label?: string) => void,
 ) => Promise<boolean>;
 
 export function useLoadSample(): LoadSample {
   const { confirm } = useDialogs();
   const notify = useToast();
+  const undoIf = useUndoIf();
   const t = useT();
 
   return useCallback(
@@ -38,7 +43,7 @@ export function useLoadSample(): LoadSample {
             : t('Örnek okul verisi yüklenecek'),
           body: holds
             ? t(
-                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.',
+                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından "Geri al" ile geri gelir.',
                 { kayip: cost },
               )
             : t(
@@ -50,13 +55,15 @@ export function useLoadSample(): LoadSample {
       ) {
         return false;
       }
-      change(() => sampleState());
+      const said = t('Örnek okul yüklendi.');
+      const next = sampleState();
+      change(() => next, said);
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
       markIntroSeen();
-      notify(t('Örnek okul yüklendi.'));
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
       return true;
     },
-    [confirm, notify, t],
+    [confirm, notify, t, undoIf],
   );
 }

@@ -109,7 +109,7 @@ test.describe('48. Varlık paneli', () => {
 
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await chooseEntity(page, id);
-    await page.getByRole('button', { name: 'Tümünü kapat' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.locator(`table.grid tbody tr:has(td[data-row="${id}"]) .row-head .inspect`).click();

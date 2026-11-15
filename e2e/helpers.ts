@@ -349,7 +349,7 @@ export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(state)),
   });
-  await answerDialog(page); // "şu anki programın yerine geçecek"
+  await fileOpened(page);
 
   // ...and wait until the WORLD is in storage, not merely until something is.
   //
@@ -440,15 +440,17 @@ export async function savedState(page: Page, previous: string): Promise<State> {
  *
  * - AA..EE each hold two hours in a row on Tuesday against a school limit of
  *   one: five breaches of "art arda", and each has an own daily limit.
- * - FF holds a four-hour lesson in Tuesday's four hours, all of them closed
- *   for FF: four lessons on a closed hour.
- * - GG is closed all week and owes 501..505 an hour each: five lessons with
- *   nowhere to go.
+ * - FF holds four one-hour lessons in Tuesday's four hours, all of them closed
+ *   for FF: four lessons on a closed hour, one row each (Kontrol draws one row
+ *   per LESSON since 2026-11-15, so a single four-hour lesson would be one).
+ * - GG, II and JJ are closed all week and owe 501..505 an hour each: five
+ *   lessons with nowhere to go, under three causes (Kontrol groups them by
+ *   cause, and a list of one row has nothing to alternate).
  * - 506 is owed three single hours by AA..DD in a two-day week: the advisor.
  * - 501..505 carry an own same-lesson limit.
  */
 export function listWorld(): State {
-  const short = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG'];
+  const short = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF', 'GG', 'II', 'JJ'];
   const teachers = short.map((s, i) => ({
     id: `o${s}`,
     short: s,
@@ -467,14 +469,17 @@ export function listWorld(): State {
     lessons.push({ id, classId: `s50${i + 1}`, teacherId: `o${short[i]}`, weeklyHours: 2 });
     placements[`s50${i + 1}|0|0`] = id;
     placements[`s50${i + 1}|0|1`] = id;
-    lessons.push({ id: `yok${i}`, classId: `s50${i + 1}`, teacherId: 'oGG', weeklyHours: 1 });
+    const away = ['oGG', 'oGG', 'oII', 'oJJ', 'oJJ'][i]!;
+    lessons.push({ id: `yok${i}`, classId: `s50${i + 1}`, teacherId: away, weeklyHours: 1 });
   }
-  lessons.push({ id: 'kapali', classId: 's506', teacherId: 'oFF', weeklyHours: 4 });
   for (let s = 0; s < 4; s++) {
-    placements[`s506|0|${s}`] = 'kapali';
+    lessons.push({ id: `kapali${s}`, classId: 's506', teacherId: 'oFF', weeklyHours: 1 });
+    placements[`s506|0|${s}`] = `kapali${s}`;
     unavailable[`oFF|0|${s}`] = 1;
   }
-  for (let g = 0; g < 2; g++) for (let s = 0; s < 4; s++) unavailable[`oGG|${g}|${s}`] = 1;
+  for (const away of ['oGG', 'oII', 'oJJ']) {
+    for (let g = 0; g < 2; g++) for (let s = 0; s < 4; s++) unavailable[`${away}|${g}|${s}`] = 1;
+  }
   for (let i = 0; i < 4; i++) {
     lessons.push({ id: `gun${i}`, classId: 's506', teacherId: `o${short[i]}`, weeklyHours: 3 });
   }
@@ -511,7 +516,7 @@ export async function openFixture(page: Page) {
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(FIXTURE)),
   });
-  await answerDialog(page);
+  await openedWithoutQuestion(page);
   await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
 }
 
@@ -613,6 +618,28 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  *
  * Returns what the dialog said, so a test that cares can check the counting.
  */
+/**
+ * "Dosyadan aç" into an EMPTY plan asks nothing (`isEmptyPlan`): there is
+ * nothing to lose, and a red question counting "0 öğretmen" was a warning
+ * about nothing. The file is open when its toast is up and no dialog is.
+ */
+export async function openedWithoutQuestion(page: Page) {
+  await expect(page.locator('.toasts')).toContainText('Plan dosyası açıldı.');
+  await expect(page.locator('.dlg')).toHaveCount(0);
+}
+
+/**
+ * "Dosyadan aç" asks only when the open plan holds something: a world loaded
+ * over another world answers the question, one loaded into a fresh page sees
+ * none. Either way the file is open afterwards.
+ */
+export async function fileOpened(page: Page) {
+  const asked = page.locator('.dlg');
+  const opened = page.locator('.toasts', { hasText: 'Plan dosyası açıldı.' });
+  await expect(asked.or(opened).first()).toBeVisible();
+  if ((await asked.count()) > 0) await answerDialog(page);
+}
+
 export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): Promise<string> {
   const dlg = page.locator('.dlg');
   await expect(dlg).toBeVisible();
@@ -621,9 +648,9 @@ export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): 
   // that does the thing is last. An alert has only one, and it is both.
   const buttons = dlg.locator('.dlg-actions .btn');
   await (answer === 'cancel' ? buttons.first() : buttons.last()).click();
-  // Gone — OR replaced by the NEXT question. "Her şeyi sil" asks twice, and
-  // the second dialog opens in the same tick the first one closes, so waiting
-  // for `.dlg` to be hidden would wait for something that never happens.
+  // Gone — OR replaced by the NEXT question. A second dialog can open in the
+  // same tick the first one closes, so waiting for `.dlg` to be hidden would
+  // wait for something that never happens.
   await expect(async () => {
     if ((await dlg.count()) === 0) return;
     const now = (await dlg.innerText()).replace(/\s+/g, ' ').trim();
@@ -762,12 +789,16 @@ export const SCENES: Scene[] = [
   },
   { name: '7-kontrol', go: tab('Kontrol') },
   {
-    // The program's own question, with the cascade summary counted out. There
-    // used to be seventeen of these and every one was the operating system's.
+    // The program's own dialog. There used to be seventeen of these and every
+    // one was the operating system's. A deletion no longer asks (SD1); a
+    // subject that is still in use is refused, and says by whom.
     name: '7b-diyalog',
     go: async (page) => {
-      await openSetup(page, 'Derslikler');
-      await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+      await openSetup(page, 'Branşlar');
+      await page
+        .locator('table.list tr[data-row-name="Matematik"]')
+        .getByRole('button', { name: 'Sil' })
+        .click();
       await page.locator('.dlg').waitFor();
     },
     after: async (page) => {

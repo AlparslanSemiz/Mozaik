@@ -25,6 +25,7 @@ import {
   describeMenu,
   describeStrip,
   dropNotice,
+  keepSameRows,
   poolMenuFacts,
   markPreview,
   roomLetter,
@@ -158,6 +159,35 @@ describe('ızgara', () => {
     expect(onlyMoved[0]?.cells[1]?.mark).toBe('moved');
   });
 
+  it('bir yerleşimden sonra yalnız değişen satır yeni nesne, değişmeyen eskisi', () => {
+    const d = makeWorld({
+      days: 2,
+      hours: 4,
+      teachers: [{ id: 'oMC', short: 'MÇ' }],
+      classes: [
+        { id: 's510', name: '510', roomId: null },
+        { id: 's511', name: '511', roomId: null },
+      ],
+      lessons: [{ id: 'L1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+      placements: { [placementKey('s510', 0, 1)]: 'L1' },
+    });
+    const rowsOf = (x: State) =>
+      buildRows(x, buildIndex(x), 'class', EMPTY_PROGRAM_MASK, byTeacher, t);
+    const before = rowsOf(d);
+    // The same plan built again: the very same array comes back.
+    expect(keepSameRows(before, rowsOf(d))).toBe(before);
+    const moved = replaceActiveGrid(d, {
+      placements: { [placementKey('s510', 1, 2)]: 'L1' },
+    });
+    const after = keepSameRows(before, rowsOf(moved));
+    expect(after).not.toBe(before);
+    expect(after[0]).not.toBe(before[0]);
+    expect(after[0]?.cells[1 * 4 + 2]?.lessonId).toBe('L1');
+    expect(after[0]?.cells[1]).toBeNull();
+    expect(after[1]).toBe(before[1]);
+    expect(keepSameRows(null, before)).toBe(before);
+  });
+
   it('öğretmen görünümünde hücrenin sınıfı o saatteki dersten', () => {
     const d = makeWorld({
       teachers: [{ id: 'oMC', short: 'MÇ' }],
@@ -196,7 +226,8 @@ describe('araç çubuğunun altındaki satır', () => {
       progress: { placedBlocks: 1, totalBlocks: 4, nodes: 0, elapsedMs: 50, excludedBlocks: 0 },
     };
     expect(describeBar(running, 'class', t, { applied: false, result: false })).toEqual({
-      text: 'Otomatik diziliyor… 1/4 kart · 0,1 sn',
+      text: 'Otomatik diziliyor…',
+      counter: '1/4 kart · 0,1 sn',
       level: 'busy',
     });
     expect(describeBar(idle, 'teacher', t, { applied: false, result: false }).level).toBe('');
