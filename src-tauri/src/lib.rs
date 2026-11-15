@@ -99,11 +99,33 @@ fn safe_name(name: &str) -> Result<(), String> {
 /// would write its fixtures into it — and a test that is afraid to run is not
 /// a test. These three functions are everything this file DOES; the
 /// `#[tauri::command]` wrappers below them only answer "which folder".
+///
+/// THE BYTES REACH THE DISK BEFORE THE NAME DOES. A rename alone is atomic for
+/// the NAME, not for the contents: NTFS journals the rename, not the data, so a
+/// power cut after the rename and before the cache is written back can leave
+/// `ders-programi-tumu.json` empty or full of zeros, which is exactly the crash
+/// principle 6 is about (security review 2026-11-15, V2). So the temporary file
+/// is `sync_all`ed first, and on Unix the folder too, so the rename itself
+/// survives. Windows cannot open a folder as a plain file (it needs
+/// `FILE_FLAG_BACKUP_SEMANTICS`), and NTFS journals the rename anyway.
 fn write_in(dir: &Path, name: &str, text: &str) -> Result<(), String> {
+    use std::io::Write;
     safe_name(name)?;
     let tmp = dir.join(format!("{name}.tmp"));
-    fs::write(&tmp, text.as_bytes()).map_err(|e| format!("Yazılamadı: {e}"))?;
+    let yaz = || -> std::io::Result<()> {
+        let mut f = fs::File::create(&tmp)?;
+        f.write_all(text.as_bytes())?;
+        f.sync_all()
+    };
+    if let Err(e) = yaz() {
+        let _ = fs::remove_file(&tmp);
+        return Err(format!("Yazılamadı: {e}"));
+    }
     fs::rename(&tmp, dir.join(name)).map_err(|e| format!("Yerine konamadı: {e}"))?;
+    #[cfg(unix)]
+    if let Ok(klasor) = fs::File::open(dir) {
+        let _ = klasor.sync_all();
+    }
     Ok(())
 }
 
@@ -421,6 +443,33 @@ mod tests {
             fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(),
             "yeni"
         );
+    }
+
+    #[test]
+    fn a_temporary_left_by_a_crash_is_written_over_and_does_not_stay() {
+        // A power cut between the write and the rename leaves `name.json.tmp`
+        // behind, possibly empty. The next save must not append to it or trip
+        // on it: the file read back is the new text, and no `.tmp` stays.
+        let s = Scratch::new("crash-tmp");
+        fs::write(s.0.join("ders-programi-tumu.json.tmp"), "yarim kalmis cok daha uzun bir metin").unwrap();
+        write_in(&s.0, "ders-programi-tumu.json", "{\"bundleVersion\":1}").unwrap();
+
+        assert_eq!(list_in(&s.0).unwrap(), ["ders-programi-tumu.json"]);
+        assert_eq!(
+            read_in(&s.0, "ders-programi-tumu.json").unwrap().as_deref(),
+            Some("{\"bundleVersion\":1}")
+        );
+    }
+
+    #[test]
+    fn a_failed_write_leaves_the_old_file_and_no_temporary() {
+        // The temporary cannot be created (a folder holds its name): the save
+        // fails loudly and the file that was there is untouched.
+        let s = Scratch::new("fail-tmp");
+        write_in(&s.0, "ders-programi-tumu.json", "eski").unwrap();
+        fs::create_dir(s.0.join("ders-programi-tumu.json.tmp")).unwrap();
+        assert!(write_in(&s.0, "ders-programi-tumu.json", "yeni").is_err());
+        assert_eq!(fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(), "eski");
     }
 
     #[test]
