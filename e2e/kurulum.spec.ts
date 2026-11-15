@@ -226,9 +226,16 @@ test.describe('16. Branş seçimi', () => {
     await expect(branch).toHaveJSProperty('tagName', 'SELECT');
     await expect(page.getByPlaceholder('Branş')).toHaveCount(0);
 
-    // Branch is required: half a teacher record is not worth storing
+    // Branch is required: half a teacher record is not worth storing. The
+    // refusal is SAID, by Ekle and by Enter alike: a grey button and a dead
+    // Enter refused without a word.
     await page.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
-    await expect(page.getByRole('button', { name: 'Ekle', exact: true })).toBeDisabled();
+    await page.getByPlaceholder('Ad Soyad').press('Enter');
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Önce bir branş seçin.' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
     await branch.selectOption('Matematik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -558,7 +565,7 @@ test.describe('31. Kurulum — sağ sütun', () => {
     // "CA · Cem Aslan (Mat)" on the availability row; the summary carries the
     // plain name. Split rather than strip — no regex to get subtly wrong.
     const who = label.split(' · ')[1]!.split(' (')[0]!;
-    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
 
     await openSetup(page, 'Öğretmenler');
     const first = page.locator('.cols > aside table.stat tbody tr').first();

@@ -36,6 +36,14 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-15 · Ders formunda saat Ekle'den sonra varsayılana döner (`kullanim/ilk-acilis`)
+
+**Karar.** Dersler'in ekleme formu Ekle'den sonra haftalık saati 4'e, dağılımı tek saatlere
+döndürür (`pure/forms/lessonForm.ts`, `afterAdd`). Önceki gerekçe ("sonraki ders çoğu zaman
+aynı uzunlukta") denetimin akışında tutmadı: Matematik'ten kalan 6 bir sonraki derse sessizce
+geçti ve fark, sınıf açık saatini aşınca Kontrol'de görüldü. Her seferinde yazılan bir sayıya her
+seferinde bakılıyor. Yürünen eksen (sınıf ya da öğretmen) eskisi gibi kalır.
+
 ### 2026-11-15 · Güvenlik sertleştirmesi: küçük kapılar Rust'ta, capability ve CSP sonraya (`guvenlik/sertlestirme`)
 
 **Karar.** Güvenlik denetiminin küçük maddeleri kodda kapandı (TODO B7.39). Üç seçim:

@@ -134,19 +134,27 @@ export function chooseSubject(
   };
 }
 
+/** What "Haftalık saat" holds on a fresh form and after every Ekle. */
+export const DEFAULT_LESSON_HOURS = '4';
+
 /**
  * What the form keeps after a lesson is added. Keep the axis this screen is
  * walking, clear the one that changes from lesson to lesson. The old form did
  * the exact opposite — it cleared the class — so eight lessons for one class
- * meant choosing it eight times. Hours and split stay: the next lesson is more
- * often the same length than it is a different length.
+ * meant choosing it eight times.
+ *
+ * The hours go back to the default (2026-11-15). They used to stay, on the
+ * argument that the next lesson is often the same length; but a 6 left over
+ * from Matematik went silently into the next row, and the reader only saw it
+ * when the class came out over its open hours. A number he types every time
+ * is one he looks at every time. The split goes with it (LessonForm.tsx).
  */
 export function afterAdd(newLesson: LessonDraft, mode: LessonMode): LessonDraft {
   return mode === 'teacher'
-    ? { ...newLesson, classId: '' }
+    ? { ...newLesson, classId: '', hours: DEFAULT_LESSON_HOURS }
     : // `second` names one of the teacher's two subjects, so it cannot
       // outlive the teacher it belonged to — and neither can the subject,
       // which was filled in FROM that teacher: left standing it would narrow
       // the teacher list to one branch for the next lesson.
-      { ...newLesson, teacherId: '', subject: '' };
+      { ...newLesson, teacherId: '', subject: '', hours: DEFAULT_LESSON_HOURS };
 }

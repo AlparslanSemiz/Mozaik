@@ -277,4 +277,54 @@ test.describe('69. Dersler sekmesi', () => {
     const strip = await page.locator('.ribbon .ribbon-value').last().innerText();
     expect(heading.replace('Dersler · ', '')).toBe(strip.trim());
   });
+  // A 6 left in the box from the last lesson went silently into the next one
+  // (2026-11-15). After Ekle the box is back at the default, and the split
+  // with it.
+  test('Ekle’den sonra haftalık saat varsayılana, dağılım tek saatlere dönüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openLessons(page, 'class');
+
+    const teacherPick = page.locator('.form-row').getByLabel('Öğretmen', { exact: true });
+    const value = await teacherPick.locator('option').nth(1).getAttribute('value');
+    await teacherPick.selectOption(value!);
+    const hours = page.locator('.form-row input.num').first();
+    await hours.fill('6');
+    const before = await mainList(page).locator('tbody tr').count();
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(before + 1);
+
+    await expect(hours).toHaveValue('4');
+    await expect(page.locator('.form-row .split-pick')).toHaveAccessibleName('Dağılım: 1+1+1+1');
+  });
+
+  // 9A with 54 lesson hours and 48 open ones was accepted without a word: the
+  // reader found out on Kontrol, or when Otomatik diz left cards in the pool.
+  test('sınıfın açık saatini aşan ders girerken söyleniyor, sınıf satırı kırmızı', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openLessons(page, 'class');
+    await page.locator('.entity-list .entity', { hasText: '310' }).click();
+    const teacherPick = page.locator('.form-row').getByLabel('Öğretmen', { exact: true });
+    const hours = page.locator('.form-row input.num').first();
+    const warning = page.locator('.error-box.over-capacity');
+
+    // 29 + 40 = 69 of 72 open hours: still fits, nothing said.
+    await teacherPick.selectOption({ index: 1 });
+    await hours.fill('40');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.locator('.entity.over', { hasText: '310' })).toHaveCount(0);
+    await expect(warning).not.toContainText('310:');
+
+    // + 40 = 109: said at once, with the numbers, and the row turns red.
+    await teacherPick.selectOption({ index: 2 });
+    await hours.fill('40');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(warning).toContainText(
+      '310: 109 saat ders, 72 açık saat. 37 saat haftaya sığmaz.',
+    );
+    await expect(page.locator('.entity.over', { hasText: '310' })).toHaveCount(1);
+  });
 });

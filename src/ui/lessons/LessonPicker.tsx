@@ -2,8 +2,10 @@
 // class the screen is filling in, each with its lessons and hours.
 
 import { type ClassGroup, type Id, type State, type Teacher, paletteColor } from '../../leaf/model';
+import { useMemo } from 'react';
 import { weeklyLoad } from '../../pure/entities';
-import { T, useT } from '../common';
+import { buildCapacity } from '../../pure/feasibility';
+import { GoButton, T, useT } from '../common';
 import { KIND_ICON } from '../program';
 
 interface Props {
@@ -17,6 +19,13 @@ interface Props {
 
 export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun }: Props) {
   const t = useT();
+  // A row whose hours do not fit its week is red here, beside the form that
+  // filled it: the same numbers as Okul → Özet and Kontrol (`buildCapacity`).
+  const capacity = useMemo(() => buildCapacity(state), [state]);
+  const over = useMemo(() => {
+    const rows = mode === 'teacher' ? capacity.teachers : capacity.classes;
+    return new Map(rows.filter((r) => r.load > r.capacity).map((r) => [r.id, r]));
+  }, [capacity, mode]);
   return (
     <div className="panel">
       <h2>{mode === 'teacher' ? t('Hangi öğretmen') : t('Hangi sınıf')}</h2>
@@ -34,12 +43,28 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun
           const count = state.lessons.filter((l) =>
             mode === 'teacher' ? l.teacherId === x.id : l.classId === x.id,
           ).length;
+          const tooMuch = over.get(x.id);
           return (
             <button
               key={x.id}
               type="button"
-              className="entity"
+              className={tooMuch === undefined ? 'entity' : 'entity over'}
               data-id={x.id}
+              title={
+                tooMuch === undefined
+                  ? undefined
+                  : mode === 'teacher'
+                    ? t('{yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.', {
+                        yuk: tooMuch.load,
+                        acik: tooMuch.capacity,
+                        fazla: tooMuch.load - tooMuch.capacity,
+                      })
+                    : t('{yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.', {
+                        yuk: tooMuch.load,
+                        acik: tooMuch.capacity,
+                        fazla: tooMuch.load - tooMuch.capacity,
+                      })
+              }
               aria-current={x.id === focused?.id}
               onClick={() => setFocus(x.id)}
             >
@@ -61,7 +86,12 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun
       </div>
       {picking.length === 0 && (
         <p className="hint">
-          <T k="Henüz {ne} yok. **Okul** sekmesinden ekleyin." vars={{ ne: t(modeNoun) }} />
+          <T k="Henüz {ne} yok. **Okul** sekmesinden ekleyin." vars={{ ne: t(modeNoun) }} />{' '}
+          {mode === 'teacher' ? (
+            <GoButton to={{ tab: 'setup', step: 'teachers' }}>{t('Öğretmen ekle')}</GoButton>
+          ) : (
+            <GoButton to={{ tab: 'setup', step: 'classes' }}>{t('Sınıf ekle')}</GoButton>
+          )}
         </p>
       )}
     </div>

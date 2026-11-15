@@ -79,7 +79,7 @@ export default function Teachers({ state, change }: PanelProps) {
             rather than squeezing the reader's own words out. */}
         {shown.length > 0 && (
           <div className="table-scroll">
-            <table className="list">
+            <table className="list teacher-table">
               <thead>
                 <tr>
                   {order.head}
@@ -137,6 +137,13 @@ export default function Teachers({ state, change }: PanelProps) {
               </tbody>
             </table>
           </div>
+        )}
+        {/* The three rule headings are short so the table fits; what they
+            mean is said once, under it, not only in a tooltip. */}
+        {shown.length > 0 && (
+          <p className="hint">
+            <T k="**Art arda**: üst üste en fazla kaç saat. **Günde ↑**: bir günde en fazla, **Günde ↓**: geldiği gün en az kaç saat. Boş kutuda Ayarlar → Kurallar’daki sayı geçerli." />
+          </p>
         )}
       </div>
     </>
