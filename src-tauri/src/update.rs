@@ -523,6 +523,56 @@ fn diske_yaz(yol: &Path, bytes: &[u8]) -> std::io::Result<()> {
     })
 }
 
+/// The most any download may be, whatever size the page asks for: the
+/// installer is about 31 MB, the standalone exe about 12.
+pub const EN_BUYUK_INDIRME: u64 = 256 * 1024 * 1024;
+
+/// The most bytes read for a download the page says is `boyut` long.
+pub fn indirme_siniri(boyut: u64) -> u64 {
+    boyut.min(EN_BUYUK_INDIRME)
+}
+
+/// Appends one piece of a download, refusing the first byte past `boyut` (the
+/// manifest's size, which `verify` then requires exactly) or past
+/// `EN_BUYUK_INDIRME`.
+pub fn sinirli_ekle(bytes: &mut Vec<u8>, parca: &[u8], boyut: u64) -> Result<(), String> {
+    if bytes.len() as u64 + parca.len() as u64 > indirme_siniri(boyut) {
+        return Err("İnen dosya beklenenden büyük: indirme durduruldu.".into());
+    }
+    bytes.extend_from_slice(parca);
+    Ok(())
+}
+
+/// A new folder under `kok` that did not exist a moment ago, with a name
+/// nobody can guess and, on Unix, readable by this user alone. `create_dir`
+/// fails on a name that is already there, so a folder planted in advance is
+/// never reused.
+pub fn yeni_gecici_klasor(kok: &Path) -> std::io::Result<PathBuf> {
+    use std::hash::{BuildHasher, Hasher};
+    let mut son = None;
+    for deneme in 0..16u64 {
+        let mut h = std::collections::hash_map::RandomState::new().build_hasher();
+        h.write_u64(deneme);
+        h.write_u128(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_nanos())
+                .unwrap_or_default(),
+        );
+        h.write_u32(std::process::id());
+        let yol = kok.join(format!("Mozaik-kurulum-{:016x}", h.finish()));
+        let mut kurucu = fs::DirBuilder::new();
+        #[cfg(unix)]
+        std::os::unix::fs::DirBuilderExt::mode(&mut kurucu, 0o700);
+        match kurucu.create(&yol) {
+            Ok(()) => return Ok(yol),
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => son = Some(e),
+            Err(e) => return Err(e),
+        }
+    }
+    Err(son.unwrap_or_else(|| std::io::Error::other("geçici klasör açılamadı")))
+}
+
 /// `<program>.exe` -> `<program>.exe.<ek>`
 fn yan(exe: &Path, ek: &str) -> PathBuf {
     let mut ad = exe.as_os_str().to_os_string();
@@ -682,16 +732,19 @@ pub async fn download_update(
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
     let kurulum = kurulum_mu(&url);
 
-    let bytes = istemci(300)?
+    let mut yanit = istemci(300)?
         .get(&url)
         .send()
         .await
         .map_err(|e| ag_hatasi(&e))?
         .error_for_status()
-        .map_err(|e| format!("Yeni sürüm indirilemedi: {e}"))?
-        .bytes()
-        .await
-        .map_err(|e| ag_hatasi(&e))?;
+        .map_err(|e| format!("Yeni sürüm indirilemedi: {e}"))?;
+    // Read in pieces against the expected size, not with `.bytes()`: a server
+    // that keeps sending stops being read at `boyut`, not when memory runs out.
+    let mut bytes = Vec::new();
+    while let Some(parca) = yanit.chunk().await.map_err(|e| ag_hatasi(&e))? {
+        sinirli_ekle(&mut bytes, &parca, boyut)?;
+    }
 
     verify(&bytes, boyut, &sha256)?;
     let surum = ONERILEN
@@ -706,7 +759,11 @@ pub async fn download_update(
         // lives in a folder the installer owns, and the wizard is run once and
         // never kept. Its digest goes with it: `apply_update` checks the file
         // again right before running it, since the folder is not ours alone.
-        let hedef = std::env::temp_dir().join(KURULUM_ADI);
+        // A fresh folder of its own each time (security review 2026-11-16): a
+        // fixed %TEMP%\Mozaik-Kurulum.exe is a name anything else can sit on.
+        let hedef = yeni_gecici_klasor(&std::env::temp_dir())
+            .map_err(|e| format!("Kurulum için geçici klasör açılamadı: {e}"))?
+            .join(KURULUM_ADI);
         diske_yaz(&hedef, &bytes).map_err(|e| format!("Kurulum diske yazılamadı: {e}"))?;
         *INDIRILEN_KURULUM
             .lock()
@@ -835,6 +892,44 @@ mod tests {
     }
 
     // ----------------------------------------------------------- hand-over
+
+    #[test]
+    fn a_download_stops_at_the_expected_size() {
+        let mut b = Vec::new();
+        sinirli_ekle(&mut b, b"MZ12", 6).unwrap();
+        sinirli_ekle(&mut b, b"34", 6).unwrap();
+        assert_eq!(b, b"MZ1234");
+        assert!(sinirli_ekle(&mut b, b"5", 6).is_err());
+        assert_eq!(b.len(), 6, "the refused piece is not kept");
+        // One piece larger than everything expected is refused whole.
+        let mut c = Vec::new();
+        assert!(sinirli_ekle(&mut c, &[0; 10], 9).is_err());
+        assert!(c.is_empty());
+    }
+
+    #[test]
+    fn the_page_cannot_raise_the_ceiling() {
+        assert_eq!(indirme_siniri(u64::MAX), EN_BUYUK_INDIRME);
+        assert_eq!(indirme_siniri(31_000_000), 31_000_000);
+    }
+
+    #[test]
+    fn every_installer_gets_a_new_folder_of_its_own() {
+        let kok = Scratch::new("klasor");
+        let a = yeni_gecici_klasor(&kok.0).unwrap();
+        let b = yeni_gecici_klasor(&kok.0).unwrap();
+        assert_ne!(a, b);
+        assert!(a.is_dir() && b.is_dir());
+        assert!(a.starts_with(&kok.0));
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                fs::metadata(&a).unwrap().permissions().mode() & 0o777,
+                0o700
+            );
+        }
+    }
 
     #[test]
     fn devir_eskisi_gidince_bitiyor() {
