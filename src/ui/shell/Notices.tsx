@@ -6,6 +6,8 @@ import { surumEtiketi } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
 import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
+import { useState } from 'react';
+
 import { T, useT } from '../common';
 
 interface Props {
@@ -34,6 +36,11 @@ export default function Notices({
   ui,
 }: Props) {
   const t = useT();
+  const [kurulumGizli, setKurulumGizli] = useState(false);
+  const guncellemeyeBak = () => {
+    goTab('settings');
+    ui.setSection('about');
+  };
   return (
     <>
       {!canSave && (
@@ -140,6 +147,47 @@ export default function Notices({
               {t('Sonra')}
             </button>
           </span>
+        </div>
+      )}
+
+      {/* THE STANDALONE EXE HAS JUST BEEN UPDATED, and the installer is what
+      brings CP-SAT (update.rs, `guncelleme_durumu`). Said once, at this start,
+      with no network: the button is the click that asks (TRAPS 159). */}
+      {update.kurulum.oner && !kurulumGizli && update.kurulum.olmadi === null && (
+        <div className="update-bar" role="status">
+          <span>
+            <T k="**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır." />
+          </span>
+          <span className="update-acts">
+            <button
+              className="btn primary"
+              onClick={() => {
+                guncellemeyeBak();
+                update.check();
+              }}
+            >
+              {t('Kuruluma bak')}
+            </button>
+            <button className="btn" onClick={() => setKurulumGizli(true)}>
+              {t('Sonra')}
+            </button>
+          </span>
+        </div>
+      )}
+
+      {/* THE INSTALLER DID NOT FINISH, and its waiter opened this copy again
+      (update.rs, `bekle_ve_bitir`). Before 2026-11-16 the program just
+      vanished here (TRAPS 161). */}
+      {update.kurulum.olmadi !== null && (
+        <div className="save-warning" role="alert">
+          ⚠{' '}
+          <T
+            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Ayarlar → Hakkında'dan tekrar deneyebilirsiniz."
+            vars={{ kod: update.kurulum.olmadi }}
+          />{' '}
+          <button className="btn" onClick={guncellemeyeBak}>
+            {t('Güncellemeye bak')}
+          </button>
         </div>
       )}
 

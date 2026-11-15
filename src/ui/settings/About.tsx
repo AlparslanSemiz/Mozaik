@@ -236,12 +236,12 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
         </button>
         {d.ad === 'var' && kendini && (
           <button className="btn primary" onClick={update.indir}>
-            {t('Yeni sürümü indir')}
+            {d.gecis ? t('Kurulumu indir') : t('Yeni sürümü indir')}
           </button>
         )}
         {d.ad === 'hazir' && (
           <button className="btn primary" onClick={update.uygula}>
-            {t('Şimdi yeniden başlat')}
+            {d.kurulum ? t('Şimdi kur') : t('Şimdi yeniden başlat')}
           </button>
         )}
       </div>
@@ -253,7 +253,13 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
         <p className={`hint${d.ad === 'hata' ? ' bad' : ''}`} role="status">
           {d.ad === 'bakiliyor' && t('Bakılıyor…')}
           {d.ad === 'guncel' && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
-          {d.ad === 'var' && (
+          {d.ad === 'var' && d.gecis && (
+            <T
+              k="**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) için gerekli, onunla çok daha hızlı. İndirmek {mb} MB yer kaplar."
+              vars={{ mb: Math.round(d.boyut / 1024 / 1024) }}
+            />
+          )}
+          {d.ad === 'var' && !d.gecis && (
             <T
               k="**v{surum} çıktı{tarih}.** İndirmek {mb} MB yer kaplar. İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz."
               vars={{
@@ -264,7 +270,10 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
             />
           )}
           {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
-          {d.ad === 'hazir' && (
+          {d.ad === 'hazir' && d.kurulum && (
+            <T k="**Kurulum indi.** **Şimdi kur** deyince Mozaik kapanır, kurulum bir ilerleme çubuğuyla çalışır ve Mozaik kendiliğinden yeniden açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz. Masaüstündeki ya da görev çubuğundaki eski Mozaik simgesi de kurulan programı açar." />
+          )}
+          {d.ad === 'hazir' && !d.kurulum && (
             <T
               k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz."
               vars={{ surum: d.surum }}

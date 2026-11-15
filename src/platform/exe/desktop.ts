@@ -184,6 +184,17 @@ export interface UpdateCevap {
   kurulum: boolean;
   /** The chosen file's minisign signature; update.rs installs nothing unsigned. */
   imza: string | null;
+  /** Not a new version: this same one as the installer, offered to the
+      standalone exe (update.rs, `windows_karari`). `yeni_var` is false then. */
+  gecis: boolean;
+}
+
+/** What `guncelleme_durumu` answers: asked at startup, with no network. */
+export interface GuncellemeDurumu {
+  /** The standalone exe has just been updated: suggest the installer once. */
+  kurulum_oner: boolean;
+  /** An installer started from here did not finish: its exit code. */
+  kurulum_olmadi: number | null;
 }
 
 function bridge(): Invoke {
@@ -217,6 +228,20 @@ export function desktopSelfUpdates(): Promise<boolean> {
   return bridge()<boolean>('self_update_supported').then(
     (answer) => answer !== false,
     () => true,
+  );
+}
+
+/**
+ * How this start came about, from the exe itself and with no network. A
+ * bridge that does not know the command (an older exe, the test double)
+ * answers "nothing to say".
+ */
+export function desktopGuncellemeDurumu(): Promise<GuncellemeDurumu> {
+  const yok: GuncellemeDurumu = { kurulum_oner: false, kurulum_olmadi: null };
+  if (!isDesktop()) return Promise.resolve(yok);
+  return bridge()<GuncellemeDurumu>('guncelleme_durumu').then(
+    (d) => d,
+    () => yok,
   );
 }
 
