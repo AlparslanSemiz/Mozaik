@@ -246,8 +246,6 @@ const ES: Sozluk = {
     "**Hay puntos a los que prestar atención.** En las listas siguientes, las filas marcadas",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "impiden montar el horario. Resuélvalas primero.",
-  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
-    "**{n} {n:clase queda|clases quedan} en una hora cerrada.** Esas horas se cerraron después de colocar las clases; mire la lista de abajo y muévalas.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
     "Las **{n}** horas restantes esperan en la bandeja. Puede colocarlas con **Colocar automáticamente** en la pestaña **Horario**.",
   "Danışman notları ({n})": "Notas del asesor ({n})",
@@ -1023,8 +1021,6 @@ const ES: Sozluk = {
     "El aula {derslik} la comparten {n} clases ({hangileri}) con {yuk} horas en total. Está abierta {acik} a la semana, {fazla} de menos.",
   "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.":
     "Aula {derslik} ({hangileri}): {yuk} de sus {acik} horas abiertas están llenas.",
-  "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}":
-    "{n} {n:hora sin colocar|horas sin colocar} y sin sitio donde ponerlas. Un motivo de ejemplo: {sebep}",
   "{n} kural ihlali": "{n} {n:regla incumplida|reglas incumplidas}",
   "{n} ders kapalı saatte": "{n} {n:clase|clases} en hora cerrada",
   "{n} ders sığmıyor": "{n} {n:clase no cabe|clases no caben}",
@@ -1643,10 +1639,6 @@ const ES: Sozluk = {
     "Pertenece a este ordenador y **no afecta a la impresión**; la letra del papel, en **Salida**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
     "Este almacén pertenece solo a {adres}; Mozaik abierto en otra dirección tiene uno **aparte**.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
-    "Esas horas se cerraron **después** de colocar estas clases; no se borró ninguna.",
-  "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
-    "A estas clases les faltan horas por colocar, pero no queda ninguna celda libre.",
   "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "Aquí Mozaik puede actualizarse, pero no se conecta **hasta que pulse el botón**.",
   "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
@@ -1775,6 +1767,42 @@ const ES: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne}: eliminado, con {ders} {ders:clase|clases} y {saat} {saat:hora colocada|horas colocadas}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} {n:hora colocada volvió|horas colocadas volvieron} a la reserva.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Las horas colocadas volvieron a la reserva; {n} {n:hora fijada sigue|horas fijadas siguen} en su sitio.",
+  "Müsaitlik'te aç":
+    "Abrir en Disponibilidad",
+  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
+    "Esta tarjeta no se ve en la cuadrícula; quizá su fila está oculta.",
+  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
+    "La tarjeta de esta clase no se ve en la bandeja; quizá la bandeja está cerrada.",
+  "{kim} için Müsaitlik'i açar":
+    "Abre la disponibilidad de {kim}",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
+    "**{ders} {ders:clase tiene|clases tienen} {saat} {saat:hora|horas} en una hora cerrada.** Esas horas se cerraron después de colocar las clases. **Mostrar** abajo encuentra la tarjeta en el Horario.",
+  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
+    "Esas horas se cerraron **después** de colocar las clases; no se eliminó ninguna. Arrastre la tarjeta a una hora abierta o abra esa hora en Disponibilidad.",
+  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
+    "Estas clases tienen horas esperando en la bandeja, pero no queda ninguna celda donde ponerlas. Pulse el nombre de una clase para ver su tarjeta en la bandeja. Para hacer sitio, abra horas en Disponibilidad o mueva una tarjeta en el Horario.",
+  "Sebep ve dersler":
+    "Motivo y clases",
+  "Kartı havuzda gösterir":
+    "Muestra la tarjeta en la bandeja",
+  "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
+    "Todas las horas abiertas de la clase {sinif} están ocupadas por otras clases.",
+  "{kim} {n} saatinde müsait değil":
+    "{kim} no está disponible en {n} de ellas",
+  "{n} saatinde başka sınıfta":
+    "en {n}, con otra clase",
+  "{n} saatinde {derslik} dersliği dolu":
+    "en {n}, el aula {derslik} está ocupada",
+  "{n} saatinde bir kural izin vermiyor":
+    "en {n}, una regla no lo permite",
+  "{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.":
+    "La clase {sinif} tiene {n} {n:hora libre|horas libres}, pero la tarjeta de esta clase no cabe en ellas.",
+  "{sinif} sınıfının {n} boş saati var: {neden}.":
+    "La clase {sinif} tiene {n} {n:hora libre|horas libres}: {neden}.",
+  "{zaman} saatlerinde":
+    "en las horas {zaman}",
+  "{n} saatine {boy} saatlik kart sığmıyor":
+    "{n} {n:no admite|no admiten} su tarjeta de {boy} horas",
 };
 
 registerSozluk("es", ES);

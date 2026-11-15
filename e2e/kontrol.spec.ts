@@ -168,7 +168,8 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
 
     const panel = page.locator('.panel', { hasText: 'Yerleşemeyen dersler' });
     await expect(panel).toContainText('510 · MÇ Matematik');
-    await expect(panel).toContainText('Örnek sebep: MÇ Salı 1 saatinde müsait değil');
+    // The numbers that bind, not a sample closed cell (TODO SD4).
+    await expect(panel).toContainText('MÇ 0 saat müsait, 1 saat ders yüklenmiş. 1 saat fazla.');
   });
 
   test('art arda sınırı aşan program ihlal olarak sayılıyor', async ({ page }) => {
@@ -231,7 +232,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     // while the chip was red and this panel counted the lesson.
     await expect(page.locator('.check-page')).not.toContainText('Sorun görünmüyor');
     await expect(page.locator('.check-page .warn-box').first()).toContainText(
-      '1 ders kapalı saatte kaldı',
+      '1 dersin 1 saati kapalı saatte kaldı',
     );
     await expect(page.locator('.ribbon')).toContainText('1 engel');
   });
@@ -411,4 +412,117 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
       await measureAllViews(page, theme, 1);
     });
   }
+});
+
+/**
+ * Three audits found the same thing (2026-11-15): Kontrol said what was wrong
+ * and gave nothing to click. Every problem row now has somewhere to go, and a
+ * lesson is counted once however many hours it has.
+ */
+test.describe('Kontrol — Göster ve satır sayıları', () => {
+  const TWO = {
+    teachers: [
+      { id: 'oMC', short: 'MÇ' },
+      { id: 'oAV', short: 'AV', subject: 'Fizik' },
+    ],
+    classes: [
+      { id: 's510', name: '510', roomId: null },
+      { id: 's511', name: '511', roomId: null },
+    ],
+  };
+
+  test('iki saatlik ders kapalı saatte tek satır, Göster o kartı bulur', async ({ page }) => {
+    await load(page, {
+      ...TWO,
+      lessons: [
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blockSize: 2 },
+      ],
+      placements: { 's510|0|0': 'x1', 's511|0|2': 'x2', 's511|0|3': 'x2' },
+      unavailable: { 'oAV|0|2': 1, 'oAV|0|3': 1 },
+    });
+
+    await expect(page.locator('.warn-box')).toContainText('1 dersin 2 saati kapalı saatte kaldı');
+    const panel = page.locator('#kontrol-kapali');
+    await expect(panel.locator('h2')).toHaveText('Kapalı saatte ders (1)');
+    const rows = panel.locator('tbody tr');
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText('511 · AV Fizik');
+    await expect(rows.first()).toContainText('AV Salı 3, 4 saatlerinde müsait değil');
+
+    await rows.first().getByRole('button', { name: 'Göster' }).click();
+    await expect(page.getByRole('button', { name: 'Program', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    // The cell of hour 3 on Tuesday, in whichever row the grid draws it: the
+    // class in the class view, the teacher in the teacher view.
+    const marked = page.locator('td[data-reveal]');
+    await expect(marked).toHaveCount(1);
+    await expect(marked).toHaveAttribute('data-day', '0');
+    await expect(marked).toHaveAttribute('data-hour', '2');
+    expect(['s511', 'oAV']).toContain(await marked.getAttribute('data-row'));
+    await expect(marked.locator('button.card')).toBeFocused();
+  });
+
+  test("Müsaitlik'te aç kapatanın satırını açar", async ({ page }) => {
+    await load(page, {
+      ...TWO,
+      lessons: [{ id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 1 }],
+      placements: { 's511|0|1': 'x2' },
+      unavailable: { 'oAV|0|1': 1 },
+    });
+    await page.locator('#kontrol-kapali').getByRole('button', { name: "Müsaitlik'te aç" }).click();
+    await expect(page.getByRole('button', { name: 'Müsaitlik', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await expect(page.locator('.main h2', { hasText: 'müsait olmayan saatler' })).toContainText(
+      'AV',
+    );
+  });
+
+  test('aynı sebepli yerleşemeyen dersler tek satır, ders adı havuzdaki kartı gösterir', async ({
+    page,
+  }) => {
+    const away: Record<string, 1> = {};
+    for (let s = 0; s < 4; s++) away[`oAV|0|${s}`] = 1;
+    await load(page, {
+      ...TWO,
+      lessons: [
+        { id: 'y1', classId: 's510', teacherId: 'oAV', weeklyHours: 1 },
+        { id: 'y2', classId: 's511', teacherId: 'oAV', weeklyHours: 1 },
+      ],
+      unavailable: away,
+    });
+
+    const panel = page.locator('#kontrol-yerlesemeyen');
+    await expect(panel.locator('h2')).toHaveText('Yerleşemeyen dersler (2)');
+    await expect(panel.locator('tbody tr')).toHaveCount(1);
+    await expect(panel.locator('tbody tr')).toContainText(
+      'AV 0 saat müsait, 2 saat ders yüklenmiş. 2 saat fazla.',
+    );
+    const chips = panel.locator('.lesson-chip');
+    await expect(chips).toHaveCount(2);
+
+    await chips.filter({ hasText: '511' }).click();
+    await expect(page.locator('.pool-card[data-reveal]')).toHaveAttribute('data-lesson', 'y2');
+  });
+
+  test('kural ihlalinin Göster düğmesi o günün kartına gider', async ({ page }) => {
+    await load(page, {
+      days: 2,
+      limits: { maxConsecutive: 1 },
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+      placements: { 's510|1|1': 'x1', 's510|1|2': 'x1' },
+    });
+    await page
+      .locator('.panel', { hasText: 'Kural ihlalleri' })
+      .getByRole('button', { name: 'Göster' })
+      .first()
+      .click();
+    const marked = page.locator('td[data-reveal]');
+    await expect(marked).toHaveAttribute('data-day', '1');
+    await expect(marked).toHaveAttribute('data-hour', '1');
+  });
 });

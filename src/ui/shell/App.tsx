@@ -346,7 +346,7 @@ export default function App() {
                     colorMode={programColor}
                   />
                 </Activity>
-                {tab === 'check' && <Check state={state} view={ui.checkView} />}
+                {tab === 'check' && <Check state={state} view={ui.checkView} ui={ui} />}
                 {tab === 'print' && (
                   <Print
                     state={state}

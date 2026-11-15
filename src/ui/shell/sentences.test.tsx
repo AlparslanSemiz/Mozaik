@@ -217,7 +217,7 @@ describe('cümle · engelin sebebi', () => {
           "ok · 511 sınıfı: açık olan 6 saatin 4 saati dolu.",
         ],
         "yerlesemeyen": [
-          "4 saati yerleşmemiş ve koyacak yer yok. Örnek sebep: MÇ art arda 1 saatten fazla girmemeli, burada 2 saat olur",
+          "A dersliğini 2 sınıf paylaşıyor (510, 511) ve toplam 8 saat ders var. Haftada 6 saati açık, 2 saat fazla.",
         ],
       }
     `);

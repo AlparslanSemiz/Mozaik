@@ -247,8 +247,6 @@ const DE: Sozluk = {
     "**Es gibt Punkte, die Aufmerksamkeit brauchen.** In den Listen unten verhindern Zeilen mit",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "verhindern das Legen des Stundenplans. Lösen Sie diese zuerst.",
-  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
-    "**{n} {n:Stunde liegt|Stunden liegen} auf einer gesperrten Zeit.** Die Zeiten wurden gesperrt, nachdem die Stunden gelegt waren; sehen Sie in der Liste unten nach und verschieben Sie sie.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
     "Die restlichen **{n}** Stunden warten im Ablagefach. Sie können sie mit **Automatisch legen** im Reiter **Stundenplan** legen.",
   "Danışman notları ({n})": "Berater-Hinweise ({n})",
@@ -1024,8 +1022,6 @@ const DE: Sozluk = {
     "Raum {derslik} wird von {n} Klassen genutzt ({hangileri}), zusammen {yuk} Stunden. Er ist {acik} Stunden in der Woche offen, also {fazla} zu wenig.",
   "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.":
     "Raum {derslik} ({hangileri}): {yuk} von {acik} offenen Stunden sind belegt.",
-  "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}":
-    "{n} {n:Stunde ist|Stunden sind} nicht gelegt und es gibt keinen Platz. Ein Beispielgrund: {sebep}",
   "{n} kural ihlali": "{n} {n:Regelverstoß|Regelverstöße}",
   "{n} ders kapalı saatte": "{n} {n:Fach|Fächer} in geschlossener Stunde",
   "{n} ders sığmıyor": "{n} {n:Fach passt|Fächer passen} nicht",
@@ -1644,10 +1640,6 @@ const DE: Sozluk = {
     "Gehört zu diesem Rechner und **ändert den Druck nicht**; Papierschrift unter **Ausgabe**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
     "Dieser Speicher gehört allein zu {adres}; Mozaik unter einer anderen Adresse hat einen **eigenen**.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
-    "Diese Stunden wurden **nach** dem Setzen der Stunden gesperrt; gelöscht wurde keine.",
-  "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
-    "Diese Stunden sind noch nicht ganz gesetzt, aber es ist keine Zelle mehr frei.",
   "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "Hier kann sich Mozaik aktualisieren, verbindet sich aber erst **auf Knopfdruck**.",
   "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
@@ -1776,6 +1768,42 @@ const DE: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
+  "Müsaitlik'te aç":
+    "In Verfügbarkeit öffnen",
+  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
+    "Diese Karte ist gerade nicht im Raster zu sehen; ihre Zeile ist vielleicht ausgeblendet.",
+  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
+    "Die Karte dieses Fachs ist im Ablagefach nicht zu sehen; das Ablagefach ist vielleicht geschlossen.",
+  "{kim} için Müsaitlik'i açar":
+    "Öffnet die Verfügbarkeit für {kim}",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
+    "**{ders} {ders:Fach liegt|Fächer liegen} mit {saat} {saat:Stunde|Stunden} auf einer gesperrten Zeit.** Die Zeiten wurden gesperrt, nachdem die Stunden gelegt waren. **Anzeigen** unten findet die Karte im Stundenplan.",
+  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
+    "Diese Zeiten wurden **nach** dem Setzen der Stunden gesperrt; gelöscht wurde keine. Ziehen Sie die Karte in eine offene Stunde oder öffnen Sie die Stunde in Verfügbarkeit.",
+  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
+    "Diese Fächer haben Stunden im Ablagefach, aber keine Zelle ist mehr frei. Ein Klick auf den Namen zeigt die Karte im Ablagefach. Für Platz öffnen Sie Stunden in Verfügbarkeit oder verschieben eine Karte im Stundenplan.",
+  "Sebep ve dersler":
+    "Grund und Fächer",
+  "Kartı havuzda gösterir":
+    "Zeigt die Karte im Ablagefach",
+  "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
+    "Alle offenen Stunden der Klasse {sinif} sind mit anderen Fächern belegt.",
+  "{kim} {n} saatinde müsait değil":
+    "{kim} ist in {n} davon nicht verfügbar",
+  "{n} saatinde başka sınıfta":
+    "in {n} in einer anderen Klasse",
+  "{n} saatinde {derslik} dersliği dolu":
+    "in {n} ist Raum {derslik} belegt",
+  "{n} saatinde bir kural izin vermiyor":
+    "in {n} lässt eine Regel es nicht zu",
+  "{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.":
+    "Die Klasse {sinif} hat {n} freie {n:Stunde|Stunden}, aber die Karte dieses Fachs passt nicht hinein.",
+  "{sinif} sınıfının {n} boş saati var: {neden}.":
+    "Die Klasse {sinif} hat {n} freie {n:Stunde|Stunden}: {neden}.",
+  "{zaman} saatlerinde":
+    "in den Stunden {zaman}",
+  "{n} saatine {boy} saatlik kart sığmıyor":
+    "{n} {n:fasst|fassen} die {boy}-stündige Karte nicht",
 };
 
 registerSozluk("de", DE);

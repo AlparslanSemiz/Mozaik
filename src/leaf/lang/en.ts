@@ -246,8 +246,6 @@ const EN: Sozluk = {
     "**There are things worth looking at.** In the lists below, rows marked",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "stop the timetable from being laid out. Resolve those first.",
-  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
-    "**{n} {n:lesson sits|lessons sit} on a closed hour.** The hours were closed after the lessons were placed; see the list below and move them.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
     "The remaining **{n}** hours are waiting in the tray. You can lay them out with **Fill automatically** in the **Timetable** tab.",
   "Danışman notları ({n})": "Advisor notes ({n})",
@@ -1009,8 +1007,6 @@ const EN: Sozluk = {
     "Room {derslik} is shared by {n} classes ({hangileri}) with {yuk} hours in total. It is open for {acik} a week, which is {fazla} too few.",
   "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.":
     "Room {derslik} ({hangileri}): {yuk} of its {acik} open hours are full.",
-  "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}":
-    "{n} {n:hour|hours} unplaced and nowhere to put them. An example reason: {sebep}",
   "{n} kural ihlali": "{n} rule {n:breach|breaches}",
   "{n} ders kapalı saatte": "{n} {n:lesson|lessons} in a closed hour",
   "{n} ders sığmıyor": "{n} {n:lesson does|lessons do} not fit",
@@ -1627,10 +1623,6 @@ const EN: Sozluk = {
     "It belongs to this computer and **does not affect printing**; paper type is under **Print**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
     "This store belongs to {adres} alone; Mozaik opened at another address has a **separate** one.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
-    "Those hours were closed **after** these lessons were placed; none was deleted.",
-  "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
-    "These lessons still have hours to place, but no empty cell is left for them.",
   "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "Here Mozaik can update itself, but connects nowhere **until you press the button**.",
   "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
@@ -1759,6 +1751,42 @@ const EN: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} deleted, with {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} placed {n:hour|hours} went back to the pool.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
+  "Müsaitlik'te aç":
+    "Open in Availability",
+  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
+    "This card is not on the grid right now; its row may be hidden.",
+  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
+    "This lesson’s card is not visible in the tray; the tray may be closed.",
+  "{kim} için Müsaitlik'i açar":
+    "Opens Availability for {kim}",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
+    "**{ders} {ders:lesson has|lessons have} {saat} {saat:hour|hours} on a closed hour.** Those hours were closed after the lessons were placed. **Show** below finds the card in the Timetable.",
+  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
+    "These hours were closed **after** the lessons were placed; none was deleted. Drag the card to an open hour, or open that hour in Availability.",
+  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
+    "These lessons have hours waiting in the tray, but no cell is left to put them in. Press a lesson’s name to see its card in the tray. To make room, open hours in Availability or move a card in the Timetable.",
+  "Sebep ve dersler":
+    "Reason and lessons",
+  "Kartı havuzda gösterir":
+    "Shows the card in the tray",
+  "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
+    "Every open hour of class {sinif} is taken by other lessons.",
+  "{kim} {n} saatinde müsait değil":
+    "{kim} is not available in {n} of them",
+  "{n} saatinde başka sınıfta":
+    "in {n} busy with another class",
+  "{n} saatinde {derslik} dersliği dolu":
+    "in {n} room {derslik} is taken",
+  "{n} saatinde bir kural izin vermiyor":
+    "in {n} a rule does not allow it",
+  "{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.":
+    "Class {sinif} has {n} free {n:hour|hours}, but this lesson’s card does not fit {n:it|them}.",
+  "{sinif} sınıfının {n} boş saati var: {neden}.":
+    "Class {sinif} has {n} free {n:hour|hours}: {neden}.",
+  "{zaman} saatlerinde":
+    "in periods {zaman}",
+  "{n} saatine {boy} saatlik kart sığmıyor":
+    "{n} cannot hold its {boy}-hour card",
 };
 
 registerSozluk("en", EN);

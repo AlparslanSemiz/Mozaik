@@ -659,7 +659,8 @@
    line is here because a zero-length animation still fires start/end events and
    `document.getAnimations()` still reports it, and "nothing is running" is what
    the suite measures. */
-:root[data-motion="kapali"] .toast {
+:root[data-motion="kapali"] .toast,
+:root[data-motion="kapali"] [data-reveal] {
   animation: none;
 }
 
@@ -711,7 +712,8 @@
     scroll-behavior: auto;
   }
 
-  .toast {
+  .toast,
+  [data-reveal] {
     animation: none;
   }
 }
@@ -4334,6 +4336,44 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
    the label at one edge of the monitor and the number at the other. */
 .check-page {
   max-width: 68rem;
+}
+
+/* "Göster" and "Müsaitlik'te aç" at the end of a problem row: one line, never
+   wrapped under each other, so the row's own sentence takes the width. */
+.check-page td.row-actions,
+.check-page th.row-actions {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+.check-page td.row-actions .btn + .btn {
+  margin-left: var(--space-2);
+}
+
+/* The lessons under one cause, each a button to its card in the pool. Full
+   ink rather than the filter chip's --muted: these are names to read, and the
+   rows they sit in are held to 7:1 (zebra.spec.ts). */
+.lesson-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.lesson-chip {
+  color: var(--text);
+}
+
+/* Where "Göster" landed: a ring that outlasts the scroll, so the eye that
+   followed the jump finds the kart. An attribute, not a class (reveal.ts). */
+[data-reveal] {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  /* Reads --dur-slow, so "Az" shortens it; "Kapalı" and the machine's reduced
+     motion name it beside the toast, at the top of this file, so nothing runs. */
+  animation: reveal-pulse calc(var(--dur-slow) * 2) var(--ease) 3;
+}
+@keyframes reveal-pulse {
+  50% { outline-color: transparent; }
 }
 
 /* A number never wraps. `.num` is 8ch wide and "433 / 433" is nine characters,

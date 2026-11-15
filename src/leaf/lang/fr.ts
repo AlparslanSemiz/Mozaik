@@ -246,8 +246,6 @@ const FR: Sozluk = {
     "**Certains points méritent votre attention.** Dans les listes ci-dessous, les lignes marquées",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "empêchent de construire l’emploi du temps. Réglez-les d’abord.",
-  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
-    "**{n} {n:cours se trouve|cours se trouvent} sur une heure fermée.** Ces heures ont été fermées après le placement des cours ; consultez la liste ci-dessous et déplacez-les.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
     "Les **{n}** heures restantes attendent dans le bac. Vous pouvez les placer avec **Placer automatiquement** dans l’onglet **Emploi du temps**.",
   "Danışman notları ({n})": "Remarques du conseiller ({n})",
@@ -1029,8 +1027,6 @@ const FR: Sozluk = {
     "La salle {derslik} est partagée par {n} classes ({hangileri}) pour {yuk} heures au total. Elle est ouverte {acik} heures par semaine, soit {fazla} de trop.",
   "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.":
     "Salle {derslik} ({hangileri}) : {yuk} de ses {acik} heures ouvertes sont occupées.",
-  "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}":
-    "{n} {n:heure non placée|heures non placées} et nulle part où les mettre. Un exemple de motif : {sebep}",
   "{n} kural ihlali": "{n} {n:règle enfreinte|règles enfreintes}",
   "{n} ders kapalı saatte": "{n} {n:cours|cours} à une heure fermée",
   "{n} ders sığmıyor": "{n} {n:cours ne tient|cours ne tiennent} pas",
@@ -1652,10 +1648,6 @@ const FR: Sozluk = {
     "Propre à cet ordinateur et **sans effet sur l’impression** ; le papier est sous **Sortie**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
     "Ce stockage appartient au seul {adres} ; Mozaik ouvert à une autre adresse a le sien, **à part**.",
-  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
-    "Ces heures ont été fermées **après** le placement des cours ; aucun n’a été supprimé.",
-  "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
-    "Il reste des heures à placer pour ces cours, mais plus aucune cellule libre.",
   "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "Ici, Mozaik peut se mettre à jour, mais ne se connecte **qu’au clic sur le bouton**.",
   "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
@@ -1784,6 +1776,42 @@ const FR: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} : supprimé, avec {ders} {ders:cours|cours} et {saat} {saat:heure placée|heures placées}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} {n:heure placée est revenue|heures placées sont revenues} dans la réserve.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Les heures placées sont revenues dans la réserve ; {n} {n:heure épinglée reste|heures épinglées restent} en place.",
+  "Müsaitlik'te aç":
+    "Ouvrir dans Disponibilité",
+  "Bu kart şu an ızgarada görünmüyor; satırı gizlenmiş olabilir.":
+    "Cette carte n’est pas visible dans la grille ; sa ligne est peut-être masquée.",
+  "Bu dersin kartı havuzda görünmüyor; havuz kapalı olabilir.":
+    "La carte de ce cours n’est pas visible dans le bac ; le bac est peut-être fermé.",
+  "{kim} için Müsaitlik'i açar":
+    "Ouvre la disponibilité de {kim}",
+  "**{ders} dersin {saat} saati kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı. Aşağıda **Göster** kartı Program'da bulur.":
+    "**{ders} {ders:cours a|cours ont} {saat} {saat:heure|heures} sur une heure fermée.** Ces heures ont été fermées après le placement des cours. **Afficher** ci-dessous trouve la carte dans l’emploi du temps.",
+  "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi. Kartı açık bir saate sürükleyin ya da o saati Müsaitlik'te açın.":
+    "Ces heures ont été fermées **après** le placement des cours ; aucun n’a été supprimé. Faites glisser la carte vers une heure ouverte, ou ouvrez cette heure dans Disponibilité.",
+  "Bu derslerin havuzda bekleyen saatleri var ama konabilecek hücre kalmamış. Ders adına basınca kartı havuzda gösterir. Yer açmak için Müsaitlik'te saat açın ya da Program'da bir kartı taşıyın.":
+    "Ces cours ont des heures qui attendent dans le bac, mais il ne reste aucune cellule où les mettre. Cliquez sur le nom d’un cours pour voir sa carte dans le bac. Pour faire de la place, ouvrez des heures dans Disponibilité ou déplacez une carte dans l’emploi du temps.",
+  "Sebep ve dersler":
+    "Raison et cours",
+  "Kartı havuzda gösterir":
+    "Montre la carte dans le bac",
+  "{sinif} sınıfının açık saatlerinin hepsi başka derslerle dolu.":
+    "Toutes les heures ouvertes de la classe {sinif} sont prises par d’autres cours.",
+  "{kim} {n} saatinde müsait değil":
+    "{kim} n’est pas disponible pour {n} d’entre elles",
+  "{n} saatinde başka sınıfta":
+    "pour {n}, en cours avec une autre classe",
+  "{n} saatinde {derslik} dersliği dolu":
+    "pour {n}, la salle {derslik} est prise",
+  "{n} saatinde bir kural izin vermiyor":
+    "pour {n}, une règle l’interdit",
+  "{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.":
+    "La classe {sinif} a {n} {n:heure libre|heures libres}, mais la carte de ce cours n’y tient pas.",
+  "{sinif} sınıfının {n} boş saati var: {neden}.":
+    "La classe {sinif} a {n} {n:heure libre|heures libres} : {neden}.",
+  "{zaman} saatlerinde":
+    "aux heures {zaman}",
+  "{n} saatine {boy} saatlik kart sığmıyor":
+    "{n} {n:ne peut|ne peuvent} pas recevoir sa carte de {boy} heures",
 };
 
 registerSozluk("fr", FR);
