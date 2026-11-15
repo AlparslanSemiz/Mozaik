@@ -121,7 +121,10 @@ pub fn yazilabilir_mi(paket: &Path) -> Result<(), String> {
 /// The hidden folder beside the bundle: `/Applications/.Mozaik.app.yeni`.
 /// Hidden, so Finder does not show a second Mozaik while it is there.
 pub fn hazirlik(paket: &Path) -> PathBuf {
-    let ad = paket.file_name().map(|a| a.to_string_lossy().into_owned()).unwrap_or_default();
+    let ad = paket
+        .file_name()
+        .map(|a| a.to_string_lossy().into_owned())
+        .unwrap_or_default();
     paket.with_file_name(format!(".{ad}.yeni"))
 }
 
@@ -173,7 +176,11 @@ pub fn ac(paket: &Path, exe_adi: &std::ffi::OsStr) -> Result<PathBuf, String> {
     let _ = fs::remove_dir_all(&hedef);
     fs::create_dir_all(&hedef).map_err(|e| format!("Güncelleme klasörü açılamadı: {e}"))?;
     // The system's own on the Mac, as `/usr/bin/open` in mail.rs: no PATH chooses it.
-    let tar = if cfg!(target_os = "macos") { "/usr/bin/tar" } else { "tar" };
+    let tar = if cfg!(target_os = "macos") {
+        "/usr/bin/tar"
+    } else {
+        "tar"
+    };
     let durum = std::process::Command::new(tar)
         .arg("-xzf")
         .arg(indirilen(paket))
@@ -276,7 +283,9 @@ mod tests {
             Some(PathBuf::from("/Applications/Mozaik.app"))
         );
         assert_eq!(
-            uygulama_paketi(Path::new("/Users/a/Uygulamalar/Mozaik 2.app/Contents/MacOS/mozaik")),
+            uygulama_paketi(Path::new(
+                "/Users/a/Uygulamalar/Mozaik 2.app/Contents/MacOS/mozaik"
+            )),
             Some(PathBuf::from("/Users/a/Uygulamalar/Mozaik 2.app"))
         );
         for degil in [
@@ -291,9 +300,7 @@ mod tests {
 
     #[test]
     fn a_translocated_or_read_only_copy_is_told_to_move() {
-        let yol = Path::new(
-            "/private/var/folders/xy/T/AppTranslocation/1234-ABCD/d/Mozaik.app",
-        );
+        let yol = Path::new("/private/var/folders/xy/T/AppTranslocation/1234-ABCD/d/Mozaik.app");
         assert!(tasinmis_mi(yol));
         let e = yazilabilir_mi(yol).unwrap_err();
         assert!(e.contains("Uygulamalar klasörüne taşıyın"), "{e}");
@@ -325,7 +332,10 @@ mod tests {
     fn the_staging_folder_is_hidden_beside_the_bundle() {
         let p = Path::new("/Applications/Mozaik.app");
         assert_eq!(hazirlik(p), PathBuf::from("/Applications/.Mozaik.app.yeni"));
-        assert_eq!(indirilen(p), PathBuf::from("/Applications/.Mozaik.app.yeni/paket.tar.gz"));
+        assert_eq!(
+            indirilen(p),
+            PathBuf::from("/Applications/.Mozaik.app.yeni/paket.tar.gz")
+        );
     }
 
     #[test]
@@ -358,8 +368,14 @@ mod tests {
         paket_yap(&paket, "eski");
         paket_yap(&yeni, "yeni");
         takas(&paket, &yeni).unwrap();
-        assert_eq!(fs::read_to_string(paket.join("Contents/MacOS/mozaik")).unwrap(), "yeni");
-        assert_eq!(fs::read_to_string(yeni.join("Contents/MacOS/mozaik")).unwrap(), "eski");
+        assert_eq!(
+            fs::read_to_string(paket.join("Contents/MacOS/mozaik")).unwrap(),
+            "yeni"
+        );
+        assert_eq!(
+            fs::read_to_string(yeni.join("Contents/MacOS/mozaik")).unwrap(),
+            "eski"
+        );
     }
 
     #[test]
@@ -370,7 +386,10 @@ mod tests {
         fs::create_dir_all(s.0.join("hazirlik")).unwrap();
         let yok = s.0.join("hazirlik").join("Mozaik.app");
         assert!(takas(&paket, &yok).is_err());
-        assert_eq!(fs::read_to_string(paket.join("Contents/MacOS/mozaik")).unwrap(), "eski");
+        assert_eq!(
+            fs::read_to_string(paket.join("Contents/MacOS/mozaik")).unwrap(),
+            "eski"
+        );
     }
 
     /// `tar` exists on every runner this is tested on (Windows 10+ ships bsdtar).
@@ -397,7 +416,10 @@ mod tests {
         fs::create_dir_all(hazirlik(&paket)).unwrap();
         arsiv_yap(&kaynak, ARSIVDEKI_AD, &indirilen(&paket));
         let yeni = ac(&paket, std::ffi::OsStr::new("mozaik")).unwrap();
-        assert_eq!(fs::read_to_string(yeni.join("Contents/MacOS/mozaik")).unwrap(), "yeni");
+        assert_eq!(
+            fs::read_to_string(yeni.join("Contents/MacOS/mozaik")).unwrap(),
+            "yeni"
+        );
 
         // An archive whose bundle has no program by this name, or another top folder.
         assert!(ac(&paket, std::ffi::OsStr::new("baska-ad")).is_err());

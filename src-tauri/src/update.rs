@@ -394,8 +394,18 @@ pub fn karar_icin(m: Manifest, current: &str, hedef: Hedef) -> Result<Cevap, Str
 fn mac_karari(m: Manifest, current: &str, mimari: Mimari) -> Result<Cevap, String> {
     let yeni_var = is_newer(&m.version, current);
     let (url, boyut, sha256, imza) = match mimari {
-        Mimari::Arm64 => (m.mac_arm64, m.mac_arm64_boyut, m.mac_arm64_sha256, m.mac_arm64_imza),
-        Mimari::X86_64 => (m.mac_x86_64, m.mac_x86_64_boyut, m.mac_x86_64_sha256, m.mac_x86_64_imza),
+        Mimari::Arm64 => (
+            m.mac_arm64,
+            m.mac_arm64_boyut,
+            m.mac_arm64_sha256,
+            m.mac_arm64_imza,
+        ),
+        Mimari::X86_64 => (
+            m.mac_x86_64,
+            m.mac_x86_64_boyut,
+            m.mac_x86_64_sha256,
+            m.mac_x86_64_imza,
+        ),
     };
     if yeni_var {
         let alinir = matches!((&url, boyut, &sha256), (Some(u), Some(_), Some(_))
@@ -862,8 +872,9 @@ async fn mac_indir(
     fs::create_dir_all(&hazirlik).map_err(|_| update_mac::TASIYIN.to_string())?;
     diske_yaz(&update_mac::indirilen(&paket), &bytes)
         .map_err(|e| format!("Yeni sürüm diske yazılamadı: {e}"))?;
-    *INDIRILEN_EXE.lock().map_err(|_| "İndirme kaydı okunamadı.")? =
-        Some(sha256.to_ascii_lowercase());
+    *INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")? = Some(sha256.to_ascii_lowercase());
     Ok(bytes.len() as u64)
 }
 
@@ -1258,7 +1269,10 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         // fields that name the other architecture's file, another site, or
         // lack the digest or the signature.
         let e = karar_icin(manifest("9.0.0", TEK), "2.2.0", Hedef::Mac(Mimari::Arm64)).unwrap_err();
-        assert!(e.contains("9.0.0") && e.contains(&releases_sayfasi()), "{e}");
+        assert!(
+            e.contains("9.0.0") && e.contains(&releases_sayfasi()),
+            "{e}"
+        );
         let mut m = mac_manifest("9.0.0");
         m.mac_arm64 = Some(MAC_X86.into());
         assert!(karar_icin(m, "2.2.0", Hedef::Mac(Mimari::Arm64)).is_err());
@@ -1570,7 +1584,10 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
 
     #[test]
     fn only_the_windows_and_mac_builds_replace_themselves() {
-        assert_eq!(self_update_here().is_ok(), cfg!(windows) || cfg!(target_os = "macos"));
+        assert_eq!(
+            self_update_here().is_ok(),
+            cfg!(windows) || cfg!(target_os = "macos")
+        );
     }
 
     // ------------------------------------------------------------- the swap

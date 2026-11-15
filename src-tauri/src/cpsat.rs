@@ -224,11 +224,21 @@ mod tests {
 
     #[test]
     fn the_library_is_looked_for_where_the_bundle_puts_it() {
-        let yer = kutuphane_yeri(std::path::Path::new("/Applications/Mozaik.app/Contents/MacOS"));
+        let yer = kutuphane_yeri(std::path::Path::new(
+            "/Applications/Mozaik.app/Contents/MacOS",
+        ));
         if cfg!(target_os = "macos") {
-            assert_eq!(yer, PathBuf::from("/Applications/Mozaik.app/Contents/MacOS/../Frameworks/libortools.9.dylib"));
+            assert_eq!(
+                yer,
+                PathBuf::from(
+                    "/Applications/Mozaik.app/Contents/MacOS/../Frameworks/libortools.9.dylib"
+                )
+            );
         } else {
-            assert_eq!(yer, PathBuf::from("/Applications/Mozaik.app/Contents/MacOS").join(AD));
+            assert_eq!(
+                yer,
+                PathBuf::from("/Applications/Mozaik.app/Contents/MacOS").join(AD)
+            );
         }
     }
 
