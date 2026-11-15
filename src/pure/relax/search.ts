@@ -17,6 +17,8 @@ import {
   subsets,
 } from './model';
 import {
+  CP_FULL_SECONDS,
+  CP_QUICK_SECONDS,
   DEFAULTS,
   FAMILY_CONFLICTS,
   FIRST_CAP,
@@ -45,6 +47,8 @@ import { applyRelaxations, verifySuggestion } from './verify';
 export interface CpAsk {
   bytes: Uint8Array;
   family: RelaxFamily;
+  /** The most this question may take; the caller may give it less. */
+  seconds: number;
 }
 
 /**
@@ -536,33 +540,64 @@ function relaxerCore(
     if (model.needHand !== null) must.push(model.needHand);
     if (which === 'handHours' && model.handCap !== null) must.push(model.handCap);
 
-    stage = 'solving';
-    const first = yield {
-      bytes: model.sat.request({ minimize: cost, mustTrue: must }),
-      family: which,
+    /**
+     * The smallest count of `minimize` under `bound`: a short look, and a long
+     * one only when the short one did not already prove it. The long one starts
+     * from the short one's week (`load` makes it the hint) and, if it runs out
+     * of time without a week of its own, the short one's stands.
+     */
+    const lowest = function* (
+      minimize: Lit[],
+      bound: Array<{ lits: Lit[]; max: number }>,
+      wide: boolean,
+    ): Generator<CpAsk, CpAnswer | null, CpAnswer | undefined> {
+      const ask = (seconds: number): CpAsk => ({
+        bytes: model.sat.request({ minimize, mustTrue: must, atMost: bound }),
+        family: which,
+        seconds,
+      });
+      const quick = yield ask(CP_QUICK_SECONDS);
+      if (holds(quick)) model.sat.load(quick);
+      if (holds(quick) && (quick.status === 'optimal' || !wide)) return quick;
+      const full = yield ask(CP_FULL_SECONDS);
+      if (holds(full)) {
+        model.sat.load(full);
+        return full;
+      }
+      if (holds(quick)) {
+        model.sat.load(quick);
+        return quick;
+      }
+      return null;
     };
-    if (!holds(first)) return;
-    model.sat.load(first);
+
+    stage = 'solving';
+    const first = yield* lowest(cost, [], true);
+    if (first === null) return;
     let best = gridOf(base, frame, model);
     const ub = countTrue(model.sat, cost);
     let proven = first.status === 'optimal';
     // As in familySearch: the hand-over way's week must open no hour at all.
     if (which === 'reassign' && ub > 0) return;
     if (cost2.length > 0) {
+      // What is found is offered at once, as familySearch does, except for the
+      // few-teachers way, whose hours are only settled by the second count.
+      if (which !== 'fewTeachers') offer(which, model, best, false);
       stage = 'proving';
-      const second = yield {
-        bytes: model.sat.request({
-          minimize: cost2,
-          mustTrue: must,
-          atMost: [{ lits: cost, max: ub }],
-        }),
-        family: which,
-      };
-      if (holds(second)) {
-        model.sat.load(second);
+      // As in familySearch: for the few-teachers way and the rules the second
+      // count is the answer and gets the long look; for the others it is a
+      // preference among equals, looked for briefly.
+      const second = yield* lowest(
+        cost2,
+        [{ lits: cost, max: ub }],
+        which === 'fewTeachers' || which === 'rules',
+      );
+      if (second !== null) {
         best = gridOf(base, frame, model);
         proven = proven && second.status === 'optimal';
       } else {
+        // The first week is still the answer; read it back.
+        model.sat.load(first);
         proven = false;
       }
     }

@@ -172,6 +172,12 @@ export interface CpParams {
   workers: number;
   /** A ceiling, not a budget the answer depends on: optimal is optimal. */
   seconds: number;
+  /**
+   * How long CP-SAT may work on completing the hint into a whole week before
+   * it searches on its own (`hint_conflict_limit`). Its default, 10, gives up
+   * at once on this model, whose hint names only where blocks start.
+   */
+  hintConflicts?: number;
 }
 
 /** CpSolverStatus, as the response carries it. */
@@ -345,6 +351,7 @@ export function cpParams(p: CpParams): Uint8Array {
   const w = new Writer();
   w.double(36, p.seconds);
   w.int(206, Math.max(1, Math.round(p.workers)));
+  if (p.hintConflicts !== undefined) w.int(153, p.hintConflicts);
   return w.done();
 }
 

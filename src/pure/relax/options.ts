@@ -191,6 +191,25 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
  * the best week, 4 came in about 20 000 and a round of refusals says when to
  * stop.
  */
+/**
+ * CP-SAT's two looks at each count (search.ts, `cpFamilySearch`), in seconds:
+ * a short one whose week is offered at once, then a longer one for the proof.
+ * Seconds, not a count, because the library's own counters are not the
+ * conflicts above; and its several workers make it machine-dependent anyway.
+ * On the father's week with 8 workers the long look proves every way inside
+ * its ceiling; with 4 it may not, and the week offered is the short look's or
+ * better (MEASURED 2026-11-15).
+ */
+export const CP_QUICK_SECONDS = 3;
+export const CP_FULL_SECONDS = 20;
+/**
+ * CP-SAT's `hint_conflict_limit` for every question. Its default (10) never
+ * completed our hint, which names only where blocks start: the quick look
+ * then started from nothing and came back with 6 hours where the week handed
+ * to it had 4. 2 000 takes the week (MEASURED 2026-11-15; 20 000 was worse).
+ */
+export const CP_HINT_CONFLICTS = 2_000;
+
 export const NEIGHBOURHOOD_CONFLICTS = 1_000;
 
 /** How many days a neighbourhood frees, tried in this order. */

@@ -27,6 +27,7 @@ export { applyRelaxations, applySuggestion, verifySuggestion } from './verify';
 export { sameChanges, outdone } from './reading';
 export { createRelaxer, createCpRelaxer, suggest, type CpAsk, type CpRelaxer } from './search';
 export { cpParams, readAnswer, type CpAnswer } from './cpsat';
+export { CP_HINT_CONFLICTS } from './options';
 export {
   suggestionParts,
   suggestionLines,

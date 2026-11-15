@@ -185,6 +185,34 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 ---
 
+## 2026-11-15 · Kurulum paketi ve CP-SAT (`teslim/kurulum-paketi`, `ozellik/cpsat`)
+
+Alp: "en hızlısı neyse o olsun", sonra kurulum paketi (b) seçildi (DECISIONS 2026-11-15).
+
+**Kurulum.** NSIS, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`. Veri yerinde: WebView2
+profili `identifier`'a bağlı. Tauri kaldırıcısının "verileri sil" kutusu `RmDir /r` ile o
+profili siliyordu, `nsis/kancalar.nsh` kapatıyor ve `surum.yml` ölçüyor. Köprü: manifestte
+isteğe bağlı `kurulum` alanları, 2.2.0 tanımaz. Windows'ta yayınsız iki derleme yeşil
+(43710258267: kurulum 1,53 MB; 43710680734: CP-SAT'lı 15,84 MB).
+
+**CP-SAT.** Babanın verisi, 8 işçi, bu Mac, kirli ölçüm:
+
+| Ne | Sonuç |
+|---|---|
+| Doğrudan CP-SAT modeli (Python, depo dışı) | "kurulmaz" 0,14 s; 4 saat kanıtlı 7,9 s (4 işçi: 120 s'de kanıt yok) |
+| `model.ts` formülü, sayaçlar her k için | 4 saat kanıtlı 30 s |
+| aynı, kullanılmayan sayaç çıktıları yazılmadan | 4 saat kanıtlı 14,5 s |
+| üç aile sırayla, tavansız | 4 / 6 / 9, üçü kanıtlı, 56 s |
+| üç aile, 3 s + 20 s tavan | 5 / 6 / 9 ya da 4 / 6 / 9, koşudan koşuya |
+| bizim arama (`main`, tek iş parçacığı) | 4 / 6 / 9, kanıtsız, 48–49 s |
+| bizim arama + CP-SAT ikinci bakış | üç koşuda hiçbir öneri küçülmedi; bir koşuda kurallar kanıtlandı |
+
+Sonuç: ikinci bakış kapalı (`CP_SECOND_LOOK`), sıradaki iş CP-SAT'a kendi modeli (TODO B7.38).
+
+**Ders.** `git switch`, commit'lenmemiş değişikliği yeni dala taşır ve `commit -a` onu oraya
+yazar: CP-SAT'ın dört dosyası bir kez kurulum dalına girdi, geri alındı (9fa2586). Dal
+değiştirmeden önce commit.
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`

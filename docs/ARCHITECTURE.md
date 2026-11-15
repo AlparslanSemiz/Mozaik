@@ -127,7 +127,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/relax/sentences.ts` | babanın cümlesiyle öneri (`suggestionParts`, `suggestionLines`, `suggestionSentence`) ve reddedilen değişikliğin sebebi (`refusalText`) |
 | `pure/relax/questions.ts` | öğretmene sorulacak sorular (`suggestionQuestions`), cevapların parçaları, önerinin dayandığı cevaplar (`suggestionUses`) |
 | `pure/relax/diff.ts` | önizlemenin farkı (`suggestionDiff`) |
-| `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
+| `pure/relax/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır. Kodlamalar bir `Formula` alır: `Sat` ya da `CpFormula` |
+| `pure/relax/cpsat.ts` | aynı formülün OR-Tools CP-SAT için kaydı (`CpFormula`), soru başına `CpModelProto` baytları, `SatParameters` (`cpParams`) ve `CpSolverResponse` okuyucusu (`readAnswer`); bağımlılıksız el yazması protobuf. Arama `createCpRelaxer` ile CP-SAT'a soruyor, exe `src-tauri/src/cpsat.rs` ile cevaplıyor |
 | `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
