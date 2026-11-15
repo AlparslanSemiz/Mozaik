@@ -287,10 +287,42 @@ pub fn run() {
     #[cfg(target_os = "linux")]
     linux_renderer();
 
+    let args: Vec<String> = std::env::args().collect();
+
+    // The installer's waiter (update.rs, `kurulumu_baslat`): no window, no
+    // single instance; it runs the installer and ends.
+    if let Some(bekleyici) = update::bekleyici_mi(&args) {
+        update::bekle_ve_bitir(bekleyici);
+    }
+
     // Started by `apply_update`: wait for the old version to be gone before
     // claiming the single instance below (`update::eskisi_gitsin` says why).
-    if std::env::args().any(|a| a == update::GUNCELLENDI) {
+    if args.iter().any(|a| a == update::GUNCELLENDI) {
         update::eskisi_gitsin(std::io::stdin(), update::DEVIR_SURESI);
+    }
+
+    if let Ok(exe) = std::env::current_exe() {
+        update::acilis(&args, &exe);
+        // A standalone copy on a machine where Mozaik is installed opens the
+        // installed program instead, before it claims the single instance:
+        // the pin and the shortcut to the old file keep working (TRAPS 160).
+        // Not after an installer that did not finish: then this copy is the
+        // one that works.
+        #[cfg(windows)]
+        if !args.iter().any(|a| a == update::KURULUM_OLMADI) {
+            if let Some(yerel) = std::env::var_os("LOCALAPPDATA") {
+                if let Some(kurulu) = update::kurulu_program(Path::new(&yerel), &exe) {
+                    let devir = std::process::Command::new(&kurulu)
+                        .arg(update::GUNCELLENDI)
+                        .stdin(std::process::Stdio::piped())
+                        .spawn();
+                    if let Ok(cocuk) = devir {
+                        std::mem::forget(cocuk);
+                        std::process::exit(0);
+                    }
+                }
+            }
+        }
     }
 
     tauri::Builder::default()
@@ -307,18 +339,20 @@ pub fn run() {
                 let _ = pencere.set_focus();
             }
         }))
-        // A standalone copy that just handed over to the installer left its own
-        // path behind (update.rs, `ESKI_KOPYA_NOTU`). Only the installed
-        // program acts on it, and only on a different .exe (`silinecek_eski`).
+        // The installed program leaves its own path where a standalone copy
+        // looks for it (update.rs, `KURULU_NOTU`), and clears the installer's
+        // waiter out of the temporary folder.
         .setup(|app| {
             if let (Ok(dir), Ok(exe)) = (app.path().app_local_data_dir(), std::env::current_exe()) {
-                let not = dir.join(update::ESKI_KOPYA_NOTU);
-                if let Ok(icerik) = fs::read_to_string(&not) {
-                    if let Some(eski) = update::silinecek_eski(&icerik, &exe) {
-                        update::eski_kopyayi_kaldir(eski, not);
-                    }
+                if update::kurulu_mu(&exe) {
+                    let _ = fs::create_dir_all(&dir);
+                    let _ = fs::write(
+                        dir.join(update::KURULU_NOTU),
+                        exe.to_string_lossy().as_bytes(),
+                    );
                 }
             }
+            let _ = fs::remove_file(std::env::temp_dir().join(update::BEKLEYICI_ADI));
             Ok(())
         })
         // The version this replaced, if we are the replacement, goes only once
@@ -353,6 +387,7 @@ pub fn run() {
             update::self_update_supported,
             update::download_update,
             update::apply_update,
+            update::guncelleme_durumu,
             cpsat::cpsat_var,
             cpsat::cpsat_coz,
             cpsat::cpsat_durdur
