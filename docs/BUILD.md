@@ -11,7 +11,7 @@ Vitest                  ->  saf mantık testleri ve jsdom duman testi
 Playwright              ->  tarayıcıda uçtan uca testler
 Radix UI                ->  diyalog, bağlam menüsü, açılır menü ve benzeri katmanlar
 lucide-react            ->  simgeler (ağaç budanır, yalnız kullanılan simge gömülür)
-Tauri 2                 ->  Windows exe
+Tauri 2                 ->  Windows exe ve Mac .app
 ```
 
 CSS tek bir `src/styles.css` dosyasında, CSS değişkenleriyle yazılıyor.
@@ -386,6 +386,52 @@ Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfas
 ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
 siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 
+### Mac
+
+Aynı `src-tauri/`, macOS'ta derlenince `Mozaik.app` ve bir `.dmg` (DECISIONS 2026-11-15, "Mac
+sürümü"). Mac'e özgü ayarların hepsi `src-tauri/tauri.macos.conf.json`'da; Tauri onu yalnız
+macOS'ta `tauri.conf.json`'ın üstüne katar, Windows ayarı değişmez. İçinde: paket hedefleri
+(`app`, `dmg`), en düşük macOS 11, ad-hoc imza (`signingIdentity: "-"`), program adı `Mozaik`
+(`mainBinaryName`), `src-tauri/icons/Mozaik.icns` (`scripts/ikon-mac.mjs` üretir: çizim
+1024'lük tuvalde 824 piksel, macOS 11'in ızgarası) ve Belgeler izninin cümlesi
+(`src-tauri/macos/Info.plist`).
+
+```sh
+scripts/ortools-mac.sh arm64          # OR-Tools 9.15, özeti sabit; src-tauri/ortools/ ve tauri.ortools.json
+npx vite build                        # cargo test'ten önce
+MOZAIK_ORTOOLS=$PWD/src-tauri/ortools/libortools.9.dylib cargo test --manifest-path src-tauri/Cargo.toml
+npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
+# -> src-tauri/target/release/bundle/macos/Mozaik.app, bundle/dmg/Mozaik_<sürüm>_aarch64.dmg
+```
+
+Intel için `scripts/ortools-mac.sh x86_64` ve `build --target x86_64-apple-darwin` (çapraz
+derleme, `rustup target add x86_64-apple-darwin`). Universal paket yok: iki mimari iki dosya.
+
+**CP-SAT.** `scripts/ortools-mac.sh` resmi arşivi indirir, SHA-256'sını betikteki sabitle
+karşılaştırır ve `libortools.9.dylib`'in `@rpath` kapanışını (`otool -L`, 99 dylib, 53 MB)
+`src-tauri/ortools/`'a kopyalar; `tauri.ortools.json` onları `bundle.macOS.frameworks` olarak
+verir, Tauri `Contents/Frameworks`'e koyup tek tek ad-hoc imzalar. `cpsat.rs` kütüphaneyi
+`Contents/MacOS/../Frameworks/` altında arar. Arşivin adındaki `macOS-26.2` derlendiği makine,
+en düşük sürüm değil (tuzak 157).
+
+**Veri ve pencere.** Klasör `~/Documents/Ders Programı`; Tauri'nin `document_dir`'i `$HOME`'u
+okuyor, yani `HOME=<sahte ev>` ile açılan program gerçek Belgeler'e dokunmaz (yerel denemelerde
+böyle açıldı). Sayfanın deposu WKWebView'de, `~/Library/WebKit/com.dersprogrami.arac`. Menü
+çubuğu Türkçe ve `lib.rs`'te (`mac_menusu`): Düzen menüsü olmayan bir Mac programında metin
+kutularında Cmd+C/V/X/A çalışmaz. Cmd+Q bizim öğemiz, pencereyi kırmızı düğme gibi kapatır, yani
+sayfa kapanmadan önce Belgeler'e yazar (TB7); hazır "Quit" öğesi süreci `CloseRequested`
+olmadan bitiriyor. Dock'tan "Çık" ve oturum kapatma hâlâ o yoldan gidiyor.
+
+**Yayın.** `surum.yml`'in `mac` işi iki mimariyi `macos-15`'te derler, paketin içine bakar
+(`codesign --verify --deep --strict`, Frameworks, en düşük sürüm, mimari) ve
+`Mozaik-mac-<mimari>.app.tar.gz` ile `Mozaik-mac-<mimari>.dmg`'yi verir. `publish` arşivleri
+minisign ile imzalar ve `surum.json`'a yazar. Apple imzası bir anahtar: `APPLE_CERTIFICATE`,
+`APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` sırları tanımlıysa Developer ID ve
+sertleştirilmiş çalışma zamanı, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` de varsa
+notarization; yoksa ad-hoc. `.github/workflows/mac.yml` yayından önceki hafif ikizi: yalnız
+arm64, Rust testleri CP-SAT'ın küçük modeliyle, `tauri build`, paketin içi ve programın yirmi
+saniye ayakta kalması. Mac'e dokunan PR'da, `main` push'unda ve elle koşar, hiçbir şeyi kilitlemez.
+
 ## Release varlıkları
 
 Üç teslim dosyasının tek kaynağı `.github/workflows/surum.yml`, ve bir `vX.Y.Z`
@@ -400,7 +446,10 @@ README'nin indirme bağlantıları bunlar.
 | `Mozaik.html` | çift tıklanan tek dosya |
 | `Mozaik-Windows-kurulum.zip` | `Kur.cmd` ve yerel sunucu |
 | `Mozaik.exe` | kendi penceresi olan program |
-| `SHA256SUMS.txt` | üç dosyanın özeti |
+| `Mozaik-Kurulum.exe` | Windows kurulum sihirbazı (2026-11-15'ten) |
+| `Mozaik-mac-arm64.dmg`, `Mozaik-mac-x86_64.dmg` | Mac'in ilk kurulumu, Apple Silicon ve Intel (2026-11-15'ten) |
+| `Mozaik-mac-arm64.app.tar.gz`, `Mozaik-mac-x86_64.app.tar.gz` | Mac kopyasının kendini güncellerken indirdiği paket |
+| `SHA256SUMS.txt` | öteki dosyaların özeti |
 | `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu manifest: sürüm, tarih, exe'nin adresi, boyutu ve SHA-256 özeti |
 
 Varlık adları yalnız ASCII, çünkü URL'de kodlanıyorlar. Release sayfasının
@@ -541,14 +590,21 @@ dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
 yarıda kalırsa eski programı yerine geri koyar. `.eski` yeni sürümün sayfası
 yüklendikten sonra silinir, açılışın ilk satırında değil: pencere açamayan bir yeni sürüm
 geri dönülecek kopyayı silmemiş olur. İndirme ve takas yalnız
-Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya
-Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi onu
-kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
+Windows'ta ve Mac'te yapılır (`self_update_here`): Linux ikilisinin manifestte kendi dosyası
+yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini kendi üstüne
+yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
 taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir ve `/S /R` ile
 çalıştırır; tek dosyalık bir kopya geçerken yolunu bir not dosyasına (`update.rs`, `ESKI_KOPYA_NOTU`) yazar ve kurulan
 program onu açılışta siler (`update.rs`).
+
+**`exe`, Mac'te.** Aynı üç düğme ve aynı iki kilit (özet ve minisign imzası, güvenilen yorum
+`mozaik <sürüm> Mozaik-mac-<mimari>.app.tar.gz`). Mac kopyası manifestten yalnız kendi mimarisinin
+`mac_*` alanlarını okur. İndirme paketin yanındaki gizli `.Mozaik.app.yeni`'ye yazar; "Şimdi
+yeniden başlat" arşivi yeniden özetler, açar ve çalışan `.app` ile `renamex_np(RENAME_SWAP)` ile
+tek adımda yer değiştirir (`src-tauri/src/update_mac.rs`). Program dmg'den ya da App
+Translocation'dan çalışıyorsa indirmeden önce "Mozaik'i Uygulamalar klasörüne taşıyın" der.
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
 sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:

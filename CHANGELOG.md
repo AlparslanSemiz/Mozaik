@@ -21,6 +21,8 @@ release is incomplete, the entry says so.
 
 - Each teacher's week can be sent by e-mail from Çıktı: "Open in e-mail" opens a new message in your own mail program with the teacher's address and the week as plain text, and you press Send; Mozaik sends nothing itself. The address is a new column in Okul → Öğretmenler (plan file version 17; older backups open with no addresses); the box opens to the whole address while you type in it, and an address can also be typed in the add form or pasted from Excel as a sixth column. If no mail program is chosen, one line says so.
 
+- A Mac version: `Mozaik-mac-arm64.dmg` for Apple silicon and `Mozaik-mac-x86_64.dmg` for Intel Macs, macOS 11 or later. Drag Mozaik into Applications. It has its own window and a Turkish menu bar (copy, paste and undo work in every box), saves every plan into `~/Documents/Ders Programı` on its own, uses OR-Tools CP-SAT for suggestions like the Windows installer does, and updates itself from Ayarlar → Hakkında, checking our signature before it installs anything. It is not signed by an Apple developer account yet, so the first launch needs Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç once (README, "Mac"). If it runs from the disk image instead of Applications, it says to move it there before updating.
+
 - Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
 
 ### Changed
