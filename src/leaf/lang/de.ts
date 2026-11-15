@@ -1786,8 +1786,8 @@ const DE: Sozluk = {
     "Alle offenen Stunden der Klasse {sinif} sind mit anderen Fächern belegt.",
   "{kim} {n} saatinde müsait değil":
     "{kim} ist in {n} davon nicht verfügbar",
-  "{n} saatinde başka sınıfta":
-    "in {n} in einer anderen Klasse",
+  "{n} saatinde {kim} başka sınıfta":
+    "in {n} ist {kim} in einer anderen Klasse",
   "{n} saatinde {derslik} dersliği dolu":
     "in {n} ist Raum {derslik} belegt",
   "{n} saatinde bir kural izin vermiyor":

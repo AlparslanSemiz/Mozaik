@@ -14,10 +14,17 @@ const MARK_MS = 2400;
 /** How long to wait for Program to become visible after the tab switch. */
 const WAIT_MS = 1500;
 
+/** The newest reveal request; earlier waits stop when it changes. */
+let latest = 0;
+
 /** Waits for `find` to return an element that is laid out, frame by frame. */
 function whenVisible(find: () => HTMLElement | null, then: (el: HTMLElement | null) => void) {
   const start = performance.now();
+  // Only the latest request answers: an older one that gives up after a newer
+  // one landed would say "not found" over a card that is marked on screen.
+  const mine = ++latest;
   const step = () => {
+    if (mine !== latest) return;
     const el = find();
     if (el !== null && el.getClientRects().length > 0) return then(el);
     if (performance.now() - start > WAIT_MS) return then(null);

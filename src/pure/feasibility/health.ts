@@ -115,7 +115,9 @@ export function health(d: State): Health {
   // telling them nothing on the one screen where it could tell them something.
   const empty = d.lessons.length === 0;
   const hard = blocked + stranded + report.unplaceable.length;
-  const trouble = hard + warnings;
+  // The same number as Kontrol's "Sorunlar (N)", so the chip and the strip
+  // never disagree; capacity that will not fit has its own "uyarı".
+  const problems = stranded + report.violations.length + report.unplaceable.length;
 
   return {
     blocked,
@@ -123,7 +125,7 @@ export function health(d: State): Health {
     pending,
     stranded,
     hard,
-    problems: stranded + report.violations.length + report.unplaceable.length,
+    problems,
     advice: report.advice.length,
     level,
     message: empty
@@ -133,10 +135,12 @@ export function health(d: State): Health {
         : parts.join(' · '),
     short: empty
       ? t('Henüz ders girilmedi')
-      : trouble > 0
-        ? t('{n} sorun', { n: trouble })
-        : pending > 0
-          ? t('{n} saat havuzda', { n: pending })
-          : t('Sorun yok'),
+      : problems > 0
+        ? t('{n} sorun', { n: problems })
+        : warnings > 0
+          ? t('{n} uyarı', { n: warnings })
+          : pending > 0
+            ? t('{n} saat havuzda', { n: pending })
+            : t('Sorun yok'),
   };
 }

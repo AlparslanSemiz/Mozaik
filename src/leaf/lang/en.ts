@@ -1769,8 +1769,8 @@ const EN: Sozluk = {
     "Every open hour of class {sinif} is taken by other lessons.",
   "{kim} {n} saatinde müsait değil":
     "{kim} is not available in {n} of them",
-  "{n} saatinde başka sınıfta":
-    "in {n} busy with another class",
+  "{n} saatinde {kim} başka sınıfta":
+    "in {n} {kim} is in another class",
   "{n} saatinde {derslik} dersliği dolu":
     "in {n} room {derslik} is taken",
   "{n} saatinde bir kural izin vermiyor":

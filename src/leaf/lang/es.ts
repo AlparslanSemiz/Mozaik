@@ -1785,8 +1785,8 @@ const ES: Sozluk = {
     "Todas las horas abiertas de la clase {sinif} están ocupadas por otras clases.",
   "{kim} {n} saatinde müsait değil":
     "{kim} no está disponible en {n} de ellas",
-  "{n} saatinde başka sınıfta":
-    "en {n}, con otra clase",
+  "{n} saatinde {kim} başka sınıfta":
+    "en {n}, {kim} está con otra clase",
   "{n} saatinde {derslik} dersliği dolu":
     "en {n}, el aula {derslik} está ocupada",
   "{n} saatinde bir kural izin vermiyor":

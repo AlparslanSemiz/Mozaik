@@ -118,7 +118,7 @@ describe('stuckReason ve groupUnplaceable', () => {
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1', 's511|0|2': 'x2', 's511|0|3': 'x2' },
     });
     const [u] = buildReport(d).unplaceable;
-    expect(u!.message).toBe('510 sınıfının 2 boş saati var: 2 saatinde başka sınıfta.');
+    expect(u!.message).toBe('510 sınıfının 2 boş saati var: 2 saatinde AV başka sınıfta.');
     expect(u!.fix).toBeNull();
   });
 
@@ -172,8 +172,14 @@ describe('health.short', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
       unavailable: { 'oMC|0|0': 1, 'oMC|0|1': 1, 'oMC|0|2': 1, 'oMC|0|3': 1 },
     });
-    // One lesson with nowhere to go, and MÇ's capacity row as a warning.
-    expect(health(stuck).short).toBe('2 sorun');
+    // One lesson with nowhere to go: the same number as "Sorunlar (N)". MÇ's
+    // capacity row is a warning, and not a row of that panel.
+    expect(health(stuck).short).toBe('1 sorun');
+    expect(health(stuck).problems).toBe(1);
+    const over = makeWorld({
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 5 }],
+    });
+    expect(health(over).short).toBe('3 uyarı'); // MÇ, 510 and room A
     const done = makeWorld({
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
       placements: { 's510|0|0': 'x1' },

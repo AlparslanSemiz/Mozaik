@@ -152,6 +152,11 @@ export default function Check({ state, view, ui }: Props) {
   const stranded = useMemo(() => groupStranded(state, ix, conflicts), [state, ix, conflicts]);
   const strandedHours = conflicts.length;
   const stuck = useMemo(() => groupUnplaceable(report.unplaceable), [report]);
+  // Once per change, not per render: each lookup walks the week's placements.
+  const violationCells = useMemo(
+    () => new Map(report.violations.map((v) => [v.key, violationCell(state, ix, v)])),
+    [report, state, ix],
+  );
 
   // The tab switch first, then the reveal: Program is kept alive in an
   // Activity, so the kart exists and only has to become visible (reveal.ts).
@@ -366,7 +371,7 @@ export default function Check({ state, view, ui }: Props) {
                 </thead>
                 <tbody>
                   {report.violations.map((v) => {
-                    const cell = violationCell(state, ix, v);
+                    const cell = violationCells.get(v.key) ?? null;
                     return (
                       <tr key={v.key}>
                         <td>

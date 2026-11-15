@@ -103,7 +103,9 @@ export function stuckReason(
   const rule = (counts.get('rule') ?? 0) + (counts.get('relatedDay') ?? 0);
   const parts: string[] = [];
   if (away > 0) parts.push(t('{kim} {n} saatinde müsait değil', { kim: teacher.short, n: away }));
-  if (elsewhere > 0) parts.push(t('{n} saatinde başka sınıfta', { n: elsewhere }));
+  if (elsewhere > 0) {
+    parts.push(t('{n} saatinde {kim} başka sınıfta', { n: elsewhere, kim: teacher.short }));
+  }
   if (room > 0) {
     const roomName = (group.roomId !== null && ix.roomById.get(group.roomId)?.name) || '?';
     parts.push(t('{n} saatinde {derslik} dersliği dolu', { n: room, derslik: roomName }));
@@ -126,10 +128,12 @@ export function stuckReason(
     };
   }
 
+  // Availability only helps when a CLOSED hour is what binds most; a rule or a
+  // busy teacher is not opened from there.
   const fix: Target | null =
-    away > 0 && away >= elsewhere && away >= room
+    away > 0 && away >= elsewhere && away >= room && away >= rule
       ? { kind: 'teacher', id: teacher.id }
-      : room > elsewhere && group.roomId !== null
+      : room > elsewhere && room >= rule && group.roomId !== null
         ? { kind: 'room', id: group.roomId }
         : null;
   return {
