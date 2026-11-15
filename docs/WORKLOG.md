@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
+Son güncelleme: 2026-11-15 (`kullanim/sadelik`, sade ekranın ilk dilimi); öncesi 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -87,7 +87,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
-   KS ve Ö maddelerinin önünde.
+   KS ve Ö maddelerinin önünde. İlk dilimi `kullanim/sadelik`'te (2026-11-15, aşağıdaki girdi);
+   karar isteyen kalanı TODO §8m (SD1–SD6).
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel; rpm 2026-10-10'da bırakıldı, B7.28). B7.22 (Sığdır'ın gün
@@ -189,6 +190,50 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 
 
+
+---
+
+## 2026-11-15 · Sade ekranın ilk dilimi (`kullanim/sadelik`)
+
+`main` db869d2'den. **Neden bu iş.** Babanın 1 numaralı isteği (daha az yazı, daha az soru) için
+tam dolu kursla (`src/fixtures/tam-dolu-kurs-dizili.json`) bir kullanılabilirlik ölçümü yapıldı
+(dalın dışında, oturumun scratch'inde). Önerilerinden karar istemeyenler bu dalda, her biri kendi
+commit'inde; kalanı TODO §8m.
+
+**Yapılan.**
+- Çıktı, koyu tema: önizleme kâğıdı koyu `--paper`'ı alıyordu ve kart yazısı (miras `--text`) pastel
+  zeminde 1,91:1'di. `.print-sheet` koyu temada açık paletin değerlerini yeniden tanımlıyor; koyu
+  temanın `--print-line` ve `--print-head-bg` geçersizlemesi kalktı. `yazdir.spec.ts`'in koyu tema
+  testi artık kâğıdın kendisini ölçüyor (açık, çizgi 3:1, en kötü kart 4,5:1, en az bir kart).
+  Basılan kâğıt değişmedi (PDF ve `print` medyasıyla bakıldı).
+- Çıktı, kâğıt: basılan kâğıda açık bir bildirim çıkıyordu ("Yedek yüklendi.", `position: fixed`,
+  her sayfada). `.toasts` `@media print`'te gizli; gerileme testi `yazdir.spec.ts`'te, önce kırmızı.
+- Öneri paneli: yalnız sırada bulunan ilk yol açık, ötekiler `<details>` "Başka yollar (N)" altında,
+  katın açıklığı panelin durumunda (her cevap aramayı yeniden başlatınca kapanmasın). Arama sürerken
+  her yol için bir "aranıyor" satırı yerine saniyeli tek cümle ve bir `<progress>`. Tam dolu kursta
+  bitmiş panel 53 görünen kelime ve 4 düğme (rapor: ~195 kelime, 19 düğme); arama 25 s.
+  `otomatik.spec.ts`'in uzun testine yalnız katı açan bir adım eklendi.
+- Erişim: Dersler satırındaki haftalık saat kutusu ve bütün `LimitBox`'lar `aria-label` taşıyor
+  (Dersler'de satırın adıyla). `.chip-count` opaklığı kalktı (3,69:1 idi). Tam dolu kursta axe:
+  Dersler · Genel `label` 146 → 0, `label-title-only` 146 → 0, `color-contrast` 16 → 0;
+  Öğretmenler `label-title-only` 54 → 0, `color-contrast` 2 → 0, `label` 36 kaldı (SD6).
+  `erisim.spec.ts`'in `BILINEN`'inde Dersler'in iki satırı silindi.
+- Kontrol · Danışman: aynı türden notlar tek satırda ("5 ders bloklara bölünmüş …: adlar"), tek kalan
+  kendi cümlesiyle. `Advice`'a `who` eklendi (DENETIM KS22, Ö38).
+
+**Yapılmayan.** "Geri al" bildirimi (SD1: `Toasts.tsx` bilerek eylemsiz, geri al yığınına kimlik
+gerekiyor), sınıflarda "Sıkışık" (SD2, karar), plan ve program (SD3, karar), Yerleşemeyen dersler
+(SD4), raporun öteki önerileri (SD5).
+
+**Ölçüm.** `dist/index.html` 1 207 180 bayt, brotli 289,5 kB (eşikler 1 210 000 ve 290 000, ikisi de
+altında ama brotli payı 500 B).
+
+**Koşulan.** `tsc`, `eslint src`, `npm run sinir` yeşil; `npm run hizli` 1525 testin 1514'ü geçti, 11
+kırmızı dört dosyada (`agir.test.ts`: bu Mac'te `flock` yok; `emptyStart`, `otherWindow`, `rowOrder`:
+aynı 11'i `origin/main`'in temiz kopyasında da kırmızı, Node 26'nın `localStorage`'ı ile ilgili gibi,
+ölçülmedi); `size-limit` yeşil; Playwright `yazdir`, `kontrol`, `liste`, `erisim`, `metin` 78/78,
+`otomatik` 15/15 (uzun test 2,3 dk). `scripts/agir.sh` bu makinede koşmuyor (`flock` yok), Playwright
+doğrudan ve tek oturumda koşuldu. **Koşulmayan.** Ana E2E'nin geri kalanı, WebKit, gerçek exe (CI'da).
 
 ---
 
