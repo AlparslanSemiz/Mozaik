@@ -46,11 +46,12 @@ const BILINEN: Record<string, Record<string, number>> = {
   // Dersler's weekly-hours box and every LimitBox carry an aria-label now
   // (2026-11-15, `kullanim/sadelik`).
   Dersler: { region: 1, 'empty-table-header': 2 },
+  // The grid's scroll box is its one Tab stop now (2026-11-15, KS8), so
+  // `scrollable-region-focusable` left the list.
   Program: {
     region: 1,
     'empty-table-header': 6,
     'heading-order': 1,
-    'scrollable-region-focusable': 1,
   },
   Kontrol: { region: 1 },
   Çıktı: { region: 1, 'heading-order': 1 },

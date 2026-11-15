@@ -619,8 +619,10 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // without saying what to. Reading in order it is: the block, the three
     // things behind it, the one-hour lock, and two doors — the locks that take
     // many hours, and putting a row or a day aside. Nothing that a hand reaches
-    // for often is behind either door.
+    // for often is behind either door. "Taşı" leads: it is the keyboard's way
+    // to move the block (2026-11-15, KS8).
     await expect(menu.getByRole('menuitem')).toHaveText([
+      /^Taşı/,
       /^Havuza kaldır/,
       'Dersi düzenle',
       'Öğretmeni düzenle',
@@ -889,7 +891,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
       await expect(menu.getByRole('menuitem', { name: 'Havuza kaldır' })).toBeVisible();
       await expect(cards).toHaveCount(before);
 
-      // The menu's own first item is still one Enter away from removing it.
+      // The menu's first item is one Enter away from moving it ("Taşı").
       await page.keyboard.press('Escape');
       await expect(menu).toHaveCount(0);
       await expect(cards).toHaveCount(before);
