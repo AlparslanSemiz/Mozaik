@@ -239,7 +239,14 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
    * over the whole school in the live file (the audit of 2026-11-16).
    */
   const arrive = useCallback(
-    async (handle: FileSystemDirectoryHandle, alive: () => boolean = () => true) => {
+    async (
+      handle: FileSystemDirectoryHandle,
+      alive: () => boolean = () => true,
+      // From a click (picking or allowing the folder): the user is here, and
+      // the write goes at once, as it always did; an empty bundle still lands
+      // only where nothing is lost, and the shrink guard still holds.
+      clicked = false,
+    ) => {
       // A new folder, or the same one again: whatever held the last one is over.
       held.current = false;
       // The plans this window READ, without the frozen ones put back as they
@@ -250,7 +257,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
       const mine = workOf(buildBundle(lib, collectStates(lib, id, now)));
       if (mine !== null && mine.lists > 0) {
         setStatus({ kind: 'bekliyor', name: handle.name });
-        if (openedReadable()) await write(handle);
+        if (clicked || openedReadable()) await write(handle);
         return;
       }
       // Nothing here: what does the folder hold? Held while it is read, so a
@@ -269,7 +276,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
       }
       held.current = false;
       setStatus({ kind: 'bekliyor', name: handle.name });
-      if (openedReadable()) await write(handle);
+      if (clicked || openedReadable()) await write(handle);
     },
     [write],
   );
@@ -363,7 +370,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     shrinkOk.current = false;
     setShrunk(null);
     await writeHandle(handle);
-    await arrive(handle);
+    await arrive(handle, () => true, true);
   }, [arrive]);
 
   const allow = useCallback(async () => {
@@ -374,7 +381,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
       return;
     }
     lastDay.current = '';
-    await arrive(handle);
+    await arrive(handle, () => true, true);
   }, [arrive]);
 
   const forget = useCallback(async () => {
