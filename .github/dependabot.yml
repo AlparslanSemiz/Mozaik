@@ -1,7 +1,7 @@
 # Bağımlılık güncellemesi: otomatik BİLDİRİM, otomatik güncelleme değil.
 #
 # Uzun ömürlü bir proje ve tek bakımcısı var, yani "bir gün oturup bakarım"
-# demek "bakmam" demek. Dependabot haftada bir bakar, bir PR açar, `ci.yml`
+# demek "bakmam" demek. Dependabot düzenli bakar (npm haftada, cargo ve eylemler ayda bir), bir PR açar, `ci.yml`
 # PR'ın dalındaki her push'ta süiti koşturur ve karar insana kalır. Renovate yerine bu seçildi: GitHub'ın
 # kendi içinde, kurulacak bir uygulama yok, ve istenen şey zaten bir bildirim.
 #
@@ -42,7 +42,8 @@ updates:
 
   # İş akışlarının kendi eylemleri de bağımlılık: `actions/checkout@v4` bir gün
   # eskir ve bunu kimse fark etmez. Üçüncü taraf eylemler tam commit SHA'sıyla
-  # sabit (yanında sürüm yorumu); Dependabot SHA'yı ve yorumu birlikte günceller.
+  # sabit (yanında sürüm yorumu). Dependabot etiketli olanın (rust-cache) SHA'sını ve yorumunu
+  # birlikte günceller; rust-toolchain'in `stable` dalı etiket değil, o elle tazelenir.
   - package-ecosystem: github-actions
     directory: /
     schedule:

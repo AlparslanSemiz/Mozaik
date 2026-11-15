@@ -255,12 +255,13 @@ runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` d
 sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO B7.29).
 `surum.yml`'in Windows işi `windows-latest`'te.
 
-Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
+Dependabot (`.github/dependabot.yml`, 2026-09-12) bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
 yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda. Üç ekosisteme
 bakar: npm (haftalık), `src-tauri`'nin cargo'su ve iş akışlarının eylemleri (aylık).
 Üçüncü taraf eylemler (`dtolnay/rust-toolchain`, `Swatinem/rust-cache`) tam commit
-SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15).
+SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15); `stable` bir dal
+olduğu için rust-toolchain'in SHA'sını Dependabot tazelemez, elle güncellenir.
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
 yeşil bir `main` push'unda yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
