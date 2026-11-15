@@ -66,7 +66,8 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
-weeklyHours) eski formülle ve ikinci bakışa girmiyor.
+weeklyHours) eski formülle ve ikinci bakışa girmiyor; `hiz/tepki`'den sonra bırakma 4×'te hâlâ
+~156 ms (hedef 100) ve öneri aramasında iki işçi iki gerçek çekirdekte ölçülmedi.
 
 **Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
@@ -262,6 +263,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 | Güncelleme kapısı | gerçek `update.rs` akışıyla 1 geçti (2026-10-24 gece, `tp7-windows-exe`); önceki biçimi (yalnız dosya takası) iki koşuda yeşildi (`ogretmene-eposta`) | `guncelleme-windows.yml` 40128285002; 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
+| Bırakma ve geri alma, babanın haftası | bırakmanın `pointerup` INP'si 312 → 156 ms (4×), 472 → 192 ms (6×); en uzun görev 256 → 117 / 414 → 146; geri al en uzun görev 203 → 79 / 330 → 120 (2026-11-16, `hiz/tepki`, KİRLİ: yük 30–118) | `scratch/olc-surukle.mjs`, 3 tur iç içe, 12 bırakma |
+| Çıktı sekmesi, babanın haftası | tıklamadan iki rAF'a 207 → 115 ms (4×), 318 → 177 (6×); yazdırılan ve PDF 20/20 sayfa (2026-11-16, `hiz/tepki`, KİRLİ) | `scratch/olc-baski.mjs`, 3 tur |
 | Program'ın ilk açılışı, Sığdır, babanın haftası | 103,5–118,1 ms medyan x1, 327,1–504,6 ms x4; öncesi 155,5–157,9 ve 548,3–746,8 (2026-11-15, `hiz/sigdir`, KİRLİ: yük ortalaması 16–107) | `scratch/olc-ab.mjs`, 7 koşu, iç içe A/B |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
@@ -273,6 +276,64 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 
 ---
+
+## 2026-11-16 · Tepki: bırakma, geri alma, sekmeler, koşunun sonu ve Durdur (`hiz/tepki`)
+
+**Başlangıç.** Tepki denetimi (main f098e1f, derlenmiş kopya, babanın haftası, CDP 4× ve 6×,
+`hardwareConcurrency` 2): her bırakma ve geri alma 206–382 ms donuyordu, ara görüntü yok;
+koşunun sonu 246 ms, Durdur 227–311 ms, Program/Kontrol/Çıktı geçişi 117–232 ms.
+
+**Sebep ölçüldü ve plandan başka çıktı (tuzak 101).** Raporun adı Program.tsx'in türetilmiş
+verisiydi; bırakmanın profili (4×, sıkıştırılmamış derleme) başka gösterdi: 188 ms'lik React
+işinin 109'u App'teki sağlık çipiydi (`health` → `buildReport` → `commonestBlock`), ve onun
+85 ms'i `blockerDetail`'ın her hücrede bloğun boyunu bütün ızgaradan yeniden okumasıydı
+(`blockSizeFor` → `pendingBlocks` → `placedBlocks`). Program'ın kendisi 15 ms'ti.
+
+**Çare.** (1) `commonestBlock` boyu bir kez okuyor; aynı sonuç. Durdur'un raporu da aynı yoldan
+hızlandı. (2) Sağlık çipi ile Kontrol aynı planın raporunu tek yuvadan alıyor (`sharedReport`,
+plan ve dil anahtarlı), Kontrol tek dizin kuruyor. (3) Izgara: değişmeyen satır eski nesnesini
+(`keepSameRows`), hücre işleyicileri kimliğini (`useSteady`) koruyor; bir bırakmada `Row`
+çizimi 25 ms'den 2 ms'ye. (4) Havuz, şeridin sayıları ve sağlık durumu `useDeferredValue`:
+kart önce ızgarada, gerisi kesilebilir bir çizimde. İncelemenin bulgusu: geriden gelen havuzdan
+artık borçlu olunmayan bir kart tutulabiliyordu; `beginDrag` kartın bloğunu ekrandaki plana
+soruyor (`2966f01`). (5) `useSolver`: öneri araması sonuç çizildikten bir kare sonra başlıyor;
+Durdur koşuyu hemen kaldırıyor, sebepler bir kare sonra; ilerleme saniyede dört kez.
+(6) Çıktı ilk 4 sayfayı hemen, sonra karede 6 sayfa çiziyor; Yazdır düğmesi ve `beforeprint`
+eksikleri `flushSync` ile önce çiziyor. (7) Öğretmen ve ders aramasında satırlar arkadan.
+
+**Ölçüm (KİRLİ: yük ortalaması 16–132, başka oturumlar E2E koşuyordu; iç içe A/B, medyan).**
+
+| Ne | önce 4× | sonra 4× | önce 6× | sonra 6× |
+|---|---|---|---|---|
+| Bırakma, `pointerup` INP (12) | 312 | 156 | 472 | 192 |
+| Bırakma, en uzun görev | 256 | 117 | 414 | 146 |
+| Geri al, en uzun görev (3) | 203 | 79 | 330 | 120 |
+| Sekme Program · Kontrol · Çıktı (3) | 168 · 102 · 165 | 107 · 33 · 76 | 248 · 152 · 256 | 194 · 57 · 124 |
+| Çıktı: yazdırılan / PDF sayfası | 20 / 20 | 20 / 20 | 20 / 20 | 20 / 20 |
+| Durdur → düğme gitti (3) | 277 | 35 | 464 | 46 |
+| Koşunun sonunda en uzun görev (1) | 256 | 124 | 420 | 715* |
+| Öğretmen araması, tuş medyanı (3) | 80 | 72 | 90 | 106 |
+| Heap, MB | 17 | 19 | 19 | 21 |
+
+*6×'teki 715 ms koşunun sonunda değil, aramanın 31. saniyesinde (koşu 14,7 s'de bitti); tek
+koşu, sebebi ölçülmedi. Bırakmanın hedefi (≤100 ms, 4×) bu yükte tutmadı; kalan acil iş
+ızgaranın kendi yerleşim ve boyaması ile `buildRows` (tuzak 105, 117).
+
+**İki işçi (TODO).** `hardwareConcurrency` 2 → 1 işçi, 3 → 2 işçi, aynı derleme, 4×, 2 koşu:
+arama sonu 131 · 136 s ile 133 · 117 s, bulunan yol 4 · 5 ile 8 · 8, kare aralığı p95 19–20
+ikisinde. Değiştirilmedi: CDP yalnız ana iş parçacığını yavaşlatıyor ve bu Mac'in çekirdekleri
+kısılamıyor, yani iki işçi iki çekirdekte ölçülmedi; ölçüm iki gerçek çekirdekli bir makinede
+(ya da `--cpus=2` bir kapta) yapılmalı. İlerleme çubuğu hâlâ aile bitince ilerliyor: havuz
+aile içi ilerleme bildirmiyor, yeni bir bildirim aramaya dokunmak olurdu.
+
+**Boyut.** Ham `dist/index.html` 1 229 155 → 1 232 247 B, eşik 1 230 000 → 1 240 000 B
+(`.size-limit.json`); brotli 287,9 kB, eşik 292 000 değişmedi. `file://` açılışı, CPU 4×,
+babanın haftası depoda, 9 koşu medyanı (kirli): hazır 447 → 362 ms, ilk Program tıklaması
+cevaplanmış 570 → 524 ms (`olc-tepki.mjs`'in açılış bölümü).
+
+**Koşulanlar.** `npx tsc --noEmit -p .` 0, `npx eslint .` 0, prettier, `npm run hizli`,
+`npx vite build`, `npm run boyut`, E2E (aşağıda). Ölçüm betikleri denetimin betikleri
+(`olc-surukle`, `olc-tepki`, `olc-diz`, yeni `olc-baski`), oturumun geçici klasöründe kaldı.
 
 ## 2026-11-15 · Silmede soru yerine "Geri al" (`kullanim/geri-al`, TODO SD1)
 

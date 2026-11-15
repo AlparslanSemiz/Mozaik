@@ -35,6 +35,8 @@ release is incomplete, the entry says so.
 - Every list now shades every second row, the same way in every list and a little more visibly in both themes, so a row is easier to follow across the screen: the setup lists and summary tables, the picking list beside Availability and Lessons, the lessons in a teacher's or class's panel, and the preview when pasting from Excel. Grey secondary text is darker in the light theme and lighter in the dark theme, so it reads at least as well on a shaded row as it did before. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, and the split button in Lessons now looks like the boxes beside it.
 - The row under the mouse is outlined instead of changing colour, so its text never gets harder to read; the selected name in the picking list is written in the normal text colour on its highlight, and the open plan is marked on its row in Plans. The row handle, the colour box and the split button show the same keyboard focus ring as the other controls.
 
+- Mozaik answers faster on a slow computer. Dropping a card or undoing now shows the move on the grid at once and updates the tray, the counts and the status chip a moment later, instead of freezing for a quarter of a second. Opening Print shows the first pages at once and adds the rest while you look (printing still gets every page). Durdur stops a run at once; the end of an automatic run shows the week before the search for suggestions starts. Typing in the teacher and lesson search boxes no longer waits for the list.
+
 ### Fixed
 
 - In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.
