@@ -26,14 +26,20 @@ function whenVisible(find: () => HTMLElement | null, then: (el: HTMLElement | nu
   requestAnimationFrame(step);
 }
 
+/** The pending removal of the current mark. */
+let unmark = 0;
+
 /**
  * `data-reveal`, not a class: React owns `className` and rewrites it on the
  * next render of the row; an attribute it never set is left alone.
  */
 function mark(el: HTMLElement) {
+  // One mark at a time: a second "Göster" within the 2.4 s moves it.
+  for (const old of document.querySelectorAll('[data-reveal]')) old.removeAttribute('data-reveal');
   el.scrollIntoView({ block: 'center', inline: 'center' });
   el.setAttribute('data-reveal', '');
-  window.setTimeout(() => el.removeAttribute('data-reveal'), MARK_MS);
+  window.clearTimeout(unmark);
+  unmark = window.setTimeout(() => el.removeAttribute('data-reveal'), MARK_MS);
 }
 
 /**
