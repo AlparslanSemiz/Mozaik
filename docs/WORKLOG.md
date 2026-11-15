@@ -109,6 +109,12 @@ doğrulama CI'da, mutasyon haftalık. Belge kapısı yalnız yapıyı ölçüyor
 olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de koşar. Ağır
 komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
+**Dallar (2026-10-24).** Biten dal ve worktree'ler `npm run dal-temizle` ile gider (önce
+kuru koşu, `-- --uygula`; yalnız `origin/main`'e birleşmiş olanı, bundle, `arsiv/` etiketi
+ve `scratch/`'i `~/GitHub/Mozaikler/_arsiv/`'e aldıktan sonra). Silinen dalların uçları
+`~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24*.bundle`'da. `klasorleme`'den taşınacak
+testler TODO B7.38'de.
+
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 turları açık (DECISIONS 2026-10-24). `refactor/moduller` (2026-10-24, aşağıdaki girdiler) her
 kaynak dosyayı `src/<katman>/<alan>/`'a koydu; RF1, RF5, RF6, RF8, RF9 ve RF10 bitti, açık
@@ -1321,6 +1327,41 @@ dosyada uyarı veriyor (fikstürler, `styles.css`, JSON), onlar denetimin kapsam
 scripts/favicon.mjs`, `ci.yml`'in `prettier --check` komutu `index.html`'le, `npm run build`,
 `boyut` (`dist/index.html` 1 164 932 bayt, brotli 280,59 kB), `temel.spec.ts` 72 ve 77 `agir.sh` altında 4/4. **Koşulmayan.**
 `kontrol`, bütün E2E.
+
+## 2026-10-24 · Dal temizliği (`dal-temizlik`)
+
+**Envanter** (salt okunur, ayrıntısı `scratch/dal-temizlik/`'te). 25 yerel ve 30 uzak dal,
+14 worktree. Tetikleyiciler: `ci.yml` her dalın push'unda (`'**'`), site işi ve Pages yalnız
+`main`; `windows.yml` yalnız `main`; `surum.yml` `v*` etiketinde derler ve Release yayınlar,
+exe en son Release'in `surum.json`'ına bakar (`update.rs`). Başka adlı etiket ve dal silmek
+hiçbir şey tetiklemiyor. Yeni bir dal itmek bir CI koşusu başlatıyor, deploy ya da sürüm
+başlatmıyor (tuzak 155).
+
+**Betik.** `npm run dal-temizle`: `scripts/dal-temizle.mjs` (girdiler ve uygulama) ile
+`scripts/dal-plan.mjs` (saf kurallar, `src/dalPlan.test.ts` 13 test). Varsayılanı kuru koşu,
+`-- --uygula` uygular. Yalnız `origin/main`'in atası olan dal silinir. Korunan: `main`,
+`gh-pages`, workflow'da adı geçen dal, açık PR'ı olan dal, kirli worktree'deki dal, içinde bir
+sürecin durduğu worktree (`/proc/*/cwd`, açık oturum) ve komutun koştuğu worktree. Ayrık
+HEAD'li worktree yalnız listelenir. Silmeden önce doğrulanmış bir bundle, yerel `arsiv/<dal>`
+etiketleri ve kaldırılacak worktree'nin `scratch/`'i `_arsiv/<dal>/`'a (tuzak 154).
+
+**Temizlik.** 11 yerel ve 14 uzak dal silindi: birleşmiş olanların hepsi (`ispc`, `PC`,
+`ozellik/sade-ekran`, `rakip/asc-karar`, `refactor/storage`, `ruflo-oncesi`, `v0.6`-`v2.0`,
+`z-turu`) ve kullanıcının kararıyla `origin/klasorleme`. Uçları üç bundle'da, üçü de
+`git bundle verify`'dan geçiyor:
+
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24.bundle`: birleşmiş 24 uç
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-2.bundle`: son beş uzak uç (`v1.0-teslim`,
+  `v1.1-kurulum`, `v1.2-blok-dagilimi`, `v2.0-dil`, `z-turu`)
+- `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`: `origin/klasorleme` (`d202775`)
+
+Her ucun yerel bir `arsiv/` etiketi var (17), uzakta hiçbiri yok. Hiçbir worktree
+kaldırılmadı: birleşmiş dalı olan tek worktree (`zebra`) kirliydi. Duranlar: bugün açılan
+dallar ve `ruflo/kurulum` (çalışan oturumların), `test/gercek-ortam` (süren iş, TP7).
+`klasorleme`'nin testlerinden main'de karşılığı olmayanlar TODO B7.38'de.
+
+**Koşulan.** `npm run hizli`, `src/dalPlan.test.ts`, `src/docs.test.ts`, `tsc --noEmit`,
+eslint, knip, prettier.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

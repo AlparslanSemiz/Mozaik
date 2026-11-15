@@ -69,6 +69,8 @@ npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve te
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
+npm run dal-temizle        # biten dal ve worktree'lerin planı, hiçbir şey değiştirmeden
+npm run dal-temizle -- --uygula  # planı uygular: önce bundle ve arsiv/ etiketi, sonra siler
 scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kurar ya da günceller
 ```
 
@@ -183,6 +185,8 @@ scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGE
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
+scripts/dal-temizle.mjs      biten dal ve worktree'leri arşivleyip siler (kuru koşu varsayılan)
+scripts/dal-plan.mjs         dal-temizle'nin kararları: neyin silinip neyin korunduğu, saf
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop

@@ -1005,6 +1005,24 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       süre hâlâ iki kat oynuyor. Test değiştirilmedi. Sıradaki: birkaç gün daha ölç; en yavaşı
       %75'i geçerse senaryo küçük bir dünyaya iner ya da test `haftalik.yml`'e gider ve push'ta
       küçük bir ikizi koşar; `setTimeout` büyütülmez.
+- [ ] **B7.38 `klasorleme`'nin main'de karşılığı olmayan testlerini taşı (2026-10-24).**
+      Dal silindi. Kalıcı kaynağı bundle: `~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle`
+      (`d202775`); yerel `arsiv/klasorleme` etiketi yalnız bu checkout'ta. Geri almak için
+      (bundle dalı uzak izleme adıyla taşıyor):
+      `git fetch ~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle refs/remotes/origin/klasorleme:refs/heads/klasorleme`.
+      Testleri o dalda `swap`, `bar`, `rows` ve `pool` test dosyaları (`git ls-tree -r
+      klasorleme`); main'de karşılıkları
+      `src/constraints.test.ts` (takas), `src/programView.test.ts` ve `src/programScreen.test.tsx`.
+      Eksik olanlar:
+      - takas: kaynak blok sabitliyse takas yok (main yalnız sabit hedefi soruyor);
+      - takas: Uyar seviyesindeki bir kuralın uyarısı takas cümlesine ` · ` ile ekleniyor;
+      - takas: başarılı takas girdi state'i değiştirmiyor;
+      - takas: bilinmeyen sınıf ya da öğretmende blok adı `?` (`blockName`);
+      - alt satır: koşu sürüyor ama ilerleme henüz yoksa boştaki satıra düşüyor;
+      - alt satır: koşu sürerken eski bir sonuç olsa da ilerleme yazılıyor;
+      - ızgara: `continues` 1+1+1'de hiçbir hücrede yok, günün son saatinden ertesi güne geçmiyor;
+      - ızgara: dersi silinmiş (yetim) bir yerleşim sınıf ekseninde `?` ile çiziliyor, çökertmiyor;
+      - havuz: hiçbir branşa uymayan süzgeç boş tepsi veriyor, toplam aynı kalıyor.
 
 ---
 

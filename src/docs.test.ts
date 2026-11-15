@@ -302,9 +302,10 @@ const BARE_EXT = /\.(ts|tsx|js|mjs|cjs|json|md|css|rs|toml|yml|yaml|ps1|cmd|txt|
 
 /** Produced by a build, so absent from a clean checkout. `dist-exe` and
     `src-tauri/target` joined the list with `npm run exe:linux` (2026-09-24):
-    the Linux binary cargo writes and the copy the script puts beside it. */
+    the Linux binary cargo writes and the copy the script puts beside it.
+    `src-tauri/gen` (Tauri's schemas) joined with `dal-temizle`'s cache list. */
 const GENERATED_DIR =
-  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|test-results|playwright-report|node_modules|scratch)\//;
+  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|src-tauri\/gen|test-results|playwright-report|node_modules|scratch)\//;
 
 /**
  * Produced by the release workflow rather than held in the repository. The

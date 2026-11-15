@@ -265,6 +265,31 @@ bakılır, `prune` koşulmaz; sabit yol `git grep 'GitHub/Mozaik'` ile aranır.
 `src/linuxKur.test.ts` betiği sahte bir evde yeni yolla koşuyor, betiği eski yola döndüren
 mutasyon kırmızı.
 
+### 154 · `git worktree remove` yoksayılan dosyaları sormadan siler
+`--force` olmadan da: komut yalnız izlenen değişiklik ve izlenmeyen dosya varsa durur,
+`.gitignore`'daki her şey worktree'yle birlikte gider. Bu depoda o `scratch/` demek, yani
+ölçüm betikleri, raporlar ve bir işin bütün ara çıktısı (2026-10-24'te bir worktree'de 132 MB).
+Karşı önlem: `npm run dal-temizle` bir worktree'yi kaldırmadan önce yoksayılan her yolu,
+yeniden üretilen önbellekler (`node_modules`, `dist*`, `src-tauri/target`, `test-results`...)
+dışında, `~/GitHub/Mozaikler/_arsiv/<dal>/`'a taşır, sonra `git worktree remove`'u
+`--force`'suz verir. Elle kaldırırken de önce `git ls-files --others --ignored
+--exclude-standard --directory`'ye bakılır. `src/dalPlan.test.ts` `scratch/`'in önbellek
+sayılmadığını ölçüyor.
+
+### 155 · Hangi push neyi tetikler: dal CI'ı, `v*` etiketi babanın exe'sini
+Ölçüldü 2026-10-24, `.github/workflows/` okunarak. `ci.yml` `branches: ['**']` ile her dalın
+her push'unda koşar; yeni bir dal itmek bir CI koşusu başlatır, ama site işi
+yalnız `refs/heads/main`'de ve `github-pages` ortamı yalnız `main`'e açık, yani deploy yok.
+`windows.yml` yalnız `main`. `surum.yml` `tags: ['v*']` ile her `v` ile başlayan etikette
+derler ve Release yayınlar; `gh release create` onu "Latest" yapar ve exe en son
+Release'in `surum.json`'ına bakar (`update.rs`), yani babanın exe'si onu görür.
+`ci.yml` yalnız `branches` filtresi taşıdığı için etiket push'unda koşmaz. Başka adlı bir
+etiket hiçbir şey tetiklemez. Karşı önlem: arşiv etiketleri `arsiv/<dal>` adlı (desen `v*`
+`arsiv/v1.0-teslim`'i tutmaz), hafif (`--follow-tags` hafif etiketi itmez) ve hiç itilmez;
+`git push --tags` bu depoda verilmez. Bir dalın adı `v` ile başlıyorsa (`v1.0-teslim`)
+o adda bir etiket itilmez: `surum.yml` derler, numara `package.json`'la uyuşmadığı için
+yayın adımında durur, ama iki derleme boşa koşar.
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1432,7 +1457,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1447,6 +1472,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 153, yeni bir tuzak 154'ten devam eder. Test stratejisi
+büyük kullanılan numara 155, yeni bir tuzak 156'dan devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.
