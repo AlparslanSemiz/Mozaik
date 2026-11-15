@@ -27,7 +27,7 @@ import type { UpdateRun } from '../../platform/update';
 import { emptyState } from '../../pure/entities';
 import { activePlacements } from '../../pure/grid';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
-import { type PlanControls, T, useDialogs, useT } from '../common';
+import { GoButton, type PlanControls, T, useDialogs, useT, WRONG_FILE } from '../common';
 import { useLoadSample } from '../plans';
 import { useRef, useState } from 'react';
 import { Build, Changelog } from './About';
@@ -85,7 +85,12 @@ export default function Data({
   const loadSample = useLoadSample();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
-  const [note, setNote] = useState<{ bad: boolean; text: string } | null>(null);
+  const [note, setNote] = useState<{
+    bad: boolean;
+    text: string;
+    /** The refusal is "update first": the note carries the way there. */
+    update?: boolean;
+  } | null>(null);
 
   const report = storageReport(plans.library);
   const planCount = plans.library.plans.length;
@@ -147,16 +152,17 @@ export default function Data({
       // (TODO B7.35).
       const single = readPlanFile(text);
       const isPlan = 'state' in single || single.problem !== 'okunamadi';
+      const newer = version !== null && version !== BUNDLE_VERSION;
       setNote({
         bad: true,
-        text:
-          version !== null && version !== BUNDLE_VERSION
-            ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
-            : isPlan
-              ? t(
-                  'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
-                )
-              : `${t('Bu dosya okunamadı')}. ${t("Mozaik'in kaydettiği bir .json plan dosyası seçin.")}`,
+        update: newer,
+        text: newer
+          ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
+          : isPlan
+            ? t(
+                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+              )
+            : [t('Bu dosya okunamadı') + '.', ...WRONG_FILE.map((k) => t(k))].join(' '),
       });
       return;
     }
@@ -170,6 +176,7 @@ export default function Data({
     if (read.plans.length === 0) {
       setNote({
         bad: true,
+        update: yeni > 0,
         text:
           yeni > 0
             ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
@@ -230,6 +237,7 @@ export default function Data({
           : t('{acilan} plan açıldı.', { acilan: ok });
     setNote({
       bad: failed > 0 || unreadable > 0,
+      update: yeni > 0,
       text:
         yeni > 0
           ? `${opened} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
@@ -273,7 +281,10 @@ export default function Data({
       </div>
       {note !== null && (
         <p className={note.bad ? 'hint bad' : 'hint'} role="status">
-          {note.text}
+          {note.text}{' '}
+          {note.update === true && (
+            <GoButton to={{ tab: 'settings', section: 'about' }}>{t('Güncellemeye bak')}</GoButton>
+          )}
         </p>
       )}
     </div>

@@ -42,6 +42,25 @@ export function planSummary(d: State) {
   };
 }
 
+/**
+ * Whether opening a file in place of this plan can lose anything: no list, no
+ * closed hour, no card in any seçenek and no school name. "Dosyadan aç" asks
+ * before it replaces the open plan, and on a first run that question was a red
+ * dialog counting "0 öğretmen, 0 sınıf" — a warning about nothing.
+ */
+export function isEmptyPlan(d: State): boolean {
+  return (
+    d.rooms.length === 0 &&
+    d.teachers.length === 0 &&
+    d.classes.length === 0 &&
+    d.lessons.length === 0 &&
+    d.settings.subjects.length === 0 &&
+    d.settings.schoolName.trim() === '' &&
+    Object.keys(d.unavailable).length === 0 &&
+    d.programs.every((p) => Object.keys(p.placements).length === 0)
+  );
+}
+
 export interface DeletionQuestion {
   /** "MÇ (Mehmet Çelik) silinecek" — no full stop, no question mark. */
   title: string;

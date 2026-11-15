@@ -94,6 +94,7 @@ export { addTeachersFromRows, addClassesFromRows, addLessonsFromRows } from './r
 export { weeklyLoad, hourLabels, extraNames, duplicateShorts } from './counting';
 export {
   planSummary,
+  isEmptyPlan,
   deletionQuestion,
   deletionNotice,
   type EntityKind,

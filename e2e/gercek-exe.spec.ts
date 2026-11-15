@@ -99,6 +99,20 @@ const test = base.extend<{ exe: Exe }>({
   },
 });
 
+/**
+ * "Dosyadan aç" asks only when the open plan holds something (`isEmptyPlan`):
+ * a fresh profile opens the file at once. Either way the file ends up open.
+ */
+async function dosyaAcildi(exe: Exe): Promise<void> {
+  const durum = () =>
+    exe.oturum.js<string>(
+      `if (document.querySelector('.dlg')) return 'soru';
+       return (document.querySelector('.toasts')?.innerText ?? '').includes('Plan dosyası açıldı') ? 'acildi' : '';`,
+    );
+  await expect.poll(durum, { timeout: 10_000 }).not.toBe('');
+  if ((await durum()) === 'soru') await exe.oturum.tikla('.dlg-actions .btn:last-child');
+}
+
 /** The saved bundle's text, or '' while it has not been written yet. */
 function tumu(klasor: string): string {
   const dosya = join(klasor, 'ders-programi-tumu.json');
@@ -401,8 +415,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       girdi.files = dt.files;
       girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
     );
-    await exe.oturum.bekle('.dlg');
-    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await dosyaAcildi(exe);
     await exe.oturum.tikla('metin:Program');
     await exe.oturum.tikla('metin:Otomatik diz');
 
@@ -496,8 +509,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       girdi.files = dt.files;
       girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
     );
-    await exe.oturum.bekle('.dlg');
-    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await dosyaAcildi(exe);
     await expect
       .poll(() => exe.oturum.js<string>(`return document.querySelector('.topbar').innerText;`), {
         timeout: 5_000,
@@ -527,8 +539,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       girdi.files = dt.files;
       girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
     );
-    await exe.oturum.bekle('.dlg');
-    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await dosyaAcildi(exe);
     await exe.oturum.tikla('metin:Çıktı');
     await exe.oturum.tikla(`button[aria-label="${short} için e-postayı aç"]`);
 
@@ -580,8 +591,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       girdi.files = dt.files;
       girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
     );
-    await exe.oturum.bekle('.dlg');
-    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await dosyaAcildi(exe);
     await exe.oturum.tikla('metin:Ayarlar');
     await exe.oturum.tikla('metin:Görünüm');
     await exe.oturum.js(

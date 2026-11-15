@@ -111,7 +111,7 @@ test.describe('53. Durum çipi', () => {
     });
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.locator(`.entity[data-id="${id}"]`).click();
-    await page.getByRole('button', { name: 'Tümünü kapat' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
 
     await expect(chip).toHaveClass(/impossible/);
     await expect(chip).toContainText('kapalı saatte');

@@ -349,7 +349,7 @@ export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(state)),
   });
-  await answerDialog(page); // "şu anki programın yerine geçecek"
+  await openedWithoutQuestion(page);
 
   // ...and wait until the WORLD is in storage, not merely until something is.
   //
@@ -511,7 +511,7 @@ export async function openFixture(page: Page) {
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(FIXTURE)),
   });
-  await answerDialog(page);
+  await openedWithoutQuestion(page);
   await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
 }
 
@@ -613,6 +613,16 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  *
  * Returns what the dialog said, so a test that cares can check the counting.
  */
+/**
+ * "Dosyadan aç" into an EMPTY plan asks nothing (`isEmptyPlan`): there is
+ * nothing to lose, and a red question counting "0 öğretmen" was a warning
+ * about nothing. The file is open when its toast is up and no dialog is.
+ */
+export async function openedWithoutQuestion(page: Page) {
+  await expect(page.locator('.toasts')).toContainText('Plan dosyası açıldı.');
+  await expect(page.locator('.dlg')).toHaveCount(0);
+}
+
 export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): Promise<string> {
   const dlg = page.locator('.dlg');
   await expect(dlg).toBeVisible();

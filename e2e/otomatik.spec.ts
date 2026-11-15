@@ -101,7 +101,7 @@ test.describe('22. Otomatik dizme', () => {
     const first = page.locator('.entity').first();
     const id = (await first.getAttribute('data-id'))!;
     await chooseEntity(page, id);
-    await page.getByRole('button', { name: 'Tümünü kapat' }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await autoFill(page);

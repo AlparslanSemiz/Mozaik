@@ -21,6 +21,7 @@ import {
   deleteSubject,
   deleteTeacher,
   deletionQuestion,
+  isEmptyPlan,
   entityFacts,
   entityWeek,
   genderLabel,
@@ -555,6 +556,22 @@ describe('makeShort ve duplicateShorts', () => {
 
 // The sentence decides whether he presses Enter or Escape, so it must COUNT
 // what is lost, not guess at it.
+describe('isEmptyPlan', () => {
+  // "Dosyadan aç" skips its question on an empty plan, so every field that a
+  // replaced plan would take with it has to count as not-empty.
+  it('yeni plan boş, her liste ve ad onu dolu yapar', () => {
+    expect(isEmptyPlan(emptyState())).toBe(true);
+    expect(isEmptyPlan(addRoom(emptyState(), 'A'))).toBe(false);
+    expect(isEmptyPlan(addSubject(emptyState(), 'Fizik'))).toBe(false);
+    expect(isEmptyPlan(updateSettings(emptyState(), { schoolName: 'Kurs' }))).toBe(false);
+    const closed = emptyState();
+    expect(isEmptyPlan({ ...closed, unavailable: { 'x|0|0': 1 } })).toBe(false);
+    expect(isEmptyPlan({ ...closed, settings: { ...closed.settings, schoolName: '  ' } })).toBe(
+      true,
+    );
+  });
+});
+
 describe('deletionQuestion', () => {
   function loaded(): State {
     let d = emptyState();

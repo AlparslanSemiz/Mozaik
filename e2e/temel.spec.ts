@@ -17,6 +17,7 @@ import {
   dragAndDrop,
   mainList,
   answerDialog,
+  openedWithoutQuestion,
   savedText,
 } from './helpers';
 
@@ -107,7 +108,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v1)),
     });
-    await answerDialog(page); // "şu anki programın yerine geçecek"
+    await openedWithoutQuestion(page);
 
     // The teacher, the class and the placed 2-hour block all survived.
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -157,7 +158,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v2)),
     });
-    await answerDialog(page); // "şu anki programın yerine geçecek"
+    await openedWithoutQuestion(page);
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
@@ -230,7 +231,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v3)),
     });
-    await answerDialog(page); // "şu anki programın yerine geçecek"
+    await openedWithoutQuestion(page);
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
@@ -317,7 +318,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v4)),
     });
-    await answerDialog(page); // "şu anki programın yerine geçecek"
+    await openedWithoutQuestion(page);
 
     // The laid-out block survived the migration untouched.
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -363,7 +364,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       mimeType: 'application/json',
       buffer: readFileSync(resolve('src/fixtures/v16.json')),
     });
-    await answerDialog(page);
+    await openedWithoutQuestion(page);
 
     await openSetup(page, 'Öğretmenler');
     const kutu = page.getByRole('textbox', { name: 'MÇ e-postası' });
@@ -503,9 +504,30 @@ test.describe('29. Hata yolları', () => {
 
     // Read while it is on screen, then dismiss it: the dialog is the program's
     // own now, so the text is in the DOM rather than in a browser event.
-    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
+    const said = await answerDialog(page);
+    expect(said).toContain('Bu dosya okunamadı');
+    // What to pick instead, in the words of the button he saved it with.
+    expect(said).toContain("Bu, Mozaik'in kaydettiği bir dosya değil.");
+    expect(said).toContain('Dosyaya kaydet');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  // A first run that opens last term's file had a red question counting
+  // "Şu an: 0 öğretmen, 0 sınıf" — a warning about nothing.
+  test('boş plana dosya açmak soru sormuyor, ama dolu plana açmak soruyor', async ({ page }) => {
+    await open(page);
+    const file = {
+      name: 'ders-programi-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(FIXTURE)),
+    };
+    await page.locator('input[type=file]').setInputFiles(file);
+    await openedWithoutQuestion(page);
+    await expect.poll(() => savedText(page)).toContain('Mehmet Çelik');
+
+    await page.locator('input[type=file]').setInputFiles(file);
+    expect(await answerDialog(page, 'cancel')).toContain('Açık olan planın yerine geçecek');
   });
 
   // TB1: a file whose lesson list holds a null row threw out of the reader,
@@ -543,6 +565,14 @@ test.describe('29. Hata yolları', () => {
     expect(said).toContain('Bu dosya daha yeni bir sürümle yazılmış');
     expect(said).toContain("Mozaik'i güncelleyin");
     expect(said).not.toContain('okunamadı');
+    // The answer is a button: "Güncellemeye bak" opens Ayarlar → Hakkında.
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Ayarlar',
+    );
+    await expect(
+      page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
+    ).toContainText('Hakkında');
   });
 
   // DK11: a file with no teachers and no lessons at all used to be taken as a
@@ -605,7 +635,7 @@ test.describe('29. Hata yolları', () => {
     };
 
     await page.locator('input[type=file]').setInputFiles(file);
-    await answerDialog(page);
+    await openedWithoutQuestion(page);
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
 
     // The input clears its own value, so picking the same path fires again.

@@ -109,7 +109,7 @@ test.describe('49. Liste araçları', () => {
     // Bir öğretmeni bütünüyle kapatmak örnekteki uygun öğretmenlerin yanına
     // kesin bir “İmkânsız” sınır örneği koyar.
     await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
     await openSetup(page, 'Öğretmenler');
     await checkLoadFacet(page, await rows(page).count());
 

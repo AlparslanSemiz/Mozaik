@@ -236,7 +236,7 @@ export default function School({ state, change }: PanelProps) {
 
           <p className="hint">
             <T
-              k="Şu an **{gun} gün × {saat} saat** = {yer} hücre."
+              k="Şu an **{gun} gün × {saat} saat** = haftada {yer} saat."
               vars={{ gun: dayCount, saat: hourCount, yer: dayCount * hourCount }}
             />
             {dayCount === 0 && ` ${t('En az bir gün seçmelisiniz.')}`}

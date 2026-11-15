@@ -216,7 +216,7 @@ export function programStrip({
               onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
             >
               <Play {...ICON} />
-              {t('Otomatik diz ({n})', { n: pending })}
+              {t('Otomatik diz ({n} kart)', { n: pending })}
             </button>
             <button
               className="btn"
