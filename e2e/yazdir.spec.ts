@@ -543,20 +543,18 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     expect(pages, 'üç sınıf üç sayfa olmalı — arkalarında boş sayfa var').toBe(3);
   });
 
-  test('önizleme koyu temada da OKUNUYOR', async ({ page }) => {
-    // The sheet takes --paper, so on a dark screen it is a dark sheet — that is
-    // deliberate (the --print-line/--print-head-bg dark overrides exist for it)
-    // and `@media print` pins the paper values back so it cannot reach the
-    // printer. What must hold is that the grid line is still VISIBLE on it:
-    // a table rule is non-text, so 3:1 is its floor. Measured 2.02 before the
-    // theme was darkened, 3.01 after.
-    await openWithSample(page);
+  test('önizleme koyu temada da OKUNUYOR: kâğıt açık paletle çiziliyor', async ({ page }) => {
+    // LAYOUT: "Kâğıt fiziksel. Açık palet kullanır." The sheet used to take the
+    // dark --paper, and a card's ink (inherited --text) landed light grey on
+    // the pastel palette: 1.91:1 at the full course (2026-11-15). Now the
+    // sheet re-declares the light palette, so on a dark screen it is the same
+    // light sheet the printer gets. Measured on the SHEET, not on :root, and
+    // on a world with a placed lesson: the sample has none, so no card.
+    await loadWorld(page, PAPER_WORLD, 'Çıktı');
     await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
-    const ratio = await page.evaluate(() => {
-      const cs = getComputedStyle(document.documentElement);
+    const m = await page.evaluate(() => {
       const rgb = (v: string) =>
         (v.trim().startsWith('#')
           ? [1, 3, 5].map((i) => parseInt(v.trim().slice(i, i + 2), 16))
@@ -565,15 +563,42 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
         const s = c / 255;
         return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
       };
-      const lum = ([r, g, b]: number[]) =>
-        0.2126 * lin(r ?? 0) + 0.7152 * lin(g ?? 0) + 0.0722 * lin(b ?? 0);
-      const [a = 0, b = 0] = [
-        lum(rgb(cs.getPropertyValue('--print-line'))),
-        lum(rgb(cs.getPropertyValue('--paper'))),
-      ].sort((x, y) => y - x);
-      return (a + 0.05) / (b + 0.05);
+      const lum = (v: string) => {
+        const [r = 0, g = 0, b = 0] = rgb(v);
+        return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+      };
+      const ratio = (x: string, y: string) => {
+        const [a = 0, b = 0] = [lum(x), lum(y)].sort((p, q) => q - p);
+        return (a + 0.05) / (b + 0.05);
+      };
+      const sheet = document.querySelector('.print-sheet')!;
+      const cs = getComputedStyle(sheet);
+      // The worst card: the lowest ink/background ratio over every coloured cell.
+      let worst = Infinity;
+      let cards = 0;
+      for (const td of document.querySelectorAll<HTMLElement>('.print-page td[style]')) {
+        const top = td.querySelector('.p-top');
+        if (!top) continue;
+        cards++;
+        worst = Math.min(
+          worst,
+          ratio(getComputedStyle(top).color, getComputedStyle(td).backgroundColor),
+        );
+      }
+      return {
+        paper: lum(cs.backgroundColor),
+        line: ratio(
+          getComputedStyle(document.querySelector('.print-page td')!).borderTopColor,
+          cs.backgroundColor,
+        ),
+        worst,
+        cards,
+      };
     });
-    expect(ratio, `çizgi/kâğıt kontrastı ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+    expect(m.cards, 'önizlemede renkli kart yok, ölçülecek bir şey yok').toBeGreaterThan(0);
+    expect(m.paper, 'koyu temada kâğıt açık değil').toBeGreaterThan(0.9);
+    expect(m.line, `çizgi/kâğıt kontrastı ${m.line.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+    expect(m.worst, `en kötü kart kontrastı ${m.worst.toFixed(2)}`).toBeGreaterThanOrEqual(4.5);
   });
 });
 
