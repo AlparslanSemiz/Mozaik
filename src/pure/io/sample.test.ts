@@ -74,9 +74,13 @@ describe('sampleState — gerçek ölçek', () => {
   });
 });
 
+/** The greedy week, filled once for this file: both tests below read it. */
+let greedy: ReturnType<typeof greedyFill> | undefined;
+const filled = () => (greedy ??= greedyFill(sampleState()));
+
 describe('gerçek ölçekte doldurma', () => {
   it('açgözlü doldurma ders saatlerinin çoğunu yerleştirir ve hiç çakışma üretmez', () => {
-    const { state, placed, total } = greedyFill(sampleState());
+    const { state, placed, total } = filled();
 
     // The greedy strategy is not optimal; even 70% shows the engine is consistent.
     expect(placed / total).toBeGreaterThan(0.7);
@@ -111,31 +115,45 @@ describe('gerçek ölçekte doldurma', () => {
     }
   });
 
-  it('sürükleme başlangıcının gerçek dropMap hesabı boş ve dolu programda hızlı kalır', () => {
+  it('sürükleme başlangıcının gerçek dropMap hesabı dolu programda boştakinden pahalı değil', () => {
     const blank = sampleState();
-    const dense = greedyFill(sampleState()).state;
+    const dense = filled().state;
+    expect(Object.keys(activeProgram(dense).placements).length).toBeGreaterThan(400);
 
-    const median = (state: State) => {
-      const lessonId = state.lessons[0]!.id;
-      const ix = buildIndex(state);
-      const timings: number[] = [];
-      for (let round = 0; round < 15; round++) {
-        const started = performance.now();
-        const map = dropMap(state, ix, lessonId, 1);
-        timings.push(performance.now() - started);
-        expect(map.size).toBe(state.settings.days.length * state.settings.hours.length);
-      }
-      timings.sort((a, b) => a - b);
-      return timings[Math.floor(timings.length / 2)]!;
+    const run = (state: State, ix: ReturnType<typeof buildIndex>) => {
+      const started = performance.now();
+      const map = dropMap(state, ix, state.lessons[0]!.id, 1);
+      const ms = performance.now() - started;
+      expect(map.size).toBe(state.settings.days.length * state.settings.hours.length);
+      return ms;
     };
+    const blankIx = buildIndex(blank);
+    const denseIx = buildIndex(dense);
+    const blankMs: number[] = [];
+    const denseMs: number[] = [];
+    // Interleaved, so a burst of load from the rest of the machine lands on
+    // both halves alike.
+    for (let round = 0; round < 15; round++) {
+      blankMs.push(run(blank, blankIx));
+      denseMs.push(run(dense, denseIx));
+    }
+    const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)]!;
 
-    const blankMs = median(blank);
-    const denseMs = median(dense);
-
-    // Deliberately loose: this catches an accidental per-cell whole-week scan
-    // without turning normal CI scheduling noise into a failure.
-    expect(blankMs, `boş program medyanı ${blankMs.toFixed(2)} ms`).toBeLessThan(50);
-    expect(denseMs, `dolu program medyanı ${denseMs.toFixed(2)} ms`).toBeLessThan(50);
+    // What this guards against is a per-cell walk over the week: the old drop
+    // map rebuilt a block's whole week for every occupied cell. That costs
+    // nothing in an empty week and grows with every placed block in a full one, so the
+    // full week's median against the empty week's, measured side by side, is
+    // the signal; both were about 1 ms on 2026-11-16. A bound in milliseconds
+    // stood here until then (50 ms), and on a loaded machine the test timed
+    // out before it was ever reached, while the greedy fill above it ran a
+    // second time (pitfall 171, TESTPLAN TP15: a time threshold only under
+    // clean conditions). The 0.5 ms floor keeps timer granularity on the empty
+    // side from deciding.
+    const ratio = median(denseMs) / Math.max(median(blankMs), 0.5);
+    expect(
+      ratio,
+      `dolu/boş medyan ${median(denseMs).toFixed(2)} / ${median(blankMs).toFixed(2)} ms`,
+    ).toBeLessThan(4);
   });
 });
 import { activeProgram } from '../grid/programs';
