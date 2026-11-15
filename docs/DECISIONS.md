@@ -36,6 +36,43 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · 2.2.0'dan kuruluma: aynı sürümde öneri, bekleyici, eski dosya kalır (`guncelleme/windows-yolu`)
+
+**Karar.** Windows denetiminin bulguları (TRAPS 159–162), Alp'in verdiği işle. Baba 2.2.0'da,
+tek başına exe'de; bir sonraki sürüm ona kurulumu ve CP-SAT'ı güvenle getirmeli.
+
+- **Aynı sürümde geçiş.** 2.2.0 kurulum alanlarını tanımaz ve tek başına exe'yi takas eder;
+  o exe aynı numarayla sorduğu için 2026-11-15'in köprüsü kurulumu hiç önermezdi. Artık
+  kurulmamış bir kopya (`kurulu_mu` değil, yalnız Windows) aynı sürümün imzalı kurulumunu
+  `gecis` olarak görür; Hakkında "Mozaik'i bu bilgisayara kurun: öneri araması (CP-SAT) için
+  gerekli" der. Kurulu kopya aynı sürümde güncel kalır. Güncellemeden sonraki ilk açılışta
+  (`--guncellendi` ya da 2.2.0'ın bıraktığı `.eski`) şerit bir kez öneriyor; ağa yine yalnız
+  düğmeyle çıkılıyor.
+- **Bekleyici ve `/P`.** Kurulum `/S` yerine `/P /R` ile (ilerleme çubuğu; bir hata bir kutu),
+  ve program kurulumu kendisi değil, geçici klasöre kopyalanmış bir bekleyici
+  (`Mozaik-kurulum-bekleyici.exe`) çalıştırıyor: Tauri'nin kurulumu çalışan her `Mozaik.exe`'yi
+  kapatır, bekleyici o adı taşımadığı için kalır. Kurulum bitmezse eski kopyayı
+  `--kurulum-olmadi <kod>` ile açar, sayfa kodlu bir uyarı gösterir. **Seçenek:** yalnız `/P`
+  (bekleyicisiz) daha basitti ama başarısızlıkta programı kapalı bırakırdı.
+- **Eski dosya kalır, kurulan programı açar.** Kurulan program eski kopyayı silmiyor;
+  her açılışta yolunu `kurulu-yol.txt`'ye (profil klasöründe) yazıyor, ve tek başına kopya o
+  notu (yoksa `%LOCALAPPDATA%\Programs\Mozaik`'i) bulursa kurulan programı açıp çıkıyor.
+  Görev çubuğundaki ve masaüstündeki simge çalışmaya devam ediyor. **Seçenek:** silip yeni
+  kısayol açmak; sabitlenmiş simgeyi kırdığı için bırakıldı. **Bedel:** iki program dosyası
+  kalıyor (eskisi 4 MB) ve eskisi kaldırılana kadar bir yönlendirici.
+- **CP-SAT.** OR-Tools 9.15'in Windows DLL'leri AVX2 istemiyor: `ortools.dll`'in 4,5 milyon
+  komutundan 675'i VEX kodlu ve her biri MSVC'nin `__isa_available` denetiminin arkasında
+  (AVX-512 yolları da öyle); `highs.dll`'in AVX2 çekirdekleri de çalışma anında seçiliyor ve
+  CP-SAT onları çağırmıyor. CPUID kapısı eklenmedi. `CP_PROOF_SUBSOLVERS`'ta kanıtı veren
+  `max_lp_sym` ve `core` başa alındı (az işçide listenin sonu düşer), işçi en az 2, ve exe soru
+  sürerken kendi sürecini `BELOW_NORMAL`'a indiriyor (sayfa WebView2'nin süreçlerinde).
+  İki işçide ölçülmedi.
+- **CI.** `guncelleme-windows.yml` yayınlanmış v2.2.0'ı kendi düğmeleriyle koşuyor: adresi
+  derlenmiş olduğu için github.com runner'da hosts ve makinenin güvendiği bir sertifikayla
+  yerel sunucuya çevriliyor. Yeni `kurulum-windows.yml` kurulumu derleyip bekleyiciyle kuruyor,
+  CP-SAT'ı kurulan DLL'lerle koşuyor ve kaldırmanın veriyi bıraktığını ölçüyor; `yayinla`
+  ikisini de bekliyor. İkisi de henüz koşmadı.
+
 ### 2026-11-15 · Ders formunda saat Ekle'den sonra varsayılana döner (`kullanim/ilk-acilis`)
 
 **Karar.** Dersler'in ekleme formu Ekle'den sonra haftalık saati 4'e, dağılımı tek saatlere
@@ -107,11 +144,9 @@ tam o klasörü `RmDir /r` ile siliyordu; `src-tauri/nsis/kancalar.nsh` kutunun 
 kaldırma bölümünün başında sıfırlıyor ve `surum.yml` kancanın üretilen betikte olduğunu
 ölçmeden kurulumu yayına sokmuyor.
 
-**Köprü.** Manifeste iki isteğe bağlı alan girdi (`kurulum`, `kurulum_boyut`). Sahadaki
-2.2.0 onları tanımaz ve tek dosyayı takas etmeye devam eder; o yeni exe bir sonraki
-"Denetle"de kurulumu önerir, kurulumu `/S /R` ile çalıştırır ve kendi yolunu
-`eski-kopya.txt`'ye yazar; kurulan program açılışta o eski dosyayı siler
-(`update.rs`, `silinecek_eski`: yalnız kurulu bir program, yalnız başka bir `.exe`).
+**Köprü.** Manifeste isteğe bağlı kurulum alanları girdi (`kurulum`, `kurulum_boyut`,
+`kurulum_sha256`, `kurulum_imza`). Sahadaki 2.2.0 onları tanımaz ve tek dosyayı takas etmeye
+devam eder; o exe'nin kuruluma nasıl geçtiği 2026-11-16'da.
 
 **Klasör.** Tauri'nin varsayılanı `%LOCALAPPDATA%\Mozaik`, `Kur.cmd`'nin tarayıcı
 kurulumunun klasörü. Kanca yalnız varsayılanı `%LOCALAPPDATA%\Programs\Mozaik`'e çeviriyor.

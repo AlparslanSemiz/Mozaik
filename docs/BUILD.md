@@ -441,7 +441,7 @@ Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.
 Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu,
 sonra `exe-windows.yml` koşusu (yoksa `main`'de başlatılarak) bulunup sonuna kadar
 beklenir, dördüncü olarak güncelleme kapısı `guncelleme-windows.yml` da (aşağıda), her
-sürümde. Hepsi yeşilse etiket annotated atılır, adıyla itilir
+sürümde, beşinci olarak kurulum kapısı `kurulum-windows.yml` (2026-11-16). Hepsi yeşilse etiket annotated atılır, adıyla itilir
 ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi
 görünür: site güncellenir, üç indirme dosyası eski kalır. Biri kırmızıysa, iptal
 edildiyse ya da hiç görünmediyse etiket atılmadan durur. Site yalnız `ci.yml`'in
@@ -457,9 +457,9 @@ yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor
 worktree `main`'in commit'inde ayrık durabilir.
 
 `npm run yayinla -- --kuru` depoda hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`,
-`windows.yml`, `exe-windows.yml` ve `guncelleme-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. İki exe iş akışı her push'ta
+`windows.yml`, `exe-windows.yml`, `guncelleme-windows.yml` ve `kurulum-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. Üç exe iş akışı her push'ta
 koşmadığı için commit'in koşusu yoksa onu `main`'de başlatır (2026-10-10, güncelleme kapısı
-2026-10-24).
+2026-10-24, kurulum kapısı 2026-11-16).
 
 **Güncelleme kapısı (2026-10-24, `guncelleme-windows.yml`).** Babanın bugünkü exe'sinden bu
 commit'in exe'sine geçişin kendisi: son Release'in `Mozaik.exe`'si indirilir ve özeti
@@ -478,6 +478,23 @@ değerin depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hi�
 boyunun değişmediği ve günlük kopyaların silinmediği sorulur (`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
 push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
 bekler (kullanıcının kararı, 2026-10-24).
+
+İkinci evre babanın kendi yolu (2026-11-16, tuzak 162): yukarıdaki eski kopya bu commit'in
+kodu, 2.2.0'ınki değil. Yayınlanmış v2.2.0 (özeti sabit) `Ders-Programi.exe` adıyla açılır;
+manifest adresi içine derlenmiş olduğu için github.com runner'da geçici olarak bu makineye
+çevrilir (hosts dosyası ve makinenin güvendiği tek günlük bir sertifika, adım bitince ikisi de
+geri alınır), ve 2.2.0 kendi üç düğmesiyle bu commit'in exe'sine geçer. Yeni exe kurulum
+şeridini göstermeli, kendi denetimi aynı sürümün kurulumunu önermeli ve istemeli
+(`scripts/guncelleme-220.mjs`). Kurulumun imzası orada yok; kurulum yolu aşağıda.
+
+**Kurulum kapısı (2026-11-16, `kurulum-windows.yml`).** Kurulum `surum.yml`'deki gibi
+OR-Tools'la derlenir; tek başına bir test exe'si (güncelleme kökü yerel sunucuda, aynı numara)
+kendi düğmeleriyle aynı sürümün kurulumuna geçer, bekleyici kurulumu `/P /R` ile çalıştırır,
+kurulan program açılıp notunu yazar, beklenen dosyalar (CP-SAT'ın 9 DLL'i ve VC++) kurulum
+klasöründedir, eski dosya yerindedir ve yeniden açılınca kurulan programı açar
+(`scripts/kurulum-gecisi.mjs`). Sonra `cpsat.rs`'in küçük modeli kurulan `ortools.dll`'le
+cevap verir, ve kaldırıcı programı siler, Belgeler'deki yedeği ve profili bırakır. Kuruluma ve
+güncellemeye dokunan bir `main` push'unda ve elle koşar; `yayinla` bekler.
 
 **Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
 `e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
@@ -546,9 +563,16 @@ Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi 
 kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
-taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir ve `/S /R` ile
-çalıştırır; tek dosyalık bir kopya geçerken yolunu bir not dosyasına (`update.rs`, `ESKI_KOPYA_NOTU`) yazar ve kurulan
-program onu açılışta siler (`update.rs`).
+taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. Kurulmamış bir kopyaya
+kurulum aynı sürümde de önerilir (`gecis`, `windows_karari`; 2026-11-16): sahadaki 2.2.0 tek
+dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 159). Güncellemeden sonraki
+ilk açılışta şerit bunu bir kez söyler (`guncelleme_durumu`, ağsız). "Şimdi kur" kurulumu
+kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kurulum-bekleyici.exe`)
+programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
+ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 161). Eski dosya
+silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,
+ve tek başına kopya onu bulunca kurulan programı açıp çıkar (`kurulu_hedef`, tuzak 160).
+CP-SAT sorusu sürerken exe kendi sürecini `BELOW_NORMAL`'a indirir (`cpsat.rs`).
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
 sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:

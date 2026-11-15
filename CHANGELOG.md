@@ -33,6 +33,9 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- Windows app: a copy that is not installed (the single Mozaik.exe) is now offered the installer of its own version in Settings → About ("Install Mozaik on this computer": the suggestion search's CP-SAT comes only with it), and once in a strip right after it has been updated. The installer runs with a progress bar instead of silently, and if it does not finish Mozaik opens again with a message that gives the code. The old Mozaik.exe is no longer deleted: it opens the installed program, so desktop icons and taskbar pins keep working.
+- Windows app: the suggestion search runs at a lower priority while CP-SAT works, so the window stays usable on a two-core computer.
+
 - Opening a plan file into an empty plan no longer asks first, because nothing can be lost; opening it over a plan that holds something still asks.
 - After "Add" in Lessons the weekly hours go back to 4 and the split to single hours, so the last lesson's number is not reused by mistake.
 - Adding a teacher without a subject now says "Önce bir branş seçin" (choose a subject first) instead of greying out the button without a word.

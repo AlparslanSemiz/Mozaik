@@ -48,6 +48,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Dalda, birleşmedi: `erisim/geri-al` (`metin/tek-ad`'ın üstünde) SD1'in kalanını yapıyor: sınıf,
   derslik, branş, seçenek silme ve `Baştan diz` sormuyor, `Her şeyi sil` tek soru; bildirim 10 s
   ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
+- Dalda, birleşmedi: `guncelleme/windows-yolu` (`main`'den, `platform/mac`'le aynı `update.rs`
+  bölgelerine az dokunuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
+  2026-11-16, tuzak 159–162). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -64,7 +67,8 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
-   (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
+   (2.2.0 → yeni exe → kurulum, 2026-11-16'dan beri aynı sürümde önerilen), antivirüs/SmartScreen
+   davranışı; bekleyici exe'nin geçici klasörden çalışması bir tarayıcıya takılır mı.
 
 **Açık teknik işler (TODO):** capability daraltma ve
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
@@ -84,6 +88,30 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+
+## 2026-11-16 · 2.2.0'dan kuruluma giden Windows yolu (`guncelleme/windows-yolu`)
+
+Windows denetiminin altı bulgusu (DECISIONS 2026-11-16, tuzak 159–162). Commit'ler: `update.rs`
+ve `lib.rs` (aynı sürümde `gecis`, bekleyici ve `/P /R`, eski dosyanın kurulan programı açması,
+`guncelleme_durumu`), sayfa (Hakkında metinleri, şerit, dört sözlük), CP-SAT (alt çözücü sırası,
+en az iki işçi, `BELOW_NORMAL`), CI (`guncelleme-220.mjs`, `kurulum-windows.yml`, `yayinla`
+bekliyor), belgeler.
+
+**AVX2 (ölçüldü, bu Mac, `objdump -d`).** `surum.yml`'in sabitlediği arşiv indirildi, özeti tuttu
+(`43429c74…ea30`). `ortools.dll` 34,5 MB, 4 523 099 satır; VEX kodlu 675 komut (en çok
+`vmovdqu` 100, `vpblendvb` 43, `vpmullq` 32 AVX-512DQ), `%ymm` 413, FMA 0; bakılan yollar
+`cmpl $0x6, __isa_available` arkasında (MSVC'nin çalışma anı seçimi). Ötekiler: `highs` 5 834 VEX
+/ 4 578 ymm (HiGHS'ın kendi seçimli çekirdekleri, CP-SAT çağırmıyor), `abseil` 209, `libprotobuf`
+164, `libscip` 93, `re2` 25, `zlib1`/`bz2`/`libutf8_validity` 0. Sonuç: taban x86-64 (SSE2),
+AVX2 gerekmiyor, CPUID kapısı eklenmedi. DLL'in başlatıcıları ayrıca ayıklanmadı.
+
+**Koşulan.** `cargo test` 68/68 (bu Mac); `MOZAIK_ORTOOLS` Mac'teki `libortools.9.dylib`'le küçük
+model geçti; `cargo check --target x86_64-pc-windows-msvc --all-targets` uyarısız (llvm-rc yerine
+boş çıktı yazan bir taslakla; bağlama yok); `cargo clippy` yeni uyarı yok; `npm run tipler`,
+eslint, prettier, `kontrat`/`docs`/sözlük testleri yeşil; `npm run hizli` yük 41 iken iki koşuda 4 ve 7 testi süre aşımıyla düşürdü (`linuxKur`, `App`, `relax`, `sentences`, `programScreen`), beşi tek başına uzun süre sınırıyla 65/65; `actionlint` iki iş
+akışında temiz. **Koşulmayan:** iki Windows iş akışı (Windows makinesi yok, dal itilmedi),
+Playwright, iki işçide CP-SAT ölçümü (babanın verisi bu oturumda yok; örnek okulla ölçmek
+kanıt sorusunu cevaplamazdı).
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
 
