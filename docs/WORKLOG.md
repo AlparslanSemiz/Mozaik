@@ -102,6 +102,8 @@ yerde kırmızı, macOS'un üstte duran kaydırma çubuğu, bu dalın değil. Ko
 `gercek-exe` ve `guncelleme-exe` (exe derlemesi ister; metinleri güncellendi), Stryker,
 `kontrol`. Kilit yok (`flock` bu Mac'te yok), ölçümler kirli.
 
+---
+
 ## 2026-11-15 · Okunurluk turu (`erisim/gorsel`)
 
 Okunurluk denetiminin on bulgusu, yalnız `src/styles.css`, belgeler ve dokunduğu testler
