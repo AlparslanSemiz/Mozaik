@@ -56,6 +56,7 @@ describe('depo adları düz metne karşı', () => {
       'ders-programi-hareket',
       'ders-programi-havuz',
       'ders-programi-havuz-boy',
+      'ders-programi-ilk-adimlar',
       'ders-programi-kenar',
       'ders-programi-musaitlik-saat',
       'ders-programi-olcek',
