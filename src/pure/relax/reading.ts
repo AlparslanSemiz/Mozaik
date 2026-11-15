@@ -22,7 +22,6 @@ import {
 } from '../constraints';
 import { replaceActiveGrid } from '../grid';
 import type { Model } from './model';
-import type { Formula } from './sat';
 import type { Suggestion } from './options';
 
 // --------------------------------------------------------------- the reading
@@ -63,7 +62,7 @@ export function openedHours(base: State, grid: Readonly<Record<string, Id>>): Re
 }
 
 /** The closed teacher hours a model teaches, read off its literals. */
-export function openedOf(model: Model<Formula>): Relaxation[] {
+export function openedOf(model: Model): Relaxation[] {
   const out: Relaxation[] = [];
   for (const [key, o] of model.opened) {
     if (!model.sat.value(o)) continue;
