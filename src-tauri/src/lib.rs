@@ -23,6 +23,7 @@
 mod cpsat;
 mod mail;
 mod update;
+mod update_mac;
 
 use std::fs;
 use std::path::{Path, PathBuf};

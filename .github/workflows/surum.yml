@@ -14,6 +14,11 @@
 #   Mozaik-Windows-kurulum.zip   Kur.cmd + yerel sunucu
 #   Mozaik.exe                   kendi penceresi, Belgelerim'e yazar
 #
+# 2026-11-15'ten beri bir de Mac (DECISIONS, "Mac sürümü"), mimari başına iki
+# dosya: ilk kurulum için `Mozaik-mac-<mimari>.dmg`, kendini güncelleme için
+# `Mozaik-mac-<mimari>.app.tar.gz` (update_mac.rs). Apple imzası yok, yalnız
+# ad-hoc; güncellemeyi bizim minisign imzamız korur, Windows'takiyle aynı.
+#
 # ARTI BİR DÖRDÜNCÜ, ve o bir program değil bir CÜMLE: `surum.json`. Exe'nin
 # "yeni sürüm var mı" diye sorduğu tek yer burasıdır
 # (`src-tauri/src/update.rs`). `publish` işinde üretilir, çünkü içindeki
@@ -255,9 +260,123 @@ jobs:
           path: teslim/*
           if-no-files-found: error
 
-  # ------------------------------------------------------------- 3 · publish
+  # ----------------------------------------------------------------- 3 · mac
+  # Mozaik.app, iki mimari için ayrı (BUILD.md, "Mac"): OR-Tools her mimariye
+  # ayrı arşiv yayımlıyor ve 99 dylib'i `lipo` ile tek tek birleştirmek, her
+  # Mac'e iki kat büyük bir indirme demek. İkisi de Apple Silicon bir runner'da
+  # derlenir; x86_64 çapraz derleme, Rust'ın kendi hedefiyle.
+  #
+  # APPLE İMZASI BİR ANAHTAR: `APPLE_CERTIFICATE` sırrı tanımlıysa Tauri
+  # Developer ID ile imzalar (ve `APPLE_ID` üçlüsü de varsa notarize eder);
+  # tanımlı değilse ad-hoc imza (`signingIdentity: "-"`, tauri.macos.conf.json),
+  # ki Apple Silicon imzasız bir programı hiç çalıştırmaz. Bugün sır yok
+  # (DECISIONS 2026-11-15): ilk açılışta "Yine de Aç" gerekir (README.md, "Mac").
+  mac:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - mimari: arm64
+            hedef: aarch64-apple-darwin
+          - mimari: x86_64
+            hedef: x86_64-apple-darwin
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
+        with:
+          toolchain: stable
+          targets: ${{ matrix.hedef }}
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+          key: ${{ matrix.hedef }}
+
+      - run: npm ci
+      - run: npm run build
+
+      # OR-Tools'un resmi macOS arşivi, SHA-256'sı betikte sabit; .app'e
+      # `libortools.9.dylib`'in yüklediği dylib'lerin kapanışı girer.
+      - name: OR-Tools CP-SAT for the .app
+        run: scripts/ortools-mac.sh ${{ matrix.mimari }}
+
+      # Rust testleri ve CP-SAT'ın küçük modeli, yalnız runner'ın kendi
+      # mimarisinde (çapraz derlenen x86_64 burada koşamaz).
+      - name: cargo test, with the CP-SAT tiny model
+        if: matrix.mimari == 'arm64'
+        run: |
+          MOZAIK_ORTOOLS="$PWD/src-tauri/ortools/libortools.9.dylib" \
+            cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Build Mozaik.app and the .dmg
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          # Boş bir sır yine de tanımlı bir değişkendir ve Tauri onu dener:
+          # sır yoksa değişken hiç yok.
+          if [ -n "$APPLE_CERTIFICATE" ]; then
+            echo "Developer ID ile imzalanıyor"
+            # Notarize için sertleştirilmiş çalışma zamanı şart.
+            node -e '
+              const fs = require("fs"), y = "src-tauri/tauri.ortools.json";
+              const c = JSON.parse(fs.readFileSync(y, "utf8"));
+              c.bundle.macOS.hardenedRuntime = true;
+              fs.writeFileSync(y, JSON.stringify(c, null, 2));'
+            [ -n "$APPLE_ID" ] || unset APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+          else
+            echo "Apple imzası yok: ad-hoc"
+            unset APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
+              APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+          fi
+          npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json --target ${{ matrix.hedef }}
+
+      # Paket ne taşıyor: imza bütün mü, CP-SAT ve lisans içeride mi, en düşük
+      # macOS 11 mi, Belgeler izninin cümlesi Info.plist'te mi. Biri eksikse
+      # program yine açılır ama yavaş yoldan ya da sessizce kayıtsız, ve bunu
+      # kimse fark etmez.
+      - name: Is the .app whole
+        run: |
+          set -euo pipefail
+          kok="src-tauri/target/${{ matrix.hedef }}/release/bundle"
+          app="$kok/macos/Mozaik.app"
+          test -d "$app" || { echo "Mozaik.app üretilmedi" >&2; ls -R "$kok" | head -50; exit 1; }
+          codesign --verify --deep --strict --verbose=2 "$app"
+          test -f "$app/Contents/Frameworks/libortools.9.dylib"
+          test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
+          [ "$(ls "$app/Contents/Frameworks" | wc -l | tr -d ' ')" = "$(ls src-tauri/ortools/*.dylib | wc -l | tr -d ' ')" ]
+          [ "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = "11.0" ]
+          /usr/libexec/PlistBuddy -c 'Print :NSDocumentsFolderUsageDescription' "$app/Contents/Info.plist"
+          program="$app/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Contents/Info.plist")"
+          lipo -archs "$program" | grep -qx "${{ matrix.mimari }}"
+          mkdir -p teslim
+          # Arşivin içinde tek bir `Mozaik.app` (update_mac.rs, ARSIVDEKI_AD);
+          # Finder'ın `._` dosyaları girmesin.
+          COPYFILE_DISABLE=1 tar -C "$kok/macos" -czf "teslim/Mozaik-mac-${{ matrix.mimari }}.app.tar.gz" Mozaik.app
+          dmg=$(ls "$kok"/dmg/*.dmg | head -1)
+          cp "$dmg" "teslim/Mozaik-mac-${{ matrix.mimari }}.dmg"
+          ls -l teslim
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mac-${{ matrix.mimari }}
+          path: teslim/*
+          if-no-files-found: error
+
+  # ------------------------------------------------------------- 4 · publish
   publish:
-    needs: [package, exe]
+    needs: [package, exe, mac]
     permissions:
       contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
@@ -271,7 +390,9 @@ jobs:
         run: |
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
-          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe; do
+          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe \
+                   Mozaik-mac-arm64.app.tar.gz Mozaik-mac-arm64.dmg \
+                   Mozaik-mac-x86_64.app.tar.gz Mozaik-mac-x86_64.dmg; do
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
 
@@ -297,7 +418,7 @@ jobs:
       # söylüyor. Anahtarın gizli yarısı depo sırrı MOZAIK_IMZA_ANAHTARI, açık
       # yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
       # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
-      - name: Sign the two programs
+      - name: Sign the programs
         env:
           ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
         run: |
@@ -313,6 +434,12 @@ jobs:
             -t "mozaik $surum Mozaik.exe"
           minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
             -t "mozaik $surum Mozaik-Kurulum.exe"
+          # Mac'in güncelleme arşivleri, aynı anahtar ve aynı biçimde yorum
+          # (update_mac.rs). .dmg'ler elle kurulur, program onları indirmez.
+          for m in arm64 x86_64; do
+            minisign -S -s "$gizli/anahtar" -m "teslim/Mozaik-mac-$m.app.tar.gz" -x "imza-mac-$m.minisig" \
+              -t "mozaik $surum Mozaik-mac-$m.app.tar.gz"
+          done
           rm -rf "$gizli"
 
       - name: Build surum.json
@@ -352,6 +479,16 @@ jobs:
           # Kurulum aynı önekte. Eski kopyalar bu iki alanı tanımaz ve
           # yukarıdaki tek dosyayı indirmeye devam eder (köprü, update.rs).
           kurulum="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Kurulum.exe"
+          # Mac arşivleri de aynı önekte; her Mac yalnız kendi mimarisininkini
+          # alır (update.rs, `mac_karari`). Eski Windows kopyaları bu alanları
+          # tanımaz ve atlar (kontrat.test.ts, OPTIONAL).
+          mac_kok="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download"
+          for m in arm64 x86_64; do
+            f="teslim/Mozaik-mac-$m.app.tar.gz"
+            export "MAC_${m}_ADRES=$mac_kok/Mozaik-mac-$m.app.tar.gz"
+            export "MAC_${m}_BOYUT=$(stat -c%s "$f")"
+            export "MAC_${m}_OZET=$(sha256sum "$f" | cut -d' ' -f1)"
+          done
           node -e "
             const fs = require('fs');
             fs.writeFileSync('teslim/surum.json', JSON.stringify({
@@ -365,6 +502,14 @@ jobs:
               kurulum_sha256: process.argv[7],
               imza: fs.readFileSync('imza-exe.minisig', 'utf8'),
               kurulum_imza: fs.readFileSync('imza-kurulum.minisig', 'utf8'),
+              mac_arm64: process.env.MAC_arm64_ADRES,
+              mac_arm64_boyut: Number(process.env.MAC_arm64_BOYUT),
+              mac_arm64_sha256: process.env.MAC_arm64_OZET,
+              mac_arm64_imza: fs.readFileSync('imza-mac-arm64.minisig', 'utf8'),
+              mac_x86_64: process.env.MAC_x86_64_ADRES,
+              mac_x86_64_boyut: Number(process.env.MAC_x86_64_BOYUT),
+              mac_x86_64_sha256: process.env.MAC_x86_64_OZET,
+              mac_x86_64_imza: fs.readFileSync('imza-mac-x86_64.minisig', 'utf8'),
             }, null, 2) + '\n');
           " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
@@ -379,7 +524,10 @@ jobs:
         run: |
           set -o pipefail
           cd teslim
-          sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe surum.json > SHA256SUMS.txt
+          sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe \
+            Mozaik-mac-arm64.app.tar.gz Mozaik-mac-arm64.dmg \
+            Mozaik-mac-x86_64.app.tar.gz Mozaik-mac-x86_64.dmg \
+            surum.json > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       # WHAT IS NEW, on the Release page itself: the Turkish lines Ayarlar →
@@ -415,5 +563,9 @@ jobs:
             teslim/Mozaik-Windows-kurulum.zip \
             teslim/Mozaik.exe \
             teslim/Mozaik-Kurulum.exe \
+            teslim/Mozaik-mac-arm64.app.tar.gz \
+            teslim/Mozaik-mac-arm64.dmg \
+            teslim/Mozaik-mac-x86_64.app.tar.gz \
+            teslim/Mozaik-mac-x86_64.dmg \
             teslim/surum.json \
             teslim/SHA256SUMS.txt
