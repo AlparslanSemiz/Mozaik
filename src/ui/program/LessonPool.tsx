@@ -65,7 +65,7 @@ const SORTS: Array<{ id: PoolSort; label: string }> = [
   { id: 'row', label: 'Izgara sırası' },
   { id: 'name', label: 'Ada göre' },
   { id: 'subject', label: 'Branşa göre' },
-  { id: 'size', label: 'Uzun bloklar önce' },
+  { id: 'size', label: 'Uzun kartlar önce' },
   { id: 'left', label: 'En çok kalan' },
 ];
 
@@ -298,7 +298,7 @@ function LessonPool({
       // sentence saying so) and gives the height back to the grid. A 176px
       // tray of nothing is 176px that was carrying five teachers.
       className={open && cards.length > 0 ? 'pool' : 'pool pool-closed'}
-      aria-label={t('Yerleşmeyi bekleyen dersler')}
+      aria-label={t('Yerleşmeyi bekleyen kartlar')}
     >
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
@@ -350,13 +350,13 @@ function LessonPool({
             <>
               {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
                   calling them two lessons would not add up against Kurulum. */}
-              <strong>{t('{n} blok bekliyor', { n: cards.length })}</strong>
+              <strong>{t('{n} kart bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
                 {/* Narrowed, the head says so with the number it is hiding.
                     A tray that quietly shows a twelfth of what is left would
                     make "hepsi yerleşti" a lie one click away. */}
                 {narrowed
-                  ? t('{n} blok süzgeç dışında · sürükleyip bırakın', {
+                  ? t('{n} kart süzgeç dışında · sürükleyip bırakın', {
                       n: total - cards.length,
                     })
                   : t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
@@ -458,7 +458,7 @@ function LessonPool({
                             c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
                           }
                           title={
-                            t('{ust} · {alt} {brans} · {boy} saatlik blok', {
+                            t('{ust} · {alt} {brans} · {boy} saatlik kart', {
                               ust: c.top,
                               alt: c.bottom,
                               brans: c.subject,

@@ -250,11 +250,11 @@ export function suggestionSentence(d: State, s: Suggestion): string {
     }
   }
   if (s.accepted.length > 0) {
-    return t('Olur dediklerinize ek olarak {kosullar} hafta kuruluyor.', {
+    return t('Olur dediklerinize ek olarak {kosullar} program kuruluyor.', {
       kosullar: joined(clauses),
     });
   }
-  return t('{kosullar} hafta kuruluyor.', { kosullar: joined(clauses) });
+  return t('{kosullar} program kuruluyor.', { kosullar: joined(clauses) });
 }
 
 /** A refusal as the reader sees it in the "Olmaz dediğiniz" line. */

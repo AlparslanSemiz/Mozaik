@@ -360,8 +360,8 @@ test.describe('2. Sürükle-bırak', () => {
     // block is this" on screen is now the width (`[data-size='2']` is twice
     // `[data-size='1']`, asserted below) and the tooltip, which is where a
     // number the eye does not need but a reader might still lives.
-    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik blok/);
-    await expect(singles.first()).toHaveAttribute('title', /1 saatlik blok/);
+    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik kart/);
+    await expect(singles.first()).toHaveAttribute('title', /1 saatlik kart/);
     const widths = await page.evaluate(() => {
       const one = document.querySelector('.pool-card[data-size="1"]')!;
       const two = document.querySelector('.pool-card[data-size="2"]')!;
@@ -1180,7 +1180,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
     const before = await blocks();
     expect(before).toBeGreaterThan(10);
-    await expect(page.locator('.pool-count strong')).toContainText(`${before} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${before} kart`);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
@@ -1258,8 +1258,8 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // A tray that quietly showed a twelfth of what is left would make the head
     // count a lie, so the head says what it holds AND what it holds back, and
     // the two add up to the whole tray. The number held back was never checked.
-    await expect(page.locator('.pool-count strong')).toContainText(`${shown} blok`);
-    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} blok süzgeç dışında`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${shown} kart`);
+    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} kart süzgeç dışında`);
 
     await filter.selectOption('');
     await expect.poll(blocks).toBe(all);
@@ -1323,7 +1323,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     const blocks = piles.reduce((n, p) => n + p.count, 0);
     expect(piles.length, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
     expect(piles.length, 'hiçbir blok desteye girmemiş').toBeLessThan(blocks);
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} kart`);
     await expect(page.locator('.pool-card')).toHaveCount(piles.length);
 
     for (const p of piles) {
@@ -1373,7 +1373,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       ),
     });
     await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} kart`);
   });
 
   // THE TRAY OPENS INTO THE ROOM THE GRID IS NOT USING, AND SAYS WHEN THERE IS
@@ -1755,7 +1755,7 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
         has: page.locator('.pool-card:not([aria-hidden])', { hasText: 'MÇ' }),
       }),
     ).toHaveCount(1);
-    // .last(): "Yedek yüklendi" from loadWorld is still on screen.
+    // .last(): "Plan dosyası açıldı" from loadWorld is still on screen.
     await expect(page.locator('.toast').last()).toContainText('510 · MÇ dersi havuza döndü');
   });
 
@@ -1818,12 +1818,12 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await page.waitForTimeout(150);
     await hover(page, 0, 2);
     await expect(page.locator('.reason-bar')).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirecek',
+      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirecek',
     );
     await page.mouse.up();
 
     await expect(page.locator('.toast').last()).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirdi',
+      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirdi',
     );
     // The 2-hour block is one cell two columns wide.
     await expect(cell(2)).toContainText('510');
@@ -2262,21 +2262,21 @@ test.describe('86. Sabitleme', () => {
     const cards = page.locator('table.grid .card');
     await expect(cards).toHaveCount(1);
 
-    const programs = page.getByTitle('Program seç ve yönet');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
     await programs.click();
-    await page.locator('.menu').getByRole('menuitem', { name: 'Kopyasını kaydet' }).click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
     await answerDialog(page);
-    await expect(programs).toContainText('Program 2');
+    await expect(programs).toContainText('Seçenek 2');
 
     await cards.first().focus();
     await page.keyboard.press('Delete');
     await expect(cards).toHaveCount(0);
 
     await programs.click();
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Program 1' }).click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
     await expect(cards).toHaveCount(1);
     await programs.click();
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Program 2' }).click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 2' }).click();
     await expect(cards).toHaveCount(0);
   });
 

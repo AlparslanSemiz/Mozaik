@@ -1360,7 +1360,7 @@ describe('yerleşmiş blokların atomik takası', () => {
     const result = swapAt(d, ref('a', 's510', 0, 0, 2), 0, 2);
 
     expect(result.verdict.action.kind).toBe('swap');
-    expect(result.verdict.warning).toBe('510 · MÇ ile 511 · MÇ (2 blok) yer değiştirecek');
+    expect(result.verdict.warning).toBe('510 · MÇ ile 511 · MÇ (2 kart) yer değiştirecek');
     const after = activeProgram(result.state).placements;
     expect(after[placementKey('s510', 0, 2)]).toBe('a');
     expect(after[placementKey('s510', 0, 3)]).toBe('a');

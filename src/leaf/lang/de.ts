@@ -27,7 +27,7 @@ const DE: Sozluk = {
   "Takas olmaz, {ne} eski yerine geçemiyor: {sebep}":
     "Kein Tausch, {ne} kann nicht an die alte Stelle: {sebep}",
   "{bir} ile {iki} yer değiştirdi": "{bir} und {iki} wurden getauscht",
-  "{ad} ({n} blok)": "{ad} ({n} {n:Block|Blöcke})",
+  "{ad} ({n} kart)": "{ad} ({n} {n:Karte|Karten})",
   // -------------------------------------------- the week and the subjects
   //
   // DATA drawn, never data stored: `settings.days[].name` and
@@ -67,9 +67,9 @@ const DE: Sozluk = {
 
   // src/App.tsx
   "Dosyaya kaydet": "In Datei speichern",
-  "yedek al": "Sicherung anlegen",
-  "Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.":
-    "Sicherung in eine Datei geschrieben. Sehen Sie im Ordner „Downloads“ nach.",
+  "plan dosyası": "Plandatei",
+  "Plan dosyaya yazıldı. İndirilenler klasörüne bakın.":
+    "Plan in eine Datei geschrieben. Schauen Sie im Ordner Downloads nach.",
   "Otomatik diz": "Automatisch legen",
   Program: "Stundenplan",
   "Açık temaya geç": "Zum hellen Design wechseln",
@@ -91,28 +91,28 @@ const DE: Sozluk = {
     "Der gespeicherte Text dieses Plans konnte nicht gelesen werden; wird der Plan gelöscht, ist auch dieser Text weg. Das lässt sich nicht rückgängig machen.",
   "Bu taslak okunamadı": "Dieser Entwurf konnte nicht gelesen werden",
   "Bu dosya okunamadı": "Diese Datei konnte nicht gelesen werden",
-  'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
+  "Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki \"Tümünü dosyadan aç\" düğmesini kullanın.":
     "Sie ersetzt nicht einen einzelnen Plan, sondern alle Pläne auf diesem Computer. Verwenden Sie „Alle aus Datei öffnen“ unter Einstellungen → Pläne und Sicherung.",
-  "Programı güncelleyin, sonra tekrar deneyin.":
-    "Aktualisieren Sie das Programm und versuchen Sie es erneut.",
-  "Program tarafından indirilmiş bir .json yedek dosyası seçin.":
-    "Wählen Sie eine von diesem Programm heruntergeladene .json-Sicherungsdatei.",
-  "Şu anki programın yerine geçecek": "Es ersetzt den aktuellen Stundenplan",
+  "Mozaik'i güncelleyin, sonra tekrar deneyin.":
+    "Aktualisieren Sie Mozaik und versuchen Sie es erneut.",
+  "Mozaik'in kaydettiği bir .json plan dosyası seçin.":
+    "Wählen Sie eine von Mozaik gespeicherte .json-Plandatei.",
+  "Açık olan planın yerine geçecek": "Sie ersetzt den geöffneten Plan",
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
     "Der Plan auf dem Bildschirm wird durch den aus der Datei ersetzt und der Rückgängig-Verlauf geleert. Wählen Sie vorher „In Datei speichern“, falls Sie es sich anders überlegen könnten.",
-  "Yedeği yükle": "Sicherung laden",
+  "Planı aç": "Plan öffnen",
   "Bu dosya eksik":
     "Diese Datei ist unvollständig",
-  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.":
-    "Der Datei fehlt die Liste der Lehrkräfte, Klassen, Stunden oder Räume; sie wurde vielleicht gekürzt oder von Hand bearbeitet. Wählen Sie eine .json-Sicherung, die das Programm heruntergeladen hat.",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Mozaik'in kaydettiği bir .json plan dosyası seçin.":
+    "Der Datei fehlt die Liste der Lehrkräfte, Klassen, Fächer oder Räume; sie wurde vielleicht gekürzt oder von Hand bearbeitet. Wählen Sie eine von Mozaik gespeicherte .json-Plandatei.",
   "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
     "In der Datei: {ogretmen} {ogretmen:Lehrkraft|Lehrkräfte}, {sinif} {sinif:Klasse|Klassen}, {ders} {ders:Fach|Fächer}, {saat} gelegte {saat:Stunde|Stunden}.",
   "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
     "Jetzt: {ogretmen} {ogretmen:Lehrkraft|Lehrkräfte}, {sinif} {sinif:Klasse|Klassen}, {ders} {ders:Fach|Fächer}, {saat} gelegte {saat:Stunde|Stunden}.",
-  "Yedek yüklendi.": "Sicherung geladen.",
+  "Plan dosyası açıldı.": "Plandatei geöffnet.",
   Bölümler: "Bereiche",
   "Programın durumu: {durum}. Ayrıntı için Kontrol.":
-    "Status des Plans: {durum}. Einzelheiten unter Prüfung.",
+    "Status des Stundenplans: {durum}. Einzelheiten unter Prüfung.",
   "{durum}. Kontrol sekmesini açar": "{durum}. Öffnet den Reiter Prüfung",
   Plan: "Plan",
   "Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek":
@@ -121,8 +121,8 @@ const DE: Sozluk = {
   "Geri al (Ctrl+Z)": "Rückgängig (Strg+Z)",
   "İleri al": "Wiederholen",
   "İleri al (Ctrl+Y)": "Wiederholen (Strg+Y)",
-  "Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.":
-    "Schreibt den Stundenplan in eine .json-Datei. Das Programm speichert auf diesem Computer ohnehin selbst; die Datei dient zum Übertragen und Aufbewahren.",
+  "Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.":
+    "Schreibt den geöffneten Plan in eine .json-Plandatei. Mozaik speichert auf diesem Computer ohnehin selbst; die Datei dient zum Übertragen und Aufbewahren.",
   "Daha önce kaydedilmiş bir .json dosyasını açar":
     "Öffnet eine zuvor gespeicherte .json-Datei",
   "Dosyadan aç": "Aus Datei öffnen",
@@ -136,8 +136,8 @@ const DE: Sozluk = {
   "Bir sekmeye git": "Zu einem Bereich springen",
   "Bu ekranı aç": "Dieses Fenster öffnen",
   "İptal et veya kapat": "Abbrechen oder schließen",
-  "Odaklı dersi havuza kaldır":
-    "Fokussierte Unterrichtsstunde in den Pool zurücklegen",
+  "Odaklı kartı havuza kaldır":
+    "Fokussierte Karte in den Pool zurücklegen",
   "Odaklı kartın sağ tık menüsünü aç":
     "Kontextmenü der fokussierten Karte öffnen",
   Listeler: "Listen",
@@ -164,10 +164,10 @@ const DE: Sozluk = {
     "**Der gespeicherte Plan konnte beim Start nicht gelesen werden.** Er wurde nicht überschrieben.",
   "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
     "**Der gespeicherte Plan wurde von einer neueren Version geschrieben.** Diese Version kann ihn nicht öffnen und überschreibt ihn nicht; was Sie hier tun, wird nicht gespeichert.",
-  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
-    "**Der gespeicherte Plan konnte nicht gelesen werden.** Er wurde nicht überschrieben; was Sie hier tun, wird nicht gespeichert. Ihre Sicherungsdatei öffnen Sie mit **Aus Datei öffnen**.",
-  "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
-    "**Das automatische Speichern funktioniert auf diesem Computer nicht.** Alles geht verloren, wenn das Programm geschlossen wird. Drücken Sie beim Arbeiten häufig **In Datei speichern** und legen Sie vor dem Herunterfahren unbedingt eine Sicherung an.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Plan dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**Der gespeicherte Plan konnte nicht gelesen werden.** Er wurde nicht überschrieben; was Sie hier tun, wird nicht gespeichert. Ihre Plandatei öffnen Sie mit **Aus Datei öffnen**.",
+  "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Mozaik kapanınca yaptığınız her şey kaybolur. Çalışırken ve bilgisayarı kapatmadan önce sık sık **Dosyaya kaydet** düğmesine basın.":
+    "**Das automatische Speichern funktioniert auf diesem Computer nicht.** Alles geht verloren, wenn Mozaik geschlossen wird. Drücken Sie beim Arbeiten und vor dem Herunterfahren häufig **In Datei speichern**.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
     "**Eine neue Version ist bereit.** Sie verwenden {surum}; die neue kommt, wenn Sie **Neu laden** drücken. Ihre Arbeit geht nicht verloren.",
   "**{klasor}** klasörüne yazılamıyor: tarayıcı izni sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor.":
@@ -181,37 +181,39 @@ const DE: Sozluk = {
   "Müsait olmayan saatler": "Nicht verfügbare Stunden",
   "Önce {ne} ekleyin.": "Fügen Sie zuerst {ne} hinzu.",
   "{kim} · müsait olmayan saatler": "{kim} · nicht verfügbare Stunden",
-  "Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına tıklayınca haftanın o saati değişir.":
+  "Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki saat numarasına tıklayınca haftanın o saati değişir.":
     "Halten und ziehen Sie, um mehrere Zellen zu markieren. Ein Klick auf den Tagesnamen links schaltet den ganzen Tag um, ein Klick auf die Stundennummer oben diese Stunde in der ganzen Woche.",
   "Haftanın bu saatini değiştir": "Diese Stunde der Woche umschalten",
   "{gun}: bütün günü değiştir": "{gun}: den ganzen Tag umschalten",
   "Haftanın darlığı": "Wie eng die Woche ist",
-  "{gun} {ders}. ders: {kapali} / {toplam} kapalı":
+  "{gun} {ders}. saat: {kapali} / {toplam} kapalı":
     "{gun}, {ders}. Stunde: {kapali} von {toplam} geschlossen",
   "Kimin saatleri": "Wessen Stunden",
   "Müsaitlik listesi": "Verfügbarkeitsliste",
   "Tümünü aç": "Alle öffnen",
   "Tümünü kapat": "Alle schließen",
   "{n} saat fazla, bu program dizilemez.":
-    "{n} {n:Stunde|Stunden} zu viel; dieser Plan lässt sich nicht legen.",
+    "{n} {n:Stunde|Stunden} zu viel; dieser Stundenplan lässt sich nicht legen.",
   ", {n} tanesi {kim} üzerinde": ", {n} davon bei {kim}",
   "Müsaitlik girebilmek için **Okul** sekmesinden en az bir {ne} eklemeniz gerekiyor.":
     "Um Verfügbarkeiten einzutragen, brauchen Sie mindestens {ne} aus dem Reiter **Schule**.",
   "**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş.":
     "**{kim}**: {acik} Stunden offen, {yuk} Stunden Unterricht zugewiesen.",
+  "**{kim}**: {acik} saat müsait, {yuk} saat ders yüklenmiş.": "**{kim}**: {acik} Stunden verfügbar, {yuk} Stunden Unterricht zugewiesen.",
   "**Kapattığınız saatlerde yerleşmiş {n} ders var{kimde}.** Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle, **Kontrol** sekmesinde tek tek listeleniyor.":
     "**{n} gelegte {n:Stunde liegt|Stunden liegen} in Zeiten, die Sie geschlossen haben{kimde}.** Nichts wurde gelöscht. Im Reiter **Stundenplan** sind sie rot umrandet, in **Prüfung** einzeln aufgeführt.",
 
   // src/ui/CapacityRows.tsx
   Ad: "Name",
   Açık: "Offen",
+  "Müsait": "Verfügbar",
   Yük: "Last",
   Durum: "Status",
 
   // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "Es gibt noch nichts zu prüfen.",
   İmkânsız: "Unmöglich",
-  "Programın durumu": "Status des Plans",
+  "Programın durumu": "Status des Stundenplans",
   "Yerleşmiş saat": "Gelegte Stunden",
   "Tamamlanan ders": "Fertige Fächer",
   "Haftanın doluluğu": "Auslastung der Woche",
@@ -219,9 +221,10 @@ const DE: Sozluk = {
   "Kapalı saatte ders ({n})": "Fächer in geschlossener Stunde ({n})",
   Açıklama: "Erklärung",
   "Kapalı saat": "Geschlossene Stunden",
+  "Müsait değil": "Nicht verfügbar",
   "Kural ihlalleri ({n})": "Regelverstöße ({n})",
-  "Kural dışı": "Regelwidrig",
   Uyarı: "Warnung",
+  "Engel": "Sperre",
   "Yerleşemeyen dersler ({n})": "Nicht legbare Fächer ({n})",
   Ders: "Fach",
   Sebep: "Grund",
@@ -235,24 +238,24 @@ const DE: Sozluk = {
   "Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.":
     "Auch die GESAMTSTUNDEN der Klassen, die sich einen Raum teilen, müssen in die Woche passen. Dieser Engpass wird am häufigsten übersehen.",
   "Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
-    "Kommen Sie hierher zurück, sobald Sie im Reiter **Schule** Lehrkräfte und Klassen und im Reiter **Fächer** die Fächer eingetragen haben. Diese Seite sagt im Voraus, ob sich der Plan überhaupt legen lässt.",
+    "Kommen Sie hierher zurück, sobald Sie im Reiter **Schule** Lehrkräfte und Klassen und im Reiter **Fächer** die Fächer eingetragen haben. Diese Seite sagt im Voraus, ob sich der Stundenplan überhaupt legen lässt.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
-    "**Es sieht alles in Ordnung aus.** Verfügbarkeiten sowie Klassen- und Raumkapazitäten decken die zugewiesenen Stunden. Der Plan lässt sich legen.",
-  "**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
-    "**Es sieht alles in Ordnung aus.** Einige Lehrkräfte, Klassen oder Räume haben genau oder fast so viele freie Stunden wie zugewiesene (**Eng**): dort bleibt keine oder kaum eine Stunde übrig, aber der Plan lässt sich legen.",
+    "**Es sieht alles in Ordnung aus.** Verfügbarkeiten sowie Klassen- und Raumkapazitäten decken die zugewiesenen Stunden. Der Stundenplan lässt sich legen.",
+  "**Sorun görünmüyor.** Bazı öğretmenlerin müsait saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
+    "**Es sieht alles in Ordnung aus.** Einige Lehrkräfte haben genau oder fast so viele verfügbare Stunden, einige Klassen oder Räume so viele offene Stunden wie zugewiesene (**Eng**): dort bleibt keine oder kaum eine Stunde übrig, aber der Stundenplan lässt sich legen.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
     "**Es gibt Punkte, die Aufmerksamkeit brauchen.** In den Listen unten verhindern Zeilen mit",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
-    "das Legen des Plans. Lösen Sie diese zuerst.",
+    "verhindern das Legen des Stundenplans. Lösen Sie diese zuerst.",
   "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
     "**{n} {n:Stunde liegt|Stunden liegen} auf einer gesperrten Zeit.** Die Zeiten wurden gesperrt, nachdem die Stunden gelegt waren; sehen Sie in der Liste unten nach und verschieben Sie sie.",
-  "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
-    "Die restlichen **{n}** Stunden warten im Ablagefach. Sie können sie mit **Automatisch legen** im Reiter **Stundenplan** platzieren.",
-  "Danışman uyarıları ({n})": "Berater-Hinweise ({n})",
+  "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz.":
+    "Die restlichen **{n}** Stunden warten im Ablagefach. Sie können sie mit **Automatisch legen** im Reiter **Stundenplan** legen.",
+  "Danışman notları ({n})": "Berater-Hinweise ({n})",
   "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
-    "Diese blockieren den Plan nicht; es sind Punkte, die bei der Dateneingabe übersehen worden sein könnten.",
+    "Diese blockieren den Stundenplan nicht; es sind Punkte, die bei der Dateneingabe übersehen worden sein könnten.",
   "Danışmanın söyleyecek bir şeyi yok.": "Der Berater hat nichts zu sagen.",
-  Öneri: "Hinweis",
+  "Not": "Hinweis",
 
   // src/ui/common/ColorPick.tsx
   Vazgeç: "Abbrechen",
@@ -297,23 +300,21 @@ const DE: Sozluk = {
 
   // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Höchstens pro Tag",
-  "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
-    "Wird die Aufteilung geändert, verschwindet diese Stunde aus dem Plan, auch die angehefteten Blöcke",
+  "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş kartlar da":
+    "Wird die Aufteilung geändert, verschwindet dieses Fach aus dem Stundenplan, auch die angehefteten Karten",
 
   // src/ui/Ribbon.tsx — what the two destructive questions promise
-  "Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.":
+  "Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.":
     "Die {n} angehefteten Stunden bleiben, der Rest wird neu geplant. Ctrl+Z macht es rückgängig.",
-  "Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.":
-    "Die {n} angehefteten Stunden bleiben. Stunden, Lehrkräfte und Sperrzeiten bleiben unberührt. Ctrl+Z macht es rückgängig.",
-  "{ad}: bilgileri ve haftalık programı": "{ad}: Angaben und Wochenplan",
+  "{ad}: bilgileri ve haftalık programı": "{ad}: Angaben und Wochenstundenplan",
 
   // src/ui/program/Inspector.tsx
   Kapat: "Schließen",
-  "Haftalık programı": "Wochenplan",
+  "Haftalık programı": "Wochenstundenplan",
   "Kayıt bulunamadı": "Kein Eintrag gefunden",
 
   // src/ui/program/LessonPool.tsx
-  "Yerleşmeyi bekleyen dersler": "Fächer, die auf Platzierung warten",
+  "Yerleşmeyi bekleyen kartlar": "Karten, die auf Platzierung warten",
   "Havuz yüksekliği": "Höhe des Ablagefachs",
   "Sürükleyerek havuzun boyunu ayarlayın":
     "Ziehen Sie, um die Höhe des Ablagefachs einzustellen",
@@ -322,12 +323,12 @@ const DE: Sozluk = {
     "Ablagefach schließen: Das Raster nimmt die volle Höhe ein",
   "Havuzu aç": "Ablagefach öffnen",
   "Hepsi yerleşti": "Alles gelegt",
-  "{n} dersin tamamı programda": "alle {n} {n:Fach ist|Fächer sind} im Plan",
-  "{n} blok bekliyor": "{n} {n:Block wartet|Blöcke warten}",
+  "{n} dersin tamamı programda": "alle {n} {n:Fach ist|Fächer sind} im Stundenplan",
+  "{n} kart bekliyor": "{n} {n:Karte wartet|Karten warten}",
   "{n} saat · sürükleyip bırakın":
     "{n} {n:Stunde|Stunden} · ziehen und ablegen",
-  "{ust} · {alt} {brans} · {boy} saatlik blok":
-    "{ust} · {alt} {brans} · {boy}-stündiger Block",
+  "{ust} · {alt} {brans} · {boy} saatlik kart":
+    "{ust} · {alt} {brans} · {boy}-stündige Karte",
   " · {n} tane bekliyor": " · {n} warten",
   " · dersin {yerlesen}/{toplam} saati yerleşti":
     " · {yerlesen} von {toplam} Stunden des Fachs gelegt",
@@ -355,7 +356,7 @@ const DE: Sozluk = {
 
   // src/ui/print/Print.tsx
   Gün: "Tag",
-  "Yazdırılacak program yok.": "Es gibt keinen Plan zum Drucken.",
+  "Yazdırılacak program yok.": "Es gibt keinen Stundenplan zum Drucken.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",
   Tümü: "Alle",
   Hiçbiri: "Keine",
@@ -365,7 +366,7 @@ const DE: Sozluk = {
   "Hiçbir sayfa seçili değil, basılacak bir şey yok.":
     "Keine Seite ausgewählt, es gibt nichts zu drucken.",
   "Sayfa düzeni": "Seitenlayout",
-  "Bir kâğıda kaç program": "Pläne pro Blatt",
+  "Bir kâğıda kaç program": "Stundenpläne pro Blatt",
   "Kâğıttaki yazı": "Text auf dem Papier",
   "Sayfada ne olsun": "Was auf die Seite kommt",
   "Çıktı özeti": "Druckübersicht",
@@ -377,25 +378,25 @@ const DE: Sozluk = {
     "Tragen Sie zuerst im Reiter **Fächer** die Fächer ein und legen Sie sie dann im Reiter **Stundenplan**.",
   "**{n}** kâğıt": "**{n}** {n:Blatt|Blätter}",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
-    "**{n}** der gewählten Seiten sind völlig leer. Die Pläne dieser Lehrkräfte wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
+    "**{n}** der gewählten Seiten sind völlig leer. Die Stundenpläne dieser Lehrkräfte wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
-    "**{n}** der gewählten Seiten sind völlig leer. Die Pläne dieser Klassen wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
+    "**{n}** der gewählten Seiten sind völlig leer. Die Stundenpläne dieser Klassen wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Hier kann abgelegt werden.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
-    "Wird automatisch gelegt… {yerlesen}/{toplam} Blöcke · {sure} s",
-  "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
-    "Zeilen sind Lehrkräfte. Eine Zelle zeigt Klasse und Raum. Ziehen Sie ein gelegtes Fach zum Verschieben; ein Rechtsklick schickt es zurück ins Ablagefach.",
-  "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
-    "Zeilen sind Klassen. Eine Zelle zeigt die Lehrkraft und ihr Fach. Ziehen Sie ein gelegtes Fach zum Verschieben; ein Rechtsklick schickt es zurück ins Ablagefach.",
-  "Program dizildi. {n} blok yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.":
-    "Plan gelegt. {n} Blöcke platziert ({sure} s). Mit Strg+Z rückgängig.",
+  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
+    "Wird automatisch gelegt… {yerlesen}/{toplam} Karten · {sure} s",
+  "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
+    "Zeilen sind Lehrkräfte. Eine Zelle zeigt Klasse und Raum. Ziehen Sie eine gelegte Karte zum Verschieben; ein Rechtsklick schickt sie zurück ins Ablagefach.",
+  "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
+    "Zeilen sind Klassen. Eine Zelle zeigt die Lehrkraft und ihr Fach. Ziehen Sie eine gelegte Karte zum Verschieben; ein Rechtsklick schickt sie zurück ins Ablagefach.",
+  "Program dizildi. {n} kart yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.":
+    "Stundenplan gelegt. {n} Karten platziert ({sure} s). Mit Strg+Z rückgängig.",
   " (ve {n} ders daha)": " (und {n} {n:weiteres Fach|weitere Fächer})",
-  "Durduruldu. {yerlesen}/{toplam} blok yerleşti.":
-    "Angehalten. {yerlesen} von {toplam} Blöcken gelegt.",
-  "{yerlesen}/{toplam} blok yerleşti.":
-    "{yerlesen} von {toplam} Blöcken gelegt.",
+  "Durduruldu. {yerlesen}/{toplam} kart yerleşti.":
+    "Angehalten. {yerlesen} von {toplam} Karten gelegt.",
+  "{yerlesen}/{toplam} kart yerleşti.":
+    "{yerlesen} von {toplam} Karten gelegt.",
   "{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.":
     "{bas} {ders}: {saat} Stunden konnten nicht gelegt werden. {sebep}{digerleri}.",
   "Henüz dizilecek ders yok.": "Es gibt noch keine Fächer zu legen.",
@@ -405,43 +406,32 @@ const DE: Sozluk = {
   Tamam: "OK",
   Öğretmen: "Lehrkraft",
   Sınıf: "Klasse",
-  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
-    "Tragen Sie zuerst im Reiter **Schule** Räume, Lehrkräfte und Klassen ein, markieren Sie im Reiter **Verfügbarkeit** die Stunden, zu denen Lehrkräfte nicht können, und fügen Sie dann im Reiter **Fächer** für jede Klasse die Wochenstunden hinzu.",
+  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
+    "Tragen Sie zuerst im Reiter **Schule** Räume, Lehrkräfte und Klassen ein, markieren Sie im Reiter **Verfügbarkeit** die Stunden, zu denen Lehrkräfte nicht verfügbar sind, und fügen Sie dann im Reiter **Fächer** für jede Klasse die Wochenstunden hinzu.",
 
   // src/ui/Ribbon.tsx
-  "Okul listeleri": "Schullisten",
-  "Ders girişi araçları": "Werkzeuge zur Facheingabe",
   "Liste boş": "Die Liste ist leer",
-  "Müsaitlik araçları": "Verfügbarkeitswerkzeuge",
-  "Program araçları": "Stundenplanwerkzeuge",
   Durdur: "Anhalten",
-  "Havuzda bekleyen ders yok": "Kein Fach wartet im Ablagefach",
-  "Havuzdaki dersleri kurallara uyarak yerleştirir":
-    "Legt die Fächer aus dem Ablagefach regelkonform",
+  "Havuzda bekleyen kart yok": "Keine Karte wartet im Ablagefach",
+  "Havuzdaki kartları kurallara uyarak dizer":
+    "Legt die Karten aus dem Ablagefach regelkonform",
   "Otomatik diz ({n})": "Automatisch legen ({n})",
   "Dizilmiş programı silip baştan dizer":
-    "Löscht den Plan und legt ihn von vorn",
+    "Löscht den Stundenplan und legt ihn von vorn",
   "Dizilmiş {n} saatin tamamı silinecek":
     "Alle {n} gelegten Stunden werden gelöscht",
-  "Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.":
-    "Der Plan wird von vorn gelegt. Mit Strg+Z rückgängig.",
+  "Program baştan dizilecek. Ctrl+Z ile geri alınabilir.":
+    "Der Stundenplan wird von vorn gelegt. Mit Strg+Z rückgängig.",
   "Baştan diz": "Von vorn legen",
-  "Dizilmiş {n} saatin tamamı havuza dönecek":
-    "Alle {n} gelegten Stunden gehen zurück ins Ablagefach",
-  "Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.":
-    "Das Raster wird geleert; Fächer, Lehrkräfte und Verfügbarkeiten bleiben unverändert. Mit Strg+Z rückgängig.",
   "Programı boşalt": "Stundenplan leeren",
-  "Kontrol araçları": "Prüfwerkzeuge",
   "Sorun yok": "Keine Probleme",
   "Sorunlar ({n})": "Probleme ({n})",
   "{n} engel": "{n} {n:Sperre|Sperren}",
   "{n} uyarı": "{n} {n:Warnung|Warnungen}",
-  "Yazdırma araçları": "Druckwerkzeuge",
   "İkisi de": "Beide",
   "Öğretmen renkleri kâğıda basılır":
     "Lehrerfarben werden auf das Papier gedruckt",
   "Renkli bas": "In Farbe drucken",
-  "Ayar bölümleri": "Einstellungsbereiche",
 
   // src/ui/lessons/index.tsx
   "Yeni ders": "Neue Stunde",
@@ -465,10 +455,10 @@ const DE: Sozluk = {
   Dağılım: "Aufteilung",
   Ekle: "Hinzufügen",
   "Dersleri yapıştır": "Fächer einfügen",
-  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)":
-    "Klasse · Lehrkraft (Name oder Kürzel) · Wochenstunden · Block (1 · 2 · 3)",
-  "Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz":
-    'Die Regel "höchstens {n} Stunden am Tag" lässt für diesen Block keinen Platz',
+  "Sınıf · Öğretmen (ad veya kısa ad) · Haftalık saat · Blok (1 · 2 · 3)":
+    "Klasse · Lehrkraft (Name oder Kurzname) · Wochenstunden · Block (1 · 2 · 3)",
+  "Günde en fazla {n} saat kuralı bu kartı hiçbir yere sığdırmaz":
+    "Die Regel \"höchstens {n} Stunden am Tag\" lässt für diese Karte keinen Platz",
   "{boy} saat > günde {n}": "{boy} Std. > {n}/Tag",
   "{sinif} · {kim}: {saat} saat ({dagilim})":
     "{sinif} · {kim}: {saat} Stunden ({dagilim})",
@@ -487,7 +477,7 @@ const DE: Sozluk = {
   "Günde ↑": "Pro Tag ↑",
   "{sinif} · {kim} dersinin branşı": "Fach der Stunde {sinif} · {kim}",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar":
-    "Wird die Aufteilung geändert, verschwinden die Platzierungen dieses Fachs aus dem Plan",
+    "Wird die Aufteilung geändert, verschwinden die Platzierungen dieses Fachs aus dem Stundenplan",
   Sil: "Löschen",
   "Hangi öğretmen": "Welche Lehrkraft",
   "Hangi sınıf": "Welche Klasse",
@@ -542,46 +532,46 @@ const DE: Sozluk = {
   Yenilikler: "Neuigkeiten",
   "Eski sürümler": "Ältere Versionen",
   // src/platform/changelog.ts — release-note bullets, translated like any other UI copy
-  "Hafta kurulamayınca program neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.":
-    "Lässt sich eine Woche nicht legen, sagt das Programm Weg für Weg, was sich ändern müsste; jeder Weg wird mit einem Klick angewendet und mit Strg+Z zurückgenommen.",
+  "Program kurulamayınca Mozaik neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.":
+    "Lässt sich ein Stundenplan nicht legen, sagt Mozaik Weg für Weg, was sich ändern müsste; jeder Weg wird mit einem Klick angewendet und mit Strg+Z zurückgenommen.",
   "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
     "Der Vorschlagsbereich listet die Fragen an die Lehrkräfte, jede mit Ja und Geht nicht; die Antworten werden mit dem Plan gespeichert.",
-  "Izgarada göster, önerilen haftayı uygulamadan önce ızgarada işaretli gösteriyor.":
-    "Im Raster zeigen markiert die vorgeschlagene Woche im Stundenplan, bevor sie angewendet wird.",
-  "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi haftayı onararak devam ediyor.":
-    "Automatisch legen gibt nicht mehr auf, wenn es hängen bleibt, sondern repariert die beste gefundene Woche weiter.",
+  "Izgarada göster, önerilen programı uygulamadan önce ızgarada işaretli gösteriyor.":
+    "Im Raster zeigen markiert den vorgeschlagenen Stundenplan im Raster, bevor er angewendet wird.",
+  "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi programı onararak devam ediyor.":
+    "Automatisch legen gibt nicht mehr auf, wenn es hängen bleibt, sondern repariert den besten gefundenen Stundenplan weiter.",
   "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
     "Eine Zeile \"Nicht am selben Tag\" auf der Seite des Fachs: zwei Fächer kommen nie auf denselben Tag.",
-  "Bir blok, bırakıldığı saatleri dolduran derslerle yer değiştirebiliyor.":
-    "Ein Block kann mit den Fächern tauschen, die die Stunden füllen, auf die er fallen gelassen wird.",
+  "Bir kart, bırakıldığı saatleri dolduran kartlarla yer değiştirebiliyor.":
+    "Eine Karte kann mit den Karten tauschen, die die Stunden füllen, auf die sie fallen gelassen wird.",
   "Ayarlar → Hakkında, öneri aramasının bu bilgisayarda ne kadar sürdüğünü gösteriyor.":
     "Einstellungen → Über zeigt, wie lange die Vorschlagssuche auf diesem Rechner dauert.",
   "Kontrol, program tamamken sıkışık satırlar için artık \"Dikkat\" demiyor.":
-    "Prüfung sagt bei engen Zeilen nicht mehr \"Achtung\", wenn der Plan vollständig ist.",
+    "Prüfung sagt bei engen Zeilen nicht mehr \"Achtung\", wenn der Stundenplan vollständig ist.",
   "Dil değişince bildirimler yeni dilde; boş ekranlar dersler için Dersler sekmesini gösteriyor.":
     "Meldungen folgen einem Sprachwechsel; die leeren Seiten verweisen für Fächer auf den Reiter Fächer.",
-  "Program şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.":
-    "Ein Farbmenü im Stundenplan-Band färbt Karten nach Lehrkraft, Klasse, Raum oder Fach.",
+  "Program araç şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.":
+    "Ein Farbmenü in der Werkzeugleiste von Stundenplan färbt Karten nach Lehrkraft, Klasse, Raum oder Fach.",
   "Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.":
     "Eine Karte auf eine andere Karte fallen zu lassen tauscht beide, wenn beide Züge erlaubt sind.",
   "Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.":
     "Ein Punkt auf der Schaltfläche Über im Einstellungen-Band, solange ungelesene Versionshinweise da sind.",
-  "Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.":
-    "Das Programmfenster öffnet sich jetzt bildschirmfüllend, nicht in einem kleinen Kasten.",
+  "Mozaik'in penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.":
+    "Das Fenster von Mozaik öffnet sich jetzt bildschirmfüllend, nicht in einem kleinen Kasten.",
   "Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası \"4…\" değil \"411\" okunuyor.":
     "In der Dichte Einpassen wird der Kartentext nicht mehr abgeschnitten: die Klassennummer lautet \"411\", nicht \"4…\".",
   "Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.":
     "Einpassen gibt den Platz, den es bei Zeilenköpfen und Tagestrennern spart, an die Fachspalten.",
   "Yazı büyüklüğü yüzde 100'ün altındayken kart yazısı da onunla birlikte küçülüyor.":
     "Ist die Schriftgröße unter 100 Prozent, wird auch der Kartentext kleiner.",
-  "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
+  "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman notları eklendi.":
     "Regeln für Lücken bei Klassen und Lehrkräften, die Planungsanalyse und Berater-Hinweise wurden hinzugefügt.",
-  'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
-    "Für Tastenkombinationen wurde ein Hilfebildschirm hinzugefügt (obere Leiste, Strg+K oder die ?-Taste).",
+  "Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk ya da \"?\" tuşu).":
+    "Für Tastenkombinationen wurde ein Hilfebildschirm hinzugefügt (obere Leiste oder die ?-Taste).",
   'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
     "Dieses Neuigkeiten-Panel wurde zu Einstellungen → Über hinzugefügt.",
   "Program kartlarını sürükleme, yoğun programlarda yaklaşık yüzde 63 hızlandırıldı.":
-    "Das Ziehen von Stundenplankarten ist bei dichten Plänen etwa 63 Prozent schneller.",
+    "Das Ziehen von Stundenplankarten ist bei dichten Stundenplänen etwa 63 Prozent schneller.",
   "Windows görev çubuğu simgesi 20 piksel ve üzerinde ayrıntılı logoyu kullanıyor.":
     "Das Windows-Taskleistensymbol verwendet ab 20 Pixeln das detaillierte Logo.",
   "Dersler → Sınıftan görünümündeki gereksiz Branş başlığı kaldırıldı.":
@@ -596,7 +586,7 @@ const DE: Sozluk = {
   "Yeni sürüm iniyor…": "Die neue Version wird heruntergeladen…",
   "Her şey silinecek": "Alles wird gelöscht",
   "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.":
-    "Lehrkräfte, Klassen, Fächer und der gelegte Plan. Dieser Plan bleibt völlig leer.",
+    "Lehrkräfte, Klassen, Fächer und der gelegte Stundenplan. Dieser Plan bleibt völlig leer.",
   "Devam et": "Weiter",
   "Son kez soruyorum": "Letzte Nachfrage",
   'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.':
@@ -605,8 +595,8 @@ const DE: Sozluk = {
     "{yazilan} {yazilan:Plan|Pläne} in die Datei geschrieben; die Daten von {eksik} {eksik:Plan|Plänen} wurden nicht gefunden.",
   "{yazilan} plan tek dosyaya yazıldı.":
     "{yazilan} {yazilan:Plan|Pläne} in eine Datei geschrieben.",
-  "Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.":
-    "Diese Datei wurde mit einer neueren Programmversion geschrieben. Aktualisieren Sie das Programm.",
+  "Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.":
+    "Diese Datei wurde mit einer neueren Version von Mozaik geschrieben. Aktualisieren Sie Mozaik.",
   'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.':
     "Diese Datei enthält nicht alle Pläne. Einen einzelnen Plan öffnen Sie mit „Aus Datei öffnen“ in der oberen Leiste.",
   "Bu bilgisayardaki bütün planların yerine geçecek":
@@ -618,10 +608,10 @@ const DE: Sozluk = {
     "Kein einziger Plan in der Datei konnte gelesen werden; nichts hat sich geändert.",
   "{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.":
     "{acilan} {acilan:Plan|Pläne} geöffnet, {yazilamayan} konnten nicht geschrieben werden. Der Speicher könnte voll sein. Bewahren Sie die Datei auf.",
-  "Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.":
-    "{yeni} {yeni:Plan|Pläne} in der Datei {yeni:wurde|wurden} mit einer neueren Version des Programms geschrieben und {yeni:wird|werden} nicht geöffnet. Aktualisieren Sie das Programm.",
-  "{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.":
-    "{yeni} {yeni:Plan wurde|Pläne wurden} mit einer neueren Version des Programms geschrieben und nicht geöffnet. Aktualisieren Sie das Programm.",
+  "Dosyadaki {yeni} plan Mozaik'in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik'i güncelleyin.":
+    "{yeni} {yeni:Plan|Pläne} in der Datei {yeni:wurde|wurden} mit einer neueren Version von Mozaik geschrieben und {yeni:wird|werden} nicht geöffnet. Aktualisieren Sie Mozaik.",
+  "{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.":
+    "{yeni} {yeni:Plan wurde|Pläne wurden} mit einer neueren Version von Mozaik geschrieben und nicht geöffnet. Aktualisieren Sie Mozaik.",
   "Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.":
     "{eksik} {eksik:Plan|Pläne} in der Datei {eksik:ist|sind} unvollständig oder beschädigt und {eksik:wird|werden} nicht geöffnet.",
   "{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.":
@@ -648,11 +638,11 @@ const DE: Sozluk = {
   Yer: "Größe",
   "Bu bilgisayardaki otomatik yedekler":
     "Automatische Sicherungen auf diesem Computer",
-  "Henüz otomatik yedek yok, bu ilk oturum.":
-    "Noch keine automatische Sicherung, dies ist die erste Sitzung.",
-  Oturum: "Sitzung",
-  "bir önceki": "die vorige",
-  "{n} oturum önce": "vor {n} {n:Sitzung|Sitzungen}",
+  "Henüz otomatik yedek yok; ilki Mozaik bir daha açılınca alınır.":
+    "Noch keine automatische Sicherung; die erste entsteht beim nächsten Start von Mozaik.",
+  "Otomatik yedek": "Automatische Sicherung",
+  "bir önceki açılış": "letzter Start",
+  "{n} açılış önce": "vor {n} {n:Start|Starts}",
   "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
     "von einer neueren Version geschrieben, diese Version kann sie nicht öffnen",
   "okunamadı": "nicht lesbar",
@@ -665,8 +655,8 @@ const DE: Sozluk = {
     "**Eine neue Version ist bereit.** Drücken Sie oben auf **Neu laden**.",
   "**v{surum} çıktı{tarih}.** İndirmek {mb} MB yer kaplar. İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz.":
     "**v{surum} ist erschienen{tarih}.** Der Download belegt {mb} MB. Nach dem Herunterladen entscheiden Sie, wann Sie wechseln.",
-  "**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz.":
-    "**v{surum} wurde heruntergeladen.** Beim Neustart öffnet sich die neue Version. Ihre Arbeit ist gespeichert, nichts geht verloren.",
+  "**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz.":
+    "**v{surum} wurde heruntergeladen.** Beim Neustart öffnet sich die neue Version. Ihre Pläne sind gespeichert, nichts geht verloren.",
 
   // src/ui/settings/Plans.tsx
   "Bu işlem geri alınamaz.": "Das lässt sich nicht rückgängig machen.",
@@ -679,7 +669,7 @@ const DE: Sozluk = {
   "Boş plan": "Leerer Plan",
   "Bu planın kopyası": "Kopie dieses Plans",
   "Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır":
-    "Lehrkräfte, Klassen und Fächer bleiben; der gelegte Plan wird geleert",
+    "Lehrkräfte, Klassen und Fächer bleiben; der gelegte Stundenplan wird geleert",
   "Taslak olarak kaydet": "Als Entwurf speichern",
   Taslak: "Entwurf",
   İçerik: "Inhalt",
@@ -694,7 +684,7 @@ const DE: Sozluk = {
   "Taslaktan başla": "Mit einem Entwurf beginnen",
   "· verisi yok": "· keine Daten",
   "Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır; ** dizilmiş program boş gelir**. Taslağın kendisi değişmez.":
-    "Die Einrichtung des Entwurfs (Räume, Lehrkräfte, Klassen, Fächer) wird kopiert; **der gelegte Plan kommt leer**. Der Entwurf selbst ändert sich nicht.",
+    "Die Einrichtung des Entwurfs (Räume, Lehrkräfte, Klassen, Fächer) wird kopiert; **der gelegte Stundenplan kommt leer**. Der Entwurf selbst ändert sich nicht.",
 
   // src/ui/settings/Rules.tsx
   Kurallar: "Regeln",
@@ -709,7 +699,7 @@ const DE: Sozluk = {
   "Günde ↓": "Pro Tag ↓",
   "Şu anki ihlaller ({n})": "Aktuelle Verstöße ({n})",
   "Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.":
-    "Der gelegte Plan überschreitet keine der von Ihnen gesetzten Grenzen.",
+    "Der gelegte Stundenplan überschreitet keine der von Ihnen gesetzten Grenzen.",
   "Kendi sınırı olan sınıflar ({n})": "Klassen mit eigener Grenze ({n})",
 
   // src/ui/settings/School.tsx
@@ -720,31 +710,31 @@ const DE: Sozluk = {
   "ders yok": "kein Unterricht",
   "{gun} öğle arası": "Mittagspause am {gun}",
   "Uzun ara yok": "Keine lange Pause",
-  "{n}. dersten sonra": "nach der {n}. Stunde",
+  "{n}. saatten sonra": "nach der {n}. Stunde",
   "En az bir gün seçmelisiniz.": "Sie müssen mindestens einen Tag wählen.",
-  "Ders saatleri": "Unterrichtszeiten",
-  "Günlük ders sayısı": "Stunden pro Tag",
-  "İlk ders başlangıcı": "Beginn der ersten Stunde",
+  "Günün saatleri": "Stunden des Tages",
+  "Günlük saat sayısı": "Stunden pro Tag",
+  "İlk saatin başlangıcı": "Beginn der ersten Stunde",
   "Başlangıç saati": "Anfangsstunde",
   "Başlangıç dakikası": "Anfangsminute",
-  "Ders (dk)": "Stunde (Min.)",
+  "Saat (dk)": "Stunde (Min.)",
   "Teneffüs (dk)": "Pause (Min.)",
   "Öğle arası (dk)": "Mittagspause (Min.)",
-  "Ders adları (virgülle; boş kalan saat numarasını alır)":
-    "Stundennamen (durch Kommas getrennt; eine Stunde ohne Namen behält ihre Nummer)",
-  "{n} ad ders sayısından fazlaydı ve kullanılmadı.":
+  "Saat adları (virgülle; boş kalan numarasını alır)":
+    "Namen der Stunden (durch Komma getrennt; eine Stunde ohne Namen behält ihre Nummer)",
+  "{n} ad saat sayısından fazlaydı ve kullanılmadı.":
     "{n} {n:Name war|Namen waren} mehr als die Anzahl der Stunden und {n:wurde|wurden} nicht verwendet.",
   "Bunların {n} saati sabitli, sabitlemeleri de kalkacak.":
     "{n} davon {n:ist|sind} fixiert, auch die {n:Fixierung verschwindet|Fixierungen verschwinden}.",
-  "Öteki programlarda da {n} saat kalkacak.":
-    "Auch in den anderen Stundenplänen {n:verschwindet|verschwinden} {n} {n:Stunde|Stunden}.",
+  "Öteki seçeneklerde de {n} saat kalkacak.":
+    "Auch in den anderen Varianten {n:verschwindet|verschwinden} {n} {n:Stunde|Stunden}.",
   "Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.":
     "Diese Stunden kommen zurück in die Ablage. Rückgängig holt sie zurück.",
-  "Günlük ders sayısı {n} olacak":
+  "Günlük saat sayısı {n} olacak":
     "Der Tag hat dann {n} {n:Stunde|Stunden}",
-  "{saat}. dersten sonraki saatlerde yerleşmiş {n} saat var.":
+  "{saat}. saatten sonra yerleşmiş {n} saat var.":
     "Nach der {saat}. Stunde {n:ist|sind} {n} {n:Stunde|Stunden} gelegt.",
-  "Ders sayısını düşür":
+  "Saat sayısını düşür":
     "Anzahl senken",
   "{gun} ders günlerinden çıkacak":
     "{gun} ist dann kein Unterrichtstag mehr",
@@ -756,8 +746,8 @@ const DE: Sozluk = {
   Ara: "Pause",
   "Öğle arası, {dk} dk": "Mittagspause, {dk} Min.",
   Bitiş: "Ende",
-  "Şu an **{gun} gün × {saat} saat** = {yer} slot.":
-    "Derzeit **{gun} Tage × {saat} Stunden** = {yer} Plätze.",
+  "Şu an **{gun} gün × {saat} saat** = {yer} hücre.":
+    "Derzeit **{gun} Tage × {saat} Stunden** = {yer} Zellen.",
 
   // src/ui/setup/Classes.tsx
   Derslik: "Raum",
@@ -779,7 +769,7 @@ const DE: Sozluk = {
   "{ad} bir günde aynı dersten en fazla kaç saat":
     "wie viele Stunden eines Fachs {ad} an einem Tag haben darf",
   yok: "keine",
-  "Bilgileri ve haftalık programı": "Angaben und Wochenplan",
+  "Bilgileri ve haftalık programı": "Angaben und Wochenstundenplan",
 
   // src/ui/setup/Paste.tsx
   "Buraya yapıştırın...": "Hier einfügen...",
@@ -806,7 +796,7 @@ const DE: Sozluk = {
   "· listede değil": "· nicht in der Liste",
   "{ad} kısaltması": "Kürzel für {ad}",
   Varsayılan: "Standard",
-  "Programda gömülü olan kısaltma": "Die im Programm eingebaute Kurzform",
+  "Mozaik'te gömülü olan kısaltma": "Die in Mozaik eingebaute Kurzform",
   "Listeden çıkar": "Aus der Liste entfernen",
   "Bu branş zaten listede değil":
     "Dieses Fach steht ohnehin nicht in der Liste",
@@ -823,6 +813,7 @@ const DE: Sozluk = {
   "Yeni branş": "Neues Fach",
   "Bu branş listede zaten var.": "Dieses Fach steht bereits in der Liste.",
   Kısaltma: "Kürzel",
+  "Kısa ad": "Kurzname",
 
   // src/ui/setup/Summary.tsx
   Renkler: "Farben",
@@ -862,7 +853,7 @@ const DE: Sozluk = {
   // src/ui/setup/Teachers.tsx
   Cinsiyet: "Geschlecht",
   "Branşa göre": "Nach Fach",
-  "Açık saate göre": "Nach offenen Stunden",
+  "Müsait saate göre": "Nach verfügbaren Stunden",
   "Cinsiyete göre": "Nach Geschlecht",
   "Öğretmenler ({n})": "Lehrkräfte ({n})",
   "Yeni öğretmen": "Neue Lehrkraft",
@@ -876,8 +867,8 @@ const DE: Sozluk = {
   "İkinci branş": "Zweites Fach",
   "İkinci branş yok": "Kein zweites Fach",
   "Öğretmenleri yapıştır": "Lehrkräfte einfügen",
-  "Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta":
-    "Vor- und Nachname · Kürzel · Fach · Geschlecht · Zweites Fach · E-Mail",
+  "Ad Soyad · Kısa ad · Branş · Cinsiyet · İkinci branş · E-posta":
+    "Vor- und Nachname · Kurzname · Fach · Geschlecht · Zweites Fach · E-Mail",
   "Bu aramaya uyan öğretmen yok.": "Keine Lehrkraft passt zu dieser Suche.",
   "2. branş": "2. Fach",
   "Art arda en fazla kaç saat": "Höchstens wie viele Stunden am Stück",
@@ -897,20 +888,19 @@ const DE: Sozluk = {
     "mindestens wie viele Stunden an einem Anwesenheitstag von {kim}",
   "Branş listesi boş. **Branşlar** adımından ekleyebilirsiniz.":
     "Die Fächerliste ist leer. Sie können sie im Schritt **Fächer** hinzufügen.",
-  "**Aynı kısaltma birden çok öğretmende:** ızgarada iki satır ayırt edilemez.":
-    "**Dasselbe Kürzel bei mehreren Lehrkräften:** Zwei Zeilen im Raster sind nicht zu unterscheiden.",
+  "**Aynı kısa ad birden çok öğretmende:** ızgarada iki satır ayırt edilemez.":
+    "**Derselbe Kurzname bei mehreren Lehrkräften:** Zwei Zeilen im Raster sind nicht zu unterscheiden.",
 
   // src/ui/setup/index.tsx
   Başlarken: "Zum Anfang",
-  "Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.":
-    "Wenn Sie sehen möchten, was das Werkzeug tut, können Sie eine fertige Schule laden.",
-  "Örnek veriyle doldur": "Mit Beispieldaten füllen",
-  "Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder":
-    "Diese Zeile erscheint nicht wieder; die Beispieldaten bleiben unter Einstellungen → Über",
+  "Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.":
+    "Wenn Sie sehen möchten, was Mozaik tut, können Sie eine fertige Schule laden.",
+  "Bu satır bir daha çıkmaz; örnek okul Ayarlar → Hakkında’da durmaya devam eder":
+    "Diese Zeile erscheint nicht wieder; die Beispielschule bleibt unter Einstellungen → Über",
   "Bir daha gösterme": "Nicht mehr anzeigen",
   "{ad} ile başla": "Mit {ad} beginnen",
   "Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez.":
-    "Die Einrichtung der als **Entwurf** markierten Pläne liegt bereit. Wählen Sie einen, öffnet sich **ein neuer Plan**: Räume, Lehrkräfte, Klassen und Fächer werden kopiert, der gelegte Plan kommt leer. Der Entwurf selbst ändert sich nicht.",
+    "Die Einrichtung der als **Entwurf** markierten Pläne liegt bereit. Wählen Sie einen, öffnet sich **ein neuer Plan**: Räume, Lehrkräfte, Klassen und Fächer werden kopiert, der gelegte Stundenplan kommt leer. Der Entwurf selbst ändert sich nicht.",
 
   // src/ui/useRowOrder.tsx
   Sıra: "Reihenfolge",
@@ -922,24 +912,24 @@ const DE: Sozluk = {
   // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:Lehrkraft|Lehrkräfte}, {sinif} {sinif:Klasse|Klassen} und {ders} {ders:Fach|Fächer} werden gelöscht.",
-  "Bu plandaki her şeyin yerine örnek veri geçecek":
-    "Beispieldaten ersetzen alles in diesem Plan",
+  "Bu plandaki her şeyin yerine örnek okul geçecek":
+    "Die Beispielschule ersetzt alles in diesem Plan",
   "Örnek okul verisi yüklenecek": "Beispiel-Schuldaten werden geladen",
-  '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 derslik örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.':
+  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce \"Dosyaya kaydet\" deyin.":
     "{kayip} An ihre Stelle tritt eine Beispielschule mit 25 Lehrkräften, 20 Klassen, 8 Räumen und 99 Fächern. Die anderen Pläne bleiben unberührt. Nicht rückgängig zu machen. Wählen Sie vorher „In Datei speichern“.",
-  '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.':
-    "25 Lehrkräfte, 20 Klassen, 8 Räume und 99 Fächer. Um zu sehen, was das Werkzeug tut; bevor Sie eigene Daten eintragen, räumen Sie mit Einstellungen → Über → „Alles löschen“ auf.",
+  "25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → \"Her şeyi sil\" ile temizleyin.":
+    "25 Lehrkräfte, 20 Klassen, 8 Räume und 99 Fächer. Um zu sehen, was Mozaik tut; bevor Sie eigene Daten eintragen, räumen Sie mit Einstellungen → Über → „Alles löschen“ auf.",
   "Yerine koy": "Ersetzen",
   Yükle: "Laden",
-  "Örnek veri yüklendi.": "Beispieldaten geladen.",
+  "Örnek okul yüklendi.": "Beispielschule geladen.",
 
   // src/constraints.ts
   "Ders bulunamadı": "Fach nicht gefunden",
   "Ders eksik tanımlı": "Das Fach ist unvollständig definiert",
   "Geçersiz hücre": "Ungültige Zelle",
   "Bu saat günün dışında": "Diese Stunde liegt außerhalb des Tages",
-  "{boy} saatlik blok güne sığmıyor":
-    "Ein {boy}-stündiger Block passt nicht in den Tag",
+  "{boy} saatlik kart güne sığmıyor":
+    "Eine {boy}-stündige Karte passt nicht in den Tag",
   "{n}. gün": "Tag {n}",
   "{sinif} sınıfının {gun} {saat} saatinde {ders} var":
     "Klasse {sinif} hat am {gun} in der {saat}. Stunde bereits {ders}",
@@ -1007,7 +997,8 @@ const DE: Sozluk = {
   "Haftalık ders yükü": "Wöchentliche Fachlast",
   "{n} saat": "{n} {n:Stunde|Stunden}",
   "Açık saat": "Offene Stunden",
-  "Programa yerleşmiş": "Im Plan gelegt",
+  "Müsait saat": "Verfügbare Stunden",
+  "Programa yerleşmiş": "Im Stundenplan gelegt",
   "{yerlesen} / {toplam} saat": "{yerlesen} von {toplam} Stunden",
   "Branşı: {brans}": "Fach: {brans}",
   "Henüz dersi yok": "Noch keine Fächer",
@@ -1048,8 +1039,8 @@ const DE: Sozluk = {
     "{ders} ist in {n} eigenständige Blöcke aufgeteilt und lässt keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann.",
   "{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:":
     "{n} Fächer müssen öfter pro Woche gelegt werden, als es Tage gibt; jedes erscheint an mindestens einem Tag zweimal:",
-  "{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:":
-    "{n} Lehrkräfte haben weniger freie Tage, als eines ihrer Fächer braucht; es kann an einem Tag zweimal landen:",
+  "{n} öğretmenin müsait günü bir dersinin istediğinden az; bir güne iki kez düşebilir:":
+    "{n} Lehrkräfte haben weniger verfügbare Tage, als eines ihrer Fächer braucht; es kann an einem Tag zweimal landen:",
   "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:":
     "{n} Fächer sind in Blöcke aufgeteilt und lassen keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann:",
 
@@ -1073,7 +1064,8 @@ const DE: Sozluk = {
   "Windows kurulumu": "Windows-Installation",
   Site: "Website",
   "plan listesi": "die Planliste",
-  "bir önceki oturum": "die vorige Sitzung",
+  "otomatik yedek · bir önceki açılış": "automatische Sicherung · letzter Start",
+  "otomatik yedek · {n} açılış önce": "automatische Sicherung · vor {n} {n:Start|Starts}",
   "tema tercihi": "Design-Einstellung",
   "dil tercihi": "Spracheinstellung",
   "kenar çubuğu tercihi": "Seitenleisten-Einstellung",
@@ -1086,7 +1078,7 @@ const DE: Sozluk = {
   "şerit kaydırınca gizlensin mi": "ob die Leiste beim Scrollen ausblendet",
   "müsaitlikte saat gösterimi": "Uhrzeiten im Verfügbarkeitsbildschirm",
   "hareket (animasyon) tercihi": "Bewegungs-Einstellung (Animation)",
-  "örnek veri satırı görüldü mü": "ob die Beispieldatenzeile gesehen wurde",
+  "örnek okul satırı görüldü mü": "ob die Zeile zur Beispielschule gesehen wurde",
   "kâğıt seçenekleri": "Papieroptionen",
   "görülen sürüm notu": "zuletzt gesehene Version der Versionshinweise",
 
@@ -1108,10 +1100,10 @@ const DE: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} Wochenstunden sind gewünscht; offene Stunden und Regeln lassen höchstens {olabilen} zu",
-  "Hafta baştan dizilince değişiklik gerekmeden kuruluyor":
-    "Neu angeordnet lässt sich die Woche ohne Änderung aufbauen",
-  "Programı baştan yerleştir":
-    "Plan neu einsetzen",
+  "Program baştan dizilince değişiklik gerekmeden kuruluyor":
+    "Neu gelegt lässt sich der Stundenplan ohne Änderung aufbauen",
+  "Uygula ve baştan diz":
+    "Übernehmen und neu legen",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
     "Mit den gesetzten Stunden an ihrem Platz gibt es keinen Weg; diese Wege ordnen sie neu an, angeheftete bleiben stehen.",
   "Nasıl kurulacağı aranıyor… {sure} sn":
@@ -1133,13 +1125,13 @@ const DE: Sozluk = {
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders}: {yeni} statt {eski} Wochenstunden",
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
-    "Der Plan hat sich inzwischen geändert. Drücken Sie Automatisch legen, um wieder einen Vorschlag zu sehen.",
-  "Hafta değişiklik gerekmeden kuruluyor":
-    "Die Woche lässt sich ohne Änderung aufbauen",
-  "Otomatik dizme bu haftayı bulamadı; ikinci arama buldu ve denetledi.":
-    "Das automatische Legen hat diese Woche nicht gefunden; die zweite Suche hat sie gefunden und geprüft.",
-  "Programı yerleştir":
-    "Plan einsetzen",
+    "Der Stundenplan hat sich inzwischen geändert. Drücken Sie Automatisch legen, um wieder einen Vorschlag zu sehen.",
+  "Program değişiklik gerekmeden kuruluyor":
+    "Der Stundenplan lässt sich ohne Änderung aufbauen",
+  "Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.":
+    "Das automatische Legen hat diesen Stundenplan nicht gefunden; die zweite Suche hat ihn gefunden und geprüft.",
+  "Uygula ve diz":
+    "Übernehmen und legen",
   "{ders}: {yeni} versin":
     "{ders}: unterrichtet von {yeni}",
   "{kim} {gun} {saatler}. saate":
@@ -1162,8 +1154,8 @@ const DE: Sozluk = {
     "{ders} {yeni} sein kann",
   "{ders} haftada {yeni} saat olabilirse":
     "{ders} {yeni} Stunden pro Woche haben kann",
-  "{kosullar} hafta kuruluyor.":
-    "Die Woche lässt sich aufbauen, wenn {kosullar}.",
+  "{kosullar} program kuruluyor.":
+    "Der Stundenplan lässt sich aufbauen, wenn {kosullar}.",
   "{kim} {gun}":
     "{kim} am {gun}",
   "{kim}: günlük sınır":
@@ -1232,12 +1224,12 @@ const DE: Sozluk = {
     "Geht nicht: {ne}",
   "Olur dedi":
     "Hat zugesagt",
-  "Olur dedikleriniz yetiyor: hafta kuruluyor":
-    "Ihre Zusagen reichen: die Woche lässt sich aufbauen",
-  "Olur dediklerinize ek olarak {kosullar} hafta kuruluyor.":
-    "Zusätzlich zu Ihren Zusagen lässt sich die Woche aufbauen, wenn {kosullar}.",
-  "Uygulayınca cevaplarınız veriye yazılır ve hafta yerleşir.":
-    "Beim Anwenden werden Ihre Antworten in die Daten geschrieben und die Woche verteilt.",
+  "Olur dedikleriniz yetiyor: program kuruluyor":
+    "Ihre Zusagen reichen: der Stundenplan lässt sich aufbauen",
+  "Olur dediklerinize ek olarak {kosullar} program kuruluyor.":
+    "Zusätzlich zu Ihren Zusagen lässt sich der Stundenplan aufbauen, wenn {kosullar}.",
+  "Uygulayınca cevaplarınız veriye yazılır ve program dizilir.":
+    "Beim Anwenden werden Ihre Antworten in die Daten geschrieben und der Stundenplan gelegt.",
   "Izgarada göster":
     "Im Raster zeigen",
   "Sorular":
@@ -1270,8 +1262,8 @@ const DE: Sozluk = {
     "Können Sie {ders} unterrichten?",
   "Yalnız bu saatler olmaz ({gun} {saatler}. saat)":
     "Nur diese Stunden gehen nicht ({gun}, Stunde {saatler})",
-  "{gun} hiç gelemez":
-    "Kann am {gun} gar nicht kommen",
+  "{gun} hiç müsait değil":
+    "Am {gun} gar nicht verfügbar",
   "{gun} en fazla {n} saat gelebilir":
     "Kann am {gun} höchstens {n} {n:Stunde|Stunden} kommen",
   "{kim} için hiçbir değişiklik olmasın":
@@ -1286,8 +1278,8 @@ const DE: Sozluk = {
     "Vorschau: {yol}",
   "Önizlemeyi kapat":
     "Vorschau schließen",
-  "Hangi hafta":
-    "Welche Woche",
+  "Hangi program":
+    "Welcher Stundenplan",
   "Şu anki":
     "Aktuell",
   "Önerilen":
@@ -1314,18 +1306,18 @@ const DE: Sozluk = {
     "Damit die Woche aufgeht",
   "Ayrıntı":
     "Details",
-  "Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.":
-    "Mit dieser Änderung passt die ganze Woche; der Plan wurde gefunden und geprüft.",
+  "Bu değişiklikle bütün kartlar yerleşiyor; program bulundu ve denetlendi.":
+    "Mit dieser Änderung passen alle Karten; der Stundenplan wurde gefunden und geprüft.",
   "Bundan küçük bir değişiklik yetmiyor.":
     "Keine kleinere Änderung reicht.",
   "Bulduğumuz en küçük değişiklik bu.":
     "Das ist die kleinste Änderung, die wir gefunden haben.",
-  "Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.":
-    "Der Vorschlag wurde übernommen und der Plan eingesetzt. Mit Strg+Z rückgängig machen.",
+  "Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.":
+    "Der Vorschlag wurde übernommen und der Stundenplan gelegt. Mit Strg+Z rückgängig machen.",
   "{sinif} sınıfında boş açık saat kalmadı":
     "die Klasse {sinif} hat keine offene Stunde mehr frei",
-  "Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor":
-    "die frei gebliebenen Stunden passen nicht zum {boy}-stündigen Block dieses Fachs",
+  "Boş kalan saatler bu dersin {boy} saatlik kartına uymuyor":
+    "die frei gebliebenen Stunden passen nicht zur {boy}-stündigen Karte dieses Fachs",
   "Tek başına {gun} {saat} saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor":
     "allein passt es am {gun} in die {saat}. Stunde, aber nicht zusammen mit den anderen fehlenden Fächern der Klasse",
   "{gun} {saat} saatine sığıyor, arama oraya varmadan durdu":
@@ -1358,8 +1350,8 @@ const DE: Sozluk = {
   ders: "Fach",
   "Yük durumu": "Auslastung",
   Boş: "Leer",
-  "Öğretmenin gelemeyeceği saatlere tıklayın.":
-    "Klicken Sie die Stunden an, zu denen die Lehrkraft nicht kann.",
+  "Öğretmenin müsait olmadığı saatlere tıklayın.":
+    "Klicken Sie die Stunden an, zu denen die Lehrkraft nicht verfügbar ist.",
   "Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.":
     "Klicken Sie die Stunden an, zu denen die Klasse keinen Unterricht haben kann. In diese Stunden kann kein Fach gelegt werden.",
   "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.":
@@ -1373,10 +1365,10 @@ const DE: Sozluk = {
   "Planlar ve yedek": "Pläne und Sicherung",
   "Hücre en büyük, kartın alt satırı tam boyda":
     "Größte Zelle, untere Kartenzeile in voller Größe",
-  "Hücre geniş, ders saatleri görünür":
-    "Breite Zelle, Unterrichtszeiten sichtbar",
-  "Haftanın tamamı ekrana sığar, ders saatleri gizlenir":
-    "Die ganze Woche passt auf den Bildschirm, Unterrichtszeiten werden ausgeblendet",
+  "Hücre geniş, başlangıç saatleri görünür":
+    "Breite Zelle, Anfangszeiten sichtbar",
+  "Programın tamamı ekrana sığar, başlangıç saatleri gizlenir":
+    "Der ganze Stundenplan passt auf den Bildschirm, Anfangszeiten werden ausgeblendet",
   Öğretmenden: "Von einer Lehrkraft",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Wählen Sie eine Lehrkraft und tragen Sie alle ihre Klassen nacheinander ein",
@@ -1394,8 +1386,6 @@ const DE: Sozluk = {
   Koyu: "Dunkel",
   Tam: "Voll",
   Az: "Wenig",
-  Uyar: "Warnen",
-  Engelle: "Sperren",
   Belirtilmemiş: "Nicht angegeben",
   Kadın: "Weiblich",
   Erkek: "Männlich",
@@ -1407,11 +1397,11 @@ const DE: Sozluk = {
   Küçük: "Klein",
   Büyük: "Groß",
   "Bir A4’e bir program, duvara asılan boy":
-    "Ein Plan auf A4, in der Größe zum Aufhängen",
-  "Alt alta iki program": "Zwei Pläne untereinander",
+    "Ein Stundenplan auf A4, in der Größe zum Aufhängen",
+  "Alt alta iki program": "Zwei Stundenpläne untereinander",
   "İki sütun, iki satır, dağıtmak için":
     "Zwei Spalten, zwei Zeilen, zum Austeilen",
-  "Kurs adı": "Schulname",
+  "Okul adı": "Schulname",
   "Başlığın altındaki satırda okulun adı":
     "Der Name der Schule in der Zeile unter der Überschrift",
   "Derslik ve branş": "Raum und Fach",
@@ -1419,7 +1409,7 @@ const DE: Sozluk = {
     "In derselben Zeile der Raumbuchstabe oder das Fach der Lehrkraft",
   "Sütun başlığında 08:30–09:10": "08:30–09:10 in der Spaltenüberschrift",
   "Hücrenin alt satırı": "Die untere Zeile der Zelle",
-  "Öğretmen kısaltması ya da derslik": "Das Kürzel der Lehrkraft oder der Raum",
+  "Öğretmenin kısa adı ya da derslik": "Der Kurzname der Lehrkraft oder der Raum",
   "Çıktı tarihi": "Druckdatum",
   "Sayfanın altında yazdırılma tarihi ve saati":
     "Datum und Uhrzeit des Drucks am Seitenfuß",
@@ -1472,16 +1462,16 @@ const DE: Sozluk = {
   "Aldığı dersler": "Belegte Fächer",
   "{ne} dersini başka öğretmene aktar":
     "Das Fach {ne} an eine andere Lehrkraft übergeben",
-  "Başka hocaya aktar…": "An andere Lehrkraft übergeben…",
+  "Başka öğretmene aktar…": "An andere Lehrkraft übergeben…",
   "{ne} dersi {kim} öğretmenine geçecek": "Das Fach {ne} geht an {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
-    "Dieses Fach steht noch nicht im Plan, es kann also nichts verloren gehen.",
-  "Programdaki {n} bloğu yeni öğretmenin haftasına göre yeniden denenecek; sığmayanlar havuza döner.":
-    "Seine {n} gesetzten Blöcke werden gegen die Woche der neuen Lehrkraft erneut geprüft; was nicht passt, geht zurück ins Fach.",
+    "Dieses Fach steht noch nicht im Stundenplan, es kann also nichts verloren gehen.",
+  "Programdaki {n} kartı yeni öğretmenin müsait saatlerine göre yeniden denenecek; sığmayanlar havuza döner.":
+    "Seine {n} gelegten Karten werden gegen die verfügbaren Stunden der neuen Lehrkraft erneut geprüft; was nicht passt, geht zurück ins Ablagefach.",
   Aktar: "Übergeben",
   "{ne} dersi {kim} öğretmenine geçti.": "Das Fach {ne} ging an {kim}.",
-  "{ne} dersi {kim} öğretmenine geçti. {n} blok havuza döndü.":
-    "Das Fach {ne} ging an {kim}. {n} Blöcke gingen zurück ins Fach.",
+  "{ne} dersi {kim} öğretmenine geçti. {n} kart havuza döndü.":
+    "Das Fach {ne} ging an {kim}. {n} Karten gingen zurück ins Ablagefach.",
   "Azalan sıralı. Artana çevirmek için tıklayın":
     "Absteigend sortiert. Klicken für aufsteigend",
   "Artan sıralı. Azalana çevirmek için tıklayın":
@@ -1490,7 +1480,7 @@ const DE: Sozluk = {
     "Zum Umsortieren ziehen oder Pfeiltasten benutzen",
   "Çözülmesi gereken satırlar": "Zu lösende Zeilen",
   "Danışman ({n})": "Berater ({n})",
-  "Öneri yok": "Keine Hinweise",
+  "Not yok": "Keine Hinweise",
   "Veri girişinde gözden kaçmış olabilecek noktalar":
     "Punkte, die bei der Dateneingabe übersehen worden sein könnten",
   "Öğretmen yükleri": "Lehrerdeputate",
@@ -1506,22 +1496,23 @@ const DE: Sozluk = {
   // way every entry here is: `i18n.test.ts` can tell us a key is DEAD, never
   // that one is missing - an untranslated sentence falls back to correct
   // Turkish and says nothing (pitfall 87).
-  " {n} blok geçici kapsam dışında kaldı.":
-    " {n} {n:Block blieb|Blöcke blieben} außerhalb.",
-  " · {n} blok geçici kapsam dışında": " · {n} {n:Block|Blöcke} außerhalb",
+  " {n} kart geçici kapsam dışında kaldı.":
+    " {n} {n:Karte blieb|Karten blieben} außerhalb.",
+  " · {n} kart geçici kapsam dışında": " · {n} {n:Karte|Karten} außerhalb",
   "{gun} geçici olarak kapsam dışında": "{gun} ist vorübergehend außerhalb",
-  "Program seç ve yönet": "Stundenplan wählen und verwalten",
-  "Kopyasını kaydet": "Kopie speichern",
-  "Boş program oluştur": "Leeren Stundenplan anlegen",
+  "Seçenek seç ve yönet": "Variante wählen und verwalten",
+  Seçenek: "Variante",
+  "Bu seçeneğin kopyası": "Kopie dieser Variante",
+  "Boş seçenek": "Leere Variante",
   "Yeniden adlandır": "Umbenennen",
-  "Programı sil": "Stundenplan löschen",
-  "Program adı": "Name des Stundenplans",
-  "Aynı okul verilerini kullanan alternatif program için bir ad yazın.":
-    "Benennen Sie den Alternativplan, der dieselben Schuldaten nutzt.",
-  "Program adı boş olamaz": "Der Stundenplan braucht einen Namen",
-  "Bu program adı zaten kullanılıyor": "Dieser Name ist bereits vergeben",
+  "Seçeneği sil": "Variante löschen",
+  "Seçenek adı": "Name der Variante",
+  "Bu planın verilerini kullanan seçenek için bir ad yazın.":
+    "Benennen Sie die Variante, die die Daten dieses Plans nutzt.",
+  "Seçenek adı boş olamaz": "Die Variante braucht einen Namen",
+  "Bu seçenek adı zaten kullanılıyor": "Dieser Name ist bereits vergeben",
   Kaydet: "Speichern",
-  "{ad} programı silinecek": "Der Stundenplan {ad} wird gelöscht",
+  "{ad} seçeneği silinecek": "Die Variante {ad} wird gelöscht",
   "{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.":
     "{n} belegte {n:Stunde|Stunden} und {s} {s:Anheftung|Anheftungen} gehen mit. Die gemeinsamen Schuldaten bleiben.",
   "Öğretmeni düzenle": "Lehrkraft bearbeiten",
@@ -1542,8 +1533,8 @@ const DE: Sozluk = {
   soluk: "abgeblendet",
   gizli: "ausgeblendet",
   İşlemler: "Aktionen",
-  "Izgara işlemleri": "Aktionen für den Plan",
-  "Tüm programı sabitle": "Ganzen Plan anheften",
+  "Izgara işlemleri": "Aktionen für das Raster",
+  "Tüm programı sabitle": "Ganzen Stundenplan anheften",
   "Tüm sabitlemeleri kaldır": "Alle Anheftungen lösen",
   "{n} saat sabitlendi.": "{n} {n:Stunde|Stunden} angeheftet.",
   "{n} saatin sabitlemesi kaldırıldı.":
@@ -1557,19 +1548,19 @@ const DE: Sozluk = {
   Taşı: "Verschieben",
   "Yerleşmiş saatler olduğu gibi taşınır. Ctrl+Z ile geri alınabilir.":
     "Die belegten Stunden ziehen mit. Ctrl+Z macht es rückgängig.",
-  "{n} blok havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.":
-    "{n} {n:Block geht|Blöcke gehen} zurück ins Ablagefach, {s} {s:Anheftung wird|Anheftungen werden} gelöst. Ctrl+Z macht es rückgängig.",
+  "{n} kart havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.":
+    "{n} {n:Karte geht|Karten gehen} zurück ins Ablagefach, {s} {s:Anheftung wird|Anheftungen werden} gelöst. Ctrl+Z macht es rückgängig.",
   "Ders {ad} sınıfına taşındı.": "Die Stunde ist zu {ad} gewechselt.",
-  "Ders {ad} sınıfına taşındı. {n} blok havuza döndü.":
-    "Die Stunde ist zu {ad} gewechselt. {n} {n:Block ging|Blöcke gingen} zurück ins Ablagefach.",
+  "Ders {ad} sınıfına taşındı. {n} kart havuza döndü.":
+    "Die Stunde ist zu {ad} gewechselt. {n} {n:Karte ging|Karten gingen} zurück ins Ablagefach.",
   "Ders {kim} öğretmenine geçsin mi?": "Die Stunde an {kim} übergeben?",
   "Yerleşmiş saatler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.":
     "Die belegten Stunden bleiben, wo sie sind. Ctrl+Z macht es rückgängig.",
-  "{n} blok havuza döner. Ctrl+Z ile geri alınabilir.":
-    "{n} {n:Block geht|Blöcke gehen} zurück ins Ablagefach. Ctrl+Z macht es rückgängig.",
+  "{n} kart havuza döner. Ctrl+Z ile geri alınabilir.":
+    "{n} {n:Karte geht|Karten gehen} zurück ins Ablagefach. Ctrl+Z macht es rückgängig.",
   "Ders {kim} öğretmenine geçti.": "Die Stunde ist an {kim} gegangen.",
-  "Ders {kim} öğretmenine geçti. {n} blok havuza döndü.":
-    "Die Stunde ist an {kim} gegangen. {n} {n:Block ging|Blöcke gingen} zurück ins Ablagefach.",
+  "Ders {kim} öğretmenine geçti. {n} kart havuza döndü.":
+    "Die Stunde ist an {kim} gegangen. {n} {n:Karte ging|Karten gingen} zurück ins Ablagefach.",
   "**Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir.":
     "Im Tab **Fächer** lassen sich Stunden löschen und neue anlegen.",
   "Art arda en fazla": "Höchstens am Stück",
@@ -1577,17 +1568,17 @@ const DE: Sozluk = {
   "Günde aynı dersten en fazla": "Gleiches Fach pro Tag höchstens",
   "Havuz sıralaması": "Reihenfolge im Ablagefach",
   "Havuz süzgeci": "Filter im Ablagefach",
-  "Izgara sırası": "Wie im Plan",
-  "Uzun bloklar önce": "Lange Blöcke zuerst",
+  "Izgara sırası": "Wie im Raster",
+  "Uzun kartlar önce": "Lange Karten zuerst",
   "En çok kalan": "Am meisten offen",
-  "{n} saatlik bloklar": "Blöcke zu {n} Stunden",
+  "{n} saatlik kartlar": "Karten zu {n} Stunden",
   "{n} saat kaldı": "noch {n} {n:Stunde|Stunden}",
-  "{n} blok süzgeç dışında · sürükleyip bırakın":
-    "{n} weitere {n:Block|Blöcke} hinter dem Filter · ziehen und ablegen",
+  "{n} kart süzgeç dışında · sürükleyip bırakın":
+    "{n} weitere {n:Karte|Karten} hinter dem Filter · ziehen und ablegen",
   Göster: "Anzeigen",
   Saatler: "Uhrzeiten",
   Satır: "Zeile",
-  "Ders numaralarının altına başlangıç saatlerini yaz":
+  "Saat numaralarının altına başlangıç saatlerini yaz":
     "Anfangszeit unter jeder Stundennummer anzeigen",
   "Haftanın darlığı tablosunu göster ya da gizle":
     "Tabelle der engsten Stunden ein- oder ausblenden",
@@ -1605,30 +1596,30 @@ const DE: Sozluk = {
     "**Wenig.** Die Dauern halbieren sich, und alles, was sich BEWEGT, entfällt.",
   "**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin.":
     "**Der offene Plan** wird gelöscht, **nicht widerrufbar**; erst **In Datei speichern**.",
-  "**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:":
-    "**Diese Kopie aktualisiert sich nie** und verbindet sich nirgends. Neueste Version:",
+  "**Mozaik burada kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:":
+    "**Hier aktualisiert sich Mozaik nie** und verbindet sich nirgends. Neueste Version:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
     "**Alle Pläne** werden von selbst nach Dokumente geschrieben; die letzten {gun} Tage bleiben.",
   "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
     "**Weit.** Die größte Zelle: am besten lesbar, am meisten Scrollen.",
-  "**Rahat.** Hücre geniş ve saatler yazılı; hafta sığmadığı için sağa kaydırırsınız.":
-    "**Bequem.** Breite Zellen mit Uhrzeiten; die Woche passt nicht, also scrollen Sie.",
-  "**Sığdır.** Haftanın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Passend.** Die ganze Woche auf einem Bildschirm; der Preis: **Uhrzeiten entfallen**.",
+  "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
+    "**Bequem.** Breite Zellen mit Uhrzeiten; der Stundenplan passt nicht, also scrollen Sie.",
+  "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
+    "**Passend.** Der ganze Stundenplan auf einem Bildschirm; der Preis: **Uhrzeiten entfallen**.",
   "**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**.":
     "**Passend.** Zeilen rücken zusammen; gekürzt wird Abstand, **nicht die Schriftgröße**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
     "**Ihr Browser kann nicht in einen Ordner schreiben.** Chrome und Edge können es.",
-  "**Uyar** yalnız sayar, **Engelle** dersi o hücreye hiç bıraktırmaz.":
-    "**Warnen** zählt nur; **Sperren** lässt die Stunde dort gar nicht ablegen.",
-  "**Yük**, **Açık**'ı geçerse o sınıfın haftası tutmaz.":
-    "Übersteigt **Last** den Wert **Offen**, geht die Woche dieser Klasse nicht auf.",
-  "Arayüzün dili. Bu bilgisayara aittir, yedek dosyasına girmez.":
-    "Die Sprache der Oberfläche. Sie gehört zu diesem Rechner, nicht zur Sicherungsdatei.",
+  "**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz.":
+    "**Warnung** zählt nur; **Sperre** lässt die Karte dort gar nicht ablegen.",
+  "**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz.":
+    "Übersteigt **Last** den Wert **Offen**, geht der Stundenplan dieser Klasse nicht auf.",
+  "Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.":
+    "Die Sprache der Oberfläche. Sie gehört zu diesem Rechner, nicht zur Plandatei.",
   "Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı.":
     "Auch die **Gesamtstunden** von Klassen mit gemeinsamem Raum müssen in die Woche passen.",
-  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit odasıdır.":
-    "Eine Schülergruppe mit gemeinsamem Plan; der **Raum** ist ihr fester Raum.",
+  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
+    "Eine Schülergruppe mit gemeinsamem Stundenplan; der **Raum** ist ihr fester Raum.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "Das sind **Ihre eigenen Lehrkräfte**: Passt ein Name nicht, ist die Größe zu groß.",
   "Basılan sayfada saatler her üç durumda da yazar.":
@@ -1645,22 +1636,22 @@ const DE: Sozluk = {
     "Wählen Sie einen Ordner; **alle Pläne** landen dort, die letzten {gun} Tage bleiben.",
   "Bir öğretmen iki branş veriyorsa + İkinci branş ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; boş bırakılırsa Ayarlar → Kurallar’daki sayı geçerli olur.":
     "Unterrichtet eine Lehrkraft zwei Fächer, wird das zweite mit + Zweites Fach eingetragen; bei jeder Stunde wird dann zusätzlich gewählt, welches der beiden gilt. Die Farbe wird automatisch vergeben und kollidiert mit keiner anderen. Die drei Felder rechts sind die eigenen Grenzen dieser Lehrkraft; bleiben sie leer, gilt der Wert aus Einstellungen → Regeln.",
-  "Bir şey belirirken görülen kısa hareketler; kapatmak programın işini değiştirmez.":
+  "Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez.":
     "Die kurzen Bewegungen beim Erscheinen; das Abschalten ändert sonst nichts.",
-  "Branş **listeden seçilir**; kısaltma ızgarada satır başlığı olur.":
-    "Das Fach wird **aus der Liste gewählt**; das Kürzel steht am Zeilenkopf.",
+  "Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur.":
+    "Das Fach wird **aus der Liste gewählt**; der Kurzname steht am Zeilenkopf.",
   "Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde.":
     "Gehört zu diesem Rechner und **ändert den Druck nicht**; Papierschrift unter **Ausgabe**.",
-  "Bu depo yalnız {adres} adresine ait; öteki kopyaların depoları **ayrıdır**.":
-    "Dieser Speicher gehört allein zu {adres}; die anderen Kopien haben **eigene**.",
+  "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
+    "Dieser Speicher gehört allein zu {adres}; Mozaik unter einer anderen Adresse hat einen **eigenen**.",
   "Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi.":
     "Diese Stunden wurden **nach** dem Setzen der Stunden gesperrt; gelöscht wurde keine.",
   "Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.":
     "Diese Stunden sind noch nicht ganz gesetzt, aber es ist keine Zelle mehr frei.",
-  "Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
-    "Diese Kopie kann sich aktualisieren, verbindet sich aber erst **auf Knopfdruck**.",
-  "Bu kopya geliştirme ve test için; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
-    "Diese Kopie dient der Entwicklung und dem Testen; sie aktualisiert sich nicht selbst. Die Prüfung sagt nur, ob es eine neue Version gibt.",
+  "Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
+    "Hier kann sich Mozaik aktualisieren, verbindet sich aber erst **auf Knopfdruck**.",
+  "Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
+    "Dies ist die Entwicklungs- und Testfassung von Mozaik; sie aktualisiert sich nicht selbst. Die Prüfung sagt nur, ob es eine neue Version gibt.",
   "Bu sayılar **bütün okul** için; **0** yazmak “sınır yok” demektir.":
     "Diese Zahlen gelten für die **ganze Schule**; **0** heißt „keine Grenze“.",
   "Bu tarayıcının bu bilgisayardaki deposunda duruyor.":
@@ -1677,21 +1668,21 @@ const DE: Sozluk = {
     "Die Aufteilung sagt, wie sich die Stunden über die Woche verteilen: 2+1 heißt zwei Stunden am Stück an einem Tag und eine einzelne an einem anderen. Ein Block kann 2 oder 3 Stunden umfassen; der Rest sind Einzelstunden. Pro Tag ↑ ist das Höchstmaß an einem Tag; bleibt es leer, gilt der Wert aus Einstellungen → Regeln.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Haken Sie die Unterrichtstage an; das Feld daneben nennt die **Mittagspause**.",
-  "Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":
+  "Derslik dizerken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":
     "Der Raum wird beim Setzen nicht gewählt, und zwei Klassen mit demselben Raum können nicht zur selben Stunde. Die Farbe wird automatisch vergeben, kollidiert mit keiner anderen und erscheint als Punkt am Zeilenkopf sowie im Titel des gedruckten Blatts.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Für Klassen ohne Raum entfällt diese Prüfung.",
   "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
     "Der **Rest** des Bildschirms: Listen, Panels, Felder. Das Raster bleibt unberührt.",
-  "Gün kaçta başlıyor, ders ve teneffüs kaç dakika. Saatler bunlardan hesaplanır.":
-    "Wann der Tag beginnt und wie lang Stunde und Pause sind. Daraus folgen die Zeiten.",
+  "Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.":
+    "Wann der Tag beginnt und wie viele Minuten eine Stunde und eine Pause dauern. Die Klingelzeiten werden daraus berechnet.",
   "Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**":
     "Eine fertige Schule: 25 Lehrkräfte, 20 Klassen, 99 Stunden. **Ersetzt den offenen Plan.**",
-  "Her plan **ayrı bir programdır**; üst çubuktaki listeden aralarında geçilir.":
-    "Jeder Plan ist **ein eigener Stundenplan**; die Liste oben wechselt zwischen ihnen.",
+  "Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir.":
+    "Jeder Plan **hat eigene Daten**; die Liste oben wechselt zwischen ihnen.",
   "Her sınıf okul sayısını kullanıyor. Bir sınıfa özel sayı: **Okul → Sınıflar**.":
     "Jede Klasse nutzt den Schulwert. Für eine einzelne: **Schule → Klassen**.",
-  "Her sınıfın sabit odası; aynı dersliği paylaşan iki sınıf aynı saate konamaz.":
+  "Her sınıfın sabit dersliği; aynı dersliği paylaşan iki sınıf aynı saate konamaz.":
     "Der feste Raum jeder Klasse; zwei Klassen mit demselben Raum können nicht gleichzeitig.",
   "Herkes okul sınırlarını kullanıyor. Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
     "Alle nutzen die Schulgrenzen. Für eine Lehrkraft: **Schule → Lehrkräfte**.",
@@ -1699,28 +1690,28 @@ const DE: Sozluk = {
     "Gesperrte Stunden sind schraffiert; ändern unter **Verfügbarkeit**.",
   "Okulun listesinde **bulunmayan** hazır branşlar; eklemek için tıklayın.":
     "Mitgelieferte Fächer, die **nicht** auf der Schulliste stehen; zum Hinzufügen klicken.",
-  "Program **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil.":
-    "Das Programm speichert **von selbst**; **In Datei speichern** kommt daneben, nicht dafür.",
+  "Mozaik **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil.":
+    "Mozaik speichert **von selbst**; **In Datei speichern** kommt daneben, nicht dafür.",
   "Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor.":
-    "Der Plan überschreitet die Grenzen aus **Einstellungen → Regeln**.",
+    "Der Stundenplan überschreitet die Grenzen aus **Einstellungen → Regeln**.",
   "Renk kimliktir: ızgaradaki satırı havuzdaki kartıyla eşleştiren şey budur.":
     "Farbe ist Identität: Sie verbindet die Zeile im Raster mit ihrer Karte im Fach.",
-  "Sekmelerin altındaki bar, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**.":
-    "Die Leiste unter den Reitern **blendet sich beim Herunterscrollen aus**.",
+  "Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**.":
+    "Die Werkzeugleiste unter den Reitern **blendet sich beim Herunterscrollen aus**.",
   "Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.":
     "Löschungen haben Lücken in den Farben hinterlassen; Neuverteilen ordnet sie nur.",
   "Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.":
     "Aus Startzeit und drei Dauern berechnet; jedes Pausenmuster hat eine eigene Spalte.",
-  "Son üç oturumun durumu ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
-    "Die letzten drei Sitzungen liegen separat; sie gehören zu **diesem Rechner** und dem Startplan.",
-  "Sınıf başına **{yer}** saat var ({gun} gün × {ders} ders); girilen yük **{yuk}** saat.":
+  "Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
+    "Der Stand der letzten drei Starts wird als automatische Sicherung getrennt aufbewahrt; er gehört zu **diesem Computer** und zum Plan, der beim Start offen war.",
+  "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":
     "**{yer}** Stunden je Klasse ({gun} Tage × {ders} Stunden); eingetragene Last: **{yuk}**.",
   "Sırayla: **derslikler**, **branşlar**, **öğretmenler**, **sınıflar**, sonra **dersler**.":
     "Der Reihe nach: **Räume**, **Fächer**, **Lehrkräfte**, **Klassen**, dann **Stunden**.",
   "Tarayıcının bu site için ayırdığı depoda duruyor.":
     "Es liegt in dem Speicher, den der Browser für diese Seite hält.",
-  "Toplam **{yer}**; tarayıcının bu programa ayırdığı yer yaklaşık **5 MB**.":
-    "Insgesamt **{yer}**; der Browser gibt diesem Programm etwa **5 MB**.",
+  "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
+    "Insgesamt **{yer}**; der Browser gibt Mozaik etwa **5 MB**.",
   "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
     "Betrifft nur das Raster in **Stundenplan**: Zellengröße und sichtbare Tage.",
   "Yazdırma penceresinde **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz.":
@@ -1734,18 +1725,16 @@ const DE: Sozluk = {
   "{ad} temaya geç": "Zum Design {ad} wechseln",
   "{dosya} **bütün planlarınızdır**; yanındakiler onun gün gün duran hâlleri.":
     "{dosya} sind **alle Ihre Pläne**; die Dateien daneben sind die Tageskopien.",
-  "{n} engelle": "{n} sperren",
   "{n} gün": "{n} {n:Tag|Tage}",
   "{n} kapalı": "{n} aus",
-  "{n} uyar": "{n} warnen",
   "Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz.":
     "Beim Anlegen einer Lehrkraft wird das Fach **aus dieser Liste** gewählt, nie getippt.",
   "Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz.":
     "Die offenen Stunden einer Lehrkraft dürfen nicht unter ihrer Last liegen.",
   "Üst çubuktaki **Dosyaya kaydet** açık planı yazar; buradaki dosya **bütün planları**.":
     "**In Datei speichern** oben schreibt den offenen Plan; diese Datei **alle Pläne**.",
-  "İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve oturum yedekleri girmez.":
-    "Inhalt: Räume, Lehrkräfte, Klassen, Stunden, gesetzter Plan, Name und Entwurfsmarke jedes Plans. Einstellungen dieses Rechners wie das Design und die Sitzungssicherungen sind nicht dabei.",
+  "İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.":
+    "Inhalt: Räume, Lehrkräfte, Klassen, Fächer, gelegter Stundenplan, Name und Entwurfsmarke jedes Plans. Einstellungen dieses Rechners wie das Design und die automatischen Sicherungen sind nicht dabei.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Was abgewählt ist, kommt nicht aufs Papier.",
   "E-posta":
@@ -1756,29 +1745,29 @@ const DE: Sozluk = {
     "Hier steht genau eine E-Mail-Adresse: name@beispiel.de",
   "E-postayla gönder":
     "Per E-Mail senden",
-  "Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
-    "Die Woche der Lehrkraft öffnet sich als neue Nachricht in Ihrem E-Mail-Programm. Auf Senden drücken Sie selbst.",
+  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
+    "Der Stundenplan der Lehrkraft öffnet sich als neue Nachricht in Ihrer E-Mail-App. Auf Senden drücken Sie selbst.",
   "adres yok":
     "keine Adresse",
   "adres hatalı":
     "Adresse fehlerhaft",
   "programı boş":
-    "Plan ist leer",
+    "Stundenplan ist leer",
   "e-postaya sığmıyor":
     "zu lang für eine E-Mail",
   "{kim} için e-postayı aç":
     "E-Mail an {kim} öffnen",
   "E-postada aç":
     "In E-Mail öffnen",
-  "Bu bilgisayarda seçili bir e-posta programı yok.":
-    "Auf diesem Computer ist kein E-Mail-Programm ausgewählt.",
-  "E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.":
-    "Wenn sich kein E-Mail-Programm geöffnet hat, ist auf diesem Computer keines ausgewählt.",
-  "E-posta programı açılamadı.":
-    "Das E-Mail-Programm ließ sich nicht öffnen.",
+  "Bu bilgisayarda seçili bir e-posta uygulaması yok.":
+    "Auf diesem Computer ist keine E-Mail-App ausgewählt.",
+  "E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.":
+    "Wenn sich keine E-Mail-App geöffnet hat, ist auf diesem Computer keine ausgewählt.",
+  "E-posta uygulaması açılamadı.":
+    "Die E-Mail-App ließ sich nicht öffnen.",
   "{ad} · Haftalık ders programı":
     "{ad} · Wochenstundenplan",
-  "{n}. ders":
+  "{n}. saat":
     "{n}. Stunde",
   "Ders silindi.": "Fach gelöscht.",
   "{ne} silindi.": "{ne} gelöscht.",

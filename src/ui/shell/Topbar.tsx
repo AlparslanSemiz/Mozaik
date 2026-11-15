@@ -205,10 +205,10 @@ export default function Topbar({
         className="btn primary"
         onClick={() => {
           downloadBackup(state);
-          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         }}
         title={t(
-          'Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.',
+          'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
         )}
       >
         {t('Dosyaya kaydet')}

@@ -1560,7 +1560,7 @@ describe('entityFacts', () => {
     d = setWholeWeek(d, d.teachers[0]!.id, true);
     const facts = entityFacts(d, 'teacher', d.teachers[0]!.id)!;
     expect(facts.rows.find((r) => r.label === 'Haftalık ders yükü')!.tight).toBe(true);
-    expect(facts.rows.find((r) => r.label === 'Açık saat')!.value).toBe(
+    expect(facts.rows.find((r) => r.label === 'Müsait saat')!.value).toBe(
       `0 / ${d.settings.days.length * d.settings.hours.length}`,
     );
   });

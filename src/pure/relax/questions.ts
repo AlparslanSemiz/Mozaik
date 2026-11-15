@@ -79,7 +79,7 @@ export function suggestionQuestions(d: State, s: Suggestion): Question[] {
         refusal: { kind: 'teacherHours', ...entry, hours: [...entry.hours] },
       },
       {
-        label: t('{gun} hiç gelemez', { gun }),
+        label: t('{gun} hiç müsait değil', { gun }),
         refusal: { kind: 'teacherDay', teacherId: entry.teacherId, day: entry.day },
       },
     ];

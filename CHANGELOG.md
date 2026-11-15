@@ -25,6 +25,8 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- Every idea on screen now has one name, and no word stands for two ideas. A "plan" is a whole saved school (a new first plan is called "Plan 1"); "program" is only the laid-out weekly timetable; a timetable variant inside a plan is a "seçenek" (variant), so the strip's menu says "Seçenek", "Bu seçeneğin kopyası" and "Boş seçenek", and a new one is "Seçenek 1"; the application itself is "Mozaik" ("Mozaik'i güncelleyin" instead of "Programı güncelleyin"). A period of the day is a "saat" ("3. saat", "Günlük saat sayısı"), the piece you move on the grid and in the tray is a "kart" ("2 kart bekliyor"), and "blok" is left for the 2- or 3-hour split of a lesson. A teacher has a "Kısa ad" (subjects keep their "kısaltma"), teachers are "müsait" or "müsait değil", the hard rule level is "Engel" and the soft one "Uyarı", Danışman lists "notlar", the single-plan file is a "plan dosyası", the sample button is "Örnek okulu yükle" everywhere, and each tool strip is named after its tab. The English, German, French and Spanish texts follow the same rule (German "Stundenplan" for the timetable, "Plan" for the plan; Spanish "copia de seguridad" for a backup). Saved data, file names and plans made before keep their names and open unchanged.
+- The in-app note for 2.1.0 said Ctrl+K opens the keyboard help; it is the top-bar button or the "?" key (Ctrl+K opens search).
 - Deleting a lesson or a teacher, and "Programı boşalt", no longer ask first: the change happens and a notice says what went, with a "Geri al" (undo) button for 8 seconds. The button only undoes that change; after any other edit it does nothing. Ctrl+Z works as before.
 - Kontrol no longer marks a class "Sıkışık" (tight) just because its lessons fill its open hours, which a full course does on purpose; a class is flagged only when its lessons do not fit. Teachers and rooms keep the warning.
 - When "Fill automatically" gets stuck, the panel shows only the first way the week can be built; the others fold under "Other ways (N)". While it searches, one line with the seconds and a progress bar replaces the row per way.
@@ -144,7 +146,7 @@ gained them on 2026-09-26, before 2.2.0.
 ### Added
 
 - Class and teacher gap rules, planning analysis, and Advisor notes.
-- A help screen for keyboard shortcuts (top bar, Ctrl+K, or the ? key).
+- A help screen for keyboard shortcuts (top bar, or the ? key; Ctrl+K opens search, not the help).
 - A What's new panel in Settings > About, with a dot on the Settings tab until it is seen.
 
 ### Changed

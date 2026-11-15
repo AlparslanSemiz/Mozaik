@@ -70,10 +70,10 @@ export default function Classes({ state, change }: PanelProps) {
           </button>
         }
         description={
-          <T k="Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit odasıdır." />
+          <T k="Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir." />
         }
         more={t(
-          'Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.',
+          'Derslik dizerken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.',
         )}
       >
         <div className="form-row">

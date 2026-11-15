@@ -110,7 +110,7 @@ export function Inspector({
           placed === 0
             ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
             : t(
-                'Programdaki {n} bloğu yeni öğretmenin haftasına göre yeniden denenecek; sığmayanlar havuza döner.',
+                'Programdaki {n} kartı yeni öğretmenin müsait saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
                 { n: placed },
               ),
         confirmLabel: t('Aktar'),
@@ -128,7 +128,7 @@ export function Inspector({
     toast(
       returned === 0
         ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.short })
-        : t('{ne} dersi {kim} öğretmenine geçti. {n} blok havuza döndü.', {
+        : t('{ne} dersi {kim} öğretmenine geçti. {n} kart havuza döndü.', {
             ne: other,
             kim: to.short,
             n: returned,
@@ -205,12 +205,12 @@ export function Inspector({
 
                 {teacherOf !== undefined && (
                   <>
-                    <dt>{t('Kısaltma')}</dt>
+                    <dt>{t('Kısa ad')}</dt>
                     <dd>
                       <input
                         type="text"
                         className="text-sm"
-                        aria-label={t('Kısaltma')}
+                        aria-label={t('Kısa ad')}
                         key={`s-${teacherOf.id}-${teacherOf.short}`}
                         defaultValue={teacherOf.short}
                         onBlur={(e) => {
@@ -423,7 +423,7 @@ export function Inspector({
                               aria-label={t('{ne} dersini başka öğretmene aktar', { ne: x.other })}
                               onChange={(e) => void hand(x.id, x.other, e.target.value)}
                             >
-                              <option value="">{t('Başka hocaya aktar…')}</option>
+                              <option value="">{t('Başka öğretmene aktar…')}</option>
                               {state.teachers
                                 .filter((teacher) => teacher.id !== lessonTeacher(x.id))
                                 .map((teacher) => (

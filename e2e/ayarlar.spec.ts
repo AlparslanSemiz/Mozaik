@@ -67,7 +67,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     // Both patterns still end at 19:10 — there is exactly one long break.
     await expect(preview.locator('tbody tr').last()).toContainText('19:10');
 
-    const lengthBox = page.getByLabel('Ders (dk)');
+    const lengthBox = page.getByLabel('Saat (dk)');
     await lengthBox.fill('45');
     await lengthBox.blur();
     await expect(preview).toContainText('09:00–09:45');
@@ -143,7 +143,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     await expect(firstHour).toHaveText('09:00');
 
     await openSettings(page, 'Zil ve günler');
-    const lessonMinutes = page.getByLabel('Ders (dk)');
+    const lessonMinutes = page.getByLabel('Saat (dk)');
     await lessonMinutes.fill('45');
     await lessonMinutes.blur();
 
@@ -457,11 +457,11 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   test('günlük ders sayısını düşürmek de önce kaybı soruyor', async ({ page }) => {
     const before = await laidOutSample(page);
     await openSettings(page, 'Zil ve günler');
-    const count = page.getByLabel('Günlük ders sayısı');
+    const count = page.getByLabel('Günlük saat sayısı');
     await count.fill('10');
     await count.blur();
     const said = await answerDialog(page, 'cancel');
-    expect(said).toMatch(/10\. dersten sonraki saatlerde yerleşmiş \d+ saat var/);
+    expect(said).toMatch(/10\. saatten sonra yerleşmiş \d+ saat var/);
     // The box is not React's to reset (defaultValue), so it is put back by hand.
     await expect(count).toHaveValue('12');
 
@@ -474,11 +474,11 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   test('ders adlarına az ad yazmak günü kısaltmıyor, hiçbir dersi indirmiyor', async ({ page }) => {
     const before = await laidOutSample(page);
     await openSettings(page, 'Zil ve günler');
-    const names = page.getByLabel(/Ders adları/);
+    const names = page.getByLabel(/Saat adları/);
     await names.fill('Etüt, 1, 2, 3');
     await names.blur();
     await expect(page.locator('.dlg')).toHaveCount(0);
-    await expect(page.getByLabel('Günlük ders sayısı')).toHaveValue('12');
+    await expect(page.getByLabel('Günlük saat sayısı')).toHaveValue('12');
     // The box shows what the day is now called, hour by hour.
     await expect(names).toHaveValue('Etüt, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12');
 
@@ -492,12 +492,12 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   }) => {
     await openWithSample(page);
     await openSettings(page, 'Zil ve günler');
-    const names = page.getByLabel(/Ders adları/);
+    const names = page.getByLabel(/Saat adları/);
     await names.fill('1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14');
     await names.blur();
     await expect(names).toHaveValue('1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12');
-    await expect(page.getByText('2 ad ders sayısından fazlaydı ve kullanılmadı.')).toBeVisible();
-    await expect(page.getByLabel('Günlük ders sayısı')).toHaveValue('12');
+    await expect(page.getByText('2 ad saat sayısından fazlaydı ve kullanılmadı.')).toBeVisible();
+    await expect(page.getByLabel('Günlük saat sayısı')).toHaveValue('12');
   });
 
   test('gün eklenince ızgaraya bir sütun grubu ekleniyor', async ({ page }) => {
@@ -516,7 +516,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   test('günlük ders sayısı artırılınca ızgara büyüyor', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Zil ve günler');
-    const count = page.getByLabel('Günlük ders sayısı');
+    const count = page.getByLabel('Günlük saat sayısı');
     await count.fill('14');
     await count.blur();
 
@@ -532,11 +532,11 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   test('ders adları verilebiliyor ve ızgarada görünüyor', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Zil ve günler');
-    const count = page.getByLabel('Günlük ders sayısı');
+    const count = page.getByLabel('Günlük saat sayısı');
     await count.fill('3');
     await count.blur();
 
-    const names = page.getByLabel(/Ders adları/);
+    const names = page.getByLabel(/Saat adları/);
     await names.fill('Sabah, Öğle, Akşam');
     await names.blur();
 
@@ -551,7 +551,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     await page
       .locator('table.list tr', { hasText: 'Salı' })
       .locator('select')
-      .selectOption({ label: '3. dersten sonra' });
+      .selectOption({ label: '3. saatten sonra' });
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // The separator sits on the LEFT edge of the period that follows it.
@@ -591,7 +591,7 @@ test.describe('33. Ayarlar — kurallar', () => {
 
     const min = page.locator('table.list tr', { hasText: 'Öğretmen günde en az' });
     await expect(min.locator('select option')).toHaveCount(2);
-    await expect(min.locator('select')).not.toContainText('Engelle');
+    await expect(min.locator('select')).not.toContainText('Engel');
 
     const max = page.locator('table.list tr', { hasText: 'Öğretmen günde en fazla' });
     await expect(max.locator('select option')).toHaveCount(3);
@@ -610,7 +610,7 @@ test.describe('33. Ayarlar — kurallar', () => {
     ]) {
       const row = page.locator('table.list tr', { hasText: label });
       await expect(row.locator('select option')).toHaveCount(2);
-      await expect(row.locator('select')).not.toContainText('Engelle');
+      await expect(row.locator('select')).not.toContainText('Engel');
     }
   });
 

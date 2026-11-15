@@ -103,7 +103,7 @@ export function blockerDetail(
       message:
         block === 1
           ? t('Bu saat günün dışında')
-          : t('{boy} saatlik blok güne sığmıyor', { boy: block }),
+          : t('{boy} saatlik kart güne sığmıyor', { boy: block }),
     };
   }
 

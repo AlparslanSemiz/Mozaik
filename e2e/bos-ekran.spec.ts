@@ -32,8 +32,8 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     }) => {
       await open(page);
       const line = page.locator('.intro-line');
-      await expect(line).toContainText('Aracın ne yaptığını görmek');
-      await expect(line.getByRole('button', { name: 'Örnek veriyle doldur' })).toBeVisible();
+      await expect(line).toContainText("Mozaik'in ne yaptığını görmek");
+      await expect(line.getByRole('button', { name: 'Örnek okulu yükle' })).toBeVisible();
 
       await line.getByRole('button', { name: 'Bir daha gösterme' }).click();
       await expect(page.locator('.intro-line')).toHaveCount(0);
@@ -47,7 +47,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
     test('örnek veri yüklendikten sonra Kurulum’a dönünce satır yok', async ({ page }) => {
       await open(page);
-      await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+      await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
       await answerDialog(page);
       await expect.poll(() => savedText(page)).toContain('Örnek Kurs');
 

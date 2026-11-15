@@ -146,7 +146,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       await loadWorld(page, world.state);
       await autoFill(page);
       await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-      await expect(page.locator('.badge', { hasText: 'Kural dışı' })).toHaveCount(0);
+      await expect(page.locator('.badge', { hasText: /^Engel$/ })).toHaveCount(0);
     }
   });
 

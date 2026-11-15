@@ -81,7 +81,7 @@ export async function open(page: Page) {
 /** Loads the sample data and switches to the Program tab. */
 export async function openWithSample(page: Page) {
   await open(page);
-  await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+  await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
   await answerDialog(page); // "örnek okul verisi yüklenecek"
   await page.getByRole('button', { name: 'Program', exact: true }).click();
   await expect(page.locator('table.grid')).toBeVisible();
@@ -294,7 +294,7 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
 }
 
 /**
- * A hand-built world loaded through the real "Yedek yükle" dialog: 2 days x 4
+ * A hand-built world loaded through the real "Planı aç" dialog: 2 days x 4
  * hours, one teacher, one class. Everything fits on screen, so the rule tests
  * below do not depend on where the sample data happens to leave a free cell.
  */
@@ -838,7 +838,7 @@ export async function openWithSampleTheme(page: Page, theme: 'light' | 'dark') {
   await page.goto(FILE);
   await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
   await page.reload();
-  await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+  await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
   await answerDialog(page);
 }
 

@@ -69,7 +69,7 @@ export function teacherListConfig(state: State, t: Translate): ListConfig<Teache
       },
       {
         id: 'acik',
-        label: t('Açık saate göre'),
+        label: t('Müsait saate göre'),
         cmp: byNumberThen(
           (x) => openHours(state, x.id),
           (x) => x.name,

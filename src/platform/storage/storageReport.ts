@@ -106,7 +106,10 @@ export function storageReport(lib: Library): StorageReport {
   for (let i = 0; i < BACKUP_COUNT; i++) {
     rows.push({
       key: backupKey(i),
-      what: i === 0 ? t('bir önceki oturum') : t('{n} oturum önce', { n: i + 1 }),
+      what:
+        i === 0
+          ? t('otomatik yedek · bir önceki açılış')
+          : t('otomatik yedek · {n} açılış önce', { n: i + 1 }),
       chars: charsAt(backupKey(i)),
     });
   }

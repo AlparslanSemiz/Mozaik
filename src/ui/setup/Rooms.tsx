@@ -52,7 +52,7 @@ export default function Rooms({ state, change }: PanelProps) {
           </button>
         }
         description={t(
-          'Her sınıfın sabit odası; aynı dersliği paylaşan iki sınıf aynı saate konamaz.',
+          'Her sınıfın sabit dersliği; aynı dersliği paylaşan iki sınıf aynı saate konamaz.',
         )}
         more={t('Dersliği olmayan sınıflar için bu kontrol yapılmaz.')}
       >

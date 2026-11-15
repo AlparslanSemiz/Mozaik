@@ -118,7 +118,7 @@ export function teacherMail(
             ? `  ${periods[e.from]?.start ?? ''}–${periods[e.to]?.end ?? ''}`
             : '';
           const room = withTimes && e.room !== '' ? ` · ${e.room}` : '';
-          return `  ${t('{n}. ders', { n: label(e) })}${time}  ${e.group}${room}`;
+          return `  ${t('{n}. saat', { n: label(e) })}${time}  ${e.group}${room}`;
         }),
         '',
       ];

@@ -67,7 +67,7 @@ const GROUPS: Group[] = [
   {
     title: 'Izgara',
     rows: [
-      { keys: 'Delete', desc: 'Odaklı dersi havuza kaldır' },
+      { keys: 'Delete', desc: 'Odaklı kartı havuza kaldır' },
       { keys: 'Enter', desc: 'Odaklı kartın sağ tık menüsünü aç' },
     ],
   },

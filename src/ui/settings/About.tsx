@@ -91,7 +91,7 @@ export function Build({ update }: { update: UpdateRun }) {
       {update.kind === 'exe' && <ExeUpdate update={update} />}
       {update.kind === 'yok' && (
         <p className="hint">
-          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{' '}
+          <T k="**Mozaik burada kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{' '}
           <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
           </a>
@@ -224,9 +224,9 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
     <>
       <p className="hint">
         {kendini ? (
-          <T k="Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
+          <T k="Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
         ) : (
-          <T k="Bu kopya geliştirme ve test için; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
+          <T k="Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
         )}
       </p>
 
@@ -266,7 +266,7 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
           {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
           {d.ad === 'hazir' && (
             <T
-              k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz."
+              k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz."
               vars={{ surum: d.surum }}
             />
           )}

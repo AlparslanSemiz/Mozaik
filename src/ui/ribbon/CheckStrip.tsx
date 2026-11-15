@@ -37,9 +37,7 @@ export function checkStrip({ ui, t, status }: StripContext): React.ReactElement 
       label: t('Danışman ({n})', { n: status.advice }),
       icon: <Lightbulb {...ICON} />,
       title:
-        status.advice === 0
-          ? t('Öneri yok')
-          : t('Veri girişinde gözden kaçmış olabilecek noktalar'),
+        status.advice === 0 ? t('Not yok') : t('Veri girişinde gözden kaçmış olabilecek noktalar'),
     },
     {
       id: 'teachers',
@@ -61,7 +59,7 @@ export function checkStrip({ ui, t, status }: StripContext): React.ReactElement 
     },
   ];
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol araçları')}>
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol')}>
       <Group label={t('Göster')}>
         {views.map((v) => (
           <button

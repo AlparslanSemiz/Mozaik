@@ -33,7 +33,7 @@ export function settingsStrip({
 }: StripContext): React.ReactElement {
   const rules = Object.values(state.settings.rules);
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Ayar bölümleri')}>
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Ayarlar')}>
       <Group label="Bölüm">
         {SECTIONS.map((s) => (
           <button
@@ -90,7 +90,7 @@ export function settingsStrip({
           <span className="ribbon-value">
             {t('{n} gün', { n: state.settings.days.length })}
             {' · '}
-            {t('{n} ders', { n: state.settings.hours.length })}
+            {t('{n} saat', { n: state.settings.hours.length })}
           </span>
         </Group>
       ) : ui.section === 'rules' ? (
@@ -99,12 +99,12 @@ export function settingsStrip({
             <span
               className={`badge ${rules.filter((r) => r === 'block').length > 0 ? 'impossible' : 'ok'}`}
             >
-              {t('{n} engelle', { n: rules.filter((r) => r === 'block').length })}
+              {t('{n} engel', { n: rules.filter((r) => r === 'block').length })}
             </span>
             <span
               className={`badge ${rules.filter((r) => r === 'warn').length > 0 ? 'tight' : 'ok'}`}
             >
-              {t('{n} uyar', { n: rules.filter((r) => r === 'warn').length })}
+              {t('{n} uyarı', { n: rules.filter((r) => r === 'warn').length })}
             </span>
             <span className="badge ok">
               {t('{n} kapalı', { n: rules.filter((r) => r === 'off').length })}

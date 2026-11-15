@@ -342,11 +342,11 @@ describe('öneri — yollar, cümleler ve "bu olmaz"', () => {
       accepted: [],
     };
     expect(suggestionSentence(d, s)).toMatch(
-      /^AV .+ 3–4\. saatlere de gelebilirse hafta kuruluyor\.$/,
+      /^AV .+ 3–4\. saatlere de gelebilirse program kuruluyor\.$/,
     );
     const one = { ...s, changes: [s.changes[0]!] };
     expect(suggestionSentence(d, one)).toMatch(
-      /^AV .+ 3\. saate de gelebilirse hafta kuruluyor\.$/,
+      /^AV .+ 3\. saate de gelebilirse program kuruluyor\.$/,
     );
   });
 

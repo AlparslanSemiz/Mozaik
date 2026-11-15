@@ -7,12 +7,7 @@ import { Group, ICON, Sep, type StripContext } from './parts';
 
 export function printStrip({ ui, t }: StripContext): React.ReactElement {
   return (
-    <div
-      className="ribbon"
-      data-section={ui.tab}
-      role="toolbar"
-      aria-label={t('Yazdırma araçları')}
-    >
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Çıktı')}>
       {/* The two kinds of sheet are drawn with the same two symbols they carry
           in Kurulum, Müsaitlik and the entity panel — one drawing per thing. */}
       <Group label="İçerik">
