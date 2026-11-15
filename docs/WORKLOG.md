@@ -194,6 +194,101 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · cpModel ve ikinci bakış, `main` ile birleşti (`ozellik/cpsat`)
+
+Ajan haftalık kullanım sınırına takılıp `main`'in birleştirmesinde durdu; birleştirme (yalnız
+WORKLOG çakışıyordu) tamamlandı. Ham eşik 1 230 000 B için `file://` açılışı, CPU 4× yavaş,
+7 koşu medyanı (kirli): bugünkü `main` (1 204 559 B) 207 ms, bu dal (1 223 937 B) 204 ms.
+`tsc`, `hizli` (1540 yeşil, 4 atlandı), size-limit; `dist/` tek `index.html`.
+
+## 2026-11-15 · CP-SAT'a kendi modeli, ikinci bakış açık (`ozellik/cpsat`)
+
+`src/pure/relax/cpModel.ts`: ajan raporunun (scratch `analiz/1-cpsat-model.md`) tasarımı,
+`frameOf`'tan okuyup `CpModelProto`'yu doğrudan kuruyor; öğretmen saati aileleri ve kurallar
+için. `cpFamilySearch` bu aileleri onunla, ötekileri `CpFormula`'yla soruyor. Babanın verisinde
+model 3 911 değişken, 4 150 kısıt (öğretmen saati, `apart` dahil). Testler (`cpModel.test.ts`,
+CP-SAT'sız): 60 rastgele küçük dünyada bizim aramanın, rastgele ve bozulmuş haftalar dört
+ailede `model.ts`'in formülüyle ve `verifySuggestion`'la aynı kabul/reddi alıyor, maliyetler
+`model.ts`'in en küçükleriyle ve okuyucularla aynı; yazılan baytlar `protoReader.ts` ile geri
+okunup aynı cevabı veriyor. İki sapma not edildi: `model.ts`'in açılan saati başlangıçlara tek
+yönlü bağlı (x → o), az öğretmenin ikinci sayısı orada haftanın gerçek sayısının altına
+inebiliyor (CP modeli tam); ve denetçinin blok açığı (DECISIONS, düzeltildi).
+
+Ölçüm, kirli (bu Mac, başka oturumlar; yük 5–18). Bizim arama (`createRelaxer`, üç aile,
+tek iş parçacığı): 4 / 6 / 9, kanıtsız, 139 s. Sonra `createCpRelaxer(previous)`, C API
+(`cpsolve.py`), her soru seçilmiş alt çözücülerle:
+
+| İşçi | Tohum | Toplam | teacherHours 4 | fewTeachers 1 + 6 | rules 6 + 3 |
+|---|---|---|---|---|---|
+| 4 | 1 | 10 s | kanıtlı, 1,7 s | kanıtlı, 0,3 + 2,6 s | kanıtlı, 2,2 + 0,6 s |
+| 4 | 2 | 15 s | kanıtlı, 1,2 s | kanıtlı, 0,3 + 4,7 s | kanıtlı, 5,0 + 1,0 s |
+| 4 | 3 | 16 s | kanıtlı, 2,9 s | kanıtlı, 0,3 + 6,9 s | kanıtlı, 2,2 + 0,5 s |
+| 8 | 1 | 13 s | kanıtlı, 2,5 s | kanıtlı, 0,3 + 3,3 s | kanıtlı, 2,9 + 0,8 s |
+| 8 | 2 | 25 s | kanıtlı, 5,1 s | kanıtlı, 0,3 + 9,9 s | kanıtlı, 4,7 + 2,4 s |
+| 8 | 3 | 23 s | kanıtlı, 2,6 s | kanıtlı, 0,3 + 13,4 s | kanıtlı, 3,1 + 0,5 s |
+
+Toplamın kalanı öğretmen saatinin `apart` bakışı (3 s tavan, kanıt aranmıyor). Aynı model,
+öteki soru biçimleri (4 işçi, 3 tohum): 4 saat için "≤ 3 olur mu" 8,7 / 23,4 / 30 s+ ve sınırlı
+en aza indirme 13,8–21,8 s; az öğretmenin "≤ 5" kararı 3/3 30 s'de cevapsız; kuralların "≤ 5"
+kararı 20 / 20 / 30 s+, sınırlı en aza indirme 2,5–3,2 s. `CP_SECOND_LOOK` açık (DECISIONS).
+Temiz koşulda yeniden ölçülmedi; babanın makinesinde çekirdek sayısı hâlâ bilinmiyor.
+
+**Boyut eşiği.** `cpModel.ts` ham `dist/index.html`'i 1 208 270 B'tan 1 219 219 B'a çıkardı,
+eşik 1 210 000 B'tı. CLAUDE.md'nin kuralıyla önce `file://` açılışı, Chromium, CPU 4×, babanın
+dizili haftası, 7 koşu, iki tur, medyan (kirli, yük 3–6):
+
+| Derleme | Bayt | ızgara | `loadEventEnd` |
+|---|---|---|---|
+| dal ucu, `cpModel.ts`'siz (`c7a80ed`) | 1 208 270 | 397 / 379 ms | 128 / 113 ms |
+| bu dal | 1 219 219 | 384 / 391 ms | 121 / 119 ms |
+
+Fark yok; ham eşik 1 230 000 B (brotli eşiği 290 000 B, değişmedi).
+
+## 2026-11-15 · CP-SAT: kanıt "bir eksiği olur mu" kararıyla (`ozellik/cpsat`)
+
+Model ajanının bulgusu (scratch `analiz/1-cpsat-model.md`): kanıtı `max_lp_sym` veriyor ve 4
+işçinin varsayılan portföyünde yok; kendi CP-SAT modeliyle "≤ 3 olur mu" 4 işçide 2–13 s. Bu
+dalda `lowest()` artık kısa bir bakıştan sonra en aza indirme değil karar soruyor, seçilmiş alt
+çözücülerle (`CP_PROOF_SUBSOLVERS`), ve `proven` öğretmen ailelerinde birinci sayıya bağlı.
+`model.ts`'in formülüyle ölçüm (babanın verisi, bizim arama sonra ikinci bakış, kirli: makinede
+başka ajanlar):
+
+| İşçi | teacherHours ≤ 3 | fewTeachers ≤ 5 | rules ≤ 5 / ikinci |
+|---|---|---|---|
+| 4 | 20 s'de cevapsız | 20 s'de cevapsız | olmaz 9,0 s / cevapsız |
+| 8 | 20 s'de cevapsız | 20 s'de cevapsız | olmaz 8,4 s / olmaz 20,2 s |
+
+Kazanç alt çözücü listesinden değil modelin biçiminden geliyor; `CP_SECOND_LOOK` kapalı kalıyor,
+sıradaki iş CP-SAT'a kendi modeli (`cpModel.ts`, ajan raporundaki tasarım).
+
+## 2026-11-15 · Kurulum paketi ve CP-SAT (`teslim/kurulum-paketi`, `ozellik/cpsat`)
+
+Alp: "en hızlısı neyse o olsun", sonra kurulum paketi (b) seçildi (DECISIONS 2026-11-15).
+
+**Kurulum.** NSIS, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`. Veri yerinde: WebView2
+profili `identifier`'a bağlı. Tauri kaldırıcısının "verileri sil" kutusu `RmDir /r` ile o
+profili siliyordu, `nsis/kancalar.nsh` kapatıyor ve `surum.yml` ölçüyor. Köprü: manifestte
+isteğe bağlı `kurulum` alanları, 2.2.0 tanımaz. Windows'ta yayınsız iki derleme yeşil
+(43710258267: kurulum 1,53 MB; 43710680734: CP-SAT'lı 15,84 MB).
+
+**CP-SAT.** Babanın verisi, 8 işçi, bu Mac, kirli ölçüm:
+
+| Ne | Sonuç |
+|---|---|
+| Doğrudan CP-SAT modeli (Python, depo dışı) | "kurulmaz" 0,14 s; 4 saat kanıtlı 7,9 s (4 işçi: 120 s'de kanıt yok) |
+| `model.ts` formülü, sayaçlar her k için | 4 saat kanıtlı 30 s |
+| aynı, kullanılmayan sayaç çıktıları yazılmadan | 4 saat kanıtlı 14,5 s |
+| üç aile sırayla, tavansız | 4 / 6 / 9, üçü kanıtlı, 56 s |
+| üç aile, 3 s + 20 s tavan | 5 / 6 / 9 ya da 4 / 6 / 9, koşudan koşuya |
+| bizim arama (`main`, tek iş parçacığı) | 4 / 6 / 9, kanıtsız, 48–49 s |
+| bizim arama + CP-SAT ikinci bakış | üç koşuda hiçbir öneri küçülmedi; bir koşuda kurallar kanıtlandı |
+
+Sonuç: ikinci bakış kapalı (`CP_SECOND_LOOK`), sıradaki iş CP-SAT'a kendi modeli (TODO B7.38).
+
+**Ders.** `git switch`, commit'lenmemiş değişikliği yeni dala taşır ve `commit -a` onu oraya
+yazar: CP-SAT'ın dört dosyası bir kez kurulum dalına girdi, geri alındı (9fa2586). Dal
+değiştirmeden önce commit.
+
 ## 2026-11-15 · Sınıfta "Sıkışık" yok (`kullanim/sikisik`, TODO SD2)
 
 Kullanılabilirlik ölçümünün bulgusu: tam dolu kursta 20 sınıfın 20'si sarı "Sıkışık", çünkü

@@ -94,6 +94,37 @@ kaldırma bölümünün başında sıfırlıyor ve `surum.yml` kancanın üretil
 **Klasör.** Tauri'nin varsayılanı `%LOCALAPPDATA%\Mozaik`, `Kur.cmd`'nin tarayıcı
 kurulumunun klasörü. Kanca yalnız varsayılanı `%LOCALAPPDATA%\Programs\Mozaik`'e çeviriyor.
 
+**CP-SAT bağlandı, ikinci bakış kapalı (`ozellik/cpsat`, aynı gün).** Kurulum OR-Tools
+v9.15'in 9 DLL'ini ve Visual C++ çalışma zamanını taşıyor (15,8 MB, kütüphanesiz 1,5 MB;
+arşivin SHA-256'sı `surum.yml`'de sabit). Rust C API'yi `libloading` ile çağırıyor
+(`cpsat.rs`), sayfa `model.ts`'in formülünü `CpFormula`'ya yazıyor. Babanın verisinde
+CP-SAT bu formülle üç ailenin en küçüklerini (4, 6, 9) buluyor, birinde 4'ünü de, kurallar
+dahil üçünü de kanıtlıyor. Ama süresi koşudan koşuya çok değişiyor (öğretmen saati kanıtı
+10–30 s, 20 s tavanında bazen 5'te kalıyor) ve bizim aramanın ardından ikinci bakış olarak üç
+koşuda hiçbir öneriyi küçültmedi. Python'da doğrudan CP-SAT için yazılmış bir model aynı
+kanıtı 7,9 s'de veriyor: darboğaz kütüphane değil, SAT için yazılmış formülün ona olduğu gibi
+verilmesi. Bu yüzden `relaxPool.ts`'in `CP_SECOND_LOOK`'u kapalı; açılması CP-SAT'a kendi
+modeli yazıldıktan sonra (TODO B7.38). **Denendi:** ipucu çatışma sınırı 10 (varsayılan)
+ipucunu hiç tamamlamıyordu, 2 000 tamamlıyor, 20 000 kötü; sayaçların kullanılmayan çıktıları
+yazılmayınca bir soru 30 s'den 14,5 s'ye indi.
+
+**İkinci bakış açıldı: CP-SAT'a kendi modeli (`ozellik/cpsat`, aynı gün).** Öğretmen saati
+aileleri ve kurallar artık `model.ts`'in formülüyle değil `cpModel.ts`'le soruluyor: eş bloklar
+sayılı tek grup, dolu sınıf saati "tam bir", açılan saat başlangıçların toplamı, günlük sınırlar
+doğrusal, kural adımları üç sıralı bayrak. Soru da değişti: "bir eksiği olur mu" kararı değil,
+bizim aramanın haftası ipucuyla tek bir en aza indirme, seçilmiş alt çözücülerle
+(`CP_PROOF_SUBSOLVERS`); "optimal" kanıt. Babanın verisinde (kirli ölçüm, bu Mac, başka
+oturumlar koşuyor) ikinci bakış 4 / 6 / 9'un üçünü de 18 koşunun 18'inde kanıtladı: 4 işçide
+toplam 10–16 s, 8 işçide 13–25 s. Eşik (4 işçide üç aile en az 2/3 tohumda kanıtlı, toplam
+≤ 60 s) aşıldı, `CP_SECOND_LOOK` açık. İkinci bakış yalnız bu dört aileye; ötekiler
+(`CpFormula` yolu) yeni soruyla ölçülmedi, bizim aramanın bulduğu gibi kalıyor. **Denendi:**
+aynı modelde "bir eksiği olur mu" (hedefsiz karar) 4 işçide 4 saat için 9–30 s (biri 30 s'de
+cevapsız), az öğretmenin ikinci sayısında 3/3 cevapsız; en aza indirme 1,1–4,1 s. Hedef `core`
+alt çözücüsüne alt sınır veriyor, karar sorusunda o yok. **Çıkan hata:** `verifySuggestion`
+iki saatlik bloğun tek saatini ya da iki güne bölünmüş saatlerini tam sayıyordu
+(`pendingBlocks` tekliyi bloğun yerine sayıyor); `cpModel.test.ts`'in bozulmuş haftaları buldu,
+denetçi artık dersin ızgaradaki koşularının planına bölünmesini istiyor.
+
 **Açık kalan.** Gerçek Windows'ta eski sürümden yenisine güncelleme (CLAUDE.md, "Sürüm")
 ve kurulumun antivirüs ve SmartScreen davranışı ölçülmedi; TODO B7.38.
 

@@ -138,11 +138,43 @@ jobs:
       # hapseden kapı. `cargo test` onu yargılayabilen tek yer.
       - run: cargo test --manifest-path src-tauri/Cargo.toml
 
+      # OR-Tools CP-SAT, öneri araması için (DECISIONS 2026-11-15, src-tauri/src/cpsat.rs).
+      # Resmi sürümün arşivi, SHA-256'sı sabit: başka bir dosya bu adımı geçemez.
+      # Kuruluma giren 9 DLL `ortools.dll`'in içe aktarma tablosundan, Visual C++
+      # çalışma zamanı da yanında (babanın makinesinde kurulu olmayabilir).
+      # Yalnız kurulum alır; tek başına exe ve geliştirme derlemesi kütüphanesiz
+      # kalır ve sayfa kendi aramasına düşer.
+      - name: OR-Tools CP-SAT for the installer
+        shell: pwsh
+        run: |
+          $surum = "9.15.6755"
+          $ad = "or-tools_x64_VisualStudio2022_cpp_v$surum"
+          $url = "https://github.com/google/or-tools/releases/download/v9.15/$ad.zip"
+          $beklenen = "43429C741641C8B495EE77E44EA00F0F4524519495FD2EDAF929003AA2B2EA30"
+          Invoke-WebRequest $url -OutFile ortools.zip
+          $hash = (Get-FileHash ortools.zip -Algorithm SHA256).Hash
+          if ($hash -ne $beklenen) { throw "OR-Tools arşivinin özeti tutmuyor: $hash" }
+          Expand-Archive ortools.zip -DestinationPath ortools-acik
+          $bin = "ortools-acik/$ad/bin"
+          New-Item -ItemType Directory -Force -Path src-tauri/ortools | Out-Null
+          $dll = @('ortools.dll','abseil_dll.dll','bz2.dll','highs.dll','libprotobuf.dll',
+                   'libscip.dll','libutf8_validity.dll','re2.dll','zlib1.dll')
+          foreach ($d in $dll) { Copy-Item "$bin/$d" src-tauri/ortools/ }
+          $crt = @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')
+          foreach ($d in $crt) { Copy-Item "$env:WINDIR/System32/$d" src-tauri/ortools/ }
+          $kaynak = @{}
+          foreach ($d in $dll + $crt) { $kaynak["ortools/$d"] = $d }
+          $kaynak["lisanslar/UCUNCU-TARAF.txt"] = "UCUNCU-TARAF.txt"
+          @{ bundle = @{ resources = $kaynak } } | ConvertTo-Json -Depth 4 |
+            Set-Content src-tauri/tauri.ortools.json -Encoding utf8
+          Get-Content src-tauri/tauri.ortools.json
+          Get-ChildItem src-tauri/ortools | ForEach-Object { "{0,-24} {1,8:N1} MB" -f $_.Name, ($_.Length / 1MB) }
+
       # Bundle ile: aynı derleme hem tek başına `Mozaik.exe`'yi
       # (target/release) hem kurulum sihirbazını (bundle/nsis) üretir
       # (DECISIONS 2026-11-15). Eski kopyalar tek dosyayla güncellenmeye devam
       # eder, yenileri kurulumu indirir (update.rs, `karar`).
-      - run: npx --yes @tauri-apps/cli@2.12.4 build
+      - run: npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
 
       # İKİ ADA DA BAKIYOR, ve sebebi ölçülmüş bir kırıklık: v2.0.3 koşusu tam
       # burada düştü (`tauri build` başarılı, bu adım başarısız) ve o yüzden
@@ -188,6 +220,11 @@ jobs:
           if ($metin -notmatch '!include\s+"[^"]*kancalar\.nsh"') {
             Write-Host ($metin -split "`n" | Select-String -Pattern 'include' | Out-String)
             throw "kurulum betiği kancalar.nsh'i içeri almıyor"
+          }
+          # CP-SAT kuruluma girdi mi: girmezse program yine çalışır ama yavaş
+          # yoldan, ve bunu kimse fark etmez.
+          foreach ($d in @('ortools.dll', 'libprotobuf.dll', 'vcruntime140.dll', 'UCUNCU-TARAF.txt')) {
+            if (-not $metin.Contains("/oname=$d")) { throw "kurulum $d taşımıyor" }
           }
           $kanca = Get-Content src-tauri/nsis/kancalar.nsh -Raw
           foreach ($iz in @('StrCpy $DeleteAppDataCheckboxState 0', '$LOCALAPPDATA\Programs\${PRODUCTNAME}')) {

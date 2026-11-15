@@ -20,7 +20,15 @@
 // here in slices. WebView2 on Windows could not be measured from this machine.
 
 import {
+  CP_HINT_CONFLICTS,
+  CP_PROOF_SUBSOLVERS,
+  type CpAnswer,
+  type CpRelaxer,
+  cpNative,
+  cpParams,
+  createCpRelaxer,
   createRelaxer,
+  readAnswer,
   type RelaxFamily,
   type RelaxOptions,
   type RelaxProgress,
@@ -29,6 +37,7 @@ import {
   type Suggestion,
 } from '../../pure/relax';
 import type { Id, State } from '../../leaf/model';
+import { desktopCpsatCoz, desktopCpsatDurdur, desktopCpsatVar, isDesktop } from '../exe';
 import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */
@@ -150,6 +159,159 @@ export function startRelax(
 }
 
 function startOn(
+  base: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+): Relaxer {
+  if (CP_SECOND_LOOK && isDesktop())
+    return cpsatOr(base, hint, options, () => onWorkers(base, hint, options));
+  return onWorkers(base, hint, options);
+}
+
+/**
+ * ON since CP-SAT has a model of its own (pure/relax/cpModel.ts, TODO B7.38).
+ * MEASURED on the father's week (2026-11-15, this Mac, kirli: other sessions
+ * running): after our search's 4 / 6 / 9, the second look proved all three in
+ * every run, 3 seeds on 4 workers in 10-16 s and on 8 in 13-25 s. On model.ts's
+ * formula it had proved one of them in 20 s at best (DECISIONS).
+ */
+const CP_SECOND_LOOK = true;
+
+/**
+ * The exe with OR-Tools CP-SAT next to it (src-tauri/src/cpsat.rs): the search
+ * runs as everywhere else, and AFTER it CP-SAT looks again at the ways it
+ * found that cpModel.ts writes (the teacher-hour ways and the rules), each
+ * starting from that way's week. The others are left as our search found
+ * them: on model.ts's recorded formula the second look did not prove even
+ * these in time, and theirs is not measured. A week CP-SAT finds replaces the one
+ * shown only when it is smaller, or as small and proven ("Bundan küçük bir
+ * değişiklik yetmiyor"). Why after and not instead (MEASURED 2026-11-15, the
+ * father's week): our search finds 4, 6 and 9 and proves none; CP-SAT
+ * proves them, but finding the 4 hours from the stuck week took it 9-60 s
+ * (scratch analiz/1-cpsat-model.md), so on its own it could show 5 where
+ * today's search shows 4. After, it can only make the panel better. Without the library, or when it fails, the panel
+ * gets exactly today's answer.
+ */
+function cpsatOr(
+  base: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+  otherwise: () => Relaxer,
+): Relaxer {
+  const t0 = performance.now();
+  const ours = otherwise();
+  const available = desktopCpsatVar();
+  /** Our search's answer, once it is there. */
+  let first: RelaxResult | null = null;
+  let cp: CpRelaxer | null = null;
+  let finished: RelaxResult | null = null;
+  let cancelled = false;
+
+  /** Our answer with every way CP-SAT did better on put in its place. */
+  const merged = (found: Suggestion[]): Suggestion[] => {
+    const out = [...(first?.suggestions ?? [])];
+    for (const s of found) {
+      const at = out.findIndex((x) => x.family === s.family && x.relaid === s.relaid);
+      const old = at < 0 ? undefined : out[at]!;
+      if (old === undefined) continue;
+      if (s.size < old.size || (s.size === old.size && s.proven && !old.proven)) out[at] = s;
+    }
+    return out;
+  };
+  const end = (phase: RelaxResult['phase'], found: Suggestion[], rejected: number) => {
+    finished = {
+      phase,
+      suggestions: merged(found),
+      elapsedMs: performance.now() - t0,
+      rejected: (first?.rejected ?? 0) + rejected,
+    };
+  };
+
+  const second = async (answer: RelaxResult) => {
+    const families = [...new Set(answer.suggestions.map((x) => x.family))].filter(cpNative);
+    const worth =
+      answer.phase === 'done' &&
+      families.length > 0 &&
+      !answer.suggestions.some((x) => x.changes.length === 0);
+    if (!worth || !(await available) || cancelled) {
+      finished ??= answer;
+      return;
+    }
+    if (typeof document !== 'undefined') document.documentElement.dataset['oneriMotor'] = 'cpsat';
+    cp = createCpRelaxer(base, hint, {
+      ...options,
+      families,
+      previous: answer.suggestions,
+      startRelaid: answer.suggestions.some((x) => x.relaid),
+    });
+    const workers = typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4);
+    let reply: CpAnswer | undefined;
+    for (;;) {
+      const step = cp.next(reply);
+      if ('done' in step) {
+        end('done', step.done.suggestions, step.done.rejected);
+        return;
+      }
+      const bytes = await desktopCpsatCoz(
+        cpParams({
+          workers,
+          seconds: step.ask.seconds,
+          hintConflicts: CP_HINT_CONFLICTS,
+          subsolvers: CP_PROOF_SUBSOLVERS,
+        }),
+        step.ask.bytes,
+      );
+      // Cancelled while the library answered: `cancel` already returned what was found.
+      if (cancelled) return;
+      reply = readAnswer(bytes);
+    }
+  };
+
+  return {
+    step(sliceMs: number): RelaxResult | null {
+      if (finished !== null) return finished;
+      if (first === null) {
+        const answer = ours.step(sliceMs);
+        if (answer === null) return null;
+        first = answer;
+        second(answer).catch(() => {
+          // The library failed: today's answer, as it is.
+          finished ??= answer;
+        });
+      }
+      return finished;
+    },
+    progress(): RelaxProgress {
+      if (first === null || cp === null) return ours.progress();
+      const p = cp.progress();
+      // Every way our search finished, less the ones CP-SAT is still looking
+      // at again: only those say "(daha iyisi aranıyor)".
+      const again = new Set(first.suggestions.map((x) => x.family).filter(cpNative));
+      for (const f of p.finished) again.delete(f);
+      const all = options.families ?? DEFAULT_FAMILIES;
+      return {
+        ...p,
+        finished: all.filter((f) => !again.has(f)),
+        suggestions: merged(p.suggestions),
+        elapsedMs: performance.now() - t0,
+      };
+    },
+    cancel(): RelaxResult {
+      if (finished !== null) return finished;
+      cancelled = true;
+      if (first === null) {
+        finished = ours.cancel();
+        return finished;
+      }
+      void desktopCpsatDurdur();
+      const got = cp?.cancel();
+      end('cancelled', got?.suggestions ?? [], got?.rejected ?? 0);
+      return finished!;
+    },
+  };
+}
+
+function onWorkers(
   base: State,
   hint: Readonly<Record<string, Id>>,
   options: Partial<RelaxOptions>,

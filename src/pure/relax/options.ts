@@ -191,6 +191,37 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
  * the best week, 4 came in about 20 000 and a round of refusals says when to
  * stop.
  */
+/**
+ * CP-SAT's look at each count (search.ts, `cpRun`), in seconds: the long one
+ * for a count that is the answer, the short one for a preference among
+ * equals. Seconds, not a count, because the library's own counters are not
+ * the conflicts above; and its several workers make it machine-dependent
+ * anyway. A ceiling: an optimal answer comes back as soon as it is proven.
+ */
+export const CP_QUICK_SECONDS = 3;
+export const CP_FULL_SECONDS = 20;
+/**
+ * The subsolvers every question is asked with (`subsolvers`). The proof on
+ * the father's week comes from `max_lp_sym` and `core`, which CP-SAT's default
+ * portfolio leaves out below 8 workers: without them the 4-hour Minimize never
+ * closed on 4 workers in 120 s, with this list and cpModel.ts it closed in
+ * 1.1-2.3 s (MEASURED 2026-11-15, 3 seeds, kirli). Names are OR-Tools
+ * v9.15's; a version bump checks them.
+ */
+export const CP_PROOF_SUBSOLVERS: readonly string[] = [
+  'default_lp',
+  'max_lp_sym',
+  'core',
+  'quick_restart',
+];
+/**
+ * CP-SAT's `hint_conflict_limit` for every question. Its default (10) never
+ * completed our hint, which names only where blocks start: the quick look
+ * then started from nothing and came back with 6 hours where the week handed
+ * to it had 4. 2 000 takes the week (MEASURED 2026-11-15; 20 000 was worse).
+ */
+export const CP_HINT_CONFLICTS = 2_000;
+
 export const NEIGHBOURHOOD_CONFLICTS = 1_000;
 
 /** How many days a neighbourhood frees, tried in this order. */

@@ -39,6 +39,7 @@ import { createHash } from 'node:crypto';
 import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import mailRs from '../src-tauri/src/mail.rs?raw';
+import cpsatRs from '../src-tauri/src/cpsat.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
 import gercekExeSpec from '../e2e/gercek-exe.spec.ts?raw';
 import surumYml from '../.github/workflows/surum.yml?raw';
@@ -75,8 +76,12 @@ interface Command {
   returns: string;
 }
 
-/** Parameters Tauri fills in itself; the page never sends them. */
-const INJECTED = /AppHandle|State<|Window|Webview/;
+/**
+ * Parameters Tauri fills in itself; the page never sends them. A raw
+ * `Request` is the body the page sends as bytes (`cpsat_coz`), not a named
+ * argument.
+ */
+const INJECTED = /AppHandle|State<|Window|Webview|Request</;
 
 /** Rust's declared answer, in the words `desktop.ts` writes its type arguments in. */
 const PAGE_TYPE: Record<string, string> = {
@@ -87,6 +92,8 @@ const PAGE_TYPE: Record<string, string> = {
   bool: 'boolean',
   u64: 'number',
   Cevap: 'UpdateCevap',
+  // Raw bytes back: Tauri hands them over as an ArrayBuffer, or as numbers on an old WebView.
+  'tauri::ipc::Response': 'ArrayBuffer | number[]',
 };
 
 const camel = (snake: string) => snake.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
@@ -95,7 +102,7 @@ function rustCommands(): Map<string, Command> {
   const found = new Map<string, Command>();
   const FN =
     /#\[tauri::command\]\s*(?:pub\s+)?(?:async\s+)?fn\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^{]+?))?\s*\{/g;
-  for (const source of [libRs, updateRs, mailRs]) {
+  for (const source of [libRs, updateRs, mailRs, cpsatRs]) {
     for (const [, name, params, ret] of source.matchAll(FN)) {
       const args = (params ?? '')
         .split(',')
@@ -146,8 +153,9 @@ function pageCalls(file: ts.SourceFile): Call[] {
   walk(file, (node) => {
     if (!ts.isCallExpression(node)) return;
     const callee = node.expression;
+    // `raw` is the same bridge with a byte body (desktop.ts, `cpsatCoz`).
     const isInvoke =
-      (ts.isIdentifier(callee) && callee.text === 'invoke') ||
+      (ts.isIdentifier(callee) && (callee.text === 'invoke' || callee.text === 'raw')) ||
       (ts.isCallExpression(callee) &&
         ts.isIdentifier(callee.expression) &&
         callee.expression.text === 'bridge');
@@ -497,7 +505,13 @@ describe('yayınlanan exe — WebView2 hata ayıklama portu yok', () => {
       .split('\n')
       .filter((satir) => /tauri-apps\/cli\S* build/.test(satir));
     expect(derlemeler.length).toBeGreaterThan(0);
-    for (const satir of derlemeler) expect(satir).not.toMatch(/--config|-c /);
+    // One extra config is allowed: the OR-Tools DLLs as resources, which the
+    // workflow writes itself, from nothing but `bundle.resources`.
+    const ortools = '--config src-tauri/tauri.ortools.json';
+    for (const satir of derlemeler) expect(satir.replace(ortools, '')).not.toMatch(/--config|-c /);
+    const yazan = surumYml.split('\n').filter((satir) => satir.includes('tauri.ortools.json'));
+    expect(surumYml).toMatch(/@\{ bundle = @\{ resources = \$kaynak \} \} \| ConvertTo-Json/);
+    for (const satir of yazan) expect(satir).not.toMatch(/remote-debugging|additionalBrowserArgs/);
   });
 });
 

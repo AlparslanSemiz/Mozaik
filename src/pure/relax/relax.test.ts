@@ -391,6 +391,38 @@ describe('öneri — veri ve denetçi', () => {
     ).toBe(true);
   });
 
+  it('denetçi iki saatlik bloğun tek saatini ve iki güne bölünmesini eksik sayıyor', () => {
+    // A 2-hour block with one hour on the grid, or its two hours on two days,
+    // reads as singles, and pendingBlocks takes a single for the block: the
+    // week looked whole (found by cpModel.test.ts, 2026-11-15).
+    const d = makeWorld({
+      days: 2,
+      hours: 4,
+      lessons: [{ id: 'l', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 }],
+    });
+    const s: Suggestion = {
+      family: 'teacherHours',
+      changes: [],
+      placements: { 's510|0|1': 'l' },
+      size: 0,
+      proven: false,
+      relaid: false,
+      accepted: [],
+    };
+    expect(verifySuggestion(d, s, { keepPlaced: false })).toContain('eksik kaldı: l');
+    const split = { 's510|0|1': 'l', 's510|1|2': 'l' };
+    expect(verifySuggestion(d, { ...s, placements: split }, { keepPlaced: false })).toContain(
+      'eksik kaldı: l',
+    );
+    expect(
+      verifySuggestion(
+        d,
+        { ...s, placements: { 's510|0|1': 'l', 's510|0|2': 'l' } },
+        { keepPlaced: false },
+      ),
+    ).toEqual([]);
+  });
+
   it('saatler öğretmen ve gün başına birleşiyor', () => {
     const d = world('ogretmen-hafta-kapali');
     const lines = suggestionLines(d, {

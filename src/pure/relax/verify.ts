@@ -7,9 +7,11 @@ import {
   type Id,
   type Relaxation,
   type State,
+  blockPlan,
   closedKey,
   lessonSubject,
   parseKey,
+  placementKey,
   subjectKey,
   teacherSubjects,
 } from '../../leaf/model';
@@ -100,6 +102,25 @@ export function applySuggestion(d: State, s: Suggestion): State {
  */
 const LIMIT_RULES = new Set(['maxPerDay', 'maxConsecutive', 'maxSameLessonPerDay', 'notSameDay']);
 
+/** Whether runs of these lengths are exactly the blocks of `plan`, each run cut into some of them. */
+function cutsInto(runs: readonly number[], plan: readonly number[]): boolean {
+  if (runs.reduce((a, b) => a + b, 0) !== plan.reduce((a, b) => a + b, 0)) return false;
+  const left = [...plan].sort((a, b) => b - a);
+  const cut = (i: number, room: number): boolean => {
+    if (room === 0) return i + 1 >= runs.length ? true : cut(i + 1, runs[i + 1]!);
+    for (let k = 0; k < left.length; k++) {
+      const size = left[k]!;
+      if (size > room || (k > 0 && left[k - 1] === size)) continue;
+      left.splice(k, 1);
+      const ok = cut(i, room - size);
+      left.splice(k, 0, size);
+      if (ok) return true;
+    }
+    return false;
+  };
+  return runs.length === 0 ? plan.length === 0 : cut(0, runs[0]!);
+}
+
 /**
  * Everything wrong with a suggestion, as sentences for a test to print. [] means
  * the week it carries is a real timetable for the changed data.
@@ -170,14 +191,40 @@ export function verifySuggestion(
     seen.set(at, lessonId);
   }
 
-  // 5. The week is whole.
+  // 5. The week is whole, in the blocks its plan names. Owed blocks alone do
+  // not say it: a 2-hour block with one hour on the grid, or with its two
+  // hours on two days, reads as singles, and `pendingBlocks` counts a single
+  // as the block it does not match (cpModel.test.ts found both, 2026-11-15).
+  // So for a lesson the run laid out whole, its runs on the grid have to cut
+  // into its plan. Not for one with kept cells: those may sit in a shape the
+  // plan does not (an old backup), and the run did not make it.
+  const fixed = fixedCells(base, opts.keepPlaced, opts.exclusions);
+  const keptOf = new Set(Object.values(fixed));
+  const grid = activePlacements(applied);
+  const days = applied.settings.days.length;
+  const hourCount = applied.settings.hours.length;
   for (const lesson of applied.lessons) {
     if (lessonExcluded(lesson, opts.exclusions)) continue;
-    if (pendingBlocks(applied, lesson).length > 0) problems.push(`eksik kaldı: ${lesson.id}`);
+    if (pendingBlocks(applied, lesson).length > 0) {
+      problems.push(`eksik kaldı: ${lesson.id}`);
+      continue;
+    }
+    if (keptOf.has(lesson.id)) continue;
+    const runs: number[] = [];
+    for (let g = 0; g < days; g++) {
+      let run = 0;
+      for (let h = 0; h <= hourCount; h++) {
+        if (h < hourCount && grid[placementKey(lesson.classId, g, h)] === lesson.id) run++;
+        else if (run > 0) {
+          runs.push(run);
+          run = 0;
+        }
+      }
+    }
+    if (!cutsInto(runs, blockPlan(lesson))) problems.push(`eksik kaldı: ${lesson.id}`);
   }
 
   // 6. What the run could not move did not move.
-  const fixed = fixedCells(base, opts.keepPlaced, opts.exclusions);
   for (const [key, lessonId] of Object.entries(fixed)) {
     if (s.placements[key] !== lessonId) problems.push(`yerinden oynadı: ${key}`);
   }

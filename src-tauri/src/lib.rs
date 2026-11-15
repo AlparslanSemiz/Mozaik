@@ -20,6 +20,7 @@
 //! rule that means one thing in the browser and another in the exe is the
 //! thing this project spends most of its comments avoiding.
 
+mod cpsat;
 mod mail;
 mod update;
 
@@ -351,7 +352,10 @@ pub fn run() {
             update::check_update,
             update::self_update_supported,
             update::download_update,
-            update::apply_update
+            update::apply_update,
+            cpsat::cpsat_var,
+            cpsat::cpsat_coz,
+            cpsat::cpsat_durdur
         ])
         .run(tauri::generate_context!())
         .expect("Mozaik başlatılamadı");
