@@ -203,6 +203,54 @@ Doğrulama: `tsc`, `eslint src`, `npm run sinir`, `knip`, `src/ui/program` ve `s
 testleri yeşil; `npm run hizli`'de 11 kırmızı, `main`'de de aynı 11 (bu Mac'te `flock` yok,
 depolama ve `rowOrder` testleri), yenisi yok. Ekran görüntüsü alınmadı.
 
+## 2026-11-15 · SAT çözücünün yayılımı tamponlarla (`hiz/sat-yayilim`)
+
+Öneri aramasının süresinin %71'i `sat.ts`'in `propagate`'indeydi (babanın verisi). Arama
+aynı kaldı, yalnız veri yapıları değişti: `propagate` alanları yerelde tutuyor ve
+`enqueue`'yu satır içi yazıyor; izleme listeleri `Int32Array` ve ayrı bir sayaç (her
+ziyarette `length = j` ile kesilip `push` ile yeniden büyüyen dizi yerine); `trail`
+değişken sayısıyla boyutlanmış bir `Int32Array` ve `trailTop`; klozlar tek bir düz havuzda
+(`pool`, `cStart`, `cLen`), `reduce` atılanların yarıyı geçtiği yerde havuzu sıkıştırıyor,
+kloz numaraları değişmiyor.
+
+Aynılık: babanın verisinde üç ailenin (`teacherHours`, `fewTeachers`, `rules`) önerilerinin
+JSON'u, toplam çatışma (346 924) ve karar (1 111 873) sayısı her adımda öncekiyle bayt bayt
+aynı. Süreler (bu makine, kirli ölçüm):
+
+| Adım | Süre |
+|---|---|
+| Önce | 56,9 s |
+| Yerel alanlar, satır içi `enqueue` | 49,1 s |
+| Düz kloz havuzu | 49,7 s (gürültü içinde) |
+| İzleme listeleri `Int32Array` + sayaç | 32,5 s |
+| `trail` `Int32Array` + `trailTop` | 26,0 s |
+
+Kazancın çoğu dizilerin kesilip yeniden büyümesinin kalkmasından. `sat.test.ts`,
+`relax.test.ts`, `invariants.test.ts`, `relaxFullCourse.test.ts` ve `solver.test.ts` (142)
+yeşil.
+
+## 2026-11-15 · Çözücünün onarımı tamsayı dizileriyle (`hiz/onarim-dizileri`)
+
+Onarım aşaması her "bu hücrede kim var, oynayabilir mi" sorusu için `sınıf|gün|saat`
+metni kurup sözlükte arıyordu. Profil (tam-dolu-kurs, `keepPlaced: false`): 9,1 s'nin
+yaklaşık %70'i `evictions`, `movableAt` ve `trim`'de. Onarım artık sınıf, öğretmen ve
+derslik hücrelerini `Int32Array` aynalarından okuyor; aynalar `startRepair`'de sözlükten
+kuruluyor ve yalnız `claim` ile `release` değiştiriyor. Hiç değişmeyen kapalı saatler
+öğe başına bir kez okunuyor, tabu `Float64Array`. Son sözü yine `blocker()` söylüyor.
+
+Sonuç birebir aynı: 29 girdide (iki fikstür × iki kip ve `WORLDS`'ün hepsi) faz, blok,
+düğüm sayısı ve ızgaranın parmak izi değişmedi. Süreler (bu makine, temiz koşul değil,
+kirli ölçüm):
+
+| Girdi | Önce | Sonra |
+|---|---|---|
+| tam-dolu-kurs, baştan | 10,8 s | 1,6 – 2,4 s |
+| gercek-olcek-sikisik | 70 s | 5,8 – 6,8 s |
+| gercek-olcek-imkansiz | 112 s | 10 – 13 s |
+
+Öneri araması bu daldan etkilenmiyor: profilde sürenin %71'i `sat.ts`'in `propagate`'inde
+(babanın verisinde ~52 s).
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
