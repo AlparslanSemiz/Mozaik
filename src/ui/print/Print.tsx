@@ -18,6 +18,7 @@
 // screen holds what is chosen: which pages, how many to a sheet, what is on
 // them, and when the job was stamped.
 
+import { printStamp } from '../../leaf/app';
 import { useMemo } from 'react';
 import { blockSpans, buildIndex } from '../../pure/constraints';
 import { parseKey, paletteColor, type State } from '../../leaf/model';
@@ -109,17 +110,7 @@ export default function Print({
   // Read once per mount, on purpose: the sheet says when it was printed, and
   // the honest answer is "about now". Recomputing it per page would put five
   // different minutes on five sheets that came out of the same job.
-  const stamped = useMemo(
-    () =>
-      new Date().toLocaleString('tr-TR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    [],
-  );
+  const stamped = useMemo(() => printStamp(new Date()), []);
 
   // The header of lesson numbers and bell times, the same on every page.
   const head = useMemo(() => sheetHead(state, options), [state, options]);

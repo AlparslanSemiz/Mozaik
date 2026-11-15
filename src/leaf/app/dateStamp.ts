@@ -17,3 +17,14 @@ export function dayStamp(now: Date): string {
 export function minuteStamp(now: Date): string {
   return `${dayStamp(now)}-${pad2(now.getHours())}${pad2(now.getMinutes())}`;
 }
+
+/**
+ * `15.11.2026 17:42`, in local time: what the printed sheet says it was printed
+ * at. Byte for byte `toLocaleString('tr-TR', { day, month: '2-digit', year:
+ * 'numeric', hour, minute: '2-digit' })`, checked over 20 000 dates, without
+ * the first-call cost of loading the Turkish locale data, which was the
+ * largest item in Çıktı's first open (UI performance review, 2026-11-15).
+ */
+export function printStamp(now: Date): string {
+  return `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+}

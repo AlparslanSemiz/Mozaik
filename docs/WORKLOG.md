@@ -194,6 +194,13 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · Çıktı'nın ilk açılışı: basım zamanı Intl'siz (`hiz/cikti-tarih`)
+
+Arayüz performans ölçümünde Çıktı'nın en büyük kalemi `toLocaleString('tr-TR', …)`'in ilk
+çağrısıydı (Türkçe yerel verisinin yüklenmesi). `printStamp` aynı metni elle kuruyor; 20 000
+tarihte birebir aynı (birim testi 2 000'le). Babanın dizili haftası, Okul → Çıktı ilk açılış,
+CPU 4× yavaş, 7 koşu medyanı (kirli): 171 → 150 ms.
+
 ## 2026-11-15 · Sınıfta "Sıkışık" yok (`kullanim/sikisik`, TODO SD2)
 
 Kullanılabilirlik ölçümünün bulgusu: tam dolu kursta 20 sınıfın 20'si sarı "Sıkışık", çünkü
