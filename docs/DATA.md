@@ -191,6 +191,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-musaitlik-saat` | müsaitlikte saatlerin gösterilmesi |
 | `ders-programi-hareket` | hareket (`tam`, `az`, `kapali`) |
 | `ders-programi-tanitim` | örnek veri teklifi görüldü mü |
+| `ders-programi-ilk-adimlar` | Okul'daki Başlarken listesi açık mı, daraltılmış mı, kapatılmış mı, ve Yazdır'a basıldı mı; tek bir JSON kaydı |
 | `ders-programi-baski` | kâğıt seçenekleri, tek bir JSON kaydı |
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 | `ders-programi-oneri-olcum` | bu makinedeki son 20 öneri aramasının ölçümü (`relaxLog.ts`) |

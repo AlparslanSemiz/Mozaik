@@ -9,7 +9,7 @@ import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { pinnedRelationBreaches } from '../../pure/constraints';
 import type { CheckView } from '../../platform/prefs';
-import { T, useT } from '../common';
+import { NextStep, T, useT } from '../common';
 
 interface Props {
   state: State;
@@ -115,6 +115,7 @@ export default function Check({ state, view }: Props) {
         <div className="empty-screen">
           <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
           <T k="Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
+          <NextStep state={state} />
         </div>
       </>
     );

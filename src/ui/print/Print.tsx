@@ -25,6 +25,7 @@ import { parseKey, paletteColor, type State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
 import {
+  markPrinted,
   PER_SHEET_LABELS,
   PRINT_OPTION_LABELS,
   PRINT_SIZE_LABELS,
@@ -32,7 +33,7 @@ import {
   type PrintOptions,
 } from '../../platform/prefs';
 import Sheet from './Sheet';
-import { T, useT } from '../common';
+import { NextStep, T, useT } from '../common';
 import MailPanel from './MailPanel';
 
 interface Props {
@@ -142,6 +143,7 @@ export default function Print({
         <div className="empty-screen">
           <strong>{t('Yazdırılacak program yok.')}</strong>
           <T k="Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin." />
+          <NextStep state={state} />
         </div>
       </>
     );
@@ -251,7 +253,7 @@ export default function Print({
         <div className="panel no-print">
           <h2>{t('Çıktı')}</h2>
           <p className="hint">
-            <T k="Yazdırma penceresinde **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz." />
+            <T k="Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin." />
           </p>
           {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
               button stayed, because the page COUNT comes from the tick lists
@@ -260,7 +262,11 @@ export default function Print({
             <button
               className="btn primary"
               disabled={pageCount === 0}
-              onClick={() => window.print()}
+              onClick={() => {
+                // The one Başlarken step the plan cannot show (Checklist.tsx).
+                markPrinted();
+                window.print();
+              }}
             >
               {/* Sheets, not timetables: at 4-up, twenty classes are five
                   pieces of paper, and the number beside the button is the

@@ -27,8 +27,8 @@ import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../../leaf/i18n';
-import type { Kind } from '../../platform/prefs';
-import { T } from '../common';
+import type { Kind, StepId } from '../../platform/prefs';
+import { GoButton, T } from '../common';
 
 interface Props {
   state: State;
@@ -118,6 +118,13 @@ const EMPTY_TEXT: Record<Kind, string> = {
   room: 'derslik',
 };
 
+/** Where the empty screen's button goes, and what it says it does there. */
+const EMPTY_STEP: Record<Kind, { step: StepId; label: string }> = {
+  teacher: { step: 'teachers', label: 'Öğretmen ekle' },
+  class: { step: 'classes', label: 'Sınıf ekle' },
+  room: { step: 'rooms', label: 'Derslik ekle' },
+};
+
 const HINT: Record<Kind, string> = {
   teacher: 'Öğretmenin müsait olmadığı saatlere tıklayın.',
   class: 'Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.',
@@ -154,6 +161,11 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
               k="Müsaitlik girebilmek için **Okul** sekmesinden en az bir {ne} eklemeniz gerekiyor."
               vars={{ ne: t(EMPTY_TEXT[kind]) }}
             />
+            <span className="empty-go">
+              <GoButton to={{ tab: 'setup', step: EMPTY_STEP[kind].step }} primary>
+                {t(EMPTY_STEP[kind].label)}
+              </GoButton>
+            </span>
           </div>
         </div>
       </>
@@ -368,6 +380,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
       <aside>
         <div className="panel">
           <h2>{t('Kimin saatleri')}</h2>
+          <p className="hint">{t('Sağdaki sayılar: açık saat / ders saati.')}</p>
 
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more
@@ -393,7 +406,10 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                   <span className="row-dot" style={{ background: paletteColor(x.color) }} />
                 )}
                 <span className="entity-name">{x.label}</span>
-                <span className="entity-count">
+                <span
+                  className="entity-count"
+                  title={t('{acik} açık saat, {yuk} saat ders', { acik: x.open, yuk: x.load })}
+                >
                   {x.open}/{x.load}
                   {x.open < x.load && ' ⚠'}
                 </span>
@@ -403,10 +419,10 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
 
           <div className="form-row spaced">
             <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, false))}>
-              {t('Tümünü aç')}
+              {t('Bütün haftayı aç')}
             </button>
             <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, true))}>
-              {t('Tümünü kapat')}
+              {t('Bütün haftayı kapat')}
             </button>
           </div>
 

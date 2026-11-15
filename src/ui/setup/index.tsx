@@ -23,6 +23,7 @@ import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
 import Subjects from './Subjects';
+import { Checklist } from './Checklist';
 import { Summary } from '../lists';
 import { drafts as draftsOf } from '../../pure/io';
 import { STEPS } from '../program';
@@ -77,65 +78,63 @@ export default function Setup({ state, change, plans, step }: Props) {
     STEPS.findIndex((s) => s.id === step),
   );
   const current = STEPS[index] ?? STEPS[0]!;
+  const empty = state.teachers.length === 0 && state.classes.length === 0;
 
   return (
     <>
       {/* The one screen an empty project lands on, so this is where "what do I
-          do first" has to be answered. */}
-      {state.teachers.length === 0 && state.classes.length === 0 && (
-        <div className="panel">
-          <h2>{t('Başlarken')}</h2>
-          <p className="hint">
-            <T k="Sırayla: **derslikler**, **branşlar**, **öğretmenler**, **sınıflar**, sonra **dersler**." />
-          </p>
-          {/* Once, on a first run, and then never here again — its home is
-              Ayarlar → Veri. It used to be a permanent button on this screen
-              with two paragraphs around it, which is a lot of room for
-              something the reader needs exactly one afternoon. Seen is written
-              when they ACT, not when the screen is drawn: a line nobody has
-              read yet must survive a reload. */}
-          {!introSeen && (
-            <p className="hint intro-line">
-              <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
-              {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
-              <button
-                className="btn"
-                onClick={async () => {
-                  if (await loadSample(state, change)) setIntroSeen(true);
-                }}
-              >
-                {t('Örnek okulu yükle')}
-              </button>
-              <button
-                className="btn quiet"
-                title={t(
-                  'Bu satır bir daha çıkmaz; örnek okul Ayarlar → Hakkında’da durmaya devam eder',
-                )}
-                onClick={() => {
-                  markIntroSeen();
-                  setIntroSeen(true);
-                }}
-              >
-                {t('Bir daha gösterme')}
-              </button>
-            </p>
-          )}
-
-          {templates.length > 0 && (
-            <>
-              <h3>{t('Taslaktan başla')}</h3>
-              <p className="hint">
-                <T k="Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez." />
+          do first" has to be answered — and since 2026-11-15 also "what is
+          left": the list ticks itself from the plan (Checklist.tsx). */}
+      <Checklist state={state}>
+        {empty && (
+          <>
+            {/* Once, on a first run, and then never here again — its home is
+                Ayarlar → Hakkında. Seen is written when they ACT, not when the
+                screen is drawn: a line nobody has read yet must survive a
+                reload. */}
+            {!introSeen && (
+              <p className="hint intro-line">
+                <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
+                {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
+                <button
+                  className="btn"
+                  onClick={async () => {
+                    if (await loadSample(state, change)) setIntroSeen(true);
+                  }}
+                >
+                  {t('Örnek okulu yükle')}
+                </button>
+                <button
+                  className="btn quiet"
+                  title={t(
+                    'Bu satır bir daha çıkmaz; örnek okul Ayarlar → Hakkında’da durmaya devam eder',
+                  )}
+                  onClick={() => {
+                    markIntroSeen();
+                    setIntroSeen(true);
+                  }}
+                >
+                  {t('Bir daha gösterme')}
+                </button>
               </p>
-              <DraftStart
-                plans={plans}
-                label={(name) => t('{ad} ile başla', { ad: name })}
-                notify={notify}
-              />
-            </>
-          )}
-        </div>
-      )}
+            )}
+
+            {templates.length > 0 && (
+              <>
+                <h3>{t('Taslaktan başla')}</h3>
+                <p className="hint">
+                  <T k="Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez." />
+                </p>
+                <DraftStart
+                  plans={plans}
+                  label={(name) => t('{ad} ile başla', { ad: name })}
+                  notify={notify}
+                />
+              </>
+            )}
+          </>
+        )}
+      </Checklist>
 
       {/* The list on the left, and on the right what the list MEANS: the same
           capacity numbers Kontrol shows, but while you are typing rather than

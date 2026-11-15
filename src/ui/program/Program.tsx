@@ -23,7 +23,7 @@ import {
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { useToast, T, useT } from '../common';
+import { NextStep, useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -60,6 +60,7 @@ import PreviewBar from './PreviewBar';
 import GridMenu from './GridMenu';
 import PoolMenu from './PoolMenu';
 import { usePreview } from './usePreview';
+import { useWeekCut } from './useWeekCut';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -202,7 +203,13 @@ function Program({
     applied: useStillSaid(solver.applied, state),
     result: useStillSaid(solver.result, state),
   };
-  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
+  const { text: idleText, level: barLevel } = describeBar(solver, view, t, current);
+  // An idle bar also says when the week runs off the side (useWeekCut.ts).
+  const weekCut = useWeekCut(active && state.lessons.length > 0);
+  const barText =
+    barLevel === '' && weekCut
+      ? `${idleText} ${t('Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.')}`
+      : idleText;
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -428,6 +435,7 @@ function Program({
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.')}
+          <NextStep state={state} />
         </div>
       </>
     );
