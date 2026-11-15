@@ -614,6 +614,22 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ---
 
+## 2026-11-15 · Zincir `main`'e: boyut eşiği (`rk2-bozuk-iliski`, PR #22)
+
+Bugünkü `main` (#16–#19) alındı; tek çakışma `Teachers.tsx`: zincirin e-posta alanı #18'in
+bölmesine, `TeacherForm.tsx`, `TeacherRow.tsx` ve `Teachers.tsx`'in başlığına taşındı. CI'ın
+boyut kapısı kırmızı: ham `dist/index.html` 1 202 626 B, eşik 1 200 000 B (brotli 288,81 kB,
+eşiğin 190 B altında). CLAUDE.md'nin kuralıyla eşik yükseltilmeden önce `file://` açılışı,
+Chromium, CPU 4× yavaşlatılmış, 1920×1080, 7 koşu, `loadEventEnd` medyanı (bu Mac, kirli
+ölçüm):
+
+| Derleme | Bayt | Medyan |
+|---|---|---|
+| `main` (#16–#19) | 1 178 508 | 216 ms |
+| zincir + `main` | 1 202 626 | 217 ms |
+
+Fark yok; eşikler 1 210 000 B ve 290 000 B (brotli).
+
 ## 2026-11-15 · Teachers ve Dersler bileşenlere (`refactor/rf24-rf25`)
 
 RF24 ve RF25 (TODO §8k). Kod taşındı, değiştirilmedi; ekran ve davranış aynı.
