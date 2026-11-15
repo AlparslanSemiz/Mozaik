@@ -491,8 +491,10 @@ fn swap_files(exe: &Path, yeni: &Path, eski: &Path) -> Result<(), String> {
 
 /// Drops the previous version, if one is lying next to us.
 ///
-/// Called at startup rather than right after the swap, because right after the
-/// swap the old file is still the process doing the asking.
+/// Called once the new version's page has loaded (`lib.rs`, `on_page_load`),
+/// not right after the swap -- right after the swap the old file is still the
+/// process doing the asking -- and not at the first line of startup either: a
+/// version that never gets a window must leave the old one to go back to.
 pub fn sweep_old(exe: &Path) {
     let _ = fs::remove_file(yan(exe, ESKI));
 }
@@ -1122,6 +1124,22 @@ mod tests {
 
         swap(&exe).unwrap();
         assert_eq!(fs::read_to_string(&exe).unwrap(), "yeni program");
+    }
+
+    #[test]
+    fn the_old_version_goes_only_after_the_new_page_has_loaded() {
+        // Read from lib.rs, not run: a page load needs a webview. The sweep
+        // must sit inside the page-load hook and nowhere before it, or a new
+        // version that cannot open its window deletes the copy that still
+        // works (V9). Measured red: the call moved back to the top of `run`.
+        let lib = include_str!("lib.rs");
+        let kod = &lib[..lib.find("#[cfg(all(test").unwrap()];
+        let cagri: Vec<_> = kod.match_indices("update::sweep_old(").map(|(i, _)| i).collect();
+        assert_eq!(cagri.len(), 1, "sweep_old tek yerden çağrılmalı");
+        let kanca = kod.find(".on_page_load(").expect("on_page_load yok");
+        let sonraki = kod[kanca..].find(".on_window_event(").unwrap() + kanca;
+        assert!(kanca < cagri[0] && cagri[0] < sonraki, "sweep_old sayfa yüklenince değil");
+        assert!(kod[kanca..sonraki].contains("PageLoadEvent::Finished"));
     }
 
     #[test]

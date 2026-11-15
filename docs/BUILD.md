@@ -526,7 +526,9 @@ doğrular (özet 2026-10-24'ten beri; özeti olmayan bir manifestteki yeni sür�
 elle indirme adresi söylenir), adresin yalnız bu deponun Release öneklerinden gelmesine izin
 verir, takası çalışan programın kendi
 dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
-yarıda kalırsa eski programı yerine geri koyar. İndirme ve takas yalnız
+yarıda kalırsa eski programı yerine geri koyar. `.eski` yeni sürümün sayfası
+yüklendikten sonra silinir, açılışın ilk satırında değil: pencere açamayan bir yeni sürüm
+geri dönülecek kopyayı silmemiş olur. İndirme ve takas yalnız
 Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya
 Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi onu
 kendi üstüne yazardı (tuzak 126). Babanın makinesindeki

@@ -234,6 +234,9 @@ fn kapanis_istendi(window: &tauri::Window, api: &tauri::CloseRequestApi) {
     });
 }
 
+/// Once per process: a page reloaded later has nothing left to sweep.
+static ESKI_SUPURME: std::sync::Once = std::sync::Once::new();
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 /// Linux only: draw without WebKitGTK's DMA-BUF renderer, unless the shell
 /// already says otherwise.
@@ -259,13 +262,6 @@ pub fn run() {
     // claiming the single instance below (`update::eskisi_gitsin` says why).
     if std::env::args().any(|a| a == update::GUNCELLENDI) {
         update::eskisi_gitsin(std::io::stdin(), update::DEVIR_SURESI);
-    }
-
-    // The version this replaced, if we are the replacement. Here rather than
-    // right after the swap, because right after the swap that file is still
-    // the process doing the asking.
-    if let Ok(exe) = std::env::current_exe() {
-        update::sweep_old(&exe);
     }
 
     tauri::Builder::default()
@@ -295,6 +291,21 @@ pub fn run() {
                 }
             }
             Ok(())
+        })
+        // The version this replaced, if we are the replacement, goes only once
+        // THIS version has drawn its page. Not at the first line of `run`, as
+        // it used to: a new version that cannot open its window (a WebView2
+        // error, a missing DLL) then had already deleted the one copy that
+        // still worked (security review 2026-11-15, V9). Kept, `.eski` is what
+        // a person renames back by hand; the next swap clears it anyway.
+        .on_page_load(|_webview, payload| {
+            if payload.event() == tauri::webview::PageLoadEvent::Finished {
+                ESKI_SUPURME.call_once(|| {
+                    if let Ok(exe) = std::env::current_exe() {
+                        update::sweep_old(&exe);
+                    }
+                });
+            }
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
