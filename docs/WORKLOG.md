@@ -183,8 +183,8 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 12. Kayıt kuralı (2026-10-24, aşağıdaki girdi): CLAUDE.md, PRINCIPLES ve DECISIONS bugünkü
    kuralı taşır, yerine yenisi gelen kural silinir, geçmiş satırı bırakılmaz; WORKLOG'un
    tarihli girdileri ve TODO arşivi geriye dönük düzeltilmez (CONVENTIONS). PRINCIPLES'ın
-   emekli iki ilkesi silindi. DECISIONS'ın eski kayıtlarındaki "Eski hâli" blokları ve
-   yerine yenisi gelmiş kayıtlar taranmadı.
+   emekli iki ilkesi silindi. DECISIONS'ta "Eski hâli" blokları ve yerine yenisi gelmiş
+   kayıtlar da silindi (`ozellik/belge-temizlik`), denenip bırakılanlar duruyor.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -1291,6 +1291,36 @@ girdi, dal `main`'i aldı. Koşulan: `npm run hizli`.
 Koşulmayan: E2E, `kontrol` (yalnız belge).
 
 ---
+
+## 2026-10-24 · DECISIONS'ın temizliği ve index.html'in biçimi (`ozellik/belge-temizlik`)
+
+Alp'in cevabı (önceki raporun 4. sorusu, "a"): DECISIONS'ın eski kayıtları yeni kayıt
+kuralına göre, ayrı dalda.
+
+**DECISIONS.** 52 "Eski hâli" bloğu silindi, "Şimdi" etiketleri "Ne" oldu. Bir blok kaydın
+tek "neden"iyse (ölçülmüş bir sorun) o cümle bugünkü dille kaydın "Neden"ine geçti.
+Yerine yenisi gelmiş sekiz kayıt silindi: 2026-10-09 test programı (2026-10-23'te dondu) ve
+Linux'un yalnız yerel kalması (geçerli gerekçesi 2026-10-10 Linux kaydına), 2026-10-08 v0
+bitmedi, 2026-08-30 çerçeve ve ikon eşiği, 2026-08-27 ikon eşiği, 2026-08-26 görsel
+regresyonun kaldırılması, 2026-08-25 statik yayın. Ötekilerde kaldırılmış ilkelere dayanan
+gerekçe, "o günkü kayıt şunu diyordu" cümleleri ve biten 2.2.0 notu çıktı; 2026-10-09
+çalışma düzeni kaydı "Şu an"ı birleşen dalın yazması kuralına indi. Denenip bırakılanlar,
+tartılan seçenekler ve ölçümler kaldı; `reseed` "Denendi, kaldırıldı" oldu. 114 kayıttan
+106'sı kaldı, dosya 2263 satırdan 1964'e indi. Dosyanın tanım cümlesi "neyden"
+demiyor, CLAUDE.md'deki satırı aynı commit'te; TODO §1'in silinen 2026-08-30 kaydına atfı
+2026-10-08'e döndü. Linux kaydındaki `~/GitHub/Mozaik` yolu `~/GitHub/Mozaikler/Mozaik` oldu.
+
+**index.html.** `prettier --check`'ten geçmiyordu: uzun `<link rel="icon">` tek satırda ve
+`</body>` yanlış girintide, ikisi de `favicon.mjs`'in şablonundan. Şablon düzeldi, dosya
+yeniden üretildi. `.prettierignore` yerine bu seçildi, ve `index.html` `bicim`'e ve
+`ci.yml`'in biçim denetimine girdi: şablon bozulursa CI yakalıyor. `temel.spec.ts`'in
+`<link>` regex'i satır sonunu da kapsıyor. Bütün depoda `prettier --check .` hâlâ 24
+dosyada uyarı veriyor (fikstürler, `styles.css`, JSON), onlar denetimin kapsamında değil.
+
+**Koşulan.** `npm run hizli` (her commit'ten önce, 1339 geçti, 1 atlandı), `eslint
+scripts/favicon.mjs`, `ci.yml`'in `prettier --check` komutu `index.html`'le, `npm run build`,
+`boyut` (`dist/index.html` 1 164 932 bayt, brotli 280,59 kB), `temel.spec.ts` 72 ve 77 `agir.sh` altında 4/4. **Koşulmayan.**
+`kontrol`, bütün E2E.
 
 ## 2026-10-24 · Sade çizimin mavisi ve kayıt kuralı (`ozellik/asil-ikon`)
 

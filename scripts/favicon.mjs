@@ -61,7 +61,10 @@ const html = `<!doctype html>
          okunmuyor (ölçüldü). Ayrışmasını e2e/temel.spec.ts yakalar.
          data: URI, çünkü bu dosya kendi dışından hiçbir şey istemez
          (çevrimdışı ilkesi, tuzak 32). -->
-    <link rel="icon" href="${uri}" />
+    <link
+      rel="icon"
+      href="${uri}"
+    />
   </head>
   <body>
     <div id="root"></div>
@@ -90,7 +93,7 @@ const html = `<!doctype html>
           '</div>';
       }
     </script>
-    </body>
+  </body>
 </html>
 `;
 writeFileSync('index.html', html);
