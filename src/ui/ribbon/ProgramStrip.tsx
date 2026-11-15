@@ -35,7 +35,7 @@ import {
   switchProgram,
   validProgramName,
 } from '../../pure/grid';
-import { togglePinScope } from '../../pure/constraints';
+import { sanitize, togglePinScope } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
@@ -97,7 +97,7 @@ export function programStrip({
   programColor,
   setProgramColor,
   t,
-  dialogs: { confirm, prompt, alert },
+  dialogs: { prompt, alert },
   notify,
   undoIf,
   strip,
@@ -150,21 +150,23 @@ export function programStrip({
     if (name !== null) manageProgram((d) => renameProgram(d, currentProgram.id, name));
   };
 
-  const deleteCurrent = async () => {
+  // No question since 2026-11-15 (TODO SD1): a seçenek switch no longer
+  // empties the history, so deleting one is an ordinary step that "Geri al"
+  // brings back with every hour in it. The question used to say "0
+  // sabitleme silinecek"; the pins go with the hours and are not counted.
+  const deleteCurrent = () => {
     if (state.programs.length <= 1) return;
-    if (
-      !(await confirm({
-        title: t('{ad} seçeneği silinecek', { ad: currentProgram.name }),
-        body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
-          n: Object.keys(currentProgram.placements).length,
-          s: Object.keys(currentProgram.pinned).length,
-        }),
-        confirmLabel: t('Seçeneği sil'),
-        danger: true,
-      }))
-    )
-      return;
-    manageProgram((d) => removeProgram(d, currentProgram.id));
+    const hours = Object.keys(currentProgram.placements).length;
+    const said =
+      hours === 0
+        ? t('{ad} seçeneği silindi.', { ad: currentProgram.name })
+        : t('{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.', {
+            ad: currentProgram.name,
+            n: hours,
+          });
+    const next = sanitize(removeProgram(state, currentProgram.id));
+    manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program')}>
@@ -222,23 +224,21 @@ export function programStrip({
               className="btn"
               disabled={placed === 0}
               title={t('Dizilmiş programı silip baştan dizer')}
-              onClick={async () => {
-                if (
-                  await confirm({
-                    title: t('Dizilmiş {n} saatin tamamı silinecek', { n: placed }),
-                    body:
-                      pinnedHours === 0
-                        ? t('Program baştan dizilecek. Ctrl+Z ile geri alınabilir.')
-                        : t(
-                            'Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.',
-                            { n: pinnedHours },
-                          ),
-                    confirmLabel: t('Baştan diz'),
-                    danger: true,
-                  })
-                ) {
-                  solver.start(state, { keepPlaced: false, exclusions });
-                }
+              onClick={() => {
+                // No question since 2026-11-15 (TODO SD1): the run's answer
+                // lands as ONE step of the history (useSolver's `finish`), so
+                // its notice can offer "Geri al" for the whole of it. Nothing
+                // on the grid moves until the run ends, and "Durdur" is on
+                // this same spot while it runs.
+                solver.start(state, { keepPlaced: false, exclusions }, (next) => {
+                  const said =
+                    pinnedHours === 0
+                      ? t('Program baştan dizildi.')
+                      : t('Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.', {
+                          n: pinnedHours,
+                        });
+                  notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+                });
               }}
             >
               <RotateCcw {...ICON} />
@@ -276,7 +276,14 @@ export function programStrip({
             <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
               <DropdownMenu.RadioGroup
                 value={state.activeProgramId}
-                onValueChange={(id) => manageProgram((d) => switchProgram(d, id))}
+                onValueChange={(id) =>
+                  manageProgram(
+                    (d) => switchProgram(d, id),
+                    t('{ad} seçeneğine geçildi.', {
+                      ad: state.programs.find((p) => p.id === id)?.name ?? '',
+                    }),
+                  )
+                }
               >
                 {state.programs.map((program) => (
                   <DropdownMenu.RadioItem key={program.id} className="menu-item" value={program.id}>
@@ -308,7 +315,7 @@ export function programStrip({
               <DropdownMenu.Item
                 className="menu-item danger"
                 disabled={state.programs.length <= 1}
-                onSelect={() => void deleteCurrent()}
+                onSelect={deleteCurrent}
               >
                 <Trash2 size={15} aria-hidden="true" />
                 {t('Seçeneği sil')}
@@ -382,14 +389,14 @@ export function programStrip({
       {/* "Programı sıfırla" — asked for by name. It is NOT the same button as
           "Baştan diz": that one empties the grid and then fills it again, and
           there was no way to simply CLEAR it and start placing by hand.
-          Undoable, and the question says so.
+          Undoable, and its notice offers "Geri al".
 
           It stands at the far end, past the spacer, and not beside the two
           buttons that fill the grid: the only two ways to lose a placement
           by accident are clicking it and clicking "Baştan diz", and they no
           longer sit next to each other. It is NOT renamed to "Sıfırla" —
-          temel.spec.ts asserts no button anywhere is called that, because
-          the one thing in this program that cannot be undone is. */}
+          temel.spec.ts asserts no button anywhere is called that: the
+          name stays with "Her şeyi sil", the widest click there is. */}
       {/* THE WHOLE RIGHT-HAND END BEHIND ONE DOOR, and the reason is a
           MEASUREMENT. Three buttons in an equal-column group are as wide as
           the widest of them times three: at 150%, the scale where the strip

@@ -7,20 +7,30 @@ import {
   addClass,
   addClassesFromRows,
   deleteClass,
-  deletionQuestion,
+  deletionNotice,
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { useDialogs, ColorPick, LimitBox, type PanelProps, T, useT } from '../common';
+import {
+  ColorPick,
+  LimitBox,
+  moveFocusFromDeleted,
+  type PanelProps,
+  T,
+  useT,
+  useToast,
+  useUndoIf,
+} from '../common';
 import { parseClasses } from '../../pure/io';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import { classListConfig } from '../../pure/lists';
 
 export default function Classes({ state, change }: PanelProps) {
   const t = useT();
-  const { confirm } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
@@ -247,18 +257,17 @@ export default function Classes({ state, change }: PanelProps) {
                         </button>
                         <button
                           className="btn danger"
-                          onClick={async () => {
-                            const q = deletionQuestion(state, 'class', c.id);
-                            if (
-                              !(await confirm({
-                                title: q.title,
-                                body: q.cost,
-                                confirmLabel: 'Sil',
-                                danger: true,
-                              }))
-                            )
-                              return;
-                            change((d) => deleteClass(d, c.id));
+                          onClick={(e) => {
+                            // No question since SD1: the deletion happens, and
+                            // its notice says what went with it.
+                            const said = deletionNotice(state, 'class', c.id);
+                            const next = deleteClass(state, c.id);
+                            moveFocusFromDeleted(e.currentTarget);
+                            change((d) => (d === state ? next : deleteClass(d, c.id)), said);
+                            notify(said, 'info', {
+                              label: t('Geri al'),
+                              run: () => undoIf(next),
+                            });
                           }}
                         >
                           {t('Sil')}

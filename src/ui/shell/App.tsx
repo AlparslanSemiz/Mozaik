@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
 import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
-import { UndoIfProvider, useDialogs, useToast, useLang, useT } from '../common';
+import { UndoIfProvider, useAnnounce, useDialogs, useToast, useLang, useT } from '../common';
 import { useStore, storageWorks, useFolder } from '../../platform/storage';
 import {
   useToolState,
@@ -39,6 +39,7 @@ import { openPlanFile } from './openPlanFile';
 
 export default function App() {
   const t = useT();
+  const announce = useAnnounce();
   const {
     state,
     change,
@@ -47,6 +48,7 @@ export default function App() {
     undoIf,
     redo,
     loadState,
+    replaceState,
     canUndo,
     canRedo,
     plans,
@@ -54,7 +56,7 @@ export default function App() {
     saveTrouble,
     unreadable,
     setAside,
-  } = useStore();
+  } = useStore(announce);
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -365,7 +367,7 @@ export default function App() {
                   <Settings
                     state={state}
                     change={change}
-                    loadState={loadState}
+                    replaceState={replaceState}
                     plans={plans}
                     folder={folder}
                     update={update}

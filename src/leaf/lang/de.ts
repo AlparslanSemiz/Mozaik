@@ -304,8 +304,6 @@ const DE: Sozluk = {
     "Wird die Aufteilung geändert, verschwindet dieses Fach aus dem Stundenplan, auch die angehefteten Karten",
 
   // src/ui/Ribbon.tsx — what the two destructive questions promise
-  "Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.":
-    "Die {n} angehefteten Stunden bleiben, der Rest wird neu geplant. Ctrl+Z macht es rückgängig.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: Angaben und Wochenstundenplan",
 
   // src/ui/program/Inspector.tsx
@@ -418,10 +416,6 @@ const DE: Sozluk = {
   "Otomatik diz ({n})": "Automatisch legen ({n})",
   "Dizilmiş programı silip baştan dizer":
     "Löscht den Stundenplan und legt ihn von vorn",
-  "Dizilmiş {n} saatin tamamı silinecek":
-    "Alle {n} gelegten Stunden werden gelöscht",
-  "Program baştan dizilecek. Ctrl+Z ile geri alınabilir.":
-    "Der Stundenplan wird von vorn gelegt. Mit Strg+Z rückgängig.",
   "Baştan diz": "Von vorn legen",
   "Programı boşalt": "Stundenplan leeren",
   "Sorun yok": "Keine Probleme",
@@ -585,12 +579,7 @@ const DE: Sozluk = {
   "En son sürümü kullanıyorsunuz.": "Sie verwenden die neueste Version.",
   "Yeni sürüm iniyor…": "Die neue Version wird heruntergeladen…",
   "Her şey silinecek": "Alles wird gelöscht",
-  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.":
-    "Lehrkräfte, Klassen, Fächer und der gelegte Stundenplan. Dieser Plan bleibt völlig leer.",
   "Devam et": "Weiter",
-  "Son kez soruyorum": "Letzte Nachfrage",
-  'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.':
-    "Das lässt sich nicht rückgängig machen. Wählen Sie vorher „In Datei speichern“ in der oberen Leiste, falls Sie es sich anders überlegen könnten.",
   "{yazilan} plan dosyaya yazıldı; {eksik} planın verisi bulunamadı.":
     "{yazilan} {yazilan:Plan|Pläne} in die Datei geschrieben; die Daten von {eksik} {eksik:Plan|Plänen} wurden nicht gefunden.",
   "{yazilan} plan tek dosyaya yazıldı.":
@@ -803,11 +792,6 @@ const DE: Sozluk = {
   '"{ad}" branşı kullanılıyor': "Das Fach „{ad}“ wird verwendet",
   "{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.":
     "{n} {n:Lehrkraft hat|Lehrkräfte haben} dieses Fach ({kimler}). Ändern Sie zuerst deren Fach und löschen Sie es dann.",
-  '"{ad}" branşı listeden çıkarılacak':
-    "Das Fach „{ad}“ wird aus der Liste entfernt",
-  "Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.":
-    "Keine Lehrkraft hat dieses Fach, es ist also nichts weiter betroffen.",
-  Çıkar: "Entfernen",
   "Branşlar ({n})": "Fächer ({n})",
   "Yeni branş (örn. Robotik)": "Neues Fach (z. B. Robotik)",
   "Yeni branş": "Neues Fach",
@@ -915,8 +899,6 @@ const DE: Sozluk = {
   "Bu plandaki her şeyin yerine örnek okul geçecek":
     "Die Beispielschule ersetzt alles in diesem Plan",
   "Örnek okul verisi yüklenecek": "Beispiel-Schuldaten werden geladen",
-  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce \"Dosyaya kaydet\" deyin.":
-    "{kayip} An ihre Stelle tritt eine Beispielschule mit 25 Lehrkräften, 20 Klassen, 8 Räumen und 99 Fächern. Die anderen Pläne bleiben unberührt. Nicht rückgängig zu machen. Wählen Sie vorher „In Datei speichern“.",
   "25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → \"Her şeyi sil\" ile temizleyin.":
     "25 Lehrkräfte, 20 Klassen, 8 Räume und 99 Fächer. Um zu sehen, was Mozaik tut; bevor Sie eigene Daten eintragen, räumen Sie mit Einstellungen → Über → „Alles löschen“ auf.",
   "Yerine koy": "Ersetzen",
@@ -979,21 +961,8 @@ const DE: Sozluk = {
   "Bu hücreye bırakılamaz": "In dieser Zelle kann nicht abgelegt werden",
 
   // src/entities.ts
-  "Bu derslik silinecek": "Dieser Raum wird gelöscht",
-  "{ad} dersliği silinecek": "Raum {ad} wird gelöscht",
-  "{n} sınıfın dersliği boşalacak ({hangileri}) ve derslik çakışması artık kontrol edilmeyecek.":
-    "{n} {n:Klasse steht|Klassen stehen} dann ohne Raum da ({hangileri}), und Raumkonflikte werden nicht mehr geprüft.",
-  "Bu ders silinecek": "Dieses Fach wird gelöscht",
   "{sinif} sınıfının {kim} dersi": "das Fach {kim} der Klasse {sinif}",
-  "{ne} silinecek ({n} saat)": "{ne} wird gelöscht ({n} {n:Stunde|Stunden})",
-  "{ne} silinecek": "{ne} wird gelöscht",
-  "Programa yerleşmiş {n} saati de kalkacak.":
-    "Auch die {n} bereits gelegten {n:Stunde|Stunden} verschwinden.",
-  "Bu öğretmen": "Diese Lehrkraft",
   "Bu sınıf": "Diese Klasse",
-  "{n} dersi de gidecek.": "Auch {n} {n:Fach|Fächer} verschwinden.",
-  "{ders} dersi ve programa yerleşmiş {saat} saati de gidecek.":
-    "Auch {ders} {ders:Fach|Fächer} und die {saat} bereits gelegten {saat:Stunde|Stunden} verschwinden.",
   "Haftalık ders yükü": "Wöchentliche Fachlast",
   "{n} saat": "{n} {n:Stunde|Stunden}",
   "Açık saat": "Offene Stunden",
@@ -1512,9 +1481,6 @@ const DE: Sozluk = {
   "Seçenek adı boş olamaz": "Die Variante braucht einen Namen",
   "Bu seçenek adı zaten kullanılıyor": "Dieser Name ist bereits vergeben",
   Kaydet: "Speichern",
-  "{ad} seçeneği silinecek": "Die Variante {ad} wird gelöscht",
-  "{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.":
-    "{n} belegte {n:Stunde|Stunden} und {s} {s:Anheftung|Anheftungen} gehen mit. Die gemeinsamen Schuldaten bleiben.",
   "Öğretmeni düzenle": "Lehrkraft bearbeiten",
   "Sınıfı düzenle": "Klasse bearbeiten",
   "Toplu sabitle": "Mehrere anheften",
@@ -1594,8 +1560,6 @@ const DE: Sozluk = {
   // by its Turkish sentence anyway.
   "**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır.":
     "**Wenig.** Die Dauern halbieren sich, und alles, was sich BEWEGT, entfällt.",
-  "**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin.":
-    "**Der offene Plan** wird gelöscht, **nicht widerrufbar**; erst **In Datei speichern**.",
   "**Mozaik burada kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:":
     "**Hier aktualisiert sich Mozaik nie** und verbindet sich nirgends. Neueste Version:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
@@ -1776,6 +1740,26 @@ const DE: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
+  "Geri alındı.": "Rückgängig gemacht.",
+  "Geri alındı: {ne}": "Rückgängig gemacht: {ne}",
+  "Geri almak için Ctrl+Z.": "Mit Strg+Z rückgängig machen.",
+  "Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.": "Dazwischen wurde etwas anderes geändert. Mit Strg+Z Schritt für Schritt rückgängig machen.",
+  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından \"Geri al\" ile geri gelir.": "Lehrkräfte, Klassen, Fächer und der gelegte Stundenplan. Dieser Plan bleibt völlig leer. „Rückgängig“ gleich danach holt alles zurück.",
+  "Bu plandaki her şey silindi.": "Alles in diesem Plan wurde gelöscht.",
+  "**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir.": "**Der offene Plan** wird gelöscht; **Rückgängig** gleich danach holt ihn zurück.",
+  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından \"Geri al\" ile geri gelir.": "{kayip} An ihre Stelle tritt eine Beispielschule mit 25 Lehrkräften, 20 Klassen, 8 Räumen und 99 Fächern. Die anderen Pläne bleiben unberührt. „Rückgängig“ gleich danach holt Ihre Daten zurück.",
+  "Derslik silindi.": "Raum gelöscht.",
+  "{ad} dersliği silindi.": "Raum {ad} gelöscht.",
+  "{ad} dersliği silindi, {sinif} sınıfının dersliği boşaldı.": "Raum {ad} gelöscht; Klasse {sinif} hat jetzt keinen Raum.",
+  "{ad} dersliği silindi, {n} sınıfın dersliği boşaldı ({hangileri}). Bu sınıflar artık aynı saate konabilir.": "Raum {ad} gelöscht; {n} {n:Klasse hat|Klassen haben} jetzt keinen Raum ({hangileri}). Diese Klassen dürfen jetzt in dieselbe Stunde.",
+  "Öğretmen silindi.": "Lehrkraft gelöscht.",
+  "Sınıf silindi.": "Klasse gelöscht.",
+  "\"{ad}\" branşı listeden çıkarıldı.": "„{ad}“ wurde aus der Fächerliste entfernt.",
+  "{ad} seçeneği silindi.": "Variante {ad} gelöscht.",
+  "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
+  "{ad} seçeneğine geçildi.": "Zu {ad} gewechselt.",
+  "Program baştan dizildi.": "Der Stundenplan wurde von vorn gelegt.",
+  "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "Der Stundenplan wurde von vorn gelegt; {n} fixierte {n:Stunde blieb|Stunden blieben}.",
 };
 
 registerSozluk("de", DE);

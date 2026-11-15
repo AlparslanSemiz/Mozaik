@@ -28,7 +28,7 @@ import type { FolderRun } from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';
 
 interface Props extends PanelProps {
-  loadState: (next: State) => void;
+  replaceState: (next: State, label?: string) => State;
   plans: PlanControls;
   /** The folder that gets a copy of everything. Owned by App (pitfall 18). */
   folder: FolderRun;
@@ -56,7 +56,7 @@ interface Props extends PanelProps {
 export default function Settings({
   state,
   change,
-  loadState,
+  replaceState,
   plans,
   folder,
   scale,
@@ -102,7 +102,7 @@ export default function Settings({
         <Data
           state={state}
           change={change}
-          loadState={loadState}
+          replaceState={replaceState}
           plans={plans}
           folder={folder}
           update={update}
