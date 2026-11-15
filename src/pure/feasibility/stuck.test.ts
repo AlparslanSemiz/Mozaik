@@ -160,3 +160,24 @@ describe('violationCell', () => {
     });
   });
 });
+
+describe('health.short', () => {
+  it('dar çubukta da iki kelime kalır', () => {
+    expect(health(makeWorld({})).short).toBe('Henüz ders girilmedi');
+    const pending = makeWorld({
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+    });
+    expect(health(pending).short).toBe('2 saat havuzda');
+    const stuck = makeWorld({
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
+      unavailable: { 'oMC|0|0': 1, 'oMC|0|1': 1, 'oMC|0|2': 1, 'oMC|0|3': 1 },
+    });
+    // One lesson with nowhere to go, and MÇ's capacity row as a warning.
+    expect(health(stuck).short).toBe('2 sorun');
+    const done = makeWorld({
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
+      placements: { 's510|0|0': 'x1' },
+    });
+    expect(health(done).short).toBe('Sorun yok');
+  });
+});

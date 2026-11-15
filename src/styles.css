@@ -6487,9 +6487,14 @@ table.availability thead .hour-clock:empty::before {
 .health:hover { box-shadow: var(--elev-1); }
 
 /* Below this the bar has six destinations, a document name and six buttons to
-   hold: the chip keeps its colour and loses its sentence. */
+   hold: the chip trades its sentence for two words ("3 sorun"). It used to keep
+   only the dot, and a coloured pill with a dot in it read as an on/off switch
+   (usability review, 2026-11-15). */
+.health-short { display: none; }
 @media (max-width: 1500px) {
   .health-text { display: none; }
+  .health-short { display: inline; }
+  .health { flex-shrink: 0; }
 }
 
 /* --------------------------------------------------------- command palette

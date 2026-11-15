@@ -1804,6 +1804,8 @@ const DE: Sozluk = {
     "in den Stunden {zaman}",
   "{n} saatine {boy} saatlik kart sığmıyor":
     "{n} {n:fasst|fassen} die {boy}-stündige Karte nicht",
+  "{n} sorun":
+    "{n} {n:Problem|Probleme}",
 };
 
 registerSozluk("de", DE);

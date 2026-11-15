@@ -133,6 +133,11 @@ export default function Topbar({
       >
         <span className="health-dot" aria-hidden="true" />
         <span className="health-text">{status.message}</span>
+        {/* The narrow bar's words. Never only the dot: a coloured pill with a
+          dot in it read as an on/off switch (usability review, 2026-11-15). */}
+        <span className="health-short" aria-hidden="true">
+          {status.short}
+        </span>
       </button>
 
       <span className="spacer" />

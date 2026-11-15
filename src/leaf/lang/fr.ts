@@ -1812,6 +1812,8 @@ const FR: Sozluk = {
     "aux heures {zaman}",
   "{n} saatine {boy} saatlik kart sığmıyor":
     "{n} {n:ne peut|ne peuvent} pas recevoir sa carte de {boy} heures",
+  "{n} sorun":
+    "{n} {n:problème|problèmes}",
 };
 
 registerSozluk("fr", FR);

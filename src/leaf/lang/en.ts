@@ -1787,6 +1787,8 @@ const EN: Sozluk = {
     "in periods {zaman}",
   "{n} saatine {boy} saatlik kart sığmıyor":
     "{n} cannot hold its {boy}-hour card",
+  "{n} sorun":
+    "{n} {n:problem|problems}",
 };
 
 registerSozluk("en", EN);

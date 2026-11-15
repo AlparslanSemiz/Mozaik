@@ -59,6 +59,13 @@ export interface Health {
   level: Level;
   /** The chip's own sentence. Never "there is a problem" — always which. */
   message: string;
+  /**
+   * The chip's words when the bar is too narrow for `message`: "3 sorun",
+   * "45 saat havuzda", "Sorun yok". Below 1500 px it used to keep only its
+   * dot, and a coloured pill with a dot in it reads as an on/off switch
+   * (usability review, 2026-11-15).
+   */
+  short: string;
 }
 
 export function health(d: State): Health {
@@ -107,13 +114,15 @@ export function health(d: State): Health {
   // to somebody who has just opened the program for the first time is the chip
   // telling them nothing on the one screen where it could tell them something.
   const empty = d.lessons.length === 0;
+  const hard = blocked + stranded + report.unplaceable.length;
+  const trouble = hard + warnings;
 
   return {
     blocked,
     warnings,
     pending,
     stranded,
-    hard: blocked + stranded + report.unplaceable.length,
+    hard,
     problems: stranded + report.violations.length + report.unplaceable.length,
     advice: report.advice.length,
     level,
@@ -122,5 +131,12 @@ export function health(d: State): Health {
       : parts.length === 0
         ? t('Sorun yok')
         : parts.join(' · '),
+    short: empty
+      ? t('Henüz ders girilmedi')
+      : trouble > 0
+        ? t('{n} sorun', { n: trouble })
+        : pending > 0
+          ? t('{n} saat havuzda', { n: pending })
+          : t('Sorun yok'),
   };
 }
