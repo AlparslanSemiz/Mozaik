@@ -192,6 +192,20 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · Güvenlik sertleştirmesi (`guvenlik/sertlestirme`, B7.39)
+
+`teslim/kurulum-paketi`'nden (PR #20) açıldı, ondan sonra birleşir. Güvenlik ve veri
+denetiminin küçük maddeleri, her biri kendi commit'inde ve testiyle: klasör yazımında
+`sync_all` (V2), boyut 0'ın reddi (G4), `.eski`'nin sayfa yüklenince silinmesi (V9;
+kaynaktan okuyan test, çağrı `run`'ın başına geri taşınınca kırmızı ölçüldü), `remove_file`'ın
+yalnız günlük yedek adı (G7), `.yeni` ve kurulumun atomik yazımı (V10), `eski-kopya.txt`
+sınırının testleri (V8), action'ların SHA ile sabitlenmesi (G5) ve Dependabot'ta cargo.
+Capability ve CSP değiştirilmedi, gerekçe ve öneri TODO B7.39'da. Koşulan: `cargo test`
+(macOS), `cargo clippy` (iki eski uyarı, bu dalın değil), `tsc --noEmit`, `kontrat`, `surum`
+ve `docs` testleri. Windows'ta ve gerçek exe'de koşulmadı.
+
+---
+
 ## 2026-10-24 gece · Zincir `main`'e bağlandı, (A) ve gerçek güncelleme akışı
 
 **Bağlama.** `main` iki kez ilerledi (`fix/okunamayan-plan`, sonra 44 commit'lik refactor). Her dal
