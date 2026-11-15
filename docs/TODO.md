@@ -2021,10 +2021,26 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       grubu, Açık/Kapalı tema, Sığdır/Ferah/Rahat, "Okul" sekmesi ile okul, "Genel",
       pano anlamında "kopya", Program şeridindeki "Izgara" grubu (içinde programı sabitleme
       ve boşaltma da var), öneri cümlesindeki "açık saatler ve kurallar".
-- [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
-      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
-      ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama
-      "örnek sebep"in ne söyleyeceği bir karar (bugün ilk kapalı hücre, bilgi taşımıyor).
+- [x] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
+      yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Yazıldı (2026-11-15,
+      `kullanim/kontrol`, `metin/tek-ad` üstünde), birim testleri ve `kontrol`, `program`,
+      `temel`, `musaitlik`, `zebra` E2E yeşil, birleşmedi. Üç denetimin ortak bulgusuyla
+      birlikte (Kontrol neyin yanlış olduğunu söylüyor, tıklanacak bir şey vermiyordu):
+      yerleşemeyenler SEBEBE göre tek satır, dersler havuzdaki kartı işaretleyen düğmeler;
+      sebep artık bağlayan kısıt (`feasibility/stuck.ts`: önce aşan kapasite satırının kendi
+      cümlesi, sonra "sınıfın açık saatlerinin hepsi dolu", sonra sınıfın boş saatlerini
+      neyin tuttuğu sayılarak), gün ve saat içermiyor ki gruplansın. Kapalı saatte ders ders
+      başına tek satır ("1 dersin 2 saati", çip de ders sayıyor), `Göster` kartı Program'da
+      işaretleyip odaklıyor, `Müsaitlik'te aç` kapatanın satırını açıyor; kural ihlalinde de
+      `Göster`. Üst çubuktaki durum dar ekranda "3 sorun" diyor, şeritle aynı sayı. Öğretmen silme bildirimi
+      hangi sınıfın hangi dersi kaybettiğini söylüyor (Danışman notu değil: bir sınıfta bir
+      dersin olmaması genelde hata değil, ve silinen öğretmen tek İngilizce öğretmeniyse
+      "kardeş sınıflarda olan ders" kuralı da hiçbir şey bulmazdı).
+      **Kalan:** `Göster` gizli satırdaki kartı bulamayınca yalnız bir bildirim veriyor,
+      gizlemeyi kaldırmıyor; `Müsaitlik'te aç` satırı açıyor ama o saati işaretlemiyor
+      (Müsaitlik'in klavye dalı bitince); Kontrol'ün sorun listeleri sınırsız uzuyor (tam
+      dolu kursta bir öğretmen haftanın çoğunda kapatılınca 16 yerleşemeyen ders 9 satır,
+      eskiden 16).
 - [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
       yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
       Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",

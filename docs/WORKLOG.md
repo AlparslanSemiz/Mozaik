@@ -56,6 +56,8 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
 2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz.
    Harita uygulandı, `metin/tek-ad` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO SD3).
+   `kullanim/kontrol` onun üstünde: Kontrol'ün `Göster`i ve SD4 (tarihli girdi), birleşmedi;
+   ham boyut eşiğini 1 245 000 B'a çıkarıyor.
    Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
@@ -71,6 +73,65 @@ weeklyHours) eski formülle ve ikinci bakışa girmiyor.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Kontrol tıklanır oldu (`kullanim/kontrol`, TODO SD4)
+
+`metin/tek-ad`'ın üstünde (PR #44'ün adları). Üç ayrı denetim aynı şeyi buldu: Kontrol
+neyin yanlış olduğunu söylüyor, tıklanacak bir şey ve ne yapılacağını vermiyordu.
+
+- **Kapalı saatte ders** ders başına tek satır (`groupStranded`, `feasibility/stuck.ts`):
+  dersin adı, saatleri ve kimin kapattığı ("Ö18 Salı 10, 11 saatlerinde müsait değil"),
+  `Göster` ve `Müsaitlik'te aç`. İki saatlik bir ders iki aynı satırdı ve başlık, uyarı
+  kutusu ve çip saat sayıp "2 ders" diyordu; `Report.stranded` artık ders sayıyor.
+  `ClosedConflict.closedBy` kapatanı taşıyor.
+- **Göster** (`ui/program/reveal.ts`): sekmeyi Program'a alır, Program Activity'de canlı
+  durduğu için kart DOM'da hazır, görünür olunca hücreyi ortaya kaydırır, kartı odaklar ve
+  `data-reveal` ile 2,4 s işaretler. Izgara bileşenlerine dokunulmadı (koordinasyon:
+  Grid/GridRow/LessonPool başka dalda); hücre `data-row/day/hour/span`, havuz kartı
+  `data-lesson` ile bulunuyor. Kart gizli bir satırdaysa bir bildirim söylüyor.
+  `Müsaitlik'te aç` yalnız `setKind`/`setChosen`/`setTab`; Müsaitlik'in işaretlemesi
+  değişmedi.
+- **Kural ihlali**: `Violation.at` (kimin, hangi gün), `violationCell` o günün ilk kartı.
+- **Yerleşemeyenler** bağlayan sebebe göre gruplu (`stuckReason`): önce aşan kapasite
+  satırının kendi cümlesi, sonra "sınıfın açık saatlerinin hepsi dolu", sonra sınıfın boş
+  saatlerinin her birini bu dersten neyin tuttuğu sayılarak (öğretmen müsait değil, başka
+  sınıfta, derslik dolu, kural, kart sığmıyor). Gün ve saat yok, ki aynı sebep gruplansın.
+  `holeReason` (çözücünün cümlesi) değişmedi. Dersler havuzdaki kartı işaretleyen düğmeler.
+- **Durum çipi** 1500 pikselin altında "3 sorun", "2 uyarı" ya da "45 saat havuzda" diyor
+  (`Health.short`, sorun sayısı şeritteki "Sorunlar (N)" ile aynı); yalnız nokta kalan hap
+  aç kapa düğmesi gibi okunuyordu.
+
+İnceleme (taze bağlamlı alt ajan): veri riski yok, hook sırası doğru, çeviri yuvaları tutuyor.
+Düzeltilen: çipin kısa sayısı şeritten farklıydı (kapasite satırlarını da sayıyordu); "başka
+sınıfta" öğretmeni adlandırmıyordu ve iki öğretmenin dersleri tek cümlede toplanabiliyordu;
+`Müsaitlik'te aç` bir kural bağlıyorken de öneriliyordu; iki hızlı `Göster` iki işaret ve geç
+gelen bir "bulunamadı" bildirimi bırakabiliyordu; `violationCell` her render'da koşuyordu.
+Bırakılan: `Check.tsx` dizini iki kez kuruyor (perf dalının işi, ona dokunulmadı);
+İspanyolcada "ders" ile "sınıf" ikisi de "clase" (SD3'ün sözlüğü, ayrı karar).
+- **Bulgu 4 için karar:** öğretmen silinince "4 sınıf İngilizcesiz kaldı" ne bir hata ne bir
+  Danışman notu olabiliyor: bir sınıfta bir dersin olmaması genelde hata değil, ve silinen
+  tek İngilizce öğretmeniyse "kardeş sınıflarda olan ders" karşılaştırması da hiçbir şey
+  bulmazdı. Kaybın bilindiği tek an silme bildirimi; o artık sınıfları ve dersi adıyla
+  sayıyor ("MÇ silindi. 2 sınıfın Matematik dersi de gitti: 510, 511. Programdan 2 saat
+  kalktı.") ve "Geri al" yanında. Çip "Sorun yok" demeye devam ediyor, çünkü program
+  gerçekten tutarlı.
+
+Boyut: ham `dist/index.html` 1 228 580 → 1 242 360 B (dört dildeki yeni cümleler ve
+`stuck.ts`), eşik 1 230 000 B'tı. Cümleler kısaltıldıktan sonra (1,7 kB) eşik 1 245 000 B'a
+çıktı, önce ölçüldü: `file://` açılışı, CPU 4× yavaş, 9 koşu medyanı, kirli: taban 457 ms,
+bu dal 469 ms (`scratch/kontrol/acilis.mjs`). Brotli 289,6 kB, eşik değişmedi.
+
+Ekran görüntüleri (1920×1080, tam dolu kurs, bir öğretmenin iki saati sonradan kapatılmış
+ve bir öğretmen haftanın çoğunda kapalı): önce `scratch/kontrol/once-kontrol.png`, sonra
+`sonra-kontrol.png`, `sonra-kontrol-alt.png`, `sonra-goster.png`, `sonra-havuz.png`,
+`sonra-ust-1280.png`.
+
+Koşulan: `tsc` (uygulama ve e2e) 0, `eslint .` 0, `npm run hizli` yeşil (1571 geçti, 4
+atlandı; yük altındaki bir koşuda `linuxKur`, `App.test` ve `relax.test` zaman aşımına
+düştü, tek başına ve sonraki koşuda yeşil), `npx vite build`, `npm run boyut` 0, Playwright
+`--workers=2`: `kontrol` 26/26, `zebra` + `musaitlik` + `dil` + `kontrol` 117/117, `program`
++ `temel` 112/112. Koşulmayan: bütün E2E süiti, Stryker. Kilit yok (`flock` bu Mac'te
+yok), ölçümler kirli.
 
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 

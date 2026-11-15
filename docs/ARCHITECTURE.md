@@ -102,6 +102,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/feasibility/capacity.ts` | öğretmen, sınıf ve dersliğin açık saati ile istenen saati (`buildCapacity`) |
 | `pure/feasibility/advice.ts` | Danışman (`buildAdvice`) |
 | `pure/feasibility/report.ts` | Kontrol'ün bütün raporu (`buildReport`) |
+| `pure/feasibility/stuck.ts` | Kontrol satırlarının gruplanması: kapalı saatte ders ders başına (`groupStranded`), yerleşemeyenler bağlayan sebebe göre (`stuckReason`, `groupUnplaceable`), ihlalin kartı (`violationCell`) |
 | `pure/feasibility/health.ts` | her sekmedeki durum satırı (`health`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
@@ -249,6 +250,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
+| `ui/program/reveal.ts` | Kontrol'ün `Göster`i: Program'daki kartı ya da havuzdaki kartı görünür yapıp işaretler (`data-reveal`) |
 | `ui/program/Inspector.tsx` | varlık panelini açan yol: bağlam, `useInspect()` ve paneli çizen provider |
 | `ui/program/InspectorSheet.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası, bilgileri ve düzenlenmesi |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |

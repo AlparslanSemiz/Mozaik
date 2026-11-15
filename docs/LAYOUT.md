@@ -46,7 +46,7 @@ klavye kısayolları, araç şeridi aç kapa, tema.
 - **Durum çipi** her sekmede sorunu adıyla söyler ve Kontrol'e götürür.
 - **Plan seçici** tek plan varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve ancak iki plan olunca beliren bir kutu planların var olduğunu öğretemezdi. Plan yaratan, adlandıran ve silen her şey Ayarlar → Planlar ve yedek'te, çünkü üst çubuk bir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak kalıyor. `Sıfırla` da bu yüzden Ayarlar'da.
 - **Dosyaya kaydet** ve **dosyadan aç** üst çubukta, çünkü veri kaybına karşı önlem görünür olmalı. İkisi tek bir plan yazar ve okur, bir paketi reddedip yolunu gösterir (tuzak 30).
-- Çubuk daralırken önce boşluk, sonra çipin cümlesi (noktası kalır, çünkü ekran meşgulken yok olan bir durum güvenilmez bir durum), sonra belge adı feda edilir. Sekmeler feda edilmez (tuzak 48).
+- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Sekmeler feda edilmez (tuzak 48).
 
 ## Araç şeridi
 
@@ -287,6 +287,15 @@ yerleşemeyen dersler, ya da hiçbiri yoksa bunu söyleyen bir satır), Danışm
 uyarıları, ya da öğretmenler, sınıflar ve derslikler için kapasite. Sorunlar sorun
 yokken de bir cevap verir. Kapasite tablosu Okul'un Özet'iyle aynı çizim
 (`CapacityRows`).
+
+Her sorun satırının gidecek bir yeri var, çünkü yalnız neyin yanlış olduğunu söyleyen
+bir rapor okuyanı ne yapacağıyla baş başa bırakıyordu (2026-11-15). Kapalı saatte kalan
+ders, kaç saati olursa olsun tek satır: dersin adı, saatleri ve kimin kapattığı, sonda
+`Göster` (Program'a geçer, kartı ortaya kaydırıp odaklar ve bir an işaretler) ve
+`Müsaitlik'te aç` (kapatanın satırını açar). Kural ihlalinde `Göster` o günün ilk kartına
+gider. Yerleşemeyen dersler bağlayan sebebe göre tek satır, dersler altında düğme olarak,
+her biri kartı havuzda işaretler; sebep bir kişinin ya da yerin açık saati yetmiyorsa
+`Müsaitlik'te aç` da var. Gizli bir satırdaki kart bulunamazsa bunu bir bildirim söyler.
 
 ## Çıktı
 
