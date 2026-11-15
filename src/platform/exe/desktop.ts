@@ -244,7 +244,8 @@ export function desktopMail(adres: string): Promise<EpostaSonucu> {
 
 /**
  * Whether this exe can answer the suggestion search with OR-Tools CP-SAT: the
- * installer put the library next to it (src-tauri/src/cpsat.rs). No for the
+ * installer put the library next to it, or the Mac .app carries it in
+ * Contents/Frameworks (src-tauri/src/cpsat.rs). No for the
  * page in a browser, the standalone exe, an older exe and the test double.
  */
 export function desktopCpsatVar(): Promise<boolean> {

@@ -282,6 +282,77 @@ fn linux_renderer() {
     }
 }
 
+/// The Mac's menu bar, in Turkish (DECISIONS 2026-11-15, Mac).
+///
+/// A Mac program without an Edit menu loses Cmd+C, Cmd+V, Cmd+X and Cmd+A in
+/// every text box: on macOS those keys are menu items first, and a window
+/// with no item for them never sees them. Tauri's own default menu has them,
+/// in English; this is the same menu in the language the rest of the program
+/// speaks. Cmd+Z and Shift+Cmd+Z reach the page first either way (WKWebView
+/// offers a key to the page before the menu), so the timetable's own undo in
+/// `useStore.ts` still answers them outside a text box.
+///
+/// QUIT IS OURS, NOT THE PREDEFINED ONE. The predefined item calls
+/// `-[NSApp terminate:]`, which ends the process without a `CloseRequested`:
+/// the page is never told (`KAPANIYOR`) and the last two seconds of work are
+/// not written to Belgeler (TB7, the same loss the close button had). So
+/// Cmd+Q closes the window the way its red button does, and the program ends
+/// when that window has gone.
+#[cfg(target_os = "macos")]
+fn mac_menusu(app: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
+    use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
+    let hakkinda = AboutMetadata {
+        name: Some("Mozaik".into()),
+        version: Some(app.package_info().version.to_string()),
+        ..Default::default()
+    };
+    let uygulama = Submenu::with_items(
+        app,
+        "Mozaik",
+        true,
+        &[
+            &PredefinedMenuItem::about(app, Some("Mozaik Hakkında"), Some(hakkinda))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::hide(app, Some("Mozaik'i Gizle"))?,
+            &PredefinedMenuItem::hide_others(app, Some("Diğerlerini Gizle"))?,
+            &PredefinedMenuItem::show_all(app, Some("Tümünü Göster"))?,
+            &PredefinedMenuItem::separator(app)?,
+            &MenuItem::with_id(app, MENU_CIK, "Mozaik'ten Çık", true, Some("CmdOrCtrl+Q"))?,
+        ],
+    )?;
+    let duzen = Submenu::with_items(
+        app,
+        "Düzen",
+        true,
+        &[
+            &PredefinedMenuItem::undo(app, Some("Geri Al"))?,
+            &PredefinedMenuItem::redo(app, Some("Yinele"))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::cut(app, Some("Kes"))?,
+            &PredefinedMenuItem::copy(app, Some("Kopyala"))?,
+            &PredefinedMenuItem::paste(app, Some("Yapıştır"))?,
+            &PredefinedMenuItem::select_all(app, Some("Tümünü Seç"))?,
+        ],
+    )?;
+    let pencere = Submenu::with_items(
+        app,
+        "Pencere",
+        true,
+        &[
+            &PredefinedMenuItem::minimize(app, Some("Küçült"))?,
+            &PredefinedMenuItem::maximize(app, Some("Büyüt"))?,
+            &PredefinedMenuItem::fullscreen(app, Some("Tam Ekran"))?,
+            &PredefinedMenuItem::separator(app)?,
+            &PredefinedMenuItem::close_window(app, Some("Pencereyi Kapat"))?,
+        ],
+    )?;
+    Menu::with_items(app, &[&uygulama, &duzen, &pencere])
+}
+
+/// The id of our own Quit item (`mac_menusu` says why it is not the predefined one).
+#[cfg(target_os = "macos")]
+const MENU_CIK: &str = "cik";
+
 pub fn run() {
     // Before any webview exists, and while this is still the only thread.
     #[cfg(target_os = "linux")]
@@ -293,7 +364,21 @@ pub fn run() {
         update::eskisi_gitsin(std::io::stdin(), update::DEVIR_SURESI);
     }
 
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(target_os = "macos")]
+    let builder = builder.menu(mac_menusu).on_menu_event(|app, olay| {
+        if olay.id() == MENU_CIK {
+            match app.get_webview_window("main") {
+                // `close`, not `destroy`: through `kapanis_istendi`, like the red button.
+                Some(pencere) => {
+                    let _ = pencere.close();
+                }
+                None => app.exit(0),
+            }
+        }
+    });
+
+    builder
         // FIRST, before anything else is set up: one copy of the program at a
         // time (VK1). Two copies each held the plan in memory, and the one
         // closed last wrote its old copy over the other's work, in
