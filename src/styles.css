@@ -119,6 +119,15 @@
   --hairline:    #e0e4eb;
   --line:        #c6cdd7;
   --line-dark:   #8a93a0;
+  /* The edge of a CONTROL — field, select, button — and the one line here with
+     a floor that is not taste: WCAG 1.4.11 asks 3:1 for the boundary that
+     says "this is a thing you can use". Fields stood on --hairline (1.16:1
+     against their own recess) and buttons on --line (1.11:1 against --chrome-2,
+     1.40 in a list), measured 2026-11-15. This clears 3:1 against every
+     ground a control sits on, the desk included: 4.54 --paper · 4.15
+     --paper-sunk · 3.97 --zebra and --chrome-2 · 3.82 --accent-bg · 3.16 --bg.
+     Still well short of --muted (8.53), so an edge never reads as text. */
+  --border-strong: #6d7784;
   /* One step past --line-dark, and it has exactly one job: where one day ends
      and the next begins, across 78 columns. */
   --day-edge:    #5b6572;
@@ -145,6 +154,14 @@
   --ok: #177431;  --ok-bg: #d5f0dc;
   --warn: #8a6100;  --warn-bg: #fdf0cf;
   --bad: #b0201c;  --bad-bg: #fbdcda;
+  /* THE INK of a state written ON its own ground: a badge, the health pill,
+     the reason bar. --ok on --ok-bg was 4.84:1 at 12-13px (and --warn 4.89,
+     --bad 5.33), under the 7:1 the rows hold (TODO E1). The three colours above
+     are searched and stay what they are — they are the borders, dots and
+     edges of the same states. The ink is the same colour pushed toward black
+     in Oklab (25 / 20 / 15%), so it keeps its hue and the functional channel
+     keeps its distances. Measured on the ground: 7.47 · 7.63 · 7.20. */
+  --ok-ink: #0e5422;  --warn-ink: #654600;  --bad-ink: #8d1814;
   --closed: #d5d8dd;  --hatch: #e8eaee;
 
   /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg:
@@ -549,6 +566,11 @@
   --hairline: #242930;
   --line: #39404a;
   --line-dark: #78818f;
+  /* Darker than --line-dark here, because in this theme --line-dark already
+     clears the floor and a control edge at day-rule strength would shout:
+     4.07 --paper · 4.47 --paper-sunk · 4.41 --chrome · 3.60 --zebra · 4.58
+     --chrome-2 · 3.26 --accent-bg. */
+  --border-strong: #717a88;
   /* Lighter than --line-dark here for the same reason it is darker in the
      light theme: a boundary is strong when it moves AWAY from the paper. */
   --day-edge: #a3adbb;
@@ -577,6 +599,8 @@
   --warn-bg: #3b2d07;
   --bad: #ff9089;
   --bad-bg: #401614;
+  /* Already over 7:1 on their grounds in this theme (8.78 for ok). */
+  --ok-ink: var(--ok);  --warn-ink: var(--warn);  --bad-ink: var(--bad);
   --closed: #2f363e;
   --hatch: #222831;
 
@@ -1098,28 +1122,32 @@ textarea {
    of them is a difference you have to look for. Mixed from --sec, so the six
    identities stay one token each. */
 .tab[aria-current="true"] {
-  /* SOLID. Two revisions ago the lit tab was a white sheet with a 2px rule
-     under it — true to the tab metaphor and, on a 1920px bar with six of
-     them, a difference you had to go looking for. It is now filled with the
-     section's own colour, which is the loudest thing this shell says and the
-     one question it is answering: which room am I in.
-     Measured: white on the six section colours is 5.63 at worst in light and
-     5.92 in dark, so the label clears AA on every one of them. */
-  background: linear-gradient(180deg,
-    color-mix(in oklab, #fff 10%, var(--sec, var(--accent))) 0%,
-    var(--sec, var(--accent)) 100%);
-  border-color: color-mix(in oklab, #000 12%, var(--sec, var(--accent)));
+  /* SOLID, and since 2026-11-15 FLAT. Two revisions ago the lit tab was a
+     white sheet with a 2px rule under it — true to the tab metaphor and, on a
+     1920px bar with six of them, a difference you had to go looking for. It is
+     filled with the section's own colour, which is the loudest thing this
+     shell says and the one question it is answering: which room am I in.
+
+     It was a gradient, and the comment beside it claimed "5.63 at worst".
+     That was the label on the plain section colour; nobody measured the
+     stops. The light top stop (10% white) measured 4.51-4.56 and the dark
+     bottom stop (12% black under dark ink) 3.76-3.89 — under AA on six of
+     seven tabs. Now one fill, pushed AWAY from the label by a fixed step:
+     15% black in light, 25% white in dark. Measured by scratch/olc/mix.js,
+     label against fill, worst of seven: 7.76 light, 7.18 dark. The hue is
+     the section's, the lightness is the label's. */
+  background: color-mix(in oklab, #000 15%, var(--sec, var(--accent)));
+  border-color: color-mix(in oklab, #000 25%, var(--sec, var(--accent)));
   color: var(--on-accent);
   font-weight: 600;
   box-shadow: var(--elev-2);
 }
 
 :root[data-theme='dark'] .tab[aria-current="true"] {
-  /* The dark section colours are LIGHT, so the highlight stop goes the other
-     way or the tab gets paler as it rises. */
-  background: linear-gradient(180deg,
-    var(--sec, var(--accent)) 0%,
-    color-mix(in oklab, #000 12%, var(--sec, var(--accent))) 100%);
+  /* The dark section colours are LIGHT and the label is dark ink, so the
+     step goes the other way. */
+  background: color-mix(in oklab, #fff 25%, var(--sec, var(--accent)));
+  border-color: var(--sec, var(--accent));
 }
 
 .tab[aria-current="true"] svg {
@@ -1467,10 +1495,12 @@ textarea {
    is why it could not follow the inputs down to --hairline in Y0 — the inputs
    earned that by gaining --paper-sunk to sit in. It drops one step instead,
    from --line-dark (the grid's day separator, the loudest rule in the shell)
-   to --line. */
+   to --line. And back up to --border-strong on 2026-11-15: --line was
+   1.11:1 against the strip it stands on, under the 3:1 a control's edge
+   needs (WCAG 1.4.11). */
 .btn {
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   background: var(--paper);
   cursor: pointer;
@@ -1806,21 +1836,21 @@ table.list tbody tr {
 
 .reason-bar.bad {
   background: var(--bad-bg);
-  color: var(--bad);
+  color: var(--bad-ink);
   border-bottom-color: var(--bad);
   font-weight: 600;
 }
 
 .reason-bar.warn {
   background: var(--warn-bg);
-  color: var(--warn);
+  color: var(--warn-ink);
   border-bottom-color: var(--warn);
   font-weight: 600;
 }
 
 .reason-bar.ok {
   background: var(--ok-bg);
-  color: var(--ok);
+  color: var(--ok-ink);
   border-bottom-color: var(--ok);
   font-weight: 600;
 }
@@ -3794,13 +3824,16 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 /* An input is a place you write INTO, so it is drawn as a recess rather than
    as a box: a sunk surface with a hairline, not a dark rule. --line-dark here
    was the single loudest border in the shell — 25 teacher rows x 9 fields of
-   it is what made the setup screen read as a grid of cages. */
+   it is what made the setup screen read as a grid of cages.
+   The hairline went too far the other way: 1.16:1 against the recess, so for
+   a reader who has trouble seeing a field was a slightly greyer patch with no
+   edge. --border-strong is the 3:1 floor and no louder (see the token). */
 input[type="text"],
 input[type="number"],
 select,
 textarea {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   background: var(--paper-sunk);
   line-height: var(--lh-base);
@@ -3815,14 +3848,36 @@ input[type="text"]:hover:not(:disabled),
 input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: var(--line);
+  border-color: var(--muted);
+}
+
+/* A checkbox is a pointer target with nothing around it to click: the day
+   switches in Zil ve günler and the draft mark in Planlar stand alone in a
+   table cell. The browser draws 13x13, under the 24px floor (WCAG 2.5.8).
+   The accent so a ticked box reads as "on" in the same colour as everything
+   else that is on. */
+input[type='checkbox'] {
+  width: max(24px, 1.5rem);
+  height: max(24px, 1.5rem);
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* The hint inside an empty field. There was no rule, so it was the browser's
+   own #757575 whatever the theme: 4.21:1 on --paper-sunk in light and 3.82:1
+   in a dark list's number box, measured 2026-11-15. --muted is the ink every
+   secondary line here already uses (7.79 on the light recess, 10.31 on the
+   dark one), and `opacity: 1` because Firefox fades a placeholder by default. */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 input[type="text"]:hover:not(:disabled),
 input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: var(--line);
+  border-color: var(--muted);
 }
 
 /* Buttons had no focus style at all: tabbing through the top bar was invisible.
@@ -4203,7 +4258,7 @@ table.stat td input[type='number'],
 table.stat td select,
 table.sheet-lessons td select {
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-strong);
 }
 
 table.list td .split-pick {
@@ -4212,8 +4267,7 @@ table.list td .split-pick {
   cursor: pointer;
 }
 
-/* The base hover lifts --hairline to --line; these already stand at --line,
-   so the step that says "you can write here" moves one up with them. */
+/* The same hover as the base rule: from the control edge to --muted. */
 table.list td input[type='text']:hover:not(:disabled),
 table.list td input[type='number']:hover:not(:disabled),
 table.list td select:hover:not(:disabled),
@@ -4222,7 +4276,7 @@ table.stat td input[type='text']:hover:not(:disabled),
 table.stat td input[type='number']:hover:not(:disabled),
 table.stat td select:hover:not(:disabled),
 table.sheet-lessons td select:hover:not(:disabled) {
-  border-color: var(--line-dark);
+  border-color: var(--muted);
 }
 
 /* A box whose text is not what it is for (a teacher's address that is not one
@@ -4626,17 +4680,17 @@ table.sheet-lessons select.transfer-pick {
 
 .badge.ok {
   background: var(--ok-bg);
-  color: var(--ok);
+  color: var(--ok-ink);
 }
 
 .badge.tight {
   background: var(--warn-bg);
-  color: var(--warn);
+  color: var(--warn-ink);
 }
 
 .badge.impossible {
   background: var(--bad-bg);
-  color: var(--bad);
+  color: var(--bad-ink);
 }
 
 .warn-box {
@@ -6277,7 +6331,7 @@ table.availability.heat td.closed {
   gap: var(--space-2);
   padding: 0 var(--space-3);
   background: var(--paper-sunk);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   color: var(--muted);
   transition:
@@ -6489,9 +6543,9 @@ table.availability thead .hour-clock:empty::before {
   background: var(--ok);
 }
 
-.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
-.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-ink); }
+.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn-ink); }
+.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad-ink); }
 
 .health.tight .health-dot { background: var(--warn); }
 .health.impossible .health-dot { background: var(--bad); }

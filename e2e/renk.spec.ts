@@ -816,6 +816,7 @@ test.describe('93. Listelerde zebra', () => {
         '--text',
         '--muted',
         '--line',
+        '--border-strong',
       ]);
 
       // The token itself: darker than the paper in light, LIGHTER in dark (the
@@ -867,7 +868,8 @@ test.describe('93. Listelerde zebra', () => {
         expect(f.background, 'girdi zebrada kâğıt zeminli').toBe(t['--paper']);
         expect(f.style).toBe('solid');
         expect(f.width).toBeGreaterThanOrEqual(1);
-        expect(f.edge, 'girdinin kenarı').toBe(t['--line']);
+        // A control's edge, 3:1 on the row (WCAG 1.4.11), since 2026-11-15.
+        expect(f.edge, 'girdinin kenarı').toBe(t['--border-strong']);
       }
 
       // The row under the pointer gets a ring and keeps its stripe: a ground
@@ -904,7 +906,7 @@ test.describe('93. Listelerde zebra', () => {
         return { ink: s.color, background: s.backgroundColor, edge: s.borderTopColor };
       });
       expect(p.background, 'dağılım düğmesi zebrada kâğıt zeminli').toBe(t['--paper']);
-      expect(p.edge).toBe(t['--line']);
+      expect(p.edge).toBe(t['--border-strong']);
       expect(contrast(p.ink, p.background), 'dağılım düğmesinin yazısı').toBeGreaterThanOrEqual(
         4.5,
       );
