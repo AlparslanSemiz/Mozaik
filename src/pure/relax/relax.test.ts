@@ -99,7 +99,11 @@ describe('öneri — küçük dünyalar', () => {
     for (const s of found.values()) expectHonest(d, s);
     // 2.6 s alone since the hand-over ways came (2.2 s before), twice that
     // with the whole suite on the same cores: over Vitest's 5 s once (2026-09-25).
-  }, 30_000);
+    // It is a SAT search through every family with no clock in it (the budget
+    // is 600 s and never reached), so the limit only measures the machine:
+    // 14-24 s on 2026-11-16 with other sessions on the same cores, and over
+    // 30 s at worse moments. 120 s, the relax suite's own limit (pitfall 171).
+  }, 120_000);
 
   it('haftaya sığmayan ders: sınırı bir yükseltmek ya da üç saat azaltmak', () => {
     const d = world('imkansiz-ders-yaninda');
