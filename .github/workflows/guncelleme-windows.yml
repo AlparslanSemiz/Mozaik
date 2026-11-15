@@ -10,6 +10,15 @@
 # ve Belgeler'de, bu commit'in şemasında durduğuna bakılır
 # (e2e/guncelleme-exe.spec.ts).
 #
+# İKİNCİ EVRE, babanın kendi yolu (2026-11-16, TRAPS 162): yukarıdaki A bu commit'in
+# kodu, 0.0.1 diye numaralanmış; sahadaki 2.2.0'ın güncelleyicisi orada hiç koşmaz.
+# Burada yayınlanmış v2.2.0'ın kendisi (özeti sabit) `Ders-Programi.exe` adıyla açılır,
+# github.com runner'da geçici olarak bu makineye yönlendirilir (hosts ve makinenin
+# güvendiği bir sertifika; 2.2.0'ın manifest adresi derlenmiş, test kökü yok) ve
+# 2.2.0 kendi üç düğmesiyle B'yi indirip takas eder. B açılınca kurulum önerisi
+# şeridini göstermeli ve kendi denetimi aynı sürümün kurulumunu önermeli
+# (scripts/guncelleme-220.mjs). Kurulumun kendisi kurulum-windows.yml'de.
+#
 # `npm run yayinla` her sürümde etiketten önce bunun yeşilini bekler, koşu yoksa
 # başlatır (kullanıcının kararı, 2026-10-24). Exe'ye, şemaya ve depolama koduna
 # dokunan main push'unda, sürüm commit'i dahil, kendiliğinden koşar.
@@ -36,6 +45,7 @@ on:
       - 'scripts/surum.mjs'
       - 'e2e/guncelleme-exe.spec.ts'
       - 'scripts/guncelleme-eski.mjs'
+      - 'scripts/guncelleme-220.mjs'
       - 'scripts/uia.mjs'
       - 'scripts/webdriver.mjs'
       - 'playwright.guncelleme-exe.config.ts'
@@ -166,6 +176,29 @@ jobs:
           MOZAIK_YENI_EXE: ${{ runner.temp }}/yeni/Mozaik.exe
           MOZAIK_TEST_GUNCELLEME_KOKU: http://127.0.0.1:8765/
         run: npx playwright test --config playwright.guncelleme-exe.config.ts --reporter=list
+
+      # Babanın sürümü, Release'ten, özeti src/fixtures/release-v2.2.0'dakiyle sabit:
+      # "son Release" bir sonraki yayında 2.2.0 olmaktan çıkar, baba ise 2.2.0'da.
+      - name: v2.2.0'ın exe'si
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $d = Join-Path $env:RUNNER_TEMP 'v220'
+          gh release download v2.2.0 --repo $env:GITHUB_REPOSITORY --pattern Mozaik.exe --dir $d
+          $gercek = (Get-FileHash "$d\Mozaik.exe" -Algorithm SHA256).Hash.ToLower()
+          if ($gercek -ne '2e26aca67ed3466dfa7b2e3e9d53bf34ea5f1042ad9b505e016ef2c6b0513533') { throw "v2.2.0 değil: $gercek" }
+
+      # github.com'u bu adımın süresince bu makineye çevirir ve sonunda geri alır;
+      # bu yüzden son adım (artefakt yüklemesi github.com'a değil, Actions'ın
+      # kendi adresine gider).
+      - name: 2.2.0'ın kendi güncelleyicisi, sonra kurulum önerisi
+        shell: bash
+        run: >
+          node scripts/guncelleme-220.mjs
+          --eski "$RUNNER_TEMP/v220/Mozaik.exe"
+          --yeni "$RUNNER_TEMP/yeni/Mozaik.exe"
+          --kur "$RUNNER_TEMP/baba"
 
       - if: ${{ always() }}
         uses: actions/upload-artifact@v7
