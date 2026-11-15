@@ -121,7 +121,7 @@ madde.
 | Ö41 | Ctrl+Z yalnız metin kutularında susturulsun | DK8 |
 | Ö9 | Sabitli kart bir kenar işaretiyle ayrılsın, raptiye en az 24 px olsun | PRINCIPLES "Kullanılabilirlik" |
 | Ö44 | Çeviri sözlüğünde iki anlamlı Türkçe metne bağlam eki | DK12 |
-| Ö47 | "İçeriğe geç" bağlantısı ve şeritle içerik arasında bir kısayol | ölçüm KS27 |
+| Ö47 | "İçeriğe geç" bağlantısı ve şeritle içerik arasında bir kısayol (İçeriğe geç yapıldı, 2026-11-15) | ölçüm KS27 |
 | Ö1 | Rahat'ta saat başlığı arayla yazılsın ya da yalnız numara kalsın | ölçüm KS1 |
 | Ö42 | "Taslak olarak kaydet" ne yaptığını söylesin ve kullanıcıyı yerinde bıraksın | KS23 |
 

@@ -89,7 +89,8 @@ birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine 
   (`aria-labelledby` kuralın adına). `kurulum.spec`'in `Kısa ad` sorgusu `exact` (tuzak 49).
 - **Otomatik diz.** Canlı bölge satırın yalnız ilk parçası: başlarken "Otomatik diziliyor…",
   bitince sonuç; sayaç (`describeBar`'ın yeni `counter`'ı) görünür ama bölgenin dışında,
-  satır koşu boyunca `aria-busy`.
+  `aria-busy` sayacın kendisinde (satıra konunca içindeki canlı bölgeyi susturuyordu,
+  inceleme bulgusu).
 - **Taslak ve bölgeler.** Program'da ızgara ve havuz için görünmez h2, havuzun 25 `section`'ı
   `div role="group"`, kâğıdın başlığı h2, boş Program/Kontrol/Çıktı'nın başlığı. Şerit
   "Araç şeridi" adlı bir `<section>`'da (`display: contents`). İlk Tab durağı "İçeriğe geç".
@@ -97,7 +98,7 @@ birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine 
   Boş `<th>`'ler görünmez bir adla. Bildirim kapatma, sağlık çipi ve `.inspect` uygulamanın
   halkasıyla.
 - **Tarama.** `erisim.spec.ts` artık Okul'un dört adımını ve boş Program/Kontrol/Çıktı'yı da
-  tarıyor (on bir ekrandan on yediye); yeni "91. Odak" bölümü odağın dönüşünü ölçüyor.
+  tarıyor (on bir ekrandan on sekize); yeni "91. Odak" bölümü odağın dönüşünü ölçüyor.
 
 axe düğümleri, önce → sonra (aynı genişletilmiş taramayla, örnek okul): Okul · Derslikler
 11 → 0, Branşlar 3 → 0, Öğretmenler 54 → 0, Sınıflar 24 → 0, Dersler 3 → 0, Müsaitlik 3 → 2,
@@ -119,7 +120,15 @@ yani zaman aşımı yükün. Koşulmayan: tam E2E süiti, Stryker, `kontrol`.
 
 Açık: `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları (§8e), şeritten içeriğe dönüş
 kısayolu (Ö47'nin F6'sı), havuz listesinin Tab durağının sürüklemeyle etkileşimi elle
-ölçülmedi.
+ölçülmedi, ve şeridin bölgesi `display: contents` taşıyor: eski WebKit (Safari 17 öncesi, belki
+exe'nin WebKitGTK'sı) böyle bir öğenin bölgesini düşürür, Chromium ve WebView2 düşürmüyor.
+
+İnceleme (taze bağlamlı alt ajan): `aria-busy` satırdan sayaca alındı; art arda iki soruda
+açan kayboluyordu (ikinci açılış `body`'den, ilk sorunun düğmesi gitmiş), artık önceki açan
+kalıyor; havuz listesinin adı aside'ınkinin aynısıydı, artık görünmez "Havuz" başlığına
+bağlı; açan `<main>` olunca kaydırmadan odaklanıyor; TESTPLAN'daki ekran sayısı 18. Kabul
+edilip yalnız not edilen: `display: contents` (yukarıda) ve açılan anı yakalamanın Radix
+Portal'ın bir yerleşim efekti sonra çizmesine dayanması (yorumda).
 
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 

@@ -262,7 +262,7 @@ kutu iskeleti.
 
 ### Erişilebilirlik taraması
 
-`e2e/erisim.spec.ts`, `@axe-core/playwright` ile, on yedi ekranda: Okul'un dört
+`e2e/erisim.spec.ts`, `@axe-core/playwright` ile, on sekiz ekranda: Okul'un dört
 adımı ayrı ayrı, öteki beş sekme, Ayarlar'ın beş bölümü, boş proje ve boş Program,
 Kontrol, Çıktı (2026-11-15'e kadar Okul'un yalnız açılış adımı taranıyordu, ve
 öğretmen ile sınıf satırlarının 70 etiketsiz kutusu hiç sayılmamıştı). Aynı dosyanın
