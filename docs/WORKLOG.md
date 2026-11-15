@@ -194,6 +194,17 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · Bağımlılıklar: Dependabot'un açık PR'ları (`bagimlilik/actions`)
+
+Tek dalda: setup-node 7, download-artifact 8 (#12, #11), Rust'ın küçükleri, `sha2` 0.11 ve
+`minisign-verify` 0.3 (#30–#32; `cargo test` 56 yeşil, imza testleri dahil), ve npm'in
+geliştirme paketleri (#33'ün yarısı). **#33'ün çalışma zamanı yarısı alınmadı:** React 19.3 ham
+dosyaya 29,6 kB, lucide 1.72 ve Radix'in küçükleri ~4 kB daha ekliyor (her biri tek tek geri
+alınarak ölçüldü: hepsi yeni 1 244 741 B, React eski 1 215 168, lucide eski 1 241 314, Radix eski
+1 240 873); karşılığında bir şey kazanılmıyor. Brotli eşiği 292 000 B: #28 ve #29'dan sonra CI'da
+104 B, bu makinede −17 B pay kalmıştı. `file://` açılışı, CPU 4× yavaş, 7 koşu medyanı (kirli):
+sabahki `main` (1 178 508 B) 188 ms, bugünkü (1 207 882 B) 190 ms.
+
 ## 2026-11-15 · Sığdır'ın ilk açılışı: ilk oran `--wrap-w` yazılmadan ölçülmüyor (`hiz/sigdir`, B4.9)
 
 **Başlangıç.** Arayüz performansı raporu (2026-11-15, `84a72b8`): Sığdır'da Okul → Program
