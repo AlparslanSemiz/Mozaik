@@ -25,7 +25,7 @@ import { type Formula, type Lit, type NativeForms, pos } from './sat';
 // -------------------------------------------------------------- the writer
 
 /** A protobuf message being written: tag, varint and length-delimited only. */
-class Writer {
+export class Writer {
   private buf = new Uint8Array(256);
   private len = 0;
 
@@ -180,6 +180,8 @@ export interface CpParams {
   hintConflicts?: number;
   /** Only these CP-SAT subsolvers (`subsolvers`); absent, its own portfolio. */
   subsolvers?: readonly string[];
+  /** CP-SAT's `random_seed`; absent, its own (1). For measuring over seeds. */
+  seed?: number;
 }
 
 /** CpSolverStatus, as the response carries it. */
@@ -356,6 +358,7 @@ export function cpParams(p: CpParams): Uint8Array {
   if (p.hintConflicts !== undefined) w.int(153, p.hintConflicts);
   const utf8 = new TextEncoder();
   for (const name of p.subsolvers ?? []) w.bytes(207, utf8.encode(name));
+  if (p.seed !== undefined) w.int(31, p.seed);
   return w.done();
 }
 

@@ -192,24 +192,21 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
  * stop.
  */
 /**
- * CP-SAT's two looks at each count (search.ts, `cpFamilySearch`), in seconds:
- * a short one whose week is offered at once, then a longer one for the proof.
- * Seconds, not a count, because the library's own counters are not the
- * conflicts above; and its several workers make it machine-dependent anyway.
- * On the father's week with 8 workers the long look proves every way inside
- * its ceiling; with 4 it may not, and the week offered is the short look's or
- * better (MEASURED 2026-11-15).
+ * CP-SAT's look at each count (search.ts, `cpRun`), in seconds: the long one
+ * for a count that is the answer, the short one for a preference among
+ * equals. Seconds, not a count, because the library's own counters are not
+ * the conflicts above; and its several workers make it machine-dependent
+ * anyway. A ceiling: an optimal answer comes back as soon as it is proven.
  */
 export const CP_QUICK_SECONDS = 3;
 export const CP_FULL_SECONDS = 20;
-/** How many times "one fewer?" may come back with a week before the search stops asking. */
-export const CP_PROOF_ROUNDS = 3;
 /**
- * The subsolvers a "one fewer?" question is asked with (`subsolvers`). The
- * proof on the father's week comes from `max_lp_sym`, which CP-SAT's default
- * portfolio leaves out below 8 workers: without it the 4-hour proof never
- * closed on 4 workers in 120 s, with this list it closed in 2-13 s (6/6).
- * Names are OR-Tools v9.15's; a version bump checks them.
+ * The subsolvers every question is asked with (`subsolvers`). The proof on
+ * the father's week comes from `max_lp_sym` and `core`, which CP-SAT's default
+ * portfolio leaves out below 8 workers: without them the 4-hour Minimize never
+ * closed on 4 workers in 120 s, with this list and cpModel.ts it closed in
+ * 1.1-2.3 s (MEASURED 2026-11-15, 3 seeds, kirli). Names are OR-Tools
+ * v9.15's; a version bump checks them.
  */
 export const CP_PROOF_SUBSOLVERS: readonly string[] = [
   'default_lp',

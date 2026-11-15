@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { CpFormula, cpParams, readAnswer } from './cpsat';
+import { constraintsOf, fields, packed } from './protoReader';
 import { type Formula, type Lit, Sat, atMostOne, exactlyOne, not, pos, totalizer } from './sat';
 
 // The CP-SAT library is not on the test machines, so the claim tested here is
 // the one this file can fail on its own: that the bytes it writes MEAN the
 // same formula our solver gets as clauses. The test reads its own
-// CpModelProto back with the small reader below and enumerates assignments.
+// CpModelProto back with the small reader in protoReader.ts and enumerates
+// assignments.
 
 function rng(seed: number): () => number {
   let x = seed >>> 0 || 1;
@@ -15,111 +17,6 @@ function rng(seed: number): () => number {
     x ^= x << 5;
     return (x >>> 0) / 4_294_967_296;
   };
-}
-
-// ------------------------------------------------------- a protobuf reader
-
-interface Field {
-  field: number;
-  value: number | Uint8Array;
-}
-
-function fields(bytes: Uint8Array): Field[] {
-  let at = 0;
-  const varint = (): number => {
-    let result = 0n;
-    let shift = 0n;
-    for (;;) {
-      const b = bytes[at++]!;
-      result |= BigInt(b & 0x7f) << shift;
-      if ((b & 0x80) === 0) break;
-      shift += 7n;
-    }
-    return Number(BigInt.asIntN(64, result));
-  };
-  const out: Field[] = [];
-  while (at < bytes.length) {
-    const key = varint();
-    const wire = key % 8;
-    const field = Math.floor(key / 8);
-    if (wire === 0) out.push({ field, value: varint() });
-    else if (wire === 1) {
-      out.push({ field, value: bytes.subarray(at, at + 8) });
-      at += 8;
-    } else if (wire === 2) {
-      const len = varint();
-      out.push({ field, value: bytes.subarray(at, at + len) });
-      at += len;
-    } else throw new Error(`wire ${wire}`);
-  }
-  return out;
-}
-
-function packed(data: Uint8Array): number[] {
-  const vals: number[] = [];
-  let at = 0;
-  while (at < data.length) {
-    let result = 0n;
-    let shift = 0n;
-    for (;;) {
-      const b = data[at++]!;
-      result |= BigInt(b & 0x7f) << shift;
-      if ((b & 0x80) === 0) break;
-      shift += 7n;
-    }
-    vals.push(Number(BigInt.asIntN(64, result)));
-  }
-  return vals;
-}
-
-type Check = (x: Int8Array) => boolean;
-
-/** The model's constraints as predicates over a full assignment. */
-function constraintsOf(model: Uint8Array): { vars: number; checks: Check[] } {
-  const lit = (ref: number, x: Int8Array) => (ref >= 0 ? x[ref] === 1 : x[-ref - 1] === 0);
-  let vars = 0;
-  const checks: Check[] = [];
-  for (const f of fields(model)) {
-    if (f.field === 2) vars++;
-    if (f.field !== 3) continue;
-    let when: number[] = [];
-    let check: Check | null = null;
-    for (const g of fields(f.value as Uint8Array)) {
-      if (g.field === 2) when = packed(g.value as Uint8Array);
-      const args = () => {
-        const inner = fields(g.value as Uint8Array).find((h) => h.field === 1);
-        return inner === undefined ? [] : packed(inner.value as Uint8Array);
-      };
-      if (g.field === 3) {
-        const ls = args();
-        check = (x) => ls.some((r) => lit(r, x));
-      } else if (g.field === 26) {
-        const ls = args();
-        check = (x) => ls.filter((r) => lit(r, x)).length <= 1;
-      } else if (g.field === 29) {
-        const ls = args();
-        check = (x) => ls.filter((r) => lit(r, x)).length === 1;
-      } else if (g.field === 12) {
-        const parts = fields(g.value as Uint8Array);
-        const get = (n: number) => {
-          const p = parts.find((h) => h.field === n);
-          return p === undefined ? [] : packed(p.value as Uint8Array);
-        };
-        const vs = get(1);
-        const cs = get(2);
-        const [lo, hi] = get(3);
-        check = (x) => {
-          let sum = 0;
-          vs.forEach((v, i) => (sum += cs[i]! * x[v]!));
-          return sum >= lo! && sum <= hi!;
-        };
-      }
-    }
-    const c = check!;
-    const w = when;
-    checks.push((x) => !w.every((r) => lit(r, x)) || c(x));
-  }
-  return { vars, checks };
 }
 
 // ----------------------------------------------------------- the property
