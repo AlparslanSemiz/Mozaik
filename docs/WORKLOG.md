@@ -635,7 +635,7 @@ Denetimin test ve CI bulguları (TODO B7.39–B7.41).
 - **Node 26.** Node 25'ten beri `globalThis.localStorage` bir getter ve `--localstorage-file`
   verilmeyince `undefined`; vitest 3'ün jsdom ortamı global'de zaten olan anahtarı kopyalamıyor.
   `emptyStart`, `otherWindow` ve `rowOrder` bu yüzden kırmızıydı (veri kaybı sınıfının gerileme
-  testleri dahil). `vite.config.ts` Node ≥ 25'te `poolOptions.forks.execArgv`'ye
+  testleri dahil). `vite.config.ts` Node ≥ 25'te `execArgv`'ye
   `--no-experimental-webstorage` veriyor, Node 22'de (CI, `.nvmrc`) hiçbir şey değişmiyor.
 - **`agir.test.ts`** `describe.skipIf(process.platform !== 'linux')`: betik `flock`, `/proc`,
   `setsid` istiyor, macOS'ta test aracın eksikliğini ölçüyordu. CI Linux, orada koşmaya devam.
