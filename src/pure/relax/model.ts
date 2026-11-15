@@ -94,7 +94,7 @@ export interface Model<F extends Formula = Sat> {
 }
 
 /** The cells no run may move, the lessons to place, and the data they sit in. */
-interface Frame {
+export interface Frame {
   fixed: Record<string, Id>;
   fixedState: State;
   fixedIx: Index;
@@ -109,6 +109,62 @@ export function frameOf(base: State, opts: RelaxOptions): Frame {
     fixedState,
     fixedIx: buildIndex(fixedState),
     lessons: base.lessons.filter((x) => !lessonExcluded(x, opts.exclusions)),
+  };
+}
+
+/** What the reader ruled out, by what each refusal closes (cpModel.ts reads it too). */
+export function refusalsOf(opts: RelaxOptions) {
+  const refusedDays = new Set<string>();
+  const refusedHours = new Set<string>();
+  const refusedTeachers = new Set<Id>();
+  const caps = new Map<string, number>();
+  const refusedLimits = new Set<string>();
+  const refusedHands = new Set<string>();
+  const refusedLessons = new Set<string>();
+  for (const r of opts.refused) {
+    switch (r.kind) {
+      case 'teacherDay':
+        refusedDays.add(`${r.teacherId}|${r.day}`);
+        break;
+      case 'teacherHours':
+        for (const h of r.hours) refusedHours.add(closedKey(r.teacherId, r.day, h));
+        break;
+      case 'teacherCap': {
+        const key = `${r.teacherId}|${r.day}`;
+        caps.set(key, Math.min(caps.get(key) ?? r.max, r.max));
+        break;
+      }
+      case 'teacher':
+        refusedTeachers.add(r.teacherId);
+        break;
+      case 'lessonDayLimit':
+        refusedLimits.add(`L|${r.lessonId}`);
+        break;
+      case 'teacherDayLimit':
+        refusedLimits.add(`D|${r.teacherId}`);
+        break;
+      case 'teacherConsecutive':
+        refusedLimits.add(`R|${r.teacherId}`);
+        break;
+      case 'lessonTeacher':
+        refusedHands.add(`${r.lessonId}|${r.teacherId}`);
+        break;
+      default:
+        refusedLessons.add(`${r.kind}|${r.lessonId}`);
+    }
+  }
+  for (const id of refusedTeachers) {
+    refusedLimits.add(`D|${id}`);
+    refusedLimits.add(`R|${id}`);
+  }
+  return {
+    refusedDays,
+    refusedHours,
+    refusedTeachers,
+    caps,
+    refusedLimits,
+    refusedHands,
+    refusedLessons,
   };
 }
 
@@ -166,49 +222,15 @@ export function buildModel(
   };
 
   // What the reader ruled out.
-  const refusedDays = new Set<string>();
-  const refusedHours = new Set<string>();
-  const refusedTeachers = new Set<Id>();
-  const caps = new Map<string, number>();
-  const refusedLimits = new Set<string>();
-  const refusedHands = new Set<string>();
-  const refusedLessons = new Set<string>();
-  for (const r of opts.refused) {
-    switch (r.kind) {
-      case 'teacherDay':
-        refusedDays.add(`${r.teacherId}|${r.day}`);
-        break;
-      case 'teacherHours':
-        for (const h of r.hours) refusedHours.add(closedKey(r.teacherId, r.day, h));
-        break;
-      case 'teacherCap': {
-        const key = `${r.teacherId}|${r.day}`;
-        caps.set(key, Math.min(caps.get(key) ?? r.max, r.max));
-        break;
-      }
-      case 'teacher':
-        refusedTeachers.add(r.teacherId);
-        break;
-      case 'lessonDayLimit':
-        refusedLimits.add(`L|${r.lessonId}`);
-        break;
-      case 'teacherDayLimit':
-        refusedLimits.add(`D|${r.teacherId}`);
-        break;
-      case 'teacherConsecutive':
-        refusedLimits.add(`R|${r.teacherId}`);
-        break;
-      case 'lessonTeacher':
-        refusedHands.add(`${r.lessonId}|${r.teacherId}`);
-        break;
-      default:
-        refusedLessons.add(`${r.kind}|${r.lessonId}`);
-    }
-  }
-  for (const id of refusedTeachers) {
-    refusedLimits.add(`D|${id}`);
-    refusedLimits.add(`R|${id}`);
-  }
+  const {
+    refusedDays,
+    refusedHours,
+    refusedTeachers,
+    caps,
+    refusedLimits,
+    refusedHands,
+    refusedLessons,
+  } = refusalsOf(opts);
   const mayOpen = (teacherId: Id, day: number, hour: number) =>
     openTeacher &&
     !refusedTeachers.has(teacherId) &&
