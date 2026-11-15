@@ -614,6 +614,29 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ---
 
+## 2026-11-15 · Test ve CI bakımı (`bakim/test-ci`)
+
+Denetimin test ve CI bulguları (TODO B7.38–B7.40).
+
+- **Node 26.** Node 25'ten beri `globalThis.localStorage` bir getter ve `--localstorage-file`
+  verilmeyince `undefined`; vitest 3'ün jsdom ortamı global'de zaten olan anahtarı kopyalamıyor.
+  `emptyStart`, `otherWindow` ve `rowOrder` bu yüzden kırmızıydı (veri kaybı sınıfının gerileme
+  testleri dahil). `vite.config.ts` Node ≥ 25'te `poolOptions.forks.execArgv`'ye
+  `--no-experimental-webstorage` veriyor, Node 22'de (CI, `.nvmrc`) hiçbir şey değişmiyor.
+- **`agir.test.ts`** `describe.skipIf(process.platform !== 'linux')`: betik `flock`, `/proc`,
+  `setsid` istiyor, macOS'ta test aracın eksikliğini ölçüyordu. CI Linux, orada koşmaya devam.
+- **Hijyen.** `.gitignore`'a `.claude/worktrees/` ve `.playwright-mcp/`; üç eski döküm
+  `git rm --cached` ile izlemeden çıktı.
+- **CI.** `e2e`, `e2e-arama` ve `e2e-ek` işleri `~/.cache/ms-playwright`'ı `actions/cache@v6` ile
+  önbellekliyor, anahtar `@playwright/test`'in kurulu sürümü. `playwright install` duruyor,
+  isabette indirmeden dönüyor. Kazanç beklentisi iş başına 8–9 s; ilk koşu önbelleği yazar.
+- **`otomatik.spec.ts:254`** ölçüldü, değiştirilmedi (TODO B7.40): bugünün 24 koşusunda 2,4–5,8
+  dk; `hiz/sat-yayilim`'den sonra medyan 2,8 dk, en yavaşı 420 s sınırının %66'sı (önce %83).
+
+Doğrulama (bu Mac, Node 26.13.1): `tsc --noEmit` 0, `eslint src` 0, `npm run sinir` 0 ihlal,
+`npm run hizli` 1521 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
+Koşulmayan: E2E ve CI'ın önbellek isabeti (dalın CI'ında).
+
 ## 2026-11-15 · Zincir `main`'e: boyut eşiği (`rk2-bozuk-iliski`, PR #22)
 
 Bugünkü `main` (#16–#19) alındı; tek çakışma `Teachers.tsx`: zincirin e-posta alanı #18'in
