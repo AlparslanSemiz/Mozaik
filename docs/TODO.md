@@ -1944,7 +1944,9 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
       (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
       Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
-- [ ] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Tam dolu kursta 20
+- [x] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Bitti (2026-11-15,
+      `kullanim/sikisik`, Alp: "her düzeltmeyi yap"): öneri uygulandı, sınıfta `classCapacityLevel`,
+      liste süzgeci satırın kendi seviyesini okuyor. "Haftanın doluluğu" satırları duruyor (ayrı karar). Tam dolu kursta 20
       sınıfın 20'si sarı "Sıkışık" (`capacityLevel`, eşik yükün açık saate oranı 0,85). Dershanede
       eşitlik olağan. Rapor: yalnız aşan satır rozet alsın, Kontrol'deki "Haftanın doluluğu %23"
       ve "Boş kalan sınıf saati 1110" kalksın. Yapılmadı, çünkü bir karar: eşik Kontrol'ün

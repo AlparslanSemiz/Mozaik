@@ -194,6 +194,15 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · Sınıfta "Sıkışık" yok (`kullanim/sikisik`, TODO SD2)
+
+Kullanılabilirlik ölçümünün bulgusu: tam dolu kursta 20 sınıfın 20'si sarı "Sıkışık", çünkü
+eşik yükün açık saate oranı 0,85 ve dershanede eşitlik olağan. Sınıf satırı artık
+`classCapacityLevel` ile: aşınca "İmkânsız", yoksa "Uygun". Öğretmen ve derslik değişmedi.
+Listelerin "Yük durumu" süzgeci satırın kendi seviyesini okuyor (Kontrol'le ayrışamaz).
+Babanın verisinde Kontrol → Sınıflar: 0 sıkışık (önce 20), Öğretmenler 1. `feasibility` ve
+`lists` birim testleri, `kontrol.spec.ts` ve `liste.spec.ts` 33/33.
+
 ## 2026-11-15 · vite 8 ve size-limit 14 (`bagimlilik/vite8`, Dependabot #7 ve #8)
 
 vite 8.3.8 (Rolldown), @vitejs/plugin-react 6.3, size-limit ve @size-limit/file 14.3; vitest 4.1

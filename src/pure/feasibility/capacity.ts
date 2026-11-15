@@ -2,7 +2,7 @@
 
 import { t } from '../../leaf/i18n';
 import { type Id, type State, parseKey } from '../../leaf/model';
-import { type Capacity, type ReportRow, capacityLevel } from './levels';
+import { type Capacity, type ReportRow, capacityLevel, classCapacityLevel } from './levels';
 
 export function buildCapacity(d: State): Capacity {
   const totalSlots = d.settings.days.length * d.settings.hours.length;
@@ -54,7 +54,7 @@ export function buildCapacity(d: State): Capacity {
     const load = d.lessons
       .filter((x) => x.classId === c.id)
       .reduce((sum, x) => sum + x.weeklyHours, 0);
-    const level = capacityLevel(capacity, load);
+    const level = classCapacityLevel(capacity, load);
     const message =
       level === 'impossible'
         ? t(
