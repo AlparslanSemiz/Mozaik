@@ -93,6 +93,11 @@ Kayıt [DECISIONS.md](DECISIONS.md)'de.
 (önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
 Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
+**Yayın kapısı: TP7 ve B7.37 (2026-10-24, Alp).** Gerçek Windows exe'de B7.37'nin yolları
+(okunamayan plan, boş açılış, klasöre yazım ve budama) ve güncelleme yolu (eski sürümden
+yenisine, TP7) sınanıp yeşil olmadan etiket yok. Bugün ikisi de yalnız sahte Tauri köprüsünde
+ve Linux exe'de koştu.
+
 **Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
 (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi)
 `surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si `tp7-windows-exe`'de yeşil (2026-10-24);
@@ -906,7 +911,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `src/platform/storage/okunamayan.test.tsx`, `src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts` (94),
       `main`'de kırmızı, dalda yeşil. `e2e/exe.spec.ts` 76'nın ilk testi yeni kurala göre
       yeniden yazıldı (tuzak 153).
-      **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
+      **Yayın kapısı (2026-10-24, Alp; İÇİNDEKİLER'in altı):** bu kalan ve TP7 yeşil olmadan
+      etiket yok. **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
       `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
       açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
       değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
@@ -1727,7 +1733,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 
 **Birleşmeden sonraki bileşen bölmeleri (2026-10-24, kullanıcının kararı).** Her biri
 `main`'den açılan kendi dalında; dal bölmenin `dist/index.html`'e maliyetini ölçer, ve
-`size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
+`size-limit` (bugün 1 180 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
 değişmez, ekran 0 piksel.
 
 - [x] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
