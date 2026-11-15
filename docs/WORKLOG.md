@@ -49,14 +49,16 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
 **Alp'te bekleyenler (yeni oturum bunları sormalı):**
-1. `MOZAIK_IMZA_ANAHTARI` depo sırrı: `gh secret set MOZAIK_IMZA_ANAHTARI --repo
-   AlparslanSemiz/Mozaik < ~/.config/mozaik-imza/mozaik.key`. Sır yoksa `surum.yml` yayını
-   durdurur (bilerek). Anahtarın gizli yarısı yalnız `~/.config/mozaik-imza/` (600); yedeklenmeli,
-   kaybolursa dağıtılmış kopyalar yeni sürümü reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
-2. SD3: plan ve program tek kavram mı (TODO §8m).
-3. Eski dallardan yalnız `ruflo/kurulum` kaldı (11 commit): kalıcı Claude hook'ları kuruyor ve
-   `.mcp.json`'ı değiştiriyor, Alp onaylamadan birleşmez. Öteki dördü `eski/birlestirme`'de
-   `main`'e girdi (aşağıda).
+1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). Bu Mac'te gerçek
+   anahtarla `minisign -S` (şifresiz, `surum.yml`'in komutuyla) ve `-V` denendi, imza ve
+   güvenilen yorum doğrulandı; `cargo test` 59/59. Kalan: `~/.config/mozaik-imza/mozaik.key`'in
+   yedeği (parola yöneticisi ya da şifreli USB); kaybolursa dağıtılmış kopyalar yeni sürümü
+   reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
+2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz;
+   karışıklık ve erişilebilirlik öncelikli. Plan ve program aynı şey değil (plan bütün okul
+   verisi, program onun içindeki diziliş), "program" ayrıca uygulamanın kendisi; bütün
+   terimlerin haritası çıkarılıyor, adlar Alp'e tek seferde sunulacak (TODO SD3).
+3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
 

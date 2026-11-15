@@ -2006,6 +2006,12 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
 - [ ] **SD3 · Plan ve program iki kavram (rapor öneri 4).** Üst çubukta "1. plan", şeritte
       "Program 1". Babaya tek kavram görünsün mü, LAYOUT bunun tersini gerekçeli seçmiş. Karar
       sende.
+      **Karar (Alp, 2026-11-15):** her kavramın ekranda tek adı olur, bir ad iki kavramı
+      taşımaz; karışıklık, erişilebilirlik ve kolay kullanım öncelikli. İncelemede çıkan:
+      plan (bütün okul verisi) ve program (plan içindeki diziliş) iki ayrı kavram, "program"
+      ayrıca uygulamanın kendisi ("Programı güncelleyin"). Sıradaki: bütün terimlerin
+      haritası, adlar Alp'e tek seferde, sonra arayüz metinleri (kayıt anahtarları ve dosya
+      adları değişmez).
 - [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
       yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
       ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama
