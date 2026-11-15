@@ -708,7 +708,25 @@ pub async fn download_update(
              Programı Belgelerim gibi yazılabilir bir klasöre taşıyıp tekrar deneyin."
         )
     })?;
+    *INDIRILEN_EXE.lock().map_err(|_| "İndirme kaydı okunamadı.")? =
+        Some(sha256.to_ascii_lowercase());
     Ok(bytes.len() as u64)
+}
+
+/// The digest of the standalone exe downloaded in THIS session, for the swap.
+static INDIRILEN_EXE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+
+/// Is the `.yeni` file next to the program the one downloaded and checked in
+/// this session? Between the download and "Şimdi yeniden başlat" the file sat
+/// on disk where anything of this user could write (security review, B7.39);
+/// and a `.yeni` left by an earlier session was never checked by this one.
+pub fn yeni_dogru(yeni: &Path, beklenen: Option<&str>) -> Result<(), String> {
+    let beklenen = beklenen.ok_or("Önce yeni sürümü indirin.")?;
+    let bytes = fs::read(yeni).map_err(|e| format!("İndirilen sürüm okunamadı: {e}"))?;
+    if ozet(&bytes) != beklenen {
+        return Err("İndirilen sürüm değişmiş: özeti tutmuyor. Tekrar indirin.".into());
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -729,6 +747,11 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
         }
         return kurulumu_baslat(&app, &exe, &kurulum);
     }
+    let beklenen = INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")?
+        .clone();
+    yeni_dogru(&yan(&exe, YENI), beklenen.as_deref())?;
     swap(&exe)?;
     // The pipe is the hand-over (`eskisi_gitsin` says why). Its writing end
     // stays open in this process until the process ends.
@@ -896,6 +919,21 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         let mut m = manifest("9.0.0", TEK);
         m.imza = None;
         assert!(karar(m, "2.2.0").is_err());
+    }
+
+    #[test]
+    fn only_the_checked_download_is_swapped_in() {
+        let tmp = Scratch::new("yeni-dogru");
+        let yeni = yan(&tmp.exe(), YENI);
+        fs::write(&yeni, b"MZ yeni surum").unwrap();
+        let dogru = ozet(b"MZ yeni surum");
+        assert!(yeni_dogru(&yeni, Some(&dogru)).is_ok());
+        // Changed on disk after the download, or never downloaded this session.
+        fs::write(&yeni, b"MZ baska bir sey").unwrap();
+        assert!(yeni_dogru(&yeni, Some(&dogru)).is_err());
+        assert!(yeni_dogru(&yeni, None).is_err());
+        fs::remove_file(&yeni).unwrap();
+        assert!(yeni_dogru(&yeni, Some(&dogru)).is_err());
     }
 
     #[test]
