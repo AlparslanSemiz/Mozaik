@@ -93,6 +93,10 @@ kadar yavaş olduğu bilinmiyor: geliştirme makinesinde açılış ve etkileşi
 Ölçülmemiş bir "yavaş" her kararı haklı çıkarabilir, ölçülmüş bir sayı yalnız
 gerçekten pahalı olanı gösterir.
 
+Babanın makinesi ileride daha iyisiyle değişebilir, hedef yine zayıf makine kalır
+(Alp, 2026-11-15): iki çekirdek, 4 GB RAM ve eski bir disk. Bir hız ya da bellek kararı
+o makinede kabul edilebilir olmalı, yeni bir makinede iyi görünmesi yetmez.
+
 ## Özellikler nereden gelir
 
 Babanın bugün kullandığı program Roboders, ve Mozaik onun yerine geçmeyi
