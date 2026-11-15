@@ -202,7 +202,11 @@ function Program({
     applied: useStillSaid(solver.applied, state),
     result: useStillSaid(solver.result, state),
   };
-  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
+  const {
+    text: barText,
+    level: barLevel,
+    counter: barCounter,
+  } = describeBar(solver, view, t, current);
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -450,13 +454,20 @@ function Program({
           that never got it. `polite` and not `assertive`: it must not cut into
           a dialog, and the DRAG reason updates several times a second while the
           pointer moves — the region is on the wrapper so those coalesce into
-          one announcement per settled state rather than one per frame. */}
+          one announcement per settled state rather than one per frame.
+
+          The live region is the FIRST span only, not the whole bar: the run's
+          counter (`barCounter`) changes many times a second and sits beside
+          it, outside, so the start is said once and the result once. The bar
+          is `aria-busy` while the run lasts. */}
       <div
         className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
-        role="status"
-        aria-live="polite"
+        aria-busy={solver.running}
       >
-        <span>{barText}</span>
+        <span role="status" aria-live="polite">
+          {barText}
+        </span>
+        {barCounter !== undefined && <span className="reason-count">{barCounter}</span>}
         {((solver.result !== null && current.result) ||
           (solver.applied !== null && current.applied)) &&
           !solver.running && (

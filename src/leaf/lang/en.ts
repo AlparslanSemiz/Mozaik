@@ -380,8 +380,8 @@ const EN: Sozluk = {
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "It can be dropped here.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
-    "Filling automatically… {yerlesen}/{toplam} cards · {sure} s",
+  "Otomatik diziliyor…": "Filling automatically…",
+  "{yerlesen}/{toplam} kart · {sure} sn": "{yerlesen}/{toplam} cards · {sure} s",
   "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
     "Rows are teachers. A cell shows the class and the room. Drag a placed card to move it; right-click sends it back to the tray.",
   "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":

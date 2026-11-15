@@ -384,8 +384,8 @@ const DE: Sozluk = {
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Hier kann abgelegt werden.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
-    "Wird automatisch gelegt… {yerlesen}/{toplam} Karten · {sure} s",
+  "Otomatik diziliyor…": "Wird automatisch gelegt…",
+  "{yerlesen}/{toplam} kart · {sure} sn": "{yerlesen}/{toplam} Karten · {sure} s",
   "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
     "Zeilen sind Lehrkräfte. Eine Zelle zeigt Klasse und Raum. Ziehen Sie eine gelegte Karte zum Verschieben; ein Rechtsklick schickt sie zurück ins Ablagefach.",
   "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":

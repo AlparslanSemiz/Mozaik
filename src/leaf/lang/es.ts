@@ -382,8 +382,8 @@ const ES: Sozluk = {
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Se puede soltar aquí.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
-    "Colocando automáticamente… {yerlesen}/{toplam} tarjetas · {sure} s",
+  "Otomatik diziliyor…": "Colocando automáticamente…",
+  "{yerlesen}/{toplam} kart · {sure} sn": "{yerlesen}/{toplam} tarjetas · {sure} s",
   "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
     "Las filas son profesores. Una celda muestra la clase y el aula. Arrastre una tarjeta colocada para moverla; el clic derecho la devuelve a la bandeja.",
   "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
