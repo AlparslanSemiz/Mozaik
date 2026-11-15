@@ -73,6 +73,9 @@ scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kura
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
+CI Node 22'de koşar ve `.nvmrc` aynı sürümü söyler. Node 25 ve sonrası kendi
+`localStorage`'ını tanımlayıp jsdom'unkini gölgeler; `vite.config.ts` bu sürümlerde test
+süreçlerine `--no-experimental-webstorage` verir, yerelde Node 26 da çalışır.
 Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 
 `knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
