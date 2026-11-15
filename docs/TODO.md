@@ -884,7 +884,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       üretilmeli.
       (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
       Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
-      (4) `apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).
+      (4) ~~`apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).~~
+      Bitti (2026-11-15, `guvenlik/yeni-dogrula`): `yeni_dogru`, bu oturumda indirilenin özetiyle.
+      Not: `guncelleme-exe.spec.ts:185` (`.eski` 15 s'de gitmedi) ca128e0'da bir kez kırmızı, sonraki
+      üç `main` koşusunda yeşil; kurulu dosyanın özeti tutuyordu, veri eksiksiz. İzlenecek.
       (5) G1 (imza), G2 (iş akışı izinleri, CLI sabitleme), V1, V3–V7 denetim raporunda, bu dala
       girmedi.
 - [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
