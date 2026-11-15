@@ -178,6 +178,8 @@ export interface UpdateCevap {
   boyut: number;
   /** The exe's SHA-256 as published; update.rs refuses a download without it. */
   sha256: string | null;
+  /** `exe` is the installer rather than the standalone program (update.rs, `karar`). */
+  kurulum: boolean;
 }
 
 function bridge(): Invoke {
