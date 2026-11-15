@@ -38,6 +38,7 @@ import { createHash } from 'node:crypto';
 
 import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
+import updateMacRs from '../src-tauri/src/update_mac.rs?raw';
 import mailRs from '../src-tauri/src/mail.rs?raw';
 import cpsatRs from '../src-tauri/src/cpsat.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
@@ -474,6 +475,11 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     expect(surumYml).toContain(`MAC_\${m}_OZET=$(sha256sum "$f" | cut -d' ' -f1)`);
     expect(surumYml).toContain('-t "mozaik $surum Mozaik-mac-$m.app.tar.gz"');
     expect(updateRs).toContain('format!("mozaik {surum} {dosya}")');
+    // The names the Mac copy expects are the names surum.yml publishes and tars.
+    for (const m of ['arm64', 'x86_64'])
+      expect(updateMacRs).toContain(`"Mozaik-mac-${m}.app.tar.gz"`);
+    expect(updateMacRs).toContain('pub const ARSIVDEKI_AD: &str = "Mozaik.app";');
+    expect(surumYml).toContain('.app.tar.gz" Mozaik.app');
   });
 
   it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {

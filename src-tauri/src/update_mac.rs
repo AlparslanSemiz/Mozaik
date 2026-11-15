@@ -100,18 +100,22 @@ pub fn yazilabilir_mi(paket: &Path) -> Result<(), String> {
         return Err(TASIYIN.into());
     }
     let ust = paket.parent().ok_or(TASIYIN)?;
-    let deneme = ust.join(format!(".mozaik-yazma-denemesi-{}", std::process::id()));
-    match fs::create_dir(&deneme) {
-        Ok(()) => {
-            let _ = fs::remove_dir(&deneme);
-            Ok(())
+    // Both the folder the bundle sits in (the hidden folder goes there) and the
+    // bundle itself (a rename of a folder needs write access to it): a copy
+    // another account installed passes the first and fails the second.
+    for yer in [ust, paket] {
+        if !yer.is_dir() {
+            continue;
         }
-        Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
-            let _ = fs::remove_dir(&deneme);
-            Ok(())
-        }
-        Err(_) => Err(TASIYIN.into()),
+        let deneme = yer.join(format!(".mozaik-yazma-denemesi-{}", std::process::id()));
+        let _ = fs::remove_dir(&deneme);
+        fs::create_dir(&deneme).map_err(|_| TASIYIN.to_string())?;
+        let _ = fs::remove_dir(&deneme);
     }
+    if !ust.is_dir() {
+        return Err(TASIYIN.into());
+    }
+    Ok(())
 }
 
 /// The hidden folder beside the bundle: `/Applications/.Mozaik.app.yeni`.
@@ -168,7 +172,9 @@ pub fn ac(paket: &Path, exe_adi: &std::ffi::OsStr) -> Result<PathBuf, String> {
     let hedef = acilan(paket);
     let _ = fs::remove_dir_all(&hedef);
     fs::create_dir_all(&hedef).map_err(|e| format!("Güncelleme klasörü açılamadı: {e}"))?;
-    let durum = std::process::Command::new("tar")
+    // The system's own on the Mac, as `/usr/bin/open` in mail.rs: no PATH chooses it.
+    let tar = if cfg!(target_os = "macos") { "/usr/bin/tar" } else { "tar" };
+    let durum = std::process::Command::new(tar)
         .arg("-xzf")
         .arg(indirilen(paket))
         .arg("-C")
@@ -297,6 +303,22 @@ mod tests {
         assert!(yazilabilir_mi(&s.0.join("Mozaik.app")).is_ok());
         // And the probe leaves nothing behind.
         assert_eq!(fs::read_dir(&s.0).unwrap().count(), 0);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_bundle_this_user_cannot_write_is_told_to_move_too() {
+        // Another account installed it: its folder is writable, the bundle is not.
+        use std::os::unix::fs::PermissionsExt;
+        let s = Scratch::new("salt-okunur");
+        let paket = s.0.join("Mozaik.app");
+        paket_yap(&paket, "eski");
+        assert!(yazilabilir_mi(&paket).is_ok());
+        assert_eq!(fs::read_dir(&paket).unwrap().count(), 1);
+        fs::set_permissions(&paket, fs::Permissions::from_mode(0o555)).unwrap();
+        let sonuc = yazilabilir_mi(&paket);
+        fs::set_permissions(&paket, fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(sonuc.is_err());
     }
 
     #[test]

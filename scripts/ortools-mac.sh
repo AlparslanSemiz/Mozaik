@@ -67,6 +67,13 @@ while [ "${#sira[@]}" -gt 0 ]; do
   done < <(otool -L "$lib/$n" | tail -n +2 | awk '{print $1}' | sed -n 's|^@rpath/||p')
 done
 
+# The lowest macOS is read off the binaries, not the archive's name (tuzak
+# 157): every dylib must say minos 11.0, what tauri.macos.conf.json promises.
+for f in "$hedef"/*.dylib; do
+  minos=$(otool -l "$f" | awk '/LC_BUILD_VERSION/{b=1} b && /minos/ && !d {print $2; d=1}')
+  [ "$minos" = "11.0" ] || { echo "$(basename "$f") en düşük macOS $minos, 11.0 değil" >&2; exit 1; }
+done
+
 # Everything else they load is the operating system's own.
 for f in "$hedef"/*.dylib; do
   if otool -L "$f" | tail -n +2 | awk '{print $1}' | grep -vE '^(@rpath/|/usr/lib/|/System/Library/)'; then

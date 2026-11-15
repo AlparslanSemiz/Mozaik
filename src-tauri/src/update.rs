@@ -861,10 +861,12 @@ async fn mac_indir(
 fn mac_uygula(app: &tauri::AppHandle, exe: &Path) -> Result<(), String> {
     let paket = update_mac::uygulama_paketi(exe)
         .ok_or("Mozaik bir .app paketinden çalışmıyor; kendini güncelleyemez.")?;
+    // `take`, not `clone`: a second press while this one is exiting must find
+    // nothing to apply, or it would unpack over the old bundle it just set aside.
     let beklenen = INDIRILEN_EXE
         .lock()
         .map_err(|_| "İndirme kaydı okunamadı.")?
-        .clone();
+        .take();
     yeni_dogru(&update_mac::indirilen(&paket), beklenen.as_deref())?;
     let ad = exe.file_name().ok_or("Program adı bulunamadı.")?;
     let yeni = update_mac::ac(&paket, ad)?;

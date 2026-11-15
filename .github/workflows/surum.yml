@@ -325,8 +325,12 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           # Boş bir sır yine de tanımlı bir değişkendir ve Tauri onu dener:
-          # sır yoksa değişken hiç yok.
-          if [ -n "$APPLE_CERTIFICATE" ]; then
+          # sır yoksa değişken hiç yok, her biri ayrı ayrı.
+          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
+                   APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            [ -n "${!v}" ] || unset "$v"
+          done
+          if [ -n "${APPLE_CERTIFICATE:-}" ]; then
             echo "Developer ID ile imzalanıyor"
             # Notarize için sertleştirilmiş çalışma zamanı şart.
             node -e '
@@ -334,7 +338,10 @@ jobs:
               const c = JSON.parse(fs.readFileSync(y, "utf8"));
               c.bundle.macOS.hardenedRuntime = true;
               fs.writeFileSync(y, JSON.stringify(c, null, 2));'
-            [ -n "$APPLE_ID" ] || unset APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+            # Notarization üçü birden ister; eksik bir üçlü hiç verilmez.
+            if [ -z "${APPLE_ID:-}" ] || [ -z "${APPLE_PASSWORD:-}" ] || [ -z "${APPLE_TEAM_ID:-}" ]; then
+              unset APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+            fi
           else
             echo "Apple imzası yok: ad-hoc"
             unset APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
