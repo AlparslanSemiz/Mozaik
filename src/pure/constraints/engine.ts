@@ -107,14 +107,20 @@ export function blockerDetail(
     };
   }
 
-  const dayName = dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 }));
+  // Named only when a sentence needs it: most cells a search asks about are
+  // free, and translating the day for each of them was a measurable share of
+  // a solver run (2026-11-15).
+  let named: string | undefined;
+  const dayName = () =>
+    (named ??= dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 })));
+  const placements = activePlacements(d);
 
   for (let i = 0; i < block; i++) {
     const h = hour + i;
     const hourName = d.settings.hours[h] ?? `${h + 1}`;
 
     // 2. Is the class free at that hour
-    const busyLessonId = activePlacements(d)[placementKey(group.id, day, h)];
+    const busyLessonId = placements[placementKey(group.id, day, h)];
     if (busyLessonId !== undefined) {
       const other = ix.lessonById.get(busyLessonId);
       const otherSubject = other && ix.teacherById.get(other.teacherId)?.subject;
@@ -122,7 +128,7 @@ export function blockerDetail(
         code: 'classBusy',
         message: t('{sinif} sınıfının {gun} {saat} saatinde {ders} var', {
           sinif: group.name,
-          gun: dayName,
+          gun: dayName(),
           saat: hourName,
           ders: otherSubject === undefined ? t('başka ders') : subjectLabel(otherSubject),
         }),
@@ -135,7 +141,7 @@ export function blockerDetail(
         code: 'classClosed',
         message: t('{sinif} sınıfı {gun} {saat} saatinde kapalı', {
           sinif: group.name,
-          gun: dayName,
+          gun: dayName(),
           saat: hourName,
         }),
       };
@@ -147,7 +153,7 @@ export function blockerDetail(
         code: 'teacherClosed',
         message: t('{kim} {gun} {saat} saatinde müsait değil', {
           kim: teacher.short,
-          gun: dayName,
+          gun: dayName(),
           saat: hourName,
         }),
       };
@@ -162,7 +168,7 @@ export function blockerDetail(
         code: 'teacherBusy',
         message: t('{kim} {gun} {saat} saatinde {sinif} sınıfında', {
           kim: teacher.short,
-          gun: dayName,
+          gun: dayName(),
           saat: hourName,
           sinif: otherClass?.name ?? t('başka'),
         }),
@@ -180,7 +186,7 @@ export function blockerDetail(
           code: 'roomBusy',
           message: t('{derslik} dersliğinde {gun} {saat} saatinde {sinif} var', {
             derslik: roomName,
-            gun: dayName,
+            gun: dayName(),
             saat: hourName,
             sinif: otherClass?.name ?? t('başka sınıf'),
           }),
@@ -193,7 +199,7 @@ export function blockerDetail(
           code: 'roomClosed',
           message: t('{derslik} dersliği {gun} {saat} saatinde kapalı', {
             derslik: roomName,
-            gun: dayName,
+            gun: dayName(),
             saat: hourName,
           }),
         };
@@ -211,7 +217,7 @@ export function blockerDetail(
       code: 'relatedDay',
       message: t('{ders} {gun} günü var, bu dersle aynı güne konmamalı', {
         ders: relatedName(d, ix, other),
-        gun: dayName,
+        gun: dayName(),
       }),
     };
   }
@@ -257,7 +263,7 @@ function limitBreaches(
   teacher: Teacher,
   day: number,
   hour: number,
-  dayName: string,
+  dayName: () => string,
   block: number,
 ): Breach[] {
   const out: Breach[] = [];
@@ -286,7 +292,7 @@ function limitBreaches(
         name: 'maxPerDay',
         message: t('{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur', {
           kim: teacher.short,
-          gun: dayName,
+          gun: dayName(),
           sinir: maxDay,
           olan: count,
         }),
@@ -302,7 +308,7 @@ function limitBreaches(
         name: 'maxSameLessonPerDay',
         message: t(
           '{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur',
-          { sinif: group.name, gun: dayName, kim: teacher.short, sinir: maxSame, olan: count },
+          { sinif: group.name, gun: dayName(), kim: teacher.short, sinir: maxSame, olan: count },
         ),
       });
     }
@@ -339,7 +345,9 @@ export function verdictAfterBlocker(
     return { blocked: null, warning: null };
   }
 
-  const dayName = dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 }));
+  let named: string | undefined;
+  const dayName = () =>
+    (named ??= dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 })));
   const block = blockSizeFor(d, lesson, size);
   const warnings = limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName, block)
     .filter((x) => ruleLevel(d, x.name) === 'warn')
