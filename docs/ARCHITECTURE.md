@@ -230,7 +230,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
-| `ui/lessons/index.tsx` | Dersler |
+| `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menüsünü bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |

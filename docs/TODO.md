@@ -1601,8 +1601,10 @@ değişmez, ekran 0 piksel.
 - [x] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
       Bitti (2026-11-15, `refactor/rf24-rf25`): liste `Teachers.tsx`'te, ekleme bloğu
       `TeacherForm.tsx`, satır `TeacherRow.tsx`, cinsiyet seçenekleri `genders.ts`.
-- [ ] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
+- [x] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
       kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
+      Bitti (2026-11-15, `refactor/rf24-rf25`): `LessonForm.tsx`, `LessonRow.tsx` ve
+      `LessonPicker.tsx`; `index.tsx` 241 satır.
 - [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
       `ui/program/Program.tsx`'in içinde; hesapları (`describeMenu`, `poolMenuFacts`) zaten
       `pure/program/`'da.
