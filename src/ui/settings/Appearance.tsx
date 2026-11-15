@@ -201,10 +201,10 @@ export default function Appearance({
               <T k="**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan." />
             </li>
             <li>
-              <T k="**Rahat.** Hücre geniş ve saatler yazılı; hafta sığmadığı için sağa kaydırırsınız." />
+              <T k="**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız." />
             </li>
             <li>
-              <T k="**Sığdır.** Haftanın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
+              <T k="**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
             </li>
           </ul>
 
@@ -285,7 +285,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Araç şeridi')}</h2>
           <p className="hint">
-            <T k="Sekmelerin altındaki bar, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
+            <T k="Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
           </p>
           <div className="form-row">
             <button
@@ -304,7 +304,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Hareket')}</h2>
           <p className="hint">
-            <T k="Bir şey belirirken görülen kısa hareketler; kapatmak programın işini değiştirmez." />
+            <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez." />
           </p>
           <ul className="hint choice-list">
             <li>
@@ -339,7 +339,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Dil')}</h2>
           <p className="hint">
-            {t('Arayüzün dili. Bu bilgisayara aittir, yedek dosyasına girmez.')}
+            {t('Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.')}
           </p>
           {/* The same button shape as the four questions above it, and each
               language NAMES ITSELF: a language menu is read by somebody who

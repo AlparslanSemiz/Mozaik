@@ -91,7 +91,7 @@ export function sanitize(d: State): State {
 
     let name = typeof program.name === 'string' ? program.name.trim() : '';
     if (name === '') {
-      name = `Program ${index + 1}`;
+      name = `Seçenek ${index + 1}`;
       programChanged = true;
     }
     const baseName = name;

@@ -44,10 +44,10 @@ export function usePaletteActions({
       {
         id: 'save',
         label: t('Dosyaya kaydet'),
-        hint: t('yedek al'),
+        hint: t('plan dosyası'),
         run: () => {
           downloadBackup(state);
-          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         },
       },
       {

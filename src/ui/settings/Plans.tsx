@@ -89,7 +89,7 @@ export default function Plans({ state, plans }: Props) {
     <div className="panel">
       <h2>{t('Planlar ({n})', { n: library.plans.length })}</h2>
       <p className="hint">
-        <T k="Her plan **ayrı bir programdır**; üst çubuktaki listeden aralarında geçilir." />
+        <T k="Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir." />
       </p>
 
       {/* The way to ADD one comes before the list of what there is — the rule

@@ -34,15 +34,15 @@ export function useLoadSample(): LoadSample {
       if (
         !(await confirm({
           title: holds
-            ? t('Bu plandaki her şeyin yerine örnek veri geçecek')
+            ? t('Bu plandaki her şeyin yerine örnek okul geçecek')
             : t('Örnek okul verisi yüklenecek'),
           body: holds
             ? t(
-                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 derslik örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.',
+                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.',
                 { kayip: cost },
               )
             : t(
-                '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.',
+                `25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.`,
               ),
           confirmLabel: holds ? t('Yerine koy') : t('Yükle'),
           danger: holds,
@@ -54,7 +54,7 @@ export function useLoadSample(): LoadSample {
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
       markIntroSeen();
-      notify(t('Örnek veri yüklendi.'));
+      notify(t('Örnek okul yüklendi.'));
       return true;
     },
     [confirm, notify, t],

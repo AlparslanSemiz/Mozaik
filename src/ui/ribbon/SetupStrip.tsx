@@ -6,7 +6,7 @@ import { Group, type StripContext } from './parts';
 
 export function setupStrip({ ui, state, t }: StripContext): React.ReactElement {
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul listeleri')}>
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul')}>
       <Group label="Liste">
         {STEPS.map((s) => {
           const count = s.count(state);

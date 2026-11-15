@@ -48,8 +48,8 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
 
 const LEVEL_LABEL: Record<RuleLevel, string> = {
   off: 'Kapalı',
-  warn: 'Uyar',
-  block: 'Engelle',
+  warn: 'Uyarı',
+  block: 'Engel',
 };
 
 export default function Rules({ state, change }: PanelProps) {
@@ -238,7 +238,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
           <p className="hint">
-            <T k="**Uyar** yalnız sayar, **Engelle** dersi o hücreye hiç bıraktırmaz." />
+            <T k="**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz." />
           </p>
           {/* A row per breach and no ceiling on how many there can be, so this
               is the box in this panel that gives ground: in a right rail the
@@ -261,7 +261,7 @@ export default function Rules({ state, change }: PanelProps) {
                     <tr key={v.key}>
                       <td>
                         <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
+                          {v.level === 'block' ? t('Engel') : t('Uyarı')}
                         </span>
                       </td>
                       <td>{v.message}</td>

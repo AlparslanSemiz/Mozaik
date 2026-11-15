@@ -62,23 +62,23 @@ export default function MailPanel({ state, ix, spans }: Props) {
       <h2>{t('E-postayla gönder')}</h2>
       <p className="hint">
         {t(
-          'Öğretmenin haftası e-posta programınızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
+          'Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
         )}
       </p>
       {/* Above the list: the row pressed may be the first of twenty-five. */}
       {said === 'istemci-yok' && (
         <div className="warn-box" role="status">
-          {t('Bu bilgisayarda seçili bir e-posta programı yok.')}
+          {t('Bu bilgisayarda seçili bir e-posta uygulaması yok.')}
         </div>
       )}
       {said === 'tarayici' && (
         <p className="hint" role="status">
-          {t('E-posta programı açılmadıysa bu bilgisayarda seçili bir e-posta programı yok.')}
+          {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
         </p>
       )}
       {said === 'olmadi' && (
         <div className="warn-box" role="status">
-          {t('E-posta programı açılamadı.')}
+          {t('E-posta uygulaması açılamadı.')}
         </div>
       )}
       <ul className="mail-list">

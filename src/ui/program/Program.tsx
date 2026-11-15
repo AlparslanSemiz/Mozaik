@@ -424,7 +424,7 @@ function Program({
       <>
         <div className="empty-screen">
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
-          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
+          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.')}

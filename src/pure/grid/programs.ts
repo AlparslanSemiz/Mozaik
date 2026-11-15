@@ -1,7 +1,7 @@
 import type { Id, ProgramVariant, State } from '../../leaf/model';
 
 export const DEFAULT_PROGRAM_ID = 'program-1';
-const DEFAULT_PROGRAM_NAME = 'Program 1';
+const DEFAULT_PROGRAM_NAME = 'Seçenek 1';
 
 export function blankProgram(
   id: Id = DEFAULT_PROGRAM_ID,
@@ -66,8 +66,8 @@ export function mapProgramGrids(
 export function nextProgramName(programs: readonly ProgramVariant[]): string {
   const used = new Set(programs.map((program) => program.name.trim().toLocaleLowerCase('tr')));
   let number = 1;
-  while (used.has(`program ${number}`.toLocaleLowerCase('tr'))) number++;
-  return `Program ${number}`;
+  while (used.has(`seçenek ${number}`.toLocaleLowerCase('tr'))) number++;
+  return `Seçenek ${number}`;
 }
 
 export function validProgramName(

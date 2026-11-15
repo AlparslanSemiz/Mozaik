@@ -145,7 +145,7 @@ export function useStore() {
 
   // Every save goes through here, so the answer reaches the screen. It used to
   // be dropped: with the storage full the autosave failed and the page said
-  // "Örnek veri yüklendi." over it (VK2, measured by the test session).
+  // "Örnek okul yüklendi." over it (VK2, measured by the test session).
   const [trouble, setTrouble] = useState<SaveTrouble>(null);
   const write = useCallback((id: Id, d: State) => {
     // A plan this copy could not read is on screen as an empty stand-in, and

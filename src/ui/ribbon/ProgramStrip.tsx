@@ -74,13 +74,13 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
     id: 'rahat',
     label: 'Rahat',
     icon: <Rows3 {...ICON} />,
-    why: 'Hücre geniş, ders saatleri görünür',
+    why: 'Hücre geniş, başlangıç saatleri görünür',
   },
   {
     id: 'sigdir',
     label: 'Sığdır',
     icon: <Minimize2 {...ICON} />,
-    why: 'Haftanın tamamı ekrana sığar, ders saatleri gizlenir',
+    why: 'Programın tamamı ekrana sığar, başlangıç saatleri gizlenir',
   },
 ];
 
@@ -108,10 +108,10 @@ export function programStrip({
 
   const askProgramName = async (initial: string, exceptId?: string) => {
     const name = await prompt({
-      title: t('Program adı'),
-      body: t('Aynı okul verilerini kullanan alternatif program için bir ad yazın.'),
+      title: t('Seçenek adı'),
+      body: t('Bu planın verilerini kullanan seçenek için bir ad yazın.'),
       defaultValue: initial,
-      inputLabel: t('Program adı'),
+      inputLabel: t('Seçenek adı'),
       confirmLabel: t('Kaydet'),
     });
     if (name === null) return null;
@@ -119,7 +119,7 @@ export function programStrip({
     if (clean !== null) return clean;
     await alert({
       title:
-        name.trim() === '' ? t('Program adı boş olamaz') : t('Bu program adı zaten kullanılıyor'),
+        name.trim() === '' ? t('Seçenek adı boş olamaz') : t('Bu seçenek adı zaten kullanılıyor'),
       tone: 'warn',
     });
     return null;
@@ -154,12 +154,12 @@ export function programStrip({
     if (state.programs.length <= 1) return;
     if (
       !(await confirm({
-        title: t('{ad} programı silinecek', { ad: currentProgram.name }),
+        title: t('{ad} seçeneği silinecek', { ad: currentProgram.name }),
         body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
           n: Object.keys(currentProgram.placements).length,
           s: Object.keys(currentProgram.pinned).length,
         }),
-        confirmLabel: t('Programı sil'),
+        confirmLabel: t('Seçeneği sil'),
         danger: true,
       }))
     )
@@ -167,7 +167,7 @@ export function programStrip({
     manageProgram((d) => removeProgram(d, currentProgram.id));
   };
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program')}>
       {/* Two positions, not one toggle: a single button saying "switch to the
           class view" tells you what the next click does, never where you are.
 
@@ -210,8 +210,8 @@ export function programStrip({
               disabled={pending === 0}
               title={
                 pending === 0
-                  ? t('Havuzda bekleyen ders yok')
-                  : t('Havuzdaki dersleri kurallara uyarak yerleştirir')
+                  ? t('Havuzda bekleyen kart yok')
+                  : t('Havuzdaki kartları kurallara uyarak dizer')
               }
               onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
             >
@@ -228,9 +228,9 @@ export function programStrip({
                     title: t('Dizilmiş {n} saatin tamamı silinecek', { n: placed }),
                     body:
                       pinnedHours === 0
-                        ? t('Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.')
+                        ? t('Program baştan dizilecek. Ctrl+Z ile geri alınabilir.')
                         : t(
-                            'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.',
+                            'Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.',
                             { n: pinnedHours },
                           ),
                     confirmLabel: t('Baştan diz'),
@@ -253,7 +253,7 @@ export function programStrip({
       {/* WHICH TIMETABLE — and everything that can be done to one — behind a
           SINGLE button.
 
-          It arrived as three controls (a `<select>`, "Kopyasını kaydet" and a
+          It arrived as three controls (a `<select>`, "Bu seçeneğin kopyası" and a
           "Yönet" menu) sitting at the head of the strip, and that was two
           problems in one. It displaced the view switch, and it put a second
           library selector three rows under the plan selector in the top bar —
@@ -264,10 +264,10 @@ export function programStrip({
           of them is a RadioGroup rather than a row of items, because picking
           one is a choice with a current answer, and Radix says so out loud
           (`aria-checked`) instead of leaving it to the tick. */}
-      <Group label="Program">
+      <Group label="Seçenek">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="btn" disabled={solver.running} title={t('Program seç ve yönet')}>
+            <button className="btn" disabled={solver.running} title={t('Seçenek seç ve yönet')}>
               <Library {...ICON} />
               <span className="ribbon-ellipsis">{currentProgram.name}</span>
             </button>
@@ -294,11 +294,11 @@ export function programStrip({
               <DropdownMenu.Separator className="menu-sep" />
               <DropdownMenu.Item className="menu-item" onSelect={() => void copyCurrent()}>
                 <Copy size={15} aria-hidden="true" />
-                {t('Kopyasını kaydet')}
+                {t('Bu seçeneğin kopyası')}
               </DropdownMenu.Item>
               <DropdownMenu.Item className="menu-item" onSelect={() => void createBlank()}>
                 <Plus size={15} aria-hidden="true" />
-                {t('Boş program oluştur')}
+                {t('Boş seçenek')}
               </DropdownMenu.Item>
               <DropdownMenu.Item className="menu-item" onSelect={() => void renameCurrent()}>
                 <Pencil size={15} aria-hidden="true" />
@@ -311,7 +311,7 @@ export function programStrip({
                 onSelect={() => void deleteCurrent()}
               >
                 <Trash2 size={15} aria-hidden="true" />
-                {t('Programı sil')}
+                {t('Seçeneği sil')}
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>

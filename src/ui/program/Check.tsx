@@ -40,7 +40,7 @@ const GROUPED: Record<Advice['code'], string> = {
   lessonNeedsMoreDays:
     '{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:',
   teacherManyBlockedDays:
-    '{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
+    '{n} öğretmenin müsait günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
   lessonManyBlocks:
     '{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:',
 };
@@ -76,7 +76,13 @@ function Section({
     <div className="panel" id={id}>
       <h2>{title}</h2>
       <p className="hint">{description}</p>
-      <CapacityRows rows={rows} empty={empty} problemsFirst colorOf={colorOf} />
+      <CapacityRows
+        rows={rows}
+        empty={empty}
+        problemsFirst
+        colorOf={colorOf}
+        openLabel={id === 'kontrol-ogretmenler' ? 'Müsait' : 'Açık'}
+      />
     </div>
   );
 }
@@ -125,7 +131,7 @@ export default function Check({ state, view }: Props) {
         <div className="panel">
           <div className="ok-box">
             {report.tight ? (
-              <T k="**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
+              <T k="**Sorun görünmüyor.** Bazı öğretmenlerin müsait saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
             ) : (
               <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
             )}
@@ -199,7 +205,7 @@ export default function Check({ state, view }: Props) {
         {placed < totalWanted && (
           <p className="hint">
             <T
-              k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz."
+              k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz."
               vars={{ n: totalWanted - placed }}
             />
           </p>
@@ -270,7 +276,7 @@ export default function Check({ state, view }: Props) {
                     <tr key={v.key}>
                       <td>
                         <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
+                          {v.level === 'block' ? t('Engel') : t('Uyarı')}
                         </span>
                       </td>
                       <td>{v.message}</td>
@@ -323,7 +329,7 @@ export default function Check({ state, view }: Props) {
           first question. */}
       {view === 'advisor' && (
         <div className="panel">
-          <h2>{t('Danışman uyarıları ({n})', { n: report.advice.length })}</h2>
+          <h2>{t('Danışman notları ({n})', { n: report.advice.length })}</h2>
           <p className="hint">
             {t('Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.')}
           </p>
@@ -345,7 +351,7 @@ export default function Check({ state, view }: Props) {
                   {adviceRows(report.advice).map((group) => (
                     <tr key={group[0]!.key}>
                       <td>
-                        <span className="badge tight">{t('Öneri')}</span>
+                        <span className="badge tight">{t('Not')}</span>
                       </td>
                       <td>
                         {group.length === 1 ? (
