@@ -19,6 +19,9 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- The site is moving to its own address, mozaik.alparslansemiz.com. A copy opened at the old address says so once the new one answers, and "Move plans" copies every plan there; the new address asks before it puts them in place, and nothing is deleted at the old one. If the new address cannot take them, all plans are saved to a plan file instead.
+- The "Save to file" button's tooltip says when the last plan file was saved. In a browser that does not write to a chosen folder, one strip appears when changes have gone a week without a plan file; "Later" hides it for the session.
+
 - "Getting started" on the School tab is now a checklist of nine steps, from the school's name, days and bell times to printing. Each step ticks itself from the plan and has a button that takes you there; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next step, can be closed, and goes away by itself when every step is done. It no longer disappears when the first teacher is added.
 - Lessons warns while you enter them when a class or teacher gets more lesson hours than open hours ("9A: 54 lesson hours, 48 open hours. 6 hours do not fit the week."), and the class or teacher is marked red in the list on the right.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
@@ -65,6 +68,10 @@ release is incomplete, the entry says so.
 - Mozaik answers faster on a slow computer. Dropping a card or undoing now shows the move on the grid at once and updates the tray, the counts and the status chip a moment later, instead of freezing for a quarter of a second. Opening Print shows the first pages at once and adds the rest while you look (printing still gets every page). Durdur stops a run at once; the end of an automatic run shows the week before the search for suggestions starts. Typing in the teacher and lesson search boxes no longer waits for the list.
 
 ### Fixed
+
+- On the site, Mozaik asks the browser to keep its storage (`persist`) after the first real change, so it is not cleared when space runs low or, in Safari, after a week without a visit.
+- A site update could store the previous version under the new version's name for up to ten minutes; the service worker now asks past the browser's cache.
+- Saving a plan file could fail in some Safari versions, because the file's address was released in the same moment as the click.
 
 - Check counted a lesson on closed hours once per hour, so one two-hour lesson read "2 lessons" in the heading and in the top bar.
 - Closing a dialog (search, keyboard shortcuts, a question, a teacher's or class's panel, a lesson's window) with Esc or a button puts the keyboard back where it was, on the button or card that opened it, instead of at the top of the page. If that is gone, the keyboard lands in the screen's content.

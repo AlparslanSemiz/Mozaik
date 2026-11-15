@@ -65,6 +65,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
+5. Sitenin alt alan adı (2026-11-16, `web/kalicilik`, birleşmedi): DNS kaydı, Pages'in özel
+   alan adı, `ders-programi` deposunda eski adres sayfası ve sonra `yeniAdresAcik`; sıra
+   [BUILD.md](BUILD.md) "Alan adına geçiş"te.
 5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
    imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
 
@@ -143,6 +146,43 @@ src/kontrat.test.ts src/surum.test.ts` yeşil, `npx tsc --noEmit -p .` 0, dokunu
 
 ---
 
+
+## 2026-11-16 · Web kalıcılığı ve alt alan adına geçiş (`web/kalicilik`)
+
+Web denetiminin (Chromium'da doğrulanmış) beş bulgusu ve Alp'in kararı: site
+`mozaik.alparslansemiz.com`'a taşınıyor (DECISIONS 2026-11-16).
+
+- `persist()` hiç istenmiyordu, canlı site `persisted: false`. Sitede iş taşıyan ilk
+  değişiklikte bir kez isteniyor (`persist.ts`).
+- Son plan dosyasının tarihi Dosyaya kaydet'in ipucunda; klasöre yazılmayan tarayıcıda bir
+  haftalık kaydedilmemiş değişiklik tek şerit (`fileSaved.ts`, yeni anahtar
+  `ders-programi-son-dosya`).
+- `sw.js` kabuğu `cache: 'reload'`, tazelemeyi `cache: 'no-cache'` ile istiyor
+  (`src/sw.test.ts` dosyayı sahte `self` ile koşuyor; site süiti istek kipini göremiyor).
+- `download.ts` blob adresini 30 s sonra bırakıyor (`temel.spec.ts` gerilemesi: tıklamadan
+  sonra adres okunuyor).
+- `/ders-programi/` için kendini silen sayfa `site/eski-adres/`; yayını Alp yapacak.
+- Taşıma: `move.ts` (el sıkışma), `useMove.ts`, `openBundle.ts` (Tümünü dosyadan aç'tan
+  ayrıldı), yoklama `vite.site.config.ts`'te. `tasima.spec.ts` iki gerçek kökeni Playwright
+  yönlendiricisiyle `dist-site`'tan sunuyor: evet, vazgeç, yabancı köken, cevap yok.
+
+İnceleme (taze bağlamlı alt ajan) dokuz bulgu verdi, yedisi düzeldi: eski `/ders-programi/`
+sayfası yönlendirmeyi körü körüne izleyip planları eski kökende bırakıyordu (artık yeni adres
+cevap verince kendisi taşıyor); depo dolup bir kısmı yazılamayan taşıma "taşındı" diyordu
+(`eksik`, dosyaya da iner); cevapsız kalan pencereden sonra düğme gizli kalıyordu; üst üste
+gelen iki soru ilkini sonsuza dek bekletiyordu (`Dialogs.tsx`, ilki "hayır" sayılıyor);
+yoklamanın olayı efektten önce gelirse kaçıyordu; `?tasima=1` her kökende dinleniyordu (artık
+yalnız yeni kökende). Bırakılanlar: ikinci taşımada hangi tarafın yeni olduğunu söylemek (soru
+zaten sayıyor) ve bir nonce (aynı kökendeki bir sayfa kendi akışını başlatabildiği için
+kazancı az).
+
+Boyut: ham 1 316 168 B (sınır 1 320 000; `main`'deki Mac işiyle birlikte), brotli 304,83 kB
+(sınır 306 000). Koşulanlar: `tipler`, e2e `tsc`, `lint`, `prettier --check`, `sinir`, `knip`,
+`npm run hizli` (68 dosya yeşil), `npx vite build`, `npm run boyut`, site süiti `--workers=2`
+(30/30, `tasima.spec.ts` dahil), `temel`, `planlar`, `ayarlar` (99/99), önceden `metin`,
+`kabuk`, `surum`, `dil`. `scripts/agir.sh` bu Mac'te `flock` olmadığı için çalışmadı;
+Playwright kilitsiz, `--workers=2` ile koştu. Koşulmayanlar: ana E2E süitinin geri kalanı,
+WebKit, Firefox (persist'in sorusu elle görülmedi).
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
 

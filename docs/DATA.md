@@ -198,6 +198,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-baski` | kâğıt seçenekleri, tek bir JSON kaydı |
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 | `ders-programi-oneri-olcum` | bu makinedeki son 20 öneri aramasının ölçümü (`relaxLog.ts`) |
+| `ders-programi-son-dosya` | son plan dosyasının zamanı ve ondan sonraki ilk değişikliğin zamanı, tek bir JSON kaydı (`fileSaved.ts`) |
 
 Bu listenin tamamı Ayarlar → Hakkında'daki "Veriler nerede" tablosunda görünür, ve
 satırları `storageReport.ts` üretir, tercihlerinkini
@@ -210,6 +211,19 @@ her `ders-programi*` anahtarını o tabloda arar. Yeni bir tercih anahtarı
 Yalnız bir oturumu ilgilendiren bir tercih `sessionStorage`'a gider ve bu satır
 borcunu doğurmaz. Güncelleme şeridinin `Sonra`'sı böyle: o oturumda bir daha
 sorulmaz.
+
+Son plan dosyasının kaydı (`ders-programi-son-dosya`) üst çubuğun ve Ayarlar'ın iki
+dosyasında da yazılır. Tarihi Dosyaya kaydet'in ipucunda görünür; seçilmiş bir klasöre
+yazılmayan bir tarayıcıda (Firefox, Safari, ya da klasör seçmemiş Chromium) dosyadan sonraki
+ilk değişiklik bir haftayı geçince tek bir şerit çıkar, `Sonra` onu o oturum için kapatır.
+Sitede iş taşıyan ilk değişiklikte bir kez `navigator.storage.persist()` istenir
+(`persist.ts`).
+
+Depo kökene bağlı: aynı tarayıcıda `alparslansemiz.github.io` ile
+`mozaik.alparslansemiz.com` iki ayrı depo. Eski adresten yeni adrese geçiş planları bir
+paket olarak kopyalar ve yeni adres Tümünü dosyadan aç'ın sorusuyla sorar
+(`move.ts`, [BUILD.md](BUILD.md) "Alan adına geçiş"); eski adresteki anahtarlar yerinde
+kalır.
 
 Seçilen klasörün tutamağı localStorage'da değil `IndexedDB['ders-programi-klasor']`'da,
 çünkü bir `FileSystemDirectoryHandle` string değil ve onu saklayabilen yol structured

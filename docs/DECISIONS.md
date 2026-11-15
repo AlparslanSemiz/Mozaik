@@ -36,6 +36,30 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Site kendi alt alan adına, planlar sorulup taşınır (`web/kalicilik`)
+
+**Karar (Alp, 2026-11-16).** Web sürümü `https://mozaik.alparslansemiz.com/`'a taşınıyor
+(TODO'daki "Sitenin kökeni GitHub Pages depolarınla ortak" sorusunun (a) seçeneği). Gerekçe
+kökenin kendisi: `alparslansemiz.github.io` o hesabın bütün Pages sayfalarıyla ortak ve
+localStorage kökene bağlı, yani başka bir depo Mozaik'in planlarını okuyabilir ya da
+silebilirdi. DNS kaydını ve Pages'in özel alan adını Alp kurar ([BUILD.md](BUILD.md), "Alan
+adına geçiş").
+
+**Taşıma.** Yeni köken boş başlar, o yüzden eski kökendeki kopya planları kendisi taşır: yeni
+adres cevap verince bir şerit, **Planları taşı** yeni adresi açar ve paketi `postMessage` ile
+verir. Köken iki yönde de açıkça yazılı (hiçbir yerde `'*'` yok), kaynak açılan ya da açan
+pencere, şekil sıkı; paket Tümünü dosyadan aç'ın okuyucusundan ve sorusundan geçer, yani bir
+yabancının verdiği dosyadan fazla güvenilmez. Yeni adres sormadan yazmaz; eski adresteki veri
+silinmez; pencere cevap vermezse planlar plan dosyasına iner. Taşımanın açılıp açılmayacağı
+derleme anahtarına bağlanmadı, çünkü Pages eski yolu yönlendirdiği anda oradaki kopya bir daha
+güncellenemez: kod ondan önce yayında olmalı ve yeni adresin cevap verdiğini kendisi
+öğrenmeli. Bu yoklama yalnız site derlemesinde; çift tıklanan dosyada `fetch` yok.
+
+**Aynı turda (web denetimi).** `persist()` sitede bir kez istenir; son plan dosyasının tarihi
+görünür ve klasörü olmayan bir tarayıcıda bir haftalık kaydedilmemiş değişiklik tek bir şerit
+çıkarır; service worker kabuğu HTTP önbelleğinin arkasından ister; indirmenin blob adresi 30 s
+yaşar; `/ders-programi/` için kendini silen bir sayfa (`site/eski-adres/`).
+
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 
 **Karar (Alp, 2026-11-16).** Babanın programı Windows'ta ve sitede; Mac ikinci sırada. `surum.yml`'in
