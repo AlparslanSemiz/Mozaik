@@ -22,6 +22,8 @@
     package here would become a second chunk that vite-plugin-singlefile does
     not inline, and "tek dosya" is the whole delivery. */
 type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
+/** The same `invoke`, with a raw body: Tauri passes a Uint8Array through as bytes. */
+type RawInvoke = <T>(cmd: string, body: Uint8Array) => Promise<T>;
 
 declare global {
   interface Window {
@@ -181,4 +183,39 @@ export function desktopSelfUpdates(): Promise<boolean> {
 /** Puts the downloaded program in place and restarts onto it. */
 export function desktopApply(): Promise<void> {
   return bridge()<void>('apply_update');
+}
+
+// ------------------------------------------------------------- CP-SAT
+
+/**
+ * Whether this exe can answer the suggestion search with OR-Tools CP-SAT: the
+ * installer put the library next to it (src-tauri/src/cpsat.rs). No for the
+ * page in a browser, the standalone exe, an older exe and the test double.
+ */
+export function desktopCpsatVar(): Promise<boolean> {
+  if (!isDesktop()) return Promise.resolve(false);
+  return bridge()<boolean>('cpsat_var').then(
+    (answer) => answer === true,
+    () => false,
+  );
+}
+
+/**
+ * One CP-SAT question, raw bytes both ways (pure/relax/cpsat.ts writes and
+ * reads them). The body is the params' length, the params, then the model:
+ * the shape `cpsat::ayir` splits.
+ */
+export async function desktopCpsatCoz(params: Uint8Array, model: Uint8Array): Promise<Uint8Array> {
+  const body = new Uint8Array(4 + params.length + model.length);
+  new DataView(body.buffer).setUint32(0, params.length, true);
+  body.set(params, 4);
+  body.set(model, 4 + params.length);
+  const raw = bridge() as unknown as RawInvoke;
+  const out = await raw<ArrayBuffer | number[]>('cpsat_coz', body);
+  return out instanceof ArrayBuffer ? new Uint8Array(out) : Uint8Array.from(out);
+}
+
+/** Stops the question being solved; its best week so far still comes back. */
+export function desktopCpsatDurdur(): Promise<void> {
+  return bridge()<void>('cpsat_durdur').catch(() => undefined);
 }

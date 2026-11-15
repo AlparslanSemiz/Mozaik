@@ -25,7 +25,8 @@ export {
 } from './options';
 export { applyRelaxations, applySuggestion, verifySuggestion } from './verify';
 export { sameChanges, outdone } from './reading';
-export { createRelaxer, suggest } from './search';
+export { createRelaxer, createCpRelaxer, suggest, type CpAsk, type CpRelaxer } from './search';
+export { cpParams, readAnswer, type CpAnswer } from './cpsat';
 export {
   suggestionParts,
   suggestionLines,

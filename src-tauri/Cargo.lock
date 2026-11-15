@@ -717,6 +717,7 @@ dependencies = [
 name = "ders-programi"
 version = "2.2.0"
 dependencies = [
+ "libloading",
  "reqwest",
  "serde",
  "serde_json",

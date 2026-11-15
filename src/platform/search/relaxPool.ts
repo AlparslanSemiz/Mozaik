@@ -20,7 +20,12 @@
 // here in slices. WebView2 on Windows could not be measured from this machine.
 
 import {
+  type CpAnswer,
+  type CpRelaxer,
+  cpParams,
+  createCpRelaxer,
   createRelaxer,
+  readAnswer,
   type RelaxFamily,
   type RelaxOptions,
   type RelaxProgress,
@@ -29,6 +34,7 @@ import {
   type Suggestion,
 } from '../../pure/relax';
 import type { Id, State } from '../../leaf/model';
+import { desktopCpsatCoz, desktopCpsatDurdur, desktopCpsatVar, isDesktop } from '../exe';
 import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */
@@ -150,6 +156,97 @@ export function startRelax(
 }
 
 function startOn(
+  base: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+): Relaxer {
+  if (isDesktop()) return cpsatOr(base, hint, options, () => onWorkers(base, hint, options));
+  return onWorkers(base, hint, options);
+}
+
+/**
+ * The exe with OR-Tools CP-SAT next to it: the same search, every question
+ * answered by the library on its own thread (src-tauri/src/cpsat.rs). Without
+ * the library, or the first time it fails, `otherwise` -- the workers, or the
+ * main thread -- runs the search as before. Driven the same way from outside:
+ * `step` returns null until the answer is there.
+ */
+function cpsatOr(
+  base: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+  otherwise: () => Relaxer,
+): Relaxer {
+  const t0 = performance.now();
+  const families = options.families ?? DEFAULT_FAMILIES;
+  const budgetMs = options.budgetMs ?? 120_000;
+  let cp: CpRelaxer | null = null;
+  let inner: Relaxer | null = null;
+  let finished: RelaxResult | null = null;
+  let cancelled = false;
+  const fallBack = () => {
+    if (finished === null && inner === null && !cancelled) inner = otherwise();
+  };
+
+  const run = async () => {
+    if (!(await desktopCpsatVar()) || cancelled) return fallBack();
+    mark(0);
+    if (typeof document !== 'undefined') document.documentElement.dataset['oneriMotor'] = 'cpsat';
+    cp = createCpRelaxer(base, hint, options);
+    const workers = typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4);
+    let answer: CpAnswer | undefined;
+    for (;;) {
+      const step = cp.next(answer);
+      if ('done' in step) {
+        finished = step.done;
+        return;
+      }
+      const seconds = Math.max(1, (budgetMs - (performance.now() - t0)) / 1000);
+      const bytes = await desktopCpsatCoz(cpParams({ workers, seconds }), step.ask.bytes);
+      // Cancelled while the library answered: `cancel` already returned what was found.
+      if (cancelled) return;
+      answer = readAnswer(bytes);
+    }
+  };
+  run().catch(() => {
+    cp = null;
+    fallBack();
+  });
+
+  return {
+    step(sliceMs: number): RelaxResult | null {
+      if (finished !== null) return finished;
+      if (inner !== null) return inner.step(sliceMs);
+      return null;
+    },
+    progress(): RelaxProgress {
+      if (inner !== null) return inner.progress();
+      if (cp !== null) return cp.progress();
+      return {
+        family: families[0] ?? 'teacherHours',
+        stage: 'building',
+        finished: [],
+        suggestions: [],
+        elapsedMs: performance.now() - t0,
+      };
+    },
+    cancel(): RelaxResult {
+      if (finished !== null) return finished;
+      if (inner !== null) return inner.cancel();
+      cancelled = true;
+      void desktopCpsatDurdur();
+      finished = cp?.cancel() ?? {
+        phase: 'cancelled',
+        suggestions: [],
+        elapsedMs: performance.now() - t0,
+        rejected: 0,
+      };
+      return finished;
+    },
+  };
+}
+
+function onWorkers(
   base: State,
   hint: Readonly<Record<string, Id>>,
   options: Partial<RelaxOptions>,

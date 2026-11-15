@@ -54,6 +54,11 @@ reqwest = { version = "0.13", default-features = false, features = ["native-tls"
 # it); listed here because `derive` is used directly.
 serde = { version = "1", features = ["derive"] }
 
+# Loads OR-Tools' CP-SAT (cpsat.rs) when the installer put it next to the
+# program, and only then: a missing library is a sentence, not a program that
+# will not start. Already in the lock at this version (a tauri dependency).
+libloading = "0.7"
+
 [dev-dependencies]
 # update.rs's test that a 2.2.0 copy still reads the new manifest. Already in
 # the lock (tauri depends on it); tests only, nothing reaches the exe.
