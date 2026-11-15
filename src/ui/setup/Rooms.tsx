@@ -3,17 +3,18 @@
 
 import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
-import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
+import { addRoom, deletionNotice, deleteRoom, updateRoom } from '../../pure/entities';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { useDialogs, type PanelProps, useT } from '../common';
+import { moveFocusFromDeleted, type PanelProps, useT, useToast, useUndoIf } from '../common';
 import { parseRooms } from '../../pure/io';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import { roomListConfig } from '../../pure/lists';
 
 export default function Rooms({ state, change }: PanelProps) {
   const t = useT();
-  const { confirm } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
@@ -158,18 +159,17 @@ export default function Rooms({ state, change }: PanelProps) {
                         </button>
                         <button
                           className="btn danger"
-                          onClick={async () => {
-                            const q = deletionQuestion(state, 'room', r.id);
-                            if (
-                              !(await confirm({
-                                title: q.title,
-                                body: q.cost,
-                                confirmLabel: 'Sil',
-                                danger: true,
-                              }))
-                            )
-                              return;
-                            change((d) => deleteRoom(d, r.id));
+                          onClick={(e) => {
+                            // No question since SD1: the deletion happens, and
+                            // its notice names the classes that lost the room.
+                            const said = deletionNotice(state, 'room', r.id);
+                            const next = deleteRoom(state, r.id);
+                            moveFocusFromDeleted(e.currentTarget);
+                            change((d) => (d === state ? next : deleteRoom(d, r.id)), said);
+                            notify(said, 'info', {
+                              label: t('Geri al'),
+                              run: () => undoIf(next),
+                            });
                           }}
                         >
                           {t('Sil')}

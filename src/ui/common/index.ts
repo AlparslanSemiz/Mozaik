@@ -12,6 +12,7 @@ export * from './Dialogs';
 export * from './Toasts';
 export * from './Undo';
 export { useReturnFocus } from './returnFocus';
+export * from './deleteFocus';
 export { default as Field } from './Field';
 export { default as LimitBox } from './LimitBox';
 export { default as ColorPick } from './ColorPick';

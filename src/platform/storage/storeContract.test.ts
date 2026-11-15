@@ -138,14 +138,22 @@ describe('sözleşme · geri al yığını', () => {
     expect(cur.past[0]?.settings.schoolName).toBe(String(60 - cap));
   });
 
-  it('program değişikliği, yükleme ve plan geçişi geçmişi TEMİZLİYOR', () => {
+  it('yükleme ve plan geçişi geçmişi TEMİZLİYOR', () => {
     const one = reduce(box(emptyState()), { type: 'change', apply: () => named('A') });
-    expect(reduce(one, { type: 'program-change', apply: () => named('B') }).past).toEqual([]);
     expect(reduce(one, { type: 'load', state: named('C') }).past).toEqual([]);
     const switched = reduce(one, { type: 'switch', id: 'p2', state: named('D') });
     expect(switched.past).toEqual([]);
     expect(switched.future).toEqual([]);
     expect(switched.planId).toBe('p2');
+  });
+
+  // Since 2026-11-15: a seçenek change is an ordinary step. The history holds
+  // whole states, so nothing is replayed into another seçenek (undo.ts).
+  it('seçenek değişikliği geçmişi TUTUYOR ve bir adım ekliyor', () => {
+    const one = reduce(box(emptyState()), { type: 'change', apply: () => named('A') });
+    const two = reduce(one, { type: 'program-change', apply: () => named('B') });
+    expect(two.past).toHaveLength(2);
+    expect(reduce(two, { type: 'undo' }).present).toBe(one.present);
   });
 });
 
@@ -679,5 +687,31 @@ describe('sözleşme · React kancası', () => {
     });
     expect(store.state.settings.schoolName).not.toBe('Yazıldı');
     input.remove();
+  });
+
+  // Where the focus lands when a deletion empties a list (deleteFocus.ts):
+  // an EMPTY add box has nothing of its own to undo, so Ctrl+Z is the plan's.
+  it('boş ekleme kutusunda Ctrl+Z planı geri alıyor, dolu olanda almıyor', () => {
+    mount();
+    act(() => store.change(() => named('Yazıldı')));
+    const panel = document.createElement('div');
+    panel.className = 'add-panel-body';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = 'A';
+    panel.appendChild(input);
+    document.body.appendChild(panel);
+    const press = () =>
+      act(() => {
+        input.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }),
+        );
+      });
+    press();
+    expect(store.state.settings.schoolName).toBe('Yazıldı');
+    input.value = '';
+    press();
+    expect(store.state.settings.schoolName).not.toBe('Yazıldı');
+    panel.remove();
   });
 });

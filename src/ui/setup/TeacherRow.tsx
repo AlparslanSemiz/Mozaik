@@ -21,12 +21,12 @@ import {
 } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { ColorPick, LimitBox, useT, useToast, useUndoIf } from '../common';
+import { ColorPick, LimitBox, moveFocusFromDeleted, useT, useToast, useUndoIf } from '../common';
 import { GENDERS } from './genders';
 
 interface Props {
   state: State;
-  change: (fn: (d: State) => State) => void;
+  change: (fn: (d: State) => State, label?: string) => void;
   teacher: Teacher;
   /** The drag handle cell, from `useRowOrder`. */
   grip: ReactNode;
@@ -257,12 +257,14 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
           </button>
           <button
             className="btn danger"
-            onClick={() => {
+            onClick={(e) => {
               // No question since SD1: the deletion happens, and its notice
               // says what went with it and offers "Geri al".
+              const said = deletionNotice(state, 'teacher', teacher.id);
               const next = deleteTeacher(state, teacher.id);
-              change((d) => (d === state ? next : deleteTeacher(d, teacher.id)));
-              notify(deletionNotice(state, 'teacher', teacher.id), 'info', {
+              moveFocusFromDeleted(e.currentTarget);
+              change((d) => (d === state ? next : deleteTeacher(d, teacher.id)), said);
+              notify(said, 'info', {
                 label: t('Geri al'),
                 run: () => undoIf(next),
               });

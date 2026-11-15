@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
 import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
-import { UndoIfProvider, useDialogs, useToast, useLang, useT } from '../common';
+import { UndoIfProvider, useAnnounce, useDialogs, useToast, useLang, useT } from '../common';
 import { useStore, storageWorks, useFolder } from '../../platform/storage';
 import {
   useToolState,
@@ -39,14 +39,18 @@ import { openPlanFile } from './openPlanFile';
 
 export default function App() {
   const t = useT();
+  const announce = useAnnounce();
   const {
     state,
     change,
     manageProgram,
+    viewProgram,
+    peek,
     undo,
     undoIf,
     redo,
     loadState,
+    replaceState,
     canUndo,
     canRedo,
     plans,
@@ -54,7 +58,7 @@ export default function App() {
     saveTrouble,
     unreadable,
     setAside,
-  } = useStore();
+  } = useStore(announce);
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -130,7 +134,7 @@ export default function App() {
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
-  const solver = useSolver(change);
+  const solver = useSolver(change, peek);
   // The folder my father picked, if he picked one (task B4). Here for the
   // same reason as the solver: a pending write must not die because a tab
   // changed. It works on EVERY route in Chromium — file:// included, where
@@ -266,6 +270,7 @@ export default function App() {
             state={state}
             change={change}
             manageProgram={manageProgram}
+            viewProgram={viewProgram}
             solver={solver}
             programMask={programMask}
             setProgramMask={setProgramMask}
@@ -390,7 +395,7 @@ export default function App() {
                   <Settings
                     state={state}
                     change={change}
-                    loadState={loadState}
+                    replaceState={replaceState}
                     plans={plans}
                     folder={folder}
                     update={update}

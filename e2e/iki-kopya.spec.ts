@@ -84,7 +84,6 @@ test.describe('iki kopya · bayat pencere ötekinin işini silmiyor (VK1)', () =
     await openSetup(a, 'Derslikler');
     const once = await savedText(a);
     await mainList(a).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await answerDialog(a);
     await expect.poll(() => savedText(a), { timeout: 5_000 }).not.toBe(once);
     const aninKaydi = await savedText(a);
 

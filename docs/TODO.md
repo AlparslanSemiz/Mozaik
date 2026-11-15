@@ -37,7 +37,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    `zebra-liste`'de bitti: açık temada soluk yazı zebrada 6,65'e düşmüştü, dört liste
    zebrasızdı, iki yerde şerit sırası bozuktu. Şimdi her listede, iki temada aynı yükte,
    satırda yazı her zeminde ve durumda 7:1 (DESIGN Renk ve Erişilebilirlik,
-   `e2e/zebra.spec.ts` 94). İki istisna E1'de (§8e). Windows ve WebView2'de görülmedi.
+   `e2e/zebra.spec.ts` 94). Kalan tek istisna ("Sil") E1'de (§8e). Windows ve WebView2'de görülmedi.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -1394,7 +1394,11 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       meselesi değil (`styles.css`), yani çare yeniden aramak: `--ok`, `--warn` ve `--bad`
       ya da rozet mürekkebi için 7:1 ve işlevsel renkler arası ΔE kısıtıyla,
       `scripts/bolum-renk.mjs` gibi bir betikle. Bitince `e2e/zebra.spec.ts` 94'teki
-      istisna (`.badge`, `.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      istisna (`.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      → Rozetler yapıldı (2026-11-15, `erisim/gorsel`): işlevsel renkler aynı kaldı, kendi
+      zeminlerindeki yazı için ayrı mürekkep (`--ok-ink`, `--warn-ink`, `--bad-ink`, açık
+      temada 7,47 · 7,63 · 7,20), rozet, sağlık çipi ve sebep çubuğunda; `.badge` istisnası
+      kalktı. Kalan: "Sil" (6,84) ve dağılım seçicisinin gerekçe satırı (5,54).
 
 ### 8f · Test stratejisinden sıraya konanlar (2026-09-12)
 
@@ -1997,18 +2001,21 @@ yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâ�
 panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
 `.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
 
-- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Yapıldı (2026-11-15,
-      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt` sormuyor,
-      bildirim 8 s ve "Geri al" (`undo-if`: yalnız kendi adımı tepedeyken). Kalan: `Baştan diz`
-      hâlâ soruyor, çünkü sonucu çözücü bitince ayrı bir adım; KS26 (30 adımlık tavan) açık. Ders silme
-      (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
-      sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
-      `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın
-      başka bir düzenlemede ilerler; yanlış değişikliği sessizce geri alan bir düğme hiç
-      olmamasından kötü"). Önce yığının bir adımını kimlikle bilmek (bildirimin düğmesi yalnız
-      o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
-      (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
-      Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
+- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** İlk dilim (2026-11-15,
+      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt`
+      sormuyor, bildirim "Geri al" taşıyor (`undo-if`: yalnız kendi adımı tepedeyken). İkinci
+      dilim (2026-11-15, `erisim/geri-al`, birleşmedi, klavye ve okuma denetimi): sınıf, derslik,
+      kullanılmayan branş ve seçenek silme, `Baştan diz` sormuyor; `Her şeyi sil` tek soru sorup
+      geri alınabilen bir adım oluyor ("Son kez soruyorum" gitti), dolu planın yerine örnek okul
+      da öyle. Bildirim 10 s, fare üstünde ya da odak içindeyken süresi duruyor; yalnız en yeni
+      bildirim "Geri al" taşıyor, o da arada başka bir değişiklik olduysa bunu söylüyor. `Sil`'den
+      sonra odak sonraki (son satırda önceki, liste boşsa ekleme kutusuna) satırın `Sil`'ine
+      gidiyor, bildirim ekran okuyucuya "Geri almak için Ctrl+Z" diyor, Ctrl+Z "Geri alındı: …"
+      diyor. Seçenek değiştirmek geri al geçmişini artık silmiyor ve kendisi bir adım değil (geçmiş
+      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
+      `Dosyadan aç` geçmişi hâlâ siliyor (bilerek, soru soruyor); bildirime klavyeyle doğrudan
+      gidecek bir kısayol yok (F6 tarayıcının; odak `Geri al`dan sonra geldiği yere dönüyor);
+      Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol edilmez" diyor.
 - [x] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Bitti (2026-11-15,
       `kullanim/sikisik`, Alp: "her düzeltmeyi yap"): öneri uygulandı, sınıfta `classCapacityLevel`,
       liste süzgeci satırın kendi seviyesini okuyor. "Haftanın doluluğu" satırları duruyor (ayrı karar). Tam dolu kursta 20

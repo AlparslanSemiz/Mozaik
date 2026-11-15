@@ -32,7 +32,7 @@ import { LessonPicker } from './LessonPicker';
 
 interface Props {
   state: State;
-  change: (fn: (d: State) => State) => void;
+  change: (fn: (d: State) => State, label?: string) => void;
   mode: LessonMode;
   focus: Id;
   setFocus: (next: Id) => void;

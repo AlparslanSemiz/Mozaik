@@ -23,9 +23,12 @@ export interface RibbonProps {
   open: boolean;
   state: State;
   /** Only the strip's own destructive action needs it: "Programı boşalt". */
-  change: (fn: (d: State) => State) => void;
-  /** Program boundaries deliberately clear undo/redo history. */
-  manageProgram: (fn: (d: State) => State) => void;
+  change: (fn: (d: State) => State, label?: string) => void;
+  /** The seçenek list: switch, add, rename, delete. Each is a step of the
+      history since 2026-11-15; `label` names it for the undo's announcement. */
+  manageProgram: (fn: (d: State) => State, label?: string) => void;
+  /** Another seçenek on screen: not a step of the history (undo.ts, `view`). */
+  viewProgram: (fn: (d: State) => State) => void;
   solver: SolverRun;
   programMask: ProgramMask;
   setProgramMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
@@ -57,7 +60,7 @@ export interface StripContext extends RibbonProps {
   dialogs: ReturnType<typeof useDialogs>;
   /** A notice, and the undo its "Geri al" button runs (SD1). */
   notify: ReturnType<typeof useToast>;
-  undoIf: (expected: PlanState) => void;
+  undoIf: (expected: PlanState) => boolean;
   /** The Program strip's counts, memoised in `index.tsx`; null on every other tab. */
   strip: StripCounts | null;
 }
