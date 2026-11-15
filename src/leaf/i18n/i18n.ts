@@ -130,8 +130,56 @@ export function registerSozluk(dil: Dil, sozluk: Sozluk): void {
   SOZLUKLER[dil] = sozluk;
 }
 
+/**
+ * Between two sentences in a packed dictionary. Must equal `PAKET_AYIRAC` in
+ * `scripts/sozluk-paket.mjs`, which refuses a dictionary that contains it.
+ */
+export const PAKET_AYIRAC = '~';
+
+/** Packed dictionaries not yet asked for: the shared keys and this language's values. */
+const PAKETLER: Partial<Record<Dil, readonly [string, string]>> = {};
+
+/**
+ * What the BUILT file registers instead of `registerSozluk` (the build's
+ * `sozlukPaketi` plugin writes the call; the source never does): the Turkish
+ * sentences once, shared by all four, and this language's translations in the
+ * same order. Nothing is split until the language is first used.
+ *
+ * @public
+ */
+export function registerPaket(dil: Dil, keys: string, values: string): void {
+  PAKETLER[dil] = [keys, values];
+  delete SOZLUKLER[dil];
+}
+
+/** The split key string, kept because all four languages share the same one. */
+let keyCache: { packed: string; keys: string[] } | null = null;
+
+/** Turns a packed dictionary back into the object its source file declares. */
+export function unpackSozluk(packedKeys: string, packedValues: string): Sozluk {
+  if (keyCache?.packed !== packedKeys) {
+    keyCache = { packed: packedKeys, keys: packedKeys.split(PAKET_AYIRAC) };
+  }
+  const keys = keyCache.keys;
+  const values = packedValues.split(PAKET_AYIRAC);
+  const sozluk: Sozluk = {};
+  for (let i = 0; i < keys.length; i++) {
+    const value = values[i];
+    // Empty is a key this language has no translation for: it stays Turkish.
+    if (value !== undefined && value !== '') sozluk[keys[i]!] = value;
+  }
+  return sozluk;
+}
+
 export function sozlukOf(dil: Dil): Sozluk | undefined {
-  return SOZLUKLER[dil];
+  const ready = SOZLUKLER[dil];
+  if (ready !== undefined) return ready;
+  const paket = PAKETLER[dil];
+  if (paket === undefined) return undefined;
+  const sozluk = unpackSozluk(paket[0], paket[1]);
+  SOZLUKLER[dil] = sozluk;
+  delete PAKETLER[dil];
+  return sozluk;
 }
 
 // ------------------------------------------------------------ the language
@@ -194,7 +242,7 @@ function isOne(dil: Dil, n: number): boolean {
  * the wrong thing.
  */
 export function translate(dil: Dil, key: string, vars?: Vars): string {
-  const phrase = (dil === 'tr' ? undefined : SOZLUKLER[dil]?.[key]) ?? key;
+  const phrase = (dil === 'tr' ? undefined : sozlukOf(dil)?.[key]) ?? key;
   if (vars === undefined) return phrase;
   return phrase.replace(SLOT, (whole, name: string, forms: string | undefined) => {
     if (!(name in vars)) return whole;
