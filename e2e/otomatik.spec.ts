@@ -82,7 +82,7 @@ test.describe('22. Otomatik dizme', () => {
     // The question counts what is about to go — "426 saatin tamamı", not
     // "the timetable". That number is the whole reason it is asked.
     expect(asked).toMatch(/Dizilmiş \d+ saatin tamamı silinecek/);
-    expect(asked).toContain('sıfırdan dizilecek');
+    expect(asked).toContain('baştan dizilecek');
     expect(asked).toContain('Ctrl+Z ile geri alınabilir');
     expect(await page.locator('table.grid .card').count()).toBe(first);
   });
@@ -136,7 +136,7 @@ test.describe('22. Otomatik dizme', () => {
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.locator('.badge', { hasText: 'Kural dışı' })).toHaveCount(0);
+    await expect(page.locator('.badge', { hasText: /^Engel$/ })).toHaveCount(0);
   });
 
   test('sonuç çubuğu "Tamam" ile kapanıyor', async ({ page }) => {
@@ -267,7 +267,7 @@ test.describe('22. Otomatik dizme', () => {
       const panel = page.locator('.panel.suggestions');
       await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
       const fewest = panel.locator('li[data-family="teacherHours"]');
-      await expect(fewest).toContainText('de gelebilirse hafta kuruluyor', { timeout: 150_000 });
+      await expect(fewest).toContainText('de gelebilirse program kuruluyor', { timeout: 150_000 });
       await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {
         timeout: 200_000,
       });
@@ -286,7 +286,7 @@ test.describe('22. Otomatik dizme', () => {
       const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
       const refused = `${who} ${day}`;
       await question.getByRole('button', { name: /^Olmaz/ }).click();
-      await page.getByRole('menuitem', { name: `${day} hiç gelemez` }).click();
+      await page.getByRole('menuitem', { name: `${day} hiç müsait değil` }).click();
       await expect(panel).toContainText('Cevaplarınız:');
       await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {

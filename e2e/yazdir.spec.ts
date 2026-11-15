@@ -543,7 +543,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
 
   test('bildirim kâğıda çıkmıyor', async ({ page }) => {
     // A toast is position: fixed, and Chrome prints a fixed box on every
-    // sheet. Loading a world leaves "Yedek yüklendi" up for six seconds, and a
+    // sheet. Loading a world leaves "Plan dosyası açıldı" up for six seconds, and a
     // print started inside them put it on the paper (2026-11-15).
     await loadWorld(page, PAPER_WORLD, 'Çıktı');
     await expect(page.locator('.toast').first()).toBeVisible();
@@ -1125,7 +1125,7 @@ test.describe('Çıktı: öğretmene e-postayla', () => {
     expect(href.startsWith('mailto:mc@example.com?subject=')).toBe(true);
     const body = decodeURIComponent(/[?&]body=([^&]*)/.exec(href)?.[1] ?? '');
     expect(body).toContain('MÇ · Haftalık ders programı');
-    expect(body).toMatch(/1–2\. ders {2}\d\d:\d\d–\d\d:\d\d {2}510/);
+    expect(body).toMatch(/1–2\. saat {2}\d\d:\d\d–\d\d:\d\d {2}510/);
     expect(body).toContain('\r\n');
 
     const row = (who: string) => panel.locator('.mail-row', { hasText: who });

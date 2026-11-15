@@ -158,7 +158,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       expect(ilk).toBe('');
     }
 
-    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.tikla('metin:Örnek okulu yükle');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
 
@@ -179,7 +179,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   // keeps the ten newest backups that HOLD WORK. An empty backup is not one of
   // the ten; the old prune counted it.
   test('okunmuş planla açılış yazıyor, budama yalnız dolu günlükleri sayıyor', async ({ exe }) => {
-    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.tikla('metin:Örnek okulu yükle');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).toContain('Örnek Kurs');
@@ -249,7 +249,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   });
 
   test('örnek okulu otomatik diziyor', async ({ exe }) => {
-    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.tikla('metin:Örnek okulu yükle');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
@@ -313,7 +313,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     // It did, every time, on this machine's Intel GPU: WebKitGTK's DMA-BUF
     // renderer aborted inside Mesa (iris) while drawing the pinned card, and
     // WebDriver answered "session deleted because of page crash" (tuzak 130).
-    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.tikla('metin:Örnek okulu yükle');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
@@ -412,7 +412,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       );
     await expect
       .poll(async () => (await satirlar()).join('\n'), { timeout: 240_000, intervals: [2_000] })
-      .toContain('de gelebilirse hafta kuruluyor');
+      .toContain('de gelebilirse program kuruluyor');
     expect(
       Number(
         await exe.oturum.js<string>(`return document.documentElement.dataset.oneriIsci ?? '';`),
@@ -535,7 +535,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     if (WINDOWS) {
       await exe.oturum.bekle('.mail-panel .warn-box', 10_000);
       expect(await exe.oturum.metin('.mail-panel .warn-box')).toContain(
-        'Bu bilgisayarda seçili bir e-posta programı yok.',
+        'Bu bilgisayarda seçili bir e-posta uygulaması yok.',
       );
       const openWith = spawnSync('tasklist', ['/FI', 'IMAGENAME eq OpenWith.exe', '/NH'], {
         encoding: 'utf8',
@@ -552,7 +552,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     const adres = readFileSync(kayit, 'utf8').trim();
     const govde = decodeURIComponent(/[?&]body=([^&]*)/.exec(adres)?.[1] ?? '');
     expect(govde).toContain(`${name} · Haftalık ders programı`);
-    expect(govde).toMatch(/\d+\. ders {2}\d\d:\d\d–\d\d:\d\d {2}\S+/);
+    expect(govde).toMatch(/\d+\. saat {2}\d\d:\d\d–\d\d:\d\d {2}\S+/);
     expect(adres.length).toBeLessThanOrEqual(2000);
     expect(
       await exe.oturum.js('return document.querySelector(".mail-panel .warn-box") === null;'),
@@ -661,7 +661,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       return n;`);
     expect(dolgu).toBeGreaterThan(0);
 
-    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.tikla('metin:Örnek okulu yükle');
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.bekle('.save-warning', 10_000);

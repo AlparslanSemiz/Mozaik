@@ -42,7 +42,7 @@ test.describe('62. Sayfada ne olsun', () => {
 
     // Everything that was already on paper stays on it; the stamp is the one
     // thing that never existed, so it starts off.
-    for (const on of ['Kurs adı', 'Derslik ve branş', 'Ders saatleri', 'Hücrenin alt satırı']) {
+    for (const on of ['Okul adı', 'Derslik ve branş', 'Günün saatleri', 'Hücrenin alt satırı']) {
       await expect(box(page, on), on).toBeChecked();
     }
     await expect(box(page, 'Çıktı tarihi')).not.toBeChecked();
@@ -53,7 +53,7 @@ test.describe('62. Sayfada ne olsun', () => {
     const sub = page.locator('.print-page').first().locator('.p-title-sub');
     await expect(sub).toContainText('Örnek Kurs');
 
-    await box(page, 'Kurs adı').uncheck();
+    await box(page, 'Okul adı').uncheck();
     await expect(sub).not.toContainText('Örnek Kurs');
     // The room is still there, and so is no stray separator in front of it.
     await expect(sub).toContainText('dersliği');
@@ -62,7 +62,7 @@ test.describe('62. Sayfada ne olsun', () => {
 
   test('ikisi de kapanınca künye SATIRI hiç çizilmiyor', async ({ page }) => {
     await openPrint(page);
-    await box(page, 'Kurs adı').uncheck();
+    await box(page, 'Okul adı').uncheck();
     await box(page, 'Derslik ve branş').uncheck();
     await expect(page.locator('.print-page').first().locator('.p-title-sub')).toHaveCount(0);
     // The big line is untouched: this switch is about the credits, not the title.
@@ -77,7 +77,7 @@ test.describe('62. Sayfada ne olsun', () => {
     await expect(first.locator('.p-clock').first()).toBeVisible();
     await expect(first.locator('thead th').nth(1)).toContainText(':');
 
-    await box(page, 'Ders saatleri').uncheck();
+    await box(page, 'Günün saatleri').uncheck();
     await expect(first.locator('.p-clock')).toHaveCount(0);
     // The lesson NUMBER stays: that is the column's name, not its clock.
     await expect(first.locator('thead th').nth(1)).toHaveText('1');
@@ -157,14 +157,14 @@ test.describe('62. Sayfada ne olsun', () => {
 
   test('seçim YENİLEMEDEN sonra da duruyor', async ({ page }) => {
     await openPrint(page);
-    await box(page, 'Ders saatleri').uncheck();
+    await box(page, 'Günün saatleri').uncheck();
     await box(page, 'Çıktı tarihi').check();
 
     await reopen(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
-    await expect(box(page, 'Ders saatleri')).not.toBeChecked();
+    await expect(box(page, 'Günün saatleri')).not.toBeChecked();
     await expect(box(page, 'Çıktı tarihi')).toBeChecked();
     await expect(page.locator('.p-clock')).toHaveCount(0);
     await expect(page.locator('.p-stamp').first()).toBeVisible();

@@ -47,7 +47,7 @@ describe('alternatif programlar', () => {
     const migrated = parseState(JSON.stringify(legacy))!;
     expect(migrated.programs).toHaveLength(1);
     expect(activeProgram(migrated)).toMatchObject({
-      name: 'Program 1',
+      name: 'Seçenek 1',
       placements: program.placements,
       pinned: program.pinned,
     });
@@ -67,10 +67,10 @@ describe('alternatif programlar', () => {
 
   it('adları benzersiz tutar; aktif silinince komşusuna geçer ve sonuncuyu silmez', () => {
     let d = world();
-    d = addProgram(d, blankProgram('p2', 'Program 2'));
-    expect(addProgram(d, blankProgram('p3', 'program 2'))).toBe(d);
-    expect(renameProgram(d, 'p2', ' Program 2 ').programs[1]?.name).toBe('Program 2');
-    expect(nextProgramName(d.programs)).toBe('Program 3');
+    d = addProgram(d, blankProgram('p2', 'Seçenek 2'));
+    expect(addProgram(d, blankProgram('p3', 'seçenek 2'))).toBe(d);
+    expect(renameProgram(d, 'p2', ' Seçenek 2 ').programs[1]?.name).toBe('Seçenek 2');
+    expect(nextProgramName(d.programs)).toBe('Seçenek 3');
 
     d = removeProgram(d, 'p2');
     expect(d.programs).toHaveLength(1);

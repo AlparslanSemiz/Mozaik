@@ -368,7 +368,7 @@ describe('veriler nerede — depo raporu', () => {
       ['ders-programi-serit-gizle', 'şerit kaydırınca gizlensin mi'],
       ['ders-programi-musaitlik-saat', 'müsaitlikte saat gösterimi'],
       ['ders-programi-hareket', 'hareket (animasyon) tercihi'],
-      ['ders-programi-tanitim', 'örnek veri satırı görüldü mü'],
+      ['ders-programi-tanitim', 'örnek okul satırı görüldü mü'],
       ['ders-programi-baski', 'kâğıt seçenekleri'],
       ['ders-programi-yenilik-gorulen', 'görülen sürüm notu'],
       ['ders-programi-oneri-olcum', 'öneri aramasının ölçümleri'],

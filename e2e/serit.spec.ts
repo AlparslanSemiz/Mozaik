@@ -99,7 +99,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       }
       return sides;
     });
-    expect(left).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM']);
+    expect(left).toEqual(['GÖRÜNÜM', 'DİZ', 'SEÇENEK']);
     expect(right).toEqual(['RENK', 'YOĞUNLUK', 'IZGARA']);
 
     // ...and the first control on it is the teacher view, before the class one

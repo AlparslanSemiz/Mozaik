@@ -284,7 +284,7 @@ const DUNYA: Liste[] = [
     git: kontrol(/^Sorunlar/),
     satir: panelRows('Yerleşemeyen dersler'),
   },
-  { ad: 'Danışman uyarıları', git: kontrol(/^Danışman/), satir: panelRows('Danışman uyarıları') },
+  { ad: 'Danışman notları', git: kontrol(/^Danışman/), satir: panelRows('Danışman notları') },
   {
     ad: 'Öğretmenlerin kapasitesi',
     git: kontrol(/^Öğretmenler$/),

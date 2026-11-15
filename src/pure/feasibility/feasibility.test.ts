@@ -315,7 +315,7 @@ describe('holeReason', () => {
     d.unavailable['s510|0|3'] = 1;
 
     expect(holeReason(d, buildIndex(d), 'x1')).toBe(
-      'Boş kalan saatler bu dersin 2 saatlik bloğuna uymuyor',
+      'Boş kalan saatler bu dersin 2 saatlik kartına uymuyor',
     );
   });
 

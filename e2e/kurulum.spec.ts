@@ -41,7 +41,7 @@ test.describe('5. Kurulum ve yedek', () => {
       'true',
     );
 
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
 
     await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
@@ -77,7 +77,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Öğretmenler');
 
     const name = page.getByPlaceholder('Ad Soyad');
-    const short = page.getByLabel('Kısaltma');
+    const short = page.getByLabel('Kısa ad');
     const branch = page.getByLabel('Branş', { exact: true });
 
     // The placeholder shows what will be derived, live
@@ -92,7 +92,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await branch.selectOption('Fizik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    const warning = page.locator('.warn-box', { hasText: 'Aynı kısaltma' });
+    const warning = page.locator('.warn-box', { hasText: 'Aynı kısa ad' });
     await expect(warning).toBeVisible();
     await expect(warning).toContainText('Ahmet Sarı, Ayşe Solmaz');
 
@@ -100,7 +100,7 @@ test.describe('5. Kurulum ve yedek', () => {
     const secondShort = page.locator('table.list tbody tr').nth(1).locator('input').nth(1);
     await secondShort.fill('AYS');
     await secondShort.blur();
-    await expect(page.locator('.warn-box', { hasText: 'Aynı kısaltma' })).toHaveCount(0);
+    await expect(page.locator('.warn-box', { hasText: 'Aynı kısa ad' })).toHaveCount(0);
   });
 
   test('silmeden önce her zaman soruyor ve ne gideceğini sayıyor', async ({ page }) => {
@@ -826,7 +826,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
     await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
-    await expect(page.getByText('Ad Soyad · Kısaltma · Branş · Cinsiyet')).toBeVisible();
+    await expect(page.getByText('Ad Soyad · Kısa ad · Branş · Cinsiyet')).toBeVisible();
 
     await page.locator('textarea').fill('Nazlı Er\tNE\tFizik\tKadın\nOkan Su\tOS\tKimya');
     await page.getByRole('button', { name: 'Önizle' }).click();
@@ -1299,8 +1299,8 @@ test.describe('67. Ders dağılımı', () => {
     // veeya 2 saat x3 gibi gözükmesin kartlarda güzel değil"). It is still in
     // the tooltip, and on screen it is the WIDTH — which is what the reader is
     // choosing between when two cards of one lesson sit side by side.
-    await expect(own.first()).toHaveAttribute('title', /2 saatlik blok/);
-    await expect(own.last()).toHaveAttribute('title', /1 saatlik blok/);
+    await expect(own.first()).toHaveAttribute('title', /2 saatlik kart/);
+    await expect(own.last()).toHaveAttribute('title', /1 saatlik kart/);
   });
 
   // A THREE-hour block, which the model could not express between v7 and v9.
