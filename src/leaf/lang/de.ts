@@ -1757,7 +1757,6 @@ const DE: Sozluk = {
   "\"{ad}\" branşı listeden çıkarıldı.": "„{ad}“ wurde aus der Fächerliste entfernt.",
   "{ad} seçeneği silindi.": "Variante {ad} gelöscht.",
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} gelöscht, mit {n} gesetzten {n:Stunde|Stunden}.",
-  "{ad} seçeneğine geçildi.": "Zu {ad} gewechselt.",
   "Program baştan dizildi.": "Der Stundenplan wurde von vorn gelegt.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "Der Stundenplan wurde von vorn gelegt; {n} fixierte {n:Stunde blieb|Stunden blieben}.",
 };

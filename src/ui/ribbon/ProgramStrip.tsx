@@ -89,6 +89,7 @@ export function programStrip({
   state,
   change,
   manageProgram,
+  viewProgram,
   solver,
   programMask,
   setProgramMask,
@@ -276,14 +277,7 @@ export function programStrip({
             <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
               <DropdownMenu.RadioGroup
                 value={state.activeProgramId}
-                onValueChange={(id) =>
-                  manageProgram(
-                    (d) => switchProgram(d, id),
-                    t('{ad} seçeneğine geçildi.', {
-                      ad: state.programs.find((p) => p.id === id)?.name ?? '',
-                    }),
-                  )
-                }
+                onValueChange={(id) => viewProgram((d) => switchProgram(d, id))}
               >
                 {state.programs.map((program) => (
                   <DropdownMenu.RadioItem key={program.id} className="menu-item" value={program.id}>

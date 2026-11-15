@@ -44,6 +44,8 @@ export default function App() {
     state,
     change,
     manageProgram,
+    viewProgram,
+    peek,
     undo,
     undoIf,
     redo,
@@ -132,7 +134,7 @@ export default function App() {
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
-  const solver = useSolver(change);
+  const solver = useSolver(change, peek);
   // The folder my father picked, if he picked one (task B4). Here for the
   // same reason as the solver: a pending write must not die because a tab
   // changed. It works on EVERY route in Chromium — file:// included, where
@@ -249,6 +251,7 @@ export default function App() {
           state={state}
           change={change}
           manageProgram={manageProgram}
+          viewProgram={viewProgram}
           solver={solver}
           programMask={programMask}
           setProgramMask={setProgramMask}

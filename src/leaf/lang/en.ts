@@ -1740,7 +1740,6 @@ const EN: Sozluk = {
   "\"{ad}\" branşı listeden çıkarıldı.": "\"{ad}\" was removed from the subject list.",
   "{ad} seçeneği silindi.": "Variant {ad} deleted.",
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variant {ad} deleted, with its {n} placed {n:hour|hours}.",
-  "{ad} seçeneğine geçildi.": "Switched to {ad}.",
   "Program baştan dizildi.": "The timetable was laid out from scratch.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
 };

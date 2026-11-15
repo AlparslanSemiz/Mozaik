@@ -28,7 +28,7 @@ import type { FolderRun } from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';
 
 interface Props extends PanelProps {
-  replaceState: (next: State, label?: string) => State;
+  replaceState: (next: State, label?: string) => State | null;
   plans: PlanControls;
   /** The folder that gets a copy of everything. Owned by App (pitfall 18). */
   folder: FolderRun;

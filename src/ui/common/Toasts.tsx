@@ -149,8 +149,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   // A notice that closes under the pointer or with the focus in it leaves no
   // event behind (nothing fires pointerleave or blur for a removed node), so
   // the pause is looked at again whenever the list changes.
+  // A removed notice that was under the pointer fires no pointerleave either,
+  // so whether the pointer is still over one is asked of the page itself.
   useEffect(() => {
-    if (items.length === 0) hovered.current = false;
+    hovered.current = items.length > 0 && (region.current?.matches(':hover') ?? false);
     settle();
   }, [items, settle]);
 
@@ -182,6 +184,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     hovered.current = false;
     settle();
   };
+  // Where the keyboard was before it came to a notice: "Geri al" takes its
+  // own notice away, and the focus goes back there instead of to <body>.
+  const cameFrom = useRef<HTMLElement | null>(null);
+  const focused = (e: FocusEvent<HTMLDivElement>) => {
+    const from = e.relatedTarget;
+    if (from instanceof HTMLElement && region.current?.contains(from) !== true) {
+      cameFrom.current = from;
+    }
+    settle();
+  };
   // Focus moving between two buttons of the same notice is not a resume:
   // React's blur fires first, and the focus is not inside yet.
   const blurred = (e: FocusEvent<HTMLDivElement>) => {
@@ -199,7 +211,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           role="status"
           aria-live="polite"
           ref={region}
-          onFocus={settle}
+          onFocus={focused}
           onBlur={blurred}
         >
           {items.map((toast) => (
@@ -230,6 +242,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   onClick={() => {
                     const done = toast.action?.run();
                     drop(toast.id);
+                    if (cameFrom.current?.isConnected === true) cameFrom.current.focus();
                     if (done === false) {
                       notify(
                         t('Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.'),

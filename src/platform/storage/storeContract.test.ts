@@ -688,4 +688,30 @@ describe('sözleşme · React kancası', () => {
     expect(store.state.settings.schoolName).not.toBe('Yazıldı');
     input.remove();
   });
+
+  // Where the focus lands when a deletion empties a list (deleteFocus.ts):
+  // an EMPTY add box has nothing of its own to undo, so Ctrl+Z is the plan's.
+  it('boş ekleme kutusunda Ctrl+Z planı geri alıyor, dolu olanda almıyor', () => {
+    mount();
+    act(() => store.change(() => named('Yazıldı')));
+    const panel = document.createElement('div');
+    panel.className = 'add-panel-body';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = 'A';
+    panel.appendChild(input);
+    document.body.appendChild(panel);
+    const press = () =>
+      act(() => {
+        input.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }),
+        );
+      });
+    press();
+    expect(store.state.settings.schoolName).toBe('Yazıldı');
+    input.value = '';
+    press();
+    expect(store.state.settings.schoolName).not.toBe('Yazıldı');
+    panel.remove();
+  });
 });

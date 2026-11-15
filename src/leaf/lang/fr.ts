@@ -1765,7 +1765,6 @@ const FR: Sozluk = {
   "\"{ad}\" branşı listeden çıkarıldı.": "« {ad} » a été retirée de la liste des matières.",
   "{ad} seçeneği silindi.": "Variante {ad} supprimée.",
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variante {ad} supprimée, avec {n} {n:heure placée|heures placées}.",
-  "{ad} seçeneğine geçildi.": "Passage à {ad}.",
   "Program baştan dizildi.": "L’emploi du temps a été reconstruit de zéro.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "L’emploi du temps a été reconstruit de zéro ; {n} {n:heure épinglée est restée|heures épinglées sont restées} en place.",
 };

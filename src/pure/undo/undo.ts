@@ -50,6 +50,13 @@ export type Action =
    * taken back; nothing is ever replayed into the one being looked at.
    */
   | { type: 'program-change'; apply: (d: State) => State; label?: string }
+  /**
+   * Looking at another seçenek: the present changes, the history does not.
+   * Switching just to look used to fill the 30 steps and wipe redo (review,
+   * 2026-11-15). Undo after it is still right: the step it takes back is a
+   * whole State, with the seçenek that was active when it was made.
+   */
+  | { type: 'view'; apply: (d: State) => State }
   | { type: 'undo' }
   /**
    * Undo, but only while `expected` is still the present: the "Geri al" of a
@@ -91,6 +98,14 @@ export function reduce(box: Box, action: Action): Box {
         past: [...box.past, box.present].slice(-HISTORY_LIMIT),
         future: [],
       };
+    }
+    case 'view': {
+      const next = sanitize(action.apply(box.present));
+      if (next === box.present) return box;
+      // What undo would take back has not changed, so neither has its name.
+      const label = labels.get(box.present);
+      if (label !== undefined) labels.set(next, label);
+      return { ...box, present: next };
     }
     case 'undo-if':
       if (box.present !== action.expected) return box;

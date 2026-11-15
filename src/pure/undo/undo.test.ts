@@ -57,7 +57,7 @@ describe('seçenek değişikliği geçmişi silmiyor', () => {
 
   it('başka seçenekte yapılan düzenlemeyi geri almak o seçeneği geri getiriyor', () => {
     const box = twoOptions();
-    // On "a", place one hour; then switch to "b"; then undo twice.
+    // On "a", place one hour; then look at "b"; then undo.
     const a = reduce(box, { type: 'program-change', apply: onA });
     const aId = a.present.activeProgramId;
     const lesson = a.present.lessons[0]!;
@@ -69,17 +69,18 @@ describe('seçenek değişikliği geçmişi silmiyor', () => {
         programs: d.programs.map((p) => (p.id === aId ? { ...p, placements: hour } : p)),
       }),
     });
-    const onB = reduce(emptied, {
-      type: 'program-change',
-      apply: (d) => switchProgram(d, 'b'),
-    });
+    const onB = reduce(emptied, { type: 'view', apply: (d) => switchProgram(d, 'b') });
     expect(onB.present.activeProgramId).toBe('b');
+    // Looking is not a step: the history is the one it was on "a".
+    expect(onB.past).toBe(emptied.past);
     const once = reduce(onB, { type: 'undo' });
     expect(once.present.activeProgramId).toBe(aId);
-    expect(activePlacements(once.present)).toEqual(hour);
-    const twice = reduce(once, { type: 'undo' });
-    expect(twice.present.activeProgramId).toBe(aId);
-    expect(activePlacements(twice.present)).toEqual({});
+    expect(activePlacements(once.present)).toEqual({});
+    // Redo puts back what was on screen when undo was pressed: "b" in view,
+    // the hour in "a".
+    const again = reduce(once, { type: 'redo' });
+    expect(again.present).toBe(onB.present);
+    expect(again.present.programs.find((p) => p.id === aId)?.placements).toEqual(hour);
   });
 
   it('silinen seçenek geri alınınca yerleşimiyle geri geliyor', () => {
@@ -107,6 +108,19 @@ describe('undoLabel: Ctrl+Z neyi geri aldığını söyleyebiliyor', () => {
     const two = reduce(one, { type: 'change', apply: rename('B'), label: 'ikinci' });
     expect(undoLabel(two)).toBe('ikinci');
     expect(undoLabel(reduce(two, { type: 'undo' }))).toBe('birinci');
+  });
+
+  it('seçeneğe bakmak geri alınacak adımın adını değiştirmiyor', () => {
+    const box = reduce(start(), {
+      type: 'program-change',
+      apply: (d) => addProgram(d, blankProgram('b', 'Seçenek 2')),
+      label: 'kopya',
+    });
+    const back = reduce(box, {
+      type: 'view',
+      apply: (d) => switchProgram(d, d.programs[0]!.id),
+    });
+    expect(undoLabel(back)).toBe('kopya');
   });
 
   it('etiketsiz değişiklikte ve boş geçmişte bir şey söylemiyor', () => {

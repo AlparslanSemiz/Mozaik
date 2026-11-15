@@ -151,6 +151,10 @@ export function useStore(announce: (text: string) => void = () => undefined) {
         : { type: 'program-change', apply, label },
     );
   }, []);
+  /** Another seçenek on screen, without a step of the history (undo.ts, `view`). */
+  const viewProgram = useCallback((apply: (d: State) => State) => {
+    dispatch({ type: 'view', apply });
+  }, []);
   const undo = useCallback(() => {
     if (current.current.past.length === 0) return;
     say.current(undoneSentence(current.current));
@@ -167,6 +171,8 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     return true;
   }, []);
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
+  /** The present as of the last render, for a callback that must not act on a stale one. */
+  const peek = useCallback(() => current.current.present, []);
   // A load is "Dosyadan aç" or "Her şeyi sil", each behind its own question:
   // the user has put something in this plan's place, so a plan this copy
   // could not read may be written over now (libraryStore.ts, A1). A plain
@@ -178,13 +184,20 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     dispatch({ type: 'load', state });
   }, []);
   /**
-   * "Her şeyi sil" since 2026-11-15: the same decision to put something in
-   * this plan's place as a load, but an ordinary step of the history, so its
+   * "Her şeyi sil" since 2026-11-15: an ordinary step of the history, so its
    * notice can offer "Geri al". Returns the state it put in place, for that
-   * notice's `undoIf`.
+   * notice's `undoIf`, or null when it had to be a load (below).
    */
-  const replaceState = useCallback((state: State, label?: string): State => {
-    thawPlan(openNow.current);
+  const replaceState = useCallback((state: State, label?: string): State | null => {
+    // A plan this copy could not read stays a load: an undo would bring back
+    // the empty stand-in with the thaw still in force, and the next autosave
+    // would write it over the unreadable text (review, 2026-11-15). Null says
+    // there is nothing to undo.
+    if (frozenPlan(openNow.current) !== null) {
+      thawPlan(openNow.current);
+      dispatch({ type: 'load', state });
+      return null;
+    }
     dispatch(
       label === undefined
         ? { type: 'change', apply: () => state }
@@ -290,10 +303,15 @@ export function useStore(announce: (text: string) => void = () => undefined) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!e.ctrlKey && !e.metaKey) return;
-      // An EMPTY one-line box has no text of its own to take back. It is
-      // where the focus goes when a deletion empties a list (deleteFocus.ts),
-      // and that deletion's notice says "Geri almak için Ctrl+Z" (2026-11-15).
-      const empty = e.target instanceof HTMLInputElement && e.target.value === '';
+      // An EMPTY add box has no text of its own to take back. It is where
+      // the focus goes when a deletion empties a list (deleteFocus.ts), and
+      // that deletion's notice says "Geri almak için Ctrl+Z" (2026-11-15).
+      // Only there: a rename or search box keeps the browser's own undo.
+      const empty =
+        e.target instanceof HTMLInputElement &&
+        e.target.type === 'text' &&
+        e.target.value === '' &&
+        e.target.closest('.add-panel-body') !== null;
       if (isTextInput(e.target) && !empty) return;
       const letter = e.key.toLowerCase();
       if (letter === 'z' && !e.shiftKey) {
@@ -326,11 +344,13 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     state: box.present,
     change,
     manageProgram,
+    viewProgram,
     undo,
     undoIf,
     redo,
     loadState,
     replaceState,
+    peek,
     // Exposed for the two callers that leave the page without unloading it:
     // the exe restarting onto a new version, and the exe's window closing
     // (App.tsx, TB7). `beforeunload` covers a closing

@@ -38,7 +38,7 @@ interface Props {
   state: State;
   change: (apply: (d: State) => State, label?: string) => void;
   /** Puts `next` in this plan's place as an undoable step (useStore). */
-  replaceState: (next: State, label?: string) => State;
+  replaceState: (next: State, label?: string) => State | null;
   plans: PlanControls;
   folder: FolderRun;
   update: UpdateRun;
@@ -112,7 +112,8 @@ export default function Data({
     }
     const said = t('Bu plandaki her şey silindi.');
     const next = replaceState(emptyState(), said);
-    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    if (next === null) notify(said, 'info');
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   }
 
   function saveAll() {

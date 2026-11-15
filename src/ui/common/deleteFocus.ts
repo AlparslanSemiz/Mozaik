@@ -32,11 +32,15 @@ export function moveFocusFromDeleted(button: HTMLElement): void {
     .reverse()
     .map(pick)
     .find((b) => b !== null);
-  const target =
-    after ??
-    before ??
-    (button.closest('.cols') ?? document).querySelector<HTMLElement>(
-      '.add-panel-body input, .add-panel-body select',
-    );
-  target?.focus();
+  (after ?? before ?? addField(table))?.focus();
+}
+
+/** The add field of the step the table is in: the nearest ancestor that holds one. */
+function addField(table: HTMLElement): HTMLElement | null {
+  const FIELD = '.add-panel-body input, .add-panel-body select';
+  for (let box = table.parentElement; box !== null; box = box.parentElement) {
+    const field = box.querySelector<HTMLElement>(FIELD);
+    if (field !== null) return field;
+  }
+  return null;
 }

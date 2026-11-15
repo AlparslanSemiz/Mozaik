@@ -122,7 +122,11 @@ export interface SolverRun {
   clear: () => void;
 }
 
-export function useSolver(change: (apply: (d: State) => State) => void): SolverRun {
+/** `peek` reads the present as of the last render (useStore), for `start`'s `placed`. */
+export function useSolver(
+  change: (apply: (d: State) => State) => void,
+  peek?: () => State,
+): SolverRun {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState<SolverProgress | null>(null);
   const [result, setResult] = useState<SolverResult | null>(null);
@@ -211,12 +215,17 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       // What it guards: if the timetable moved while we were searching (an
       // undo, a drop, a loaded backup), the answer describes a world that no
       // longer exists and must not be pasted over the new one.
+      // Whether the answer will land, asked BEFORE the change: if the
+      // timetable moved meanwhile the change is a no-op, and a notice saying
+      // it was laid out again would be false (review, 2026-11-15). A stopped
+      // run's half week is not announced either; its own bar says it stopped.
+      const lands = peek === undefined || peek() === from;
       change((d) => (d === from ? done.state : d));
       const placed = onPlaced.current;
       onPlaced.current = undefined;
-      placed?.(done.state);
+      if (lands && done.phase !== 'cancelled') placed?.(done.state);
     },
-    [change],
+    [change, peek],
   );
 
   useEffect(() => {
