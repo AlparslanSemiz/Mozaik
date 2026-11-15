@@ -1170,8 +1170,6 @@ const EN: Sozluk = {
     "Block shape",
   "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
     "Pick one way; each is enough on its own, and the classes' hours are never touched.",
-  "{yol}: aranıyor…":
-    "{yol}: looking…",
   "Uygula":
     "Apply",
   "Uygula, baştan diz":
@@ -1182,6 +1180,12 @@ const EN: Sozluk = {
     "Take back: {ne}",
   "(daha iyisi aranıyor)":
     "(looking for a better one)",
+  "Başka yollar da aranıyor… {sure} sn":
+    "Looking for other ways too… {sure} s",
+  "Aramanın ilerlemesi":
+    "Search progress",
+  "Başka yollar ({n})":
+    "Other ways ({n})",
   "(inceltilmedi)":
     "(not refined)",
   "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":

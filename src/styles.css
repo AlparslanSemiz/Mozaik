@@ -1870,6 +1870,31 @@ table.list tbody tr {
   min-width: 16em;
 }
 
+/* Only the first way is open; the rest fold under "Başka yollar (N)". The
+   fold is a plain list item, so it takes no number of its own. */
+.suggestion-more {
+  list-style: none;
+}
+
+.suggestion-more > details > summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.suggestion-more .suggestion-list {
+  margin-top: var(--space-2);
+}
+
+/* The search in one line: the sentence with its seconds and this bar,
+   rather than a row per way still being looked for. */
+.suggestion-progress {
+  width: 10em;
+  height: .6em;
+  accent-color: var(--accent);
+}
+
 .suggestion-detail {
   margin: var(--space-2) 0 var(--space-2);
 }

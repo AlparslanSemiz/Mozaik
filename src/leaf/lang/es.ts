@@ -1184,8 +1184,6 @@ const ES: Sozluk = {
     "Forma de bloque",
   "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
     "Elija un camino; cada uno basta por sí solo y las horas de las clases no se tocan.",
-  "{yol}: aranıyor…":
-    "{yol}: buscando…",
   "Uygula":
     "Aplicar",
   "Uygula, baştan diz":
@@ -1196,6 +1194,12 @@ const ES: Sozluk = {
     "Deshacer: {ne}",
   "(daha iyisi aranıyor)":
     "(buscando una mejor)",
+  "Başka yollar da aranıyor… {sure} sn":
+    "También se buscan otros caminos… {sure} s",
+  "Aramanın ilerlemesi":
+    "Progreso de la búsqueda",
+  "Başka yollar ({n})":
+    "Otros caminos ({n})",
   "(inceltilmedi)":
     "(sin afinar)",
   "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":

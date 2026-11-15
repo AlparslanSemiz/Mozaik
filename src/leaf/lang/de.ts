@@ -1185,8 +1185,6 @@ const DE: Sozluk = {
     "Blockform",
   "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
     "Wählen Sie einen Weg; jeder reicht für sich allein, die Stunden der Klassen bleiben unberührt.",
-  "{yol}: aranıyor…":
-    "{yol}: wird gesucht…",
   "Uygula":
     "Anwenden",
   "Uygula, baştan diz":
@@ -1197,6 +1195,12 @@ const DE: Sozluk = {
     "Zurücknehmen: {ne}",
   "(daha iyisi aranıyor)":
     "(eine bessere wird gesucht)",
+  "Başka yollar da aranıyor… {sure} sn":
+    "Es wird auch nach anderen Wegen gesucht… {sure} s",
+  "Aramanın ilerlemesi":
+    "Fortschritt der Suche",
+  "Başka yollar ({n})":
+    "Andere Wege ({n})",
   "(inceltilmedi)":
     "(nicht verfeinert)",
   "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":
