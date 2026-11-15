@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Merged into the .app's Info.plist by `tauri build` (tauri.macos.conf.json).
+       ~/Documents is behind macOS's privacy prompt: the first save into
+       ~/Documents/Ders Programı asks once, and this is the sentence it shows. -->
+  <key>NSDocumentsFolderUsageDescription</key>
+  <string>Mozaik ders programlarınızı ve günlük yedeklerinizi Belgeler içindeki "Ders Programı" klasörüne kaydeder.</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>tr</string>
+</dict>
+</plist>

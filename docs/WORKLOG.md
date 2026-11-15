@@ -65,6 +65,8 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
+5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
+   imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
 
 **Açık teknik işler (TODO):** capability daraltma ve
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
@@ -83,6 +85,63 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
+
+Cmd+C/V elle denendi, çalışıyor (Alp, 2026-11-16). Alp'in önceliği: Windows ve web önce, Mac
+hiçbir şeyi engellemez (DECISIONS 2026-11-16). `surum.yml`: `publish` `always()` ile koşuyor ve
+yalnız `package` ile `exe`'yi şart koşuyor, `mac` matrisi `fail-fast: false`; ilk adım her mimarinin
+iki dosyasına bakıp gelenleri `MAC_VAR`'a yazıyor, gelmeyen için uyarı ve iş özeti ("Mac paketi bu
+sürümde yok"); imza, `surum.json` alanları (`undefined` ile düşen), `SHA256SUMS.txt` ve
+`gh release create` yalnız gelen mimariyi alıyor. `kontrat.test.ts` yayınlanan dosyaları "Publish
+the release" adımından okuyor ve yeni şartları ölçüyor. Koşulan: `actionlint` (yalnız SC2012
+bilgi), `cargo test` 73/73, `vitest` kontrat + surum + docs 82/82, `npm run hizli` yeşil. İş akışı
+koşmadı.
+
+## 2026-11-15 · Mac sürümü (`platform/mac`, TODO B7.42)
+
+Alp'in kararı (DECISIONS 2026-11-15, "Mac sürümü"): Apple imzasız bir Mac sürümü, güncellemesi
+bizim minisign imzamızla. Yapılan: `tauri.macos.conf.json` (app + dmg, macOS 11, ad-hoc imza,
+`mainBinaryName: Mozaik`, Mac ızgarasında `Mozaik.icns`, Belgeler izninin cümlesi),
+`scripts/ortools-mac.sh` (OR-Tools 9.15 arşivi özetle, `libortools.9.dylib`'in 99 dylib'lik
+kapanışı `Contents/Frameworks`'e), `cpsat.rs` Frameworks'te arıyor ve `cpsat_var` async (tuzak
+158), Türkçe menü (`mac_menusu`; Cmd+Q bizim öğemiz, `CloseRequested`'tan geçiyor), `mail.rs`
+Mac'te `/usr/bin/open`, `update_mac.rs` (indir, doğrula, gizli klasöre yaz, yeniden özetle, aç,
+`renamex_np` ile takas, başlat, geri al), `surum.json`'a mimari başına dört isteğe bağlı alan,
+`surum.yml`'e iki mimarili `mac` işi ve Apple imzası anahtarı, hafif `mac.yml`. Tuzak 157 (arşiv adı
+26.2, en düşük 11.0) ve 158 (ilk dylib yüklemesi 15 s / Rosetta'da 79 s). Başka dal 156'yı aldıysa
+numaralar birleşmede kayar.
+
+Bu Mac'te ölçülen (macOS 27.2, Apple Silicon): arm64 `Mozaik.app` 58 MB, `.dmg` 20,5 MB,
+`Mozaik-mac-arm64.app.tar.gz` 20,4 MB; Intel çapraz derleme `.app.tar.gz` 23,2 MB, dmg 23,2 MB,
+`lipo -archs` x86_64, 99 dylib, `LSMinimumSystemVersion` 11.0. `codesign --verify --deep --strict`
+ikisinde de geçti, `spctl -a` "rejected" (beklenen: ad-hoc, "Yine de Aç" gerekiyor). Release
+derlemesi sıfırdan yaklaşık 6 dk, artımlı 3 dk.
+
+Doğrulanan, uygulamanın kendisinde (sahte `HOME`, gerçek Belgeler'e dokunulmadı): pencere açıldı ve
+örnek okul dizildi; `~/Documents/Ders Programı/` altında `ders-programi-tumu.json` ve günlük yedek
+yazıldı; menü Türkçe ve `Düzen`'de Cmd+Z/⇧Cmd+Z/Cmd+X/C/V/A var; "Mozaik'ten Çık" süreci bitirdi.
+Güncelleme, uçtan uca, `MOZAIK_TEST_GUNCELLEME_KOKU=http://127.0.0.1:8791/` ile derlenen eski kopyadan
+yerel sunucudaki yeni arşive: Denetle "v9.9.9 çıktı, 19 MB", İndir arşivi `.Mozaik.app.yeni/`'ye
+yazdı, Şimdi yeniden başlat paketi takasladı ve `--guncellendi` ile yenisini başlattı (ikilinin
+özeti yeni derlemeninki), eski süreç bitti, gizli klasör sayfa yüklenince silindi, plan yerinde,
+imza geçerli, karantina özniteliği yok. Salt okunur bağlanmış dmg'den açılan kopya İndir'de
+"Mozaik'i Uygulamalar klasörüne taşıyın" dedi ve sunucuya istek gitmedi. CP-SAT: küçük model
+`.app`'in kendi `Contents/Frameworks/libortools.9.dylib`'iyle geçti; Intel kütüphanesi Rosetta'da
+da geçti.
+
+Doğrulanmayan: Cmd+C/V'nin bir metin kutusunda klavyeyle çalışması (arka plan otomasyonu menüden
+"Tümünü Seç"i inputa ulaştırdı, Kopyala ve Yapıştır'ı ulaştıramadı; uygulama öndeyken bir insan
+denemeli), gerçek Release'le güncelleme, iki iş akışının hiçbiri (koşmadı), Windows'ta değişiklik
+yok sayıldı ama Windows'ta derlenmedi (Windows'a dokunan tek kod `cpsat_var`'ın async olması).
+
+Koşulan: `cargo test` 72/72 (`MOZAIK_ORTOOLS` ile, küçük model dahil), `npx vitest run
+src/kontrat.test.ts src/surum.test.ts` yeşil, `npx tsc --noEmit -p .` 0, dokunulan dosyalarda
+`eslint` 0 ve `prettier --check`, `actionlint` (yalnız SC2012 bilgi notları), `npm run hizli` yeşil
+(1562 geçti, 4 atlandı; belge kapısı `src-tauri/icons`, `src-tauri/macos`'u tanıyor,
+`src-tauri/ortools` üretilen klasör). Kilit yok, ölçümler kirli.
+
+---
 
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
