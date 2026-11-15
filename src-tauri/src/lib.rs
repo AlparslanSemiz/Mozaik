@@ -161,9 +161,37 @@ fn read_in(dir: &Path, name: &str) -> Result<Option<String>, String> {
     }
 }
 
+/// Is this the name of a daily backup: `ders-programi-YYYY-MM-DD.json`?
+///
+/// The same shape as `DAILY` in `src/platform/storage/folder.ts`, the only
+/// names `prunable()` ever hands to `removeEntry`.
+fn gunluk_yedek_mi(name: &str) -> bool {
+    let Some(tarih) = name
+        .strip_prefix("ders-programi-")
+        .and_then(|n| n.strip_suffix(".json"))
+    else {
+        return false;
+    };
+    let b = tarih.as_bytes();
+    b.len() == 10
+        && b.iter().enumerate().all(|(i, c)| match i {
+            4 | 7 => *c == b'-',
+            _ => c.is_ascii_digit(),
+        })
+}
+
 /// Deletes one daily backup. Missing is not an error: the caller is pruning.
+///
+/// ONLY a daily backup. The page decides WHICH ones go (`prunable()`), but
+/// what may go at all is decided here too: a bug or a script in the page
+/// could otherwise delete any `.json` in the folder, my father's own files
+/// among them (security review 2026-11-15, G7). Listing still shows
+/// everything; deleting does not reach everything.
 fn remove_in(dir: &Path, name: &str) -> Result<(), String> {
     safe_name(name)?;
+    if !gunluk_yedek_mi(name) {
+        return Err(format!("Yalnız günlük yedek silinir: {name}"));
+    }
     match fs::remove_file(dir.join(name)) {
         Ok(()) => Ok(()),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
@@ -350,7 +378,7 @@ mod linux_tests {
 
 #[cfg(test)]
 mod tests {
-    use super::{list_in, read_in, remove_in, safe_name, write_in};
+    use super::{gunluk_yedek_mi, list_in, read_in, remove_in, safe_name, write_in};
     use std::fs;
     use std::path::PathBuf;
 
@@ -481,6 +509,32 @@ mod tests {
         fs::create_dir(s.0.join("ders-programi-tumu.json.tmp")).unwrap();
         assert!(write_in(&s.0, "ders-programi-tumu.json", "yeni").is_err());
         assert_eq!(fs::read_to_string(s.0.join("ders-programi-tumu.json")).unwrap(), "eski");
+    }
+
+    #[test]
+    fn only_a_daily_backup_can_be_removed() {
+        // The live bundle, a rescue file and my father's own `.json` all pass
+        // `safe_name`; none of them may be deleted through `remove_file`.
+        let s = Scratch::new("remove-gate");
+        for ad in [
+            "ders-programi-tumu.json",
+            "ders-programi-kurtarma-2026-11-15-101010.json",
+            "vergi-beyani.json",
+        ] {
+            fs::write(s.0.join(ad), "x").unwrap();
+            assert!(remove_in(&s.0, ad).is_err(), "silinebildi: {ad}");
+            assert!(s.0.join(ad).exists(), "silindi: {ad}");
+        }
+        assert!(gunluk_yedek_mi("ders-programi-2026-08-27.json"));
+        for kotu in [
+            "ders-programi-2026-8-27.json",
+            "ders-programi-2026-08-27.json.tmp",
+            "ders-programi-2026_08_27.json",
+            "ders-programi-20260-8-27.json",
+            "xders-programi-2026-08-27.json",
+        ] {
+            assert!(!gunluk_yedek_mi(kotu), "kabul edildi: {kotu}");
+        }
     }
 
     #[test]
