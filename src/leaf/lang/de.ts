@@ -1776,6 +1776,8 @@ const DE: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
+  "{ad} kısa adı": "Kurzname von {ad}",
+  "Yeni sınıfın dersliği": "Raum der neuen Klasse",
 };
 
 registerSozluk("de", DE);

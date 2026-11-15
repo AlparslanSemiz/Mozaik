@@ -1775,6 +1775,8 @@ const ES: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne}: eliminado, con {ders} {ders:clase|clases} y {saat} {saat:hora colocada|horas colocadas}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} {n:hora colocada volvió|horas colocadas volvieron} a la reserva.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Las horas colocadas volvieron a la reserva; {n} {n:hora fijada sigue|horas fijadas siguen} en su sitio.",
+  "{ad} kısa adı": "nombre corto de {ad}",
+  "Yeni sınıfın dersliği": "Aula de la nueva clase",
 };
 
 registerSozluk("es", ES);

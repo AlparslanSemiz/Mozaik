@@ -77,7 +77,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Öğretmenler');
 
     const name = page.getByPlaceholder('Ad Soyad');
-    const short = page.getByLabel('Kısa ad');
+    const short = page.getByLabel('Kısa ad', { exact: true });
     const branch = page.getByLabel('Branş', { exact: true });
 
     // The placeholder shows what will be derived, live

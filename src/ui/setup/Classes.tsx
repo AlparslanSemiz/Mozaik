@@ -87,6 +87,7 @@ export default function Classes({ state, change }: PanelProps) {
             }}
           />
           <select
+            aria-label={t('Yeni sınıfın dersliği')}
             value={newClass.roomId}
             onChange={(e) => setNewClass({ ...newClass, roomId: e.target.value })}
           >
@@ -187,6 +188,7 @@ export default function Classes({ state, change }: PanelProps) {
                     <td>
                       <input
                         type="text"
+                        aria-label={t('{ad} adı', { ad: c.name })}
                         defaultValue={c.name}
                         onBlur={(e) =>
                           change((d) =>

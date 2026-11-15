@@ -55,6 +55,7 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
       <td>
         <input
           type="text"
+          aria-label={t('{ad} adı', { ad: teacher.short })}
           defaultValue={teacher.name}
           onBlur={(e) =>
             change((d) =>
@@ -69,6 +70,7 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
         <input
           type="text"
           className="text-sm"
+          aria-label={t('{ad} kısa adı', { ad: teacher.short })}
           defaultValue={teacher.short}
           onBlur={(e) =>
             change((d) =>

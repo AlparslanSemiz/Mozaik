@@ -135,6 +135,7 @@ export default function Rooms({ state, change }: PanelProps) {
                     <td>
                       <input
                         type="text"
+                        aria-label={t('{ad} adı', { ad: r.name })}
                         defaultValue={r.name}
                         onBlur={(e) => change((d) => updateRoom(d, r.id, e.target.value))}
                       />
