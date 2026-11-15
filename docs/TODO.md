@@ -2003,15 +2003,24 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       öğretmen ile derslik satırlarında aynı kural mı kalacak, ayrı mı, söylenmedi.
       Öneri: sınıflarda "Sıkışık" hiç çıkmasın (yalnız aşınca "İmkânsız"), öğretmen ve
       derslikte bugünkü gibi kalsın.
-- [ ] **SD3 · Plan ve program iki kavram (rapor öneri 4).** Üst çubukta "1. plan", şeritte
-      "Program 1". Babaya tek kavram görünsün mü, LAYOUT bunun tersini gerekçeli seçmiş. Karar
-      sende.
+- [x] **SD3 · Plan ve program iki kavram (rapor öneri 4).** Yazıldı (2026-11-15,
+      `metin/tek-ad`), birim testleri ve E2E yeşil, birleşmedi.
       **Karar (Alp, 2026-11-15):** her kavramın ekranda tek adı olur, bir ad iki kavramı
-      taşımaz; karışıklık, erişilebilirlik ve kolay kullanım öncelikli. İncelemede çıkan:
-      plan (bütün okul verisi) ve program (plan içindeki diziliş) iki ayrı kavram, "program"
-      ayrıca uygulamanın kendisi ("Programı güncelleyin"). Sıradaki: bütün terimlerin
-      haritası, adlar Alp'e tek seferde, sonra arayüz metinleri (kayıt anahtarları ve dosya
-      adları değişmez).
+      taşımaz; karışıklık, erişilebilirlik ve kolay kullanım öncelikli. Uygulanan harita:
+      **plan** bütün okul verisi (ilk plan "Plan 1"); **program** yalnız dizilmiş haftalık
+      program; **seçenek** plan içindeki diziliş ("Seçenek 1", "Bu seçeneğin kopyası", "Boş
+      seçenek"); **Mozaik** uygulamanın kendisi; **saat** günün bir saati ("3. saat",
+      "Günlük saat sayısı"), **ders** yalnız ders; **kart** ızgarada ve havuzda taşınan parça,
+      **blok** yalnız dağılımdaki 2-3 saatlik parça; **derslik**, **öğretmen**, **hücre**,
+      **araç şeridi**; öğretmende **Kısa ad**, branşta **kısaltma**; fiil **diz**;
+      öğretmen **müsait / müsait değil**, sınıf ve derslik **kapalı**; kural seviyesi
+      **Engel** ve **Uyarı**, aşılması **ihlal**; Danışman **notları**; **plan dosyası**,
+      **otomatik yedek**; **Örnek okulu yükle**; **Okul adı**; araç şeridinin adı sekmenin
+      adı. Dört dil aynı kurala uyar. Kayıt anahtarları, dosya adları ve kayıtlı adlar
+      değişmedi. Kalanlar (karar sende): Ayarlar "Görünüm" ile Program'daki "Görünüm"
+      grubu, Açık/Kapalı tema, Sığdır/Ferah/Rahat, "Okul" sekmesi ile okul, "Genel",
+      pano anlamında "kopya", Program şeridindeki "Izgara" grubu (içinde programı sabitleme
+      ve boşaltma da var), öneri cümlesindeki "açık saatler ve kurallar".
 - [ ] **SD4 · Kontrol · Yerleşemeyen dersler 12 satırın 12'si aynı kalıpta** ("N saati
       yerleşmemiş ve koyacak yer yok. Örnek sebep: … kapalı"). Rapor: tek başlık, altında
       ders adları çip olarak, tıklanınca ızgaraya. Danışman'daki gruplamanın aynısı, ama

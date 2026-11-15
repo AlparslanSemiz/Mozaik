@@ -997,6 +997,14 @@ Sözlükte o anahtarın tek bir değeri olabildiği için Kimya dört dilde "Who
 sözlükten çıkarmak: yerleşik kısaltmalar `lang/kisaltmalar.ts`'teki kendi tablosundan
 okunur. `i18n.test.ts` Kimya'nın "Who" olmadığını ve tablonun dört dilde tam olduğunu ölçer.
 
+### 156 · Ölü anahtar tarayıcısı sözlüklerin kendisini de okuyordu
+`i18n.test.ts` `src/`'ten `src/leaf/lang/`'e taşınınca kaynak taraması
+`'../../**/*.{ts,tsx}'` oldu ve sözlükler artık `./en.ts` diye geliyordu; dışarıda
+bırakan süzgeç hâlâ `./lang/` arıyordu. Her anahtar kendi sözlüğünde bulunduğu için
+test aylarca bedava yeşildi, yalnız sözlükte kaçışla yazılan bir anahtar (`\"`)
+yakalanıyordu. SD3'ün yeniden adlandırması üç ölü anahtar buldurdu. Süzgeç artık
+`/^\.\/(en|de|es|fr)\.ts$/`; dosya taşınırsa glob anahtarlarının biçimine bakılır.
+
 ---
 
 ## Test hijyeni ve bedava yeşil
@@ -1464,7 +1472,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
-| Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
+| Çeviri ve metin | 12, 80, 87, 89, 90, 143, 156 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
 
@@ -1472,6 +1480,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 155, yeni bir tuzak 156'dan devam eder. Test stratejisi
+büyük kullanılan numara 156, yeni bir tuzak 157'den devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

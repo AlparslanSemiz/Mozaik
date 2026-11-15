@@ -54,10 +54,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    güvenilen yorum doğrulandı; `cargo test` 59/59. Kalan: `~/.config/mozaik-imza/mozaik.key`'in
    yedeği (parola yöneticisi ya da şifreli USB); kaybolursa dağıtılmış kopyalar yeni sürümü
    reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
-2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz;
-   karışıklık ve erişilebilirlik öncelikli. Plan ve program aynı şey değil (plan bütün okul
-   verisi, program onun içindeki diziliş), "program" ayrıca uygulamanın kendisi; bütün
-   terimlerin haritası çıkarılıyor, adlar Alp'e tek seferde sunulacak (TODO SD3).
+2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz.
+   Harita uygulandı, `metin/tek-ad` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO SD3).
+   Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
@@ -72,6 +71,36 @@ weeklyHours) eski formülle ve ikinci bakışa girmiyor.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
+
+Alp'in SD3 kararı (bir ad iki kavramı taşımaz) arayüzün bütün metnine uygulandı; harita
+TODO SD3'te. Sözlüklerde (1146 → 1138) 147 anahtar yeniden adlandı, 41'inin yalnız çevirisi düzeldi, 16
+anahtar silindi (on üçü var olan bir anahtara katıldı: altı araç şeridi adı sekmenin adına, "Kural dışı" "Engel"e, "Uyar" ve
+"Engelle" "Uyarı" ve "Engel"e, "{n} engelle" ve "{n} uyar" şeritteki sayaçlara, "Örnek
+veriyle doldur" "Örnek okulu yükle"ye, "Ayar bölümleri" "Ayarlar"a katıldı, üçü zaten
+ölüydü), 8 anahtar eklendi (Seçenek, Kısa ad, Engel, Müsait, Müsait saat, Müsait değil,
+öğretmenin müsait saat cümlesi, otomatik yedeğin satırı). Kod tarafında: öğretmenin satırı
+ve paneli "Müsait saat" ve "Müsait değil" diyor (`inspect.ts`, `CapacityRows`'un
+`openLabel`'ı, Müsaitlik'teki özet); yeni seçenek `Seçenek N` (`programs.ts`, adı boş
+zarfın adı `sanitize.ts`'te), ilk plan `Plan 1` (`library.ts`); kayıtlı adlar, depo
+anahtarları, dosya adları ve şema değişmedi. v12'den eski bir dosyanın tek seçeneği artık
+"Seçenek 1" adıyla açılıyor (eskiden "Program 1"), çünkü o ad dosyada değil göçte
+üretiliyor. Almancada "Plan" yalnız plan (diziliş "Stundenplan"), İspanyolcada yedek
+"copia de seguridad", "copia" kopya.
+
+Bulunan hata: `i18n.test.ts`'in ölü anahtar taraması `src/leaf/lang/`'e taşındığından beri
+sözlükleri de okuyordu ve bedava yeşildi (tuzak 156). Süzgeç düzeldi, üç ölü anahtar silindi.
+
+Koşulan: `npx tsc --noEmit -p .` ve `-p e2e` 0, `npx eslint .` 0, `npm run hizli` yeşil
+(1674 geçti, 4 atlandı; `linuxKur.test.ts` bir koşuda 5 s'de zaman aşımına düştü, sonraki
+koşularda yeşil), `npx vite build` 1 228,34 kB (main 1 229,15 kB), `npm run boyut` sınırın
+1,64 kB altında, `npx playwright test --workers=4` 726 testten 725'i yeşil (düzeltilenler
+yeniden koşuldu), `--config playwright.site.config.ts` 24/24. Kırmızı kalan tek test
+`kayma.spec.ts:129` ("kaydırma çubuğu yer kaplamıyor"): `origin/main`'in yapısında da aynı
+yerde kırmızı, macOS'un üstte duran kaydırma çubuğu, bu dalın değil. Koşulmayan:
+`gercek-exe` ve `guncelleme-exe` (exe derlemesi ister; metinleri güncellendi), Stryker,
+`kontrol`. Kilit yok (`flock` bu Mac'te yok), ölçümler kirli.
 
 ## 2026-11-15 · Eski dallar birleşti (`eski/birlestirme`)
 
