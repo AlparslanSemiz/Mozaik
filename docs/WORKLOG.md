@@ -185,6 +185,28 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 ---
 
+## 2026-11-15 · Çözücünün onarımı tamsayı dizileriyle (`hiz/onarim-dizileri`)
+
+Onarım aşaması her "bu hücrede kim var, oynayabilir mi" sorusu için `sınıf|gün|saat`
+metni kurup sözlükte arıyordu. Profil (tam-dolu-kurs, `keepPlaced: false`): 9,1 s'nin
+yaklaşık %70'i `evictions`, `movableAt` ve `trim`'de. Onarım artık sınıf, öğretmen ve
+derslik hücrelerini `Int32Array` aynalarından okuyor; aynalar `startRepair`'de sözlükten
+kuruluyor ve yalnız `claim` ile `release` değiştiriyor. Hiç değişmeyen kapalı saatler
+öğe başına bir kez okunuyor, tabu `Float64Array`. Son sözü yine `blocker()` söylüyor.
+
+Sonuç birebir aynı: 29 girdide (iki fikstür × iki kip ve `WORLDS`'ün hepsi) faz, blok,
+düğüm sayısı ve ızgaranın parmak izi değişmedi. Süreler (bu makine, temiz koşul değil,
+kirli ölçüm):
+
+| Girdi | Önce | Sonra |
+|---|---|---|
+| tam-dolu-kurs, baştan | 10,8 s | 1,6 – 2,4 s |
+| gercek-olcek-sikisik | 70 s | 5,8 – 6,8 s |
+| gercek-olcek-imkansiz | 112 s | 10 – 13 s |
+
+Öneri araması bu daldan etkilenmiyor: profilde sürenin %71'i `sat.ts`'in `propagate`'inde
+(babanın verisinde ~52 s).
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
