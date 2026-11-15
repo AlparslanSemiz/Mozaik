@@ -1,0 +1,153 @@
+# Kurulum, Windows'ta, uçtan uca (2026-11-16, TRAPS 164): bugüne kadar hiçbir iş kurulumu
+# çalıştırmıyordu, `ortools.dll`'i de hiçbir iş Windows'ta yüklemiyordu.
+#
+#   1. Kurulum, surum.yml'in derlediği gibi: OR-Tools'un sabit arşivi ve Tauri NSIS.
+#   2. Tek başına bir test exe'si (A, güncelleme kökü yerel sunucuda, bu commit'in
+#      numarasıyla) kendi düğmeleriyle aynı sürümün kurulumuna geçer: update.rs'in
+#      bekleyicisi kurulumu `/P /R` ile çalıştırır, kurulan program açılır, A'nın
+#      dosyası yerinde kalır ve bir sonraki açılışta kurulan programı açar
+#      (scripts/kurulum-gecisi.mjs).
+#   3. CP-SAT kurulan DLL'lerle: cpsat.rs'in küçük modeli `MOZAIK_ORTOOLS` kurulan
+#      `ortools.dll`'i gösterirken.
+#   4. Kaldırma: program gider, Belgeler'deki yedek ve profil (planlar) kalır.
+#
+# Yavaş (iki Rust derlemesi): main'de kuruluma ve güncellemeye dokunan push'ta ve
+# elle. `npm run yayinla` her sürümde etiketten önce bunun da yeşilini bekler, koşu
+# yoksa başlatır (2026-11-16).
+name: kurulum-windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src-tauri/**'
+      - 'package.json'
+      - 'src/platform/update.ts'
+      - 'src/platform/exe/**'
+      - 'src/ui/settings/About.tsx'
+      - 'scripts/kurulum-gecisi.mjs'
+      - 'scripts/yerel-sunucu.mjs'
+      - 'scripts/uia.mjs'
+      - 'scripts/webdriver.mjs'
+      - '.github/workflows/kurulum-windows.yml'
+      - '.github/workflows/surum.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kurulum-windows-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  kurulum:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      # UI Automation'ın bastığı düğme görünür olmalı (guncelleme-windows.yml).
+      - name: Ekran 1920×1080
+        shell: pwsh
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force
+          Add-Type -AssemblyName System.Windows.Forms
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          if ($b.Width -lt 1920) { throw 'çözünürlük değişmedi' }
+
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: src-tauri -> target
+
+      # surum.yml'in adımının aynısı; özet orada da aynı olmalı, yoksa bu iş
+      # yayınlanmayacak bir kurulumu sınar.
+      - name: OR-Tools CP-SAT, surum.yml'deki gibi
+        shell: pwsh
+        run: |
+          $surum = "9.15.6755"
+          $ad = "or-tools_x64_VisualStudio2022_cpp_v$surum"
+          $url = "https://github.com/google/or-tools/releases/download/v9.15/$ad.zip"
+          $beklenen = "43429C741641C8B495EE77E44EA00F0F4524519495FD2EDAF929003AA2B2EA30"
+          if (-not (Select-String -Path .github/workflows/surum.yml -SimpleMatch $beklenen -Quiet)) { throw 'surum.yml başka bir OR-Tools sabitliyor' }
+          Invoke-WebRequest $url -OutFile ortools.zip
+          $hash = (Get-FileHash ortools.zip -Algorithm SHA256).Hash
+          if ($hash -ne $beklenen) { throw "OR-Tools arşivinin özeti tutmuyor: $hash" }
+          Expand-Archive ortools.zip -DestinationPath ortools-acik
+          $bin = "ortools-acik/$ad/bin"
+          New-Item -ItemType Directory -Force -Path src-tauri/ortools | Out-Null
+          $dll = @('ortools.dll','abseil_dll.dll','bz2.dll','highs.dll','libprotobuf.dll',
+                   'libscip.dll','libutf8_validity.dll','re2.dll','zlib1.dll')
+          foreach ($d in $dll) { Copy-Item "$bin/$d" src-tauri/ortools/ }
+          $crt = @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')
+          foreach ($d in $crt) { Copy-Item "$env:WINDIR/System32/$d" src-tauri/ortools/ }
+          $kaynak = @{}
+          foreach ($d in $dll + $crt) { $kaynak["ortools/$d"] = $d }
+          $kaynak["lisanslar/UCUNCU-TARAF.txt"] = "UCUNCU-TARAF.txt"
+          @{ bundle = @{ resources = $kaynak } } | ConvertTo-Json -Depth 4 |
+            Set-Content src-tauri/tauri.ortools.json -Encoding utf8
+
+      - name: Kurulum
+        shell: pwsh
+        run: |
+          npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
+          $kur = Get-ChildItem src-tauri/target/release/bundle/nsis -Filter *-setup.exe | Select-Object -First 1
+          if (-not $kur) { throw "kurulum üretilmedi" }
+          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP/kurulum" | Out-Null
+          Copy-Item $kur.FullName "$env:RUNNER_TEMP/kurulum/Mozaik-Kurulum.exe"
+
+      # A: tek başına, güncelleme kökü yerel sunucuda (update.rs, TEST_KOKU), aynı
+      # numarayla. Kurulumun içindeki program yukarıdaki, gerçek köklü derleme.
+      - name: Tek başına test exe'si (A)
+        shell: bash
+        env:
+          MOZAIK_TEST_GUNCELLEME_KOKU: http://127.0.0.1:8765/
+        run: |
+          npx --yes @tauri-apps/cli@2.12.4 build --no-bundle
+          mkdir -p "$RUNNER_TEMP/tek"
+          node --input-type=module -e "import { varsayilanIkili } from './scripts/webdriver.mjs'; import { copyFileSync } from 'node:fs'; copyFileSync(varsayilanIkili(), process.env.RUNNER_TEMP + '/tek/Mozaik.exe');"
+
+      - name: A kendi düğmeleriyle kuruluma geçiyor
+        shell: bash
+        run: >
+          node scripts/kurulum-gecisi.mjs
+          --tek "$RUNNER_TEMP/tek/Mozaik.exe"
+          --kurulum "$RUNNER_TEMP/kurulum/Mozaik-Kurulum.exe"
+
+      # cpsat.rs'in küçük modeli kurulan kütüphaneyle. PATH: test ikilisi kurulum
+      # klasöründe değil, ve Windows bir DLL'in bağımlılıklarını uygulamanın
+      # klasöründe ve PATH'te arar, DLL'in kendi klasöründe değil. Kurulan
+      # program için ikisi aynı klasör.
+      - name: CP-SAT kurulan DLL'lerle
+        shell: pwsh
+        run: |
+          $k = Join-Path $env:LOCALAPPDATA 'Programs\Mozaik'
+          $env:MOZAIK_ORTOOLS = Join-Path $k 'ortools.dll'
+          $env:PATH = "$k;$env:PATH"
+          cargo test --manifest-path src-tauri/Cargo.toml cpsat -- --nocapture
+          if ($LASTEXITCODE -ne 0) { throw 'CP-SAT kurulan DLL ile cevap vermedi' }
+
+      - name: Kaldırma veriyi bırakıyor
+        shell: pwsh
+        run: |
+          $k = Join-Path $env:LOCALAPPDATA 'Programs\Mozaik'
+          # `_?=` kaldırıcıyı yerinde ve bekleyerek çalıştırır (NSIS kendini
+          # yoksa geçici klasöre kopyalayıp hemen döner).
+          $p = Start-Process "$k\uninstall.exe" -ArgumentList '/S', "_?=$k" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "kaldırıcı $($p.ExitCode) ile çıktı" }
+          if (Test-Path "$k\Mozaik.exe") { throw 'program kaldırılmadı' }
+          $belgeler = [Environment]::GetFolderPath('MyDocuments')
+          $yedek = Join-Path $belgeler 'Ders Programı\ders-programi-2026-01-01.json'
+          $profil = Join-Path $env:LOCALAPPDATA 'com.dersprogrami.arac\kurulum-deneme.txt'
+          foreach ($f in @($yedek, $profil)) { if (-not (Test-Path $f)) { throw "kaldırma sildi: $f" } }
+          Write-Host 'program gitti, yedek ve profil yerinde'

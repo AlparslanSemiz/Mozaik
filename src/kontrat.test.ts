@@ -93,6 +93,7 @@ const PAGE_TYPE: Record<string, string> = {
   bool: 'boolean',
   u64: 'number',
   Cevap: 'UpdateCevap',
+  Durum: 'GuncellemeDurumu',
   // Raw bytes back: Tauri hands them over as an ArrayBuffer, or as numbers on an old WebView.
   'tauri::ipc::Response': 'ArrayBuffer | number[]',
 };
@@ -292,6 +293,12 @@ describe('exe köprüsü — Rust ile desktop.ts aynı sözleşmeyi konuşuyor',
 
   it('UpdateCevap ile Cevap aynı alanları taşıyor', () => {
     expect(interfaceFields(desktop, 'UpdateCevap').sort()).toEqual([...CEVAP].sort());
+  });
+
+  it('GuncellemeDurumu ile Durum aynı alanları taşıyor', () => {
+    expect(interfaceFields(desktop, 'GuncellemeDurumu').sort()).toEqual(
+      rustFields('Durum', updateRs).sort(),
+    );
   });
 });
 

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { type Lesson, type State, paletteColor } from '../../leaf/model';
 import {
   useToast,
+  useKeepBefore,
   useUndoIf,
   moveFocusFromDeleted,
   LimitBox,
@@ -35,6 +36,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
   const t = useT();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const group = state.classes.find((c) => c.id === x.classId);
   const teacher = state.teachers.find((t) => t.id === x.teacherId);
   return (
@@ -139,6 +141,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
               const said = deletionNotice(state, 'lesson', x.id);
               const next = deleteLesson(state, x.id);
               moveFocusFromDeleted(e.currentTarget);
+              keepBefore(state, said);
               change((d) => (d === state ? next : deleteLesson(d, x.id)), said);
               notify(said, 'info', {
                 label: t('Geri al'),

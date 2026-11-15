@@ -155,9 +155,53 @@ fn cpsat() -> Result<&'static Cpsat, String> {
 /// to the library that made it.
 static CALISAN: Mutex<Option<usize>> = Mutex::new(None);
 
+/// The program's priority, lowered while CP-SAT works (Windows only).
+///
+/// The search occupies every core it is given (`relaxPool.ts` gives it all of
+/// them), and on a weak two-core machine the window would then wait behind it.
+/// The library makes its own threads, so lowering the calling thread would not
+/// reach them; the PROCESS's class does, and it is this process only: the
+/// page itself is drawn by WebView2's own processes, which keep theirs. Put
+/// back when the question ends, whatever way it ends.
+struct DusukOncelik;
+
+#[cfg(windows)]
+mod oncelik {
+    use std::ffi::c_void;
+    pub const NORMAL: u32 = 0x0000_0020;
+    pub const BELOW_NORMAL: u32 = 0x0000_4000;
+    #[link(name = "kernel32")]
+    extern "system" {
+        pub fn GetCurrentProcess() -> *mut c_void;
+        pub fn SetPriorityClass(process: *mut c_void, class: u32) -> i32;
+    }
+}
+
+impl DusukOncelik {
+    fn al() -> Self {
+        // SAFETY: the pseudo-handle of this process; nothing else is touched.
+        #[cfg(windows)]
+        unsafe {
+            oncelik::SetPriorityClass(oncelik::GetCurrentProcess(), oncelik::BELOW_NORMAL);
+        }
+        DusukOncelik
+    }
+}
+
+impl Drop for DusukOncelik {
+    fn drop(&mut self) {
+        // SAFETY: as above.
+        #[cfg(windows)]
+        unsafe {
+            oncelik::SetPriorityClass(oncelik::GetCurrentProcess(), oncelik::NORMAL);
+        }
+    }
+}
+
 /// One question, solved to the end (or to its time limit, or to "Durdur").
 pub fn coz(model: &[u8], params: &[u8]) -> Result<Vec<u8>, String> {
     let c = cpsat()?;
+    let _oncelik = DusukOncelik::al();
     let model_len = c_int::try_from(model.len()).map_err(|_| "CP-SAT modeli çok büyük.")?;
     let params_len = c_int::try_from(params.len()).map_err(|_| "CP-SAT ayarları çok büyük.")?;
     let mut res: *mut c_void = std::ptr::null_mut();
