@@ -186,7 +186,7 @@ const EN: Sozluk = {
   "{gun}: bütün günü değiştir": "{gun}: flip the whole day",
   "Haftanın darlığı": "How tight the week is",
   "{gun} {ders}. saat: {kapali} / {toplam} kapalı":
-    "{gun}, period {ders}: {kapali} of {toplam} closed",
+    "{gun}, hour {ders}: {kapali} of {toplam} closed",
   "Kimin saatleri": "Whose hours",
   "Müsaitlik listesi": "Availability list",
   "Tümünü aç": "Open all",
@@ -530,9 +530,9 @@ const EN: Sozluk = {
   "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
     "The suggestion panel lists the questions to ask each teacher, each with Yes and Not possible; the answers are saved with the plan.",
   "Izgarada göster, önerilen programı uygulamadan önce ızgarada işaretli gösteriyor.":
-    "Show on the grid marks the suggested week on the timetable before it is applied.",
+    "Show on the grid marks the suggested timetable on the grid before it is applied.",
   "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi programı onararak devam ediyor.":
-    "Automatic arrangement no longer gives up when it gets stuck; it keeps repairing the best week it found.",
+    "Automatic arrangement no longer gives up when it gets stuck; it keeps repairing the best timetable it found.",
   "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
     "A \"Not on the same day\" row on the lesson's sheet: two lessons are never put on the same day.",
   "Bir kart, bırakıldığı saatleri dolduran kartlarla yer değiştirebiliyor.":
@@ -701,7 +701,7 @@ const EN: Sozluk = {
   "ders yok": "no lessons",
   "{gun} öğle arası": "{gun} lunch break",
   "Uzun ara yok": "No long break",
-  "{n}. saatten sonra": "after period {n}",
+  "{n}. saatten sonra": "after hour {n}",
   "En az bir gün seçmelisiniz.": "You must choose at least one day.",
   "Günün saatleri": "Hours of the day",
   "Günlük saat sayısı": "Hours per day",
@@ -1086,7 +1086,7 @@ const EN: Sozluk = {
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} hours a week are asked for; the open hours and the rules allow at most {olabilen}",
   "Program baştan dizilince değişiklik gerekmeden kuruluyor":
-    "Laid out afresh, the week can be built without any change",
+    "Laid out afresh, the timetable can be built without any change",
   "Uygula ve baştan diz":
     "Apply and lay out again",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
@@ -1112,9 +1112,9 @@ const EN: Sozluk = {
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
     "The timetable has changed since. Press Fill automatically to see a suggestion again.",
   "Program değişiklik gerekmeden kuruluyor":
-    "The week can be built without any change",
+    "The timetable can be built without any change",
   "Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.":
-    "Filling automatically did not find this week; the second search found it and checked it.",
+    "Filling automatically did not find this timetable; the second search found it and checked it.",
   "Uygula ve diz":
     "Apply and lay out",
   "{ders}: {yeni} versin":
@@ -1140,7 +1140,7 @@ const EN: Sozluk = {
   "{ders} haftada {yeni} saat olabilirse":
     "{ders} can be {yeni} hours a week",
   "{kosullar} program kuruluyor.":
-    "The week can be built if {kosullar}.",
+    "The timetable can be built if {kosullar}.",
   "{kim} {gun}":
     "{kim} on {gun}",
   "{kim}: günlük sınır":
@@ -1210,11 +1210,11 @@ const EN: Sozluk = {
   "Olur dedi":
     "Said yes",
   "Olur dedikleriniz yetiyor: program kuruluyor":
-    "Your yeses are enough: the week can be built",
+    "Your yeses are enough: the timetable can be built",
   "Olur dediklerinize ek olarak {kosullar} program kuruluyor.":
-    "On top of your yeses, the week can be built if {kosullar}.",
+    "On top of your yeses, the timetable can be built if {kosullar}.",
   "Uygulayınca cevaplarınız veriye yazılır ve program dizilir.":
-    "Applying writes your answers into the data and lays the week out.",
+    "Applying writes your answers into the data and lays the timetable out.",
   "Izgarada göster":
     "Show on the grid",
   "Sorular":
@@ -1264,7 +1264,7 @@ const EN: Sozluk = {
   "Önizlemeyi kapat":
     "Close preview",
   "Hangi program":
-    "Which week",
+    "Which timetable",
   "Şu anki":
     "Current",
   "Önerilen":
@@ -1586,9 +1586,9 @@ const EN: Sozluk = {
   "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
     "**Roomy.** The largest cell: easiest to read, most scrolling.",
   "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Comfortable.** Wide cells with the clock times; the week does not fit, so you scroll.",
+    "**Comfortable.** Wide cells with the clock times; the timetable does not fit, so you scroll.",
   "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Fit.** The whole week on one screen, and the price is **hiding the clock times**.",
+    "**Fit.** The whole timetable on one screen, and the price is **hiding the clock times**.",
   "**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**.":
     "**Fit.** Rows tighten; what is cut is space, **not the type size**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
@@ -1596,7 +1596,7 @@ const EN: Sozluk = {
   "**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz.":
     "**Warning** only counts; **Blocker** will not let the card be dropped there at all.",
   "**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz.":
-    "If **Load** passes **Open**, that class's week does not add up.",
+    "If **Load** passes **Open**, that class's timetable does not add up.",
   "Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.":
     "The interface language. It belongs to this computer, not to the plan file.",
   "Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı.":

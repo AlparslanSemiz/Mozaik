@@ -536,9 +536,9 @@ const ES: Sozluk = {
   "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
     "El panel de sugerencias lista las preguntas para cada profesor, cada una con Sí y No es posible; las respuestas se guardan con el plan.",
   "Izgarada göster, önerilen programı uygulamadan önce ızgarada işaretli gösteriyor.":
-    "Mostrar en la cuadrícula marca la semana sugerida en el horario antes de aplicarla.",
+    "Mostrar en la cuadrícula marca el horario sugerido en la cuadrícula antes de aplicarlo.",
   "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi programı onararak devam ediyor.":
-    "La colocación automática ya no se rinde al atascarse: sigue reparando la mejor semana encontrada.",
+    "La colocación automática ya no se rinde al atascarse: sigue reparando el mejor horario encontrado.",
   "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
     "Una fila \"No el mismo día\" en la ficha de la clase: dos clases nunca van el mismo día.",
   "Bir kart, bırakıldığı saatleri dolduran kartlarla yer değiştirebiliyor.":
@@ -1100,7 +1100,7 @@ const ES: Sozluk = {
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "se piden {istenen} horas a la semana; las horas abiertas y las reglas permiten como máximo {olabilen}",
   "Program baştan dizilince değişiklik gerekmeden kuruluyor":
-    "Colocada de nuevo, la semana se puede montar sin ningún cambio",
+    "Montado de nuevo, el horario se puede montar sin ningún cambio",
   "Uygula ve baştan diz":
     "Aplicar y montar de nuevo",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
@@ -1126,9 +1126,9 @@ const ES: Sozluk = {
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
     "El horario ha cambiado entretanto. Pulse Colocar automáticamente para volver a ver una sugerencia.",
   "Program değişiklik gerekmeden kuruluyor":
-    "La semana se puede montar sin ningún cambio",
+    "El horario se puede montar sin ningún cambio",
   "Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.":
-    "La colocación automática no encontró esta semana; la segunda búsqueda la encontró y la comprobó.",
+    "La colocación automática no encontró este horario; la segunda búsqueda lo encontró y lo comprobó.",
   "Uygula ve diz":
     "Aplicar y montar",
   "{ders}: {yeni} versin":
@@ -1154,7 +1154,7 @@ const ES: Sozluk = {
   "{ders} haftada {yeni} saat olabilirse":
     "{ders} puede tener {yeni} horas a la semana",
   "{kosullar} program kuruluyor.":
-    "La semana se puede montar si {kosullar}.",
+    "El horario se puede montar si {kosullar}.",
   "{kim} {gun}":
     "{kim} el {gun}",
   "{kim}: günlük sınır":
@@ -1224,11 +1224,11 @@ const ES: Sozluk = {
   "Olur dedi":
     "Dijo que sí",
   "Olur dedikleriniz yetiyor: program kuruluyor":
-    "Sus síes bastan: la semana se puede montar",
+    "Sus síes bastan: el horario se puede montar",
   "Olur dediklerinize ek olarak {kosullar} program kuruluyor.":
-    "Además de sus síes, la semana se puede montar si {kosullar}.",
+    "Además de sus síes, el horario se puede montar si {kosullar}.",
   "Uygulayınca cevaplarınız veriye yazılır ve program dizilir.":
-    "Al aplicar, sus respuestas pasan a los datos y la semana se coloca.",
+    "Al aplicar, sus respuestas pasan a los datos y se monta el horario.",
   "Izgarada göster":
     "Mostrar en la cuadrícula",
   "Sorular":
@@ -1278,7 +1278,7 @@ const ES: Sozluk = {
   "Önizlemeyi kapat":
     "Cerrar vista previa",
   "Hangi program":
-    "Qué semana",
+    "Qué horario",
   "Şu anki":
     "Actual",
   "Önerilen":
@@ -1602,9 +1602,9 @@ const ES: Sozluk = {
   "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
     "**Amplio.** La celda más grande: la más legible, la que más se desplaza.",
   "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Cómodo.** Celdas anchas con las horas; la semana no cabe, así que se desplaza.",
+    "**Cómodo.** Celdas anchas con las horas; el horario no cabe, así que se desplaza.",
   "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Ajustar.** Toda la semana en una pantalla, a costa de **ocultar las horas**.",
+    "**Ajustar.** Todo el horario en una pantalla, a costa de **ocultar las horas**.",
   "**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**.":
     "**Ajustar.** Las filas se aprietan; se recorta el espacio, **no el tamaño de letra**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
@@ -1612,7 +1612,7 @@ const ES: Sozluk = {
   "**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz.":
     "**Aviso** solo cuenta; **Bloqueo** impide del todo soltar la tarjeta ahí.",
   "**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz.":
-    "Si **Carga** supera **Abierto**, la semana de ese grupo no cuadra.",
+    "Si **Carga** supera **Abierto**, el horario de ese grupo no cuadra.",
   "Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.":
     "El idioma de la interfaz. Pertenece a este ordenador, no al archivo de plan.",
   "Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı.":

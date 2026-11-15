@@ -32,7 +32,7 @@ Durum işaretleri: `denenmedi`, `denendi, bulgu yok`, `denendi, bulgu var`, `kı
 | Ad | Ne | Nereden |
 |---|---|---|
 | boş | ilk açılış, boş depo | temiz bir tarayıcı bağlamı |
-| örnek | örnek okul: 25 öğretmen, 20 sınıf, 8 derslik, 99 ders | Okul → `Örnek veriyle doldur` |
+| örnek | örnek okul: 25 öğretmen, 20 sınıf, 8 derslik, 99 ders | Okul → `Örnek okulu yükle` |
 | fikstür | babanın adsız planı, 0 yerleşim, bu hâliyle kurulamıyor | `src/fixtures/tam-dolu-kurs.json` |
 | dizili | aynı plan, babanın elle dizdiği saatlerle | `src/fixtures/tam-dolu-kurs-dizili.json` |
 | tam | dizili plana bir öneri uygulanmış tam hafta, her sınıf dolu | `scratch/tam-hafta-uret.mjs` |

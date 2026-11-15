@@ -537,9 +537,9 @@ const DE: Sozluk = {
   "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
     "Der Vorschlagsbereich listet die Fragen an die Lehrkräfte, jede mit Ja und Geht nicht; die Antworten werden mit dem Plan gespeichert.",
   "Izgarada göster, önerilen programı uygulamadan önce ızgarada işaretli gösteriyor.":
-    "Im Raster zeigen markiert die vorgeschlagene Woche im Stundenplan, bevor sie angewendet wird.",
+    "Im Raster zeigen markiert den vorgeschlagenen Stundenplan im Raster, bevor er angewendet wird.",
   "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi programı onararak devam ediyor.":
-    "Automatisch legen gibt nicht mehr auf, wenn es hängen bleibt, sondern repariert die beste gefundene Woche weiter.",
+    "Automatisch legen gibt nicht mehr auf, wenn es hängen bleibt, sondern repariert den besten gefundenen Stundenplan weiter.",
   "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
     "Eine Zeile \"Nicht am selben Tag\" auf der Seite des Fachs: zwei Fächer kommen nie auf denselben Tag.",
   "Bir kart, bırakıldığı saatleri dolduran kartlarla yer değiştirebiliyor.":
@@ -1101,7 +1101,7 @@ const DE: Sozluk = {
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} Wochenstunden sind gewünscht; offene Stunden und Regeln lassen höchstens {olabilen} zu",
   "Program baştan dizilince değişiklik gerekmeden kuruluyor":
-    "Neu angeordnet lässt sich die Woche ohne Änderung aufbauen",
+    "Neu gelegt lässt sich der Stundenplan ohne Änderung aufbauen",
   "Uygula ve baştan diz":
     "Übernehmen und neu legen",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
@@ -1127,9 +1127,9 @@ const DE: Sozluk = {
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
     "Der Stundenplan hat sich inzwischen geändert. Drücken Sie Automatisch legen, um wieder einen Vorschlag zu sehen.",
   "Program değişiklik gerekmeden kuruluyor":
-    "Die Woche lässt sich ohne Änderung aufbauen",
+    "Der Stundenplan lässt sich ohne Änderung aufbauen",
   "Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.":
-    "Das automatische Legen hat diese Woche nicht gefunden; die zweite Suche hat sie gefunden und geprüft.",
+    "Das automatische Legen hat diesen Stundenplan nicht gefunden; die zweite Suche hat ihn gefunden und geprüft.",
   "Uygula ve diz":
     "Übernehmen und legen",
   "{ders}: {yeni} versin":
@@ -1155,7 +1155,7 @@ const DE: Sozluk = {
   "{ders} haftada {yeni} saat olabilirse":
     "{ders} {yeni} Stunden pro Woche haben kann",
   "{kosullar} program kuruluyor.":
-    "Die Woche lässt sich aufbauen, wenn {kosullar}.",
+    "Der Stundenplan lässt sich aufbauen, wenn {kosullar}.",
   "{kim} {gun}":
     "{kim} am {gun}",
   "{kim}: günlük sınır":
@@ -1225,11 +1225,11 @@ const DE: Sozluk = {
   "Olur dedi":
     "Hat zugesagt",
   "Olur dedikleriniz yetiyor: program kuruluyor":
-    "Ihre Zusagen reichen: die Woche lässt sich aufbauen",
+    "Ihre Zusagen reichen: der Stundenplan lässt sich aufbauen",
   "Olur dediklerinize ek olarak {kosullar} program kuruluyor.":
-    "Zusätzlich zu Ihren Zusagen lässt sich die Woche aufbauen, wenn {kosullar}.",
+    "Zusätzlich zu Ihren Zusagen lässt sich der Stundenplan aufbauen, wenn {kosullar}.",
   "Uygulayınca cevaplarınız veriye yazılır ve program dizilir.":
-    "Beim Anwenden werden Ihre Antworten in die Daten geschrieben und die Woche verteilt.",
+    "Beim Anwenden werden Ihre Antworten in die Daten geschrieben und der Stundenplan gelegt.",
   "Izgarada göster":
     "Im Raster zeigen",
   "Sorular":
@@ -1279,7 +1279,7 @@ const DE: Sozluk = {
   "Önizlemeyi kapat":
     "Vorschau schließen",
   "Hangi program":
-    "Welche Woche",
+    "Welcher Stundenplan",
   "Şu anki":
     "Aktuell",
   "Önerilen":
@@ -1603,9 +1603,9 @@ const DE: Sozluk = {
   "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
     "**Weit.** Die größte Zelle: am besten lesbar, am meisten Scrollen.",
   "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Bequem.** Breite Zellen mit Uhrzeiten; die Woche passt nicht, also scrollen Sie.",
+    "**Bequem.** Breite Zellen mit Uhrzeiten; der Stundenplan passt nicht, also scrollen Sie.",
   "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Passend.** Die ganze Woche auf einem Bildschirm; der Preis: **Uhrzeiten entfallen**.",
+    "**Passend.** Der ganze Stundenplan auf einem Bildschirm; der Preis: **Uhrzeiten entfallen**.",
   "**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**.":
     "**Passend.** Zeilen rücken zusammen; gekürzt wird Abstand, **nicht die Schriftgröße**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
@@ -1613,7 +1613,7 @@ const DE: Sozluk = {
   "**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz.":
     "**Warnung** zählt nur; **Sperre** lässt die Karte dort gar nicht ablegen.",
   "**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz.":
-    "Übersteigt **Last** den Wert **Offen**, geht die Woche dieser Klasse nicht auf.",
+    "Übersteigt **Last** den Wert **Offen**, geht der Stundenplan dieser Klasse nicht auf.",
   "Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.":
     "Die Sprache der Oberfläche. Sie gehört zu diesem Rechner, nicht zur Plandatei.",
   "Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı.":

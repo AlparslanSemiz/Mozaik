@@ -1018,7 +1018,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `src/pure/constraints/constraints.test.ts` (takas), `src/pure/program/programView.test.ts` ve `src/ui/program/programScreen.test.tsx`.
       Eksik olanlar:
       - takas: kaynak blok sabitliyse takas yok (main yalnız sabit hedefi soruyor);
-      - takas: Uyar seviyesindeki bir kuralın uyarısı takas cümlesine ` · ` ile ekleniyor;
+      - takas: Uyarı seviyesindeki bir kuralın uyarısı takas cümlesine ` · ` ile ekleniyor;
       - takas: başarılı takas girdi state'i değiştirmiyor;
       - takas: bilinmeyen sınıf ya da öğretmende blok adı `?` (`blockName`);
       - alt satır: koşu sürüyor ama ilerleme henüz yoksa boştaki satıra düşüyor;
