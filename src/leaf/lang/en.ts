@@ -1897,6 +1897,8 @@ const EN: Sozluk = {
   "Son silme geri alındı.": "The last deletion was undone.",
   "son silmeden önceki hâl": "the plan before the last deletion",
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Nothing is written to the folder until you choose.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
 };
 
 registerSozluk("en", EN);

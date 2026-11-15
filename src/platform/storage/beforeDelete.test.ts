@@ -61,6 +61,20 @@ describe('silmeden önceki hâl', () => {
     expect(third.offerAtStart('1', LESS)).toBeNull();
   });
 
+  it('silmeden sonra plan değiştiyse önerilmiyor: geri getirmek o değişikliği de silerdi', async () => {
+    const m = await import('./beforeDelete');
+    m.keepBeforeDelete('1', FULL, 'sınıf silindi');
+    m.noteAfter('1', LESS); // the autosave's first save after the deletion
+    vi.resetModules();
+    expect((await import('./beforeDelete')).offerAtStart('1', LESS)).not.toBeNull();
+
+    m.keepBeforeDelete('1', FULL, 'sınıf silindi');
+    m.noteAfter('1', LESS);
+    vi.resetModules();
+    const later: State = { ...LESS, teachers: LESS.teachers.slice(1) };
+    expect((await import('./beforeDelete')).offerAtStart('1', later)).toBeNull();
+  });
+
   it('geri alınmış silme (aynı hâl), başka plan ya da boş plan önerilmiyor', async () => {
     const m = await import('./beforeDelete');
     expect(

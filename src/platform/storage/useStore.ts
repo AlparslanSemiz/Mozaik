@@ -31,7 +31,7 @@ import {
   writeRefused,
 } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
-import { keepBeforeDelete, offerAtStart, type Offer } from './beforeDelete';
+import { keepBeforeDelete, noteAfter, offerAtStart, type Offer } from './beforeDelete';
 import type { Id, State } from '../../leaf/model';
 import { t } from '../../leaf/i18n';
 
@@ -228,6 +228,7 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     // the stand-in is never saved: the strip says so instead (A1).
     if (writesClosed() || frozenPlan(id) !== null) return;
     const landed = savePlan(id, d);
+    if (landed) noteAfter(id, d);
     setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');
   }, []);
 

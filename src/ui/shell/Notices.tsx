@@ -19,6 +19,8 @@ interface Props {
   folder: FolderRun;
   /** The folder's fuller copy, after an empty start ('bulundu'). */
   openFolderCopy: () => void;
+  /** The shrink strip's "keep the small one", behind a question (App). */
+  acceptShrink: () => void;
   /** The open plan before the last deletion of an earlier session (SD1). */
   lastDelete: ReturnType<typeof useStore>['lastDelete'];
   restoreLastDelete: () => void;
@@ -37,6 +39,7 @@ export default function Notices({
   setUpdateHidden,
   folder,
   openFolderCopy,
+  acceptShrink,
   lastDelete,
   restoreLastDelete,
   closeLastDelete,
@@ -167,7 +170,10 @@ export default function Notices({
               dosya: folder.shrunk.file,
             }}
           />{' '}
-          <button className="btn" onClick={() => void folder.acceptShrink()}>
+          <button className="btn primary" onClick={openFolderCopy}>
+            {t("Belgelerim'deki son kaydı aç")}
+          </button>{' '}
+          <button className="btn" onClick={acceptShrink}>
             {t('Yeni hâlini asıl dosya yap')}
           </button>
         </div>

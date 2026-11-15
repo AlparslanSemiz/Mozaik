@@ -267,9 +267,12 @@ export default function App() {
   };
 
   // The folder's fuller copy after an empty start (useFolder's `bulundu`).
-  const openFolderCopyNow = () => {
-    if (folder.status.kind !== 'bulundu') return;
-    const bundle = parseBundle(folder.status.copy.text);
+  // Also from the shrink strip: there the plan here is the small one, and it
+  // stays in the day's rescue file the guard wrote it to.
+  const openFolderCopyNow = async () => {
+    const copy = folder.status.kind === 'bulundu' ? folder.status.copy : await folder.folderCopy();
+    const bundle = copy === null ? null : parseBundle(copy.text);
+    if (bundle !== null) keepBefore(state, t('Plan dosyası açıldı.'));
     const opened = bundle === null ? null : openFolderCopy(bundle);
     if (opened === null || opened.ok === 0) {
       notify(t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'), 'info');
@@ -277,6 +280,23 @@ export default function App() {
     }
     folder.release();
     notify(t('{acilan} plan açıldı.', { acilan: opened.ok }), 'info');
+  };
+
+  // The shrink strip's "keep the small one" goes over the live file: asked,
+  // because the only button on a strip is the one an older reader presses.
+  const acceptShrink = async () => {
+    if (
+      await confirm({
+        title: t('Yeni hâlini asıl dosya yap'),
+        body: t(
+          'Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.',
+        ),
+        confirmLabel: t('Yeni hâlini asıl dosya yap'),
+        danger: true,
+      })
+    ) {
+      await folder.acceptShrink();
+    }
   };
 
   const fileChosen = openPlanFile({
@@ -396,7 +416,8 @@ export default function App() {
                     updateHidden={updateHidden}
                     setUpdateHidden={setUpdateHidden}
                     folder={folder}
-                    openFolderCopy={openFolderCopyNow}
+                    openFolderCopy={() => void openFolderCopyNow()}
+                    acceptShrink={() => void acceptShrink()}
                     lastDelete={lastDeleteOpen ? lastDelete : null}
                     restoreLastDelete={restoreLastDelete}
                     closeLastDelete={() => setLastDeleteOpen(false)}

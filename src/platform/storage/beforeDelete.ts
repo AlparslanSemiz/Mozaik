@@ -33,7 +33,24 @@ interface Slot {
   state: unknown;
   /** Offered at a start already: it is not offered again. */
   seen?: boolean;
+  /** A fingerprint of the plan as first saved after the deletion (`noteAfter`). */
+  after?: string;
 }
+
+/** FNV-1a over the plan's text: enough to tell "the same plan" apart. */
+function fingerprint(state: State): string {
+  const read = readStoredPlan(JSON.stringify(state));
+  const text = JSON.stringify('state' in read ? read.state : state);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return `${text.length}:${(h >>> 0).toString(36)}`;
+}
+
+/** The plan whose first save after a deletion is still to be noted. */
+let waiting: Id | null = null;
 
 /** Whether a plan holds anything a person would miss. */
 export function holdsAnything(state: State): boolean {
@@ -66,7 +83,24 @@ export function keepBeforeDelete(planId: Id, state: State, label: string, quiet 
   // A refused write leaves the older slot in place, and offering THAT one as
   // "the last deletion" would put back the wrong state.
   if (!landed) safely(() => localStorage.removeItem(BEFORE_DELETE_KEY));
+  waiting = landed && !quiet ? planId : null;
   return landed;
+}
+
+/**
+ * The autosave's answer, after it saved plan `planId` as `state`: the first
+ * save after a deletion is the state the deletion left, and the next start
+ * offers the slot only while the plan is still that state. Otherwise "Geri
+ * getir" would take back every later change with it (review, 2026-11-16).
+ */
+export function noteAfter(planId: Id, state: State): void {
+  if (waiting !== planId) return;
+  waiting = null;
+  const slot = read();
+  if (slot === null || slot.planId !== planId || slot.seen === true) return;
+  safely(() =>
+    localStorage.setItem(BEFORE_DELETE_KEY, JSON.stringify({ ...slot, after: fingerprint(state) })),
+  );
 }
 
 export interface Offer {
@@ -97,7 +131,8 @@ function read(): Slot | null {
 
 /**
  * At startup: the slot, if it belongs to the plan that opened, was not offered
- * before, and holds something other than what opened. Offered once: it is
+ * before, holds something other than what opened, and the plan has not
+ * changed since the deletion left it (`noteAfter`). Offered once: it is
  * marked as seen here, whether or not it is offered (an undone deletion leaves
  * a slot equal to the plan). A slot of another plan waits for that plan.
  */
@@ -121,6 +156,9 @@ function firstOffer(planId: Id, present: State): Offer | null {
   }
   if (!('state' in parsed) || !holdsAnything(parsed.state)) return null;
   if (JSON.stringify(parsed.state) === JSON.stringify(present)) return null;
+  // Changed since the deletion: putting the slot back would undo that too.
+  // It stays, quietly, as the session chain's backups do.
+  if (slot.after !== undefined && slot.after !== fingerprint(present)) return null;
   const at = new Date(slot.at);
   return {
     label: slot.label,

@@ -448,7 +448,8 @@ export async function saveInto(
   if (work && !allowShrink) {
     let before: Work | null = null;
     for (const name of [MAIN_NAME, daily]) {
-      const held = await readText(dir, name);
+      // A file open in another program is no reference; writing it says so.
+      const held = await readText(dir, name).catch(() => null);
       const there = held === null ? null : workOf(held);
       if (there !== null && (before === null || there.lists > before.lists)) before = there;
     }

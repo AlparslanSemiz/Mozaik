@@ -33,6 +33,7 @@ import {
 } from './folder';
 import { writesClosed } from './otherWindow';
 import { findPlan } from '../../pure/io';
+import { holdsAnything } from './beforeDelete';
 import { frozenPlan, mayWritePlan, readPlanText } from './libraryStore';
 import { collectStates } from './download';
 import { openedReadable } from './planStore';
@@ -55,7 +56,9 @@ export type FolderStatus =
   | { kind: 'izin-gerek'; name: string }
   | { kind: 'yazildi'; name: string; at: Date; files: string[] }
   | { kind: 'bekliyor'; name: string }
-  | { kind: 'hata'; name: string; text: string }
+  // `plan`: the folder is fine, a plan's text is not (B7.37); choosing the
+  // folder again would not help.
+  | { kind: 'hata'; name: string; text: string; plan?: string }
   // The start found this browser's storage empty or unreadable, and the folder
   // holds more work (`newestInFolder`): nothing is written to the folder until
   // the user opens that copy or says to start empty (`release`).
@@ -88,6 +91,8 @@ export interface FolderRun {
   shrunk: Shrunk | null;
   /** From a click: the smaller plan is the one to keep; writes it at once. */
   acceptShrink: () => Promise<void>;
+  /** The copy the folder would offer now (`newestInFolder`), for the shrink strip. */
+  folderCopy: () => Promise<FolderCopy | null>;
   /** Before a deletion: the open plan as it is, into the folder (TODO SD1). */
   keepBefore: (state: State) => void;
 }
@@ -175,6 +180,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
         setStatus({
           kind: 'hata',
           name: handle.name,
+          plan: bundle.broken,
           text: t('"{plan}" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.', {
             plan: bundle.broken,
           }),
@@ -234,14 +240,22 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
    */
   const arrive = useCallback(
     async (handle: FileSystemDirectoryHandle, alive: () => boolean = () => true) => {
-      const bundle = bundleNow();
-      const mine = bundle !== null && 'text' in bundle ? workOf(bundle.text) : null;
-      if (openedReadable() && mine !== null && mine.lists > 0) {
+      // A new folder, or the same one again: whatever held the last one is over.
+      held.current = false;
+      // The plans this window READ, without the frozen ones put back as they
+      // are stored: only a window with none of its own work offers the
+      // folder's copy, because opening that copy replaces every plan here
+      // (review, 2026-11-16: an unreadable open plan beside full ones did).
+      const { library: lib, planId: id, present: now } = latest.current;
+      const mine = workOf(buildBundle(lib, collectStates(lib, id, now)));
+      if (mine !== null && mine.lists > 0) {
         setStatus({ kind: 'bekliyor', name: handle.name });
-        await write(handle);
+        if (openedReadable()) await write(handle);
         return;
       }
-      // Empty, or not read: what does the folder hold?
+      // Nothing here: what does the folder hold? Held while it is read, so a
+      // flush in the meantime does not get ahead of the answer.
+      held.current = true;
       let copy: FolderCopy | null = null;
       try {
         copy = await newestInFolder(handle);
@@ -249,16 +263,15 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
         // A folder that cannot be read: the write below says so in red.
       }
       if (!alive()) return;
-      const here = mine === null ? 0 : mine.lists + mine.placed;
-      if (copy !== null && copy.work.lists + copy.work.placed > here) {
-        held.current = true;
+      if (copy !== null && copy.work.lists > 0) {
         setStatus({ kind: 'bulundu', name: handle.name, copy });
         return;
       }
+      held.current = false;
       setStatus({ kind: 'bekliyor', name: handle.name });
       if (openedReadable()) await write(handle);
     },
-    [write, bundleNow],
+    [write],
   );
 
   // ------------------------------------------------------------- on load
@@ -346,6 +359,9 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     }
     dir.current = handle;
     lastDay.current = '';
+    // A "yes, keep the smaller plan" was said about the other folder.
+    shrinkOk.current = false;
+    setShrunk(null);
     await writeHandle(handle);
     await arrive(handle);
   }, [arrive]);
@@ -366,6 +382,8 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     window.clearTimeout(timer.current);
     dir.current = null;
     held.current = false;
+    shrinkOk.current = false;
+    setShrunk(null);
     await dropHandle();
     setStatus({ kind: 'secilmedi' });
   }, []);
@@ -385,16 +403,21 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     await write(dir.current);
   }, [write]);
 
+  const folderCopy = useCallback(async () => {
+    const handle = dir.current;
+    if (handle === null) return null;
+    try {
+      return await newestInFolder(handle);
+    } catch {
+      return null;
+    }
+  }, []);
+
   const keepBefore = useCallback((state: State) => {
     const handle = dir.current;
     // Not while the folder is held, nor from a window that stopped writing,
     // nor an empty stand-in: the file would be a plan with nothing in it.
-    if (handle === null || held.current || writesClosed()) return;
-    if (
-      state.teachers.length + state.classes.length + state.lessons.length + state.rooms.length ===
-      0
-    )
-      return;
+    if (handle === null || held.current || writesClosed() || !holdsAnything(state)) return;
     void saveBefore(handle, JSON.stringify(state), new Date()).catch(() => undefined);
   }, []);
 
@@ -408,6 +431,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     release,
     shrunk,
     acceptShrink,
+    folderCopy,
     keepBefore,
   };
 }

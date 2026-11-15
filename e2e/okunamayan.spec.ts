@@ -302,12 +302,30 @@ test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (den
     await expect(found(page)).toHaveCount(0);
     d = await disk(page);
     expect(d.files['ders-programi-tumu.json']).toBe(TWO_PLANS);
-    // The user says the sample is the one to keep.
-    await page.getByRole('button', { name: 'Yeni hâlini asıl dosya yap' }).click();
+    // The user says the sample is the one to keep, and is asked once more.
+    await shrunk(page).getByRole('button', { name: 'Yeni hâlini asıl dosya yap' }).click();
+    await answerDialog(page);
     await expect(shrunk(page)).toHaveCount(0);
     await expect
       .poll(async () => teachersIn((await disk(page)).files['ders-programi-tumu.json']))
       .toBe(25);
+  });
+
+  test('küçülme şeridinden “son kaydı aç” klasördeki okulu geri getiriyor', async ({ page }) => {
+    await fakeExe(page, { 'ders-programi-tumu.json': TWO_PLANS });
+    await open(page);
+    await page.getByRole('button', { name: 'Boş başla' }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+    await answerDialog(page);
+    await expect(shrunk(page)).toBeVisible({ timeout: 8000 });
+    await shrunk(page).getByRole('button', { name: "Belgelerim'deki son kaydı aç" }).click();
+    await expect
+      .poll(async () => JSON.parse((await stored(page, 'ders-programi')) ?? '{}').teachers?.length)
+      .toBe(DOLU.teachers.length);
+    await expect(shrunk(page)).toHaveCount(0, { timeout: 8000 });
+    expect(teachersIn((await disk(page)).files['ders-programi-tumu.json'])).toBe(
+      DOLU.teachers.length,
+    );
   });
 
   test('silme günün silmeden-önce dosyasına önceki hâli yazıyor', async ({ page }) => {
