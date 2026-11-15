@@ -368,7 +368,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     await name.blur();
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await expect(page.locator('.print-page h3').first()).toContainText('Semiz Kurs');
+    await expect(page.locator('.print-page h2').first()).toContainText('Semiz Kurs');
     // ...and into the top bar, which is where you see which file you are in.
     await expect(page.locator('.app-title')).toHaveText('Semiz Kurs');
   });

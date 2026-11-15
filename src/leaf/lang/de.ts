@@ -1778,6 +1778,8 @@ const DE: Sozluk = {
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
   "{ad} kısa adı": "Kurzname von {ad}",
   "Yeni sınıfın dersliği": "Raum der neuen Klasse",
+  "İçeriğe geç": "Zum Inhalt springen",
+  "Ders günü": "Unterrichtstag",
 };
 
 registerSozluk("de", DE);

@@ -118,7 +118,9 @@ export default function Teachers({ state, change }: PanelProps) {
                     {t('Günde ↓')}
                   </th>
                   <th className="w-col-sm">{t('Ders saati')}</th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody ref={order.bodyRef}>

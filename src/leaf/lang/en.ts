@@ -1761,6 +1761,8 @@ const EN: Sozluk = {
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
   "{ad} kısa adı": "short name of {ad}",
   "Yeni sınıfın dersliği": "Room of the new class",
+  "İçeriğe geç": "Skip to content",
+  "Ders günü": "School day",
 };
 
 registerSozluk("en", EN);

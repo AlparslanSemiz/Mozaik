@@ -215,6 +215,20 @@ export default function App() {
        A custom property's SCOPE is part of its contract (pitfall 52). */
     <UndoIfProvider value={undoIf}>
       <div className="app" ref={appRef} data-section={tab}>
+        {/* The first Tab stop: from here to the first thing in the content
+            was 23 to 28 Tabs through the top bar and the strip (DENETIM
+            KS27). Not a hash link: the address is the file's, and the
+            content box is what has to take focus, not a scroll position. */}
+        <a
+          className="skip-link"
+          href="#icerik"
+          onClick={(event) => {
+            event.preventDefault();
+            mainRef.current?.focus();
+          }}
+        >
+          {t('İçeriğe geç')}
+        </a>
         {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
@@ -240,28 +254,34 @@ export default function App() {
           toggleTheme={toggleTheme}
         />
 
-        {/* Row two: the tools of whichever section is open. */}
-        <Ribbon
-          ui={ui}
-          open={ribbon}
-          state={state}
-          change={change}
-          manageProgram={manageProgram}
-          solver={solver}
-          programMask={programMask}
-          setProgramMask={setProgramMask}
-          density={density}
-          setDensity={setDensity}
-          availClock={availClock}
-          setAvailClock={setAvailClock}
-          theme={theme}
-          setTheme={setTheme}
-          programColor={programColor}
-          setProgramColor={setProgramColor}
-          changelogUnseen={changelogUnseen}
-          planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
-          status={status}
-        />
+        {/* Row two: the tools of whichever section is open. A named region
+            around it, because a toolbar is not a landmark: outside `<header>`
+            and `<main>` the strip had no place in a screen reader's list of
+            regions (axe `region`, on every screen). `display: contents`, so
+            the box changes nothing on screen. */}
+        <section className="ribbon-band" aria-label={t('Araç şeridi')}>
+          <Ribbon
+            ui={ui}
+            open={ribbon}
+            state={state}
+            change={change}
+            manageProgram={manageProgram}
+            solver={solver}
+            programMask={programMask}
+            setProgramMask={setProgramMask}
+            density={density}
+            setDensity={setDensity}
+            availClock={availClock}
+            setAvailClock={setAvailClock}
+            theme={theme}
+            setTheme={setTheme}
+            programColor={programColor}
+            setProgramColor={setProgramColor}
+            changelogUnseen={changelogUnseen}
+            planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
+            status={status}
+          />
+        </section>
 
         <InspectorProvider state={state} change={change}>
           <LessonEditProvider state={state} change={change}>
@@ -300,8 +320,13 @@ export default function App() {
             updates at low priority without throwing away the ızgara DOM or
             its scroll position. Keeping `<main>` itself stable is essential;
             a key here would remount the Activity boundary too. */}
+              {/* `tabIndex={-1}`: focusable by code, not a Tab stop. The skip
+                  link lands here, and so does a closing dialog whose opener
+                  is gone (`returnFocus.ts`). */}
               <main
                 ref={mainRef}
+                id="icerik"
+                tabIndex={-1}
                 className={
                   tab === 'program' && state.lessons.length > 0
                     ? 'main no-overflow'

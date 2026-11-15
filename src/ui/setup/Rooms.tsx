@@ -125,7 +125,9 @@ export default function Rooms({ state, change }: PanelProps) {
                   {order.head}
                   <th className="w-col-xl">{t('Ad')}</th>
                   <th className="w-col-lg">{t('Sınıf sayısı')}</th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody ref={order.bodyRef}>

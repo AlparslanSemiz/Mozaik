@@ -78,6 +78,7 @@ function Section({
       <p className="hint">{description}</p>
       <CapacityRows
         rows={rows}
+        label={title}
         empty={empty}
         problemsFirst
         colorOf={colorOf}
@@ -113,6 +114,8 @@ export default function Check({ state, view }: Props) {
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings. */}
+          <h2 className="visually-hidden">{t('Kontrol')}</h2>
           <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
           <T k="Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
         </div>

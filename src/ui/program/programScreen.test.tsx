@@ -362,7 +362,7 @@ function bar(): string {
 /** One line per printed page: its title, then each day's cells as `span:text`. */
 function printLines(): string[] {
   return [...container.querySelectorAll('.print-page')].map((page) => {
-    const title = [...page.querySelectorAll('h3 span.p-title-main, h3 span.p-title-sub')]
+    const title = [...page.querySelectorAll('h2 span.p-title-main, h2 span.p-title-sub')]
       .map(text)
       .join(' / ');
     const days = [...page.querySelectorAll('tbody tr')].map((tr) =>

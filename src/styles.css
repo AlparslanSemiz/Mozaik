@@ -3575,6 +3575,67 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   display: none;
 }
 
+/* Off the screen but in the accessibility tree: a heading a screen reader
+   navigates by, over a region whose purpose a sighted reader takes from the
+   layout. `display: none` would remove it from both. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The named region around the tool strip (App.tsx). It exists for the
+   accessibility tree only; on screen the strip stays a row of `.app`. */
+.ribbon-band {
+  display: contents;
+}
+
+/* "İçeriğe geç": the first Tab stop, invisible until it has focus, then
+   drawn over the top bar's left end where the eye already is. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-4);
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-sm);
+  background: var(--paper);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A scroll box that takes a Tab stop so the keyboard can scroll it (axe
+   `scrollable-region-focusable`). Not in the ring list below: that list
+   makes the focused thing `position: relative`, and a box that is placed some
+   other way must not move when it gets focus. The ring is drawn inside, where
+   the box's own overflow cannot clip it. */
+.pool-list:focus-visible,
+.focus-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* The content box takes focus from the skip link and from a dialog whose
+   opener is gone. A ring around the whole screen would say nothing the next
+   Tab does not, so it draws none. */
+main:focus {
+  outline: none;
+}
+
 .scroll-x {
   overflow-x: auto;
 }
@@ -3788,7 +3849,10 @@ textarea:focus-visible,
 .row-grip:focus-visible,
 .color-pick:focus-visible,
 .split-pick:focus-visible,
-.entity:focus-visible {
+.entity:focus-visible,
+.toast-close:focus-visible,
+.health:focus-visible,
+.inspect:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
      a lesson card, a swatch — and that is precisely where somebody navigating
@@ -5211,7 +5275,7 @@ table.availability td.closed {
 /* Two lines, both centred: the big one says what the sheet IS, the small one
    whose it is. Centred on screen as well — the preview has to look like the
    paper, or choosing what to print becomes guesswork. */
-.print-page h3 {
+.print-page h2 {
   /* In mm, and the same number in both media. It was 6px here and 4mm in
      `@media print`, i.e. every sheet was about 9 px taller on paper than the
      preview said — a small lie in the one place this project promises there
@@ -5372,7 +5436,7 @@ table.availability td.closed {
   border: 1px solid var(--edge);
 }
 
-.print-page h3 .p-dot {
+.print-page h2 .p-dot {
   display: inline-block;
   width: 11px;
   height: 11px;

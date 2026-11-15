@@ -175,7 +175,9 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                   <th className="w-col-md" title={t('Bu ders bir günde en fazla kaç saat')}>
                     {t('Günde ↑')}
                   </th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody ref={order.bodyRef}>

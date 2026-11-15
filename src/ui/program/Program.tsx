@@ -427,6 +427,9 @@ function Program({
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings: the
+              sentence below says what is missing, the heading says where. */}
+          <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
           <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
@@ -511,6 +514,10 @@ function Program({
           while down the right; it came back under the grid once it could
           open into the room the timetable does not use and be closed. */}
       <div className={shown === null ? 'program-body' : 'program-body previewing'}>
+        {/* The grid's place in the outline: h1 the school, h2 the grid and
+            the pool (LessonPool), h3 the pool's groups. It had no h2, so the
+            pool's groups hung straight off the school name. */}
+        <h2 className="visually-hidden">{t('Program')}</h2>
         <Grid
           settings={state.settings}
           rows={rows}

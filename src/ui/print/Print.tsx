@@ -140,6 +140,8 @@ export default function Print({
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings. */}
+          <h2 className="visually-hidden">{t('Çıktı')}</h2>
           <strong>{t('Yazdırılacak program yok.')}</strong>
           <T k="Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin." />
         </div>

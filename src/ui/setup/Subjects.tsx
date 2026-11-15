@@ -305,7 +305,9 @@ export default function Subjects({ state, change }: PanelProps) {
                   "Varsayılan" is ten characters — sm's 10ch leaves nothing for
                   the cell padding. */}
                 <th className="w-col-md">{t('Varsayılan')}</th>
-                <th className="w-col-md" />
+                <th className="w-col-md">
+                  <span className="visually-hidden">{t('İşlemler')}</span>
+                </th>
               </tr>
             </thead>
             <tbody ref={order.bodyRef}>

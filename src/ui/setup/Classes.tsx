@@ -171,7 +171,9 @@ export default function Classes({ state, change }: PanelProps) {
                   >
                     {t('Günde aynı ders ↑')}
                   </th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody ref={order.bodyRef}>

@@ -324,7 +324,7 @@ describe('cümle · basılan sayfanın iskeleti', () => {
 
     expect(skeleton(sheet!).join('\n')).toMatchInlineSnapshot(`
       "div.print-page
-        h3
+        h2
           span.p-title-main
             span.p-dot
           span.p-title-sub

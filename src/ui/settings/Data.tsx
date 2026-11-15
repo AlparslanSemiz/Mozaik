@@ -317,9 +317,12 @@ export default function Data({
     </div>
   );
 
+  // A Tab stop of its own: in the side rail this panel scrolls inside itself
+  // (`.cols > aside > .panel:only-child`), and the part below the fold was
+  // out of the keyboard's reach (axe `scrollable-region-focusable`).
   const wherePanel = (
-    <div className="panel">
-      <h2>{t('Veriler nerede')}</h2>
+    <div className="panel focus-scroll" tabIndex={0} role="group" aria-labelledby="veriler-nerede">
+      <h2 id="veriler-nerede">{t('Veriler nerede')}</h2>
       {/* The exe changes what is TRUE here, not just the wording. On the
             three browser routes the storage below is the only copy until
             somebody saves a file, and "tarama verilerini temizle" can take
