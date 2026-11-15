@@ -33,6 +33,9 @@ function adviceRows(advice: Advice[]): Advice[][] {
   return [...byCode.values()];
 }
 
+// Translation KEYS, translated where they are drawn: a `t()` here would run
+// once at load and freeze the language. The four dictionaries carry them
+// word for word, and i18n.test.ts's dead-key scan finds them in this file.
 const GROUPED: Record<Advice['code'], string> = {
   lessonNeedsMoreDays:
     '{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:',

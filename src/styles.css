@@ -1870,21 +1870,21 @@ table.list tbody tr {
   min-width: 16em;
 }
 
-/* Only the first way is open; the rest fold under "Başka yollar (N)". The
-   fold is a plain list item, so it takes no number of its own. */
+/* Only the first way is open; the rest are `hidden` under "Başka yollar (N)".
+   The toggle's row is a block, not a list item, so it takes no number and the
+   ways keep theirs (1, 2, 3 …). */
 .suggestion-more {
-  list-style: none;
+  display: block;
 }
 
-.suggestion-more > details > summary {
+.suggestion-more-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  width: fit-content;
   color: var(--accent);
+  font: inherit;
   font-weight: 600;
-}
-
-.suggestion-more .suggestion-list {
-  margin-top: var(--space-2);
 }
 
 /* The search in one line: the sentence with its seconds and this bar,
@@ -5047,7 +5047,9 @@ table.availability td.closed {
    inherited --text, landed light grey on the pastel palette: 1.91:1 at the
    fixture's size (2026-11-15). The values are the light theme's own, so the
    dark preview is the same sheet as the light one. `color` is restated here
-   because an inherited colour arrives already computed from <body>. */
+   because an inherited colour arrives already computed from <body>. Screen
+   only: on paper the `@media print` pins below speak alone. */
+@media screen {
 :root[data-theme="dark"] .print-sheet {
   color-scheme: light;
   --paper: #ffffff;
@@ -5057,6 +5059,7 @@ table.availability td.closed {
   --print-line: #444;
   --print-head-bg: #eee;
   color: var(--text);
+}
 }
 
 /* ONE TIMETABLE. Not renamed to `.print-plan` even though that is what it is:
@@ -5434,10 +5437,10 @@ table.bell-preview td {
     --band: #ffffff;
     --zebra: #ffffff;
 
-    /* Pinned here for the same reason as everything above. The dark theme no
-       longer overrides them (the preview sheet is light in both themes, see
-       `.print-sheet`), but a pin costs nothing and keeps the paper's grid the
-       light theme's own whatever a future theme does. */
+    /* Pinned here for the same reason as everything above. The dark theme
+       sets them only on the preview `.print-sheet`, on screen and to the light
+       values; a pin keeps the paper's grid the light theme's own whatever a
+       future theme does. */
     --print-line: #444;
     --print-head-bg: #eee;
 

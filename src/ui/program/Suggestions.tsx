@@ -8,7 +8,7 @@
 // the search goes on to the next way.
 //
 // The ways keep their order (FAMILY_ORDER, the user's own list first), and
-// only the first one found is open: the others fold under "Başka yollar (N)"
+// only the first of the found ways in that order is open: the others fold under "Başka yollar (N)"
 // (2026-11-15, the father's "less to read": six ways were ~195 words and 19
 // buttons). While the search runs the panel says so in one line with a
 // progress bar, not a row per way still being looked for.
@@ -35,7 +35,7 @@ import { type Translate, useT } from '../common';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnswerBook, QuestionSheet } from './AnswerBook';
 
-/** What each way asks for, in a few words: the row's name while it is looked for. */
+/** What each way asks for, in a few words: the heading of its questions and of the preview bar. */
 export function wayName(t: Translate, family: RelaxFamily): string {
   switch (family) {
     case 'teacherDays':
@@ -95,8 +95,8 @@ export default function Suggestions({
   const first = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState<ReadonlySet<RelaxFamily>>(new Set());
   const [printing, setPrinting] = useState<Suggestion | null>(null);
-  // Held here rather than by the <details> alone: every answer runs the search
-  // again and the fold can be redrawn, and an opened fold must stay open.
+  // Whether "Başka yollar" is open. Kept while the search runs again after an
+  // answer, so an opened fold stays open.
   const [more, setMore] = useState(false);
   const { suggestions, searching, stopped, progress } = advice;
   const as = suggestions.find((s) => s.changes.length === 0);
@@ -211,12 +211,17 @@ export default function Suggestions({
   const why =
     !stale && !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
 
-  const way = ({ family, found }: { family: RelaxFamily; found: Suggestion }) => {
+  const way = ({ family, found }: { family: RelaxFamily; found: Suggestion }, folded: boolean) => {
     const shown = open.has(family);
     const detailId = `suggestion-${family}`;
     const previewed = preview?.family === family;
     return (
-      <li key={family} data-family={family} className={previewed ? 'previewed' : undefined}>
+      <li
+        key={family}
+        data-family={family}
+        hidden={folded}
+        className={previewed ? 'previewed' : undefined}
+      >
         <div className="suggestion-row">
           <span className="suggestion-title">
             {suggestionSentence(state, found)}
@@ -324,19 +329,29 @@ export default function Suggestions({
         </button>
       </div>
       {answerLine}
+      {/* ONE list, every way keyed by its family, and the fold is only
+          `hidden`: when a way earlier in the order turns up mid-search, the
+          old first row moves down without being redrawn, so its open
+          questions and the keyboard's place in it survive. */}
       {rows.length > 0 && (
         <ol className="suggestion-list">
-          {rows.slice(0, 1).map(way)}
-          {rows.length > 1 && (
-            <li className="suggestion-more">
-              <details open={more} onToggle={(e) => setMore(e.currentTarget.open)}>
-                <summary>{t('Başka yollar ({n})', { n: rows.length - 1 })}</summary>
-                <ol className="suggestion-list" start={2}>
-                  {rows.slice(1).map(way)}
-                </ol>
-              </details>
-            </li>
-          )}
+          {rows.flatMap((row, i) => {
+            const li = way(row, i > 0 && !more);
+            return i === 0 && rows.length > 1
+              ? [
+                  li,
+                  <li key="more" className="suggestion-more">
+                    <button
+                      className="suggestion-more-toggle"
+                      aria-expanded={more}
+                      onClick={() => setMore((m) => !m)}
+                    >
+                      {more ? '▾' : '▸'} {t('Başka yollar ({n})', { n: rows.length - 1 })}
+                    </button>
+                  </li>,
+                ]
+              : [li];
+          })}
         </ol>
       )}
       {staleNote}
