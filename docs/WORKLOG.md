@@ -634,7 +634,7 @@ Denetimin test ve CI bulguları (TODO B7.39–B7.41).
   dk; `hiz/sat-yayilim`'den sonra medyan 2,8 dk, en yavaşı 420 s sınırının %66'sı (önce %83).
 
 Doğrulama (bu Mac, Node 26.13.1): `tsc --noEmit` 0, `eslint src` 0, `npm run sinir` 0 ihlal,
-`npm run hizli` 1521 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
+`npm run hizli` 1525 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
 Koşulmayan: E2E ve CI'ın önbellek isabeti (dalın CI'ında).
 
 ## 2026-11-15 · Açılışta plan dizini ezilmiyor (`fix/kutuphane-acilis`)

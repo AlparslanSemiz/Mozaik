@@ -944,7 +944,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       global'ini tanımlıyor), `src/agir.test.ts` ise `flock`, `/proc` ve `setsid` istiyor.
       **Yapıldı (2026-11-15, `bakim/test-ci`):** `vite.config.ts` Node 25 ve sonrasında test
       süreçlerine `--no-experimental-webstorage` veriyor, `.nvmrc` 22; `agir.test.ts` Linux dışında
-      atlanıyor (CI'da koşuyor). Bu Mac'te `hizli` 1521 geçti, 4 atlandı.
+      atlanıyor (CI'da koşuyor). Bu Mac'te `hizli` 1525 geçti, 4 atlandı.
 - [x] **B7.40 Depo hijyeni ve Playwright önbelleği (2026-11-15).** `.gitignore`'da
       `.claude/worktrees/` ve `.playwright-mcp/` yoktu, `.playwright-mcp/`'nin 2026-08-30'dan kalan
       üç dökümü izleniyordu; CI'ın her E2E işi tarayıcıları baştan indiriyordu (8–9 s).
