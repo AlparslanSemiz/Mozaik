@@ -155,7 +155,10 @@ mod kabuk {
             return Err(ISTEMCI_YOK.into());
         }
         let co = unsafe {
-            CoInitializeEx(null_mut(), COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)
+            CoInitializeEx(
+                null_mut(),
+                COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE,
+            )
         };
         let r = unsafe {
             ShellExecuteW(
@@ -202,7 +205,9 @@ mod tests {
 
     #[test]
     fn yalniz_mailto_ve_kodlanmis_metin_gecer() {
-        assert!(adres_gecerli("mailto:a@example.com?subject=S&body=Sal%C4%B1%0D%0A"));
+        assert!(adres_gecerli(
+            "mailto:a@example.com?subject=S&body=Sal%C4%B1%0D%0A"
+        ));
         assert!(adres_gecerli("MAILTO:a@example.com"));
         for kotu in [
             "",
@@ -228,7 +233,9 @@ mod tests {
     fn openwith_istemci_sayilmiyor() {
         // What AssocQueryStringW answered on the runner with no mail program.
         assert!(secici_mi(r#"C:\Windows\system32\OpenWith.exe "%1""#));
-        assert!(!secici_mi(r#""C:\Program Files\Mozilla Thunderbird\thunderbird.exe" -osint -compose "%1""#));
+        assert!(!secici_mi(
+            r#""C:\Program Files\Mozilla Thunderbird\thunderbird.exe" -osint -compose "%1""#
+        ));
     }
 
     #[test]

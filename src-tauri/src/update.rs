@@ -411,8 +411,7 @@ pub fn eski_kopyayi_kaldir(eski: PathBuf, not: PathBuf) {
 /// The installer downloaded in this session, waiting for "Şimdi yeniden başlat".
 /// With the digest it was checked against: `apply_update` checks it again.
 #[allow(clippy::type_complexity)]
-static INDIRILEN_KURULUM: std::sync::Mutex<Option<(PathBuf, String)>> =
-    std::sync::Mutex::new(None);
+static INDIRILEN_KURULUM: std::sync::Mutex<Option<(PathBuf, String)>> = std::sync::Mutex::new(None);
 
 /// Is what came down the wire a Windows program, and the one we were promised?
 ///
@@ -437,7 +436,7 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
     }
     if bytes.len() as u64 != boyut {
         return Err(format!(
-            "İnen dosya eksik: {} bayt bekleniyordu, {} geldi.",
+            "İndirme yarıda kesildi. Tekrar deneyin. ({} / {})",
             boyut,
             bytes.len()
         ));
@@ -449,7 +448,7 @@ pub fn verify(bytes: &[u8], boyut: u64, sha256: &str) -> Result<(), String> {
         return Err("İnen dosya bir Windows programı değil.".into());
     }
     if ozet(bytes) != sha256.to_ascii_lowercase() {
-        return Err("İnen dosya yayımlanan dosya değil: özeti tutmuyor.".into());
+        return Err("İndirme bozuk geldi. Tekrar deneyin.".into());
     }
     Ok(())
 }
@@ -500,7 +499,10 @@ static ONERILEN: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 /// SHA-256 of `bytes`, lowercase hex, as `sha256sum` writes it.
 fn ozet(bytes: &[u8]) -> String {
     use sha2::{Digest, Sha256};
-    Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
+    Sha256::digest(bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
 }
 
 /// Writes a downloaded program whole or not at all: `<yol>.tmp`, `sync_all`,
@@ -550,6 +552,9 @@ pub fn swap(exe: &Path) -> Result<(), String> {
     swap_files(exe, &yeni, &yan(exe, ESKI))
 }
 
+/// How a failed swap starts: the old copy is still the one that runs.
+const YAPILAMADI: &str = "Güncelleme yapılamadı, Mozaik eski sürümüyle çalışmaya devam ediyor.";
+
 /// The two renames, split out from the guard above so the rollback can be
 /// tested. Handing it a `yeni` that is not there is not a hypothetical: on
 /// Windows an antivirus can quarantine a freshly downloaded .exe in the
@@ -561,12 +566,18 @@ fn swap_files(exe: &Path, yeni: &Path, eski: &Path) -> Result<(), String> {
     // old copy that has not quit yet holds its own file: so this goes first.
     let _ = fs::remove_file(eski);
 
-    fs::rename(exe, eski).map_err(|e| format!("Eski sürüm kenara alınamadı: {e}"))?;
+    // A plain sentence first, and the system's own words in brackets: the
+    // reader acts on the first half, whoever helps him reads the second.
+    fs::rename(exe, eski).map_err(|e| {
+        format!("{YAPILAMADI} Mozaik'i kapatıp yeniden açın ve tekrar deneyin. ({e})")
+    })?;
     match fs::rename(yeni, exe) {
         Ok(()) => Ok(()),
         Err(e) => {
             let _ = fs::rename(eski, exe);
-            Err(format!("Yeni sürüm yerine konamadı: {e}"))
+            Err(format!(
+                "{YAPILAMADI} Bilgisayarı yeniden başlatıp tekrar deneyin. ({e})"
+            ))
         }
     }
 }
@@ -708,8 +719,9 @@ pub async fn download_update(
              Programı Belgelerim gibi yazılabilir bir klasöre taşıyıp tekrar deneyin."
         )
     })?;
-    *INDIRILEN_EXE.lock().map_err(|_| "İndirme kaydı okunamadı.")? =
-        Some(sha256.to_ascii_lowercase());
+    *INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")? = Some(sha256.to_ascii_lowercase());
     Ok(bytes.len() as u64)
 }
 
@@ -724,7 +736,7 @@ pub fn yeni_dogru(yeni: &Path, beklenen: Option<&str>) -> Result<(), String> {
     let beklenen = beklenen.ok_or("Önce yeni sürümü indirin.")?;
     let bytes = fs::read(yeni).map_err(|e| format!("İndirilen sürüm okunamadı: {e}"))?;
     if ozet(&bytes) != beklenen {
-        return Err("İndirilen sürüm değişmiş: özeti tutmuyor. Tekrar indirin.".into());
+        return Err("İndirilen sürüm bozulmuş. Tekrar indirin.".into());
     }
     Ok(())
 }
@@ -743,7 +755,7 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
         // user: the file run is the file that was checked, or nothing runs.
         let bytes = fs::read(&kurulum).map_err(|e| format!("Kurulum okunamadı: {e}"))?;
         if ozet(&bytes) != beklenen {
-            return Err("İndirilen kurulum değişmiş: özeti tutmuyor. Tekrar indirin.".into());
+            return Err("İndirilen kurulum bozulmuş. Tekrar indirin.".into());
         }
         return kurulumu_baslat(&app, &exe, &kurulum);
     }
@@ -988,7 +1000,10 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         // published v2.0.2, and the manifest keeps pointing at it (surum.yml)
         // so that copy can still fetch; a build from here has to accept it too
         // or the next release strands the previous one all over again.
-        assert!(safe_url("https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe").is_ok());
+        assert!(safe_url(
+            "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe"
+        )
+        .is_ok());
     }
 
     // ------------------------------------------------------------ the answer
@@ -1123,12 +1138,24 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         assert_eq!(silinecek_eski(&kendisi.to_string_lossy(), &simdiki), None);
         // Only the extension `.exe`, in any case, and nothing that merely
         // contains it.
-        for ad in ["Mozaik.exe.txt", "Mozaik.exe.yeni", "Mozaik", "ayarlar.json"] {
+        for ad in [
+            "Mozaik.exe.txt",
+            "Mozaik.exe.yeni",
+            "Mozaik",
+            "ayarlar.json",
+        ] {
             let yol = tmp.0.join("baska").join(ad);
-            assert_eq!(silinecek_eski(&yol.to_string_lossy(), &simdiki), None, "{ad}");
+            assert_eq!(
+                silinecek_eski(&yol.to_string_lossy(), &simdiki),
+                None,
+                "{ad}"
+            );
         }
         let buyuk = tmp.0.join("baska").join("ESKI.EXE");
-        assert_eq!(silinecek_eski(&buyuk.to_string_lossy(), &simdiki), Some(buyuk));
+        assert_eq!(
+            silinecek_eski(&buyuk.to_string_lossy(), &simdiki),
+            Some(buyuk)
+        );
         // An empty note is no path at all.
         assert_eq!(silinecek_eski("  \n", &simdiki), None);
     }
@@ -1145,7 +1172,10 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
 
     #[test]
     fn a_new_version_without_a_digest_is_not_offered_for_download() {
-        let mut m = manifest("9.0.0", &format!("{}latest/download/Mozaik.exe", RELEASE_KOKLERI[0]));
+        let mut m = manifest(
+            "9.0.0",
+            &format!("{}latest/download/Mozaik.exe", RELEASE_KOKLERI[0]),
+        );
         m.sha256 = None;
         let e = karar(m, "2.0.2").unwrap_err();
         assert!(e.contains(&releases_sayfasi()), "adres yazmıyor: {e}");
@@ -1195,7 +1225,11 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         // manifest started carrying the new name, and a copy that had nothing
         // to download answered "Beklenmeyen adres: https://..." instead of
         // "güncel". Nothing was being fetched -- there was nothing newer.
-        let c = karar(manifest("2.0.2", "https://baska-yer.example/Mozaik.exe"), "2.0.2").unwrap();
+        let c = karar(
+            manifest("2.0.2", "https://baska-yer.example/Mozaik.exe"),
+            "2.0.2",
+        )
+        .unwrap();
         assert!(!c.yeni_var);
     }
 
@@ -1203,8 +1237,11 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     fn a_new_version_behind_an_unknown_address_says_where_to_go() {
         // Still an error -- this build cannot fetch that -- but one that can
         // be acted on: the version, and the page to download it from.
-        let e = karar(manifest("9.0.0", "https://baska-yer.example/Mozaik.exe"), "2.0.2")
-            .unwrap_err();
+        let e = karar(
+            manifest("9.0.0", "https://baska-yer.example/Mozaik.exe"),
+            "2.0.2",
+        )
+        .unwrap_err();
         assert!(e.contains("9.0.0"), "sürüm yazmıyor: {e}");
         assert!(e.contains(&releases_sayfasi()), "adres yazmıyor: {e}");
     }
@@ -1340,11 +1377,17 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
         // works (V9). Measured red: the call moved back to the top of `run`.
         let lib = include_str!("lib.rs");
         let kod = &lib[..lib.find("#[cfg(all(test").unwrap()];
-        let cagri: Vec<_> = kod.match_indices("update::sweep_old(").map(|(i, _)| i).collect();
+        let cagri: Vec<_> = kod
+            .match_indices("update::sweep_old(")
+            .map(|(i, _)| i)
+            .collect();
         assert_eq!(cagri.len(), 1, "sweep_old tek yerden çağrılmalı");
         let kanca = kod.find(".on_page_load(").expect("on_page_load yok");
         let sonraki = kod[kanca..].find(".on_window_event(").unwrap() + kanca;
-        assert!(kanca < cagri[0] && cagri[0] < sonraki, "sweep_old sayfa yüklenince değil");
+        assert!(
+            kanca < cagri[0] && cagri[0] < sonraki,
+            "sweep_old sayfa yüklenince değil"
+        );
         assert!(kod[kanca..sonraki].contains("PageLoadEvent::Finished"));
     }
 

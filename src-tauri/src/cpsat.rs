@@ -58,10 +58,7 @@ fn yol() -> Option<PathBuf> {
     if let Some(p) = std::env::var_os("MOZAIK_ORTOOLS") {
         return Some(PathBuf::from(p));
     }
-    std::env::current_exe()
-        .ok()?
-        .parent()
-        .map(|d| d.join(AD))
+    std::env::current_exe().ok()?.parent().map(|d| d.join(AD))
 }
 
 fn yukle() -> Result<Cpsat, String> {
