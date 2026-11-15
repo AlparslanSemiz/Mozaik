@@ -378,12 +378,12 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
   // `Option`, so every manifest already published still tells a copy it is
   // up to date. Only `sha256` may be missing.
   it('kayıtlı surum.json Manifest’in alanlarını, Rust’ın tipleriyle taşıyor (özet ve kurulum öncesi)', () => {
-    expect(Object.keys(manifest).sort()).toEqual(MANIFEST.filter((k) => !OPTIONAL.includes(k)).sort());
+    expect(Object.keys(manifest).sort()).toEqual(
+      MANIFEST.filter((k) => !OPTIONAL.includes(k)).sort(),
+    );
     expect(updateRs).toMatch(/#\[serde\(default\)\]\s*pub sha256: Option<String>/);
     for (const k of OPTIONAL.slice(1)) {
-      expect(updateRs).toMatch(
-        new RegExp(`#\\[serde\\(default[^\\]]*\\)\\]\\s*pub ${k}: Option<`),
-      );
+      expect(updateRs).toMatch(new RegExp(`#\\[serde\\(default[^\\]]*\\)\\]\\s*pub ${k}: Option<`));
     }
     expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(manifest.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
