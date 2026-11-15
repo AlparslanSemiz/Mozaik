@@ -60,7 +60,7 @@ sha2 = "0.10"
 
 # The release signature (update.rs, `imza_dogru`): minisign's own verifier,
 # pure Rust and no dependencies of its own, so the exe grows by kilobytes.
-minisign-verify = "0.2"
+minisign-verify = "0.3"
 
 [dev-dependencies]
 # update.rs's tests: a recorded manifest read back, and a 2.2.0 copy still
