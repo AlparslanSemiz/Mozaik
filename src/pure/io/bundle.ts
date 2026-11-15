@@ -140,7 +140,7 @@ export function parseBundle(text: string): Bundle | null {
   if (Object.keys(states).length === 0) return null;
   // No id AND no object state: neither list above would name it.
   for (const item of list) {
-    if (typeof item !== 'object' || item === null || entries.includes(item as RawEntry)) continue;
+    if (typeof item !== 'object' || item === null || entries.includes(item)) continue;
     const { id, name } = item as RawEntry;
     if (typeof id !== 'string') {
       dropped.push(typeof name === 'string' && name.trim() !== '' ? name.trim() : '?');
