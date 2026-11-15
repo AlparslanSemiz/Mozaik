@@ -543,6 +543,17 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     expect(pages, 'üç sınıf üç sayfa olmalı — arkalarında boş sayfa var').toBe(3);
   });
 
+  test('bildirim kâğıda çıkmıyor', async ({ page }) => {
+    // A toast is position: fixed, and Chrome prints a fixed box on every
+    // sheet. Loading a world leaves "Yedek yüklendi" up for six seconds, and a
+    // print started inside them put it on the paper (2026-11-15).
+    await loadWorld(page, PAPER_WORLD, 'Çıktı');
+    await expect(page.locator('.toast').first()).toBeVisible();
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.locator('.toasts')).toBeHidden();
+    await page.emulateMedia({ media: 'screen' });
+  });
+
   test('önizleme koyu temada da OKUNUYOR: kâğıt açık paletle çiziliyor', async ({ page }) => {
     // LAYOUT: "Kâğıt fiziksel. Açık palet kullanır." The sheet used to take the
     // dark --paper, and a card's ink (inherited --text) landed light grey on
