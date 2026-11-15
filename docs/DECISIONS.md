@@ -36,6 +36,20 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-15 · Okunurluk turu: sözcük gitmez, kapalı saat ızgarada gri (`erisim/gorsel`)
+
+Bir okunurluk denetiminin on bulgusu (DENETIM'in dışında, ölçüm betikleri `scratch/olc/`'ta).
+İki karar eskisini çeviriyor. **Dar kutuda sözcükler gitmiyor:** sekme etiketi 1280 pikselin
+altında `display: none`, şerit sözcüğü 78em'in altında `font-size: 0` idi; Windows %150'de
+1920'lik ekran tam 1280 CSS pikseli, yani babanın ekranı simgelere kalıyordu. Etiket simgenin
+altına iner, şerit sözcüğü bir basamak küçülür, üst bar sığmazsa iki satıra geçer; erişilebilir
+ad zaten korunuyordu, artık çizim de. **Program ızgarasında kapalı saatin çarpısı Müsaitlik'inkiyle
+aynı değil:** kırmızı 25 px kalın çarpı gri 17 px oldu, çünkü bu ızgarada kırmızı "reddedildi"
+demek ve çarpılar derslerden yüksek sesle konuşuyordu. Müsaitlik'teki büyük kırmızı çarpı
+kararı (aşağıda) o ekran için duruyor. Rahat'ta saat başlığı 13 px ve boşluklu olunca hafta
+2516'dan 2946 piksele genişledi; Rahat zaten yana kayıyordu, Sığdır değişmedi, Ferah'ın hücresi
+Rahat'tan geniş kalsın diye 3,5rem oldu.
+
 ### 2026-11-15 · Güvenlik sertleştirmesi: küçük kapılar Rust'ta, capability ve CSP sonraya (`guvenlik/sertlestirme`)
 
 **Karar.** Güvenlik denetiminin küçük maddeleri kodda kapandı (TODO B7.39). Üç seçim:

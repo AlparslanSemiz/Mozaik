@@ -37,7 +37,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    `zebra-liste`'de bitti: açık temada soluk yazı zebrada 6,65'e düşmüştü, dört liste
    zebrasızdı, iki yerde şerit sırası bozuktu. Şimdi her listede, iki temada aynı yükte,
    satırda yazı her zeminde ve durumda 7:1 (DESIGN Renk ve Erişilebilirlik,
-   `e2e/zebra.spec.ts` 94). İki istisna E1'de (§8e). Windows ve WebView2'de görülmedi.
+   `e2e/zebra.spec.ts` 94). Kalan tek istisna ("Sil") E1'de (§8e). Windows ve WebView2'de görülmedi.
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -1378,7 +1378,11 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       meselesi değil (`styles.css`), yani çare yeniden aramak: `--ok`, `--warn` ve `--bad`
       ya da rozet mürekkebi için 7:1 ve işlevsel renkler arası ΔE kısıtıyla,
       `scripts/bolum-renk.mjs` gibi bir betikle. Bitince `e2e/zebra.spec.ts` 94'teki
-      istisna (`.badge`, `.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      istisna (`.btn.danger`) kalkar ve genel kontrast eşiği 4,5'ten 7'ye çıkar.
+      → Rozetler yapıldı (2026-11-15, `erisim/gorsel`): işlevsel renkler aynı kaldı, kendi
+      zeminlerindeki yazı için ayrı mürekkep (`--ok-ink`, `--warn-ink`, `--bad-ink`, açık
+      temada 7,47 · 7,63 · 7,20), rozet, sağlık çipi ve sebep çubuğunda; `.badge` istisnası
+      kalktı. Kalan: "Sil" (6,84) ve dağılım seçicisinin gerekçe satırı (5,54).
 
 ### 8f · Test stratejisinden sıraya konanlar (2026-09-12)
 
