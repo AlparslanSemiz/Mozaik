@@ -67,7 +67,18 @@ export class Sat {
   private heap: number[] = [];
 
   // ---- clauses
-  private lits: Int32Array[] = [];
+  /**
+   * Every clause's literals, one after another in one array: clause `id` is
+   * `pool[cStart[id] .. cStart[id] + cLen[id])`. One typed array instead of an
+   * Int32Array per clause, because propagation reads a clause per watch and a
+   * separate object per clause was a pointer to chase each time (2026-11-15).
+   */
+  private pool = new Int32Array(1 << 16);
+  private poolTop = 0;
+  /** Pool slots held by clauses reduce() has dropped; compacted when they are half the pool. */
+  private poolWaste = 0;
+  private cStart: number[] = [];
+  private cLen: number[] = [];
   private learnt: boolean[] = [];
   private cActivity: number[] = [];
   private lbd: number[] = [];
@@ -79,12 +90,38 @@ export class Sat {
    */
   private binary: number[][] = [];
   /** Longer clauses: per literal, (clause, blocker) pairs; a true blocker skips the clause. */
-  private watches: number[][] = [];
+  private watches: Int32Array[] = [];
+  /**
+   * How many slots of each literal's `watches` are in use. A typed buffer and a
+   * count rather than a plain array cut with `length = j`: propagation shrinks
+   * and regrows these lists on every visit, and the array kept being re-trimmed
+   * and re-grown underneath (2026-11-15).
+   */
+  private watchCount: number[] = [];
+
+  private watch(l: Lit, id: number, other: Lit): void {
+    let buf = this.watches[l]!;
+    const at = this.watchCount[l]!;
+    if (at + 2 > buf.length) {
+      const next = new Int32Array(Math.max(8, buf.length * 2));
+      next.set(buf);
+      this.watches[l] = buf = next;
+    }
+    buf[at] = id;
+    buf[at + 1] = other;
+    this.watchCount[l] = at + 2;
+  }
   private learntCount = 0;
   private maxLearnt = 4000;
 
   // ---- search state
-  private trail: number[] = [];
+  /**
+   * The assigned literals in order, `trail[0 .. trailTop)`. Sized with the
+   * variables (each is on it at most once), so it never grows during a search;
+   * a plain array was pushed and cut back on every conflict (2026-11-15).
+   */
+  private trail = new Int32Array(0);
+  private trailTop = 0;
   private trailLim: number[] = [];
   private qhead = 0;
   private varInc = 1;
@@ -121,6 +158,7 @@ export class Sat {
     this.seen = copy(this.seen, (k) => new Uint8Array(k), cap);
     this.heapIndex = copy(this.heapIndex, (k) => new Int32Array(k), cap);
     this.stamp = copy(this.stamp, (k) => new Int32Array(k), cap + 1);
+    this.trail = copy(this.trail, (k) => new Int32Array(k), cap);
     this.cap = cap;
   }
 
@@ -131,7 +169,8 @@ export class Sat {
     this.phase[v] = -1;
     this.heapIndex[v] = -1;
     this.binary.push([], []);
-    this.watches.push([], []);
+    this.watches.push(new Int32Array(0), new Int32Array(0));
+    this.watchCount.push(0, 0);
     this.heapInsert(v);
     return v;
   }
@@ -192,25 +231,37 @@ export class Sat {
       if (this.propagate() >= 0) this.ok = false;
       return this.ok;
     }
-    this.attach(Int32Array.from(out), false);
+    this.attach(out, false);
     return true;
   }
 
-  private attach(c: Int32Array, learnt: boolean): number {
-    const id = this.lits.length;
-    this.lits.push(c);
+  private attach(c: readonly Lit[], learnt: boolean): number {
+    const id = this.cStart.length;
+    const len = c.length;
+    if (this.poolTop + len > this.pool.length) {
+      let size = this.pool.length * 2;
+      while (this.poolTop + len > size) size *= 2;
+      const next = new Int32Array(size);
+      next.set(this.pool.subarray(0, this.poolTop));
+      this.pool = next;
+    }
+    const start = this.poolTop;
+    for (let k = 0; k < len; k++) this.pool[start + k] = c[k]!;
+    this.poolTop += len;
+    this.cStart.push(start);
+    this.cLen.push(len);
     this.learnt.push(learnt);
     this.cActivity.push(0);
     this.lbd.push(0);
     this.dead.push(false);
     const a = c[0]!;
     const b = c[1]!;
-    if (c.length === 2) {
+    if (len === 2) {
       this.binary[a]!.push(b, id);
       this.binary[b]!.push(a, id);
     } else {
-      this.watches[a]!.push(id, b);
-      this.watches[b]!.push(id, a);
+      this.watch(a, id, b);
+      this.watch(b, id, a);
       if (learnt) this.learntCount++;
     }
     return id;
@@ -222,36 +273,65 @@ export class Sat {
     this.vals[l ^ 1] = -1;
     this.levels[v] = this.trailLim.length;
     this.reasons[v] = reason;
-    this.trail.push(l);
+    this.trail[this.trailTop++] = l;
   }
 
-  /** Unit propagation. The conflicting clause, or -1. */
+  /**
+   * Unit propagation. The conflicting clause, or -1.
+   *
+   * The hottest loop of the suggestion search (71% of its time on the father's
+   * data, 2026-11-15), so the fields it reads are held in locals and
+   * `enqueue()` is written out inline. The order of every read and write is the
+   * one `enqueue()` and the loops had before: the search is the same search.
+   */
   private propagate(): number {
     const vals = this.vals;
-    while (this.qhead < this.trail.length) {
-      const falseLit = this.trail[this.qhead++]! ^ 1;
+    const levels = this.levels;
+    const reasons = this.reasons;
+    const trail = this.trail;
+    const pool = this.pool;
+    const cStart = this.cStart;
+    const cLen = this.cLen;
+    const dead = this.dead;
+    const binary = this.binary;
+    const watches = this.watches;
+    const watchCount = this.watchCount;
+    // Propagation never opens a level, so every literal it sets lands on this one.
+    const level = this.trailLim.length;
+    let qhead = this.qhead;
+    let top = this.trailTop;
+    while (qhead < top) {
+      const falseLit = trail[qhead++]! ^ 1;
 
-      const bs = this.binary[falseLit]!;
-      for (let i = 0; i < bs.length; i += 2) {
+      const bs = binary[falseLit]!;
+      const bn = bs.length;
+      for (let i = 0; i < bn; i += 2) {
         const other = bs[i]!;
         const value = vals[other];
         if (value === 1) continue;
         const id = bs[i + 1]!;
         if (value === -1) {
-          this.qhead = this.trail.length;
+          this.qhead = top;
+          this.trailTop = top;
           return id;
         }
         // The implied literal goes first: analyze() reads a reason that way.
-        const c = this.lits[id]!;
-        if (c[0] !== other) {
-          c[1] = c[0]!;
-          c[0] = other;
+        const s = cStart[id]!;
+        if (pool[s] !== other) {
+          pool[s + 1] = pool[s]!;
+          pool[s] = other;
         }
-        this.enqueue(other, id);
+        vals[other] = 1;
+        vals[other ^ 1] = -1;
+        levels[other >> 1] = level;
+        reasons[other >> 1] = id;
+        trail[top++] = other;
       }
 
-      const ws = this.watches[falseLit]!;
-      const n = ws.length;
+      // `watch()` below only ever grows OTHER literals' buffers (`l` is not
+      // false, `falseLit` is), so this one stays put for the whole loop.
+      const ws = watches[falseLit]!;
+      const n = watchCount[falseLit]!;
       let i = 0;
       let j = 0;
       next: while (i < n) {
@@ -263,24 +343,25 @@ export class Sat {
           ws[j++] = blocker;
           continue;
         }
-        if (this.dead[id] === true) continue;
-        const c = this.lits[id]!;
-        if (c[0] === falseLit) {
-          c[0] = c[1]!;
-          c[1] = falseLit;
+        if (dead[id] === true) continue;
+        const s = cStart[id]!;
+        if (pool[s] === falseLit) {
+          pool[s] = pool[s + 1]!;
+          pool[s + 1] = falseLit;
         }
-        const first = c[0]!;
+        const first = pool[s]!;
         if (first !== blocker && vals[first] === 1) {
           ws[j++] = id;
           ws[j++] = first;
           continue;
         }
-        for (let k = 2; k < c.length; k++) {
-          const l = c[k]!;
+        const end = s + cLen[id]!;
+        for (let k = s + 2; k < end; k++) {
+          const l = pool[k]!;
           if (vals[l] !== -1) {
-            c[1] = l;
-            c[k] = falseLit;
-            this.watches[l]!.push(id, first);
+            pool[s + 1] = l;
+            pool[k] = falseLit;
+            this.watch(l, id, first);
             continue next;
           }
         }
@@ -288,21 +369,28 @@ export class Sat {
         ws[j++] = first;
         if (vals[first] === -1) {
           while (i < n) ws[j++] = ws[i++]!;
-          ws.length = j;
-          this.qhead = this.trail.length;
+          watchCount[falseLit] = j;
+          this.qhead = top;
+          this.trailTop = top;
           return id;
         }
-        this.enqueue(first, id);
+        vals[first] = 1;
+        vals[first ^ 1] = -1;
+        levels[first >> 1] = level;
+        reasons[first >> 1] = id;
+        trail[top++] = first;
       }
-      ws.length = j;
+      watchCount[falseLit] = j;
     }
+    this.qhead = qhead;
+    this.trailTop = top;
     return -1;
   }
 
   private cancelUntil(target: number): void {
     if (this.level() <= target) return;
     const stop = this.trailLim[target]!;
-    for (let i = this.trail.length - 1; i >= stop; i--) {
+    for (let i = this.trailTop - 1; i >= stop; i--) {
       const l = this.trail[i]!;
       const v = l >> 1;
       this.phase[v] = (l & 1) === 1 ? -1 : 1;
@@ -311,7 +399,7 @@ export class Sat {
       this.reasons[v] = -1;
       if (this.heapIndex[v] === -1) this.heapInsert(v);
     }
-    this.trail.length = stop;
+    this.trailTop = stop;
     this.trailLim.length = target;
     this.qhead = stop;
   }
@@ -321,14 +409,16 @@ export class Sat {
     const out: Lit[] = [0];
     let pathCount = 0;
     let p = -1;
-    let index = this.trail.length - 1;
+    let index = this.trailTop - 1;
     let reason = conflict;
     const current = this.level();
     do {
       if (this.learnt[reason] === true) this.bumpClause(reason);
-      const c = this.lits[reason]!;
-      for (let k = p === -1 ? 0 : 1; k < c.length; k++) {
-        const q = c[k]!;
+      const pool = this.pool;
+      const s = this.cStart[reason]!;
+      const end = s + this.cLen[reason]!;
+      for (let k = p === -1 ? s : s + 1; k < end; k++) {
+        const q = pool[k]!;
         const v = q >> 1;
         if (this.seen[v] === 1 || this.levels[v] === 0) continue;
         this.bumpVar(v);
@@ -352,9 +442,10 @@ export class Sat {
       const r = this.reasons[v]!;
       let redundant = r >= 0;
       if (redundant) {
-        const c = this.lits[r]!;
-        for (let k = 1; k < c.length; k++) {
-          const w = c[k]! >> 1;
+        const s = this.cStart[r]!;
+        const end = s + this.cLen[r]!;
+        for (let k = s + 1; k < end; k++) {
+          const w = this.pool[k]! >> 1;
           if (this.seen[w] !== 1 && this.levels[w] !== 0) {
             redundant = false;
             break;
@@ -413,12 +504,12 @@ export class Sat {
   /** Drops the worse half of the long learnt clauses that no assignment rests on. */
   private reduce(): void {
     const candidates: number[] = [];
-    for (let id = 0; id < this.lits.length; id++) {
-      const c = this.lits[id]!;
-      if (!this.learnt[id] || this.dead[id] === true || c.length <= 2 || this.lbd[id]! <= 2)
+    for (let id = 0; id < this.cStart.length; id++) {
+      if (!this.learnt[id] || this.dead[id] === true || this.cLen[id]! <= 2 || this.lbd[id]! <= 2)
         continue;
-      const v = c[0]! >> 1;
-      if (this.reasons[v] === id && this.vals[c[0]!] !== 0) continue;
+      const first = this.pool[this.cStart[id]!]!;
+      const v = first >> 1;
+      if (this.reasons[v] === id && this.vals[first] !== 0) continue;
       candidates.push(id);
     }
     candidates.sort(
@@ -427,10 +518,31 @@ export class Sat {
     for (let i = 0; i < candidates.length / 2; i++) {
       const id = candidates[i]!;
       this.dead[id] = true;
-      this.lits[id] = new Int32Array(0);
+      this.poolWaste += this.cLen[id]!;
+      this.cLen[id] = 0;
       this.learntCount--;
     }
+    if (this.poolWaste * 2 > this.poolTop) this.compact();
     this.maxLearnt = Math.floor(this.maxLearnt * 1.1);
+  }
+
+  /**
+   * Squeezes dropped clauses out of the pool. Clause ids do not change, only
+   * where their literals sit, so nothing the search reads by id moves.
+   */
+  private compact(): void {
+    const next = new Int32Array(this.pool.length);
+    let top = 0;
+    for (let id = 0; id < this.cStart.length; id++) {
+      const len = this.cLen[id]!;
+      const from = this.cStart[id]!;
+      next.set(this.pool.subarray(from, from + len), top);
+      this.cStart[id] = top;
+      top += len;
+    }
+    this.pool = next;
+    this.poolTop = top;
+    this.poolWaste = 0;
   }
 
   // ---- the activity heap
@@ -511,7 +623,7 @@ export class Sat {
           this.enqueue(clause[0]!, -1);
         } else {
           const lbd = this.span(clause);
-          const id = this.attach(Int32Array.from(clause), true);
+          const id = this.attach(clause, true);
           this.lbd[id] = lbd;
           this.bumpClause(id);
           this.enqueue(clause[0]!, id);
@@ -526,14 +638,14 @@ export class Sat {
           this.cancelUntil(0);
           continue;
         }
-        if (this.learntCount - this.trail.length >= this.maxLearnt) this.reduce();
+        if (this.learntCount - this.trailTop >= this.maxLearnt) this.reduce();
 
         let next = -1;
         while (this.level() < this.assumptions.length) {
           const a = this.assumptions[this.level()]!;
           const value = this.vals[a];
           if (value === 1) {
-            this.trailLim.push(this.trail.length);
+            this.trailLim.push(this.trailTop);
           } else if (value === -1) {
             // An assumption is false given the others: no model under these.
             this.cancelUntil(0);
@@ -559,7 +671,7 @@ export class Sat {
           }
         }
         this.decisions++;
-        this.trailLim.push(this.trail.length);
+        this.trailLim.push(this.trailTop);
         this.enqueue(next, -1);
       }
       if ((step & 255) === 0 && performance.now() >= deadline) return 'paused';

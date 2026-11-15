@@ -185,6 +185,32 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 ---
 
+## 2026-11-15 · SAT çözücünün yayılımı tamponlarla (`hiz/sat-yayilim`)
+
+Öneri aramasının süresinin %71'i `sat.ts`'in `propagate`'indeydi (babanın verisi). Arama
+aynı kaldı, yalnız veri yapıları değişti: `propagate` alanları yerelde tutuyor ve
+`enqueue`'yu satır içi yazıyor; izleme listeleri `Int32Array` ve ayrı bir sayaç (her
+ziyarette `length = j` ile kesilip `push` ile yeniden büyüyen dizi yerine); `trail`
+değişken sayısıyla boyutlanmış bir `Int32Array` ve `trailTop`; klozlar tek bir düz havuzda
+(`pool`, `cStart`, `cLen`), `reduce` atılanların yarıyı geçtiği yerde havuzu sıkıştırıyor,
+kloz numaraları değişmiyor.
+
+Aynılık: babanın verisinde üç ailenin (`teacherHours`, `fewTeachers`, `rules`) önerilerinin
+JSON'u, toplam çatışma (346 924) ve karar (1 111 873) sayısı her adımda öncekiyle bayt bayt
+aynı. Süreler (bu makine, kirli ölçüm):
+
+| Adım | Süre |
+|---|---|
+| Önce | 56,9 s |
+| Yerel alanlar, satır içi `enqueue` | 49,1 s |
+| Düz kloz havuzu | 49,7 s (gürültü içinde) |
+| İzleme listeleri `Int32Array` + sayaç | 32,5 s |
+| `trail` `Int32Array` + `trailTop` | 26,0 s |
+
+Kazancın çoğu dizilerin kesilip yeniden büyümesinin kalkmasından. `sat.test.ts`,
+`relax.test.ts`, `invariants.test.ts`, `relaxFullCourse.test.ts` ve `solver.test.ts` (142)
+yeşil.
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
