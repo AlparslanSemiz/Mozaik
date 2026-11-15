@@ -680,6 +680,8 @@ test.describe('11. Görsel cila', () => {
 
   test('klavyeyle gezerken nerede olduğun belli', async ({ page }) => {
     await open(page);
+    // Past "İçeriğe geç" (KS27) to the first section button.
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
 
     const focus = await page.evaluate(() => {

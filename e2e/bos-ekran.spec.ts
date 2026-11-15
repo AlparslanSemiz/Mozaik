@@ -254,8 +254,11 @@ test.describe('36. Klavye', () => {
   test('Tab ile yedi sekmeye de ulaşılıyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
+    // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
+    await expect(page.locator(':focus')).toHaveText('İçeriğe geç');
+    await page.keyboard.press('Tab');
 
-    // The rail is first in the DOM, so the first stop is the first section.
+    // Then the sections, in the order they are drawn.
     const names: string[] = [];
     for (let i = 0; i < 7; i++) {
       names.push(
@@ -277,7 +280,10 @@ test.describe('36. Klavye', () => {
   test('Enter ile sekme değiştirilebiliyor ve aria-current takip ediyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
-    // Four stops in: Kurulum, Müsaitlik, Dersler, Program.
+    // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
+    await expect(page.locator(':focus')).toHaveText('İçeriğe geç');
+    await page.keyboard.press('Tab');
+    // Four stops in: Okul, Müsaitlik, Dersler, Program.
     for (let i = 0; i < 3; i++) await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(

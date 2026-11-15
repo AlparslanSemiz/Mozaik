@@ -132,12 +132,18 @@ test.describe('40. Plan kitaplığı', () => {
     await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Okul adı').fill('Deneme Kursu');
     await page.getByLabel('Okul adı').blur();
-    await expect(page.getByRole('button', { name: /Geri al/ })).toBeEnabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
+    ).toBeEnabled();
 
     await openPlans(page);
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
-    await expect(page.getByRole('button', { name: /Geri al/ })).toBeDisabled();
-    await expect(page.getByRole('button', { name: /İleri al/ })).toBeDisabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
+    ).toBeDisabled();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'İleri al', exact: true }),
+    ).toBeDisabled();
   });
 
   test('değişiklikten hemen sonra geçmek o değişikliği GİDEN planda bırakıyor', async ({
