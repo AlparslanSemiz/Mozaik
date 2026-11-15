@@ -247,6 +247,69 @@ export function buildRows(
     .filter((row) => row.mask !== 'hidden');
 }
 
+function sameCell(a: GridCell | null, b: GridCell | null): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  return (
+    a.lessonId === b.lessonId &&
+    a.top === b.top &&
+    a.bottom === b.bottom &&
+    a.color === b.color &&
+    a.continues === b.continues &&
+    a.conflict === b.conflict &&
+    a.pinned === b.pinned &&
+    a.mask === b.mask &&
+    a.mark === b.mark
+  );
+}
+
+function sameRow(a: GridRow, b: GridRow): boolean {
+  if (
+    a.id !== b.id ||
+    a.kind !== b.kind ||
+    a.name !== b.name ||
+    a.secondary !== b.secondary ||
+    a.color !== b.color ||
+    a.mask !== b.mask ||
+    a.cells.length !== b.cells.length ||
+    a.closed.length !== b.closed.length
+  ) {
+    return false;
+  }
+  for (let i = 0; i < a.cells.length; i++) {
+    if (!sameCell(a.cells[i] ?? null, b.cells[i] ?? null)) return false;
+  }
+  for (let i = 0; i < a.closed.length; i++) {
+    if (a.closed[i] !== b.closed[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * `next`, with every row that draws exactly as before replaced by the row
+ * object it was last time — and `prev` itself if nothing changed at all.
+ *
+ * `buildRows` makes every row new, and the grid's rows are memoised on their
+ * identity (pitfall 10): without this one drop redrew all of them, ~2100
+ * cells, and on the weak machine that was most of a quarter-second freeze.
+ * Comparing is a few thousand field reads; drawing a row is 84 cells.
+ */
+export function keepSameRows(prev: GridRow[] | null, next: GridRow[]): GridRow[] {
+  if (prev === null) return next;
+  const before = new Map(prev.map((row) => [row.id, row]));
+  let changed = prev.length !== next.length;
+  const out = next.map((row, i) => {
+    const old = before.get(row.id);
+    if (old !== undefined && sameRow(old, row)) {
+      if (prev[i] !== old) changed = true;
+      return old;
+    }
+    changed = true;
+    return row;
+  });
+  return changed ? out : prev;
+}
+
 /**
  * The preview's marks (TODO B5.11): on the week a way would make, the teacher
  * hours it opens and the cells whose lesson is new there. Opened wins where a

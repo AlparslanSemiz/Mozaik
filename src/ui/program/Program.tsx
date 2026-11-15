@@ -2,10 +2,22 @@
 //
 // Performance contract (for the slow machine):
 //   - `rows` and `cards` are useMemo'd, recomputed only when the state changes.
+//   - A row that draws as before keeps its object (`keepSameRows`) and the
+//     cell handlers keep their identity (`useSteady`), so a drop redraws the
+//     one or two rows it touched and not ~2100 cells (pitfall 10).
 //   - Grid is React.memo; changing the reason bar does not redraw the grid.
 //   - No state changes at all during a drag (see drag.ts).
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type React from 'react';
 import {
   blockAt,
@@ -20,6 +32,7 @@ import {
   pinScopeCells,
   togglePinScope,
   type BlockRef,
+  type Index,
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
@@ -35,12 +48,14 @@ import {
   describeBar,
   describeMenu,
   dropNotice,
+  keepSameRows,
   poolMenuFacts,
   markPreview,
   roomLetter,
   visibleDays,
   waitingSubjects,
   type ColorOf,
+  type GridRow,
 } from '../../pure/program';
 import { useDrag, type DragData } from '../../platform/dom';
 import { samePlan, type SolverRun } from '../../platform/search';
@@ -96,6 +111,40 @@ function useStillSaid(said: unknown, state: State): boolean {
   return said === null || at === null || at.said !== said || samePlan(at.state, state);
 }
 
+/**
+ * A handler with one identity for the life of the screen that always calls
+ * the latest `fn`. The grid's rows are memoised, and a handler that closes
+ * over `state` is new after every change: passed straight down it redrew
+ * every row on every drop. Safe because these run from events, never during
+ * render, so the latest closure is the one an event should see.
+ */
+function useSteady<A extends unknown[]>(fn: (...args: A) => void): (...args: A) => void {
+  const latest = useRef(fn);
+  useLayoutEffect(() => {
+    latest.current = fn;
+  });
+  return useCallback((...args: A) => {
+    latest.current(...args);
+  }, []);
+}
+
+/**
+ * `buildIndex`, remembering the last two plans it was asked about: the grid
+ * reads the plan on screen and the tray (deferred) the one before it, and
+ * neither should build an index the other already has. Two slots, not a map
+ * keyed by plan: the undo stack keeps thirty plans alive.
+ */
+function useRecentIndex(): (d: State) => Index {
+  const recent = useRef<Array<{ d: State; ix: Index }>>([]);
+  return useCallback((d: State) => {
+    const hit = recent.current.find((x) => x.d === d);
+    if (hit !== undefined) return hit.ix;
+    const built = buildIndex(d);
+    recent.current = [{ d, ix: built }, ...recent.current].slice(0, 2);
+    return built;
+  }, []);
+}
+
 /** What a cell in the preview does when touched: nothing, it is not the timetable. */
 const still = () => {};
 
@@ -114,7 +163,8 @@ function Program({
   colorMode,
 }: Props) {
   const t = useT();
-  const ix = useMemo(() => buildIndex(state), [state]);
+  const indexOf = useRecentIndex();
+  const ix = useMemo(() => indexOf(state), [indexOf, state]);
   const notify = useToast();
   const editLesson = useLessonEdit();
   // "öğretmeni düzenleme ve sınıfı düzenlemede her şeyi düzenleyebilelim":
@@ -158,24 +208,34 @@ function Program({
     (d, lesson) => programColorIndex(d, lesson, colorMode),
     [colorMode],
   );
-  const rows = useMemo(
-    () =>
-      shown !== null && diff !== null
-        ? markPreview(
-            buildRows(shown, buildIndex(shown), view, mask, colorOf, t),
-            shown,
-            diff,
-            view,
-          )
-        : buildRows(state, ix, view, mask, colorOf, t),
-    [shown, diff, state, ix, view, mask, colorOf, t],
-  );
+  // The preview's index, built once for the grid and the tray alike.
+  const shownIx = useMemo(() => (shown === null ? null : buildIndex(shown)), [shown]);
+  // The rows drawn last time, so an unchanged row keeps its object. Written
+  // inside the memo: it runs only when its inputs change, and an aborted render
+  // that wrote it can only make the next comparison start from newer rows.
+  const lastRows = useRef<GridRow[] | null>(null);
+  const rows = useMemo(() => {
+    const built =
+      shown !== null && shownIx !== null && diff !== null
+        ? markPreview(buildRows(shown, shownIx, view, mask, colorOf, t), shown, diff, view)
+        : buildRows(state, ix, view, mask, colorOf, t);
+    const kept = keepSameRows(lastRows.current, built);
+    lastRows.current = kept;
+    return kept;
+  }, [shown, shownIx, diff, state, ix, view, mask, colorOf, t]);
   // The plan's answers are the search's: an answer, or an undo that takes one
   // back, runs it again (useSolver checks whether anything changed).
   const { reconsider } = solver;
   useEffect(() => {
     if (advice !== null) reconsider(state.answers);
   }, [state.answers, advice, reconsider]);
+  // The tray follows the plan a moment late. A drop or an undo paints the
+  // grid first and the tray in a render React may interrupt: on the weak
+  // machine rebuilding both in one task was a quarter-second freeze with
+  // nothing on screen changing. `useDeferredValue` hands back the plan the
+  // tray last drew until that render runs, so the memos below hit their cache.
+  const trayState = useDeferredValue(state);
+  const trayIx = useMemo(() => indexOf(trayState), [indexOf, trayState]);
   const {
     cards,
     completed,
@@ -184,13 +244,13 @@ function Program({
     // In the preview the tray is the suggested week's too: what it leaves
     // waiting, which for a way that builds the week is nothing.
     () =>
-      shown === null
-        ? buildPool(state, ix, view, mask, poolSort, poolFilter, colorOf, t)
-        : buildPool(shown, buildIndex(shown), view, mask, poolSort, poolFilter, colorOf, t),
-    [shown, state, ix, view, mask, poolSort, poolFilter, colorOf, t],
+      shown === null || shownIx === null
+        ? buildPool(trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t)
+        : buildPool(shown, shownIx, view, mask, poolSort, poolFilter, colorOf, t),
+    [shown, shownIx, trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t],
   );
   // The branches with something still waiting (see `waitingSubjects`).
-  const poolSubjects = useMemo(() => waitingSubjects(state, mask), [state, mask]);
+  const poolSubjects = useMemo(() => waitingSubjects(trayState, mask), [trayState, mask]);
   const dayIndices = useMemo(
     () => visibleDays(state.settings.days, mask.days),
     [state.settings.days, mask.days],
@@ -419,6 +479,11 @@ function Program({
     [state, ix, view, beginDrag],
   );
 
+  // What the grid's rows hold: one identity each (see `useSteady`).
+  const steadyRemove = useSteady(cellRemove);
+  const steadyMoveStart = useSteady(cellMoveStart);
+  const steadyPin = useSteady(pinCell);
+
   if (state.lessons.length === 0) {
     return (
       <>
@@ -506,9 +571,9 @@ function Program({
           dayIndices={dayIndices}
           dayModes={mask.days}
           firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
-          onCellRemove={shown === null ? cellRemove : still}
-          onCellMoveStart={shown === null ? cellMoveStart : still}
-          onCellPin={shown === null ? pinCell : still}
+          onCellRemove={shown === null ? steadyRemove : still}
+          onCellMoveStart={shown === null ? steadyMoveStart : still}
+          onCellPin={shown === null ? steadyPin : still}
           onMenu={shown === null ? setMenuTarget : still}
           menuOpen={active && menuOpen}
           onMenuOpenChange={setMenuOpen}

@@ -1,5 +1,5 @@
 import { Activity, useEffect, useRef, useState } from 'react';
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
 import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
@@ -178,11 +178,16 @@ export default function App() {
   // `dil` although `health` does not take it: its sentences are translated
   // inside, so after a live language switch the memo would keep the old words
   // until the next edit (e2e/dil.spec.ts).
+  //
+  // Deferred: the chip is a summary, and on the weak machine its report was
+  // the larger half of the freeze after every drop and undo. The grid paints
+  // the move first and the chip follows in a render React may interrupt.
   const { dil } = useLang();
+  const settled = useDeferredValue(state);
   const status = useMemo(() => {
     void dil;
-    return health(state);
-  }, [state, dil]);
+    return health(settled);
+  }, [settled, dil]);
 
   useShortcuts(setPaletteOpen, goTab, openShortcuts);
 

@@ -53,7 +53,7 @@
 // drawn and computes what more than one of them reads; `parts.tsx` says why
 // the strips are functions and not components.
 
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { describeStrip } from '../../pure/program';
 import { useDialogs, useT, useToast, useUndoIf } from '../common';
 import type { RibbonProps, StripContext } from './parts';
@@ -75,9 +75,13 @@ export default function Ribbon(props: RibbonProps) {
   // father's week), and App draws the ribbon on every solver slice. Only the
   // Program tab reads them, and they change only with the plan or the mask
   // (TODO RO2). Above the early return: a hook may not sit behind one.
+  // The strip's counts follow the plan a moment late (`useDeferredValue`):
+  // they are a frame and a half on the weak machine, and a drop should paint
+  // the card in its new place before the buttons above recount it.
+  const counted = useDeferredValue(state);
   const strip = useMemo(
-    () => (ui.tab === 'program' ? describeStrip(state, programMask) : null),
-    [ui.tab, state, programMask],
+    () => (ui.tab === 'program' ? describeStrip(counted, programMask) : null),
+    [ui.tab, counted, programMask],
   );
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold
