@@ -257,7 +257,10 @@ sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO 
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
-yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda.
+yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda. Üç ekosisteme
+bakar: npm (haftalık), `src-tauri`'nin cargo'su ve iş akışlarının eylemleri (aylık).
+Üçüncü taraf eylemler (`dtolnay/rust-toolchain`, `Swatinem/rust-cache`) tam commit
+SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15).
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
 yeşil bir `main` push'unda yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
