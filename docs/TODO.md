@@ -1661,20 +1661,24 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 `size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
 değişmez, ekran 0 piksel.
 
-- [ ] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
-- [ ] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
+- [x] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
+      Bitti (2026-11-15, `refactor/rf24-rf25`): liste `Teachers.tsx`'te, ekleme bloğu
+      `TeacherForm.tsx`, satır `TeacherRow.tsx`, cinsiyet seçenekleri `genders.ts`.
+- [x] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
       kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
-- [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
+      Bitti (2026-11-15, `refactor/rf24-rf25`): `LessonForm.tsx`, `LessonRow.tsx` ve
+      `LessonPicker.tsx`; `index.tsx` 241 satır.
+- [x] **RF26 Program'ın sağ tık menüleri bileşenlere.** Bitti (2026-11-15, `refactor/rf26-ro`): `ui/program/GridMenu.tsx` ve `PoolMenu.tsx`. Izgaranın ve havuzun menüleri
       `ui/program/Program.tsx`'in içinde; hesapları (`describeMenu`, `poolMenuFacts`) zaten
       `pure/program/`'da.
 
 **Optimizasyon fırsatları** (refactor turu hiçbirini yapmadı; her biri önce ölçülür, tuzak
 105 ve 117):
 
-- [ ] **RO1 `health(state)` iki kez hesaplanıyor.** App üst çubuğun durum satırı için, şerit
+- [x] **RO1 `health(state)` iki kez hesaplanıyor.** Bitti (2026-11-15): App hesaplıyor, şerit `status` prop'unu alıyor; babanın dizili haftasında bir çağrı 15,5 ms, her düzenlemede bir kez kazanılıyor. App üst çubuğun durum satırı için, şerit
       Kontrol'ün sayıları için, her biri kendi `useMemo`'suyla aynı `state` ve `dil` üstünde.
       Biri hesaplayıp öbürüne verebilir. Kazanç ölçülmedi.
-- [ ] **RO2 Program şeridinin sayıları her çizimde baştan.** `describeStrip` (eskiden şeridin
+- [x] **RO2 Program şeridinin sayıları her çizimde baştan.** Bitti (2026-11-15): `Ribbon` `describeStrip`'i yalnız Program sekmesinde ve `state` ile maske değişince hesaplıyor; bir çağrı 4,5 ms, çözücü koşarken her dilimde kazanılıyor. `describeStrip` (eskiden şeridin
       gövdesinde) her ders için `pendingBlocks`'u ve bütün programın `pinScopeCells`'ini
       memo'suz koşuyor, şerit her `App` çiziminde yeniden çiziliyor. Babanın tam haftasında
       ölçülür, sonra `useMemo`.

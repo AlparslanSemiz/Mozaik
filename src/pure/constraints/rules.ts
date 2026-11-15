@@ -149,8 +149,9 @@ export function teacherDayCount(ix: Index, teacherId: Id, day: number, hourCount
 
 export function lessonDayCount(d: State, lesson: Lesson, day: number, hourCount: number): number {
   let n = 0;
+  const placements = activePlacements(d);
   for (let h = 0; h < hourCount; h++) {
-    if (activePlacements(d)[placementKey(lesson.classId, day, h)] === lesson.id) n++;
+    if (placements[placementKey(lesson.classId, day, h)] === lesson.id) n++;
   }
   return n;
 }

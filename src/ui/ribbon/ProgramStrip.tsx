@@ -98,11 +98,10 @@ export function programStrip({
   setProgramColor,
   t,
   dialogs: { confirm, prompt, alert },
+  strip,
 }: StripContext): React.ReactElement {
-  const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } = describeStrip(
-    state,
-    programMask,
-  );
+  const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
+    strip ?? describeStrip(state, programMask);
   const currentProgram = activeProgram(state);
 
   const askProgramName = async (initial: string, exceptId?: string) => {

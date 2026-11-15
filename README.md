@@ -3,7 +3,7 @@
 # Mozaik
 
 A single-file tool for laying out a school's weekly timetable. It replaces aSc
-Timetables for one private course in Turkey — it does about half of what aSc
+Timetables for one private course in Turkey. It does about half of what aSc
 does, and aims to do that half better.
 
 **No installer. No server. No internet required.** No account, no password, no
@@ -18,7 +18,7 @@ Spanish and French.
 
 ## Download
 
-Everything below is a finished file — nothing to build.
+Everything below is a finished file. Nothing to build.
 
 | File | What to do with it |
 |---|---|
@@ -27,7 +27,7 @@ Everything below is a finished file — nothing to build.
 | **[Mozaik.exe](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
 
 Or use it without downloading anything:
-**<https://alparslansemiz.github.io/Mozaik/>** — it works offline after
+**<https://alparslansemiz.github.io/Mozaik/>** works offline after
 the first visit.
 
 These links always point at the newest release; no version number and no login
@@ -37,7 +37,7 @@ download can be checked (`Get-FileHash Mozaik.exe`).
 
 ### Windows will warn you, and here is exactly what it says
 
-The `.exe` and the installer are **unsigned** — a code-signing certificate
+The `.exe` and the installer are **unsigned**: a code-signing certificate
 costs money and this project does not have one. So:
 
 * SmartScreen may say *"Windows protected your PC"*. Click **More info**, then
@@ -51,7 +51,7 @@ costs money and this project does not have one. So:
 
 ## The four delivery routes
 
-All four carry **the same page** — the same `dist/index.html`. What differs is
+All four carry **the same page**, the same `dist/index.html`. What differs is
 what is around it.
 
 1. **The file.** `dist/index.html`, double-clicked. One file: JavaScript, CSS
@@ -60,13 +60,13 @@ what is around it.
    shared with every other local HTML page in that browser.
 2. **The Windows install.** `Kur.cmd` copies the program under
    `%LOCALAPPDATA%`, makes a desktop shortcut, and serves it from
-   `http://dersprogrami.localhost:7654` — a ~150-line file server, no admin
+   `http://dersprogrami.localhost:7654`, a ~150-line file server, no admin
    rights, no `hosts` file edit. Chrome and Edge resolve `*.localhost`
    themselves. Nothing leaves the machine.
 3. **The site.** GitHub Pages, a service worker, works with the plug pulled.
 4. **The `.exe`.** Tauri, WebView2, one binary. It writes every plan into
    `Documents\Ders Programı` on its own, without being asked, and it can
-   update itself — but only when you press the button.
+   update itself, but only when you press the button.
 
 ### Linux
 
@@ -91,7 +91,7 @@ with one file:
 2. In the new Mozaik, **Ayarlar → Planlar ve yedek → Tümünü dosyadan aç**,
    pick that file, **Hepsini değiştir**. It should say *"n plan açıldı."*
 3. Pick the folder again (same section, **Klasör seç…**) and set theme, scale
-   and density by hand — machine preferences are not in the file.
+   and density by hand. Machine preferences are not in the file.
 4. Keep the old copy for a week as a spare; removing it is your call.
 
 ## Where the data lives
@@ -105,7 +105,7 @@ between machines: **Dosyaya kaydet** (one plan, a `.json` file) and
 **Tümünü dosyaya kaydet** (every plan, one file). The `.exe` and the Windows
 install also mirror everything into a folder you choose.
 
-Each route has its **own** storage — a file, a local site and the `.exe` do not
+Each route has its **own** storage: a file, a local site and the `.exe` do not
 see each other's data. Moving between them is the same two buttons.
 
 ## Development
@@ -115,16 +115,16 @@ npm install && npx playwright install chromium   # once, on a new machine
 
 npm run dev          # dev server
 npm run tipler       # tsc, twice: src and everything outside src
-npm test             # Vitest — pure logic (719 tests)
-npm run build        # dist/index.html, one file — THE delivery
-npm run build:site   # dist-site/ — PWA: one file + manifest + sw.js + icons
+npm test             # Vitest: pure logic (719 tests)
+npm run build        # dist/index.html, one file, THE delivery
+npm run build:site   # dist-site/: PWA, one file + manifest + sw.js + icons
 npm run test:e2e     # Playwright over file:// (512 tests)
 npm run test:site    # site · local server · folder, over http (22 tests)
 npm run kontrol      # all of it: types + unit + build + e2e + site + solver
 npm run ekran        # screenshots in both themes -> test-results/ekran/
 npm run cozucu       # full-scale solver stress (part of `kontrol`)
-npm run sunucu       # local server — http://dersprogrami.localhost:7654
-npm run paket        # dist-kurulum/ — the one folder that ships to Windows
+npm run sunucu       # local server at http://dersprogrami.localhost:7654
+npm run paket        # dist-kurulum/: the one folder that ships to Windows
 ```
 
 Three more commands are **not** part of `kontrol`, because they need
@@ -136,7 +136,7 @@ npm run exe          # builds the binary            (Rust)
 npm run exe:test     # the Rust side's tests        (Rust)
 ```
 
-The E2E suite opens **`dist/index.html` over `file://`**, not a dev server —
+The E2E suite opens **`dist/index.html` over `file://`**, not a dev server:
 the actual file that gets double-clicked. Drag and drop, the sticky column,
 print overflow and colour contrast only show up there.
 
@@ -159,4 +159,4 @@ at runtime, and that claim is verified **mechanically** by `temel.spec.ts` and
 ## Licence
 
 [MIT](LICENSE). The embedded IBM Plex Sans is under the SIL Open Font
-License 1.1 — see [LICENSE](LICENSE) and `scripts/font-source/OFL.txt`.
+License 1.1. See [LICENSE](LICENSE) and `scripts/font-source/OFL.txt`.

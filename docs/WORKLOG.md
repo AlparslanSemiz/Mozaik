@@ -614,6 +614,89 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ---
 
+## 2026-11-15 · Teachers ve Dersler bileşenlere (`refactor/rf24-rf25`)
+
+RF24 ve RF25 (TODO §8k). Kod taşındı, değiştirilmedi; ekran ve davranış aynı.
+
+- `ui/setup/Teachers.tsx` 560 → 136 satır: ekleme bloğu ve taslağı `TeacherForm.tsx`, listenin
+  satırı `TeacherRow.tsx`, ikisinin cinsiyet seçenekleri `genders.ts`. "İkinci branş sorulan
+  satırlar" (`opening`) listede kaldı, satırlara iniyor.
+- `ui/lessons/index.tsx` 684 → 241 satır: `LessonForm.tsx` (ekleme bloğu, taslak, yapıştırma),
+  `LessonRow.tsx`, `LessonPicker.tsx` (odaklı kipte sağ sütun). Kipe göre süzgeci temizleyen
+  `useEffect` ekranda kaldı.
+
+Doğrulama: `tsc`, `eslint src`, `npm run sinir` (0 ihlal), `knip` (çıkış 0), belge kapısı yeşil.
+`npm run hizli` 11 kırmızı, `main`'dekiyle aynı 11 (bu Mac'te `flock` yok, depolama testleri,
+`rowOrder`). Playwright: `dersler`, `kurulum` ve `liste` spec'leri 94/94 yeşil (Chromium). `dist/index.html`
+1 173 991 → 1 174 664 bayt (+673, yeni bileşenlerin prop'ları), sınırın 11,8 kB altında;
+brotli'li hâli sınırın 6,5 kB altında.
+
+## 2026-11-15 · Program'ın menüleri ve şeridin tekrarları (`refactor/rf26-ro`)
+
+RF26: ızgaranın ve havuzun sağ tık menüleri `Program.tsx`'ten (879 satır) kendi dosyalarına
+taşındı, `GridMenu.tsx` (302) ve `PoolMenu.tsx` (113); Program 564 satır. JSX değişmeden
+taşındı, yalnız `solver.running` ve `menuPortalRef.current` prop olarak geliyor. Taşıma ile
+içerik ayrı commit'lerde.
+
+RO1 ve RO2, ölçülerek (babanın dizili haftası, `tam-dolu-kurs-dizili.json`, 50 çağrının
+ortalaması, bu makine, kirli ölçüm): `health` 15,5 ms, `describeStrip` 4,5 ms. `health` artık
+yalnız App'te hesaplanıyor ve şeride `status` olarak veriliyor, yani her düzenlemede bir
+hesap eksik. `describeStrip` `Ribbon`'da `useMemo` ile, yalnız Program sekmesinde ve `state`
+ya da maske değişince; App çözücü koşarken her dilimde çizildiği için kazanç o sırada her
+karede.
+
+Doğrulama: `tsc`, `eslint src`, `npm run sinir`, `knip`, `src/ui/program` ve `src/pure/program`
+testleri yeşil; `npm run hizli`'de 11 kırmızı, `main`'de de aynı 11 (bu Mac'te `flock` yok,
+depolama ve `rowOrder` testleri), yenisi yok. Ekran görüntüsü alınmadı.
+
+## 2026-11-15 · SAT çözücünün yayılımı tamponlarla (`hiz/sat-yayilim`)
+
+Öneri aramasının süresinin %71'i `sat.ts`'in `propagate`'indeydi (babanın verisi). Arama
+aynı kaldı, yalnız veri yapıları değişti: `propagate` alanları yerelde tutuyor ve
+`enqueue`'yu satır içi yazıyor; izleme listeleri `Int32Array` ve ayrı bir sayaç (her
+ziyarette `length = j` ile kesilip `push` ile yeniden büyüyen dizi yerine); `trail`
+değişken sayısıyla boyutlanmış bir `Int32Array` ve `trailTop`; klozlar tek bir düz havuzda
+(`pool`, `cStart`, `cLen`), `reduce` atılanların yarıyı geçtiği yerde havuzu sıkıştırıyor,
+kloz numaraları değişmiyor.
+
+Aynılık: babanın verisinde üç ailenin (`teacherHours`, `fewTeachers`, `rules`) önerilerinin
+JSON'u, toplam çatışma (346 924) ve karar (1 111 873) sayısı her adımda öncekiyle bayt bayt
+aynı. Süreler (bu makine, kirli ölçüm):
+
+| Adım | Süre |
+|---|---|
+| Önce | 56,9 s |
+| Yerel alanlar, satır içi `enqueue` | 49,1 s |
+| Düz kloz havuzu | 49,7 s (gürültü içinde) |
+| İzleme listeleri `Int32Array` + sayaç | 32,5 s |
+| `trail` `Int32Array` + `trailTop` | 26,0 s |
+
+Kazancın çoğu dizilerin kesilip yeniden büyümesinin kalkmasından. `sat.test.ts`,
+`relax.test.ts`, `invariants.test.ts`, `relaxFullCourse.test.ts` ve `solver.test.ts` (142)
+yeşil.
+
+## 2026-11-15 · Çözücünün onarımı tamsayı dizileriyle (`hiz/onarim-dizileri`)
+
+Onarım aşaması her "bu hücrede kim var, oynayabilir mi" sorusu için `sınıf|gün|saat`
+metni kurup sözlükte arıyordu. Profil (tam-dolu-kurs, `keepPlaced: false`): 9,1 s'nin
+yaklaşık %70'i `evictions`, `movableAt` ve `trim`'de. Onarım artık sınıf, öğretmen ve
+derslik hücrelerini `Int32Array` aynalarından okuyor; aynalar `startRepair`'de sözlükten
+kuruluyor ve yalnız `claim` ile `release` değiştiriyor. Hiç değişmeyen kapalı saatler
+öğe başına bir kez okunuyor, tabu `Float64Array`. Son sözü yine `blocker()` söylüyor.
+
+Sonuç birebir aynı: 29 girdide (iki fikstür × iki kip ve `WORLDS`'ün hepsi) faz, blok,
+düğüm sayısı ve ızgaranın parmak izi değişmedi. Süreler (bu makine, temiz koşul değil,
+kirli ölçüm):
+
+| Girdi | Önce | Sonra |
+|---|---|---|
+| tam-dolu-kurs, baştan | 10,8 s | 1,6 – 2,4 s |
+| gercek-olcek-sikisik | 70 s | 5,8 – 6,8 s |
+| gercek-olcek-imkansiz | 112 s | 10 – 13 s |
+
+Öneri araması bu daldan etkilenmiyor: profilde sürenin %71'i `sat.ts`'in `propagate`'inde
+(babanın verisinde ~52 s).
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
