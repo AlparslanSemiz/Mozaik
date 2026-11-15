@@ -19,6 +19,59 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
+Son güncelleme: 2026-11-15 akşam. Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
+olduğu gibi aşağıda, "2026-11-15 · Önceki 'Şu an'" girdisinde.
+
+**Sürüm.** 2.2.0 sahada (2026-09-26). Üstüne çok iş birikti ve yayınlanmadı (CHANGELOG
+Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunamayan plan düzeltmesini
+(A1/A2, TB1, TB8) taşıyor, ayrı bir köprü gerekmiyor ama yayın sırası bu.
+
+**2026-11-15'te `main`'e giren (PR #16–#39, ayrıntı aşağıdaki tarihli girdiler, DECISIONS):**
+- Hız: çözücünün onarımı tamsayı dizileriyle (babanın haftası 10,8 → 1,4 s), SAT yayılımı
+  tamponlarla (öneri araması 2,2×), Sığdır'ın ilk açılışı (`gridFit`), Çıktı'nın ilk açılışı
+  (`printStamp`), vite 8.
+- CP-SAT: kurulumda OR-Tools v9.15 (9 DLL + VC++), Rust C API (`cpsat.rs`), CP-SAT'a kendi modeli
+  (`pure/relax/cpModel.ts`); exe'de bizim aramanın ARDINDAN ikinci bakış (`relaxPool.ts`,
+  `CP_SECOND_LOOK = true`), yalnız teacherHours, teacherDays, fewTeachers, rules. Babanın verisinde
+  18/18 kanıt, 4 işçide 10–16 s. Tarayıcı ve tek dosya bugünkü aramada.
+- Teslim: NSIS kurulum (`Mozaik-Kurulum.exe`, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`),
+  kaldırıcının "verileri sil" kutusu kancayla kapalı (`src-tauri/nsis/kancalar.nsh`); 2.2.0'dan köprü
+  (manifestte isteğe bağlı `kurulum*` alanları).
+- Güvenlik: güncellemeler minisign imzalı, imza sürüm + dosyaya bağlı (`imza_yorumu`), adres
+  normalleştirilip denetleniyor, `.yeni` takastan önce yeniden doğrulanıyor, `write_in` fsync,
+  `remove_file` yalnız günlük yedek, yayın akışı en az yetki, action'lar SHA ile.
+- Veri: PR'sız kalmış 11 dallık zincir (TB1, TB7, TB8, B7.32, e-posta, güncelleme kapısı) `main`'de;
+  açılışta boş okunan plan dizini artık ötekileri gizlemiyor (`adoptOrphans`).
+- Kullanım: öneri paneli tek yol + "Başka yollar"; koyu temada Çıktı okunur; 146 etiketsiz kutu;
+  sınıfta sahte "Sıkışık" yok (SD2); ders/öğretmen silme ve "Programı boşalt" sormuyor, "Geri al"
+  bildirimi (`undo-if`, SD1).
+- Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
+  (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
+
+**Alp'te bekleyenler (yeni oturum bunları sormalı):**
+1. `MOZAIK_IMZA_ANAHTARI` depo sırrı: `gh secret set MOZAIK_IMZA_ANAHTARI --repo
+   AlparslanSemiz/Mozaik < ~/.config/mozaik-imza/mozaik.key`. Sır yoksa `surum.yml` yayını
+   durdurur (bilerek). Anahtarın gizli yarısı yalnız `~/.config/mozaik-imza/` (600); yedeklenmeli,
+   kaybolursa dağıtılmış kopyalar yeni sürümü reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
+2. SD3: plan ve program tek kavram mı (TODO §8m).
+3. PR'sız eski dallar: `zebra-liste` (12 commit), `dal-temizlik` (11), `ruflo/kurulum` (11,
+   Alp'in deny testi), `birlesme-sonrasi` (3), `ozellik/belge-temizlik` (3); birleşsin mi silinsin mi.
+4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
+   (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
+
+**Açık teknik işler (TODO):** `Baştan diz` hâlâ soruyor (SD1'in kalanı); capability daraltma ve
+CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
+`.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
+LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
+weeklyHours) eski formülle ve ikinci bakışa girmiyor.
+
+**Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
+kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
+için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
+birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Önceki 'Şu an' (2026-11-15 akşamına kadarki hâli, olduğu gibi)
+
 Son güncelleme: 2026-11-15 (`kullanim/sadelik`, sade ekranın ilk dilimi); öncesi 2026-10-24 gece (`rk2-bozuk-iliski`, on bir dallık zincirin ucu; ilk sürüm `tp7-windows-exe`'de biter).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
