@@ -443,11 +443,13 @@ yarısı. Kurallar (DECISIONS 2026-11-16):
 - **CP-SAT yalnız kurulu kopyanın klasöründen** (`cpsat.rs`, `kutuphane_yolu`): Windows'ta
   yanında `uninstall.exe` olmayan bir exe `ortools.dll` aramaz (İndirilenler'e bırakılmış bir
   DLL yüklenmesin), kütüphane `LoadLibraryExW` ile yalnız kendi klasörü ve System32'de arama
-  yaparak açılır. `MOZAIK_ORTOOLS` yalnız debug derlemede okunur.
+  yaparak açılır. `MOZAIK_ORTOOLS` yalnız debug derlemede okunur. `uninstall.exe` bir kanıt değil,
+  bir eşik: DLL bırakabilen `uninstall.exe` de bırakabilir; durdurduğu, sıradan bir indirme klasörü.
 - **İndirme beklenen boyutta kesilir** (`update.rs`, `sinirli_ekle`): parça parça okunur,
   manifestin `boyut`'unu ya da 256 MB'ı aşan ilk parçada durur. Kurulum her seferinde
   `%TEMP%`'in altında yeni, tahmin edilemez adlı bir klasöre yazılır (`yeni_gecici_klasor`,
-  `create_dir` var olan adı reddeder) ve oradan çalıştırılır.
+  `create_dir` var olan adı reddeder) ve oradan çalıştırılır; önceki indirmelerin klasörleri yeni
+  indirmeden önce silinir (`eski_gecici_klasorleri_sil`).
 
 ### GitHub ayarları
 

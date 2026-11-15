@@ -263,7 +263,7 @@ jobs:
   # ---------------------------------------------------------------- 3 · sign
   # İMZALAYAN TEK İŞ, ve anahtarı gören tek iş (DECISIONS 2026-11-16). Sır depo
   # düzeyinde değil `release` ortamında; o ortamı yalnız `v*` etiketleri
-  # kullanabilir (ayarları BUILD.md'nin "İmza anahtarı" bölümünde). Bu iş kod
+  # kullanabilir (ayarları BUILD.md'nin "Yayın güvenliği" bölümünde). Bu iş kod
   # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe artefaktını indirir,
   # imzalar, iki `.minisig` yükler. Yayınlayan iş anahtarı hiç görmez.
   sign:

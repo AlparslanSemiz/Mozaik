@@ -109,10 +109,10 @@ açıldı, birleşmedi. Ayrıntı ve gerekçe DECISIONS 2026-11-16, ayarlar BUIL
   `ac()` gövdesi `libloading 0.7.4`'le ayrı bir küçük paket olarak `x86_64-pc-windows-msvc`'ye
   derlendi.
 - **Güncelleme:** indirme parça parça, `boyut`'u (en çok 256 MB) aşan ilk parçada durur; kurulum
-  her seferinde `%TEMP%` altında yeni bir klasöre (Unix'te 0700). `kurulumu_baslat`'a ve karar
+  her seferinde `%TEMP%` altında yeni bir klasöre (Unix'te 0700), öncekiler silinerek. `kurulumu_baslat`'a ve karar
   mantığına dokunulmadı (`guncelleme/windows-yolu` orada çalışıyor).
 
-Koşulanlar: `cargo test` (65), `npm run hizli`, `tsc`, `eslint`, `prettier`, `vite build`, `npm run
+Koşulanlar: `cargo test` (66), `npm run hizli`, `tsc`, `eslint`, `prettier`, `vite build`, `npm run
 boyut`, `actionlint` (yalnız `kanarya.yml`'in bilinen `ubuntu-26.04` etiketi), `e2e/csp.spec.ts`.
 Bu makinede `flock` yok, Playwright kilitsiz koştu.
 

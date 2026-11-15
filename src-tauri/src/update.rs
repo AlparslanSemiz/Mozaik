@@ -543,6 +543,24 @@ pub fn sinirli_ekle(bytes: &mut Vec<u8>, parca: &[u8], boyut: u64) -> Result<(),
     Ok(())
 }
 
+/// The prefix of every folder `yeni_gecici_klasor` makes.
+const GECICI_ONEK: &str = "Mozaik-kurulum-";
+
+/// Removes the installer folders earlier downloads left under `kok`. Only
+/// real folders with our prefix: a symlink with that name is not followed.
+pub fn eski_gecici_klasorleri_sil(kok: &Path) {
+    let Ok(girdiler) = fs::read_dir(kok) else {
+        return;
+    };
+    for g in girdiler.flatten() {
+        let ad = g.file_name();
+        let bizim = ad.to_str().is_some_and(|a| a.starts_with(GECICI_ONEK));
+        if bizim && g.file_type().is_ok_and(|t| t.is_dir()) {
+            let _ = fs::remove_dir_all(g.path());
+        }
+    }
+}
+
 /// A new folder under `kok` that did not exist a moment ago, with a name
 /// nobody can guess and, on Unix, readable by this user alone. `create_dir`
 /// fails on a name that is already there, so a folder planted in advance is
@@ -560,7 +578,7 @@ pub fn yeni_gecici_klasor(kok: &Path) -> std::io::Result<PathBuf> {
                 .unwrap_or_default(),
         );
         h.write_u32(std::process::id());
-        let yol = kok.join(format!("Mozaik-kurulum-{:016x}", h.finish()));
+        let yol = kok.join(format!("{GECICI_ONEK}{:016x}", h.finish()));
         let mut kurucu = fs::DirBuilder::new();
         #[cfg(unix)]
         std::os::unix::fs::DirBuilderExt::mode(&mut kurucu, 0o700);
@@ -761,6 +779,9 @@ pub async fn download_update(
         // again right before running it, since the folder is not ours alone.
         // A fresh folder of its own each time (security review 2026-11-16): a
         // fixed %TEMP%\Mozaik-Kurulum.exe is a name anything else can sit on.
+        // The folders earlier downloads left are removed first: each holds a
+        // 31 MB installer that has already run, or never will.
+        eski_gecici_klasorleri_sil(&std::env::temp_dir());
         let hedef = yeni_gecici_klasor(&std::env::temp_dir())
             .map_err(|e| format!("Kurulum için geçici klasör açılamadı: {e}"))?
             .join(KURULUM_ADI);
@@ -911,6 +932,19 @@ mod tests {
     fn the_page_cannot_raise_the_ceiling() {
         assert_eq!(indirme_siniri(u64::MAX), EN_BUYUK_INDIRME);
         assert_eq!(indirme_siniri(31_000_000), 31_000_000);
+    }
+
+    #[test]
+    fn earlier_installer_folders_are_removed_and_nothing_else() {
+        let kok = Scratch::new("eski-klasor");
+        let eski = yeni_gecici_klasor(&kok.0).unwrap();
+        fs::write(eski.join(KURULUM_ADI), b"MZ").unwrap();
+        fs::create_dir(kok.0.join("baska")).unwrap();
+        fs::write(kok.0.join("Mozaik-kurulum-dosya"), b"x").unwrap();
+        eski_gecici_klasorleri_sil(&kok.0);
+        assert!(!eski.exists());
+        assert!(kok.0.join("baska").is_dir());
+        assert!(kok.0.join("Mozaik-kurulum-dosya").is_file());
     }
 
     #[test]
