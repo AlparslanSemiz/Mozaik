@@ -181,6 +181,7 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 | Güncelleme kapısı | gerçek `update.rs` akışıyla 1 geçti (2026-10-24 gece, `tp7-windows-exe`); önceki biçimi (yalnız dosya takası) iki koşuda yeşildi (`ogretmene-eposta`) | `guncelleme-windows.yml` 40128285002; 40117527794, 40118278485 |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
+| Program'ın ilk açılışı, Sığdır, babanın haftası | 103,5–118,1 ms medyan x1, 327,1–504,6 ms x4; öncesi 155,5–157,9 ve 548,3–746,8 (2026-11-15, `hiz/sigdir`, KİRLİ: yük ortalaması 16–107) | `scratch/olc-ab.mjs`, 7 koşu, iç içe A/B |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/pure/solver/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/pure/solver/solver.test.ts`, "gerçek ölçek" |
@@ -189,6 +190,66 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 
 
+
+---
+
+## 2026-11-15 · Sığdır'ın ilk açılışı: ilk oran `--wrap-w` yazılmadan ölçülmüyor (`hiz/sigdir`, B4.9)
+
+**Başlangıç.** Arayüz performansı raporu (2026-11-15, `84a72b8`): Sığdır'da Okul → Program
+ilk geçiş x1 323 ms, x4 640–960 ms, ve fazlası `gridFit.ts`'te: `--fit` yazılıp
+`overflows()` ile geri okununca neredeyse tam ikinci bir tablo yerleşimi. Öneri, oranı
+`canvas.measureText` ile yerleşimsiz hesaplamaktı.
+
+**Sebep ölçüldü ve başka çıktı (tuzak 101).** Yerleşmiş bir Sığdır'da 79 küçülmüş satırın
+`--fit`'ini değiştirip bir kez okumak x1'de 4,2 ms (`scratch/olc-yazoku.mjs`), yani yazıp
+okumanın kendisi pahalı değil. Pahalı olan ilk açılışta tablonun hâlâ `100cqw`'den
+yerleşmesi: Activity gizliyken efekt yok, `attachGridFit` ilk görünüşte bağlanıyor, ve
+`ResizeObserver`'ın ilk çağrısı (`--wrap-w`'nin ilk yazılışı) aynı karede `fit`'in rAF'ından
+SONRA geliyor. O rAF'taki ilk geri okuma tabloyu konteynere karşı yeniden yerleştiriyordu
+(x1 59,8 ms, tuzak 141'in sürükleme kasmasındaki aynı maliyet). Kanıt: sayfaya
+`.grid-wrap { --wrap-w: 1920px }` enjekte edilince ilk açılış x1 153 → 51, x4 645 → 224 ms
+(3 koşu, kirli). `contain: size layout` satırlarda işe yaramadı (167 → 209, x4 703 → 745).
+
+**Çare.** `gridFit.ts`: rAF, `--wrap-w` yazılmadan oranı ölçmüyor; ilk ölçüm
+`ResizeObserver`'ın ilk çağrısında, genişlik yazıldıktan hemen sonra, aynı karede ve
+boyamadan önce koşuyor. Ölçüm yöntemi (Range ile `getBoundingClientRect`, tuzak 140) ve
+oranın hesabı değişmedi; canvas'a gerek kalmadı. Kalan büyük parça commit'teki ilk
+yerleşim (LessonPool'un `useLayoutEffect`'i), o hâlâ `100cqw` ile ve x1 65–73 ms; onu
+kaldırmak `--wrap-w`'yi ilk yerleşimden önce bilmeyi ister, ve havuzun ölçümü tablonun o
+yerleşimine bakıyor (tuzak 121), yani ayrı bir iş.
+
+**Ölçüm (KİRLİ: `agir.sh` macOS'ta `flock` olmadan çalışmıyor, kilitsiz koşuldu; yük
+ortalaması 16–94, 8 çekirdek).** Babanın haftası (`tam-dolu-kurs-dizili.json`), 1920×1080,
+`file://`, `scratch/olc-ab.mjs` 7 koşu iç içe ve karışık sırayla, medyan, tıklamadan iki rAF'a:
+
+| Sığdır, Okul → Program | önce (`origin/main` db869d2) | sonra |
+|---|---|---|
+| ilk, x1, 1. koşu · 2. koşu | 155,5 · 157,9 ms | 118,1 · 103,5 ms (−%24 · −%34) |
+| ilk, x4, 1. koşu · 2. koşu | 746,8 · 548,3 ms | 504,6 · 327,1 ms (−%32 · −%40) |
+| sıcak, x1 · x4 (1. koşu) | 29,8 · 137,2 | 29,2 · 134,2 |
+| Rahat ilk, x1 · x4 (5 koşu) | 52,2 · 173,4 | 49,3 · 142,9 (gürültü) |
+| Açılış Sığdır, ızgara + 2 rAF, x1 (7 koşu, A-B-A) | 174,7 · 177,7 | 144,2 |
+
+İki koşu arasında kod bir kez değişti, Chromium'da davranışı aynı: `contentBoxSize`'ı
+vermeyen eski bir motorda ilk oran hiç ölçülmesin diye, gözlemcinin ilk cevabı genişlik
+yazılmasa da ölçümü başlatıyor. Ölçülen kazancın üst sınırı (`fit` kapalı) ile karşılaştırma:
+bu çare x1'de ondan da hızlı (aynı gün, ayrı A/B koşularında fit kapalı 115–119 ms), çünkü kaldırılan yerleşim
+`fit`'in kendi işi değil `100cqw`'nin bedeliydi.
+
+**Görüntü birebir aynı.** `scratch/olc-goruntu.mjs`: iki veri (babanın haftası ve `v17.json`),
+iki kutu (1920×1080 ve 1536×864 DPR 1,25), iki yol (Okul → Program ilk geçiş, Program'a
+yeniden yükleme), iki glif ölçüsü (bu makinenin ve `--font-render-hinting=none`, tuzak 146):
+16 karşılaştırmanın 16'sında piksel farkı 0, 228 satırın `--fit` dizisi, `--wrap-w`, tablo
+kutusu ve kırpılan satır sayısı aynı. Aletin farkı görebildiği kanıtlandı: `fit` kapalı
+derleme 14 143 piksel farklı çıkıyor. İlk boyanan karede oranlar yazılı (ikinci rAF'ta 79/79,
+öncesiyle aynı), yani "…" ile bir kare görünüp küçülme yok.
+
+**Koşulanlar.** `npx tsc --noEmit` 0, `npx eslint src` 0, `npx playwright test
+e2e/gorunum.spec.ts e2e/izgara.spec.ts` 46/46 (45b'nin sürükleme yerleşim oranı dahil;
+`agir.sh` olmadan). `npm run hizli`: 59 dosyanın 55'i geçti, kırmızılar beş dosyada
+(`agir.test.ts`: `flock` yok; `linuxKur.test.ts`: zaman aşımı; `emptyStart.test.ts`,
+`otherWindow.test.ts`, `rowOrder.test.tsx`: `localStorage` tanımsız, Node 26) ve aynı beş
+dosya `origin/main`'de de aynı biçimde kırmızı, yani bu makinenin ortamı, değişiklik değil.
 
 ---
 

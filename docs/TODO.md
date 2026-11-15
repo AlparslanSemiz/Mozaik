@@ -503,6 +503,10 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       alındı ([PRINCIPLES.md](PRINCIPLES.md), "Hedef makine"). Aynı desen B4.7'de
       de yaşandı, birinci tur yanlış yeri ölçtü ve şikayet ikinci kez geldi, yani
       bu maddenin üçüncü kez gelmemesi ölçümün doğru yere bakmasına bağlı.
+      2026-11-15 (`hiz/sigdir`): Sığdır'ın ilk açılışındaki ikinci yerleşim kalktı, x1
+      156–158 → 104–118 ms, x4 548–747 → 327–505 (kirli), görüntü piksel piksel aynı ([WORKLOG.md](WORKLOG.md)).
+      Kalan: ilk yerleşimin kendisi hâlâ `100cqw` ile (x1 65–73 ms), ve babanın Sığdır'da
+      olup olmadığı sorulmadı.
 - [ ] **B4.10 "Programı boşalt" zaten kırmızı, görünen ağırlığı ölçülmedi.**
       Senin satırın: *"Program kısmında sağ üstteki işlemlerde programı boşalt
       kırmızı olmalı ya da işte önemli bir işlem."* Ölçüldü ve renk yerinde:
