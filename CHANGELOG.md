@@ -32,6 +32,8 @@ release is incomplete, the entry says so.
 - When "Fill automatically" gets stuck, the panel shows only the first way the week can be built; the others fold under "Other ways (N)". While it searches, one line with the seconds and a progress bar replaces the row per way.
 - Check → Advisor says a repeated note once, with the lessons or teachers it is about listed after it, instead of the same sentence for each.
 - The weekly-hours and daily-limit boxes in the lists now have names for screen readers, and the counts on the filter chips are easier to read.
+- Screen readers: every box in Setup's teacher, class and room rows and every number box in Settings → Rules now has a name; the program screen, the tray and the printed sheet have headings in order, and the empty Timetable, Check and Print screens have one too; the tool strip is a named region; boxes that scroll (the tray, the load tables, the side panel in About) can be reached and scrolled with the keyboard; and "Fill automatically" says when it starts and what it managed, instead of reading out its counter many times a second.
+- The first Tab on every screen is "İçeriğe geç" (skip to content), which jumps past the top bar and the tool strip to the screen itself. The close button on a notice, the status chip and the names at the start of a grid row show the same focus ring as the other controls.
 - The notes in Settings are now as large as the body text.
 - A new icon: a calendar page with five coloured lessons on it, on the same indigo. The browser tab, the top bar and the smallest Windows icon sizes use a simpler version of it with three lessons, so they stay sharp.
 - Every list now shades every second row, the same way in every list and a little more visibly in both themes, so a row is easier to follow across the screen: the setup lists and summary tables, the picking list beside Availability and Lessons, the lessons in a teacher's or class's panel, and the preview when pasting from Excel. Grey secondary text is darker in the light theme and lighter in the dark theme, so it reads at least as well on a shaded row as it did before. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, and the split button in Lessons now looks like the boxes beside it.
@@ -39,6 +41,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Closing a dialog (search, keyboard shortcuts, a question, a teacher's or class's panel, a lesson's window) with Esc or a button puts the keyboard back where it was, on the button or card that opened it, instead of at the top of the page. If that is gone, the keyboard lands in the screen's content.
 - In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.
 - A notice that happened to be on screen ("Backup loaded.") no longer comes out on every printed page.
 - If the list of plans read empty when the program opened, it used to be replaced by a single "1. plan", and every other plan, though still saved, could no longer be opened. The program now finds those plans and lists them again as "Recovered plan 1, 2, …".

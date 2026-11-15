@@ -1339,12 +1339,18 @@ listeledi, çünkü bir kısmı bilerek olabilir. Her madde bir karar bekliyor, 
 karar verilip düzeltilince testteki `BILINEN` tablosundan da çıkar. Renk kontrastı
 bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
 
-- [ ] **`region` · on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı: `.ribbon`.**
+- [x] **`region` · on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı: `.ribbon`.**
+      Yapıldı (2026-11-15, `erisim/anlam`): şerit "Araç şeridi" adlı bir `<section>`'da
+      (`display: contents`, ekranda bir şey değişmedi); bütün ekranlarda 1 → 0.
       Araç şeridi `<main>`, `<nav>` ve `<header>`'ın dışında duruyor, yani ekran
       okuyucunun bölge listesinde bir yeri yok. Tek bir karar on bir satırı birden
       kapatıyor: şeridi bir `<header>` ya da `role="toolbar"` taşıyan bir bölgeye
       almak. Etkisi: şerit klavyeyle zaten geziliyor, eksik olan "burası ne" cevabı.
-- [ ] **`label` · Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu.**
+- [x] **`label` · Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu.**
+      Yapıldı (2026-11-15, `erisim/anlam`): tarama artık Okul'un dört adımını ayrı tarıyor ve
+      gerçek sayı Derslikler 8, Öğretmenler 50, Sınıflar 20 (+1 `select-name`) idi; hepsi 0.
+      Satır kutuları satırın adıyla (`{ad} adı`, `{ad} kısa adı`), Kurallar'ın sayı kutuları
+      kuralın adına `aria-labelledby` ile bağlı.
       Kritik seviye. Kutular tablo satırlarının içinde ve başlıkları sütun
       başlığından okunuyor, yani gören bir kullanıcı için etiketli, ekran okuyucu
       için etiketsiz. Muhtemel çare `aria-label` ya da `aria-labelledby` ile sütun
@@ -1357,14 +1363,24 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
       seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
       için görünür.
 - [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
+      Kısmen (2026-11-15, `erisim/anlam`): listelerin tutamak ve işlem sütunları ile Zil ve
+      günler'in onay sütunu ekran okuyucuya adlı ("Taşı", "İşlemler", "Ders günü"), Okul,
+      Dersler ve Ayarlar 0. Kalan Program 6 (`Grid.tsx`'in köşesi ve gün bantlarının ayraçları)
+      ve Müsaitlik 2 (iki tablonun köşesi): o dosyalar başka dalların işi.
       Küçük seviye. Boş başlık hücreleri: tutamak sütunu (`.grip-col`), ızgaranın
       köşesi ve gün bandının ayraçları. Bunların çoğu **bilerek boş**, çünkü bir
       başlıkları yok. Karar: `scope` kaldırmak mı, `aria-hidden` mı, yoksa gerçekten
       bir ad vermek mi.
-- [ ] **`heading-order` · Program'da 1, Çıktı'da 1.** Kart panelinin ve baskı
+- [x] **`heading-order` · Program'da 1, Çıktı'da 1.** Yapıldı (2026-11-15, `erisim/anlam`):
+      Program'da ızgara ve havuz için görünmez birer h2, kâğıdın başlığı h2, boş Program, Kontrol
+      ve Çıktı'nın da başlığı var. Havuzun 25 `section` bölgesi `div role="group"`. Kart panelinin ve baskı
       sayfasının başlığı `h3`, ondan önce gelen bir `h2` yok. Baskı sayfasında
       `h3`'ün bir gerekçesi olabilir (kâğıtta punto), ama düzey ile punto ayrı şeyler.
-- [ ] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+- [x] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+      Yapıldı (2026-11-15, `erisim/anlam`): havuz listesi, Özet'in yük tabloları ve hazır
+      branşlar, Hakkında'nın yan paneli `tabIndex=0` ve adlı; halka kutunun içinde. Sürükleme
+      E2E'si (`temel`, `panel`) yeşil, ama bir Tab durağının sürüklemeyle etkileşimi ayrıca
+      ölçülmedi (tuzak 13).
       Ciddi seviye. Fareyle kaydırılan ama klavyeyle odaklanamayan bir kutu, yani
       içeriğinin bir kısmına klavyeyle hiç ulaşılamıyor. Çare `tabindex="0"`, ve
       havuzda bunun sürükleme ile etkileşimi ölçülmeden dokunulmaz (tuzak 13).
@@ -2028,9 +2044,11 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
 - [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
       yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
       Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
-      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
+      ızgara ekseni ve rengin hatırlanması, şerit için `region` ve "İçeriğe geç" (ikisi yapıldı,
+      2026-11-15, `erisim/anlam`, KS27), havuz kartına
       klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
-- [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
+- [x] **SD6 · Okul'daki etiketsiz kutular.** Yapıldı (2026-11-15, `erisim/anlam`, §8e'nin
+      `label` maddesi). Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
       e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
       36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).

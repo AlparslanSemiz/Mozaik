@@ -1,4 +1,4 @@
-// Automatic accessibility scan: axe-core over all seven screens.
+// Automatic accessibility scan: axe-core over every screen, step and section.
 //
 // WHAT THIS IS NOT. Colour contrast and colour separation are already measured
 // by hand in renk.spec.ts, computing the WCAG ratio and the CIE Lab ΔE, and

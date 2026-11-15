@@ -65,12 +65,61 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
-weeklyHours) eski formülle ve ikinci bakışa girmiyor.
+weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
+diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
+bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 
 **Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Ekran okuyucu ve diyalog odağı (`erisim/anlam`, TODO §8e, SD6, KS27)
+
+`metin/tek-ad`'ın üstünde (PR #44'ün adları). Denetimin `aria` ve `klavye` bulguları.
+
+- **Diyalog odağı.** Radix'in modal diyaloğu odağı `Dialog.Trigger`'a verir, ve programın
+  hiçbir diyaloğunun Trigger'ı yok: palet, kısayollar, `Dialogs.tsx`'in soruları, bilgi
+  sayfası ve ders penceresi kapanınca odak `body`'ye düşüyordu. `useReturnFocus`
+  (`src/ui/common/returnFocus.ts`) açılış anında odaktakini tutar (bir menü öğesiyse menünün
+  açıldığı kartı, `body`'yse son odaklananı), kapanınca ona döner, açan gitmişse `<main>`'e
+  (`tabIndex=-1`); kapanış odağı bilerek bir yere koyduysa dokunmaz.
+- **Adlar.** Okul'un öğretmen, sınıf ve derslik satırlarındaki ad ve kısa ad kutuları
+  (`{ad} adı`, `{ad} kısa adı`), yeni sınıfın derslik seçicisi, Kurallar'ın sayı kutuları
+  (`aria-labelledby` kuralın adına). `kurulum.spec`'in `Kısa ad` sorgusu `exact` (tuzak 49).
+- **Otomatik diz.** Canlı bölge satırın yalnız ilk parçası: başlarken "Otomatik diziliyor…",
+  bitince sonuç; sayaç (`describeBar`'ın yeni `counter`'ı) görünür ama bölgenin dışında,
+  satır koşu boyunca `aria-busy`.
+- **Taslak ve bölgeler.** Program'da ızgara ve havuz için görünmez h2, havuzun 25 `section`'ı
+  `div role="group"`, kâğıdın başlığı h2, boş Program/Kontrol/Çıktı'nın başlığı. Şerit
+  "Araç şeridi" adlı bir `<section>`'da (`display: contents`). İlk Tab durağı "İçeriğe geç".
+  Kaydırılan kutular (havuz, Özet'in tabloları, Hakkında'nın yan paneli) Tab durağı ve adlı.
+  Boş `<th>`'ler görünmez bir adla. Bildirim kapatma, sağlık çipi ve `.inspect` uygulamanın
+  halkasıyla.
+- **Tarama.** `erisim.spec.ts` artık Okul'un dört adımını ve boş Program/Kontrol/Çıktı'yı da
+  tarıyor (on bir ekrandan on yediye); yeni "91. Odak" bölümü odağın dönüşünü ölçüyor.
+
+axe düğümleri, önce → sonra (aynı genişletilmiş taramayla, örnek okul): Okul · Derslikler
+11 → 0, Branşlar 3 → 0, Öğretmenler 54 → 0, Sınıflar 24 → 0, Dersler 3 → 0, Müsaitlik 3 → 2,
+Program 9 → 6, Kontrol 1 → 0, Çıktı 2 → 0, Ayarlar'ın beş bölümü 9 → 0, boş proje ve boş
+üç sekme 4 → 0; toplam 128 → 8. Kalan 8'i `empty-table-header`: `Grid.tsx`'in köşesi ve gün
+ayraçları (6) ve Müsaitlik'in iki köşesi (2), o dosyalar başka dalların.
+
+Boyut: ham `dist/index.html` 1 228 582 → 1 233 459 B (+4,9 kB: çeviriler, görünmez başlıklar,
+`returnFocus`), eşik 1 230 000 → 1 235 000 B. `file://` açılışı, CPU 4× yavaş, 7 koşu
+medyanı: `metin/tek-ad` 510 ms, bu dal 534 ms (kirli: yük ortalaması 32–60, başka ajanlar
+koşuyordu; fark gürültünün içinde).
+
+Koşulan: `npx tsc --noEmit` ve `-p e2e` 0, `npx eslint src` 0, prettier dokunulan dosyalarda
+temiz, `npx vite build` 0, `npm run boyut` yeni eşikle yeşil, E2E `erisim palet temel ayarlar
+liste kontrol yazdir kabuk kurulum panel` (`--workers=2`) 266/266 yeşil. `npm run hizli`
+yüklü makinede 7 test 5 s zaman aşımına düştü (`linuxKur`, `emptyStart`, `App`, `sentences`,
+`programScreen`'in tam dolu kurs testi); aynı beş dosya `--testTimeout=60000` ile 45/45 yeşil,
+yani zaman aşımı yükün. Koşulmayan: tam E2E süiti, Stryker, `kontrol`.
+
+Açık: `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları (§8e), şeritten içeriğe dönüş
+kısayolu (Ö47'nin F6'sı), havuz listesinin Tab durağının sürüklemeyle etkileşimi elle
+ölçülmedi.
 
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 

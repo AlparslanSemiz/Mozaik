@@ -38,7 +38,9 @@ bir karar değil, tuzak 52.
 ### Erişilebilirlik
 
 Liste satırında yazı her zeminde (iki şerit) ve her durumda (üstüne gelme, seçili satır, odak) en az 7:1, çünkü babanın en çok okuduğu yer satırlar. `e2e/zebra.spec.ts` 94 bunu iki temada, her listede, boyanan renkten ölçer. Bugün bunu tutmayan iki mürekkep adıyla istisna ve ikisi de [TODO.md](TODO.md) E1'de: açık temada işlevsel rozetler ve tehlikeli "Sil". O iş bitene kadar öteki yüzeylerin ölçülen eşiği 4,5:1 (`e2e/renk.spec.ts`). Çözücü ilerlemesi, sonuç satırı ve hata mesajları
-`aria-live="polite"` (`.reason-bar` `role="status"` taşıyor), geri alınamaz
+`aria-live="polite"` (`.reason-bar`'ın ilk parçası `role="status"` taşıyor; koşunun
+saniyede birkaç kez değişen sayacı onun dışında, satır koşu boyunca `aria-busy`),
+kapanan her diyalog odağı açana verir (`useReturnFocus`), geri alınamaz
 uyarılar `role="alertdialog"`. Renk tek başına bir durum taşımaz. Klavyeyle
 gidilen her yerde odak görünür.
 
