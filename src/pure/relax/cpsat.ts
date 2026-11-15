@@ -178,6 +178,8 @@ export interface CpParams {
    * at once on this model, whose hint names only where blocks start.
    */
   hintConflicts?: number;
+  /** Only these CP-SAT subsolvers (`subsolvers`); absent, its own portfolio. */
+  subsolvers?: readonly string[];
 }
 
 /** CpSolverStatus, as the response carries it. */
@@ -352,6 +354,8 @@ export function cpParams(p: CpParams): Uint8Array {
   w.double(36, p.seconds);
   w.int(206, Math.max(1, Math.round(p.workers)));
   if (p.hintConflicts !== undefined) w.int(153, p.hintConflicts);
+  const utf8 = new TextEncoder();
+  for (const name of p.subsolvers ?? []) w.bytes(207, utf8.encode(name));
   return w.done();
 }
 

@@ -21,6 +21,7 @@
 
 import {
   CP_HINT_CONFLICTS,
+  CP_PROOF_SUBSOLVERS,
   type CpAnswer,
   type CpRelaxer,
   cpParams,
@@ -249,7 +250,12 @@ function cpsatOr(
         return;
       }
       const bytes = await desktopCpsatCoz(
-        cpParams({ workers, seconds: step.ask.seconds, hintConflicts: CP_HINT_CONFLICTS }),
+        cpParams({
+          workers,
+          seconds: step.ask.seconds,
+          hintConflicts: CP_HINT_CONFLICTS,
+          ...(step.ask.proof ? { subsolvers: CP_PROOF_SUBSOLVERS } : {}),
+        }),
         step.ask.bytes,
       );
       // Cancelled while the library answered: `cancel` already returned what was found.

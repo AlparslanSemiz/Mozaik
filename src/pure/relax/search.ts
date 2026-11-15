@@ -18,6 +18,7 @@ import {
 } from './model';
 import {
   CP_FULL_SECONDS,
+  CP_PROOF_ROUNDS,
   CP_QUICK_SECONDS,
   DEFAULTS,
   FAMILY_CONFLICTS,
@@ -49,6 +50,8 @@ export interface CpAsk {
   family: RelaxFamily;
   /** The most this question may take; the caller may give it less. */
   seconds: number;
+  /** A "one fewer?" question: the caller asks it with `CP_PROOF_SUBSOLVERS`. */
+  proof: boolean;
 }
 
 /**
@@ -541,34 +544,57 @@ function relaxerCore(
     if (which === 'handHours' && model.handCap !== null) must.push(model.handCap);
 
     /**
-     * The smallest count of `minimize` under `bound`: a short look, and a long
-     * one only when the short one did not already prove it. The long one starts
-     * from the short one's week (`load` makes it the hint) and, if it runs out
-     * of time without a week of its own, the short one's stands.
+     * The smallest count of `minimize` under `bound`, and whether it is proven.
+     *
+     * A short look finds a week (from the hint, usually our own search's week).
+     * Then the proof is asked as a DECISION, not an optimisation: "is there a
+     * week with one fewer?", with the subsolvers that carry linear reasoning
+     * (`proof`). MEASURED on the father's week (2026-11-15, scratch
+     * analiz/1-cpsat-model.md): with those, "no week with 3" comes back in
+     * 2-13 s on 4 workers, where the default portfolio's Minimize never closed
+     * in 120 s; finding the week is the hard part and proving it the easy one.
+     * A week with one fewer replaces the found one and the question is asked
+     * again, a few times at most. `wide` false: one short look and no proof,
+     * for a count that is only a preference among equals.
      */
     const lowest = function* (
       minimize: Lit[],
       bound: Array<{ lits: Lit[]; max: number }>,
       wide: boolean,
-    ): Generator<CpAsk, CpAnswer | null, CpAnswer | undefined> {
-      const ask = (seconds: number): CpAsk => ({
+    ): Generator<CpAsk, { answer: CpAnswer; proven: boolean } | null, CpAnswer | undefined> {
+      const quick = yield {
         bytes: model.sat.request({ minimize, mustTrue: must, atMost: bound }),
         family: which,
-        seconds,
-      });
-      const quick = yield ask(CP_QUICK_SECONDS);
-      if (holds(quick)) model.sat.load(quick);
-      if (holds(quick) && (quick.status === 'optimal' || !wide)) return quick;
-      const full = yield ask(CP_FULL_SECONDS);
-      if (holds(full)) {
-        model.sat.load(full);
-        return full;
+        seconds: CP_QUICK_SECONDS,
+        proof: false,
+      };
+      if (!holds(quick)) return null;
+      model.sat.load(quick);
+      let best = quick;
+      if (quick.status === 'optimal') return { answer: quick, proven: true };
+      if (!wide) return { answer: quick, proven: false };
+      for (let round = 0; round < CP_PROOF_ROUNDS; round++) {
+        const ub = countTrue(model.sat, minimize);
+        if (ub === 0) return { answer: best, proven: true };
+        const fewer = yield {
+          bytes: model.sat.request({
+            mustTrue: must,
+            atMost: [...bound, { lits: minimize, max: ub - 1 }],
+          }),
+          family: which,
+          seconds: CP_FULL_SECONDS,
+          proof: true,
+        };
+        if (fewer?.status === 'infeasible') {
+          model.sat.load(best);
+          return { answer: best, proven: true };
+        }
+        if (!holds(fewer)) break;
+        model.sat.load(fewer);
+        best = fewer;
       }
-      if (holds(quick)) {
-        model.sat.load(quick);
-        return quick;
-      }
-      return null;
+      model.sat.load(best);
+      return { answer: best, proven: false };
     };
 
     stage = 'solving';
@@ -576,7 +602,7 @@ function relaxerCore(
     if (first === null) return;
     let best = gridOf(base, frame, model);
     const ub = countTrue(model.sat, cost);
-    let proven = first.status === 'optimal';
+    let proven = first.proven;
     // As in familySearch: the hand-over way's week must open no hour at all.
     if (which === 'reassign' && ub > 0) return;
     if (cost2.length > 0) {
@@ -592,13 +618,17 @@ function relaxerCore(
         [{ lits: cost, max: ub }],
         which === 'fewTeachers' || which === 'rules',
       );
+      // Where the second count is the answer (few teachers, the rules), the
+      // proof is of both; elsewhere "proven" is the first count's, the one the
+      // panel's sentence is about (scratch analiz/1-cpsat-model.md, (b)).
+      const both = which === 'fewTeachers' || which === 'rules';
       if (second !== null) {
         best = gridOf(base, frame, model);
-        proven = proven && second.status === 'optimal';
+        if (both) proven = proven && second.proven;
       } else {
         // The first week is still the answer; read it back.
-        model.sat.load(first);
-        proven = false;
+        model.sat.load(first.answer);
+        if (both) proven = false;
       }
     }
     offer(which, model, best, proven);

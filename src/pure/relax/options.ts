@@ -202,6 +202,21 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
  */
 export const CP_QUICK_SECONDS = 3;
 export const CP_FULL_SECONDS = 20;
+/** How many times "one fewer?" may come back with a week before the search stops asking. */
+export const CP_PROOF_ROUNDS = 3;
+/**
+ * The subsolvers a "one fewer?" question is asked with (`subsolvers`). The
+ * proof on the father's week comes from `max_lp_sym`, which CP-SAT's default
+ * portfolio leaves out below 8 workers: without it the 4-hour proof never
+ * closed on 4 workers in 120 s, with this list it closed in 2-13 s (6/6).
+ * Names are OR-Tools v9.15's; a version bump checks them.
+ */
+export const CP_PROOF_SUBSOLVERS: readonly string[] = [
+  'default_lp',
+  'max_lp_sym',
+  'core',
+  'quick_restart',
+];
 /**
  * CP-SAT's `hint_conflict_limit` for every question. Its default (10) never
  * completed our hint, which names only where blocks start: the quick look
