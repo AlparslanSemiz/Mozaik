@@ -272,12 +272,10 @@ const EN: Sozluk = {
 
   // src/ui/program/Grid.tsx
   "Öğle arası": "Lunch break",
-  "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, press Delete to remove",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
     "Drag to move · right-click for options",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Drag to move, right-click for options",
-  "{ust} {alt}, sabitlenmiş": "{ust} {alt}, pinned",
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Pinned. Right-click to unpin",
 
@@ -1281,10 +1279,6 @@ const EN: Sozluk = {
     "{n} teacher {n:hour opens|hours open}",
   "{n} ders yer değiştiriyor":
     "{n} {n:lesson moves|lessons move}",
-  "{ust} {alt}, açılan öğretmen saatinde":
-    "{ust} {alt}, in a teacher hour being opened",
-  "{ust} {alt}, yeri değişiyor":
-    "{ust} {alt}, moves",
   "Öneri araması":
     "Suggestion search",
   "Bu bilgisayarda henüz aranmadı":
@@ -1770,6 +1764,39 @@ const EN: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} deleted, with {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} placed {n:hour|hours} went back to the pool.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "The placed hours went back to the pool; {n} pinned {n:hour stays|hours stay} in place.",
+
+  // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
+  "Haftalık dersler": "Weekly lessons",
+  "{gun} {n}. saat": "{gun}, period {n}",
+  "açılan öğretmen saatinde": "in a teacher hour being opened",
+  "yeri değişiyor": "moves",
+  "müsait değil": "unavailable",
+  "müsait": "available",
+  "kapalı": "closed",
+  "açık": "open",
+  "boş": "empty",
+  "Bu dersin satırı ekranda değil.": "This lesson's row is not on screen.",
+  "{ders} havuza kaldırıldı.": "{ders} went back to the tray.",
+  "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} picked up. Choose the target cell with the arrow keys; Enter drops it, Esc cancels.",
+  "Taşımadan vazgeçildi.": "Move cancelled.",
+  "{ders} yerleşti: {yer}.": "{ders} placed: {yer}.",
+  "{n}. saat: bütün haftayı değiştir": "Period {n}: toggle the whole week",
+  "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} open, {yuk} {yuk:hour|hours} of lessons loaded",
+  "Izgaraya gir, bir daha basınca çık": "Enter the grid; press again to leave it",
+  "Hücreden hücreye git": "Move from cell to cell",
+  "Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra": "Go to the start or end of the row; with Ctrl, to the first or last row",
+  "Odaklı dersi taşımak için al": "Pick up the focused lesson to move it",
+  "Odaklı dersi sabitle veya sabitlemeyi kaldır": "Pin or unpin the focused lesson",
+  "Kartlar arasında git": "Move between cards",
+  "Odaklı kartı ızgaraya koymak için al": "Pick up the focused card to put it on the grid",
+  "Tutamakta: havuzun boyunu değiştir, Shift ile daha çok": "On the handle: resize the tray; with Shift, in bigger steps",
+  "Ders eldeyken": "While holding a lesson",
+  "Hedefi bir saat kaydır": "Move the target by one period",
+  "Bırakılabilecek bir sonraki saate git": "Jump to the next period it can be dropped on",
+  "Önceki veya sonraki güne git": "Go to the previous or next day",
+  "Buraya bırak": "Drop it here",
+  "Vazgeç, sürüklerken de": "Cancel, also while dragging",
+  "Saati aç veya kapat, başlıkta bütün günü veya saati": "Open or close the period; on a heading, the whole day or period",
 };
 
 registerSozluk("en", EN);

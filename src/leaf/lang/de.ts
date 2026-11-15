@@ -274,13 +274,10 @@ const DE: Sozluk = {
 
   // src/ui/program/Grid.tsx
   "Öğle arası": "Mittagspause",
-  "{ust} {alt}, kaldırmak için Delete":
-    "{ust} {alt}, zum Entfernen Entf drücken",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
     "Zum Verschieben ziehen · Rechtsklick für Optionen",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Zum Verschieben ziehen, Rechtsklick für Optionen",
-  "{ust} {alt}, sabitlenmiş": "{ust} {alt}, angeheftet",
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Angeheftet. Mit Rechtsklick lösen",
 
@@ -1296,10 +1293,6 @@ const DE: Sozluk = {
     "{n} {n:Lehrerstunde wird|Lehrerstunden werden} geöffnet",
   "{n} ders yer değiştiriyor":
     "{n} {n:Stunde wird|Stunden werden} verschoben",
-  "{ust} {alt}, açılan öğretmen saatinde":
-    "{ust} {alt}, in einer zu öffnenden Lehrerstunde",
-  "{ust} {alt}, yeri değişiyor":
-    "{ust} {alt}, wird verschoben",
   "Öneri araması":
     "Vorschlagssuche",
   "Bu bilgisayarda henüz aranmadı":
@@ -1787,6 +1780,39 @@ const DE: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne} gelöscht, mit {ders} {ders:Fach|Fächern} und {saat} gesetzten {saat:Stunde|Stunden}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} gesetzte {n:Stunde ist|Stunden sind} zurück im Vorrat.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Die gesetzten Stunden sind zurück im Vorrat; {n} fixierte {n:Stunde bleibt|Stunden bleiben}.",
+
+  // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
+  "Haftalık dersler": "Wochenstunden",
+  "{gun} {n}. saat": "{gun}, {n}. Stunde",
+  "açılan öğretmen saatinde": "in einer freigegebenen Lehrerstunde",
+  "yeri değişiyor": "wird verschoben",
+  "müsait değil": "nicht verfügbar",
+  "müsait": "verfügbar",
+  "kapalı": "gesperrt",
+  "açık": "offen",
+  "boş": "leer",
+  "Bu dersin satırı ekranda değil.": "Die Zeile dieser Stunde ist nicht sichtbar.",
+  "{ders} havuza kaldırıldı.": "{ders} ist zurück in der Ablage.",
+  "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} aufgenommen. Zielzelle mit den Pfeiltasten wählen; Enter legt ab, Esc bricht ab.",
+  "Taşımadan vazgeçildi.": "Verschieben abgebrochen.",
+  "{ders} yerleşti: {yer}.": "{ders} gesetzt: {yer}.",
+  "{n}. saat: bütün haftayı değiştir": "{n}. Stunde: ganze Woche umschalten",
+  "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:Stunde|Stunden} offen, {yuk} {yuk:Stunde|Stunden} Unterricht geplant",
+  "Izgaraya gir, bir daha basınca çık": "In das Raster wechseln, erneut drücken zum Verlassen",
+  "Hücreden hücreye git": "Von Zelle zu Zelle gehen",
+  "Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra": "An Anfang oder Ende der Zeile; mit Strg zur ersten oder letzten Zeile",
+  "Odaklı dersi taşımak için al": "Fokussierte Stunde zum Verschieben aufnehmen",
+  "Odaklı dersi sabitle veya sabitlemeyi kaldır": "Fokussierte Stunde anheften oder lösen",
+  "Kartlar arasında git": "Zwischen Karten wechseln",
+  "Odaklı kartı ızgaraya koymak için al": "Fokussierte Karte aufnehmen, um sie ins Raster zu setzen",
+  "Tutamakta: havuzun boyunu değiştir, Shift ile daha çok": "Am Griff: Ablage vergrößern oder verkleinern; mit Umschalt in größeren Schritten",
+  "Ders eldeyken": "Beim Verschieben",
+  "Hedefi bir saat kaydır": "Ziel um eine Stunde verschieben",
+  "Bırakılabilecek bir sonraki saate git": "Zur nächsten möglichen Stunde springen",
+  "Önceki veya sonraki güne git": "Zum vorigen oder nächsten Tag",
+  "Buraya bırak": "Hier ablegen",
+  "Vazgeç, sürüklerken de": "Abbrechen, auch beim Ziehen",
+  "Saati aç veya kapat, başlıkta bütün günü veya saati": "Stunde öffnen oder sperren; auf einer Überschrift den ganzen Tag oder die Stunde",
 };
 
 registerSozluk("de", DE);

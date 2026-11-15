@@ -3,7 +3,7 @@
 // only draws it and hands each choice back to Program.
 
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { Eye, EyeOff, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Move, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import type { Id } from '../../leaf/model';
 import type { InspectKind } from '../../pure/entities';
 import type { PinScope } from '../../pure/constraints';
@@ -21,6 +21,8 @@ interface Props {
   /** Where the menu and its submenus are portalled. */
   container: HTMLElement | null;
   cellRemove: (rowId: string, day: number, hour: number) => void;
+  /** Pick the block up and move it with the arrow keys (drag.ts `startKeys`). */
+  cellPick: (rowId: string, day: number, hour: number) => void;
   editLesson: (lessonId: Id) => void;
   inspect: (kind: InspectKind, id: string) => void;
   togglePin: () => void;
@@ -36,6 +38,7 @@ export default function GridMenu({
   running,
   container,
   cellRemove,
+  cellPick,
   editLesson,
   inspect,
   togglePin,
@@ -119,6 +122,27 @@ export default function GridMenu({
       <ContextMenu.Content className="menu" collisionPadding={8}>
         {menuAt !== null && (
           <>
+            {/* The keyboard's way to move a block (KS8): the same pick-up a
+                drag makes, walked with the arrows. After the menu has closed
+                and handed focus back to the card, so Esc can return it there. */}
+            <ContextMenu.Item
+              className="menu-item"
+              disabled={
+                menuPinned ||
+                menuRowMode !== undefined ||
+                menuDayMode !== undefined ||
+                menuCellMasked ||
+                running
+              }
+              onSelect={() => {
+                const { rowId, day, hour } = menuAt;
+                setTimeout(() => cellPick(rowId, day, hour), 0);
+              }}
+            >
+              <Move size={15} strokeWidth={2} aria-hidden="true" />
+              {t('Taşı')}
+              {menuPinned && <span className="menu-why">{t('sabitlenmiş')}</span>}
+            </ContextMenu.Item>
             <ContextMenu.Item
               className="menu-item"
               disabled={

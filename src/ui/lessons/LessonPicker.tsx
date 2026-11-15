@@ -29,7 +29,7 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun
           ? t('Seçtiğiniz öğretmen için ders girin. Soldaki liste de o öğretmene daralır.')
           : t('Seçtiğiniz sınıf için ders girin. Soldaki liste de o sınıfa daralır.')}
       </p>
-      <div className="entity-list" aria-label={t('Ders listesi')}>
+      <div className="entity-list" role="group" aria-label={t('Ders listesi')}>
         {picking.map((x) => {
           const count = state.lessons.filter((l) =>
             mode === 'teacher' ? l.teacherId === x.id : l.classId === x.id,

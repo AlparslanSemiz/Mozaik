@@ -273,12 +273,10 @@ const ES: Sozluk = {
 
   // src/ui/program/Grid.tsx
   "Öğle arası": "Descanso del mediodía",
-  "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, pulse Supr para quitar",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
     "Arrastre para mover · clic derecho para opciones",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Arrastre para mover, clic derecho para opciones",
-  "{ust} {alt}, sabitlenmiş": "{ust} {alt}, fijada",
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Fijada. Clic derecho para soltarla",
 
@@ -1295,10 +1293,6 @@ const ES: Sozluk = {
     "Se {n:abre|abren} {n} {n:hora|horas} de docente",
   "{n} ders yer değiştiriyor":
     "{n} {n:clase cambia|clases cambian} de lugar",
-  "{ust} {alt}, açılan öğretmen saatinde":
-    "{ust} {alt}, en una hora de docente que se abre",
-  "{ust} {alt}, yeri değişiyor":
-    "{ust} {alt}, cambia de lugar",
   "Öneri araması":
     "Búsqueda de propuestas",
   "Bu bilgisayarda henüz aranmadı":
@@ -1786,6 +1780,39 @@ const ES: Sozluk = {
   "{ne} silindi, {ders} dersi ve yerleşmiş {saat} saati de gitti.": "{ne}: eliminado, con {ders} {ders:clase|clases} y {saat} {saat:hora colocada|horas colocadas}.",
   "Dizilmiş {n} saat havuza döndü.": "{n} {n:hora colocada volvió|horas colocadas volvieron} a la reserva.",
   "Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.": "Las horas colocadas volvieron a la reserva; {n} {n:hora fijada sigue|horas fijadas siguen} en su sitio.",
+
+  // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
+  "Haftalık dersler": "Clases de la semana",
+  "{gun} {n}. saat": "{gun}, {n}.ª hora",
+  "açılan öğretmen saatinde": "en una hora de docente que se abre",
+  "yeri değişiyor": "cambia de sitio",
+  "müsait değil": "no disponible",
+  "müsait": "disponible",
+  "kapalı": "cerrado",
+  "açık": "abierto",
+  "boş": "vacía",
+  "Bu dersin satırı ekranda değil.": "La fila de esta clase no está en pantalla.",
+  "{ders} havuza kaldırıldı.": "{ders} volvió a la bandeja.",
+  "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} tomada. Elija la celda de destino con las flechas; Intro la suelta, Esc cancela.",
+  "Taşımadan vazgeçildi.": "Movimiento cancelado.",
+  "{ders} yerleşti: {yer}.": "{ders} colocada: {yer}.",
+  "{n}. saat: bütün haftayı değiştir": "{n}.ª hora: cambiar toda la semana",
+  "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hora abierta|horas abiertas}, {yuk} {yuk:hora|horas} de clase cargadas",
+  "Izgaraya gir, bir daha basınca çık": "Entrar en la cuadrícula; pulse otra vez para salir",
+  "Hücreden hücreye git": "Ir de celda en celda",
+  "Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra": "Ir al inicio o al final de la fila; con Ctrl, a la primera o última fila",
+  "Odaklı dersi taşımak için al": "Tomar la clase enfocada para moverla",
+  "Odaklı dersi sabitle veya sabitlemeyi kaldır": "Fijar o soltar la clase enfocada",
+  "Kartlar arasında git": "Moverse entre tarjetas",
+  "Odaklı kartı ızgaraya koymak için al": "Tomar la tarjeta enfocada para ponerla en la cuadrícula",
+  "Tutamakta: havuzun boyunu değiştir, Shift ile daha çok": "En el asa: cambiar el tamaño de la bandeja; con Mayús, a pasos mayores",
+  "Ders eldeyken": "Con una clase en la mano",
+  "Hedefi bir saat kaydır": "Mover el destino una hora",
+  "Bırakılabilecek bir sonraki saate git": "Ir a la siguiente hora posible",
+  "Önceki veya sonraki güne git": "Ir al día anterior o siguiente",
+  "Buraya bırak": "Soltar aquí",
+  "Vazgeç, sürüklerken de": "Cancelar, también al arrastrar",
+  "Saati aç veya kapat, başlıkta bütün günü veya saati": "Abrir o cerrar la hora; en un encabezado, todo el día o la hora",
 };
 
 registerSozluk("es", ES);

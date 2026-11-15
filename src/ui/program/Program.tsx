@@ -42,7 +42,9 @@ import {
   waitingSubjects,
   type ColorOf,
 } from '../../pure/program';
-import { useDrag, type DragData } from '../../platform/dom';
+import { focusCellSoon, useDrag, type DragData, type KeyMove } from '../../platform/dom';
+import { lessonName } from '../../pure/feasibility';
+import { dayLabel } from '../../leaf/lang';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
 import { activePinned, activePlacements } from '../../pure/grid';
@@ -147,7 +149,7 @@ function Program({
     [change, ix, notify],
   );
 
-  const { start } = useDrag(drop);
+  const { start, startKeys } = useDrag(drop);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -222,12 +224,20 @@ function Program({
         notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
         return;
       }
+      const found = classId === null ? null : blockAt(state, classId, day, hour);
+      const removed =
+        classId === null ? undefined : activePlacements(state)[placementKey(classId, day, hour)];
       change((d) => {
         const fresh = classAt(d, rowId, day, hour);
         return fresh === null ? d : removeBlock(d, fresh, day, hour);
       });
+      if (found === null || removed === undefined) return;
+      // Said, and focus kept on the grid: the card that had it is gone, and
+      // focus used to fall to <body> with nothing heard (DENETIM KS9).
+      notify(t('{ders} havuza kaldırıldı.', { ders: lessonName(ix, removed) }));
+      focusCellSoon(rowId, day, found.hour);
     },
-    [change, classAt, notify, state, t],
+    [change, classAt, notify, state, t, ix],
   );
 
   /**
@@ -341,10 +351,13 @@ function Program({
    * is busy) and 5 (the teacher is in another class) both see its own cells —
    * and it could not even be dropped back where it came from. Nothing is
    * removed for real here: the lift happens inside the drop's single change().
+   *
+   * Two hands as well: a pointer, or the keyboard (`hand.origin`, the element
+   * that had focus and gets it back). Same map, same painting, same drop.
    */
   const beginDrag = useCallback(
     (
-      e: React.PointerEvent,
+      hand: React.PointerEvent | { origin: HTMLElement | null },
       lessonId: Id,
       source: { classId: Id; day: number; hour: number } | null,
       size: number,
@@ -368,27 +381,59 @@ function Program({
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
       const teacherView = view === 'teacher';
+      const rowId = teacherView ? lesson.teacherId : lesson.classId;
+      const data: DragData = {
+        lessonId,
+        rowId,
+        blockSize: Math.max(1, size),
+        hourCount: state.settings.hours.length,
+        map,
+        source: sourceRef,
+      };
 
-      start(
-        e,
-        {
-          lessonId,
-          rowId: teacherView ? lesson.teacherId : lesson.classId,
-          blockSize: Math.max(1, size),
-          hourCount: state.settings.hours.length,
-          map,
-          source: sourceRef,
-        },
-        {
-          top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
-          bottom: teacherView
-            ? roomLetter(ix, group?.roomId)
-            : subjectShort(state.settings, lessonSubject(state, lesson)),
-          color: programColorIndex(state, lesson, colorMode),
-        },
-      );
+      if ('origin' in hand) {
+        const { origin } = hand;
+        const name = lessonName(ix, lessonId);
+        const place = (day: number, hour: number) =>
+          t('{gun} {n}. saat', {
+            gun: dayLabel(state.settings.days[day]?.name ?? ''),
+            n: size > 1 ? `${hour + 1}–${hour + size}` : hour + 1,
+          });
+        const keys: KeyMove = {
+          at: source === null ? null : { day: source.day, hour: source.hour },
+          place,
+          intro: t('{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.', {
+            ders: name,
+          }),
+          onRefuse: notify,
+          onCancel: () => {
+            notify(t('Taşımadan vazgeçildi.'));
+            if (origin?.isConnected === true && origin !== document.body) origin.focus();
+            else if (source !== null) focusCellSoon(rowId, source.day, source.hour);
+          },
+          onDrop: (day, hour) => {
+            notify(t('{ders} yerleşti: {yer}.', { ders: name, yer: place(day, hour) }));
+            // A moved block is followed to where it went. A card from the
+            // tray leaves focus on the tray, where the next one waits, unless
+            // that was the last of its pile.
+            requestAnimationFrame(() => {
+              if (source !== null || origin?.isConnected !== true) focusCellSoon(rowId, day, hour);
+            });
+          },
+        };
+        startKeys(data, keys);
+        return;
+      }
+
+      start(hand, data, {
+        top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
+        bottom: teacherView
+          ? roomLetter(ix, group?.roomId)
+          : subjectShort(state.settings, lessonSubject(state, lesson)),
+        color: programColorIndex(state, lesson, colorMode),
+      });
     },
-    [state, ix, view, start, solver.running, mask.days, colorMode, t],
+    [state, ix, view, start, startKeys, notify, solver.running, mask.days, colorMode, t],
   );
 
   const cardStart = useCallback(
@@ -396,9 +441,19 @@ function Program({
     [beginDrag],
   );
 
-  /** Left button on a placed block: pick it up and move it. */
+  /** Enter, Space or T on a pool card: pick it up from the keyboard. */
+  const cardPick = useCallback(
+    (origin: HTMLElement, lessonId: Id, size: number) =>
+      beginDrag({ origin }, lessonId, null, size),
+    [beginDrag],
+  );
+
+  /**
+   * Left button on a placed block: pick it up and move it. Or, with no
+   * pointer event, the keyboard's T and the menu's "Taşı" (`cellPick`).
+   */
   const cellMoveStart = useCallback(
-    (e: React.PointerEvent, rowId: string, day: number, hour: number) => {
+    (hand: React.PointerEvent | null, rowId: string, day: number, hour: number) => {
       const teacherView = view === 'teacher';
       const lessonId = teacherView
         ? ix.teacherBusy.get(closedKey(rowId, day, hour))
@@ -414,9 +469,22 @@ function Program({
       const found = blockAt(state, classId, day, hour);
       if (found === null) return;
 
-      beginDrag(e, lessonId, { classId, day, hour: found.hour }, found.size);
+      const origin = hand === null ? (document.activeElement as HTMLElement | null) : null;
+      beginDrag(hand ?? { origin }, lessonId, { classId, day, hour: found.hour }, found.size);
     },
     [state, ix, view, beginDrag],
+  );
+
+  const cellPick = useCallback(
+    (rowId: string, day: number, hour: number) => {
+      const classId = classAt(state, rowId, day, hour);
+      if (classId !== null && blockPinned(state, classId, day, hour)) {
+        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        return;
+      }
+      cellMoveStart(null, rowId, day, hour);
+    },
+    [cellMoveStart, classAt, notify, state, t],
   );
 
   if (state.lessons.length === 0) {
@@ -509,6 +577,7 @@ function Program({
           onCellRemove={shown === null ? cellRemove : still}
           onCellMoveStart={shown === null ? cellMoveStart : still}
           onCellPin={shown === null ? pinCell : still}
+          onCellPick={shown === null ? cellPick : still}
           onMenu={shown === null ? setMenuTarget : still}
           menuOpen={active && menuOpen}
           onMenuOpenChange={setMenuOpen}
@@ -520,6 +589,7 @@ function Program({
               running={solver.running}
               container={menuPortalRef.current}
               cellRemove={cellRemove}
+              cellPick={cellPick}
               editLesson={editLesson}
               inspect={inspect}
               togglePin={togglePin}
@@ -540,6 +610,7 @@ function Program({
           setFilter={setPoolFilter}
           subjects={poolSubjects}
           onStart={cardStart}
+          onPick={shown === null ? cardPick : still}
           onMenu={setPoolMenuLessonId}
           menuOpen={active && poolMenuOpen}
           onMenuOpenChange={setPoolMenuOpen}

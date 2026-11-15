@@ -37,6 +37,7 @@ import {
   dockHeightForRoom,
   maxDockHeight,
   attachScrollFade,
+  attachRoving,
 } from '../../platform/dom';
 import type { PoolCard } from '../../pure/program';
 import { useT } from '../common';
@@ -54,6 +55,8 @@ interface Props {
   /** The branches that still have something waiting: `[key, label]`. */
   subjects: Array<[string, string]>;
   onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
+  /** Enter, Space or T on a focused card: pick it up from the keyboard. */
+  onPick: (origin: HTMLElement, lessonId: Id, size: number) => void;
   onMenu: (lessonId: Id) => void;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -159,6 +162,7 @@ function LessonPool({
   setFilter,
   subjects,
   onStart,
+  onPick,
   onMenu,
   menuOpen,
   onMenuOpenChange,
@@ -274,6 +278,39 @@ function LessonPool({
     const box = list.current;
     return box === null ? undefined : attachScrollFade(box);
   }, [groups.length, cards.length]);
+
+  // ONE Tab stop for the tray, arrows between its cards: 99 waiting blocks
+  // were 99 stops between the grid and the rest of the screen (or, until
+  // 2026-11-15, none at all — the cards were not focusable).
+  useEffect(() => {
+    const box = list.current;
+    if (box === null) return undefined;
+    const cards = () => [...box.querySelectorAll<HTMLElement>('.pool-card[tabindex]')];
+    return attachRoving(box, {
+      item: (from) => from.closest<HTMLElement>('.pool-card[tabindex]'),
+      first: () => cards()[0] ?? null,
+      move: (from, e) => {
+        const all = cards();
+        const at = all.indexOf(from);
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') return all[at + 1] ?? from;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') return all[at - 1] ?? from;
+        if (e.key === 'Home') return all[0] ?? from;
+        if (e.key === 'End') return all[all.length - 1] ?? from;
+        return null;
+      },
+    });
+  }, []);
+
+  function pick(e: React.KeyboardEvent) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const key = e.key.toLowerCase();
+    if (key !== 'enter' && key !== ' ' && key !== 't') return;
+    const card = (e.target as Element).closest<HTMLElement>('.pool-card[tabindex]');
+    const lessonId = card?.dataset.lesson;
+    if (card == null || lessonId === undefined) return;
+    e.preventDefault();
+    onPick(card, lessonId, Number(card.dataset.size) || 1);
+  }
 
   function toggle() {
     const next = !open;
@@ -411,7 +448,7 @@ function LessonPool({
 
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <div className="pool-list scroll-fade" ref={list}>
+          <div className="pool-list scroll-fade" ref={list} onKeyDown={pick}>
             {groups.map((g) => (
               <section className="pool-group" key={g.key} aria-label={g.label}>
                 {/* The heading is what the reader asked for: a break between one
@@ -437,6 +474,18 @@ function LessonPool({
                 <div className="pool-group-cards">
                   {g.stacks.map((s) => {
                     const c = s.cards[0]!;
+                    const describe =
+                      t('{ust} · {alt} {brans} · {boy} saatlik blok', {
+                        ust: c.top,
+                        alt: c.bottom,
+                        brans: c.subject,
+                        boy: c.size,
+                      }) +
+                      (s.cards.length > 1 ? t(' · {n} tane bekliyor', { n: s.cards.length }) : '') +
+                      t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
+                        yerlesen: c.placed,
+                        toplam: c.total,
+                      });
                     return (
                       <div
                         key={s.key}
@@ -457,21 +506,15 @@ function LessonPool({
                           onPointerDown={
                             c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
                           }
-                          title={
-                            t('{ust} · {alt} {brans} · {boy} saatlik blok', {
-                              ust: c.top,
-                              alt: c.bottom,
-                              brans: c.subject,
-                              boy: c.size,
-                            }) +
-                            (s.cards.length > 1
-                              ? t(' · {n} tane bekliyor', { n: s.cards.length })
-                              : '') +
-                            t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
-                              yerlesen: c.placed,
-                              toplam: c.total,
-                            })
-                          }
+                          // A control now: Enter picks it up, the arrows walk
+                          // the tray (one Tab stop, see the effect above).
+                          // Named by its own text, the long sentence is the
+                          // description: a speech user says what is on the
+                          // card (axe label-content-name-mismatch).
+                          role="button"
+                          tabIndex={c.masked ? undefined : -1}
+                          aria-disabled={c.masked || undefined}
+                          title={describe}
                         >
                           <span className="card-top">{c.top}</span>
                           <span className="card-bottom">{c.bottom}</span>
@@ -505,6 +548,7 @@ function samePoolProps(a: Props, b: Props): boolean {
     a.setFilter === b.setFilter &&
     a.subjects === b.subjects &&
     a.onStart === b.onStart &&
+    a.onPick === b.onPick &&
     a.onMenu === b.onMenu &&
     a.menuOpen === b.menuOpen &&
     a.onMenuOpenChange === b.onMenuOpenChange &&
