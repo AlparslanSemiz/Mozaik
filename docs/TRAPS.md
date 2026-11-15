@@ -290,6 +290,18 @@ etiket hiçbir şey tetiklemez. Karşı önlem: arşiv etiketleri `arsiv/<dal>` 
 o adda bir etiket itilmez: `surum.yml` derler, numara `package.json`'la uyuşmadığı için
 yayın adımında durur, ama iki derleme boşa koşar.
 
+### 159 · Tauri `script-src`'e özet ekleyince `style-src`'e de nonce ekler, ve `'unsafe-inline'` düşer
+Ölçüldü 2026-11-16, CSP eklenirken (`e2e/csp.spec.ts`). `tauri.conf.json`'da bir `csp`
+verilince Tauri sayfayı gömerken her satır içi `<script>`'in `sha256-`'sını `script-src`'e,
+her `<style>`'a bir nonce koyup onu da `style-src`'e ekler. CSP2'den beri bir hash ya da
+nonce bulunan kaynak listesinde `'unsafe-inline'` yok sayılır: Radix'in pencere açarken
+çalışma anında yazdığı `<style>` reddedildi ("Applying inline style violates ...
+'unsafe-inline' is ignored if either a hash or nonce value is present"), oysa yapılandırmada
+`'unsafe-inline'` yazıyordu. Karşı önlem: `dangerousDisableAssetCspModification:
+["style-src"]`, `script-src` Tauri'nin özetlerine bırakılır. Koruyan test `e2e/csp.spec.ts`:
+sayfayı Tauri'nin hesabıyla kurulan başlık altında açar ve her ihlal bir konsol hatasıdır;
+bayrak kaldırılınca kırmızı.
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1465,7 +1477,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 159 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1480,6 +1492,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 156, yeni bir tuzak 157'den devam eder. Test stratejisi
+büyük kullanılan numara 159 (157 ve 158 `platform/mac` dalında), yeni bir tuzak 160'tan devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

@@ -36,6 +36,34 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · İmza anahtarı `release` ortamında, exe'nin sayfası CSP altında (`guvenlik/sertlestirme`)
+
+**Karar (Alp, 2026-11-16).** İkinci güvenlik denetiminin en ağır bulgusu: imza anahtarı bir depo
+sırrıydı, yani her dalın her iş akışı onu okuyabilirdi, ve bu anahtar babanın exe'sinin neyi
+kuracağına karar veriyor. Sır `release` adlı bir GitHub ortamına taşınıyor ve o ortamı yalnız
+`v*` etiketleri kullanabiliyor. **Onaylayıcı yok:** tek bakımcılı bir depoda onay düğmesi kendine
+onay vermek olurdu, koruma etiket kuralından ve etiketi yalnız yöneticinin açabilmesinden geliyor.
+İmza kendi işine (`sign`) ayrıldı: anahtarı gören iş kod derlemiyor, npm koşturmuyor, yazma
+token'ı taşımıyor. Ayarların kendisi BUILD.md'de, "Yayın güvenliği".
+
+Aynı dalda dört küçük kapı:
+- **Yayın derlemesi betiksiz ve önbelleksiz.** `npm ci --ignore-scripts` (betiği olan tek paket
+  macOS'un `fsevents`'i), npm ve Rust önbellekleri `surum.yml`'den çıktı. Bedel birkaç dakika.
+- **CSP.** 2026-11-15'te "exe'de ölçülmeden yanlışsa sessizce kırılıyor" diye bırakılmıştı.
+  Ölçüm yolu bulundu: Tauri'nin politikaya eklediklerini aynı hesapla kurup derlenmiş sayfayı o
+  başlık altında Chromium'da açmak (`e2e/csp.spec.ts`). `style-src` `'unsafe-inline'` taşıyor,
+  çünkü Radix çalışma anında `<style>` yazıyor; Tauri'nin oraya nonce eklemesi kapatıldı (tuzak
+  159). `withGlobalTauri` açık kaldı: kapatmak `@tauri-apps/api`'yi `dist`'e sokmak ve sahte
+  köprüyle koşan E2E'yi yeniden yazmak demekti, kazancı ise sayfadaki bir betiğin köprüyü bulması
+  zorlaşırdı, ki CSP o betiğin gelişini zaten kapatıyor. Gerçek WebView2'de doğrulama
+  `exe-windows.yml`'in işi.
+- **CP-SAT yalnız kurulu kopyadan.** Tek başına `Mozaik.exe` İndirilenler'de durur, yanına
+  `ortools.dll` adlı her dosya bırakılabilir. Kütüphane yalnız `uninstall.exe`'nin yanındaki
+  exe'de, `LoadLibraryExW` ile ve yalnız kendi klasörü ve System32'de arayarak açılıyor;
+  `MOZAIK_ORTOOLS` yalnız debug derlemede.
+- **İndirme sınırlı, kurulum kendi klasöründe.** `boyut`'u aşan ilk parçada durulur (en çok 256
+  MB), kurulum her seferinde `%TEMP%` altında yeni ve tahmin edilemez adlı bir klasöre yazılır.
+
 ### 2026-11-15 · Ders formunda saat Ekle'den sonra varsayılana döner (`kullanim/ilk-acilis`)
 
 **Karar.** Dersler'in ekleme formu Ekle'den sonra haftalık saati 4'e, dağılımı tek saatlere
@@ -72,8 +100,8 @@ Rahat'tan geniş kalsın diye 3,5rem oldu.
   yerde" ilkesinin bilinçli bir istisnası: `prunable()` hangisinin gideceğine karar veriyor,
   Rust neyin hiç gidemeyeceğine. Liste yine her şeyi gösteriyor.
 
-**Bırakılan.** `core:default`'u daraltmak ve CSP yazmak bu dala girmedi: ikisi de exe'de
-ölçülmeden yanlışsa sessizce kırılıyor (kapanışta son düzenleme, ya da açılmayan sayfa).
+**Bırakılan.** `core:default`'u daraltmak bu dala girmedi: exe'de ölçülmeden yanlışsa
+sessizce kırılıyor (kapanışta son düzenleme). CSP 2026-11-16'da geldi (yukarıda).
 
 ### 2026-11-15 · Güncellemeler imzalı (`guvenlik/imza`)
 
@@ -83,7 +111,8 @@ ile sessiz çalışıyordu. Özet dosyanın eksiksiz geldiğini söyler, bizim o
 `surum.yml` iki programı minisign (ed25519) ile imzalıyor, imzalar `surum.json`'da (`imza`,
 `kurulum_imza`), ve yayınlanan kopya imzası bizim anahtarımızla tutmayan hiçbir şeyi kurmuyor
 (`update.rs`, `imza_dogru`; doğrulayıcı `minisign-verify`, bağımlılıksız). Anahtarın açık yarısı
-`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı depo sırrı `MOZAIK_IMZA_ANAHTARI` ve Alp'in makinesinde
+`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı `release` ortamının sırrı `MOZAIK_IMZA_ANAHTARI`
+(2026-11-16, yukarıda) ve Alp'in makinesinde
 `~/.config/mozaik-imza/` (600). Sır yoksa yayın durur. Test kopyası (`TEST_KOKU`) yerel sunucudan
 beslendiği için imza istemez. **Bedel:** anahtar değişirse dağıtılmış her kopya yeni sürümü
 reddeder; gizli yarı kaybolursa aynı. Yedeği Alp'te.

@@ -883,13 +883,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       düzenlemeyi yazmadan kapanır, bunu ölçen bir CI testi yok. Önce gerçek exe'de (`gercek-exe`
       süiti, kapanış testiyle) denenmeli; sonra `build.rs`'e `AppManifest::commands` ve
       capability'ye yalnız kullanılan `allow-*` izinleri.
-      (2) **CSP (G4).** `tauri.conf.json` `csp: null` bilerek kaldı. Öneri:
-      `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'
-      data: blob:; worker-src blob:; connect-src ipc: http://ipc.localhost; object-src 'none';
-      base-uri 'none'; form-action 'none'`. Risk: tek dosyalı derleme betiği satır içi
-      koyuyor; Tauri yalnız kendi eklediklerine hash basıyorsa sayfa açılmaz. Exe'de bir kez
-      açılıp konsolda CSP ihlali aranmalı, gerekiyorsa satır içi betiğin hash'i derlemede
-      üretilmeli.
+      (2) ~~**CSP (G4).**~~ Yazıldı 2026-11-16 (`guvenlik/sertlestirme`, DECISIONS 2026-11-16):
+      `e2e/csp.spec.ts` derlenmiş sayfayı Tauri'nin hesabıyla aynı başlık altında Chromium'da
+      yürüyor (worker'lar dahil). Gerçek WebView2'de doğrulanmadı: birleşince `exe-windows.yml`
+      (ya da dalda elle `workflow_dispatch`) konsolda CSP ihlali olmadan yeşil olmalı.
       (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
       Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
       (4) ~~`apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).~~

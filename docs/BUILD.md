@@ -266,8 +266,8 @@ Dependabot (`.github/dependabot.yml`, 2026-09-12) bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
 yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda. Üç ekosisteme
 bakar: npm (haftalık), `src-tauri`'nin cargo'su ve iş akışlarının eylemleri (aylık).
-Üçüncü taraf eylemler (`dtolnay/rust-toolchain`, `Swatinem/rust-cache`) tam commit
-SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15); `stable` bir dal
+Bütün eylemler, `actions/*` dahil, tam commit SHA'sıyla sabit, yanında sürüm yorumu var
+(güvenlik denetimi 2026-11-15, birinci taraflar 2026-11-16); `stable` bir dal
 olduğu için rust-toolchain'in SHA'sını Dependabot tazelemez, elle güncellenir.
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
@@ -321,7 +321,7 @@ ile derler ve iki şey teslim eder: tek başına `Mozaik.exe` ve kurulum sihirba
 Kurulumun gerekçesi CP-SAT'ın exe'nin yanında duran kütüphaneleri; tek dosya, eski
 kopyaların güncellenebilmesi için yayında kalıyor (DECISIONS 2026-11-15). Kaldırıcı
 veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz. İki program da
-minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, DECISIONS 2026-11-15), exe imzasız hiçbir şey kurmaz.
+minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, `release` ortamının sırrı; aşağıda "Yayın güvenliği"), exe imzasız hiçbir şey kurmaz.
 
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
@@ -410,6 +410,102 @@ içindeki panelin aynısı), [CHANGELOG.md](../CHANGELOG.md)'nin o sürüme ait 
 ve her sürümün paylaştığı kurulum ve indirme metni `.github/surum-notu.md`. İkisinden
 biri boşsa iş durur, boş bir "yenilikler" yayınlanmaz. 2.2.0'a kadar sayfa yalnız
 kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
+
+## Yayın güvenliği
+
+Babanın makinesindeki exe yalnız bizim anahtarımızla imzalanmış bir programı kurar
+(`update.rs`, `imza_dogru`), yani bütün zincirin en değerli tek şeyi imza anahtarının gizli
+yarısı. Kurallar (DECISIONS 2026-11-16):
+
+- **Anahtarı tek iş görür.** `surum.yml`'in `sign` işi, `environment: release` ile. Sır depo
+  düzeyinde değil o ortamda, ortamı yalnız `v*` etiketleri kullanabilir. `sign` kod derlemez,
+  npm koşturmaz, yazma token'ı taşımaz: exe artefaktını indirir, iki programı imzalar, iki
+  `.minisig` yükler. Anahtar dosyası `trap ... EXIT` ile adım nasıl biterse bitsin silinir.
+  Release'i yazan `publish` işi anahtarı hiç görmez. Elle koşuda (`workflow_dispatch`)
+  yayın ancak bir `v*` etiketinin üstünde koşturulursa imzalanır.
+- **Yayın derlemesi kurulum betiği koşturmaz ve önbellek kullanmaz.** `npm ci
+  --ignore-scripts`: lock'ta betiği olan tek paket `fsevents` (yalnız macOS), esbuild ve
+  rolldown'un ikilileri `optionalDependencies`'ten iner; `npm ci --ignore-scripts && npm run
+  build && npm run paket` temiz bir kopyada ölçüldü (2026-11-16). `setup-node`'un npm önbelleği
+  ve `rust-cache` `surum.yml`'den çıktı: önbelleği başka dallardaki koşular da besler.
+- **Her eylem tam commit SHA'sıyla, sürümü yanında yorum.** Birinci taraf (`actions/*`) da.
+  Dependabot SHA'yı ve yorumu birlikte günceller. Tauri CLI `@tauri-apps/cli@2.12.4` sabit.
+- **Exe'nin sayfası katı bir CSP altında** (`tauri.conf.json`, `security.csp`): `default-src
+  'none'`, betik yalnız `'self'` ve Tauri'nin satır içi betiklere eklediği özetler, worker yalnız
+  `blob:` (öneri araması), font ve resim `data:`, `connect-src` yalnız Tauri'nin IPC'si. Uzak
+  köken yok: güncellemeyi Rust indirir, CSP onu kapsamaz. `style-src` `'unsafe-inline'`
+  taşır ve Tauri'ye dokundurulmaz (`dangerousDisableAssetCspModification`, tuzak 159).
+  `e2e/csp.spec.ts` derlenmiş sayfayı Tauri'nin hesabıyla aynı başlık altında açıp örneği,
+  Otomatik diz'i (worker'larla), Çıktı'yı, PDF'i ve kaydetmeyi yürür. `withGlobalTauri` açık
+  kalıyor: köprü `src/platform/exe/desktop.ts`'te tek yerde ama E2E'nin sahte köprüsü ve
+  WebDriver sürücüsü `window.__TAURI__`'ya dayanıyor, kapatmak `@tauri-apps/api`'yi `dist`'e
+  sokmak olurdu.
+- **CP-SAT yalnız kurulu kopyanın klasöründen** (`cpsat.rs`, `kutuphane_yolu`): Windows'ta
+  yanında `uninstall.exe` olmayan bir exe `ortools.dll` aramaz (İndirilenler'e bırakılmış bir
+  DLL yüklenmesin), kütüphane `LoadLibraryExW` ile yalnız kendi klasörü ve System32'de arama
+  yaparak açılır. `MOZAIK_ORTOOLS` yalnız debug derlemede okunur.
+- **İndirme beklenen boyutta kesilir** (`update.rs`, `sinirli_ekle`): parça parça okunur,
+  manifestin `boyut`'unu ya da 256 MB'ı aşan ilk parçada durur. Kurulum her seferinde
+  `%TEMP%`'in altında yeni, tahmin edilemez adlı bir klasöre yazılır (`yeni_gecici_klasor`,
+  `create_dir` var olan adı reddeder) ve oradan çalıştırılır.
+
+### GitHub ayarları
+
+Bunlar kodda değil depo ayarında, ve `gh api` ile bir kez yapılır. Sıra önemli: ortam ve sır
+önce, depo sırrı ondan sonra silinir. Sır silindikten sonra bir yayın ortam sırrını bulamazsa
+`sign` "sırrı tanımlı değil" diyerek durur, imzasız bir şey yayınlanmaz.
+
+```sh
+R=AlparslanSemiz/Mozaik
+
+# 1. `release` ortamı, onaylayıcı yok, yalnız seçilmiş ref'ler.
+gh api -X PUT repos/$R/environments/release \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+
+# 2. O ref'ler: yalnız `v*` etiketleri (dal kuralı yok, yani hiçbir dal giremez).
+gh api -X POST repos/$R/environments/release/deployment-branch-policies \
+  -f name='v*' -f type=tag
+
+# 3. Gizli anahtar ortama (değer, şifreleme gerektirdiği için `gh api` değil `gh secret`).
+gh secret set MOZAIK_IMZA_ANAHTARI --env release --repo $R < ~/.config/mozaik-imza/mozaik.key
+
+# 4. Depo düzeyindeki eski sır silinir.
+gh api -X DELETE repos/$R/actions/secrets/MOZAIK_IMZA_ANAHTARI
+
+# 5. `v*` etiketleri: yalnız yönetici (RepositoryRole 5 = admin, yani `npm run yayinla`)
+#    açar, kimse taşıyamaz ya da silemez. Bir Actions token'ı yeni bir sürüm etiketi açamaz.
+gh api -X POST repos/$R/rulesets --input - <<'JSON'
+{
+  "name": "surum-etiketleri",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "rules": [
+    { "type": "creation" },
+    { "type": "update" },
+    { "type": "deletion" },
+    { "type": "non_fast_forward" }
+  ],
+  "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]
+}
+JSON
+
+# 6. SHA'ya sabitlenmemiş bir eylem hiçbir iş akışında koşmasın.
+gh api -X PUT repos/$R/actions/permissions \
+  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true
+```
+
+Denetim, her adımdan sonra ya da sonda:
+
+```sh
+gh api repos/$R/environments/release --jq '.deployment_branch_policy'
+gh api repos/$R/environments/release/deployment-branch-policies --jq '.branch_policies[] | [.name, .type]'
+gh secret list --env release --repo $R     # MOZAIK_IMZA_ANAHTARI
+gh secret list --repo $R                   # MOZAIK_IMZA_ANAHTARI yok
+gh api repos/$R/rulesets --jq '.[] | [.name, .target, .enforcement]'
+gh api repos/$R/actions/permissions        # "sha_pinning_required": true
+```
 
 ## Sürüm numarası
 

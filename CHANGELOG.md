@@ -107,6 +107,10 @@ release is incomplete, the entry says so.
 - In the Fit density, card text no longer ends in "…" where it can be shown: a class name is written with its first word ("411A" for "411A SAY", on the card and on the class row), and a line that still does not fit is drawn smaller, down to 9px, instead of being cut. Rows keep their height, the full name is still what the card says to a screen reader, and the Comfortable and Spacious densities are unchanged. On a 1920 screen a full week with long class names went from 204 of 211 cards cut to 2; at Windows 125% the sample school went from 315 of 374 to none.
 - In the Fit density, a card in the first lesson of a day is now as wide as the cards beside it. The thick line between days was drawn inside that lesson's column and took 3px of its card, so on Windows a full week with long class names still showed five cards as "41…" at 1920. They now read "415D", "450C" and so on; the other columns are a quarter of a pixel narrower.
 
+### Security
+
+- Windows app: the window now runs under a strict Content Security Policy (no remote scripts, styles, fonts or connections). Updates are only ever downloaded up to the size the release states, and the installer is run from a new folder of its own in the temporary folder. The fast suggestion search's library is loaded only by an installed copy, from its own folder.
+
 ## [2.2.0] - 2026-09-26
 
 ### Added

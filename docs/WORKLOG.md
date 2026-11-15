@@ -52,7 +52,10 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
 **Alp'te bekleyenler (yeni oturum bunları sormalı):**
-1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). Bu Mac'te gerçek
+1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). `guvenlik/sertlestirme`
+   (2026-11-16) onu `release` ortamına taşıyan iş akışını getiriyor; ayarlar Alp'te, komutları
+   BUILD.md "Yayın güvenliği"nde, ve dal birleşmeden ÖNCE uygulanmalı (yoksa `sign` depo sırrıyla
+   koşar, korumasız). Bu Mac'te gerçek
    anahtarla `minisign -S` (şifresiz, `surum.yml`'in komutuyla) ve `-V` denendi, imza ve
    güvenilen yorum doğrulandı; `cargo test` 59/59. Kalan: `~/.config/mozaik-imza/mozaik.key`'in
    yedeği (parola yöneticisi ya da şifreli USB); kaybolursa dağıtılmış kopyalar yeni sürümü
@@ -66,8 +69,8 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
 
-**Açık teknik işler (TODO):** capability daraltma ve
-CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
+**Açık teknik işler (TODO):** capability daraltma gerçek exe'de denenmeli, CSP
+(`guvenlik/sertlestirme`) gerçek WebView2'de doğrulanmalı (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
 weeklyHours) eski formülle ve ikinci bakışa girmiyor; `hiz/tepki`'den sonra bırakma 4×'te hâlâ
@@ -84,6 +87,36 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+
+## 2026-11-16 · Güvenlik sertleştirmesi, ikinci tur (`guvenlik/sertlestirme`)
+
+İkinci güvenlik denetiminin yedi bulgusu (notlar oturumun scratch'inde). `main`'den (c8b46ac)
+açıldı, birleşmedi. Ayrıntı ve gerekçe DECISIONS 2026-11-16, ayarlar BUILD.md "Yayın güvenliği".
+
+- **İmza anahtarı:** `surum.yml`'de imza ayrı `sign` işinde, `environment: release`; `publish`
+  anahtarı görmüyor. Ortamı, etiket kuralını, sırrın taşınmasını, etiket kural setini ve SHA
+  zorunluluğunu Alp `gh api` ile yapacak (bu dal hiçbir ayara dokunmadı). Başka iş akışı
+  `MOZAIK_IMZA_ANAHTARI`'yı anmıyor (`grep`). Bütün eylemler SHA'ya sabit (`actions/*` dahil).
+- **Yayın derlemesi:** `npm ci --ignore-scripts`, önbelleksiz. Temiz bir kopyada `npm ci
+  --ignore-scripts && npm run build && npm run paket` yeşil, `dist/index.html` 1 301 713 B.
+- **CSP:** `tauri.conf.json`'da katı politika, `e2e/csp.spec.ts` (3 test). Kırmızı ölçüldü:
+  `worker-src blob:` silinince arama ana iş parçacığında koştu (`data-oneri-isci` 0) ve ihlaller
+  konsola düştü; `dangerousDisableAssetCspModification` olmadan Radix'in `<style>`'ı reddedildi
+  (tuzak 159). Gerçek WebView2'de doğrulanmadı.
+- **CP-SAT:** yalnız kurulu kopyanın klasöründen, Windows'ta `LoadLibraryExW`
+  (`LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32`); `MOZAIK_ORTOOLS` yalnız
+  debug. Windows hedefi için tam `cargo check` bu Mac'te `llvm-rc` olmadığı için koşmadı; aynı
+  `ac()` gövdesi `libloading 0.7.4`'le ayrı bir küçük paket olarak `x86_64-pc-windows-msvc`'ye
+  derlendi.
+- **Güncelleme:** indirme parça parça, `boyut`'u (en çok 256 MB) aşan ilk parçada durur; kurulum
+  her seferinde `%TEMP%` altında yeni bir klasöre (Unix'te 0700). `kurulumu_baslat`'a ve karar
+  mantığına dokunulmadı (`guncelleme/windows-yolu` orada çalışıyor).
+
+Koşulanlar: `cargo test` (65), `npm run hizli`, `tsc`, `eslint`, `prettier`, `vite build`, `npm run
+boyut`, `actionlint` (yalnız `kanarya.yml`'in bilinen `ubuntu-26.04` etiketi), `e2e/csp.spec.ts`.
+Bu makinede `flock` yok, Playwright kilitsiz koştu.
+
+---
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
 
