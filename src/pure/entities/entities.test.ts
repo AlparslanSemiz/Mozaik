@@ -21,7 +21,6 @@ import {
   deleteSubject,
   deleteTeacher,
   deletionNotice,
-  deletionQuestion,
   entityFacts,
   entityWeek,
   genderLabel,
@@ -554,9 +553,9 @@ describe('makeShort ve duplicateShorts', () => {
   });
 });
 
-// The sentence decides whether he presses Enter or Escape, so it must COUNT
-// what is lost, not guess at it.
-describe('deletionQuestion', () => {
+// The notice is what tells him what went with a deletion that no longer asks
+// first (TODO SD1), so it must COUNT what was lost, not guess at it.
+describe('deletionNotice', () => {
   function loaded(): State {
     let d = emptyState();
     d = addRoom(d, 'A');
@@ -581,64 +580,59 @@ describe('deletionQuestion', () => {
 
   it('öğretmen: ders sayısını ve yerleşmiş saati sayar', () => {
     const d = loaded();
-    expect(deletionQuestion(d, 'teacher', d.teachers[0]!.id)).toEqual({
-      title: 'MÇ (Mehmet Çelik) silinecek',
-      cost: '2 dersi ve programa yerleşmiş 2 saati de gidecek.',
-    });
+    expect(deletionNotice(d, 'teacher', d.teachers[0]!.id)).toBe(
+      'MÇ silindi. 2 sınıfın Matematik dersi de gitti: 510, 511. Programdan 2 saat kalktı.',
+    );
   });
 
-  it('bağlısı yoksa kısa sorar — ama YİNE sorar', () => {
+  it('bağlısı yoksa yalnız neyin gittiğini söyler', () => {
     let d = emptyState();
     d = addClass(d, '430', null);
-    expect(deletionQuestion(d, 'class', d.classes[0]!.id)).toEqual({
-      title: '430 sınıfı silinecek',
-      cost: '',
-    });
+    expect(deletionNotice(d, 'class', d.classes[0]!.id)).toBe('430 sınıfı silindi.');
   });
 
-  it('dersi var ama hiçbiri yerleşmemişse yerleşmiş saatten söz etmez', () => {
+  it('sınıf: dersi var ama hiçbiri yerleşmemişse yerleşmiş saatten söz etmez', () => {
     const d = loaded();
-    expect(deletionQuestion(d, 'class', d.classes[1]!.id)).toEqual({
-      title: '511 sınıfı silinecek',
-      cost: '1 dersi de gidecek.',
-    });
+    expect(deletionNotice(d, 'class', d.classes[1]!.id)).toBe(
+      '511 sınıfı silindi. Matematik dersi de gitti.',
+    );
+    expect(deletionNotice(d, 'class', d.classes[0]!.id)).toBe(
+      '510 sınıfı silindi. Matematik dersi de gitti. Programdan 2 saat kalktı.',
+    );
   });
 
-  it('derslik: hangi sınıfların dersliğinin boşalacağını ADLARIYLA söyler', () => {
+  it('derslik: dersliği boşalan sınıfları ADLARIYLA ve sade sözle söyler', () => {
     const d = loaded();
-    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
-      title: 'A dersliği silinecek',
-      cost:
-        '2 sınıfın dersliği boşalacak (510, 511) ve derslik çakışması artık kontrol ' +
-        'edilmeyecek.',
-    });
+    const said = deletionNotice(d, 'room', d.rooms[0]!.id);
+    expect(said).toBe(
+      'A dersliği silindi, 2 sınıfın dersliği boşaldı (510, 511). ' +
+        'Bu sınıflar artık aynı saate konabilir.',
+    );
+    expect(said).not.toContain('çakışma');
   });
 
-  it('derslik boşsa çakışma cümlesini kurmaz', () => {
+  it('derslik tek sınıfınsa "aynı saate" cümlesini kurmaz, boşsa hiçbir şey eklemez', () => {
     let d = emptyState();
     d = addRoom(d, 'B');
-    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
-      title: 'B dersliği silinecek',
-      cost: '',
-    });
+    expect(deletionNotice(d, 'room', d.rooms[0]!.id)).toBe('B dersliği silindi.');
+    d = addClass(d, '430', d.rooms[0]!.id);
+    expect(deletionNotice(d, 'room', d.rooms[0]!.id)).toBe(
+      'B dersliği silindi, 430 sınıfının dersliği boşaldı.',
+    );
   });
 
-  it('ders: yerleşmiş saat varsa onu, yoksa haftalık saati söyler', () => {
+  it('ders: yerleşmiş saat varsa onu söyler', () => {
     const d = loaded();
-    expect(deletionQuestion(d, 'lesson', d.lessons[0]!.id)).toEqual({
-      title: '510 sınıfının MÇ dersi silinecek',
-      cost: 'Programa yerleşmiş 2 saati de kalkacak.',
-    });
-    expect(deletionQuestion(d, 'lesson', d.lessons[1]!.id)).toEqual({
-      title: '511 sınıfının MÇ dersi silinecek (2 saat)',
-      cost: '',
-    });
+    expect(deletionNotice(d, 'lesson', d.lessons[0]!.id)).toBe(
+      '510 sınıfının MÇ dersi silindi, yerleşmiş 2 saati de kalktı.',
+    );
+    expect(deletionNotice(d, 'lesson', d.lessons[1]!.id)).toBe('511 sınıfının MÇ dersi silindi.');
   });
 
-  it('olmayan kimlikte çökmez', () => {
+  it('olmayan kimlikte çökmez ve her cümle noktayla biter', () => {
     const d = loaded();
     for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
-      expect(() => deletionQuestion(d, kind, 'yok')).not.toThrow();
+      expect(deletionNotice(d, kind, 'yok').endsWith('.')).toBe(true);
     }
   });
 
@@ -662,40 +656,6 @@ describe('deletionQuestion', () => {
     expect(deletionNotice(one, 'teacher', one.teachers[0]!.id)).toBe(
       'AY silindi. 410 sınıfının İngilizce dersi de gitti.',
     );
-  });
-
-  // The dialog wants the two halves separately: a heading and a cost line.
-  // Splitting one sentence back apart by looking for a full stop would be
-  // pitfall 22 again, so the halves are written apart and each keeps its shape.
-  // (The one-string `deletionSummary` these used to be compared against had no
-  // caller left and went with the dead-code pass.)
-  it('iki parça: başlık cümle değil, bedel tam cümle', () => {
-    const d = loaded();
-    for (const [kind, id] of [
-      ['teacher', d.teachers[0]!.id],
-      ['class', d.classes[0]!.id],
-      ['class', d.classes[1]!.id],
-      ['room', d.rooms[0]!.id],
-      ['lesson', d.lessons[0]!.id],
-      ['lesson', d.lessons[1]!.id],
-      ['room', 'yok'],
-    ] as const) {
-      const q = deletionQuestion(d, kind, id);
-      // A heading is a heading: no trailing stop, no question.
-      expect(q.title.endsWith('.')).toBe(false);
-      expect(q.title).not.toContain('Devam edilsin mi');
-      // ...and a cost line, when there is one, is a whole sentence.
-      if (q.cost !== '') expect(q.cost.endsWith('.')).toBe(true);
-    }
-  });
-
-  it('bedeli olmayan silmede cost BOŞ, uydurulmuş bir cümle değil', () => {
-    let d = emptyState();
-    d = addRoom(d, 'B');
-    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
-      title: 'B dersliği silinecek',
-      cost: '',
-    });
   });
 });
 

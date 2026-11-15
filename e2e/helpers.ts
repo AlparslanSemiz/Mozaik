@@ -626,9 +626,9 @@ export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): 
   // that does the thing is last. An alert has only one, and it is both.
   const buttons = dlg.locator('.dlg-actions .btn');
   await (answer === 'cancel' ? buttons.first() : buttons.last()).click();
-  // Gone — OR replaced by the NEXT question. "Her şeyi sil" asks twice, and
-  // the second dialog opens in the same tick the first one closes, so waiting
-  // for `.dlg` to be hidden would wait for something that never happens.
+  // Gone — OR replaced by the NEXT question. A second dialog can open in the
+  // same tick the first one closes, so waiting for `.dlg` to be hidden would
+  // wait for something that never happens.
   await expect(async () => {
     if ((await dlg.count()) === 0) return;
     const now = (await dlg.innerText()).replace(/\s+/g, ' ').trim();
@@ -767,12 +767,16 @@ export const SCENES: Scene[] = [
   },
   { name: '7-kontrol', go: tab('Kontrol') },
   {
-    // The program's own question, with the cascade summary counted out. There
-    // used to be seventeen of these and every one was the operating system's.
+    // The program's own dialog. There used to be seventeen of these and every
+    // one was the operating system's. A deletion no longer asks (SD1); a
+    // subject that is still in use is refused, and says by whom.
     name: '7b-diyalog',
     go: async (page) => {
-      await openSetup(page, 'Derslikler');
-      await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+      await openSetup(page, 'Branşlar');
+      await page
+        .locator('table.list tr[data-row-name="Matematik"]')
+        .getByRole('button', { name: 'Sil' })
+        .click();
       await page.locator('.dlg').waitFor();
     },
     after: async (page) => {

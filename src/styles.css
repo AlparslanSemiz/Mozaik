@@ -119,6 +119,15 @@
   --hairline:    #e0e4eb;
   --line:        #c6cdd7;
   --line-dark:   #8a93a0;
+  /* The edge of a CONTROL — field, select, button — and the one line here with
+     a floor that is not taste: WCAG 1.4.11 asks 3:1 for the boundary that
+     says "this is a thing you can use". Fields stood on --hairline (1.16:1
+     against their own recess) and buttons on --line (1.11:1 against --chrome-2,
+     1.40 in a list), measured 2026-11-15. This clears 3:1 against every
+     ground a control sits on, the desk included: 4.54 --paper · 4.15
+     --paper-sunk · 3.97 --zebra and --chrome-2 · 3.82 --accent-bg · 3.16 --bg.
+     Still well short of --muted (8.53), so an edge never reads as text. */
+  --border-strong: #6d7784;
   /* One step past --line-dark, and it has exactly one job: where one day ends
      and the next begins, across 78 columns. */
   --day-edge:    #5b6572;
@@ -145,6 +154,14 @@
   --ok: #177431;  --ok-bg: #d5f0dc;
   --warn: #8a6100;  --warn-bg: #fdf0cf;
   --bad: #b0201c;  --bad-bg: #fbdcda;
+  /* THE INK of a state written ON its own ground: a badge, the health pill,
+     the reason bar. --ok on --ok-bg was 4.84:1 at 12-13px (and --warn 4.89,
+     --bad 5.33), under the 7:1 the rows hold (TODO E1). The three colours above
+     are searched and stay what they are — they are the borders, dots and
+     edges of the same states. The ink is the same colour pushed toward black
+     in Oklab (25 / 20 / 15%), so it keeps its hue and the functional channel
+     keeps its distances. Measured on the ground: 7.47 · 7.63 · 7.20. */
+  --ok-ink: #0e5422;  --warn-ink: #654600;  --bad-ink: #8d1814;
   --closed: #d5d8dd;  --hatch: #e8eaee;
 
   /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg:
@@ -549,6 +566,11 @@
   --hairline: #242930;
   --line: #39404a;
   --line-dark: #78818f;
+  /* Darker than --line-dark here, because in this theme --line-dark already
+     clears the floor and a control edge at day-rule strength would shout:
+     4.07 --paper · 4.47 --paper-sunk · 4.41 --chrome · 3.60 --zebra · 4.58
+     --chrome-2 · 3.26 --accent-bg. */
+  --border-strong: #717a88;
   /* Lighter than --line-dark here for the same reason it is darker in the
      light theme: a boundary is strong when it moves AWAY from the paper. */
   --day-edge: #a3adbb;
@@ -577,6 +599,8 @@
   --warn-bg: #3b2d07;
   --bad: #ff9089;
   --bad-bg: #401614;
+  /* Already over 7:1 on their grounds in this theme (8.78 for ok). */
+  --ok-ink: var(--ok);  --warn-ink: var(--warn);  --bad-ink: var(--bad);
   --closed: #2f363e;
   --hatch: #222831;
 
@@ -907,7 +931,13 @@ textarea {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex: 0 1 auto;
+  /* A small BASIS that grows to the whole name, not `0 1 auto`: the bar wraps
+     (see the container rule beside `.tab`), and a wrapping flex line breaks on
+     each item's basis BEFORE anything shrinks. With `auto` the document's full
+     width sent the bar onto two rows at 1100px where the name would happily
+     have ellipsised on one. */
+  flex: 1 1 8em;
+  max-width: max-content;
   min-width: 0;
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   border: 1px solid var(--hairline);
@@ -1100,40 +1130,93 @@ textarea {
    of them is a difference you have to look for. Mixed from --sec, so the six
    identities stay one token each. */
 .tab[aria-current="true"] {
-  /* SOLID. Two revisions ago the lit tab was a white sheet with a 2px rule
-     under it — true to the tab metaphor and, on a 1920px bar with six of
-     them, a difference you had to go looking for. It is now filled with the
-     section's own colour, which is the loudest thing this shell says and the
-     one question it is answering: which room am I in.
-     Measured: white on the six section colours is 5.63 at worst in light and
-     5.92 in dark, so the label clears AA on every one of them. */
-  background: linear-gradient(180deg,
-    color-mix(in oklab, #fff 10%, var(--sec, var(--accent))) 0%,
-    var(--sec, var(--accent)) 100%);
-  border-color: color-mix(in oklab, #000 12%, var(--sec, var(--accent)));
+  /* SOLID, and since 2026-11-15 FLAT. Two revisions ago the lit tab was a
+     white sheet with a 2px rule under it — true to the tab metaphor and, on a
+     1920px bar with six of them, a difference you had to go looking for. It is
+     filled with the section's own colour, which is the loudest thing this
+     shell says and the one question it is answering: which room am I in.
+
+     It was a gradient, and the comment beside it claimed "5.63 at worst".
+     That was the label on the plain section colour; nobody measured the
+     stops. The light top stop (10% white) measured 4.51-4.56 and the dark
+     bottom stop (12% black under dark ink) 3.76-3.89 — under AA on six of
+     seven tabs. Now one fill, pushed AWAY from the label by a fixed step:
+     15% black in light, 25% white in dark. Measured by scratch/olc/mix.js,
+     label against fill, worst of seven: 7.76 light, 7.18 dark. The hue is
+     the section's, the lightness is the label's. */
+  background: color-mix(in oklab, #000 15%, var(--sec, var(--accent)));
+  border-color: color-mix(in oklab, #000 25%, var(--sec, var(--accent)));
   color: var(--on-accent);
   font-weight: 600;
   box-shadow: var(--elev-2);
 }
 
 :root[data-theme='dark'] .tab[aria-current="true"] {
-  /* The dark section colours are LIGHT, so the highlight stop goes the other
-     way or the tab gets paler as it rises. */
-  background: linear-gradient(180deg,
-    var(--sec, var(--accent)) 0%,
-    color-mix(in oklab, #000 12%, var(--sec, var(--accent))) 100%);
+  /* The dark section colours are LIGHT and the label is dark ink, so the
+     step goes the other way. */
+  background: color-mix(in oklab, #fff 25%, var(--sec, var(--accent)));
+  border-color: var(--sec, var(--accent));
 }
 
 .tab[aria-current="true"] svg {
   color: var(--on-accent);
 }
 
-/* Under 1280px the labels go and the icons carry it. The accessible name stays
-   on `aria-label`, so the button is still reachable by name — for a screen
-   reader and for a test. */
-@media (max-width: 1280px) {
+/* In a narrow bar the label goes UNDER the icon instead of beside it, one step
+   down the ladder. It used to go altogether (`display: none`), and that is
+   exactly the box this reader gets: %150 on a 1920px screen is 1280 CSS px,
+   %200 is 960, and the bar became seven pictures he had to learn. Stacked,
+   the widest tab is the width of "Müsaitlik" rather than icon + gap + word,
+   and the bar grows a few pixels taller instead of the words going away.
+
+   A CONTAINER query in em rather than `@media (max-width: 1280px)`: the
+   media query only saw the window, so the program's own scale (Ayarlar >
+   Görünüm, up to %150) grew the tabs without ever moving the threshold.
+   88em of the bar's own 15px is 1320px of bar at %100 (a 1366 window keeps the
+   words beside the icons, a 1280 one stacks them), and it follows the scale
+   from there. The rules sit on the bar's children, never on `.topbar` itself
+   (pitfall 110). Measured 2026-11-15, the page's sideways overflow before ->
+   after, with the words now drawn in every case (scratch/olc/nav.js):
+     %100 at 1366 / 1280 / 1100 / 1024 / 960 px    0 -> 0 (two rows at 1024, 960)
+     program %150 at 1440 / 1280 / 1024 px         366 / 0 / 169 -> 0 / 0 / 0 */
+.topbar {
+  container: bar / inline-size;
+  /* And when even the stacked tabs do not fit — %200 on a 1920 screen is 960
+     CSS px, the program's %150 in a 1280 window is narrower still — the bar
+     takes a second row instead of pushing the page sideways. A wrap that
+     never happens costs nothing: at 1920 and %100 the bar is one row. */
+  flex-wrap: wrap;
+  row-gap: var(--space-2);
+}
+
+@container bar (max-width: 88em) {
+  .tab {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-1) var(--space-2);
+  }
+
   .tab-label {
-    display: none;
+    font-size: var(--fs-xs);
+  }
+
+  /* The room the words take comes from the two text buttons beside them:
+     "Dosyaya kaydet" and "Dosyadan aç" break onto two lines rather than the
+     tabs losing theirs. Two lines fit inside the bar's own height. */
+  .topbar > .btn:not(.icon) {
+    white-space: normal;
+    max-width: 7em;
+    line-height: var(--lh-tight);
+    padding-block: var(--space-1);
+    text-align: center;
+  }
+}
+
+/* The bar's own gap cannot be in the query above (pitfall 110), so it steps
+   down with the window instead, which is where it is short of room. */
+@media (max-width: 1280px) {
+  .topbar {
+    gap: var(--space-2);
   }
 }
 
@@ -1284,30 +1367,24 @@ textarea {
 }
 
 @container serit (max-width: 78em) {
-  /* Last resort, and the only step that touches a control.
+  /* Last resort, and the only step that touches a control: the word comes
+     down one step and its padding tightens. It is still DRAWN.
 
-     `font-size: 0` and NOT `display: none`, and the difference is the whole
-     point of this step: a display:none label is gone from the accessibility
-     tree, so the button would lose its name and the two test layers would stop
-     agreeing about what it is called (pitfall 56). Collapsing the type leaves
-     the text node exactly where it was — the name, the role and every
-     `getByRole({ name })` in the suite still find it, and only the drawing is
-     given up. The buttons here write their label as a bare text node, so there
-     is nothing to hang a class on and nothing that needed one. */
+     Until 2026-11-15 this step was `font-size: 0`, which kept the name in the
+     accessibility tree (pitfall 56) and took it off the screen, so at %150 on
+     a 1024px box, or at %200, every button on the strip was a symbol. For a
+     reader who has trouble seeing, a symbol he must remember is the harder
+     half of the trade; a 12px word (at %100; it scales with the reader's own
+     setting) he can still read. The rule is written on the buttons and not on
+     the strip, because a container query cannot style its own container
+     (pitfall 110). */
   .ribbon .btn {
-    font-size: 0;
-    gap: 0;
-    /* Without the word the button is a square around a symbol, and it must not
-       fall under the pointer target floor. */
+    font-size: var(--fs-xs);
+    gap: var(--space-1);
+    padding-inline: var(--space-2);
+    /* Never below the pointer target floor, even with the tighter padding. */
     min-width: var(--ribbon-h);
     justify-content: center;
-  }
-
-  /* The symbol carries its own width and height attributes, so it is untouched
-     by the line above; this only keeps anything else inside from inheriting a
-     zero. */
-  .ribbon .btn > svg {
-    font-size: 1rem;
   }
 }
 
@@ -1469,10 +1546,12 @@ textarea {
    is why it could not follow the inputs down to --hairline in Y0 — the inputs
    earned that by gaining --paper-sunk to sit in. It drops one step instead,
    from --line-dark (the grid's day separator, the loudest rule in the shell)
-   to --line. */
+   to --line. And back up to --border-strong on 2026-11-15: --line was
+   1.11:1 against the strip it stands on, under the 3:1 a control's edge
+   needs (WCAG 1.4.11). */
 .btn {
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   background: var(--paper);
   cursor: pointer;
@@ -1808,21 +1887,21 @@ table.list tbody tr {
 
 .reason-bar.bad {
   background: var(--bad-bg);
-  color: var(--bad);
+  color: var(--bad-ink);
   border-bottom-color: var(--bad);
   font-weight: 600;
 }
 
 .reason-bar.warn {
   background: var(--warn-bg);
-  color: var(--warn);
+  color: var(--warn-ink);
   border-bottom-color: var(--warn);
   font-weight: 600;
 }
 
 .reason-bar.ok {
   background: var(--ok-bg);
-  color: var(--ok);
+  color: var(--ok-ink);
   border-bottom-color: var(--ok);
   font-weight: 600;
 }
@@ -2196,8 +2275,34 @@ table.grid thead tr:nth-child(2) th {
   line-height: var(--lh-tight);
 }
 
-/* The bell time under the lesson number. Tiny on purpose: it is a reminder,
-   the lesson number is what the eye navigates by. */
+/* The bell time under the lesson number. A reminder, the lesson number is what
+   the eye navigates by — but a reminder still has to be READ.
+
+   It was 12px with nothing between one heading and the next, and since the
+   clock is what sets the column's min-content (pitfall 37), "09:00" filled its
+   column wall to wall: the row read "09:0009:5010:40", 1px apart. Measured
+   2026-11-15 on the sample school at 1920, 1536 (%125) and 960 (%200): the
+   smallest gap between two clocks was 1.0px at every one. Now one step up the
+   ladder and with its own air on both sides, so the gap is the padding twice
+   plus the rule whatever the scale (4.25px, against 1.0). The padding is on
+   the clock and not the `th`: the hour number above it is narrower and needs
+   none. It costs width, and that is said out loud: the clock IS the column's
+   floor, so Rahat's week went from 2516px to 2946px at 1920. Rahat
+   already scrolled sideways; Sığdır, which hides the clock, is unchanged. */
+table.grid .hour-clock {
+  padding-inline: var(--space-1);
+  font-size: var(--fs-sm);
+}
+
+/* And the hairline between two bell times steps up to --line, so the gap has
+   a rule in it the eye can find. Only on the hour row: down the body the
+   hourly rhythm stays on the hairline (see `table.grid th, td`). */
+table.grid thead tr:nth-child(2) th {
+  border-right-color: var(--line);
+}
+
+/* Müsaitlik's heading keeps 12px: its columns are `table-layout: fixed` and
+   the two-line heading is measured to hold its reserved line (pitfall 102). */
 .hour-clock {
   display: block;
   font-size: var(--fs-xs);
@@ -2215,12 +2320,15 @@ table.grid thead tr:nth-child(2) th {
    leaning in. Horizontal scrolling was already how the week is read at
    "rahat"; here there is simply more of it. */
 :root[data-density='ferah'] {
-  --cell-w: 2.875rem;
+  /* 3.5rem since 2026-11-15: the bell time at 13px with its own air made
+     Rahat's column 42px wide, and at 2.875rem (37px) Ferah was no wider than
+     Rahat any more — the step existed and did nothing. */
+  --cell-w: 3.5rem;
   --cell-h: 2.75rem;
 }
 
 :root[data-density='ferah'] .card-bottom {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   opacity: 1;
 }
 
@@ -2658,7 +2766,7 @@ table.grid tbody td {
    The bottom line is left where it is: it is the room letter or the subject
    short, a second-order fact, and growing both would just be zoom. */
 table.grid tbody td.block-wide .card-top {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
 }
 
 /* The two-card drawing has NOT gone away — a block whose two hours straddle the
@@ -2692,12 +2800,18 @@ table.grid tbody td.unavailable {
     var(--hatch) 3px,
     var(--hatch) 6px
   );
-  color: var(--bad);
-  /* Match Availability's closed-hour mark exactly; the shared red, size and
-     weight make the same state read the same way while this grid keeps its
-     denser hatch. */
-  font-size: var(--fs-2xl);
-  font-weight: 700;
+  /* GREY here, and one step smaller than Müsaitlik's. It used to match that
+     screen's mark exactly — red, 25px, bold — and on a timetable with the
+     school's closed hours drawn in, the loudest thing in the grid was the
+     hours with NO lesson: a column of red crosses out-shouting the cards.
+     It also crossed the channel: on this grid red means "this drop is
+     refused" (DECISIONS, Müsaitlik's red cross is argued for THAT screen,
+     where nothing is ever refused). The hatch is the state and it carries it
+     in grayscale; the cross is now its label, in --muted (5.97:1 light,
+     6.52:1 dark on --closed) at the body's size and above. */
+  color: var(--muted);
+  font-size: var(--fs-lg);
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -2900,14 +3014,34 @@ table.grid tbody td:hover > .card-pin,
   outline-offset: -1px;
 }
 
+/* The card's two lines, and the second one is NOT a quieter ink any more.
+   Both were 12px, and the room letter / subject short underneath sat in
+   --on-color-sub, which on the 36 palette colours measures 4.71:1 at worst —
+   under the 7:1 the reader's rows hold, on the one surface he reads most.
+   --on-color clears 7.3:1 on every palette colour (palette.test.ts), so the
+   hierarchy is carried by size and weight instead: 14px bold over 13px
+   regular. Sığdır keeps its own 12px base and its fit ratio below, because
+   its contract is the whole week in the box.
+
+   The LINE BOX does not grow with the letters: it is the one the lines had
+   at 12px (12px x --lh-base = 18px at %100), written out because `.card`'s
+   `font: inherit` would otherwise hand them 1.5 x their new size and every
+   row would come out 4.5px taller. At %100 and below it is exactly Sığdır's
+   line box, so switching density moves no row (gorunum.spec.ts, "satır
+   kutusu"); above %100 Sığdır's floor stops growing and its box is smaller. */
+.card-top,
+.card-bottom {
+  line-height: calc(var(--fs-xs) * var(--lh-base));
+}
+
 .card-top {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-md);
   font-weight: 700;
 }
 
 .card-bottom {
-  font-size: var(--fs-xs);
-  color: var(--on-color-sub);
+  font-size: var(--fs-sm);
+  color: var(--on-color);
 }
 
 /* rowspan is still NOT used (a bug factory in a dynamic table): the merge above
@@ -3224,6 +3358,8 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 .pool-pick select {
   font-size: var(--fs-xs);
   padding: 2px var(--space-2);
+  /* 23px tall without it: under the 24px pointer target (WCAG 2.5.8). */
+  min-height: 24px;
 }
 
 /* Along the bottom the count sits BESIDE its subtitle, not above it: the strip
@@ -3456,7 +3592,8 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 .pool-card .counter {
   font-size: var(--fs-xs);
-  color: var(--on-color-sub);
+  /* Not --on-color-sub: 4.71:1 on the palette's worst colour, see .card-bottom. */
+  color: var(--on-color);
 }
 
 /* A double is drawn twice as wide as a single, because that is what it is about
@@ -3575,6 +3712,67 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 
 .hidden {
   display: none;
+}
+
+/* Off the screen but in the accessibility tree: a heading a screen reader
+   navigates by, over a region whose purpose a sighted reader takes from the
+   layout. `display: none` would remove it from both. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The named region around the tool strip (App.tsx). It exists for the
+   accessibility tree only; on screen the strip stays a row of `.app`. */
+.ribbon-band {
+  display: contents;
+}
+
+/* "İçeriğe geç": the first Tab stop, invisible until it has focus, then
+   drawn over the top bar's left end where the eye already is. */
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-4);
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--r-sm);
+  background: var(--paper);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A scroll box that takes a Tab stop so the keyboard can scroll it (axe
+   `scrollable-region-focusable`). Not in the ring list below: that list
+   makes the focused thing `position: relative`, and a box that is placed some
+   other way must not move when it gets focus. The ring is drawn inside, where
+   the box's own overflow cannot clip it. */
+.pool-list:focus-visible,
+.focus-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* The content box takes focus from the skip link and from a dialog whose
+   opener is gone. A ring around the whole screen would say nothing the next
+   Tab does not, so it draws none. */
+main:focus {
+  outline: none;
 }
 
 .scroll-x {
@@ -3744,13 +3942,16 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 /* An input is a place you write INTO, so it is drawn as a recess rather than
    as a box: a sunk surface with a hairline, not a dark rule. --line-dark here
    was the single loudest border in the shell — 25 teacher rows x 9 fields of
-   it is what made the setup screen read as a grid of cages. */
+   it is what made the setup screen read as a grid of cages.
+   The hairline went too far the other way: 1.16:1 against the recess, so for
+   a reader who has trouble seeing a field was a slightly greyer patch with no
+   edge. --border-strong is the 3:1 floor and no louder (see the token). */
 input[type="text"],
 input[type="number"],
 select,
 textarea {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   background: var(--paper-sunk);
   line-height: var(--lh-base);
@@ -3765,14 +3966,36 @@ input[type="text"]:hover:not(:disabled),
 input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: var(--line);
+  border-color: var(--muted);
 }
 
 input[type="text"]:hover:not(:disabled),
 input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: var(--line);
+  border-color: var(--muted);
+}
+
+/* A checkbox is a pointer target with nothing around it to click: the day
+   switches in Zil ve günler and the draft mark in Planlar stand alone in a
+   table cell. The browser draws 13x13, under the 24px floor (WCAG 2.5.8).
+   The accent so a ticked box reads as "on" in the same colour as everything
+   else that is on. */
+input[type='checkbox'] {
+  width: max(24px, 1.5rem);
+  height: max(24px, 1.5rem);
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* The hint inside an empty field. There was no rule, so it was the browser's
+   own #757575 whatever the theme: 4.21:1 on --paper-sunk in light and 3.82:1
+   in a dark list's number box, measured 2026-11-15. --muted is the ink every
+   secondary line here already uses (7.79 on the light recess, 10.31 on the
+   dark one), and `opacity: 1` because Firefox fades a placeholder by default. */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 /* Buttons had no focus style at all: tabbing through the top bar was invisible.
@@ -3790,7 +4013,10 @@ textarea:focus-visible,
 .row-grip:focus-visible,
 .color-pick:focus-visible,
 .split-pick:focus-visible,
-.entity:focus-visible {
+.entity:focus-visible,
+.toast-close:focus-visible,
+.health:focus-visible,
+.inspect:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
      a lesson card, a swatch — and that is precisely where somebody navigating
@@ -4141,7 +4367,7 @@ table.list tbody tr[aria-current='true'] > td:first-child {
 /* A field in a list row gives up its recess. In the light theme --zebra is a
    hair from --paper-sunk (ΔE 1.7), so on every second row a sunk box would
    vanish into the row it sits in. It goes to paper, and with the recess gone its edge is its only
-   boundary, which is the button's case: --line, not --hairline. The split
+   boundary, which is the button's case: --border-strong. The split
    picker is a bare <button> and was on the browser's own grey (4.53 for its
    text in the dark theme); in a list it is a field like its neighbours. */
 table.list td input[type='text'],
@@ -4153,7 +4379,7 @@ table.stat td input[type='number'],
 table.stat td select,
 table.sheet-lessons td select {
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-strong);
 }
 
 table.list td .split-pick {
@@ -4162,8 +4388,7 @@ table.list td .split-pick {
   cursor: pointer;
 }
 
-/* The base hover lifts --hairline to --line; these already stand at --line,
-   so the step that says "you can write here" moves one up with them. */
+/* The same hover as the base rule: from the control edge to --muted. */
 table.list td input[type='text']:hover:not(:disabled),
 table.list td input[type='number']:hover:not(:disabled),
 table.list td select:hover:not(:disabled),
@@ -4172,7 +4397,7 @@ table.stat td input[type='text']:hover:not(:disabled),
 table.stat td input[type='number']:hover:not(:disabled),
 table.stat td select:hover:not(:disabled),
 table.sheet-lessons td select:hover:not(:disabled) {
-  border-color: var(--line-dark);
+  border-color: var(--muted);
 }
 
 /* A box whose text is not what it is for (a teacher's address that is not one
@@ -4614,17 +4839,17 @@ table.sheet-lessons select.transfer-pick {
 
 .badge.ok {
   background: var(--ok-bg);
-  color: var(--ok);
+  color: var(--ok-ink);
 }
 
 .badge.tight {
   background: var(--warn-bg);
-  color: var(--warn);
+  color: var(--warn-ink);
 }
 
 .badge.impossible {
   background: var(--bad-bg);
-  color: var(--bad);
+  color: var(--bad-ink);
 }
 
 .warn-box {
@@ -5251,7 +5476,7 @@ table.availability td.closed {
 /* Two lines, both centred: the big one says what the sheet IS, the small one
    whose it is. Centred on screen as well — the preview has to look like the
    paper, or choosing what to print becomes guesswork. */
-.print-page h3 {
+.print-page h2 {
   /* In mm, and the same number in both media. It was 6px here and 4mm in
      `@media print`, i.e. every sheet was about 9 px taller on paper than the
      preview said — a small lie in the one place this project promises there
@@ -5412,7 +5637,7 @@ table.availability td.closed {
   border: 1px solid var(--edge);
 }
 
-.print-page h3 .p-dot {
+.print-page h2 .p-dot {
   display: inline-block;
   width: 11px;
   height: 11px;
@@ -5951,8 +6176,10 @@ table.availability.heat td.closed {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  /* 1.5rem is 19.5px at %100: the 24px target floor (WCAG 2.5.8) is in px
+     because it is about a pointer, not about type. */
+  width: max(24px, 1.5rem);
+  height: max(24px, 1.5rem);
   padding: 0;
   border: none;
   border-radius: var(--r-sm);
@@ -5965,6 +6192,21 @@ table.availability.heat td.closed {
 .toast-close:hover {
   background: var(--paper-sunk);
   color: var(--text);
+}
+
+/* Read aloud, never drawn: the "Geri almak için Ctrl+Z." of a notice and the
+   "Geri alındı: …" after Ctrl+Z. Not `display: none`, which a screen reader
+   skips as well. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 @keyframes toast-in {
@@ -6174,7 +6416,9 @@ table.availability.heat td.closed {
 .sheet-cell-bottom {
   display: block;
   font-size: var(--fs-2xs);
-  color: var(--on-color-sub);
+  /* --on-color, not --on-color-sub (4.71:1 on the worst palette colour): this
+     is the panel's week ON SCREEN, the same surface as the grid's card. */
+  color: var(--on-color);
 }
 
 /* Closed and empty: the same hatch the availability grid uses, so the two
@@ -6216,7 +6460,15 @@ table.availability.heat td.closed {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0;
+  /* The name is the target, and a short one ("MÇ") was 15x16px: under the
+     24px floor (WCAG 2.5.8). The box grows by padding and gives the same
+     amount back as negative margin, so the row head it sits in — measured to
+     the pixel in Sığdır — keeps its height and nothing beside it moves.
+     DOWNWARD only: the extra reaches over its own second line and never up
+     into the row head above, which is sticky and would paint over it. */
+  min-width: 24px;
+  padding: 0 0 8.5px;
+  margin-bottom: -8.5px;
   border: none;
   background: none;
   color: inherit;
@@ -6265,7 +6517,7 @@ table.availability.heat td.closed {
   gap: var(--space-2);
   padding: 0 var(--space-3);
   background: var(--paper-sunk);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
   color: var(--muted);
   transition:
@@ -6446,9 +6698,14 @@ table.availability thead .hour-clock:empty::before {
   /* First to give way when the bar runs out of room: the dot carries the
      answer, the sentence carries the detail. It never disappears — a status
      that vanishes when the screen is busy is a status nobody relies on. */
-  flex: 0 1 auto;
+  /* A small basis growing to the whole sentence, for `.topbar-doc`'s reason:
+     the bar wraps, and a wrapping line breaks on the basis before anything
+     shrinks. The old 28rem cap moved onto the sentence (24rem, the box's
+     28rem less its padding and dot), because the box's own max-width is now
+     its content. */
+  flex: 1 1 2.5rem;
   min-width: 2.5rem;
-  max-width: 28rem;
+  max-width: max-content;
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--hairline);
   border-radius: var(--r-full);
@@ -6465,6 +6722,7 @@ table.availability thead .hour-clock:empty::before {
 }
 
 .health-text {
+  max-width: 24rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -6477,9 +6735,9 @@ table.availability thead .hour-clock:empty::before {
   background: var(--ok);
 }
 
-.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
-.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
-.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-ink); }
+.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn-ink); }
+.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad-ink); }
 
 .health.tight .health-dot { background: var(--warn); }
 .health.impossible .health-dot { background: var(--bad); }
@@ -6696,8 +6954,9 @@ table.list td.row-no {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  /* 1.75rem is 22.75px at %100, a hair under the 24px target floor. */
+  width: max(24px, 1.75rem);
+  height: max(24px, 1.75rem);
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--r-sm);
@@ -6979,5 +7238,63 @@ body.row-dragging {
     min-width: 30ch;
     max-width: 60ch;
     padding-inline-end: calc(var(--space-3) + 0.5ch);
+  }
+}
+
+/* ------------------------------------------------------- forced colours
+   Windows' contrast themes (Ayarlar > Erişilebilirlik > Karşıtlık temaları)
+   replace every colour on the page with a handful of system colours. Until
+   2026-11-15 nothing here answered that, and three things went missing,
+   measured with Chromium's `forcedColors: 'active'` on the sample school:
+
+     - a lesson card has no border (`border: none`), only a palette ground,
+       and the ground is the thing that goes: 374 cards became text floating
+       in empty cells, a filled hour and an empty one told apart by text only;
+     - a pressed button and the lit tab are a GROUND too (the section colour,
+       the accent), so "which one is on" was lost on every strip and the bar;
+     - the focus ring is half a box-shadow, which the mode drops.
+
+   System colours are not overridden by the mode, so naming them is enough;
+   `forced-color-adjust` is switched off only where the label sits on
+   Highlight (see the note there). `!important` because each
+   of these states is written in several places at several specificities
+   (`.ribbon .btn[aria-pressed]`, `.btn.icon[aria-pressed]`, `.segmented > …`)
+   and this block has to answer for all of them, whichever wins on screen.
+   The hover ring on list rows is an outline and already survives
+   (zebra.spec.ts, "forced-colors: şerit Canvas olur"); nothing here touches it. */
+@media (forced-colors: active) {
+  .card,
+  .pool-card {
+    border: 1px solid CanvasText !important;
+  }
+
+  .btn[aria-pressed='true'],
+  .chip[aria-pressed='true'],
+  .swatch[aria-pressed='true'],
+  .card-pin[aria-pressed='true'],
+  .tab[aria-current='true'] {
+    background: Highlight !important;
+    color: HighlightText !important;
+    border-color: Highlight !important;
+    /* Without this the mode paints its Canvas backplate behind the label, and
+       HighlightText on that backplate is white on white — measured, the word
+       vanished from every pressed control. Inherited, so the label and the
+       icon inside are covered too. */
+    forced-color-adjust: none;
+    box-shadow: none !important;
+  }
+
+  .tab[aria-current='true'] .tab-dot {
+    background: HighlightText;
+  }
+
+  .btn[aria-pressed='true'] svg,
+  .tab[aria-current='true'] svg {
+    color: HighlightText !important;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 2px;
   }
 }

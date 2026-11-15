@@ -299,8 +299,6 @@ const EN: Sozluk = {
     "Changing the split clears this lesson from the timetable, pinned cards included",
 
   // src/ui/Ribbon.tsx — what the two destructive questions promise
-  "Sabitlenen {n} saat yerinde kalır, gerisi baştan dizilir. Ctrl+Z ile geri alınabilir.":
-    "The {n} pinned hours stay where they are; the rest is laid out from scratch. Ctrl+Z undoes it.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: details and weekly timetable",
 
   // src/ui/program/Inspector.tsx
@@ -378,8 +376,8 @@ const EN: Sozluk = {
 
   // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "It can be dropped here.",
-  "Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn":
-    "Filling automatically… {yerlesen}/{toplam} cards · {sure} s",
+  "Otomatik diziliyor…": "Filling automatically…",
+  "{yerlesen}/{toplam} kart · {sure} sn": "{yerlesen}/{toplam} cards · {sure} s",
   "Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
     "Rows are teachers. A cell shows the class and the room. Drag a placed card to move it; right-click sends it back to the tray.",
   "Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.":
@@ -411,10 +409,6 @@ const EN: Sozluk = {
   "Otomatik diz ({n})": "Fill automatically ({n})",
   "Dizilmiş programı silip baştan dizer":
     "Clears the timetable and lays it out from scratch",
-  "Dizilmiş {n} saatin tamamı silinecek":
-    "All {n} placed hours will be deleted",
-  "Program baştan dizilecek. Ctrl+Z ile geri alınabilir.":
-    "The timetable will be laid out from scratch. Ctrl+Z undoes it.",
   "Baştan diz": "Lay out from scratch",
   "Programı boşalt": "Empty the timetable",
   "Sorun yok": "No problems",
@@ -576,12 +570,7 @@ const EN: Sozluk = {
   "En son sürümü kullanıyorsunuz.": "You are on the latest version.",
   "Yeni sürüm iniyor…": "The new version is downloading…",
   "Her şey silinecek": "Everything will be deleted",
-  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.":
-    "Teachers, classes, lessons and the timetable as laid out. This plan will be left completely empty.",
   "Devam et": "Continue",
-  "Son kez soruyorum": "Asking one last time",
-  'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.':
-    'This cannot be undone. If you might change your mind, choose "Save to file" in the top bar first.',
   "{yazilan} plan dosyaya yazıldı; {eksik} planın verisi bulunamadı.":
     "{yazilan} {yazilan:plan|plans} written to the file; the data of {eksik} {eksik:plan|plans} could not be found.",
   "{yazilan} plan tek dosyaya yazıldı.":
@@ -791,11 +780,6 @@ const EN: Sozluk = {
   '"{ad}" branşı kullanılıyor': 'The "{ad}" subject is in use',
   "{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.":
     "{n} {n:teacher holds|teachers hold} this subject ({kimler}). Change their subject first, then delete this one.",
-  '"{ad}" branşı listeden çıkarılacak':
-    'The "{ad}" subject will be removed from the list',
-  "Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.":
-    "No teacher holds this subject, so nothing else is affected.",
-  Çıkar: "Remove",
   "Branşlar ({n})": "Subjects ({n})",
   "Yeni branş (örn. Robotik)": "New subject (e.g. Robotics)",
   "Yeni branş": "New subject",
@@ -901,8 +885,6 @@ const EN: Sozluk = {
   "Bu plandaki her şeyin yerine örnek okul geçecek":
     "The sample school will replace everything in this plan",
   "Örnek okul verisi yüklenecek": "Sample school data will be loaded",
-  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce \"Dosyaya kaydet\" deyin.":
-    "{kayip} In their place comes a sample school of 25 teachers, 20 classes, 8 rooms and 99 lessons. The other plans are untouched. It cannot be undone, so choose \"Save to file\" first.",
   "25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → \"Her şeyi sil\" ile temizleyin.":
     "25 teachers, 20 classes, 8 rooms and 99 lessons. For seeing what Mozaik does; before you start entering your own data, clear it with Settings → About → \"Delete everything\".",
   "Yerine koy": "Replace",
@@ -962,21 +944,8 @@ const EN: Sozluk = {
   "Bu hücreye bırakılamaz": "It cannot be dropped in this cell",
 
   // src/entities.ts
-  "Bu derslik silinecek": "This room will be deleted",
-  "{ad} dersliği silinecek": "Room {ad} will be deleted",
-  "{n} sınıfın dersliği boşalacak ({hangileri}) ve derslik çakışması artık kontrol edilmeyecek.":
-    "{n} {n:class|classes} will be left without a room ({hangileri}) and room clashes will no longer be checked.",
-  "Bu ders silinecek": "This lesson will be deleted",
   "{sinif} sınıfının {kim} dersi": "class {sinif}'s {kim} lesson",
-  "{ne} silinecek ({n} saat)": "{ne} will be deleted ({n} {n:hour|hours})",
-  "{ne} silinecek": "{ne} will be deleted",
-  "Programa yerleşmiş {n} saati de kalkacak.":
-    "The {n} {n:hour|hours} already on the timetable will go too.",
-  "Bu öğretmen": "This teacher",
   "Bu sınıf": "This class",
-  "{n} dersi de gidecek.": "Its {n} {n:lesson|lessons} will go too.",
-  "{ders} dersi ve programa yerleşmiş {saat} saati de gidecek.":
-    "Its {ders} {ders:lesson|lessons} and the {saat} {saat:hour|hours} already on the timetable will go too.",
   "Haftalık ders yükü": "Weekly lesson load",
   "{n} saat": "{n} {n:hour|hours}",
   "Açık saat": "Open hours",
@@ -1492,9 +1461,6 @@ const EN: Sozluk = {
   "Seçenek adı boş olamaz": "A variant needs a name",
   "Bu seçenek adı zaten kullanılıyor": "That variant name is already in use",
   Kaydet: "Save",
-  "{ad} seçeneği silinecek": "The variant {ad} will be deleted",
-  "{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.":
-    "{n} placed {n:hour|hours} and {s} {s:pin|pins} go with it. The shared school data stays.",
   "Öğretmeni düzenle": "Edit teacher",
   "Sınıfı düzenle": "Edit class",
   "Toplu sabitle": "Pin in bulk",
@@ -1573,8 +1539,6 @@ const EN: Sozluk = {
   // by its Turkish sentence anyway.
   "**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır.":
     "**Reduced.** Durations halve and anything that MOVES is switched off.",
-  "**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin.":
-    "**The open plan** is wiped and it **cannot be undone**; use **Save to file** first.",
   "**Mozaik burada kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:":
     "**Here Mozaik never updates itself** and connects nowhere. The latest version is at:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
@@ -1785,12 +1749,37 @@ const EN: Sozluk = {
     "{n} cannot hold its {boy}-hour card",
   "{n} sorun":
     "{n} {n:problem|problems}",
+  "{brans} dersi de gitti.": "Its {brans} lesson went with it.",
+  "{brans} dersleri de gitti.": "Its {brans} lessons went with it.",
   "{sinif} sınıfının {brans} dersi de gitti.":
     "Class {sinif} lost its {brans} lesson.",
   "{n} sınıfın {brans} dersi de gitti: {siniflar}.":
     "{n} {n:class|classes} lost {brans}: {siniflar}.",
   "Programdan {n} saat kalktı.":
     "{n} placed {n:hour was|hours were} removed from the timetable.",
+  "{ad} kısa adı": "short name of {ad}",
+  "Yeni sınıfın dersliği": "Room of the new class",
+  "İçeriğe geç": "Skip to content",
+  "Ders günü": "School day",
+  "Geri alındı.": "Undone.",
+  "Geri alındı: {ne}": "Undone: {ne}",
+  "Geri almak için Ctrl+Z.": "Press Ctrl+Z to undo.",
+  "Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.": "Something else changed in between. Press Ctrl+Z to undo step by step.",
+  "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından \"Geri al\" ile geri gelir.": "Teachers, classes, lessons and the timetable as laid out. This plan will be left completely empty. \"Undo\" right afterwards brings it back.",
+  "Bu plandaki her şey silindi.": "Everything in this plan was deleted.",
+  "**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir.": "**The open plan** is wiped; **Undo** right afterwards brings it back.",
+  "{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından \"Geri al\" ile geri gelir.": "{kayip} In their place comes a sample school of 25 teachers, 20 classes, 8 rooms and 99 lessons. The other plans are untouched. \"Undo\" right afterwards brings yours back.",
+  "Derslik silindi.": "Room deleted.",
+  "{ad} dersliği silindi.": "Room {ad} deleted.",
+  "{ad} dersliği silindi, {sinif} sınıfının dersliği boşaldı.": "Room {ad} deleted; class {sinif} has no room now.",
+  "{ad} dersliği silindi, {n} sınıfın dersliği boşaldı ({hangileri}). Bu sınıflar artık aynı saate konabilir.": "Room {ad} deleted; {n} {n:class has|classes have} no room now ({hangileri}). These classes can now be placed at the same hour.",
+  "Öğretmen silindi.": "Teacher deleted.",
+  "Sınıf silindi.": "Class deleted.",
+  "\"{ad}\" branşı listeden çıkarıldı.": "\"{ad}\" was removed from the subject list.",
+  "{ad} seçeneği silindi.": "Variant {ad} deleted.",
+  "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variant {ad} deleted, with its {n} placed {n:hour|hours}.",
+  "Program baştan dizildi.": "The timetable was laid out from scratch.",
+  "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
 };
 
 registerSozluk("en", EN);

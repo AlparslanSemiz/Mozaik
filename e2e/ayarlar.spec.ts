@@ -368,7 +368,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     await name.blur();
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await expect(page.locator('.print-page h3').first()).toContainText('Semiz Kurs');
+    await expect(page.locator('.print-page h2').first()).toContainText('Semiz Kurs');
     // ...and into the top bar, which is where you see which file you are in.
     await expect(page.locator('.app-title')).toHaveText('Semiz Kurs');
   });
@@ -728,20 +728,42 @@ test.describe('34. Ayarlar — planlar ve hakkında', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(25);
   });
 
-  test('"Her şeyi sil" onaylanınca gerçekten siliyor', async ({ page }) => {
+  test('"Her şeyi sil" BİR kez soruyor, siliyor ve Geri al ile geri getiriyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openSettings(page, 'Hakkında');
 
-    // It asks TWICE. The second question is the point: this is the one button
-    // in the app that cannot be undone.
-    const asked: string[] = [];
+    // One question since 2026-11-15: the reset is an ordinary step of the
+    // history, so the second "Son kez soruyorum" went (TODO SD1).
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
-    asked.push(await answerDialog(page));
-    asked.push(await answerDialog(page));
+    const asked = await answerDialog(page);
+    expect(asked).toContain('Geri al');
+    expect(asked).not.toContain('geri alınamaz');
+    await expect(page.locator('.dlg')).toHaveCount(0);
 
+    const notice = page.locator('.toast', { hasText: 'her şey silindi' });
+    await expect(notice).toBeVisible();
     await openSetup(page, 'Öğretmenler');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
-    expect(asked).toHaveLength(2);
-    expect(asked[1]).toContain('geri alınamaz');
+
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(25);
+  });
+
+  test('dolu planın yerine örnek okul Geri al ile geri dönüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(24);
+
+    await openSettings(page, 'Hakkında');
+    await page.getByRole('button', { name: 'Örnek okulu yükle' }).click();
+    const asked = await answerDialog(page);
+    expect(asked).not.toContain('Geri alınamaz');
+    const notice = page.locator('.toast', { hasText: 'Örnek okul yüklendi' });
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await openSetup(page, 'Öğretmenler');
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(24);
   });
 });

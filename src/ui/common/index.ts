@@ -4,12 +4,15 @@
  * (`Dialogs.tsx`) and short lines (`Toasts.tsx`), a labelled control
  * (`Field.tsx`), the limit box that shows the layer above when empty
  * (`LimitBox.tsx`), the colour picker (`ColorPick.tsx`), the block pattern
- * picker (`BlockCounts.tsx`) and the panels' shared props (`props.ts`).
+ * picker (`BlockCounts.tsx`), the panels' shared props (`props.ts`) and where
+ * focus goes when a dialog closes (`returnFocus.ts`).
  */
 export * from './T';
 export * from './Dialogs';
 export * from './Toasts';
 export * from './Undo';
+export { useReturnFocus } from './returnFocus';
+export * from './deleteFocus';
 export { default as Field } from './Field';
 export { default as LimitBox } from './LimitBox';
 export { default as ColorPick } from './ColorPick';

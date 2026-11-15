@@ -345,15 +345,24 @@ function poolLines(): string[] {
   return out;
 }
 
+/**
+ * The bar as `class :: what it announces | what it only shows`. The live
+ * region is read through its ROLE, so a counter that slips back into it (and
+ * is read out many times a second) changes the line.
+ */
 function bar(): string {
   const el = container.querySelector('.reason-bar');
-  return `${el?.className ?? ''} :: ${text(el?.querySelector('span'))}`;
+  const count = el?.querySelector('.reason-count');
+  return (
+    `${el?.className ?? ''}${el?.getAttribute('aria-busy') === 'true' ? ' [bar busy]' : ''} :: ` +
+    `${text(el?.querySelector('[role="status"]'))}${count ? ` | ${text(count)}` : ''}`
+  );
 }
 
 /** One line per printed page: its title, then each day's cells as `span:text`. */
 function printLines(): string[] {
   return [...container.querySelectorAll('.print-page')].map((page) => {
-    const title = [...page.querySelectorAll('h3 span.p-title-main, h3 span.p-title-sub')]
+    const title = [...page.querySelectorAll('h2 span.p-title-main, h2 span.p-title-sub')]
       .map(text)
       .join(' / ');
     const days = [...page.querySelectorAll('tbody tr')].map((tr) =>
@@ -676,7 +685,7 @@ describe('araç çubuğunun altındaki satır', () => {
       [
         "reason-bar :: Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
         "reason-bar :: Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
-        "reason-bar busy :: Otomatik diziliyor… 3/9 kart · 1,2 sn · 2 kart geçici kapsam dışında",
+        "reason-bar busy :: Otomatik diziliyor… | 3/9 kart · 1,2 sn · 2 kart geçici kapsam dışında",
         "reason-bar ok :: Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.",
         "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
         "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz. 2 kart geçici kapsam dışında kaldı.",

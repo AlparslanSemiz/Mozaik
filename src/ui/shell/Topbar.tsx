@@ -227,7 +227,7 @@ export default function Topbar({
       </button>
       {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
         aç". It is now in Ayarlar > Veri: the rarest button in the app,
-        and the only one that cannot be undone. */}
+        and the widest. */}
       <input
         ref={fileInput}
         type="file"

@@ -33,8 +33,10 @@ Yedi sekme, bu sırayla. Alt+1'den Alt+7'ye kadar bu sırayla açılırlar.
 Okul yalnız listeleri, Ayarlar yalnız ayarları tutar: dönem başında doldurulan
 şeyle yılda bir dokunulan şey aynı ekranda durmuyor. Dersler kendi sekmesi, çünkü
 en çok kullanılan ekran ve bir sihirbazın dördüncü adımından geçilerek varılmıyor.
-Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). 1280 pikselin altında
-sekme etiketleri gizlenir ve erişilebilir ad kalır.
+Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). Üst bar dar kalınca (%100'de
+yaklaşık 1320 piksellik bir barın altında, yani 1366'da yan yana, 1280'de alt alta;
+programın kendi ölçeğiyle birlikte) sekme etiketi simgenin
+altına iner ve bir basamak küçülür; gizlenmez (2026-11-15).
 
 ## Üst çubuk
 
@@ -46,7 +48,7 @@ klavye kısayolları, araç şeridi aç kapa, tema.
 - **Durum çipi** her sekmede sorunu adıyla söyler ve Kontrol'e götürür.
 - **Plan seçici** tek plan varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve ancak iki plan olunca beliren bir kutu planların var olduğunu öğretemezdi. Plan yaratan, adlandıran ve silen her şey Ayarlar → Planlar ve yedek'te, çünkü üst çubuk bir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak kalıyor. `Sıfırla` da bu yüzden Ayarlar'da.
 - **Dosyaya kaydet** ve **dosyadan aç** üst çubukta, çünkü veri kaybına karşı önlem görünür olmalı. İkisi tek bir plan yazar ve okur, bir paketi reddedip yolunu gösterir (tuzak 30).
-- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Sekmeler feda edilmez (tuzak 48).
+- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı; sekme etiketleri simgenin altına iner ve "Dosyaya kaydet" ile "Dosyadan aç" iki satıra kırılır. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Bu da yetmezse çubuk ikinci bir satıra geçer; sayfa yana kaymaz. Sekmeler feda edilmez (tuzak 48).
 
 ## Araç şeridi
 
@@ -69,9 +71,9 @@ test koruyamaz.
 1. Yedi sekmenin yedisi de şerit çizer ve şeritler aynı yükseklikte, %100'de de %150'de de. Yüksekliği sekmeyle gelip giden bir şerit altındaki her şeyi zıplatır.
 2. Her şerit bir başlıkla (`.ribbon-label`) açılır: düğmelerin hangi soruyu cevapladığı. Bir değer taşıyan grup `.ribbon-value` kullanır, çünkü başlık büyük harfli ve soluk, ve bir adı o sesle okumak onu başlık gibi gösteriyor.
 3. Gruplar `<Sep/>` ile, sağa yaslanan grup `<Spacer/>` ile ayrılır.
-4. Her düğmede bir simge ve bir kelime olur. Simge tek başına ilk seferde okunmaz ve iki test katmanında ada dönüşmez (tuzak 56), kelime tek başına bir düğmeyi komşusundan bir bakışta ayırmaya yetmez, göz önce şekli buluyor. İkisinin de bulunma sebebi bir ölçeğe bağlı değil: hangi ölçekte olursa olsun düğme ikisini birden taşır. Tek istisnası 6. maddenin son adımı, ve orada da giden şey çizim, ad değil. Üç varlık türünün simgesi `KIND_ICON`'dan, gerisi `lucide-react`'ten gelir.
+4. Her düğmede bir simge ve bir kelime olur. Simge tek başına ilk seferde okunmaz ve iki test katmanında ada dönüşmez (tuzak 56), kelime tek başına bir düğmeyi komşusundan bir bakışta ayırmaya yetmez, göz önce şekli buluyor. İkisinin de bulunma sebebi bir ölçeğe bağlı değil: hangi ölçekte olursa olsun düğme ikisini birden taşır. 2026-11-15'ten beri istisnası yok: 6. maddenin son adımı da kelimeyi küçültür, silmez. Üç varlık türünün simgesi `KIND_ICON`'dan, gerisi `lucide-react`'ten gelir.
 5. Şeritteki her kontrol aynı yükseklikte (`--ribbon-h`). Yükseklik şeride değil kontrole verilir, çünkü sabit yükseklikli bir şerit kendine verileni ortalar ve uzun bir düğmeyi saklar.
-6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri gider, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Kelime feda edilirken simge ve erişilebilir ad kalır: verilen şey bir çizim, bir ad değil (tuzak 56), ve bu yüzden kelime `display: none` ile değil yazı boyu sıfırlanarak gider, metin düğümü erişilebilirlik ağacında durur. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
+6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri bir basamak küçülür ve iç boşlukları daralır, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Son adım 2026-11-15'e kadar kelimeyi yazı boyunu sıfırlayarak siliyordu (ad erişilebilirlik ağacında kalıyordu, tuzak 56); %150'de 1024 piksel ya da %200'de şerit yalnız simgeydi ve az gören biri için ezberlenecek bir simge kelimeden zordu. En dar kutuda (%200, 960 piksel) bir iki uzun kelime üç noktayla kısalabilir. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
 
 Seçili bir seçeneği renk söyler, yazı kalınlığı değil: eşit sütunlu bir grupta
 kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydırır
@@ -194,7 +196,7 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 ### Otomatik dizme
 
 Şeritte iki düğme var: `Otomatik diz (N)` bekleyen dersleri dizer, `Baştan diz`
-(onaylı) ızgarayı boşaltıp yeniden dizer. Bir ayarı yok: "sabaha yay" gibi tercihler
+(sormadan, bildirimi `Geri al` taşır) ızgarayı boşaltıp yeniden dizer. Bir ayarı yok: "sabaha yay" gibi tercihler
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de
 duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yazılır:
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
@@ -328,7 +330,7 @@ okuyanlarla aynı.
 ## Diyaloglar, bildirimler ve boş ekranlar
 
 - **Her soru** `useDialogs()` üstünden sorulur (`confirm`, `alert`), `window.confirm` ve `window.alert` kullanılmıyor. Geri alınamaz uyarılar `role="alertdialog"`.
-- **Silmeden önce onay sorulur**, ve cümle ne kaybedileceğini sayar: "A dersliği silinecek. 4 sınıfın dersliği boşalacak (410, 411, 510, 511)…" Dosyadan aç'ın sorusu da dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
+- **Geri alınabilen silme sormaz** (TODO SD1): öğretmen, sınıf, derslik, ders, kullanılmayan branş, seçenek, `Programı boşalt` ve `Baştan diz` hemen olur, ve bildirim ne gittiğini sayar ve `Geri al` taşır: "A dersliği silindi, 4 sınıfın dersliği boşaldı (410, 411, 510, 511). Bu sınıflar artık aynı saate konabilir." Bildirim 10 s durur, fare üstündeyken ya da odak içindeyken süresi işlemez; `Geri al` yalnız en yeni bildirimde, arada başka bir değişiklik olduysa bunu söyler. `Sil`'den sonra odak sonraki satırın `Sil`'ine geçer (son satırda öncekine, liste boşaldıysa ekleme kutusuna), ve Ctrl+Z ekran okuyucuya neyi geri aldığını söyler. `Her şeyi sil` ve dolu planın yerine örnek okul bir kez sorar, sonra aynı bildirimi verir. Dosyadan aç'ın sorusu dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
 - **Olan biteni** kısa bir bildirim satırı söyler (`useToast()`), ve bir hamlede ne kaybedildiyse adıyla yazar.
 - **Boş ekranlar yönlendirir:** "Henüz ders yok" değil, nereden başlanacağı. Program, Kontrol ve Çıktı'nın boş ekranları listeler için Okul'u, dersler için Dersler sekmesini gösteriyor. Sekme adları kalın yazılıyor ama tıklanmıyor ([DENETIM.md](DENETIM.md), P19).
 - **Ctrl+K komut paleti** her yere gider, her şeyi bulur, sık yapılan işleri yapar. `?` tuşu klavye kısayolları ekranını açar.

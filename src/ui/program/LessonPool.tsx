@@ -300,6 +300,12 @@ function LessonPool({
       className={open && cards.length > 0 ? 'pool' : 'pool pool-closed'}
       aria-label={t('Yerleşmeyi bekleyen kartlar')}
     >
+      {/* The pool's place in the outline: the screen's h1 is the school, the
+          grid and the pool are its two h2s, the groups below are h3s. Seen,
+          the drawer needs no title; heard, the groups had no parent. */}
+      <h2 className="visually-hidden" id="havuz-baslik">
+        {t('Havuz')}
+      </h2>
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
       <div
@@ -411,9 +417,18 @@ function LessonPool({
 
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <div className="pool-list scroll-fade" ref={list}>
+          {/* A Tab stop of its own: the list scrolls, and without one the
+              cards below the fold were out of the keyboard's reach (axe
+              `scrollable-region-focusable`). */}
+          <div
+            className="pool-list scroll-fade"
+            ref={list}
+            tabIndex={0}
+            role="group"
+            aria-labelledby="havuz-baslik"
+          >
             {groups.map((g) => (
-              <section className="pool-group" key={g.key} aria-label={g.label}>
+              <div className="pool-group" key={g.key} role="group" aria-label={g.label}>
                 {/* The heading is what the reader asked for: a break between one
                 row's cards and the next, rather than one more 7px gap. It also
                 makes the order VISIBLE — pick "branşa göre" and the headings
@@ -483,7 +498,7 @@ function LessonPool({
                     );
                   })}
                 </div>
-              </section>
+              </div>
             ))}
           </div>
         </ContextMenu.Trigger>

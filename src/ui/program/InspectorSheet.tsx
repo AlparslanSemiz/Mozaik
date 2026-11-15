@@ -19,7 +19,7 @@ import {
   updateRoom,
   updateTeacher,
 } from '../../pure/entities';
-import { ColorPick, LimitBox, T, useDialogs, useT, useToast } from '../common';
+import { ColorPick, LimitBox, T, useDialogs, useReturnFocus, useT, useToast } from '../common';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CalendarX2, X } from 'lucide-react';
 import { useMemo } from 'react';
@@ -55,6 +55,7 @@ export function Inspector({
   onClose: () => void;
 }) {
   const t = useT();
+  const returnFocus = useReturnFocus(target !== null);
   const { confirm } = useDialogs();
   const toast = useToast();
   const lessonTeacher = (lessonId: string) =>
@@ -151,7 +152,11 @@ export function Inspector({
     <Dialog.Root open={target !== null} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
-        <Dialog.Content className="sheet" aria-describedby={undefined}>
+        <Dialog.Content
+          className="sheet"
+          aria-describedby={undefined}
+          onCloseAutoFocus={returnFocus}
+        >
           {target !== null && view !== null ? (
             <>
               <div className="sheet-head">
