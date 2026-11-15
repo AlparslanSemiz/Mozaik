@@ -59,7 +59,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     // button's own tooltip — which is where somebody about to click it looks.
     await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toHaveAttribute(
       'title',
-      /kendiliğinden saklanıyor/,
+      /kendiliğinden saklıyor/,
     );
 
     // In HAKKINDA, which is where "Veriler nerede" is — the comment above
@@ -127,7 +127,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await dragAndDrop(page);
     await openSettings(page, 'Zil ve günler');
 
-    const hourBox = page.getByLabel('Günlük ders sayısı');
+    const hourBox = page.getByLabel('Günlük saat sayısı');
     await hourBox.fill('4');
     await hourBox.blur();
 
@@ -541,12 +541,12 @@ test.describe('29. Hata yolları', () => {
     // is the program's own, written by a newer copy of it.
     const said = await answerDialog(page);
     expect(said).toContain('Bu dosya daha yeni bir sürümle yazılmış');
-    expect(said).toContain('Programı güncelleyin');
+    expect(said).toContain("Mozaik'i güncelleyin");
     expect(said).not.toContain('okunamadı');
   });
 
   // DK11: a file with no teachers and no lessons at all used to be taken as a
-  // valid plan and, one "Yedeği yükle" later, empty the open one.
+  // valid plan and, one "Planı aç" later, empty the open one.
   test('öğretmeni ve dersi olmayan dosya eksik diye reddediliyor, plan değişmiyor', async ({
     page,
   }) => {
@@ -562,7 +562,7 @@ test.describe('29. Hata yolları', () => {
 
     const said = await answerDialog(page);
     expect(said).toContain('Bu dosya eksik');
-    expect(said).not.toContain('Yedeği yükle');
+    expect(said).not.toContain('Planı aç');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
   });
@@ -610,7 +610,7 @@ test.describe('29. Hata yolları', () => {
 
     // The input clears its own value, so picking the same path fires again.
     await page.locator('input[type=file]').setInputFiles(file);
-    expect(await answerDialog(page)).toContain('Şu anki programın yerine geçecek');
+    expect(await answerDialog(page)).toContain('Açık olan planın yerine geçecek');
   });
 
   test('kayıt çalışmıyorsa kalıcı kırmızı uyarı çıkıyor', async ({ page }) => {

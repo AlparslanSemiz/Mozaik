@@ -360,8 +360,8 @@ test.describe('2. Sürükle-bırak', () => {
     // block is this" on screen is now the width (`[data-size='2']` is twice
     // `[data-size='1']`, asserted below) and the tooltip, which is where a
     // number the eye does not need but a reader might still lives.
-    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik blok/);
-    await expect(singles.first()).toHaveAttribute('title', /1 saatlik blok/);
+    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik kart/);
+    await expect(singles.first()).toHaveAttribute('title', /1 saatlik kart/);
     const widths = await page.evaluate(() => {
       const one = document.querySelector('.pool-card[data-size="1"]')!;
       const two = document.querySelector('.pool-card[data-size="2"]')!;
@@ -619,8 +619,10 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // without saying what to. Reading in order it is: the block, the three
     // things behind it, the one-hour lock, and two doors — the locks that take
     // many hours, and putting a row or a day aside. Nothing that a hand reaches
-    // for often is behind either door.
+    // for often is behind either door. "Taşı" leads: it is the keyboard's way
+    // to move the block (2026-11-15, KS8).
     await expect(menu.getByRole('menuitem')).toHaveText([
+      /^Taşı/,
       /^Havuza kaldır/,
       'Dersi düzenle',
       'Öğretmeni düzenle',
@@ -889,7 +891,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
       await expect(menu.getByRole('menuitem', { name: 'Havuza kaldır' })).toBeVisible();
       await expect(cards).toHaveCount(before);
 
-      // The menu's own first item is still one Enter away from removing it.
+      // The menu's first item is one Enter away from moving it ("Taşı").
       await page.keyboard.press('Escape');
       await expect(menu).toHaveCount(0);
       await expect(cards).toHaveCount(before);
@@ -1180,7 +1182,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
     const before = await blocks();
     expect(before).toBeGreaterThan(10);
-    await expect(page.locator('.pool-count strong')).toContainText(`${before} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${before} kart`);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
@@ -1258,8 +1260,8 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // A tray that quietly showed a twelfth of what is left would make the head
     // count a lie, so the head says what it holds AND what it holds back, and
     // the two add up to the whole tray. The number held back was never checked.
-    await expect(page.locator('.pool-count strong')).toContainText(`${shown} blok`);
-    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} blok süzgeç dışında`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${shown} kart`);
+    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} kart süzgeç dışında`);
 
     await filter.selectOption('');
     await expect.poll(blocks).toBe(all);
@@ -1323,7 +1325,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     const blocks = piles.reduce((n, p) => n + p.count, 0);
     expect(piles.length, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
     expect(piles.length, 'hiçbir blok desteye girmemiş').toBeLessThan(blocks);
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} kart`);
     await expect(page.locator('.pool-card')).toHaveCount(piles.length);
 
     for (const p of piles) {
@@ -1373,7 +1375,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       ),
     });
     await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} blok`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} kart`);
   });
 
   // THE TRAY OPENS INTO THE ROOM THE GRID IS NOT USING, AND SAYS WHEN THERE IS
@@ -1755,7 +1757,7 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
         has: page.locator('.pool-card:not([aria-hidden])', { hasText: 'MÇ' }),
       }),
     ).toHaveCount(1);
-    // .last(): "Yedek yüklendi" from loadWorld is still on screen.
+    // .last(): "Plan dosyası açıldı" from loadWorld is still on screen.
     await expect(page.locator('.toast').last()).toContainText('510 · MÇ dersi havuza döndü');
   });
 
@@ -1818,12 +1820,12 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await page.waitForTimeout(150);
     await hover(page, 0, 2);
     await expect(page.locator('.reason-bar')).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirecek',
+      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirecek',
     );
     await page.mouse.up();
 
     await expect(page.locator('.toast').last()).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirdi',
+      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirdi',
     );
     // The 2-hour block is one cell two columns wide.
     await expect(cell(2)).toContainText('510');
@@ -2262,22 +2264,73 @@ test.describe('86. Sabitleme', () => {
     const cards = page.locator('table.grid .card');
     await expect(cards).toHaveCount(1);
 
-    const programs = page.getByTitle('Program seç ve yönet');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
     await programs.click();
-    await page.locator('.menu').getByRole('menuitem', { name: 'Kopyasını kaydet' }).click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
     await answerDialog(page);
-    await expect(programs).toContainText('Program 2');
+    await expect(programs).toContainText('Seçenek 2');
 
     await cards.first().focus();
     await page.keyboard.press('Delete');
     await expect(cards).toHaveCount(0);
 
     await programs.click();
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Program 1' }).click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
     await expect(cards).toHaveCount(1);
     await programs.click();
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Program 2' }).click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 2' }).click();
     await expect(cards).toHaveCount(0);
+  });
+
+  test('seçenek sormadan siliniyor ve Geri al onu yerleşimiyle getiriyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator('table.grid .card');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
+    await answerDialog(page);
+    await expect(programs).toContainText('Seçenek 2');
+
+    // SD1: no question. The notice counts the hours and never the pins.
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Seçeneği sil' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(programs).toContainText('Seçenek 1');
+    const notice = page.locator('.toast', { hasText: 'seçeneği silindi' });
+    await expect(notice).toContainText(/yerleşmiş \d+ saati de gitti/);
+    await expect(notice).not.toContainText('sabitleme');
+
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(programs).toContainText('Seçenek 2');
+    await expect(cards).toHaveCount(1);
+  });
+
+  test('seçenek değiştirmek geri al geçmişini silmiyor, Ctrl+Z doğru seçeneğe dönüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator('table.grid .card');
+    const programs = page.getByTitle('Seçenek seç ve yönet');
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
+    await answerDialog(page);
+
+    // On Seçenek 2: take the card off, then go to Seçenek 1.
+    await cards.first().focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(0);
+    await programs.click();
+    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
+    await expect(cards).toHaveCount(1);
+
+    // Looking at Seçenek 1 is not a step. Ctrl+Z takes back the last change,
+    // and that change was made in Seçenek 2: it comes back on screen, card and all.
+    await page.locator('body').press('Control+z');
+    await expect(programs).toContainText('Seçenek 2');
+    await expect(cards).toHaveCount(1);
+    await expect(page.locator('.sr-only[role=status]')).toContainText('Geri alındı');
   });
 
   test('menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor', async ({ page }) => {
@@ -2344,15 +2397,15 @@ test.describe('86. Sabitleme', () => {
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
   });
 
-  test('"Baştan diz" sabitlenmişi YERİNDE bırakıyor, sorusu da onu sayıyor', async ({ page }) => {
+  test('"Baştan diz" sormadan sabitlenmişi YERİNDE bırakıyor', async ({ page }) => {
     const card = await filledWithOnePin(page);
     const where = (await card.boundingBox())!;
     const text = (await card.textContent())!;
 
+    // No question since SD1. The run may land on the week it started from,
+    // and then nothing changes and no notice comes: the bar is the sign.
     await page.getByRole('button', { name: 'Baştan diz' }).click();
-    const dialog = page.getByRole('alertdialog');
-    await expect(dialog).toContainText('Sabitlenen');
-    await dialog.getByRole('button', { name: 'Baştan diz' }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 30_000,
     });

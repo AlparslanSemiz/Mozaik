@@ -1,15 +1,17 @@
 // Kontrol's whole report: capacity, what cannot be placed, and advice.
 
-import { aktifDil, t } from '../../leaf/i18n';
+import { aktifDil } from '../../leaf/i18n';
 import type { State } from '../../leaf/model';
 import { type Index, buildIndex, closedConflicts, findViolations } from '../constraints';
 import { buildAdvice } from './advice';
 import { buildCapacity } from './capacity';
 import type { Report, Unplaceable } from './levels';
 import { commonestBlock, lessonName } from './naming';
+import { stuckReason } from './stuck';
 
 export function buildReport(d: State, ix: Index = buildIndex(d)): Report {
-  const { teachers, classes, rooms } = buildCapacity(d);
+  const capacity = buildCapacity(d);
+  const { teachers, classes, rooms } = capacity;
 
   // Lessons that are still incomplete and have no valid slot left at all.
   const unplaceable: Unplaceable[] = [];
@@ -21,14 +23,15 @@ export function buildReport(d: State, ix: Index = buildIndex(d)): Report {
     const summary = commonestBlock(d, ix, lesson.id, true);
     if (summary.anyValid) continue;
 
+    // The cause that BINDS, not the commonest blocked cell: that vote was won
+    // by the class's own closed hours on every row (TODO SD4, stuck.ts).
+    const why = stuckReason(d, ix, lesson.id, capacity);
     unplaceable.push({
       lessonId: lesson.id,
       name: lessonName(ix, lesson.id),
       missing,
-      message: t('{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}', {
-        n: missing,
-        sebep: summary.reason,
-      }),
+      message: why.message,
+      fix: why.fix,
     });
   }
 
@@ -36,7 +39,8 @@ export function buildReport(d: State, ix: Index = buildIndex(d)): Report {
   const advice = buildAdvice(d, ix);
 
   const rows = [...teachers, ...classes, ...rooms];
-  const stranded = closedConflicts(d, ix).length;
+  // LESSONS, not hours: a two-hour block on a closed hour is one thing to move.
+  const stranded = new Set(closedConflicts(d, ix).map((c) => c.lessonId)).size;
   const hasProblem =
     stranded > 0 ||
     unplaceable.length > 0 ||

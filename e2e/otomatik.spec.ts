@@ -9,7 +9,6 @@ import { type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { expect, test } from './kapan';
 import {
-  answerDialog,
   chooseEntity,
   loadWorld,
   openSettings,
@@ -70,21 +69,26 @@ test.describe('22. Otomatik dizme', () => {
     await expect(cell).toHaveText(before!);
   });
 
-  test('"Baştan diz" önce soruyor, sonra baştan diziyor', async ({ page }) => {
+  test('"Baştan diz" sormadan baştan diziyor ve bildirimi Geri al sunuyor', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
-    const first = await page.locator('table.grid .card').count();
+    const cards = page.locator('table.grid .card');
+    const first = await cards.count();
+    // One card back to the tray, so the fresh layout differs from this one:
+    // a run that lands on the same week changes nothing and says nothing.
+    await cards.first().focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(first - 1);
 
+    // No question since SD1: the run's answer lands as one step of the
+    // history, and its notice offers "Geri al" for the whole of it.
     await page.getByRole('button', { name: 'Baştan diz' }).click();
-    const asked = await answerDialog(page);
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-
-    // The question counts what is about to go — "426 saatin tamamı", not
-    // "the timetable". That number is the whole reason it is asked.
-    expect(asked).toMatch(/Dizilmiş \d+ saatin tamamı silinecek/);
-    expect(asked).toContain('sıfırdan dizilecek');
-    expect(asked).toContain('Ctrl+Z ile geri alınabilir');
-    expect(await page.locator('table.grid .card').count()).toBe(first);
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    const notice = page.locator('.toast', { hasText: 'baştan dizildi' });
+    await expect(notice).toBeVisible({ timeout: 30_000 });
+    await expect(cards).toHaveCount(first);
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(cards).toHaveCount(first - 1);
   });
 
   test('havuz boşken "Otomatik diz" kapalı', async ({ page }) => {
@@ -136,7 +140,7 @@ test.describe('22. Otomatik dizme', () => {
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.locator('.badge', { hasText: 'Kural dışı' })).toHaveCount(0);
+    await expect(page.locator('.badge', { hasText: /^Engel$/ })).toHaveCount(0);
   });
 
   test('sonuç çubuğu "Tamam" ile kapanıyor', async ({ page }) => {
@@ -267,7 +271,7 @@ test.describe('22. Otomatik dizme', () => {
       const panel = page.locator('.panel.suggestions');
       await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
       const fewest = panel.locator('li[data-family="teacherHours"]');
-      await expect(fewest).toContainText('de gelebilirse hafta kuruluyor', { timeout: 150_000 });
+      await expect(fewest).toContainText('de gelebilirse program kuruluyor', { timeout: 150_000 });
       await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {
         timeout: 200_000,
       });
@@ -286,7 +290,7 @@ test.describe('22. Otomatik dizme', () => {
       const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
       const refused = `${who} ${day}`;
       await question.getByRole('button', { name: /^Olmaz/ }).click();
-      await page.getByRole('menuitem', { name: `${day} hiç gelemez` }).click();
+      await page.getByRole('menuitem', { name: `${day} hiç müsait değil` }).click();
       await expect(panel).toContainText('Cevaplarınız:');
       await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {

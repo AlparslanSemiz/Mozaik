@@ -213,7 +213,7 @@ describe('buildReport — sınıf yükü', () => {
 });
 
 describe('buildReport — yerleşemeyenler', () => {
-  it('geçerli slotu kalmamış dersi en sık sebeple bildirir', () => {
+  it('geçerli slotu kalmamış dersi bağlayan sebeple bildirir', () => {
     const d = build();
     // MÇ is closed all week -> x1 cannot go anywhere.
     for (let s = 0; s < 4; s++) d.unavailable[closedKey('oMC', 0, s)] = 1;
@@ -221,7 +221,9 @@ describe('buildReport — yerleşemeyenler', () => {
     const report = buildReport(d);
     expect(report.unplaceable).toHaveLength(1);
     expect(report.unplaceable[0]!.missing).toBe(2);
-    expect(report.unplaceable[0]!.message).toContain('müsait değil');
+    // The numbers that bind, not a sample closed cell (TODO SD4, stuck.ts).
+    expect(report.unplaceable[0]!.message).toContain('MÇ 0 saat müsait, 2 saat ders yüklenmiş');
+    expect(report.unplaceable[0]!.fix).toEqual({ kind: 'teacher', id: 'oMC' });
     expect(report.hasProblem).toBe(true);
   });
 
@@ -315,7 +317,7 @@ describe('holeReason', () => {
     d.unavailable['s510|0|3'] = 1;
 
     expect(holeReason(d, buildIndex(d), 'x1')).toBe(
-      'Boş kalan saatler bu dersin 2 saatlik bloğuna uymuyor',
+      'Boş kalan saatler bu dersin 2 saatlik kartına uymuyor',
     );
   });
 

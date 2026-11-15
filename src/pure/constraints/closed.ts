@@ -18,6 +18,12 @@ export interface ClosedConflict {
   hour: number;
   /** Concrete, in blocker()'s own voice: "MÇ Salı 3 saatinde müsait değil". */
   reason: string;
+  /**
+   * WHO closed the hour: the teacher, the class or the room. Kontrol's
+   * "Müsaitlik'te aç" opens that one's row, and feasibility/stranded.ts names
+   * it once per lesson instead of once per hour.
+   */
+  closedBy: { kind: 'teacher' | 'class' | 'room'; id: Id };
 }
 
 /**
@@ -56,20 +62,24 @@ export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
     const when = t('{gun} {saat} saatinde', { gun: dayName, saat: hourName });
 
     let reason: string | null = null;
+    let closedBy: ClosedConflict['closedBy'] | null = null;
     if (d.unavailable[closedKey(teacher.id, day, hour)] !== undefined) {
       reason = t('{kim} {ne_zaman} müsait değil', { kim: teacher.short, ne_zaman: when });
+      closedBy = { kind: 'teacher', id: teacher.id };
     } else if (d.unavailable[closedKey(group.id, day, hour)] !== undefined) {
       reason = t('{sinif} sınıfı {ne_zaman} kapalı', { sinif: group.name, ne_zaman: when });
+      closedBy = { kind: 'class', id: group.id };
     } else if (
       group.roomId != null &&
       d.unavailable[closedKey(group.roomId, day, hour)] !== undefined
     ) {
       const roomName = ix.roomById.get(group.roomId)?.name ?? '?';
       reason = t('{derslik} dersliği {ne_zaman} kapalı', { derslik: roomName, ne_zaman: when });
+      closedBy = { kind: 'room', id: group.roomId };
     }
-    if (reason === null) continue;
+    if (reason === null || closedBy === null) continue;
 
-    out.push({ lessonId, classId, teacherId: teacher.id, day, hour, reason });
+    out.push({ lessonId, classId, teacherId: teacher.id, day, hour, reason, closedBy });
   }
 
   // Stable order, so the Kontrol list does not reshuffle on every keystroke.

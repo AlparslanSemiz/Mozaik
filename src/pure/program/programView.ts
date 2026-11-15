@@ -504,7 +504,7 @@ function poolGroup(card: PoolCard, sort: PoolSort, t: Translate): string {
     case 'subject':
       return card.subject;
     case 'size':
-      return t('{n} saatlik bloklar', { n: card.size });
+      return t('{n} saatlik kartlar', { n: card.size });
     case 'left':
       return t('{n} saat kaldı', { n: card.total - card.placed });
     case 'name':
@@ -787,24 +787,31 @@ export interface BarRun {
 /**
  * The single line under the toolbar. Returns the text and the class that
  * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
+ *
+ * `text` is what the line ANNOUNCES (it sits in a live region) and `counter`
+ * is what it only shows. They are apart because the run's counter changes
+ * many times a second: in the live region it was a screen reader reading
+ * "12/40 kart" over itself until the run ended. Now the start is said once,
+ * the result once, and the counter ticks beside them in silence.
  */
 export function describeBar(
   solver: BarRun,
   view: View,
   t: Translate,
   current: { applied: boolean; result: boolean },
-): { text: string; level: string } {
+): { text: string; level: string; counter?: string } {
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
-      text:
-        t('Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn', {
+      text: t('Otomatik diziliyor…'),
+      counter:
+        t('{yerlesen}/{toplam} kart · {sure} sn', {
           yerlesen: p.placedBlocks,
           toplam: p.totalBlocks,
           sure: seconds(p.elapsedMs),
         }) +
         (p.excludedBlocks > 0
-          ? t(' · {n} blok geçici kapsam dışında', { n: p.excludedBlocks })
+          ? t(' · {n} kart geçici kapsam dışında', { n: p.excludedBlocks })
           : ''),
       level: 'busy',
     };
@@ -812,7 +819,7 @@ export function describeBar(
 
   if (solver.applied !== null && current.applied) {
     return {
-      text: t('Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.'),
+      text: t('Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.'),
       level: 'ok',
     };
   }
@@ -827,10 +834,10 @@ export function describeBar(
       text:
         view === 'teacher'
           ? t(
-              'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+              'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
             )
           : t(
-              'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+              'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
             ),
       level: '',
     };
@@ -839,12 +846,12 @@ export function describeBar(
   if (done.stuck.length === 0) {
     return {
       text:
-        t('Program dizildi. {n} blok yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
+        t('Program dizildi. {n} kart yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
           n: done.placedBlocks,
           sure: seconds(done.elapsedMs),
         }) +
         (done.excludedBlocks > 0
-          ? t(' {n} blok geçici kapsam dışında kaldı.', {
+          ? t(' {n} kart geçici kapsam dışında kaldı.', {
               n: done.excludedBlocks,
             })
           : ''),
@@ -857,11 +864,11 @@ export function describeBar(
     done.stuck.length > 1 ? t(' (ve {n} ders daha)', { n: done.stuck.length - 1 }) : '';
   const head =
     done.phase === 'cancelled'
-      ? t('Durduruldu. {yerlesen}/{toplam} blok yerleşti.', {
+      ? t('Durduruldu. {yerlesen}/{toplam} kart yerleşti.', {
           yerlesen: done.placedBlocks,
           toplam: done.totalBlocks,
         })
-      : t('{yerlesen}/{toplam} blok yerleşti.', {
+      : t('{yerlesen}/{toplam} kart yerleşti.', {
           yerlesen: done.placedBlocks,
           toplam: done.totalBlocks,
         });

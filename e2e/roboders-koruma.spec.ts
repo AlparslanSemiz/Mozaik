@@ -299,7 +299,7 @@ test.describe('Roboders koruması', () => {
         <button>KAYDET</button>
         <button>Kaydet</button>
         <button>Gönder ▾</button>
-        <button aria-label="Programı sil">x</button>
+        <button aria-label="Seçeneği sil">x</button>
         <button>E-Mail Gönder</button>
         <button>Eyotek'e aktar</button>
         <button>Oluştur</button>
@@ -324,7 +324,7 @@ test.describe('Roboders koruması', () => {
     ]) {
       expect((await karar(`nav >> text="${ad}"`)).izin, ad).toBe(false);
     }
-    expect((await karar('[aria-label="Programı sil"]')).izin).toBe(false);
+    expect((await karar('[aria-label="Seçeneği sil"]')).izin).toBe(false);
     expect((await karar('nav button:last-child')).sebep).toContain('adı yok');
     expect((await karar('input[type=submit]')).sebep).toContain('gönderen');
     expect((await karar('form button')).sebep).toContain('gönderen');

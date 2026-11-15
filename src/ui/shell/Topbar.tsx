@@ -133,6 +133,11 @@ export default function Topbar({
       >
         <span className="health-dot" aria-hidden="true" />
         <span className="health-text">{status.message}</span>
+        {/* The narrow bar's words. Never only the dot: a coloured pill with a
+          dot in it read as an on/off switch (usability review, 2026-11-15). */}
+        <span className="health-short" aria-hidden="true">
+          {status.short}
+        </span>
       </button>
 
       <span className="spacer" />
@@ -205,10 +210,10 @@ export default function Topbar({
         className="btn primary"
         onClick={() => {
           downloadBackup(state);
-          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         }}
         title={t(
-          'Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.',
+          'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
         )}
       >
         {t('Dosyaya kaydet')}
@@ -222,7 +227,7 @@ export default function Topbar({
       </button>
       {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
         aç". It is now in Ayarlar > Veri: the rarest button in the app,
-        and the only one that cannot be undone. */}
+        and the widest. */}
       <input
         ref={fileInput}
         type="file"

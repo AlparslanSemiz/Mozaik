@@ -345,7 +345,7 @@ test.describe('8. Tema', () => {
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Koyu tema' }).click();
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
@@ -637,8 +637,11 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     expect(contrast(style.color, t['--closed']!)).toBeGreaterThanOrEqual(4.5);
     expect(style.backgroundImage).toContain('repeating-linear-gradient');
 
-    // Program now uses the exact same red, size and weight as Availability;
-    // the hatch remains the non-colour channel on both tables.
+    // Availability keeps its big red cross: there the screen only says open
+    // or closed. Program does NOT share it any more (2026-11-15): on this grid
+    // red means "refused", and a column of red crosses out-shouted the lessons.
+    // Its mark is the quiet ink, never red, and still the size of the text
+    // beside it (asserted above). The hatch is the state on both tables.
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     const avail = await page
       .locator('table.availability td.closed')
@@ -653,9 +656,10 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
         };
       });
     expect(avail.size).toBeGreaterThanOrEqual(15);
-    expect(style.size).toBeCloseTo(avail.size, 1);
-    expect(style.color).toBe(avail.color);
-    expect(style.weight).toBe(avail.weight);
+    expect(style.size, 'Program çarpısı Müsaitlik kadar bağırıyor').toBeLessThan(avail.size);
+    expect(style.color, 'Program çarpısı kırmızı: orada kırmızı "reddedildi" demek').not.toBe(
+      avail.color,
+    );
     expect(avail.backgroundImage).toContain('repeating-linear-gradient');
   });
 });
@@ -812,6 +816,7 @@ test.describe('93. Listelerde zebra', () => {
         '--text',
         '--muted',
         '--line',
+        '--border-strong',
       ]);
 
       // The token itself: darker than the paper in light, LIGHTER in dark (the
@@ -863,7 +868,8 @@ test.describe('93. Listelerde zebra', () => {
         expect(f.background, 'girdi zebrada kâğıt zeminli').toBe(t['--paper']);
         expect(f.style).toBe('solid');
         expect(f.width).toBeGreaterThanOrEqual(1);
-        expect(f.edge, 'girdinin kenarı').toBe(t['--line']);
+        // A control's edge, 3:1 on the row (WCAG 1.4.11), since 2026-11-15.
+        expect(f.edge, 'girdinin kenarı').toBe(t['--border-strong']);
       }
 
       // The row under the pointer gets a ring and keeps its stripe: a ground
@@ -900,7 +906,7 @@ test.describe('93. Listelerde zebra', () => {
         return { ink: s.color, background: s.backgroundColor, edge: s.borderTopColor };
       });
       expect(p.background, 'dağılım düğmesi zebrada kâğıt zeminli').toBe(t['--paper']);
-      expect(p.edge).toBe(t['--line']);
+      expect(p.edge).toBe(t['--border-strong']);
       expect(contrast(p.ink, p.background), 'dağılım düğmesinin yazısı').toBeGreaterThanOrEqual(
         4.5,
       );

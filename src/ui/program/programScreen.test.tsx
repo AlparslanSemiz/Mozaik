@@ -350,15 +350,24 @@ function poolLines(): string[] {
   return out;
 }
 
+/**
+ * The bar as `class :: what it announces | what it only shows`. The live
+ * region is read through its ROLE, so a counter that slips back into it (and
+ * is read out many times a second) changes the line.
+ */
 function bar(): string {
   const el = container.querySelector('.reason-bar');
-  return `${el?.className ?? ''} :: ${text(el?.querySelector('span'))}`;
+  const count = el?.querySelector('.reason-count');
+  return (
+    `${el?.className ?? ''}${el?.getAttribute('aria-busy') === 'true' ? ' [bar busy]' : ''} :: ` +
+    `${text(el?.querySelector('[role="status"]'))}${count ? ` | ${text(count)}` : ''}`
+  );
 }
 
 /** One line per printed page: its title, then each day's cells as `span:text`. */
 function printLines(): string[] {
   return [...container.querySelectorAll('.print-page')].map((page) => {
-    const title = [...page.querySelectorAll('h3 span.p-title-main, h3 span.p-title-sub')]
+    const title = [...page.querySelectorAll('h2 span.p-title-main, h2 span.p-title-sub')]
       .map(text)
       .join(' / ');
     const days = [...page.querySelectorAll('tbody tr')].map((tr) =>
@@ -487,7 +496,7 @@ describe('Program ızgarası', () => {
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",
           "pool": [
-            "1 blok bekliyor2 saat · sürükleyip bırakın",
+            "1 kart bekliyor2 saat · sürükleyip bırakın",
             "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           ],
         },
@@ -499,7 +508,7 @@ describe('Program ızgarası', () => {
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",
           "pool": [
-            "1 blok bekliyor2 saat · sürükleyip bırakın",
+            "1 kart bekliyor2 saat · sürükleyip bırakın",
             "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           ],
         },
@@ -534,50 +543,50 @@ describe('ders havuzu', () => {
     expect(out).toMatchInlineSnapshot(`
       {
         "class/left": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "2 saat kaldı: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           "1 saat kaldı: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/name": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146) L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/row": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146) L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/size": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
-          "2 saatlik bloklar: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
-          "1 saatlik bloklar: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
+          "2 saatlik kartlar: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
+          "1 saatlik kartlar: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/subject": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "Kimya: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           "Matematik: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "teacher/left": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "2 saat kaldı: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "1 saat kaldı: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/name": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "MÇ: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/row": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "MÇ: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
           "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
         ],
         "teacher/size": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
-          "2 saatlik bloklar: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
-          "1 saatlik bloklar: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
+          "2 saatlik kartlar: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
+          "1 saatlik kartlar: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/subject": [
-          "2 blok bekliyor3 saat · sürükleyip bırakın",
+          "2 kart bekliyor3 saat · sürükleyip bırakın",
           "Kimya: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "Matematik: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
@@ -596,14 +605,14 @@ describe('ders havuzu', () => {
           "row=Izgara sırası",
           "name=Ada göre",
           "subject=Branşa göre",
-          "size=Uzun bloklar önce",
+          "size=Uzun kartlar önce",
           "left=En çok kalan",
           "=Tüm branşlar",
           "kimya=Kimya",
           "matematik=Matematik",
         ],
         "pool": [
-          "1 blok bekliyor1 blok süzgeç dışında · sürükleyip bırakın",
+          "1 kart bekliyor1 kart süzgeç dışında · sürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
         ],
       }
@@ -617,7 +626,7 @@ describe('ders havuzu', () => {
     });
     expect(poolLines()).toMatchInlineSnapshot(`
       [
-        "1 blok bekliyor2 saat · sürükleyip bırakın",
+        "1 kart bekliyor2 saat · sürükleyip bırakın",
         "510 SAY: L3:2:AY510 SAY0/2[masked]#rgb(159, 242, 146)",
       ]
     `);
@@ -679,14 +688,14 @@ describe('araç çubuğunun altındaki satır', () => {
     );
     expect(lines).toMatchInlineSnapshot(`
       [
-        "reason-bar :: Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
-        "reason-bar :: Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
-        "reason-bar busy :: Otomatik diziliyor… 3/9 blok · 1,2 sn · 2 blok geçici kapsam dışında",
-        "reason-bar ok :: Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.",
-        "reason-bar ok :: Program dizildi. 9 blok yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
-        "reason-bar ok :: Program dizildi. 9 blok yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz. 2 blok geçici kapsam dışında kaldı.",
-        "reason-bar bad :: 7/9 blok yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. Öğretmen dolu (ve 1 ders daha).",
-        "reason-bar warn :: Durduruldu. 7/9 blok yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. x.",
+        "reason-bar :: Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
+        "reason-bar :: Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.",
+        "reason-bar busy :: Otomatik diziliyor… | 3/9 kart · 1,2 sn · 2 kart geçici kapsam dışında",
+        "reason-bar ok :: Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.",
+        "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
+        "reason-bar ok :: Program dizildi. 9 kart yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz. 2 kart geçici kapsam dışında kaldı.",
+        "reason-bar bad :: 7/9 kart yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. Öğretmen dolu (ve 1 ders daha).",
+        "reason-bar warn :: Durduruldu. 7/9 kart yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. x.",
       ]
     `);
   });

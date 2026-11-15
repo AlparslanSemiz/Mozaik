@@ -35,7 +35,7 @@ import {
   switchProgram,
   validProgramName,
 } from '../../pure/grid';
-import { togglePinScope } from '../../pure/constraints';
+import { sanitize, togglePinScope } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
@@ -74,13 +74,13 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
     id: 'rahat',
     label: 'Rahat',
     icon: <Rows3 {...ICON} />,
-    why: 'Hücre geniş, ders saatleri görünür',
+    why: 'Hücre geniş, başlangıç saatleri görünür',
   },
   {
     id: 'sigdir',
     label: 'Sığdır',
     icon: <Minimize2 {...ICON} />,
-    why: 'Haftanın tamamı ekrana sığar, ders saatleri gizlenir',
+    why: 'Programın tamamı ekrana sığar, başlangıç saatleri gizlenir',
   },
 ];
 
@@ -89,6 +89,7 @@ export function programStrip({
   state,
   change,
   manageProgram,
+  viewProgram,
   solver,
   programMask,
   setProgramMask,
@@ -97,7 +98,7 @@ export function programStrip({
   programColor,
   setProgramColor,
   t,
-  dialogs: { confirm, prompt, alert },
+  dialogs: { prompt, alert },
   notify,
   undoIf,
   strip,
@@ -108,10 +109,10 @@ export function programStrip({
 
   const askProgramName = async (initial: string, exceptId?: string) => {
     const name = await prompt({
-      title: t('Program adı'),
-      body: t('Aynı okul verilerini kullanan alternatif program için bir ad yazın.'),
+      title: t('Seçenek adı'),
+      body: t('Bu planın verilerini kullanan seçenek için bir ad yazın.'),
       defaultValue: initial,
-      inputLabel: t('Program adı'),
+      inputLabel: t('Seçenek adı'),
       confirmLabel: t('Kaydet'),
     });
     if (name === null) return null;
@@ -119,7 +120,7 @@ export function programStrip({
     if (clean !== null) return clean;
     await alert({
       title:
-        name.trim() === '' ? t('Program adı boş olamaz') : t('Bu program adı zaten kullanılıyor'),
+        name.trim() === '' ? t('Seçenek adı boş olamaz') : t('Bu seçenek adı zaten kullanılıyor'),
       tone: 'warn',
     });
     return null;
@@ -150,24 +151,26 @@ export function programStrip({
     if (name !== null) manageProgram((d) => renameProgram(d, currentProgram.id, name));
   };
 
-  const deleteCurrent = async () => {
+  // No question since 2026-11-15 (TODO SD1): a seçenek switch no longer
+  // empties the history, so deleting one is an ordinary step that "Geri al"
+  // brings back with every hour in it. The question used to say "0
+  // sabitleme silinecek"; the pins go with the hours and are not counted.
+  const deleteCurrent = () => {
     if (state.programs.length <= 1) return;
-    if (
-      !(await confirm({
-        title: t('{ad} programı silinecek', { ad: currentProgram.name }),
-        body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
-          n: Object.keys(currentProgram.placements).length,
-          s: Object.keys(currentProgram.pinned).length,
-        }),
-        confirmLabel: t('Programı sil'),
-        danger: true,
-      }))
-    )
-      return;
-    manageProgram((d) => removeProgram(d, currentProgram.id));
+    const hours = Object.keys(currentProgram.placements).length;
+    const said =
+      hours === 0
+        ? t('{ad} seçeneği silindi.', { ad: currentProgram.name })
+        : t('{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.', {
+            ad: currentProgram.name,
+            n: hours,
+          });
+    const next = sanitize(removeProgram(state, currentProgram.id));
+    manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program')}>
       {/* Two positions, not one toggle: a single button saying "switch to the
           class view" tells you what the next click does, never where you are.
 
@@ -210,8 +213,8 @@ export function programStrip({
               disabled={pending === 0}
               title={
                 pending === 0
-                  ? t('Havuzda bekleyen ders yok')
-                  : t('Havuzdaki dersleri kurallara uyarak yerleştirir')
+                  ? t('Havuzda bekleyen kart yok')
+                  : t('Havuzdaki kartları kurallara uyarak dizer')
               }
               onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
             >
@@ -222,23 +225,21 @@ export function programStrip({
               className="btn"
               disabled={placed === 0}
               title={t('Dizilmiş programı silip baştan dizer')}
-              onClick={async () => {
-                if (
-                  await confirm({
-                    title: t('Dizilmiş {n} saatin tamamı silinecek', { n: placed }),
-                    body:
-                      pinnedHours === 0
-                        ? t('Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.')
-                        : t(
-                            'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.',
-                            { n: pinnedHours },
-                          ),
-                    confirmLabel: t('Baştan diz'),
-                    danger: true,
-                  })
-                ) {
-                  solver.start(state, { keepPlaced: false, exclusions });
-                }
+              onClick={() => {
+                // No question since 2026-11-15 (TODO SD1): the run's answer
+                // lands as ONE step of the history (useSolver's `finish`), so
+                // its notice can offer "Geri al" for the whole of it. Nothing
+                // on the grid moves until the run ends, and "Durdur" is on
+                // this same spot while it runs.
+                solver.start(state, { keepPlaced: false, exclusions }, (next) => {
+                  const said =
+                    pinnedHours === 0
+                      ? t('Program baştan dizildi.')
+                      : t('Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.', {
+                          n: pinnedHours,
+                        });
+                  notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+                });
               }}
             >
               <RotateCcw {...ICON} />
@@ -253,7 +254,7 @@ export function programStrip({
       {/* WHICH TIMETABLE — and everything that can be done to one — behind a
           SINGLE button.
 
-          It arrived as three controls (a `<select>`, "Kopyasını kaydet" and a
+          It arrived as three controls (a `<select>`, "Bu seçeneğin kopyası" and a
           "Yönet" menu) sitting at the head of the strip, and that was two
           problems in one. It displaced the view switch, and it put a second
           library selector three rows under the plan selector in the top bar —
@@ -264,10 +265,10 @@ export function programStrip({
           of them is a RadioGroup rather than a row of items, because picking
           one is a choice with a current answer, and Radix says so out loud
           (`aria-checked`) instead of leaving it to the tick. */}
-      <Group label="Program">
+      <Group label="Seçenek">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button className="btn" disabled={solver.running} title={t('Program seç ve yönet')}>
+            <button className="btn" disabled={solver.running} title={t('Seçenek seç ve yönet')}>
               <Library {...ICON} />
               <span className="ribbon-ellipsis">{currentProgram.name}</span>
             </button>
@@ -276,7 +277,7 @@ export function programStrip({
             <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
               <DropdownMenu.RadioGroup
                 value={state.activeProgramId}
-                onValueChange={(id) => manageProgram((d) => switchProgram(d, id))}
+                onValueChange={(id) => viewProgram((d) => switchProgram(d, id))}
               >
                 {state.programs.map((program) => (
                   <DropdownMenu.RadioItem key={program.id} className="menu-item" value={program.id}>
@@ -294,11 +295,11 @@ export function programStrip({
               <DropdownMenu.Separator className="menu-sep" />
               <DropdownMenu.Item className="menu-item" onSelect={() => void copyCurrent()}>
                 <Copy size={15} aria-hidden="true" />
-                {t('Kopyasını kaydet')}
+                {t('Bu seçeneğin kopyası')}
               </DropdownMenu.Item>
               <DropdownMenu.Item className="menu-item" onSelect={() => void createBlank()}>
                 <Plus size={15} aria-hidden="true" />
-                {t('Boş program oluştur')}
+                {t('Boş seçenek')}
               </DropdownMenu.Item>
               <DropdownMenu.Item className="menu-item" onSelect={() => void renameCurrent()}>
                 <Pencil size={15} aria-hidden="true" />
@@ -308,10 +309,10 @@ export function programStrip({
               <DropdownMenu.Item
                 className="menu-item danger"
                 disabled={state.programs.length <= 1}
-                onSelect={() => void deleteCurrent()}
+                onSelect={deleteCurrent}
               >
                 <Trash2 size={15} aria-hidden="true" />
-                {t('Programı sil')}
+                {t('Seçeneği sil')}
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
@@ -382,14 +383,14 @@ export function programStrip({
       {/* "Programı sıfırla" — asked for by name. It is NOT the same button as
           "Baştan diz": that one empties the grid and then fills it again, and
           there was no way to simply CLEAR it and start placing by hand.
-          Undoable, and the question says so.
+          Undoable, and its notice offers "Geri al".
 
           It stands at the far end, past the spacer, and not beside the two
           buttons that fill the grid: the only two ways to lose a placement
           by accident are clicking it and clicking "Baştan diz", and they no
           longer sit next to each other. It is NOT renamed to "Sıfırla" —
-          temel.spec.ts asserts no button anywhere is called that, because
-          the one thing in this program that cannot be undone is. */}
+          temel.spec.ts asserts no button anywhere is called that: the
+          name stays with "Her şeyi sil", the widest click there is. */}
       {/* THE WHOLE RIGHT-HAND END BEHIND ONE DOOR, and the reason is a
           MEASUREMENT. Three buttons in an equal-column group are as wide as
           the widest of them times three: at 150%, the scale where the strip

@@ -17,7 +17,7 @@
 // indir" — the ONE habit my father will be taught — is `download.ts`.
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { type Box, reduce } from '../../pure/undo';
+import { type Box, reduce, undoLabel } from '../../pure/undo';
 import { loadFallbackAtStart, loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../../pure/entities';
@@ -32,6 +32,7 @@ import {
 } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../../leaf/model';
+import { t } from '../../leaf/i18n';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
 
@@ -119,19 +120,59 @@ export function isTextInput(target: EventTarget | null): boolean {
   return target.tagName === 'TEXTAREA' || target.isContentEditable === true;
 }
 
-export function useStore() {
-  const [box, dispatch] = useReducer(reduce, undefined, initialBox);
+/** What a screen reader hears after an undo: what was taken back, if it is known. */
+function undoneSentence(from: Box): string {
+  const label = undoLabel(from);
+  return label === undefined ? t('Geri alındı.') : t('Geri alındı: {ne}', { ne: label });
+}
 
-  const change = useCallback((apply: (d: State) => State) => {
-    dispatch({ type: 'change', apply });
+/**
+ * `announce` says a sentence to a screen reader (Toasts.tsx, `useAnnounce`):
+ * after an undo, what was taken back. Optional so a test can mount the store
+ * without the provider.
+ */
+export function useStore(announce: (text: string) => void = () => undefined) {
+  const [box, dispatch] = useReducer(reduce, undefined, initialBox);
+  // The box as of the last render, for the two callbacks below that have to
+  // know BEFORE dispatching whether there is anything to undo and what it was.
+  const current = useRef(box);
+  current.current = box;
+  const say = useRef(announce);
+  say.current = announce;
+
+  /** `label` names the change for the "Geri alındı: …" after its undo. */
+  const change = useCallback((apply: (d: State) => State, label?: string) => {
+    dispatch(label === undefined ? { type: 'change', apply } : { type: 'change', apply, label });
   }, []);
-  const manageProgram = useCallback((apply: (d: State) => State) => {
-    dispatch({ type: 'program-change', apply });
+  const manageProgram = useCallback((apply: (d: State) => State, label?: string) => {
+    dispatch(
+      label === undefined
+        ? { type: 'program-change', apply }
+        : { type: 'program-change', apply, label },
+    );
   }, []);
-  const undo = useCallback(() => dispatch({ type: 'undo' }), []);
-  /** Undo only while `expected` is the present: a notice's "Geri al" (undo.ts, SD1). */
-  const undoIf = useCallback((expected: State) => dispatch({ type: 'undo-if', expected }), []);
+  /** Another seçenek on screen, without a step of the history (undo.ts, `view`). */
+  const viewProgram = useCallback((apply: (d: State) => State) => {
+    dispatch({ type: 'view', apply });
+  }, []);
+  const undo = useCallback(() => {
+    if (current.current.past.length === 0) return;
+    say.current(undoneSentence(current.current));
+    dispatch({ type: 'undo' });
+  }, []);
+  /**
+   * Undo only while `expected` is the present: a notice's "Geri al" (undo.ts,
+   * SD1). Says whether it did, so the notice can say so when it did not.
+   */
+  const undoIf = useCallback((expected: State): boolean => {
+    if (current.current.present !== expected || current.current.past.length === 0) return false;
+    say.current(undoneSentence(current.current));
+    dispatch({ type: 'undo-if', expected });
+    return true;
+  }, []);
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
+  /** The present as of the last render, for a callback that must not act on a stale one. */
+  const peek = useCallback(() => current.current.present, []);
   // A load is "Dosyadan aç" or "Her şeyi sil", each behind its own question:
   // the user has put something in this plan's place, so a plan this copy
   // could not read may be written over now (libraryStore.ts, A1). A plain
@@ -142,10 +183,32 @@ export function useStore() {
     thawPlan(openNow.current);
     dispatch({ type: 'load', state });
   }, []);
+  /**
+   * "Her şeyi sil" since 2026-11-15: an ordinary step of the history, so its
+   * notice can offer "Geri al". Returns the state it put in place, for that
+   * notice's `undoIf`, or null when it had to be a load (below).
+   */
+  const replaceState = useCallback((state: State, label?: string): State | null => {
+    // A plan this copy could not read stays a load: an undo would bring back
+    // the empty stand-in with the thaw still in force, and the next autosave
+    // would write it over the unreadable text (review, 2026-11-15). Null says
+    // there is nothing to undo.
+    if (frozenPlan(openNow.current) !== null) {
+      thawPlan(openNow.current);
+      dispatch({ type: 'load', state });
+      return null;
+    }
+    dispatch(
+      label === undefined
+        ? { type: 'change', apply: () => state }
+        : { type: 'change', apply: () => state, label },
+    );
+    return state;
+  }, []);
 
   // Every save goes through here, so the answer reaches the screen. It used to
   // be dropped: with the storage full the autosave failed and the page said
-  // "Örnek veri yüklendi." over it (VK2, measured by the test session).
+  // "Örnek okul yüklendi." over it (VK2, measured by the test session).
   const [trouble, setTrouble] = useState<SaveTrouble>(null);
   const write = useCallback((id: Id, d: State) => {
     // A plan this copy could not read is on screen as an empty stand-in, and
@@ -240,7 +303,16 @@ export function useStore() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!e.ctrlKey && !e.metaKey) return;
-      if (isTextInput(e.target)) return;
+      // An EMPTY add box has no text of its own to take back. It is where
+      // the focus goes when a deletion empties a list (deleteFocus.ts), and
+      // that deletion's notice says "Geri almak için Ctrl+Z" (2026-11-15).
+      // Only there: a rename or search box keeps the browser's own undo.
+      const empty =
+        e.target instanceof HTMLInputElement &&
+        e.target.type === 'text' &&
+        e.target.value === '' &&
+        e.target.closest('.add-panel-body') !== null;
+      if (isTextInput(e.target) && !empty) return;
       const letter = e.key.toLowerCase();
       if (letter === 'z' && !e.shiftKey) {
         e.preventDefault();
@@ -272,10 +344,13 @@ export function useStore() {
     state: box.present,
     change,
     manageProgram,
+    viewProgram,
     undo,
     undoIf,
     redo,
     loadState,
+    replaceState,
+    peek,
     // Exposed for the two callers that leave the page without unloading it:
     // the exe restarting onto a new version, and the exe's window closing
     // (App.tsx, TB7). `beforeunload` covers a closing

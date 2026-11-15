@@ -176,7 +176,7 @@ describe('cümle · engelin sebebi', () => {
       {
         "classBusy": "510 sınıfının Salı 1 saatinde Matematik var",
         "classClosed": "510 sınıfı Çarşamba 1 saatinde kapalı",
-        "dayEnd": "2 saatlik blok güne sığmıyor",
+        "dayEnd": "2 saatlik kart güne sığmıyor",
         "maxConsecutive": "AV art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
         "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
@@ -217,7 +217,7 @@ describe('cümle · engelin sebebi', () => {
           "ok · 511 sınıfı: açık olan 6 saatin 4 saati dolu.",
         ],
         "yerlesemeyen": [
-          "4 saati yerleşmemiş ve koyacak yer yok. Örnek sebep: MÇ art arda 1 saatten fazla girmemeli, burada 2 saat olur",
+          "A dersliğini 2 sınıf paylaşıyor (510, 511) ve toplam 8 saat ders var. Haftada 6 saati açık, 2 saat fazla.",
         ],
       }
     `);
@@ -236,11 +236,11 @@ describe('cümle · "Veriler nerede" tablosu', () => {
 
     expect(rows).toMatchInlineSnapshot(`
       [
-        "ders-programi · 1. plan",
+        "ders-programi · Plan 1",
         "ders-programi-planlar · plan listesi",
-        "ders-programi-yedek-0 · bir önceki oturum",
-        "ders-programi-yedek-1 · 2 oturum önce",
-        "ders-programi-yedek-2 · 3 oturum önce",
+        "ders-programi-yedek-0 · otomatik yedek · bir önceki açılış",
+        "ders-programi-yedek-1 · otomatik yedek · 2 açılış önce",
+        "ders-programi-yedek-2 · otomatik yedek · 3 açılış önce",
         "ders-programi-tema · tema tercihi",
         "ders-programi-dil · dil tercihi",
         "ders-programi-kenar · kenar çubuğu tercihi",
@@ -254,7 +254,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-serit-gizle · şerit kaydırınca gizlensin mi",
         "ders-programi-musaitlik-saat · müsaitlikte saat gösterimi",
         "ders-programi-hareket · hareket (animasyon) tercihi",
-        "ders-programi-tanitim · örnek veri satırı görüldü mü",
+        "ders-programi-tanitim · örnek okul satırı görüldü mü",
         "ders-programi-baski · kâğıt seçenekleri",
         "ders-programi-yenilik-gorulen · görülen sürüm notu",
         "ders-programi-oneri-olcum · öneri aramasının ölçümleri",
@@ -324,7 +324,7 @@ describe('cümle · basılan sayfanın iskeleti', () => {
 
     expect(skeleton(sheet!).join('\n')).toMatchInlineSnapshot(`
       "div.print-page
-        h3
+        h2
           span.p-title-main
             span.p-dot
           span.p-title-sub

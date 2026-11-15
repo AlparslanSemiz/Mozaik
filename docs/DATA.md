@@ -146,8 +146,11 @@ plana uygulanamaz, ve geçişten önce bekleyen kayıt hemen yazılır (tuzak 28
 
 Bir planın içinde program alternatifleri var (v12): aynı okulu, öğretmenleri ve
 dersleri paylaşan ayrı ızgaralar. Yerleşimler ve sabitlemeler alternatife ait,
-ve ekranda, Kontrol'de ve kâğıtta olan `activeProgramId`. Bir alternatife geçmek,
-alternatif eklemek ya da silmek de geri al geçmişini temizler.
+ve ekranda, Kontrol'de ve kâğıtta olan `activeProgramId`. Alternatif eklemek, adlandırmak
+ya da silmek geri al geçmişinde sıradan bir adımdır, bir alternatife geçmek adım değildir ama
+geçmişi de silmez (2026-11-15'e kadar üçü de geçmişi temizliyordu): geçmiş bütün durumları
+tuttuğu için geri almak bir hamleyi başka bir alternatife uygulamaz, o alternatifi
+değişikliğiyle birlikte geri getirir.
 
 Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler, `programMask.ts`)
 plan başına ve yalnız bellekte tutulur. Yedeğe ve depoya yazılmıyor, aynı planın
@@ -363,7 +366,7 @@ ve onarım evresi ilişkili dersin o günkü bloklarını da yerinden edilecekle
 içinde ilk ve son dolu saat arasında kalan boş saat sayılır. Tek tanımı
 `rules.ts`'teki `gapsBetween()` ve üç okuyucusu var: iki kural ve `worlds.ts`'teki
 çözücü kalitesi ölçümü (`gridQuality()`). Bir bırakmayı engelleyemez, yani yalnız
-`Kapalı` ya da `Uyar` seçilebilir. 0 öteki sınırlardan farklı olarak olduğu gibi
+`Kapalı` ya da `Uyarı` seçilebilir. 0 öteki sınırlardan farklı olarak olduğu gibi
 kullanılır ("hiç boşluk olmasın", öteki dört kuralda ise `limit > 0` şart), ve etkinliğini yalnız seviye belirler
 (`gapRuleActive()`, `ruleActive()`'in ayrı ikizi).
 

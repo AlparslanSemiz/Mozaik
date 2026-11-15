@@ -1,6 +1,6 @@
 // Step: the school-wide rule limits and what each one does when breached.
 
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import { type RuleLevel, type RuleName, paletteColor } from '../../leaf/model';
 import { buildIndex, findViolations, type Violation } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
@@ -48,8 +48,8 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
 
 const LEVEL_LABEL: Record<RuleLevel, string> = {
   off: 'Kapalı',
-  warn: 'Uyar',
-  block: 'Engelle',
+  warn: 'Uyarı',
+  block: 'Engel',
 };
 
 export default function Rules({ state, change }: PanelProps) {
@@ -70,6 +70,8 @@ export default function Rules({ state, change }: PanelProps) {
   );
   // The daily rule is the one with three layers, and the middle one is new.
   const customClasses = state.classes.filter((c) => c.maxSameLessonPerDay !== null);
+
+  const idBase = useId();
 
   const perRule = useMemo(() => {
     const n: Partial<Record<Violation['rule'], number>> = {};
@@ -98,13 +100,19 @@ export default function Rules({ state, change }: PanelProps) {
               {RULE_ROWS.map((rule) => (
                 <tr key={rule.name}>
                   <td>
-                    {t(rule.label)}
+                    {/* The number box has no label of its own: the rule's name
+                        in this cell IS its label, so the box points here. */}
+                    <span id={`${idBase}-${rule.name}`}>{t(rule.label)}</span>
                     <br />
-                    <span className="hint">{t(rule.hint)}</span>
+                    <span className="hint" id={`${idBase}-${rule.name}-ipucu`}>
+                      {t(rule.hint)}
+                    </span>
                   </td>
                   <td>
                     <input
                       type="number"
+                      aria-labelledby={`${idBase}-${rule.name}`}
+                      aria-describedby={`${idBase}-${rule.name}-ipucu`}
                       min={0}
                       max={16}
                       className="num"
@@ -238,7 +246,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
           <p className="hint">
-            <T k="**Uyar** yalnız sayar, **Engelle** dersi o hücreye hiç bıraktırmaz." />
+            <T k="**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz." />
           </p>
           {/* A row per breach and no ceiling on how many there can be, so this
               is the box in this panel that gives ground: in a right rail the
@@ -261,7 +269,7 @@ export default function Rules({ state, change }: PanelProps) {
                     <tr key={v.key}>
                       <td>
                         <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
+                          {v.level === 'block' ? t('Engel') : t('Uyarı')}
                         </span>
                       </td>
                       <td>{v.message}</td>

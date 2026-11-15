@@ -8,14 +8,14 @@
 //
 // Contrast is read from what is PAINTED: each text node's colour, through
 // every ancestor's opacity, against the grounds stacked under it. A list row
-// holds 7:1 on both stripes and in every state (DESIGN, Erişilebilirlik). Two
-// inks do not yet, and are named here rather than hidden in a lower threshold:
-// the functional badges and the red "Sil" in the light theme (TODO E1).
+// holds 7:1 on both stripes and in every state (DESIGN, Erişilebilirlik). One
+// ink does not yet, and is named here rather than hidden in a lower threshold:
+// the red "Sil" in the light theme (TODO E1). The functional badges were the
+// second until 2026-11-15, when they got their own ink (--ok-ink and kin).
 
 import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
-  answerDialog,
   contrast,
   listWorld,
   loadWorld,
@@ -73,7 +73,7 @@ async function park(page: Page) {
 
 /**
  * The lowest painted contrast of any ink in these rows, with who it was.
- * Skipped, by name: what TODO E1 has yet to raise, and what WCAG exempts
+ * Skipped, by name: what TODO E1 has yet to raise ("Sil"), and what WCAG exempts
  * (a disabled control).
  */
 const lowestInk = (rows: Locator) =>
@@ -118,7 +118,7 @@ const lowestInk = (rows: Locator) =>
       return o;
     };
     const skipped = (el: Element) =>
-      el.closest('.badge, .btn.danger, :disabled, [aria-disabled="true"]') !== null;
+      el.closest('.btn.danger, :disabled, [aria-disabled="true"]') !== null;
     let worst = { ratio: 99, who: '' };
     for (const row of list) {
       const inks: Element[] = [];
@@ -284,7 +284,7 @@ const DUNYA: Liste[] = [
     git: kontrol(/^Sorunlar/),
     satir: panelRows('Yerleşemeyen dersler'),
   },
-  { ad: 'Danışman uyarıları', git: kontrol(/^Danışman/), satir: panelRows('Danışman uyarıları') },
+  { ad: 'Danışman notları', git: kontrol(/^Danışman/), satir: panelRows('Danışman notları') },
   {
     ad: 'Öğretmenlerin kapasitesi',
     git: kontrol(/^Öğretmenler$/),
@@ -430,9 +430,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
 
       // A row goes from the middle, and comes back to the same place.
       await rows.nth(2).getByRole('button', { name: 'Sil', exact: true }).click();
-      // Teachers and lessons go at once with a "Geri al" notice (SD1); a class
-      // or a room still asks first.
-      if (l.ad === 'Sınıflar' || l.ad === 'Derslikler') await answerDialog(page);
+      // Every list's deletion goes at once with a "Geri al" notice (SD1).
       await expect(rows).toHaveCount(total - 1);
       await check('silmeden sonra');
       await page.locator('body').press('Control+z');
@@ -607,19 +605,20 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     // The sheet's lesson rows took the stripe, and the transfer picker kept the
     // input recess (--paper-sunk) and a hairline edge: on a zebra row, a hair
     // from that recess, the box vanished. In a list a field is paper with a
-    // --line edge, like its neighbours in table.list (found by mozaik-70's review).
+    // control edge, like its neighbours in table.list (found by mozaik-70's review).
+    // The edge is --border-strong since 2026-11-15: --line was 1.4:1 on a row.
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
     const pick = page.locator('table.sheet-lessons > tbody > tr:nth-child(2) select.transfer-pick');
     await expect(pick).toBeVisible();
-    const t = await tokens(page, ['--paper', '--line']);
+    const t = await tokens(page, ['--paper', '--border-strong']);
     const box = await pick.evaluate((el) => {
       const s = getComputedStyle(el);
       return { bg: s.backgroundColor, edge: s.borderTopColor };
     });
     expect(box.bg, 'aktarma seçicisi kâğıt zeminli').toBe(t['--paper']);
-    expect(box.edge, 'aktarma seçicisinin kenarı').toBe(t['--line']);
+    expect(box.edge, 'aktarma seçicisinin kenarı').toBe(t['--border-strong']);
   });
 
   test('Branşlar: liste boşken yabancı branşların üstünde grup çizgisi yok', async ({ page }) => {
@@ -641,7 +640,6 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
       .first()
       .getByRole('button', { name: 'Sil', exact: true })
       .click();
-    await answerDialog(page);
     await park(page);
     await expect(bodies).toHaveCount(2);
     await expect(bodies.nth(0).locator('tr')).toHaveCount(0);

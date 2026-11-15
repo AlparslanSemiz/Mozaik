@@ -27,7 +27,7 @@ import type { UpdateRun } from '../../platform/update';
 import { emptyState } from '../../pure/entities';
 import { activePlacements } from '../../pure/grid';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
-import { type PlanControls, T, useDialogs, useT } from '../common';
+import { type PlanControls, T, useDialogs, useT, useToast, useUndoIf } from '../common';
 import { useLoadSample } from '../plans';
 import { useRef, useState } from 'react';
 import { Build, Changelog } from './About';
@@ -36,8 +36,9 @@ import Plans from './Plans';
 
 interface Props {
   state: State;
-  change: (apply: (d: State) => State) => void;
-  loadState: (next: State) => void;
+  change: (apply: (d: State) => State, label?: string) => void;
+  /** Puts `next` in this plan's place as an undoable step (useStore). */
+  replaceState: (next: State, label?: string) => State | null;
   plans: PlanControls;
   folder: FolderRun;
   update: UpdateRun;
@@ -73,7 +74,7 @@ function size(chars: number): string {
 export default function Data({
   state,
   change,
-  loadState,
+  replaceState,
   plans,
   folder,
   update,
@@ -82,6 +83,8 @@ export default function Data({
 }: Props) {
   const t = useT();
   const { confirm } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const loadSample = useLoadSample();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
@@ -91,31 +94,26 @@ export default function Data({
   const planCount = plans.library.plans.length;
 
   async function reset() {
-    // It asks TWICE, and the second question is the point: this is the one
-    // button in the program that cannot be undone.
+    // ONE question, because this is the widest click in the program. The
+    // second one ("Son kez soruyorum") went on 2026-11-15 with the reason for
+    // it: the reset is an ordinary step of the history now, and its notice
+    // offers "Geri al" like every other deletion (TODO SD1).
     if (
       !(await confirm({
         title: t('Her şey silinecek'),
-        body: t('Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.'),
-        confirmLabel: t('Devam et'),
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-    if (
-      !(await confirm({
-        title: t('Son kez soruyorum'),
         body: t(
-          'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.',
+          'Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından "Geri al" ile geri gelir.',
         ),
-        confirmLabel: t('Sil'),
+        confirmLabel: t('Her şeyi sil'),
         danger: true,
       }))
     ) {
       return;
     }
-    loadState(emptyState());
+    const said = t('Bu plandaki her şey silindi.');
+    const next = replaceState(emptyState(), said);
+    if (next === null) notify(said, 'info');
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   }
 
   function saveAll() {
@@ -151,12 +149,12 @@ export default function Data({
         bad: true,
         text:
           version !== null && version !== BUNDLE_VERSION
-            ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
+            ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
             : isPlan
               ? t(
                   'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
                 )
-              : `${t('Bu dosya okunamadı')}. ${t('Program tarafından indirilmiş bir .json yedek dosyası seçin.')}`,
+              : `${t('Bu dosya okunamadı')}. ${t("Mozaik'in kaydettiği bir .json plan dosyası seçin.")}`,
       });
       return;
     }
@@ -172,7 +170,7 @@ export default function Data({
         bad: true,
         text:
           yeni > 0
-            ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
+            ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
             : t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
       });
       return;
@@ -192,7 +190,7 @@ export default function Data({
           eksik > 0 ? t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik }) : '',
           yeni > 0
             ? t(
-                'Dosyadaki {yeni} plan programın daha yeni bir sürümüyle yazılmış, açılmayacak. Programı güncelleyin.',
+                "Dosyadaki {yeni} plan Mozaik'in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik'i güncelleyin.",
                 { yeni },
               )
             : '',
@@ -232,7 +230,7 @@ export default function Data({
       bad: failed > 0 || unreadable > 0,
       text:
         yeni > 0
-          ? `${opened} ${t('{yeni} plan programın daha yeni bir sürümüyle yazıldığı için açılmadı. Programı güncelleyin.', { yeni })}`
+          ? `${opened} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
           : opened,
     });
   }
@@ -246,7 +244,7 @@ export default function Data({
       <p
         className="hint"
         title={t(
-          'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve oturum yedekleri girmez.',
+          'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.',
         )}
       >
         <T k="Üst çubuktaki **Dosyaya kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
@@ -307,7 +305,7 @@ export default function Data({
 
       <h3>{t('Sıfırla')}</h3>
       <p className="hint">
-        <T k="**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin." />
+        <T k="**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir." />
       </p>
       <div className="form-row">
         <button className="btn danger" onClick={reset} title={t('Her şeyi siler')}>
@@ -317,9 +315,12 @@ export default function Data({
     </div>
   );
 
+  // A Tab stop of its own: in the side rail this panel scrolls inside itself
+  // (`.cols > aside > .panel:only-child`), and the part below the fold was
+  // out of the keyboard's reach (axe `scrollable-region-focusable`).
   const wherePanel = (
-    <div className="panel">
-      <h2>{t('Veriler nerede')}</h2>
+    <div className="panel focus-scroll" tabIndex={0} role="group" aria-labelledby="veriler-nerede">
+      <h2 id="veriler-nerede">{t('Veriler nerede')}</h2>
       {/* The exe changes what is TRUE here, not just the wording. On the
             three browser routes the storage below is the only copy until
             somebody saves a file, and "tarama verilerini temizle" can take
@@ -353,7 +354,7 @@ export default function Data({
       {storageKind() !== 'exe' && (
         <p className="hint">
           <T
-            k="Bu depo yalnız {adres} adresine ait; öteki kopyaların depoları **ayrıdır**."
+            k="Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**."
             vars={{ adres: storageAddress() }}
           />
         </p>
@@ -363,7 +364,7 @@ export default function Data({
             where the data actually lives, and the bar it left had six
             destinations to hold instead. */}
       <p className="hint">
-        <T k="Program **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
+        <T k="Mozaik **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
       </p>
       <table className="stat">
         <thead>
@@ -387,7 +388,7 @@ export default function Data({
       </table>
       <p className="hint">
         <T
-          k="Toplam **{yer}**; tarayıcının bu programa ayırdığı yer yaklaşık **5 MB**."
+          k="Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**."
           vars={{ yer: size(report.totalChars) }}
         />
       </p>
@@ -406,15 +407,17 @@ export default function Data({
     <div className="panel">
       <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
       <p className="hint">
-        <T k="Son üç oturumun durumu ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
+        <T k="Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
       </p>
       {backups.length === 0 ? (
-        <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
+        <p className="hint">
+          {t('Henüz otomatik yedek yok; ilki Mozaik bir daha açılınca alınır.')}
+        </p>
       ) : (
         <table className="stat">
           <thead>
             <tr>
-              <th>{t('Oturum')}</th>
+              <th>{t('Otomatik yedek')}</th>
               <th className="num">{t('Öğretmen')}</th>
               <th className="num">{t('Sınıf')}</th>
               <th className="num">{t('Ders')}</th>
@@ -425,7 +428,9 @@ export default function Data({
             {backups.map((b) => (
               <tr key={b.index}>
                 <td>
-                  {b.index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: b.index + 1 })}
+                  {b.index === 0
+                    ? t('bir önceki açılış')
+                    : t('{n} açılış önce', { n: b.index + 1 })}
                 </td>
                 {/* One this copy cannot read is still a backup, and after A1
                     it was the real plan: it is named, not left out. */}

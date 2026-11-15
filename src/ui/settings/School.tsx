@@ -72,7 +72,7 @@ export default function School({ state, change }: PanelProps) {
         ? t('Bunların {n} saati sabitli, sabitlemeleri de kalkacak.', { n: loss.pinned })
         : '',
       loss.elsewhere > 0
-        ? t('Öteki programlarda da {n} saat kalkacak.', { n: loss.elsewhere })
+        ? t('Öteki seçeneklerde de {n} saat kalkacak.', { n: loss.elsewhere })
         : '',
       t('Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.'),
     ].filter((x) => x !== '');
@@ -88,12 +88,12 @@ export default function School({ state, change }: PanelProps) {
     const loss = settingsLoss(state, { hours });
     const ok = await acceptLoss(
       loss,
-      t('Günlük ders sayısı {n} olacak', { n: hours.length }),
-      t('{saat}. dersten sonraki saatlerde yerleşmiş {n} saat var.', {
+      t('Günlük saat sayısı {n} olacak', { n: hours.length }),
+      t('{saat}. saatten sonra yerleşmiş {n} saat var.', {
         saat: hours.length,
         n: loss.placed,
       }),
-      t('Ders sayısını düşür'),
+      t('Saat sayısını düşür'),
     );
     if (!ok) {
       box.value = String(hourCount);
@@ -191,7 +191,9 @@ export default function School({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th className="w-col-xs" />
+                <th className="w-col-xs">
+                  <span className="visually-hidden">{t('Ders günü')}</span>
+                </th>
                 <th>{t('Gün')}</th>
                 <th className="w-col-2xl">{t('Öğle arası')}</th>
               </tr>
@@ -222,7 +224,7 @@ export default function School({ state, change }: PanelProps) {
                           <option value={0}>{t('Uzun ara yok')}</option>
                           {state.settings.hours.map((_, i) => (
                             <option key={i} value={i + 1}>
-                              {t('{n}. dersten sonra', { n: i + 1 })}
+                              {t('{n}. saatten sonra', { n: i + 1 })}
                             </option>
                           ))}
                         </select>
@@ -236,7 +238,7 @@ export default function School({ state, change }: PanelProps) {
 
           <p className="hint">
             <T
-              k="Şu an **{gun} gün × {saat} saat** = {yer} slot."
+              k="Şu an **{gun} gün × {saat} saat** = {yer} hücre."
               vars={{ gun: dayCount, saat: hourCount, yer: dayCount * hourCount }}
             />
             {dayCount === 0 && ` ${t('En az bir gün seçmelisiniz.')}`}
@@ -244,12 +246,14 @@ export default function School({ state, change }: PanelProps) {
         </div>
 
         <div className="panel">
-          <h2>{t('Ders saatleri')}</h2>
+          <h2>{t('Günün saatleri')}</h2>
           <p className="hint">
-            {t('Gün kaçta başlıyor, ders ve teneffüs kaç dakika. Saatler bunlardan hesaplanır.')}
+            {t(
+              'Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.',
+            )}
           </p>
           <div className="form-row">
-            <Field label={t('Günlük ders sayısı')}>
+            <Field label={t('Günlük saat sayısı')}>
               <input
                 type="number"
                 min={1}
@@ -275,7 +279,7 @@ export default function School({ state, change }: PanelProps) {
                 start at 00:00 with nothing to say so. There is no empty value to
                 pick here. */}
             <div className="field">
-              <span className="field-label">{t('İlk ders başlangıcı')}</span>
+              <span className="field-label">{t('İlk saatin başlangıcı')}</span>
               <span className="clock-pick">
                 <select
                   aria-label={t('Başlangıç saati')}
@@ -302,7 +306,7 @@ export default function School({ state, change }: PanelProps) {
                 </select>
               </span>
             </div>
-            <Field label={t('Ders (dk)')}>
+            <Field label={t('Saat (dk)')}>
               <input
                 type="number"
                 min={5}
@@ -341,7 +345,7 @@ export default function School({ state, change }: PanelProps) {
           </div>
 
           <div className="form-row spaced">
-            <Field label={t('Ders adları (virgülle; boş kalan saat numarasını alır)')} wide>
+            <Field label={t('Saat adları (virgülle; boş kalan numarasını alır)')} wide>
               <input
                 // Rebuilt when the stored names change (an undo, say), since
                 // an uncontrolled box does not follow its defaultValue.
@@ -356,7 +360,7 @@ export default function School({ state, change }: PanelProps) {
           </div>
           {extra > 0 && (
             <p className="hint">
-              {t('{n} ad ders sayısından fazlaydı ve kullanılmadı.', { n: extra })}
+              {t('{n} ad saat sayısından fazlaydı ve kullanılmadı.', { n: extra })}
             </p>
           )}
         </div>
@@ -381,7 +385,7 @@ export default function School({ state, change }: PanelProps) {
               <table className="list bell-preview">
                 <thead>
                   <tr>
-                    <th className="w-col-xs">{t('Ders')}</th>
+                    <th className="w-col-xs">{t('Saat')}</th>
                     {patterns.map((p) => (
                       <th key={p.after}>{p.dayNames}</th>
                     ))}

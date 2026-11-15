@@ -31,7 +31,7 @@ const DOLU = '.save-warning:has-text("kaydedilemedi")';
 const OKUNAMADI = '.save-warning:has-text("açılışta okunamadı")';
 
 async function ornekYukle(page: Page) {
-  await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+  await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
   await answerDialog(page);
   await expect.poll(() => savedText(page), { timeout: 5_000 }).toContain('Örnek Kurs');
 }
@@ -84,13 +84,12 @@ test.describe('iki kopya · bayat pencere ötekinin işini silmiyor (VK1)', () =
     await openSetup(a, 'Derslikler');
     const once = await savedText(a);
     await mainList(a).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await answerDialog(a);
     await expect.poll(() => savedText(a), { timeout: 5_000 }).not.toBe(once);
     const aninKaydi = await savedText(a);
 
     // B is stale. It loads the sample over its own empty plan...
     await expect(b.locator(BASKA)).toBeVisible();
-    await b.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await b.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(b);
     // ...waits past its own autosave, and closes.
     await b.waitForTimeout(1_000);
@@ -105,7 +104,7 @@ test.describe('iki kopya · bayat pencere ötekinin işini silmiyor (VK1)', () =
     // The other side of "flush only what is pending": the last edit made
     // inside the 400 ms window still reaches the storage when the tab closes.
     await open(page);
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.close({ runBeforeUnload: true });
     const c = await page.context().newPage();
@@ -137,7 +136,7 @@ test.describe('kota · kaydedilemeyen değişiklik ekranda söyleniyor (VK2)', (
     });
     expect(dolgu).toBeGreaterThan(0);
 
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await expect(page.locator(DOLU)).toBeVisible();
     expect(await savedText(page)).not.toContain('Örnek Kurs');

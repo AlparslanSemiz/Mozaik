@@ -101,7 +101,7 @@ test.describe('94. Okunamayan kayıt üzerine yazılmıyor', () => {
     await page.getByRole('button', { name: 'Ayarlar' }).click();
     await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
     const panel = page.locator('.panel', { hasText: 'Bu bilgisayardaki otomatik yedekler' });
-    await expect(panel).toContainText('bir önceki');
+    await expect(panel).toContainText('bir önceki açılış');
     await expect(panel).toContainText('daha yeni bir sürümle yazılmış');
   });
 });

@@ -71,7 +71,7 @@ export default function Teachers({ state, change }: PanelProps) {
             wearing one short form. It belongs over the list it is describing. */}
         {clashes.length > 0 && (
           <div className="warn-box">
-            <T k="**Aynı kısaltma birden çok öğretmende:** ızgarada iki satır ayırt edilemez." />
+            <T k="**Aynı kısa ad birden çok öğretmende:** ızgarada iki satır ayırt edilemez." />
             {clashes.map((c) => (
               <div key={c.short}>
                 <b>{c.short}</b> · {c.names.join(', ')}
@@ -113,7 +113,7 @@ export default function Teachers({ state, change }: PanelProps) {
                   {/* --w-col-lg was 16ch — 144 px at 125 %, for a heading that
                     asks for 78 and a box that holds "MÇ". This column alone was
                     the last 54 px of the sideways scroll. */}
-                  <th className="w-col-sm">{t('Kısaltma')}</th>
+                  <th className="w-col-sm">{t('Kısa ad')}</th>
                   <th>{t('Branş')}</th>
                   {/* Most of the staff hold one subject, so this column is usually
                     a row of small buttons rather than a row of dropdowns — see
@@ -143,7 +143,9 @@ export default function Teachers({ state, change }: PanelProps) {
                     {t('Günde ↓')}
                   </th>
                   <th className="w-col-sm">{t('Ders saati')}</th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody ref={order.bodyRef}>{rows}</tbody>

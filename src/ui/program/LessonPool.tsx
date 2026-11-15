@@ -37,6 +37,7 @@ import {
   dockHeightForRoom,
   maxDockHeight,
   attachScrollFade,
+  attachRoving,
 } from '../../platform/dom';
 import type { PoolCard } from '../../pure/program';
 import { useT } from '../common';
@@ -54,6 +55,8 @@ interface Props {
   /** The branches that still have something waiting: `[key, label]`. */
   subjects: Array<[string, string]>;
   onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
+  /** Enter, Space or T on a focused card: pick it up from the keyboard. */
+  onPick: (origin: HTMLElement, lessonId: Id, size: number) => void;
   onMenu: (lessonId: Id) => void;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -65,7 +68,7 @@ const SORTS: Array<{ id: PoolSort; label: string }> = [
   { id: 'row', label: 'Izgara sırası' },
   { id: 'name', label: 'Ada göre' },
   { id: 'subject', label: 'Branşa göre' },
-  { id: 'size', label: 'Uzun bloklar önce' },
+  { id: 'size', label: 'Uzun kartlar önce' },
   { id: 'left', label: 'En çok kalan' },
 ];
 
@@ -159,6 +162,7 @@ function LessonPool({
   setFilter,
   subjects,
   onStart,
+  onPick,
   onMenu,
   menuOpen,
   onMenuOpenChange,
@@ -275,6 +279,40 @@ function LessonPool({
     return box === null ? undefined : attachScrollFade(box);
   }, [groups.length, cards.length]);
 
+  // ONE Tab stop for the tray, arrows between its cards: 99 waiting blocks
+  // were 99 stops between the grid and the rest of the screen (or, until
+  // 2026-11-15, none at all — the cards were not focusable).
+  useEffect(() => {
+    const box = list.current;
+    if (box === null) return undefined;
+    const cards = () => [...box.querySelectorAll<HTMLElement>('.pool-card[tabindex]')];
+    return attachRoving(box, {
+      item: (from) => from.closest<HTMLElement>('.pool-card[tabindex]'),
+      first: () => cards()[0] ?? null,
+      move: (from, e) => {
+        const all = cards();
+        const at = all.indexOf(from);
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') return all[at + 1] ?? from;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') return all[at - 1] ?? from;
+        if (e.key === 'Home') return all[0] ?? from;
+        if (e.key === 'End') return all[all.length - 1] ?? from;
+        return null;
+      },
+    });
+  }, []);
+
+  function pick(e: React.KeyboardEvent) {
+    // A held key repeats: one press, one pick-up.
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    const key = e.key.toLowerCase();
+    if (key !== 'enter' && key !== ' ' && key !== 't') return;
+    const card = (e.target as Element).closest<HTMLElement>('.pool-card[tabindex]');
+    const lessonId = card?.dataset.lesson;
+    if (card == null || lessonId === undefined) return;
+    e.preventDefault();
+    onPick(card, lessonId, Number(card.dataset.size) || 1);
+  }
+
   function toggle() {
     const next = !open;
     writeDock(next);
@@ -298,8 +336,14 @@ function LessonPool({
       // sentence saying so) and gives the height back to the grid. A 176px
       // tray of nothing is 176px that was carrying five teachers.
       className={open && cards.length > 0 ? 'pool' : 'pool pool-closed'}
-      aria-label={t('Yerleşmeyi bekleyen dersler')}
+      aria-label={t('Yerleşmeyi bekleyen kartlar')}
     >
+      {/* The pool's place in the outline: the screen's h1 is the school, the
+          grid and the pool are its two h2s, the groups below are h3s. Seen,
+          the drawer needs no title; heard, the groups had no parent. */}
+      <h2 className="visually-hidden" id="havuz-baslik">
+        {t('Havuz')}
+      </h2>
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
       <div
@@ -350,13 +394,13 @@ function LessonPool({
             <>
               {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
                   calling them two lessons would not add up against Kurulum. */}
-              <strong>{t('{n} blok bekliyor', { n: cards.length })}</strong>
+              <strong>{t('{n} kart bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
                 {/* Narrowed, the head says so with the number it is hiding.
                     A tray that quietly shows a twelfth of what is left would
                     make "hepsi yerleşti" a lie one click away. */}
                 {narrowed
-                  ? t('{n} blok süzgeç dışında · sürükleyip bırakın', {
+                  ? t('{n} kart süzgeç dışında · sürükleyip bırakın', {
                       n: total - cards.length,
                     })
                   : t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
@@ -411,9 +455,18 @@ function LessonPool({
 
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <div className="pool-list scroll-fade" ref={list}>
+          {/* One Tab stop for the whole tray: the cards inside are a roving
+              group (arrows move, Enter picks up), so the list itself takes no
+              extra stop (axe `scrollable-region-focusable` is met by the cards). */}
+          <div
+            className="pool-list scroll-fade"
+            ref={list}
+            onKeyDown={pick}
+            role="group"
+            aria-labelledby="havuz-baslik"
+          >
             {groups.map((g) => (
-              <section className="pool-group" key={g.key} aria-label={g.label}>
+              <div className="pool-group" key={g.key} role="group" aria-label={g.label}>
                 {/* The heading is what the reader asked for: a break between one
                 row's cards and the next, rather than one more 7px gap. It also
                 makes the order VISIBLE — pick "branşa göre" and the headings
@@ -437,6 +490,18 @@ function LessonPool({
                 <div className="pool-group-cards">
                   {g.stacks.map((s) => {
                     const c = s.cards[0]!;
+                    const describe =
+                      t('{ust} · {alt} {brans} · {boy} saatlik kart', {
+                        ust: c.top,
+                        alt: c.bottom,
+                        brans: c.subject,
+                        boy: c.size,
+                      }) +
+                      (s.cards.length > 1 ? t(' · {n} tane bekliyor', { n: s.cards.length }) : '') +
+                      t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
+                        yerlesen: c.placed,
+                        toplam: c.total,
+                      });
                     return (
                       <div
                         key={s.key}
@@ -457,21 +522,15 @@ function LessonPool({
                           onPointerDown={
                             c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
                           }
-                          title={
-                            t('{ust} · {alt} {brans} · {boy} saatlik blok', {
-                              ust: c.top,
-                              alt: c.bottom,
-                              brans: c.subject,
-                              boy: c.size,
-                            }) +
-                            (s.cards.length > 1
-                              ? t(' · {n} tane bekliyor', { n: s.cards.length })
-                              : '') +
-                            t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
-                              yerlesen: c.placed,
-                              toplam: c.total,
-                            })
-                          }
+                          // A control now: Enter picks it up, the arrows walk
+                          // the tray (one Tab stop, see the effect above).
+                          // Named by its own text, the long sentence is the
+                          // description: a speech user says what is on the
+                          // card (axe label-content-name-mismatch).
+                          role="button"
+                          tabIndex={c.masked ? undefined : -1}
+                          aria-disabled={c.masked || undefined}
+                          title={describe}
                         >
                           <span className="card-top">{c.top}</span>
                           <span className="card-bottom">{c.bottom}</span>
@@ -483,7 +542,7 @@ function LessonPool({
                     );
                   })}
                 </div>
-              </section>
+              </div>
             ))}
           </div>
         </ContextMenu.Trigger>
@@ -505,6 +564,7 @@ function samePoolProps(a: Props, b: Props): boolean {
     a.setFilter === b.setFilter &&
     a.subjects === b.subjects &&
     a.onStart === b.onStart &&
+    a.onPick === b.onPick &&
     a.onMenu === b.onMenu &&
     a.menuOpen === b.menuOpen &&
     a.onMenuOpenChange === b.onMenuOpenChange &&

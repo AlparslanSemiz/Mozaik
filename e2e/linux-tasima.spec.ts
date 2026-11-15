@@ -61,7 +61,7 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     await page.goto('/');
     await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
     expect(new URL(page.url()).protocol).toBe('http:');
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await expect.poll(() => savedText(page), { timeout: 5_000 }).toContain('Örnek Kurs');
     await openPlans(page);
@@ -71,7 +71,7 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     await page.getByLabel('Okul adı').fill('İkinci Okul');
     await page.getByLabel('Okul adı').blur();
     const eski = await tumunuKaydet(page);
-    expect(eski.plans.map((p) => p.name)).toEqual(['1. plan', 'Boş plan']);
+    expect(eski.plans.map((p) => p.name)).toEqual(['Plan 1', 'Boş plan']);
 
     const yeni = await yeniKopya(browser);
     const p2 = yeni.page;
@@ -113,7 +113,7 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     // ...and on screen: the second plan's own school, the first plan's teachers.
     await picker(p2).selectOption({ label: 'Boş plan' });
     await expect(p2.locator('.app-title')).toHaveText('İkinci Okul');
-    await picker(p2).selectOption({ label: '1. plan' });
+    await picker(p2).selectOption({ label: 'Plan 1' });
     await openSetup(p2, 'Öğretmenler');
     expect(await p2.locator('table.list tbody tr').count()).toBeGreaterThan(0);
 

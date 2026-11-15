@@ -137,7 +137,7 @@ export function AnswerBook({
           {t('Soruları yazdır')}
         </button>
         <span className="hint inline">
-          {t('Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.')}{' '}
+          {t('Bu değişiklikle bütün kartlar yerleşiyor; program bulundu ve denetlendi.')}{' '}
           {found.proven
             ? t('Bundan küçük bir değişiklik yetmiyor.')
             : unfinished

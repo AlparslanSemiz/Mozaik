@@ -3,8 +3,8 @@
  * built (the thing aSc does not do and that hurts most at the school), split by
  * question: the capacity ladder (`levels.ts`), naming a lesson (`naming.ts`),
  * why a lesson is stuck (`hole.ts`), capacity, the advisor, Kontrol's report
- * and the health line. PURE functions. What this file opens is exactly what
- * `feasibility.ts` exported before the split.
+ * and the health line, and how Kontrol groups its problem rows (`stuck.ts`).
+ * PURE functions.
  */
 export {
   capacityLevel,
@@ -22,4 +22,14 @@ export { holeReason } from './hole';
 export { buildCapacity } from './capacity';
 export { buildAdvice, type Advice } from './advice';
 export { buildReport, sharedReport } from './report';
+export {
+  groupStranded,
+  groupUnplaceable,
+  stuckReason,
+  violationCell,
+  type Cell,
+  type StrandedLesson,
+  type Target,
+  type UnplaceableGroup,
+} from './stuck';
 export { health, type Health } from './health';

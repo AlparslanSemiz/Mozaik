@@ -27,7 +27,15 @@
 
 import { useState } from 'react';
 import { AddPanel, useRowOrder } from '../lists';
-import { useDialogs, type PanelProps, T, useT } from '../common';
+import {
+  moveFocusFromDeleted,
+  useDialogs,
+  type PanelProps,
+  T,
+  useT,
+  useToast,
+  useUndoIf,
+} from '../common';
 import { EMPTY_QUERY } from '../../pure/listview';
 import {
   addSubject,
@@ -49,7 +57,7 @@ interface RowProps extends PanelProps {
   inList: boolean;
   /** The handle cell, or an empty one to keep the columns lined up. */
   grip: ReactElement;
-  onRemove: () => void;
+  onRemove: (button: HTMLElement) => void;
   onRename: (next: string) => void;
 }
 
@@ -119,7 +127,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
           blank header, so the label was written once per subject and the
           column itself was never named. Where the box already holds the
           default the cell carries the empty-cell mark, a SHORT dash. */}
-      <td className="hint" title={t('Programda gömülü olan kısaltma')}>
+      <td className="hint" title={t("Mozaik'te gömülü olan kısaltma")}>
         {current === shown ? '–' : shown}
       </td>
       <td>
@@ -132,7 +140,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
             className="btn danger"
             disabled={!inList}
             title={inList ? t('Listeden çıkar') : t('Bu branş zaten listede değil')}
-            onClick={onRemove}
+            onClick={(e) => onRemove(e.currentTarget)}
           >
             {t('Sil')}
           </button>
@@ -145,6 +153,8 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
 export default function Subjects({ state, change }: PanelProps) {
   const t = useT();
   const { confirm, alert } = useDialogs();
+  const notify = useToast();
+  const undoIf = useUndoIf();
   const [fresh, setFresh] = useState('');
 
   const options = subjectOptions(state);
@@ -217,7 +227,7 @@ export default function Subjects({ state, change }: PanelProps) {
     change((d) => renameSubject(d, subject, next));
   }
 
-  async function remove(subject: string) {
+  async function remove(subject: string, button: HTMLElement) {
     const users = subjectTeachers(state, subject);
     if (users.length > 0) {
       await alert({
@@ -230,17 +240,13 @@ export default function Subjects({ state, change }: PanelProps) {
       });
       return;
     }
-    if (
-      !(await confirm({
-        title: t('"{ad}" branşı listeden çıkarılacak', { ad: subjectLabel(subject) }),
-        body: t('Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.'),
-        confirmLabel: t('Çıkar'),
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-    change((d) => deleteSubject(d, subject));
+    // Nothing uses it, so nothing else goes with it: no question since SD1,
+    // and the notice offers "Geri al" like every other deletion.
+    const said = t('"{ad}" branşı listeden çıkarıldı.', { ad: subjectLabel(subject) });
+    const next = deleteSubject(state, subject);
+    moveFocusFromDeleted(button);
+    change((d) => (d === state ? next : deleteSubject(d, subject)), said);
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   }
 
   return (
@@ -305,7 +311,9 @@ export default function Subjects({ state, change }: PanelProps) {
                   "Varsayılan" is ten characters — sm's 10ch leaves nothing for
                   the cell padding. */}
                 <th className="w-col-md">{t('Varsayılan')}</th>
-                <th className="w-col-md" />
+                <th className="w-col-md">
+                  <span className="visually-hidden">{t('İşlemler')}</span>
+                </th>
               </tr>
             </thead>
             <tbody ref={order.bodyRef}>
@@ -317,7 +325,7 @@ export default function Subjects({ state, change }: PanelProps) {
                   change={change}
                   inList
                   grip={order.grip(i, subject)}
-                  onRemove={() => remove(subject)}
+                  onRemove={(button) => void remove(subject, button)}
                   onRename={(next) => void rename(subject, next)}
                 />
               ))}
@@ -344,7 +352,7 @@ export default function Subjects({ state, change }: PanelProps) {
                         <td className="grip-col" />
                       </>
                     }
-                    onRemove={() => remove(subject)}
+                    onRemove={(button) => void remove(subject, button)}
                   />
                 ))}
               </tbody>

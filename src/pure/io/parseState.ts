@@ -583,7 +583,7 @@ const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
  * no teachers or no lessons field AT ALL was cut short or edited by hand, and
  * `parseState` - which also reads localStorage and the session backups, where
  * tolerance is the point - fills it in with empty lists. Loaded from the top
- * bar that empties the open plan after one "Yedeği yükle" (DENETIM DK11), so
+ * bar that empties the open plan after one "Planı aç" (DENETIM DK11), so
  * here it is refused. An empty list is not a missing one: a school with no
  * lessons yet is a real plan.
  *

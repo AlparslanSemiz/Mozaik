@@ -54,6 +54,28 @@ interface Reason {
   level: 'ok' | 'warn' | 'blocked';
 }
 
+/**
+ * A move made from the KEYBOARD (DENETIM KS8, the pool's "klavye yolu"). The
+ * same drag, the same map and the same painting; only the hand differs: arrow
+ * keys walk a target along the row instead of a pointer, Enter lets go, Esc
+ * puts it back. Nothing here decides where a lesson may go — that is still
+ * `dropMap`, computed once when the card is picked up (pitfall 2).
+ */
+export interface KeyMove {
+  /** The block's own start when a placed block is moved; null = the first droppable hour. */
+  at: { day: number; hour: number } | null;
+  /** How a position is said: "Salı 3. saat". */
+  place: (day: number, hour: number) => string;
+  /** Said once, when the card is picked up: what is in the hand and which keys put it down. */
+  intro: string;
+  /** Enter on a refused cell: the reason, said again. */
+  onRefuse: (why: string) => void;
+  /** Ended without a drop: Esc, Tab, a click or another key. `byTab`: focus is already leaving. */
+  onCancel: (byTab: boolean) => void;
+  /** Let go on a droppable cell, after `drop()` has run. */
+  onDrop: (day: number, hour: number) => void;
+}
+
 export interface GhostContent {
   top: string;
   bottom: string;
@@ -135,7 +157,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
   const targetRow = useRef<HTMLTableRowElement | null>(null);
   const cellAt = useRef(new Map<string, HTMLElement>());
   const shades = useRef<HTMLElement[]>([]);
-  const activate = useRef<(d: DragData) => void>(() => undefined);
+  const activate = useRef<(d: DragData, keys: KeyMove | null) => void>(() => undefined);
   const detach = useRef<() => void>(() => undefined);
   const savedBar = useRef<{
     element: HTMLElement;
@@ -197,7 +219,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     }
   }, [clearHighlight, clearPreview]);
 
-  const paintReason = (reason: Reason | null) => {
+  const paintReason = (reason: Reason | null, where: string | null = null) => {
     const bar = savedBar.current?.element ?? null;
     const text = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
     if (bar === null || text === null) return;
@@ -209,7 +231,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
           : reason.level === 'warn'
             ? 'reason-bar warn'
             : 'reason-bar bad',
-      text: reason?.text ?? t('Buraya bırakılabilir.'),
+      text: (where === null ? '' : `${where}: `) + (reason?.text ?? t('Buraya bırakılabilir.')),
     };
 
     const write = (say: { className: string; text: string }) => {
@@ -247,6 +269,22 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     }
   };
 
+  // Every answer is imperative. Red/yellow targets used to call setState
+  // here and redraw Program while the pointer crossed the row.
+  function holdBar(first: string) {
+    const bar = document.querySelector<HTMLElement>('.reason-bar');
+    const barText = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
+    if (bar !== null && barText !== null) {
+      savedBar.current = {
+        element: bar,
+        className: bar.className,
+        text: barText.textContent ?? '',
+      };
+      bar.className = 'reason-bar ok';
+      barText.textContent = first;
+    }
+  }
+
   const start = useCallback((e: React.PointerEvent, d: DragData, content: GhostContent) => {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -276,24 +314,19 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     document.body.appendChild(el);
     ghost.current = el;
 
-    // Every answer is imperative. Red/yellow targets used to call setState
-    // here and redraw Program while the pointer crossed the row.
-    const bar = document.querySelector<HTMLElement>('.reason-bar');
-    const barText = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
-    if (bar !== null && barText !== null) {
-      savedBar.current = {
-        element: bar,
-        className: bar.className,
-        text: barText.textContent ?? '',
-      };
-      bar.className = 'reason-bar ok';
-      barText.textContent = t('Buraya bırakılabilir.');
-    }
-
-    activate.current(d);
+    holdBar(t('Buraya bırakılabilir.'));
+    activate.current(d, null);
   }, []);
 
-  activate.current = (dragging: DragData) => {
+  /** The same move, picked up from the keyboard. No ghost: the highlight is the hand. */
+  const startKeys = useCallback((d: DragData, keys: KeyMove) => {
+    if (data.current !== null) return;
+    data.current = d;
+    holdBar(keys.intro);
+    activate.current(d, keys);
+  }, []);
+
+  activate.current = (dragging: DragData, keys: KeyMove | null) => {
     const wrap = document.querySelector<HTMLElement>('.grid-wrap');
     const table = wrap?.querySelector<HTMLTableElement>('table.grid') ?? null;
     const row =
@@ -440,6 +473,59 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       return wrap.scrollLeft !== beforeX || wrap.scrollTop !== beforeY;
     };
 
+    /**
+     * Paint one target: the cells the block would cover and the bar's answer.
+     * `where` is said in front of the answer when the hand is the keyboard,
+     * because then nothing on screen is under a pointer to say which cell.
+     */
+    const show = (
+      d: DragData,
+      target: { day: number; hour: number } | null,
+      where: string | null,
+    ) => {
+      if (target === null) {
+        paintReason(null, where);
+      } else {
+        const verdict = d.map.get(cellKey(target.day, target.hour));
+        const blocked = verdict === undefined ? t('Bu hücreye bırakılamaz') : verdict.blocked;
+        const warning = verdict?.warning ?? null;
+
+        paintReason(
+          blocked !== null
+            ? { text: blocked, level: 'blocked' }
+            : warning !== null
+              ? { text: warning, level: 'warn' }
+              : null,
+          where,
+        );
+
+        // Paint every cell the block will cover.
+        const cls = blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
+        for (let i = 0; i < d.blockSize; i++) {
+          const hour = target.hour + i;
+          // Two ways an hour can be on screen: as its own cell, or swallowed
+          // by a cell to its left when a multi-hour block is drawn as one
+          // (see Grid.tsx). Asking only the first way made the later hours of
+          // such a block resolve to null — and the `break` below then stopped
+          // painting the REST of the block too, with nothing to show for it.
+          //
+          // The swallowing cell is found by CONTAINMENT and not by a fixed
+          // offset: a block is 1 to 3 hours wide, so "the cell one to the
+          // left with span 2" only ever answered for the old pair (pitfalls
+          // 60 and 85 — a position is found by what covers it, not by a
+          // count).
+          const el = cellAt.current.get(cellKey(target.day, hour)) ?? null;
+          if (el == null) break;
+          // A merged cell can answer for both of its hours; painting it twice
+          // would also push it onto the cleanup list twice.
+          if (!highlighted.current.includes(el)) {
+            el.classList.add(cls);
+            highlighted.current.push(el);
+          }
+        }
+      }
+    };
+
     const frame = () => {
       // This callback is no longer pending. A pointer move or successful edge
       // scroll may request the next one below.
@@ -469,46 +555,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
         clearHighlight();
         lastTarget.current = signature;
 
-        if (target === null) {
-          paintReason(null);
-        } else {
-          const verdict = d.map.get(signature);
-          const blocked = verdict === undefined ? t('Bu hücreye bırakılamaz') : verdict.blocked;
-          const warning = verdict?.warning ?? null;
-
-          paintReason(
-            blocked !== null
-              ? { text: blocked, level: 'blocked' }
-              : warning !== null
-                ? { text: warning, level: 'warn' }
-                : null,
-          );
-
-          // Paint every cell the block will cover.
-          const cls = blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
-          for (let i = 0; i < d.blockSize; i++) {
-            const hour = target.hour + i;
-            // Two ways an hour can be on screen: as its own cell, or swallowed
-            // by a cell to its left when a multi-hour block is drawn as one
-            // (see Grid.tsx). Asking only the first way made the later hours of
-            // such a block resolve to null — and the `break` below then stopped
-            // painting the REST of the block too, with nothing to show for it.
-            //
-            // The swallowing cell is found by CONTAINMENT and not by a fixed
-            // offset: a block is 1 to 3 hours wide, so "the cell one to the
-            // left with span 2" only ever answered for the old pair (pitfalls
-            // 60 and 85 — a position is found by what covers it, not by a
-            // count).
-            const el = cellAt.current.get(cellKey(target.day, hour)) ?? null;
-            if (el == null) break;
-            // A merged cell can answer for both of its hours; painting it twice
-            // would also push it onto the cleanup list twice.
-            if (!highlighted.current.includes(el)) {
-              el.classList.add(cls);
-              highlighted.current.push(el);
-            }
-          }
-        }
+        show(d, target, null);
       }
 
       if (scrolled) scheduleFrame();
@@ -517,6 +564,22 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     const scheduleFrame = () => {
       if (loop.current === 0) loop.current = requestAnimationFrame(frame);
     };
+    // ANY scroll, not only the edge scroll above. The shades are `fixed` and
+    // placed in viewport pixels, so a wheel turned with a card in the hand
+    // moved the row and left the open strip where the screen had it. Capture
+    // on the window hears the grid's own scroll as well as the page's; the cell
+    // under the cursor changes with it, so the frame looks again.
+    const onScroll = () => {
+      positionShades();
+      if (keys !== null) return;
+      lastTarget.current = '';
+      scheduleFrame();
+    };
+
+    if (keys !== null) {
+      attachKeys(dragging, keys, row, show, positionShades, onScroll);
+      return;
+    }
     scheduleFrame();
 
     const onMove = (e: PointerEvent) => {
@@ -546,17 +609,6 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       if (e.key === 'Escape') finish();
     };
 
-    // ANY scroll, not only the edge scroll above. The shades are `fixed` and
-    // placed in viewport pixels, so a wheel turned with a card in the hand
-    // moved the row and left the open strip where the screen had it. Capture
-    // on the window hears the grid's own scroll as well as the page's; the cell
-    // under the cursor changes with it, so the frame looks again.
-    const onScroll = () => {
-      positionShades();
-      lastTarget.current = '';
-      scheduleFrame();
-    };
-
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointercancel', finish);
@@ -573,6 +625,162 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     };
   };
 
+  /**
+   * The keyboard's hand. The stops are the block STARTS that keep the whole
+   * block inside its day, in the order the row draws them, so ← → walk the
+   * week hour by hour and never land on an hour `clampToDay` would rewrite.
+   */
+  function attachKeys(
+    dragging: DragData,
+    keys: KeyMove,
+    row: HTMLTableRowElement | null,
+    show: (d: DragData, target: { day: number; hour: number } | null, where: string | null) => void,
+    positionShades: () => void,
+    onScroll: () => void,
+  ) {
+    const stops: Array<{ day: number; hour: number }> = [];
+    for (const cell of row?.querySelectorAll<HTMLElement>('td[data-day][data-hour]') ?? []) {
+      const day = Number(cell.dataset.day);
+      const first = Number(cell.dataset.hour);
+      const span = Math.max(1, Number(cell.dataset.span) || 1);
+      for (let i = 0; i < span; i++) {
+        if (first + i + dragging.blockSize <= dragging.hourCount) {
+          stops.push({ day, hour: first + i });
+        }
+      }
+    }
+    const end = (byTab = false) => {
+      finish();
+      keys.onCancel(byTab);
+    };
+    if (stops.length === 0) {
+      // The row is hidden, or the week has no hour long enough. Nothing to aim at.
+      finish();
+      keys.onRefuse(t('Bu dersin satırı ekranda değil.'));
+      return;
+    }
+
+    const droppable = (i: number) => {
+      const stop = stops[i]!;
+      return dragging.map.get(cellKey(stop.day, stop.hour))?.blocked === null;
+    };
+    const at = keys.at;
+    let index = Math.max(
+      0,
+      at === null
+        ? stops.findIndex((_, i) => droppable(i))
+        : stops.findIndex((x) => x.day === at.day && x.hour === at.hour),
+    );
+
+    const go = (next: number) => {
+      index = Math.max(0, Math.min(stops.length - 1, next));
+      const stop = stops[index]!;
+      clearHighlight();
+      show(dragging, stop, keys.place(stop.day, stop.hour));
+      cellAt.current
+        .get(cellKey(stop.day, stop.hour))
+        ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      positionShades();
+    };
+    /** The next stop in `step`'s direction that takes the drop, or where we are. */
+    const nextDroppable = (step: number) => {
+      for (let i = index + step; i >= 0 && i < stops.length; i += step) if (droppable(i)) return i;
+      return index;
+    };
+    /** The same hour (or the nearest one) on the neighbouring day the row draws. */
+    const otherDay = (step: number) => {
+      const here = stops[index]!;
+      let i = index;
+      while (i >= 0 && i < stops.length && stops[i]!.day === here.day) i += step;
+      if (i < 0 || i >= stops.length) return index;
+      const day = stops[i]!.day;
+      let best = i;
+      for (let j = i; j >= 0 && j < stops.length && stops[j]!.day === day; j += step) {
+        if (stops[j]!.hour === here.hour) return j;
+        if (Math.abs(stops[j]!.hour - here.hour) < Math.abs(stops[best]!.hour - here.hour)) {
+          best = j;
+        }
+      }
+      return best;
+    };
+    const dayEdge = (step: number) => {
+      const day = stops[index]!.day;
+      let i = index;
+      while (stops[i + step]?.day === day) i += step;
+      return i;
+    };
+
+    const onKeys = (e: KeyboardEvent) => {
+      const k = e.key;
+      // A modifier on its own is half of a chord, not an answer: Ctrl is
+      // pressed before the → of Ctrl+→.
+      if (k === 'Control' || k === 'Shift' || k === 'Alt' || k === 'Meta') return;
+      if (k === 'Tab') {
+        end(true);
+        return;
+      }
+      // The Enter that picked the card up, held down: it must not drop it too.
+      if (e.repeat && (k === 'Enter' || k === ' ')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (k === 'Escape') end();
+      else if (k === 'ArrowRight') go(e.ctrlKey ? nextDroppable(1) : index + 1);
+      else if (k === 'ArrowLeft') go(e.ctrlKey ? nextDroppable(-1) : index - 1);
+      else if (k === 'ArrowDown') go(otherDay(1));
+      else if (k === 'ArrowUp') go(otherDay(-1));
+      else if (k === 'Home') go(dayEdge(-1));
+      else if (k === 'End') go(dayEdge(1));
+      else if (k === 'Enter' || k === ' ') {
+        const stop = stops[index]!;
+        const verdict = dragging.map.get(cellKey(stop.day, stop.hour));
+        if (verdict?.blocked === null) {
+          drop(dragging, stop.day, stop.hour);
+          finish();
+          keys.onDrop(stop.day, stop.hour);
+        } else {
+          keys.onRefuse(verdict?.blocked ?? t('Bu hücreye bırakılamaz'));
+        }
+      } else if (e.ctrlKey || e.metaKey || e.altKey) {
+        // Ctrl+Z, Alt+5 and the rest would change the plan or the screen under
+        // a map computed for this one: the card goes back first.
+        end();
+        return;
+      } else if (k.length > 1 && k !== 'Delete' && k !== 'Backspace') {
+        return; // Shift, CapsLock and the like are not an answer
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const onPointer = () => end();
+
+    window.addEventListener('keydown', onKeys, { capture: true });
+    window.addEventListener('pointerdown', onPointer, { capture: true });
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    window.addEventListener('resize', onScroll);
+    detach.current = () => {
+      window.removeEventListener('keydown', onKeys, { capture: true });
+      window.removeEventListener('pointerdown', onPointer, { capture: true });
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      window.removeEventListener('resize', onScroll);
+    };
+
+    // The first answer goes after the intro the bar already holds, in ONE
+    // write, so a screen reader hears what was picked up and where it would go.
+    go(index);
+    const stop = stops[index]!;
+    const verdict = dragging.map.get(cellKey(stop.day, stop.hour));
+    const text = savedBar.current?.element.querySelector<HTMLElement>(':scope > span') ?? null;
+    if (text !== null) {
+      const answer =
+        verdict === undefined
+          ? t('Bu hücreye bırakılamaz')
+          : (verdict.blocked ?? verdict.warning ?? t('Buraya bırakılabilir.'));
+      text.textContent = `${keys.intro} ${keys.place(stop.day, stop.hour)}: ${answer}`;
+    }
+  }
+
   useEffect(
     () => () => {
       // Activity tears this tree down while Program is hidden. Treat that just
@@ -582,5 +790,5 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     [finish],
   );
 
-  return { start };
+  return { start, startKeys };
 }

@@ -59,7 +59,9 @@ import {
   type ColorOf,
   type GridRow,
 } from '../../pure/program';
-import { useDrag, type DragData } from '../../platform/dom';
+import { focusCellSoon, useDrag, type DragData, type KeyMove } from '../../platform/dom';
+import { lessonName } from '../../pure/feasibility';
+import { dayLabel } from '../../leaf/lang';
 import { samePlan, type SolverRun } from '../../platform/search';
 import { setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
 import { activePinned, activePlacements } from '../../pure/grid';
@@ -199,7 +201,7 @@ function Program({
     [change, ix, notify],
   );
 
-  const { start } = useDrag(drop);
+  const { start, startKeys } = useDrag(drop);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -264,7 +266,11 @@ function Program({
     applied: useStillSaid(solver.applied, state),
     result: useStillSaid(solver.result, state),
   };
-  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
+  const {
+    text: barText,
+    level: barLevel,
+    counter: barCounter,
+  } = describeBar(solver, view, t, current);
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -284,12 +290,25 @@ function Program({
         notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
         return;
       }
+      const found = classId === null ? null : blockAt(state, classId, day, hour);
+      const removed =
+        classId === null ? undefined : activePlacements(state)[placementKey(classId, day, hour)];
       change((d) => {
         const fresh = classAt(d, rowId, day, hour);
         return fresh === null ? d : removeBlock(d, fresh, day, hour);
       });
+      if (found === null || removed === undefined) return;
+      // Said, and focus kept on the grid: the card that had it is gone, and
+      // focus used to fall to <body> with nothing heard (DENETIM KS9).
+      notify(t('{ders} havuza kaldırıldı.', { ders: lessonName(ix, removed) }));
+      // Only when focus was on the grid or in its menu, i.e. on the card being
+      // removed: a removal asked from anywhere else does not pull focus here.
+      const active = document.activeElement;
+      if (active?.closest('.grid-wrap, [role=menu]') != null) {
+        focusCellSoon(rowId, day, found.hour);
+      }
     },
-    [change, classAt, notify, state, t],
+    [change, classAt, notify, state, t, ix],
   );
 
   /**
@@ -403,10 +422,13 @@ function Program({
    * is busy) and 5 (the teacher is in another class) both see its own cells —
    * and it could not even be dropped back where it came from. Nothing is
    * removed for real here: the lift happens inside the drop's single change().
+   *
+   * Two hands as well: a pointer, or the keyboard (`hand.origin`, the element
+   * that had focus and gets it back). Same map, same painting, same drop.
    */
   const beginDrag = useCallback(
     (
-      e: React.PointerEvent,
+      hand: React.PointerEvent | { origin: HTMLElement | null },
       lessonId: Id,
       source: { classId: Id; day: number; hour: number } | null,
       size: number,
@@ -435,27 +457,60 @@ function Program({
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
       const teacherView = view === 'teacher';
+      const rowId = teacherView ? lesson.teacherId : lesson.classId;
+      const data: DragData = {
+        lessonId,
+        rowId,
+        blockSize: Math.max(1, size),
+        hourCount: state.settings.hours.length,
+        map,
+        source: sourceRef,
+      };
 
-      start(
-        e,
-        {
-          lessonId,
-          rowId: teacherView ? lesson.teacherId : lesson.classId,
-          blockSize: Math.max(1, size),
-          hourCount: state.settings.hours.length,
-          map,
-          source: sourceRef,
-        },
-        {
-          top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
-          bottom: teacherView
-            ? roomLetter(ix, group?.roomId)
-            : subjectShort(state.settings, lessonSubject(state, lesson)),
-          color: programColorIndex(state, lesson, colorMode),
-        },
-      );
+      if ('origin' in hand) {
+        const { origin } = hand;
+        const name = lessonName(ix, lessonId);
+        const place = (day: number, hour: number) =>
+          t('{gun} {n}. saat', {
+            gun: dayLabel(state.settings.days[day]?.name ?? ''),
+            n: size > 1 ? `${hour + 1}–${hour + size}` : hour + 1,
+          });
+        const keys: KeyMove = {
+          at: source === null ? null : { day: source.day, hour: source.hour },
+          place,
+          intro: t('{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.', {
+            ders: name,
+          }),
+          onRefuse: notify,
+          onCancel: (byTab) => {
+            notify(t('Taşımadan vazgeçildi.'));
+            if (byTab) return;
+            if (origin?.isConnected === true && origin !== document.body) origin.focus();
+            else if (source !== null) focusCellSoon(rowId, source.day, source.hour);
+          },
+          onDrop: (day, hour) => {
+            notify(t('{ders} yerleşti: {yer}.', { ders: name, yer: place(day, hour) }));
+            // A moved block is followed to where it went. A card from the
+            // tray leaves focus on the tray, where the next one waits, unless
+            // that was the last of its pile.
+            requestAnimationFrame(() => {
+              if (source !== null || origin?.isConnected !== true) focusCellSoon(rowId, day, hour);
+            });
+          },
+        };
+        startKeys(data, keys);
+        return;
+      }
+
+      start(hand, data, {
+        top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
+        bottom: teacherView
+          ? roomLetter(ix, group?.roomId)
+          : subjectShort(state.settings, lessonSubject(state, lesson)),
+        color: programColorIndex(state, lesson, colorMode),
+      });
     },
-    [state, ix, view, start, solver.running, mask.days, colorMode, t],
+    [state, ix, view, start, startKeys, notify, solver.running, mask.days, colorMode, t],
   );
 
   const cardStart = useCallback(
@@ -463,9 +518,19 @@ function Program({
     [beginDrag],
   );
 
-  /** Left button on a placed block: pick it up and move it. */
+  /** Enter, Space or T on a pool card: pick it up from the keyboard. */
+  const cardPick = useCallback(
+    (origin: HTMLElement, lessonId: Id, size: number) =>
+      beginDrag({ origin }, lessonId, null, size),
+    [beginDrag],
+  );
+
+  /**
+   * Left button on a placed block: pick it up and move it. Or, with no
+   * pointer event, the keyboard's T and the menu's "Taşı" (`cellPick`).
+   */
   const cellMoveStart = useCallback(
-    (e: React.PointerEvent, rowId: string, day: number, hour: number) => {
+    (hand: React.PointerEvent | null, rowId: string, day: number, hour: number) => {
       const teacherView = view === 'teacher';
       const lessonId = teacherView
         ? ix.teacherBusy.get(closedKey(rowId, day, hour))
@@ -481,22 +546,38 @@ function Program({
       const found = blockAt(state, classId, day, hour);
       if (found === null) return;
 
-      beginDrag(e, lessonId, { classId, day, hour: found.hour }, found.size);
+      const origin = hand === null ? (document.activeElement as HTMLElement | null) : null;
+      beginDrag(hand ?? { origin }, lessonId, { classId, day, hour: found.hour }, found.size);
     },
     [state, ix, view, beginDrag],
   );
 
+  const cellPick = useCallback(
+    (rowId: string, day: number, hour: number) => {
+      const classId = classAt(state, rowId, day, hour);
+      if (classId !== null && blockPinned(state, classId, day, hour)) {
+        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        return;
+      }
+      cellMoveStart(null, rowId, day, hour);
+    },
+    [cellMoveStart, classAt, notify, state, t],
+  );
   // What the grid's rows hold: one identity each (see `useSteady`).
   const steadyRemove = useSteady(cellRemove);
   const steadyMoveStart = useSteady(cellMoveStart);
   const steadyPin = useSteady(pinCell);
+  const steadyPick = useSteady(cellPick);
 
   if (state.lessons.length === 0) {
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings: the
+              sentence below says what is missing, the heading says where. */}
+          <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
-          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
+          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.')}
@@ -522,13 +603,23 @@ function Program({
           that never got it. `polite` and not `assertive`: it must not cut into
           a dialog, and the DRAG reason updates several times a second while the
           pointer moves — the region is on the wrapper so those coalesce into
-          one announcement per settled state rather than one per frame. */}
-      <div
-        className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
-        role="status"
-        aria-live="polite"
-      >
-        <span>{barText}</span>
+          one announcement per settled state rather than one per frame.
+
+          The live region is the FIRST span only, not the whole bar: the run's
+          counter (`barCounter`) changes many times a second and sits beside
+          it, outside, so the start is said once and the result once. The
+          COUNTER is `aria-busy`, not the bar: a busy ancestor tells a screen
+          reader to hold back the live region inside it, and the start would
+          never be heard. */}
+      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
+        <span role="status" aria-live="polite">
+          {barText}
+        </span>
+        {barCounter !== undefined && (
+          <span className="reason-count" aria-busy="true">
+            {barCounter}
+          </span>
+        )}
         {((solver.result !== null && current.result) ||
           (solver.applied !== null && current.applied)) &&
           !solver.running && (
@@ -572,6 +663,10 @@ function Program({
           while down the right; it came back under the grid once it could
           open into the room the timetable does not use and be closed. */}
       <div className={shown === null ? 'program-body' : 'program-body previewing'}>
+        {/* The grid's place in the outline: h1 the school, h2 the grid and
+            the pool (LessonPool), h3 the pool's groups. It had no h2, so the
+            pool's groups hung straight off the school name. */}
+        <h2 className="visually-hidden">{t('Program')}</h2>
         <Grid
           settings={state.settings}
           rows={rows}
@@ -581,6 +676,7 @@ function Program({
           onCellRemove={shown === null ? steadyRemove : still}
           onCellMoveStart={shown === null ? steadyMoveStart : still}
           onCellPin={shown === null ? steadyPin : still}
+          onCellPick={shown === null ? steadyPick : still}
           onMenu={shown === null ? setMenuTarget : still}
           menuOpen={active && menuOpen}
           onMenuOpenChange={setMenuOpen}
@@ -592,6 +688,7 @@ function Program({
               running={solver.running}
               container={menuPortalRef.current}
               cellRemove={cellRemove}
+              cellPick={cellPick}
               editLesson={editLesson}
               inspect={inspect}
               togglePin={togglePin}
@@ -612,6 +709,7 @@ function Program({
           setFilter={setPoolFilter}
           subjects={poolSubjects}
           onStart={cardStart}
+          onPick={shown === null ? cardPick : still}
           onMenu={setPoolMenuLessonId}
           menuOpen={active && poolMenuOpen}
           onMenuOpenChange={setPoolMenuOpen}

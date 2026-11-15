@@ -118,7 +118,7 @@ describe('uygulama açılıyor', () => {
     render();
     expect(container.textContent).toContain('Başlarken');
     expect(container.textContent).toContain('Derslikler');
-    expect(button('Örnek veriyle doldur')).toBeTruthy();
+    expect(button('Örnek okulu yükle')).toBeTruthy();
   });
 
   it('altı sekmenin hepsi hata vermeden çizilir', () => {

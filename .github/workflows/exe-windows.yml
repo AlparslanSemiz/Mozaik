@@ -108,8 +108,9 @@ jobs:
           & "$d\msedgedriver.exe" --version
           "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
 
-      # Runner'ın ekranı 1024×768; büyütülmüş pencere 1280 px'in altında kalınca sekmelerin
-      # yazısı gizleniyor (styles.css) ve süit sekmeyi adıyla bulamıyor (2026-10-24).
+      # Runner'ın ekranı 1024×768; büyütülmüş pencere dar kalınca sekmelerin yazısı
+      # gizleniyordu (2026-11-15'ten beri simgenin altına iniyor) ve süit sekmeyi
+      # adıyla bulamıyordu (2026-10-24).
       # Tıklama testlerinin ölçüsü 1920×1080.
       - name: Ekran 1920×1080
         shell: pwsh

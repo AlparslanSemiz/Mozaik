@@ -51,19 +51,15 @@ export function lessonsStrip({ ui, state, t }: StripContext): React.ReactElement
   const list: Array<{ id: string; name: string; color: number }> =
     ui.lessonMode === 'teacher' ? state.teachers : state.classes;
   const selected = list.find((x) => x.id === ui.lessonFocus) ?? list[0];
-  // "Ders girişi araçları" and not "Ders araçları", which is what it was
-  // called for about an hour: `getByLabel` matches on SUBSTRING and ignores
-  // case, so "Ders araçları" also answered to `getByLabel('ders ara')` — the
-  // search box on this very screen — and the list test died of a strict-mode
-  // violation. Pitfall 74 from the other side: it is not only buttons that
-  // collide, and a name does not have to look like a name to be one.
+  // The strip is named after its tab (SD3, 2026-11-15: one name per thing).
+  // It was "Ders araçları" for about an hour once: `getByLabel` matches on
+  // SUBSTRING and ignores case, so that name also answered to
+  // `getByLabel('ders ara')` — the search box on this very screen — and the
+  // list test died of a strict-mode violation. Pitfall 74 from the other side:
+  // it is not only buttons that collide, and a name does not have to look like
+  // a name to be one. "Dersler" contains no "ders ara".
   return (
-    <div
-      className="ribbon"
-      data-section={ui.tab}
-      role="toolbar"
-      aria-label={t('Ders girişi araçları')}
-    >
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Dersler')}>
       <Group label="Yöntem">
         {LESSON_MODES.map((m) => (
           <button

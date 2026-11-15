@@ -110,7 +110,7 @@ describe('şema örnekleri', () => {
 
   // DK11: "Dosyadan aç" is stricter than the reader underneath it. A file with
   // no teachers or no lessons field at all is cut or hand-edited, and loading
-  // it used to empty the plan after one "Yedeği yükle". Every file the program
+  // it used to empty the plan after one "Planı aç". Every file the program
   // ever wrote carries all four lists, so every example must still pass.
   it.each(VERSIONS)('v%i dosyası Dosyadan aç kapısından geçiyor', (version) => {
     expect(readPlanFile(read(version))).toMatchObject({ state: { schemaVersion: SCHEMA_VERSION } });
@@ -386,7 +386,7 @@ describe('şema örnekleri — ayarlar', () => {
     // v12 moved the grid into named alternatives. A file below it has one
     // unnamed grid at the top level, and it becomes the default envelope.
     expect(program.id).toBe(version >= 12 ? 'p1' : 'program-1');
-    expect(program.name).toBe(version >= 12 ? 'A programı' : 'Program 1');
+    expect(program.name).toBe(version >= 12 ? 'A programı' : 'Seçenek 1');
     expect(state.activeProgramId).toBe(program.id);
     expect(state.programs.length).toBe(1);
     // v10 brought pinning, and a file below it cannot carry a pin. None is
@@ -568,7 +568,7 @@ describe('şema örnekleri — eksik ve bozuk alanlar', () => {
 
     const program = activeProgram(state!);
     expect(program.id).toBe('program-1');
-    expect(program.name).toBe('Program 1');
+    expect(program.name).toBe('Seçenek 1');
     expect(state!.activeProgramId).toBe('program-1');
     // The grid inside it is not collateral damage of a missing name.
     expect(Object.keys(program.placements).length).toBe(6);

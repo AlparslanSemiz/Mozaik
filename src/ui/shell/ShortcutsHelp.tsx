@@ -16,7 +16,7 @@ import { createContext, Fragment, useCallback, useContext, useState } from 'reac
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { T, useT } from '../common';
+import { T, useReturnFocus, useT } from '../common';
 
 type Open = () => void;
 
@@ -60,6 +60,7 @@ const GROUPS: Group[] = [
       { keys: 'Alt+1..7', desc: 'Bir sekmeye git' },
       { keys: 'Ctrl+Z', desc: 'Geri al' },
       { keys: 'Ctrl+Y', desc: 'İleri al' },
+      { keys: 'Ctrl+Shift+Z', desc: 'İleri al' },
       { keys: '?', desc: 'Bu ekranı aç' },
       { keys: 'Esc', desc: 'İptal et veya kapat' },
     ],
@@ -67,8 +68,39 @@ const GROUPS: Group[] = [
   {
     title: 'Izgara',
     rows: [
-      { keys: 'Delete', desc: 'Odaklı dersi havuza kaldır' },
-      { keys: 'Enter', desc: 'Odaklı kartın sağ tık menüsünü aç' },
+      { keys: 'Tab', desc: 'Izgaraya gir, bir daha basınca çık' },
+      { keys: '← → ↑ ↓', desc: 'Hücreden hücreye git' },
+      { keys: 'Home End', desc: 'Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra' },
+      { keys: 'Delete Backspace', desc: 'Odaklı kartı havuza kaldır' },
+      { keys: 'Enter Space', desc: 'Odaklı kartın sağ tık menüsünü aç' },
+      { keys: 'T', desc: 'Odaklı kartı taşımak için al' },
+      { keys: 'P', desc: 'Odaklı kartı sabitle veya sabitlemeyi kaldır' },
+    ],
+  },
+  {
+    title: 'Havuz',
+    rows: [
+      { keys: '← →', desc: 'Kartlar arasında git' },
+      { keys: 'Enter Space T', desc: 'Odaklı kartı ızgaraya koymak için al' },
+      { keys: '↑ ↓ Home End', desc: 'Tutamakta: havuzun boyunu değiştir, Shift ile daha çok' },
+    ],
+  },
+  {
+    // The keyboard's pick-up (drag.ts `startKeys`) and the mouse's drag share Esc.
+    title: 'Kart eldeyken',
+    rows: [
+      { keys: '← →', desc: 'Hedefi bir saat kaydır' },
+      { keys: 'Ctrl+← →', desc: 'Bırakılabilecek bir sonraki saate git' },
+      { keys: '↑ ↓', desc: 'Önceki veya sonraki güne git' },
+      { keys: 'Enter Space', desc: 'Buraya bırak' },
+      { keys: 'Esc', desc: 'Vazgeç, sürüklerken de' },
+    ],
+  },
+  {
+    title: 'Müsaitlik',
+    rows: [
+      { keys: '← → ↑ ↓', desc: 'Hücreden hücreye git' },
+      { keys: 'Space Enter', desc: 'Saati aç veya kapat, başlıkta bütün günü veya saati' },
     ],
   },
   {
@@ -90,11 +122,16 @@ const GROUPS: Group[] = [
 
 function ShortcutsHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
+  const returnFocus = useReturnFocus(open);
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
-        <Dialog.Content className="sheet sheet-narrow" aria-describedby={undefined}>
+        <Dialog.Content
+          className="sheet sheet-narrow"
+          aria-describedby={undefined}
+          onCloseAutoFocus={returnFocus}
+        >
           <div className="sheet-head">
             <div className="sheet-id">
               <Dialog.Title className="sheet-title">
@@ -111,7 +148,7 @@ function ShortcutsHelp({ open, onClose }: { open: boolean; onClose: () => void }
               <h3 className="sheet-h">{t(group.title)}</h3>
               <dl className="sheet-edit">
                 {group.rows.map((row) => (
-                  <Fragment key={`${group.title}-${row.desc}`}>
+                  <Fragment key={`${group.title}-${row.keys}`}>
                     <dt>
                       <kbd>{row.keys}</kbd>
                     </dt>

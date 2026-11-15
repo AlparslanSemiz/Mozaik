@@ -121,7 +121,7 @@ function blockName(ix: Index, ref: BlockRef): string {
 function targetsName(ix: Index, targets: BlockRef[]): string {
   const names = [...new Set(targets.map((x) => blockName(ix, x)))];
   if (names.length === 1 && targets.length > 1)
-    return t('{ad} ({n} blok)', { ad: names[0]!, n: targets.length });
+    return t('{ad} ({n} kart)', { ad: names[0]!, n: targets.length });
   return names.join(', ');
 }
 

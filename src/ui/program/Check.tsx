@@ -3,18 +3,62 @@
 
 import { useMemo } from 'react';
 import { CapacityRows } from '../lists';
-import { buildIndex, closedConflicts, placementKey } from '../../pure/constraints';
-import { type Advice, sharedReport, type ReportRow } from '../../pure/feasibility';
+import { buildIndex, closedConflicts } from '../../pure/constraints';
+import {
+  type Advice,
+  type Cell,
+  groupStranded,
+  groupUnplaceable,
+  lessonName,
+  type ReportRow,
+  sharedReport,
+  type Target,
+  violationCell,
+} from '../../pure/feasibility';
 import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { pinnedRelationBreaches } from '../../pure/constraints';
-import type { CheckView } from '../../platform/prefs';
-import { T, useT } from '../common';
+import type { CheckView, ToolState } from '../../platform/prefs';
+import { T, useT, useToast } from '../common';
+import { revealCell, revealPoolCard } from './reveal';
 
 interface Props {
   state: State;
   /** Which part of the report the strip has chosen. */
   view: CheckView;
+  /**
+   * Where "Göster" and "Müsaitlik'te aç" go. Three audits found the same
+   * thing: Kontrol said what was wrong and gave nothing to click (2026-11-15).
+   */
+  ui: Pick<ToolState, 'setTab' | 'setKind' | 'setChosen' | 'setPoolFilter'>;
+}
+
+/** "Göster" and "Müsaitlik'te aç", side by side at the end of a row. */
+function RowActions({
+  show,
+  open,
+  openLabel,
+}: {
+  show?: (() => void) | undefined;
+  open?: (() => void) | undefined;
+  /** Says WHOSE row opens, so two buttons in one row are not both "aç". */
+  openLabel?: string | undefined;
+}) {
+  const t = useT();
+  return (
+    <td className="row-actions">
+      {show !== undefined && (
+        <button type="button" className="btn" onClick={show}>
+          {t('Göster')}
+        </button>
+      )}
+      {open !== undefined && (
+        <button type="button" className="btn" onClick={open} title={openLabel}>
+          {t("Müsaitlik'te aç")}
+        </button>
+      )}
+    </td>
+  );
 }
 
 /**
@@ -40,7 +84,7 @@ const GROUPED: Record<Advice['code'], string> = {
   lessonNeedsMoreDays:
     '{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:',
   teacherManyBlockedDays:
-    '{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
+    '{n} öğretmenin müsait günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
   lessonManyBlocks:
     '{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:',
 };
@@ -76,13 +120,21 @@ function Section({
     <div className="panel" id={id}>
       <h2>{title}</h2>
       <p className="hint">{description}</p>
-      <CapacityRows rows={rows} empty={empty} problemsFirst colorOf={colorOf} />
+      <CapacityRows
+        rows={rows}
+        label={title}
+        empty={empty}
+        problemsFirst
+        colorOf={colorOf}
+        openLabel={id === 'kontrol-ogretmenler' ? 'Müsait' : 'Açık'}
+      />
     </div>
   );
 }
 
-export default function Check({ state, view }: Props) {
+export default function Check({ state, view, ui }: Props) {
   const t = useT();
+  const notify = useToast();
   // One index for the whole tab, and the report the health chip already built
   // for this plan (`sharedReport`): opening Kontrol built both again.
   const ix = useMemo(() => buildIndex(state), [state]);
@@ -98,6 +150,45 @@ export default function Check({ state, view }: Props) {
   const placed = Object.keys(activePlacements(state)).length;
   const totalWanted = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
   const pinnedBreaks = useMemo(() => pinnedRelationBreaches(state, ix).length, [state, ix]);
+  // One row per LESSON, not per hour: a two-hour block on a closed hour was
+  // two identical rows under a heading that said "2 ders".
+  const stranded = useMemo(() => groupStranded(state, ix, conflicts), [state, ix, conflicts]);
+  const strandedHours = conflicts.length;
+  const stuck = useMemo(() => groupUnplaceable(report.unplaceable), [report]);
+  // Once per change, not per render: each lookup walks the week's placements.
+  const violationCells = useMemo(
+    () => new Map(report.violations.map((v) => [v.key, violationCell(state, ix, v)])),
+    [report, state, ix],
+  );
+
+  // The tab switch first, then the reveal: Program is kept alive in an
+  // Activity, so the kart exists and only has to become visible (reveal.ts).
+  const show = (cell: Cell) => {
+    ui.setTab('program');
+    revealCell([cell.classId, cell.teacherId], cell.day, cell.hour, (found) => {
+      if (!found) notify(t('Kart ızgarada görünmüyor; satırı gizli olabilir.'));
+    });
+  };
+  const showInPool = (lessonId: Id) => {
+    // A pool narrowed to one subject would hide the very card asked for.
+    ui.setPoolFilter('');
+    ui.setTab('program');
+    revealPoolCard(lessonId, (found) => {
+      if (!found) notify(t('Kart havuzda görünmüyor; havuz kapalı olabilir.'));
+    });
+  };
+  const openAvailability = (who: Target) => {
+    ui.setKind(who.kind);
+    ui.setChosen(who.id);
+    ui.setTab('availability');
+  };
+  const whoName = (who: Target): string =>
+    who.kind === 'teacher'
+      ? (ix.teacherById.get(who.id)?.short ?? '?')
+      : who.kind === 'class'
+        ? t('{ad} sınıfı', { ad: ix.classById.get(who.id)?.name ?? '?' })
+        : t('{ad} dersliği', { ad: ix.roomById.get(who.id)?.name ?? '?' });
+  const openLabel = (who: Target) => t("{kim} için Müsaitlik'i açar", { kim: whoName(who) });
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
   ).length;
@@ -109,6 +200,8 @@ export default function Check({ state, view }: Props) {
     return (
       <>
         <div className="empty-screen">
+          {/* The screen's heading, for a reader who moves by headings. */}
+          <h2 className="visually-hidden">{t('Kontrol')}</h2>
           <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
           <T k="Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
         </div>
@@ -127,7 +220,7 @@ export default function Check({ state, view }: Props) {
         <div className="panel">
           <div className="ok-box">
             {report.tight ? (
-              <T k="**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
+              <T k="**Sorun görünmüyor.** Bazı öğretmenlerin müsait saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
             ) : (
               <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
             )}
@@ -139,11 +232,11 @@ export default function Check({ state, view }: Props) {
             {/* A lesson on a closed hour is its own sentence: nothing is
                 İmkânsız about it, it was placed and then its hour was taken
                 away, and it is moved rather than solved (DENETIM DK7). */}
-            {conflicts.length > 0 && (
+            {stranded.length > 0 && (
               <div>
                 <T
-                  k="**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın."
-                  vars={{ n: conflicts.length }}
+                  k="**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur."
+                  vars={{ ders: stranded.length, saat: strandedHours }}
                 />
               </div>
             )}
@@ -201,7 +294,7 @@ export default function Check({ state, view }: Props) {
         {placed < totalWanted && (
           <p className="hint">
             <T
-              k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz."
+              k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz."
               vars={{ n: totalWanted - placed }}
             />
           </p>
@@ -210,28 +303,41 @@ export default function Check({ state, view }: Props) {
 
       {view === 'problems' && (
         <>
-          {conflicts.length > 0 && (
-            <div className="panel kontrol-sorun">
-              <h2>{t('Kapalı saatte ders ({n})', { n: conflicts.length })}</h2>
+          {stranded.length > 0 && (
+            <div className="panel kontrol-sorun" id="kontrol-kapali">
+              <h2>{t('Kapalı saatte ders ({n})', { n: stranded.length })}</h2>
               <p className="hint">
-                <T k="Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi." />
+                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın." />
               </p>
               <table className="list">
                 <thead>
                   <tr>
-                    <th className="w-col-lg">{t('Durum')}</th>
-                    <th>{t('Açıklama')}</th>
+                    <th className="w-col-2xl">{t('Ders')}</th>
+                    <th>{t('Sebep')}</th>
+                    <th className="row-actions" />
                   </tr>
                 </thead>
                 <tbody>
-                  {conflicts.map((c) => (
-                    <tr key={placementKey(c.classId, c.day, c.hour)}>
-                      <td>
-                        <span className="badge impossible">{t('Kapalı saat')}</span>
-                      </td>
-                      <td>{c.reason}</td>
-                    </tr>
-                  ))}
+                  {stranded.map((s) => {
+                    const first = s.cells[0]!;
+                    const who = s.closedBy[0];
+                    return (
+                      <tr key={s.lessonId}>
+                        <td>
+                          {lessonName(ix, s.lessonId)}{' '}
+                          <span className="hint inline">
+                            · {t('{n} saat', { n: s.cells.length })}
+                          </span>
+                        </td>
+                        <td>{s.reason}</td>
+                        <RowActions
+                          show={() => show(first)}
+                          open={who === undefined ? undefined : () => openAvailability(who)}
+                          openLabel={who === undefined ? undefined : openLabel(who)}
+                        />
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -265,42 +371,70 @@ export default function Check({ state, view }: Props) {
                   <tr>
                     <th className="w-col-lg">{t('Durum')}</th>
                     <th>{t('Açıklama')}</th>
+                    <th className="row-actions" />
                   </tr>
                 </thead>
                 <tbody>
-                  {report.violations.map((v) => (
-                    <tr key={v.key}>
-                      <td>
-                        <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
-                        </span>
-                      </td>
-                      <td>{v.message}</td>
-                    </tr>
-                  ))}
+                  {report.violations.map((v) => {
+                    const cell = violationCells.get(v.key) ?? null;
+                    return (
+                      <tr key={v.key}>
+                        <td>
+                          <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
+                            {v.level === 'block' ? t('Engel') : t('Uyarı')}
+                          </span>
+                        </td>
+                        <td>{v.message}</td>
+                        <RowActions show={cell === null ? undefined : () => show(cell)} />
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           )}
 
-          {report.unplaceable.length > 0 && (
-            <div className="panel kontrol-sorun">
+          {/* One row per CAUSE, the lessons under it as buttons (TODO SD4):
+              twelve rows of one template, "Örnek sebep: … kapalı", said
+              nothing the first row had not. */}
+          {stuck.length > 0 && (
+            <div className="panel kontrol-sorun" id="kontrol-yerlesemeyen">
               <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
               <p className="hint">
-                {t('Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.')}
+                <T k="Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın." />
               </p>
               <table className="list">
                 <thead>
                   <tr>
-                    <th className="w-col-2xl">{t('Ders')}</th>
-                    <th>{t('Sebep')}</th>
+                    <th>{t('Sebep ve dersler')}</th>
+                    <th className="row-actions" />
                   </tr>
                 </thead>
                 <tbody>
-                  {report.unplaceable.map((u) => (
-                    <tr key={u.lessonId}>
-                      <td>{u.name}</td>
-                      <td>{u.message}</td>
+                  {stuck.map((g) => (
+                    <tr key={g.message}>
+                      <td>
+                        <div>{g.message}</div>
+                        <div className="lesson-chips">
+                          {g.lessons.map((u) => (
+                            <button
+                              key={u.lessonId}
+                              type="button"
+                              className="chip lesson-chip"
+                              onClick={() => showInPool(u.lessonId)}
+                            >
+                              {u.name}
+                              <span className="chip-count">
+                                · {t('{n} saat', { n: u.missing })}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                      <RowActions
+                        open={g.fix === null ? undefined : () => openAvailability(g.fix!)}
+                        openLabel={g.fix === null ? undefined : openLabel(g.fix)}
+                      />
                     </tr>
                   ))}
                 </tbody>
@@ -308,7 +442,7 @@ export default function Check({ state, view }: Props) {
             </div>
           )}
 
-          {!report.hasProblem && conflicts.length === 0 && (
+          {!report.hasProblem && stranded.length === 0 && (
             <div className="panel">
               <p className="hint">
                 {t('Kapalı saatte ders, kural ihlali ya da yerleşemeyen ders yok.')}
@@ -325,7 +459,7 @@ export default function Check({ state, view }: Props) {
           first question. */}
       {view === 'advisor' && (
         <div className="panel">
-          <h2>{t('Danışman uyarıları ({n})', { n: report.advice.length })}</h2>
+          <h2>{t('Danışman notları ({n})', { n: report.advice.length })}</h2>
           <p className="hint">
             {t('Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.')}
           </p>
@@ -347,7 +481,7 @@ export default function Check({ state, view }: Props) {
                   {adviceRows(report.advice).map((group) => (
                     <tr key={group[0]!.key}>
                       <td>
-                        <span className="badge tight">{t('Öneri')}</span>
+                        <span className="badge tight">{t('Not')}</span>
                       </td>
                       <td>
                         {group.length === 1 ? (

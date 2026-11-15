@@ -1,6 +1,7 @@
 // One row of the grid, memoised on its own: a placement redraws one or two
 // rows of ~2100 cells, not all of them (pitfall 10).
 
+import { dayLabel } from '../../leaf/lang';
 import { type Settings, paletteColor } from '../../leaf/model';
 import type { GridRow, MaskMode } from '../../pure/program';
 import { useT } from '../common';
@@ -26,6 +27,8 @@ interface RowProps {
    * 84 cells redraws on each render and the memo above stops meaning anything.
    */
   onCellPin: (rowId: string, day: number, hour: number) => void;
+  /** T on a focused card: pick the block up from the keyboard (drag.ts `startKeys`). */
+  onCellPick: (rowId: string, day: number, hour: number) => void;
 }
 
 /**
@@ -57,12 +60,14 @@ export const Row = memo(function Row({
   onCellRemove,
   onCellMoveStart,
   onCellPin,
+  onCellPick,
 }: RowProps) {
   // Read from context INSIDE the memoised row rather than passed as a prop:
   // the provider's `open` is a `useCallback([])`, i.e. stable for the life of
   // the app, so this cannot be what re-renders 25 rows of 84 cells (pitfall 10).
   const inspect = useInspect();
   const t = useT();
+  const closedWord = row.kind === 'teacher' ? t('müsait değil') : t('kapalı');
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
     const dayMasked = dayModes[settings.days[g]?.name ?? ''] === 'ghost';
@@ -155,6 +160,9 @@ export const Row = memo(function Row({
           // block resolve to nothing and their highlight silently never paints.
           data-span={spans ? span : undefined}
           colSpan={spans ? span : undefined}
+          // The cross is drawn, the word is read: "×" came out as "çarpı".
+          // One attribute on the closed cells only, not two spans in each.
+          aria-label={cell === null && closed ? closedWord : undefined}
           className={className}
           title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >
@@ -181,6 +189,7 @@ export const Row = memo(function Row({
               }
               style={{ background: paletteColor(cell.color) }}
               draggable={false}
+              tabIndex={-1}
               disabled={cellMasked}
               onPointerDown={(e) => {
                 if (!cell.pinned && !cellMasked) onCellMoveStart(e, row.id, g, s);
@@ -203,26 +212,43 @@ export const Row = memo(function Row({
                 );
               }}
               onKeyDown={(e) => {
+                // A held key repeats: one press, one pick-up.
+                if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+                const key = e.key.toLowerCase();
                 if (e.key === 'Delete' || e.key === 'Backspace') {
                   e.preventDefault();
                   onCellRemove(row.id, g, s);
+                } else if (key === 'p') {
+                  // The pin is no longer a Tab stop of its own (KS8); its key is.
+                  e.preventDefault();
+                  onCellPin(row.id, g, s);
+                } else if (key === 't' && !cell.pinned) {
+                  e.preventDefault();
+                  onCellPick(row.id, g, s);
                 }
               }}
-              aria-label={
+              // Built from parts, so an empty part leaves no stray space and
+              // the day and hour are said: a screen reader does not see the
+              // column the card stands in. The conflict used to be in the
+              // title only.
+              aria-label={[
+                t('{gun} {n}. saat', {
+                  gun: dayLabel(settings.days[g]?.name ?? ''),
+                  n: spans ? `${s + 1}–${s + span}` : s + 1,
+                }),
+                row.name,
+                cell.top,
+                cell.bottom,
                 cell.mark === 'opened'
-                  ? t('{ust} {alt}, açılan öğretmen saatinde', { ust: cell.top, alt: cell.bottom })
+                  ? t('açılan öğretmen saatinde')
                   : cell.mark === 'moved'
-                    ? t('{ust} {alt}, yeri değişiyor', { ust: cell.top, alt: cell.bottom })
-                    : cell.pinned
-                      ? t('{ust} {alt}, sabitlenmiş', {
-                          ust: cell.top,
-                          alt: cell.bottom,
-                        })
-                      : t('{ust} {alt}, kaldırmak için Delete', {
-                          ust: cell.top,
-                          alt: cell.bottom,
-                        })
-              }
+                    ? t('yeri değişiyor')
+                    : '',
+                cell.pinned ? t('sabitlenmiş') : '',
+                cell.conflict ?? '',
+              ]
+                .filter((part) => part !== '')
+                .join(', ')}
               title={
                 cell.pinned
                   ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
@@ -264,6 +290,7 @@ export const Row = memo(function Row({
             <button
               type="button"
               className="card-pin"
+              tabIndex={-1}
               aria-pressed={cell.pinned}
               disabled={cellMasked}
               // NO `stopPropagation` on pointerdown, and that is a measurement
@@ -310,6 +337,7 @@ export const Row = memo(function Row({
             row 78 columns long by eye. */}
         <button
           className="inspect"
+          tabIndex={-1}
           onClick={() => inspect(row.kind, row.id)}
           title={t('{ad}: bilgileri ve haftalık programı', { ad: row.name })}
         >

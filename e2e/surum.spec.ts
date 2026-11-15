@@ -80,7 +80,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
 
     await open(page);
     await openSettings(page, 'Hakkında');
-    await expect(page.locator('.panel', { hasText: 'Bu program' }).last()).toBeVisible();
+    await expect(page.locator('.panel', { hasText: 'Sürüm ve güncelleme' }).last()).toBeVisible();
     // Give anything asynchronous a chance to misbehave before we believe it.
     await page.waitForTimeout(500);
 
