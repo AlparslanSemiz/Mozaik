@@ -185,6 +185,23 @@ maskable ikona verdi, `ruflo/kurulum` birleşirken kendi numarasını kaydırır
 
 ---
 
+## 2026-11-15 · Teachers ve Dersler bileşenlere (`refactor/rf24-rf25`)
+
+RF24 ve RF25 (TODO §8k). Kod taşındı, değiştirilmedi; ekran ve davranış aynı.
+
+- `ui/setup/Teachers.tsx` 560 → 136 satır: ekleme bloğu ve taslağı `TeacherForm.tsx`, listenin
+  satırı `TeacherRow.tsx`, ikisinin cinsiyet seçenekleri `genders.ts`. "İkinci branş sorulan
+  satırlar" (`opening`) listede kaldı, satırlara iniyor.
+- `ui/lessons/index.tsx` 684 → 241 satır: `LessonForm.tsx` (ekleme bloğu, taslak, yapıştırma),
+  `LessonRow.tsx`, `LessonPicker.tsx` (odaklı kipte sağ sütun). Kipe göre süzgeci temizleyen
+  `useEffect` ekranda kaldı.
+
+Doğrulama: `tsc`, `eslint src`, `npm run sinir` (0 ihlal), `knip` (çıkış 0), belge kapısı yeşil.
+`npm run hizli` 11 kırmızı, `main`'dekiyle aynı 11 (bu Mac'te `flock` yok, depolama testleri,
+`rowOrder`). Playwright: `dersler`, `kurulum` ve `liste` spec'leri 94/94 yeşil (Chromium). `dist/index.html`
+1 173 991 → 1 174 664 bayt (+673, yeni bileşenlerin prop'ları), sınırın 11,8 kB altında;
+brotli'li hâli sınırın 6,5 kB altında.
+
 ## 2026-10-24 gece · Birleştirme: `fix/okunamayan-plan` ve `refactor/moduller` `main`'e
 
 **Ne oldu.** Devirdeki sıra: önce veri düzeltmesi, sonra refactor. `fix/okunamayan-plan`
