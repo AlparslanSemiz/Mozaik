@@ -64,6 +64,69 @@ Aynı dalda dört küçük kapı:
 - **İndirme sınırlı, kurulum kendi klasöründe.** `boyut`'u aşan ilk parçada durulur (en çok 256
   MB), kurulum her seferinde `%TEMP%` altında yeni ve tahmin edilemez adlı bir klasöre yazılır.
 
+### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
+
+**Karar (Alp, 2026-11-16).** Babanın programı Windows'ta ve sitede; Mac ikinci sırada. `surum.yml`'in
+`publish` işi `mac`'i yine bekler ama sonucunu şart koşmaz (`always()`, yalnız `package` ve
+`exe` yeşil olmalı), iki mimari birbirini de durdurmaz (`fail-fast: false`). Gelmeyen mimarinin
+dosyaları yayına, alanları `surum.json`'a girmez; alanlar isteğe bağlı olduğu için Windows
+kopyaları fark etmez, o Mac kopyaları "Mac'in kurabileceği bir paket yok" der ve güncellemez.
+Eksik Mac görünür kalır: bir `::warning::` ve iş özetinde "Mac paketi bu sürümde yok". Gelen her
+Mac dosyası yine minisign ile imzalanır. `kontrat.test.ts` bu şartları ölçüyor.
+
+### 2026-11-15 · Mac sürümü: Apple imzasız, güncellemesi bizim imzamızla (`platform/mac`)
+
+**Karar (Alp, 2026-11-15).** Mozaik'in bir Mac sürümü şimdi çıkıyor, Apple'ın Developer ID
+imzası ve notarization'ı olmadan. Apple Silicon imzasız bir programı hiç çalıştırmadığı için
+`.app` yalnız ad-hoc imzalı (`codesign -s -`, `tauri.macos.conf.json`'da `signingIdentity: "-"`).
+Bedeli ilk açılış: macOS "geliştirici doğrulanamadı" der, kullanıcı bir kez Sistem Ayarları →
+Gizlilik ve Güvenlik → **Yine de Aç** der (README, "Mac"). Sonraki açılışlar sorusuz.
+
+**Güncelleme imzası Apple'dan bağımsız.** Mac kopyası kendini Windows'taki üç düğmeyle günceller ve
+aynı iki kilitle: manifestteki SHA-256 ve sürümle dosya adını bağlayan minisign imzası
+(`imza_dogru`, `mozaik <sürüm> Mozaik-mac-<mimari>.app.tar.gz`). Apple imzası gelse de bu kalır:
+Apple'ınki "bu geliştirici", bizimki "bu sürüm, bu dosya" der.
+
+**Güncellemenin şekli** (`src-tauri/src/update_mac.rs`). Bir Mac programı bir klasör
+(`Mozaik.app`), tek dosya değil. İndirme arşivi paketin yanındaki gizli `.Mozaik.app.yeni`
+klasörüne yazar; "Şimdi yeniden başlat" arşivi yeniden özetler, sistemin `tar`'ıyla açar, içine
+bakar (tek `Mozaik.app`, programı ve `Info.plist`'i var) ve çalışan paketle `renamex_np(RENAME_SWAP)`
+ile tek adımda yer değiştirir: hiçbir an o yolda Mozaik'siz geçmez. Yeni süreç hiç başlatılamazsa
+takas geri alınır; başlayıp penceresini açamayan bir sürümün geri dönüşü yok, eski paket o zaman
+gizli `.Mozaik.app.yeni/acilan/` altında durur (elle ya da dmg'den yeniden kurulur).
+
+**Bilinen risk, denenmedi.** Ad-hoc imzanın kimliği ikilinin özeti, yani her güncelleme macOS'a
+yeni bir program: Belgeler izni güncellemeden sonra yeniden sorulabilir, ve macOS 13+'ın "Uygulama
+Yönetimi" `/Applications`'taki takası durdurabilir. Bu yerel deneme `/Applications`'ta değil, sahte
+bir klasörde yapıldı; ilk gerçek sürümde temiz bir kullanıcıda bakılır (TODO B7.42). Eski paket gizli klasörde kalır, yeni sürümün sayfası yüklenince silinir
+(`sweep_old`, Windows'taki `.eski` ile aynı an). `/tmp` değil paketin yanı, çünkü rename yalnız
+aynı birimde atomik. Paketin klasörü yazılamıyorsa (dmg'den ya da App Translocation'dan
+çalışıyorsa) indirmeden önce tek cümle: "Mozaik'i Uygulamalar klasörüne taşıyın".
+
+**Manifest.** `surum.json`'a mimari başına dört isteğe bağlı alan (`mac_arm64`, `_boyut`,
+`_sha256`, `_imza`, aynısı `mac_x86_64`). 2.2.0 ve sonraki Windows kopyaları bilmedikleri alanları
+atlar (`kontrat.test.ts`, OPTIONAL; `update.rs`, `a_windows_copy_reads_a_manifest_with_mac_fields`).
+Mac kopyası Windows alanlarına hiç bakmaz (`mac_karari`).
+
+**İki mimari, iki dosya; universal değil.** OR-Tools her mimariye ayrı arşiv yayımlıyor; universal
+bir paket 99 dylib'i `lipo` ile tek tek birleştirmek ve her Mac'e iki kat (≈2 × 53 MB açık) taşımak
+demek. Rust tarafı aynı kaynaktan çapraz derleniyor, iki iş bir matrisin iki satırı.
+
+**CP-SAT Mac'te de var.** OR-Tools v9.15'in resmi `macOS-26.2` arşivi, adına rağmen en düşük
+macOS 11 (`LC_BUILD_VERSION minos 11.0`, 241 dylib'in hepsinde ölçüldü). `libortools.9.dylib`'in
+`@rpath` kapanışı (99 dosya) `Contents/Frameworks`'e girer ve kendi `LC_RPATH @loader_path`'leriyle
+birbirini bulur; `install_name_tool` gerekmedi. En düşük macOS bu yüzden 11.
+
+**Apple imzası bir anahtar.** `surum.yml`'in mac işi `APPLE_CERTIFICATE` sırrı varsa Developer ID
+ile imzalar ve sertleştirilmiş çalışma zamanını açar, `APPLE_ID`/`APPLE_PASSWORD`/`APPLE_TEAM_ID`
+de varsa notarize eder (Tauri'nin kendi değişkenleri). Sır yoksa değişkenler hiç tanımlanmaz ve
+ad-hoc imza kalır. Üyelik alınınca iş akışına dokunmak gerekmiyor, yalnız sırlar.
+
+**Veri.** Klasör Windows'takiyle aynı ad: `~/Documents/Ders Programı` (`FOLDER`). macOS ilk yazmada
+Belgeler izni sorar, cümlesi `src-tauri/macos/Info.plist`'te. Paket kimliği
+`com.dersprogrami.arac` kaldı: WKWebView'in deposu `~/Library/WebKit/<kimlik>` altında, yani
+tuzak 95 Mac'te de geçerli ve kimlik ilk sürümden sonra değişmez.
+
 ### 2026-11-15 · Ders formunda saat Ekle'den sonra varsayılana döner (`kullanim/ilk-acilis`)
 
 **Karar.** Dersler'in ekleme formu Ekle'den sonra haftalık saati 4'e, dağılımı tek saatlere

@@ -1024,6 +1024,24 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - ızgara: dersi silinmiş (yetim) bir yerleşim sınıf ekseninde `?` ile çiziliyor, çökertmiyor;
       - havuz: hiçbir branşa uymayan süzgeç boş tepsi veriyor, toplam aynı kalıyor.
 
+- [~] **B7.42 Mac sürümü (2026-11-15, `platform/mac`, DECISIONS "Mac sürümü").** Yazıldı ve bu
+  Mac'te doğrulandı: `Mozaik.app` ve dmg (arm64), CP-SAT Frameworks'ten (küçük model), Türkçe
+  menü, Belgeler klasörü, Cmd+Q ile kapanış, yerel sunucudan uçtan uca güncelleme (indir,
+  doğrula, takas, yeniden başlat, gizli klasör silindi) ve dmg'den çalışan kopyanın reddi.
+  Kalanlar:
+      - gerçek bir Release'le uçtan uca (imzalı arşiv, `releases/latest`), ilk sürümde;
+      - `mac.yml` ve `surum.yml`'in mac işi hiç koşmadı (ilk koşu dalın CI'ında);
+      - Cmd+C/V metin kutusunda: elle denendi, çalışıyor (Alp, 2026-11-16);
+      - arayüz metinleri Windows diyor: Hakkında "Uygulama (.exe)", "Belgelerim'deki",
+        ipuçlarında "Ctrl+Z" (src/ui, bu dalın dışında);
+      - Dock'tan "Çık" ve oturum kapatma `CloseRequested`'sız bitiyor (son iki saniye);
+      - ad-hoc imzada her güncelleme yeni bir kimlik: Belgeler izni yeniden sorulabilir,
+        macOS 13+ Uygulama Yönetimi `/Applications`'taki takası durdurabilir; temiz bir
+        kullanıcıda `/Applications`'tan bir güncelleme denenmeli;
+      - Mac işi kırmızıysa Windows sürümü çıkmaz mıydı: düzeldi (2026-11-16), Mac yayını
+        engellemiyor, eksik mimari uyarıyla atlanıyor (DECISIONS 2026-11-16);
+      - Apple Developer üyeliği alınırsa: `APPLE_*` sırları, iş akışı hazır.
+
 ---
 
 ## §8. Karar bekleyenler

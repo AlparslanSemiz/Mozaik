@@ -8,8 +8,10 @@
 //! (`verifySuggestion`) refuses, never a wrong week.
 //!
 //! THE LIBRARY IS OPTIONAL. The installer puts `ortools.dll` and the DLLs it
-//! needs next to the program (tauri.conf.json, `bundle.resources`); the
-//! standalone exe, the Linux development build and a broken install have none.
+//! needs next to the program (tauri.conf.json, `bundle.resources`), and the Mac
+//! .app carries `libortools.9.dylib` and the dylibs it loads in
+//! `Contents/Frameworks` (scripts/ortools-mac.sh); the standalone exe, the
+//! Linux development build and a broken install have none.
 //! `cpsat_var` says which, and the page falls back to its own search.
 //!
 //! The five functions are the ones `ortools/sat/c_api/cp_solver_c.h` declares
@@ -42,8 +44,8 @@ struct Cpsat {
     stop: EnvFn,
 }
 
-/// The library's file name on each platform. Windows is the one delivered;
-/// the other two are how the Rust side is tested on a development machine.
+/// The library's file name on each platform. Windows and the Mac are
+/// delivered; Linux is how the Rust side is tested on a development machine.
 const AD: &str = if cfg!(windows) {
     "ortools.dll"
 } else if cfg!(target_os = "macos") {
@@ -53,9 +55,11 @@ const AD: &str = if cfg!(windows) {
 };
 
 /// Where the library is looked for: next to the program, where the installer
-/// puts it. `MOZAIK_ORTOOLS` names another file in a debug build only (tests
-/// and development); a released exe never reads it, so an environment variable
-/// cannot make it load somebody else's library (güvenlik denetimi 2026-11-16).
+/// puts it; on the Mac in the bundle's `Contents/Frameworks`, beside
+/// `Contents/MacOS` where the program is. `MOZAIK_ORTOOLS` names another file
+/// in a debug build only (tests and development); a released program never
+/// reads it, so an environment variable cannot make it load somebody else's
+/// library (güvenlik denetimi 2026-11-16).
 fn yol() -> Result<PathBuf, String> {
     #[cfg(debug_assertions)]
     if let Some(p) = std::env::var_os("MOZAIK_ORTOOLS") {
@@ -76,7 +80,7 @@ pub(crate) fn kutuphane_yolu(exe: &Path, kurulum_sart: bool) -> Result<PathBuf, 
     if kurulum_sart && !crate::update::kurulu_mu(exe) {
         return Err("CP-SAT yalnız kurulumla gelir; bu kopya kurulu değil.".into());
     }
-    Ok(klasor.join(AD))
+    Ok(kutuphane_yeri(klasor))
 }
 
 /// Opens the library. On Windows with `LoadLibraryExW` and only two places to
@@ -98,6 +102,17 @@ unsafe fn ac(yol: &Path) -> Result<libloading::Library, libloading::Error> {
     #[cfg(not(windows))]
     {
         libloading::Library::new(yol)
+    }
+}
+
+/// The library's path, given the folder the program runs from. The Mac's
+/// dylibs find one another through their own `LC_RPATH @loader_path`, so the
+/// first one only has to be opened by its full path.
+fn kutuphane_yeri(program_klasoru: &std::path::Path) -> PathBuf {
+    if cfg!(target_os = "macos") {
+        program_klasoru.join("../Frameworks").join(AD)
+    } else {
+        program_klasoru.join(AD)
     }
 }
 
@@ -207,9 +222,16 @@ pub fn ayir(body: &[u8]) -> Result<(&[u8], &[u8]), String> {
 // -------------------------------------------------------------- the commands
 
 /// Whether this copy can answer with CP-SAT at all.
+///
+/// Async, on the blocking pool: the first call LOADS the library, and on the
+/// Mac that is 99 dylibs (53 MB) that macOS checks before it maps them. A
+/// synchronous command runs on the main thread, where that wait would freeze
+/// the window.
 #[tauri::command]
-pub fn cpsat_var() -> bool {
-    cpsat().is_ok()
+pub async fn cpsat_var() -> bool {
+    tauri::async_runtime::spawn_blocking(|| cpsat().is_ok())
+        .await
+        .unwrap_or(false)
 }
 
 /// One question. Raw bytes both ways: the model is hundreds of kilobytes and
@@ -237,6 +259,26 @@ pub fn cpsat_durdur() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_library_is_looked_for_where_the_bundle_puts_it() {
+        let yer = kutuphane_yeri(std::path::Path::new(
+            "/Applications/Mozaik.app/Contents/MacOS",
+        ));
+        if cfg!(target_os = "macos") {
+            assert_eq!(
+                yer,
+                PathBuf::from(
+                    "/Applications/Mozaik.app/Contents/MacOS/../Frameworks/libortools.9.dylib"
+                )
+            );
+        } else {
+            assert_eq!(
+                yer,
+                PathBuf::from("/Applications/Mozaik.app/Contents/MacOS").join(AD)
+            );
+        }
+    }
 
     #[test]
     fn the_body_splits_into_params_and_model() {
@@ -268,7 +310,7 @@ mod tests {
         std::fs::write(tmp.0.join(AD), b"MZ").unwrap();
         assert!(kutuphane_yolu(&exe, true).is_err());
         // Off Windows (the development machines) the folder rule alone.
-        assert_eq!(kutuphane_yolu(&exe, false).unwrap(), tmp.0.join(AD));
+        assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
     }
 
     #[test]
@@ -277,7 +319,7 @@ mod tests {
         let exe = tmp.0.join("Mozaik.exe");
         std::fs::write(&exe, b"MZ").unwrap();
         std::fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
-        assert_eq!(kutuphane_yolu(&exe, true).unwrap(), tmp.0.join(AD));
+        assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
     }
 
     /// A release build must not read the variable: the line before the read is
@@ -308,6 +350,6 @@ mod tests {
         let cevap = coz(&model, &[]).unwrap();
         // status (field 1) OPTIMAL = 4
         assert_eq!(&cevap[..2], &[0x08, 0x04]);
-        assert!(cpsat_var());
+        assert!(cpsat().is_ok());
     }
 }

@@ -25,6 +25,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+use crate::update_mac::{self, Mimari};
+
 /// Everything this file is allowed to fetch lives under here.
 ///
 /// The manifest arrives over TLS from GitHub, so the URL inside it is already
@@ -121,18 +123,39 @@ fn manifest_url() -> String {
 const YENI: &str = "yeni";
 const ESKI: &str = "eski";
 
-/// Only the Windows build may replace itself.
+/// Which delivery this copy is: what it may download, and how it swaps.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Hedef {
+    /// `Mozaik.exe` or the installed program: the original path, unchanged.
+    Windows,
+    /// `Mozaik.app`, from 2026-11-15 (update_mac.rs).
+    Mac(Mimari),
+    /// The Linux development build: never shipped, never replaced.
+    Diger,
+}
+
+pub fn bu_hedef() -> Hedef {
+    if cfg!(windows) {
+        Hedef::Windows
+    } else if cfg!(target_os = "macos") {
+        Hedef::Mac(Mimari::bu())
+    } else {
+        Hedef::Diger
+    }
+}
+
+/// Only the Windows and Mac builds may replace themselves.
 ///
-/// The manifest names ONE download, `Mozaik.exe`, and `verify()` asks whether
-/// the bytes are a Windows program -- which they are. A Linux build (made on
-/// the development machine to drive the real window, never shipped) would pass
-/// that check, rename the Windows program over its own ELF file and leave
+/// A Linux build (made on the development machine to drive the real window,
+/// never shipped) has no download of its own in the manifest: it would be
+/// handed the Windows program, and renaming that over its own ELF file leaves
 /// nothing that starts. The check is on the platform, not on the file.
 pub fn self_update_here() -> Result<(), String> {
-    if cfg!(windows) {
-        Ok(())
-    } else {
-        Err("Kendini güncelleme yalnız Windows'taki Mozaik.exe'de var.".to_string())
+    match bu_hedef() {
+        Hedef::Windows | Hedef::Mac(_) => Ok(()),
+        Hedef::Diger => {
+            Err("Kendini güncelleme yalnız Windows ve Mac'teki Mozaik'te var.".to_string())
+        }
     }
 }
 
@@ -181,6 +204,27 @@ pub struct Manifest {
     pub imza: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kurulum_imza: Option<String>,
+    /// The Mac archives (`Mozaik-mac-<mimari>.app.tar.gz`, from 2026-11-15),
+    /// one per architecture, each with its size, digest and signature. All
+    /// optional, the same bridge as the installer's: a Windows copy never
+    /// heard of them and serde skips them; a Mac copy offers its own only with
+    /// all four (`mac_karari`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_arm64: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_arm64_boyut: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_arm64_sha256: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_arm64_imza: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_x86_64: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_x86_64_boyut: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_x86_64_sha256: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_x86_64_imza: Option<String>,
 }
 
 /// The answer the settings panel draws.
@@ -294,6 +338,14 @@ fn releases_sayfasi() -> String {
 /// says where to go -- a copy too old to update itself can still be replaced
 /// by hand, and `Beklenmeyen adres: https://...` never told anybody that.
 pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
+    karar_icin(m, current, bu_hedef())
+}
+
+/// `karar` for a given delivery, so `cargo test` on any machine judges both.
+pub fn karar_icin(m: Manifest, current: &str, hedef: Hedef) -> Result<Cevap, String> {
+    if let Hedef::Mac(mimari) = hedef {
+        return mac_karari(m, current, mimari);
+    }
     let yeni_var = is_newer(&m.version, current);
     // A download this copy cannot check is not offered either: no address of
     // ours, or no digest to hold the file against.
@@ -332,6 +384,57 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
         boyut,
         sha256,
         kurulum,
+        imza,
+    })
+}
+
+/// The Mac's answer: its own architecture's archive, or a sentence. The
+/// Windows fields are never offered to a Mac -- the exe would not run, and the
+/// file name in the signature would not match anyway.
+fn mac_karari(m: Manifest, current: &str, mimari: Mimari) -> Result<Cevap, String> {
+    let yeni_var = is_newer(&m.version, current);
+    let (url, boyut, sha256, imza) = match mimari {
+        Mimari::Arm64 => (
+            m.mac_arm64,
+            m.mac_arm64_boyut,
+            m.mac_arm64_sha256,
+            m.mac_arm64_imza,
+        ),
+        Mimari::X86_64 => (
+            m.mac_x86_64,
+            m.mac_x86_64_boyut,
+            m.mac_x86_64_sha256,
+            m.mac_x86_64_imza,
+        ),
+    };
+    if yeni_var {
+        let alinir = matches!((&url, boyut, &sha256), (Some(u), Some(_), Some(_))
+            if safe_url(u).is_ok() && u.rsplit('/').next() == Some(mimari.paket_adi()));
+        if !alinir {
+            return Err(format!(
+                "Yeni sürüm ({}) yayımlandı, ama bu Mac'in kendisi kurabileceği bir paketi yok.\n\
+                 Şu adresten indirip Uygulamalar klasöründekinin yerine koyabilirsiniz:\n{}",
+                m.version,
+                releases_sayfasi()
+            ));
+        }
+        if imza.is_none() && TEST_KOKU.is_none() {
+            return Err(format!(
+                "Yeni sürüm ({}) yayımlandı, ama imzası yok; bu kopya onu kendi kurmuyor.\n\
+                 Şu adresten indirebilirsiniz:\n{}",
+                m.version,
+                releases_sayfasi()
+            ));
+        }
+    }
+    Ok(Cevap {
+        yeni_var,
+        version: m.version,
+        date: m.date,
+        exe: url.unwrap_or_default(),
+        boyut: boyut.unwrap_or(0),
+        sha256,
+        kurulum: false,
         imza,
     })
 }
@@ -497,7 +600,7 @@ pub fn imza_dogru(bytes: &[u8], imza: Option<&str>, beklenen: &str) -> Result<()
 static ONERILEN: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
 /// SHA-256 of `bytes`, lowercase hex, as `sha256sum` writes it.
-fn ozet(bytes: &[u8]) -> String {
+pub(crate) fn ozet(bytes: &[u8]) -> String {
     use sha2::{Digest, Sha256};
     Sha256::digest(bytes)
         .iter()
@@ -658,6 +761,10 @@ fn swap_files(exe: &Path, yeni: &Path, eski: &Path) -> Result<(), String> {
 /// version that never gets a window must leave the old one to go back to.
 pub fn sweep_old(exe: &Path) {
     let _ = fs::remove_file(yan(exe, ESKI));
+    // The Mac keeps the old bundle in the hidden folder beside the new one.
+    if let (Hedef::Mac(_), Some(paket)) = (bu_hedef(), update_mac::uygulama_paketi(exe)) {
+        update_mac::sweep(&paket);
+    }
 }
 
 // --------------------------------------------------------- the hand-over
@@ -748,28 +855,15 @@ pub async fn download_update(
     self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
+    if let Hedef::Mac(mimari) = bu_hedef() {
+        return mac_indir(&exe, mimari, &url, boyut, &sha256, imza.as_deref()).await;
+    }
     let kurulum = kurulum_mu(&url);
 
-    let mut yanit = istemci(300)?
-        .get(&url)
-        .send()
-        .await
-        .map_err(|e| ag_hatasi(&e))?
-        .error_for_status()
-        .map_err(|e| format!("Yeni sürüm indirilemedi: {e}"))?;
-    // Read in pieces against the expected size, not with `.bytes()`: a server
-    // that keeps sending stops being read at `boyut`, not when memory runs out.
-    let mut bytes = Vec::new();
-    while let Some(parca) = yanit.chunk().await.map_err(|e| ag_hatasi(&e))? {
-        sinirli_ekle(&mut bytes, &parca, boyut)?;
-    }
+    let bytes = getir(&url, boyut).await?;
 
     verify(&bytes, boyut, &sha256)?;
-    let surum = ONERILEN
-        .lock()
-        .map_err(|_| "Sürüm kaydı okunamadı.")?
-        .clone()
-        .ok_or("Önce güncellemeleri denetleyin.")?;
+    let surum = onerilen()?;
     let dosya = url.rsplit('/').next().unwrap_or_default();
     imza_dogru(&bytes, imza.as_deref(), &imza_yorumu(&surum, dosya))?;
     if kurulum {
@@ -803,7 +897,101 @@ pub async fn download_update(
     Ok(bytes.len() as u64)
 }
 
+/// The whole file at `url`, or a sentence. Read in pieces against the
+/// expected size, not with `.bytes()`: a server that keeps sending stops being
+/// read at `boyut` (`sinirli_ekle`), not when memory runs out.
+async fn getir(url: &str, boyut: u64) -> Result<Vec<u8>, String> {
+    let mut yanit = istemci(300)?
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| ag_hatasi(&e))?
+        .error_for_status()
+        .map_err(|e| format!("Yeni sürüm indirilemedi: {e}"))?;
+    let mut bytes = Vec::new();
+    while let Some(parca) = yanit.chunk().await.map_err(|e| ag_hatasi(&e))? {
+        sinirli_ekle(&mut bytes, &parca, boyut)?;
+    }
+    Ok(bytes)
+}
+
+/// The version `check_update` offered in this session.
+fn onerilen() -> Result<String, String> {
+    ONERILEN
+        .lock()
+        .map_err(|_| "Sürüm kaydı okunamadı.")?
+        .clone()
+        .ok_or_else(|| "Önce güncellemeleri denetleyin.".to_string())
+}
+
+/// The Mac's download (update_mac.rs says how the whole update goes). The
+/// folder is asked first: a copy on the .dmg or under App Translocation is
+/// told to move before thirty megabytes come down for nothing.
+async fn mac_indir(
+    exe: &Path,
+    mimari: Mimari,
+    url: &str,
+    boyut: u64,
+    sha256: &str,
+    imza: Option<&str>,
+) -> Result<u64, String> {
+    let dosya = url.rsplit('/').next().unwrap_or_default();
+    if dosya != mimari.paket_adi() {
+        return Err(format!("Bu Mac için olmayan bir dosya: {dosya}"));
+    }
+    let paket = update_mac::uygulama_paketi(exe)
+        .ok_or("Mozaik bir .app paketinden çalışmıyor; kendini güncelleyemez.")?;
+    update_mac::yazilabilir_mi(&paket)?;
+    let bytes = getir(url, boyut).await?;
+    update_mac::verify(&bytes, boyut, sha256)?;
+    imza_dogru(&bytes, imza, &imza_yorumu(&onerilen()?, dosya))?;
+    let hazirlik = update_mac::hazirlik(&paket);
+    let _ = fs::remove_dir_all(&hazirlik);
+    fs::create_dir_all(&hazirlik).map_err(|_| update_mac::TASIYIN.to_string())?;
+    diske_yaz(&update_mac::indirilen(&paket), &bytes)
+        .map_err(|e| format!("Yeni sürüm diske yazılamadı: {e}"))?;
+    *INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")? = Some(sha256.to_ascii_lowercase());
+    Ok(bytes.len() as u64)
+}
+
+/// The Mac's "Şimdi yeniden başlat": the archive checked again, unpacked,
+/// exchanged with the running bundle, the new version started. If it cannot
+/// be started, the exchange is undone and this version keeps running.
+fn mac_uygula(app: &tauri::AppHandle, exe: &Path) -> Result<(), String> {
+    let paket = update_mac::uygulama_paketi(exe)
+        .ok_or("Mozaik bir .app paketinden çalışmıyor; kendini güncelleyemez.")?;
+    // `take`, not `clone`: a second press while this one is exiting must find
+    // nothing to apply, or it would unpack over the old bundle it just set aside.
+    let beklenen = INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")?
+        .take();
+    yeni_dogru(&update_mac::indirilen(&paket), beklenen.as_deref())?;
+    let ad = exe.file_name().ok_or("Program adı bulunamadı.")?;
+    let yeni = update_mac::ac(&paket, ad)?;
+    update_mac::takas(&paket, &yeni)?;
+    let program = paket.join("Contents/MacOS").join(ad);
+    match std::process::Command::new(&program)
+        .arg(GUNCELLENDI)
+        .stdin(std::process::Stdio::piped())
+        .spawn()
+    {
+        Ok(cocuk) => {
+            std::mem::forget(cocuk);
+            app.exit(0);
+            Ok(())
+        }
+        Err(e) => {
+            let _ = update_mac::takas(&paket, &yeni);
+            Err(format!("Yeni sürüm başlatılamadı: {e}"))
+        }
+    }
+}
+
 /// The digest of the standalone exe downloaded in THIS session, for the swap.
+/// On the Mac, the digest of the archive waiting beside the bundle.
 static INDIRILEN_EXE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
 /// Is the `.yeni` file next to the program the one downloaded and checked in
@@ -823,6 +1011,9 @@ pub fn yeni_dogru(yeni: &Path, beklenen: Option<&str>) -> Result<(), String> {
 pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
     self_update_here()?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
+    if let Hedef::Mac(_) = bu_hedef() {
+        return mac_uygula(&app, &exe);
+    }
     let kurulum = INDIRILEN_KURULUM
         .lock()
         .map_err(|_| "Kurulum kaydı okunamadı.")?
@@ -891,6 +1082,12 @@ mod tests {
     use super::*;
     use std::fs;
     use std::path::PathBuf;
+
+    /// The Windows answer, whatever machine runs the tests: every test below
+    /// that does not name a platform was written for it.
+    fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
+        karar_icin(m, current, Hedef::Windows)
+    }
 
     struct Scratch(PathBuf);
 
@@ -1149,7 +1346,99 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
             kurulum_sha256: None,
             imza: Some(String::new()),
             kurulum_imza: None,
+            mac_arm64: None,
+            mac_arm64_boyut: None,
+            mac_arm64_sha256: None,
+            mac_arm64_imza: None,
+            mac_x86_64: None,
+            mac_x86_64_boyut: None,
+            mac_x86_64_sha256: None,
+            mac_x86_64_imza: None,
         }
+    }
+
+    // ------------------------------------------------------------------ the Mac
+
+    const MAC_ARM: &str =
+        "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-mac-arm64.app.tar.gz";
+    const MAC_X86: &str =
+        "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-mac-x86_64.app.tar.gz";
+
+    fn mac_manifest(version: &str) -> Manifest {
+        let mut m = manifest(version, TEK);
+        m.mac_arm64 = Some(MAC_ARM.into());
+        m.mac_arm64_boyut = Some(30_000_000);
+        m.mac_arm64_sha256 = Some("aa".repeat(32));
+        m.mac_arm64_imza = Some("imza-arm".into());
+        m.mac_x86_64 = Some(MAC_X86.into());
+        m.mac_x86_64_boyut = Some(31_000_000);
+        m.mac_x86_64_sha256 = Some("bb".repeat(32));
+        m.mac_x86_64_imza = Some("imza-x86".into());
+        m
+    }
+
+    #[test]
+    fn each_mac_is_offered_its_own_archive_never_the_exe() {
+        let c = karar_icin(mac_manifest("9.0.0"), "2.2.0", Hedef::Mac(Mimari::Arm64)).unwrap();
+        assert!(c.yeni_var && !c.kurulum);
+        assert_eq!(c.exe, MAC_ARM);
+        assert_eq!(c.boyut, 30_000_000);
+        assert_eq!(c.imza.as_deref(), Some("imza-arm"));
+        let c = karar_icin(mac_manifest("9.0.0"), "2.2.0", Hedef::Mac(Mimari::X86_64)).unwrap();
+        assert_eq!(c.exe, MAC_X86);
+        assert_eq!(c.sha256.as_deref(), Some("bb".repeat(32).as_str()));
+        // And Windows, reading the same manifest, still gets the standalone exe.
+        let w = karar(mac_manifest("9.0.0"), "2.2.0").unwrap();
+        assert_eq!(w.exe, TEK);
+    }
+
+    #[test]
+    fn a_mac_with_no_archive_of_its_own_is_told_where_to_go() {
+        // A release from before the Mac (only the Windows fields), and Mac
+        // fields that name the other architecture's file, another site, or
+        // lack the digest or the signature.
+        let e = karar_icin(manifest("9.0.0", TEK), "2.2.0", Hedef::Mac(Mimari::Arm64)).unwrap_err();
+        assert!(
+            e.contains("9.0.0") && e.contains(&releases_sayfasi()),
+            "{e}"
+        );
+        let mut m = mac_manifest("9.0.0");
+        m.mac_arm64 = Some(MAC_X86.into());
+        assert!(karar_icin(m, "2.2.0", Hedef::Mac(Mimari::Arm64)).is_err());
+        let mut m = mac_manifest("9.0.0");
+        m.mac_arm64 = Some("https://baska-yer.example/Mozaik-mac-arm64.app.tar.gz".into());
+        assert!(karar_icin(m, "2.2.0", Hedef::Mac(Mimari::Arm64)).is_err());
+        let mut m = mac_manifest("9.0.0");
+        m.mac_arm64_sha256 = None;
+        assert!(karar_icin(m, "2.2.0", Hedef::Mac(Mimari::Arm64)).is_err());
+        let mut m = mac_manifest("9.0.0");
+        m.mac_arm64_imza = None;
+        assert!(karar_icin(m, "2.2.0", Hedef::Mac(Mimari::Arm64)).is_err());
+    }
+
+    #[test]
+    fn an_up_to_date_mac_is_told_so_even_without_mac_fields() {
+        let c = karar_icin(manifest("2.3.0", TEK), "2.3.0", Hedef::Mac(Mimari::Arm64)).unwrap();
+        assert!(!c.yeni_var);
+    }
+
+    #[test]
+    fn a_windows_copy_reads_a_manifest_with_mac_fields() {
+        // What 2.2.0 out in the field parses: unknown keys are skipped.
+        #[derive(serde::Deserialize)]
+        #[allow(dead_code)]
+        struct Eski {
+            version: String,
+            date: String,
+            exe: String,
+            boyut: u64,
+        }
+        let json = serde_json::to_string(&mac_manifest("9.0.0")).unwrap();
+        assert!(json.contains("mac_arm64_imza"));
+        let eski: Eski = serde_json::from_str(&json).unwrap();
+        assert_eq!(eski.exe, TEK);
+        let geri: Manifest = serde_json::from_str(&json).unwrap();
+        assert_eq!(geri.mac_x86_64.as_deref(), Some(MAC_X86));
     }
 
     // ---------------------------------------------------------- the installer
@@ -1423,8 +1712,11 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     }
 
     #[test]
-    fn only_the_windows_build_replaces_itself() {
-        assert_eq!(self_update_here().is_ok(), cfg!(windows));
+    fn only_the_windows_and_mac_builds_replace_themselves() {
+        assert_eq!(
+            self_update_here().is_ok(),
+            cfg!(windows) || cfg!(target_os = "macos")
+        );
     }
 
     // ------------------------------------------------------------- the swap
