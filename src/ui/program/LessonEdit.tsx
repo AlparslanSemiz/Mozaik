@@ -34,6 +34,7 @@ import {
   blockCeiling,
   LimitBox,
   useDialogs,
+  useReturnFocus,
   useToast,
   T,
   useT,
@@ -102,6 +103,7 @@ function LessonSheet({
   onClose: () => void;
 }) {
   const t = useT();
+  const returnFocus = useReturnFocus(lessonId !== null);
   const { confirm } = useDialogs();
   const toast = useToast();
   // Read out of the CURRENT state every render rather than captured when the
@@ -188,7 +190,11 @@ function LessonSheet({
     <Dialog.Root open={lessonId !== null} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
-        <Dialog.Content className="sheet sheet-narrow" aria-describedby={undefined}>
+        <Dialog.Content
+          className="sheet sheet-narrow"
+          aria-describedby={undefined}
+          onCloseAutoFocus={returnFocus}
+        >
           {lesson !== undefined ? (
             <>
               <div className="sheet-head">

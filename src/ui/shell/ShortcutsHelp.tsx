@@ -16,7 +16,7 @@ import { createContext, Fragment, useCallback, useContext, useState } from 'reac
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { T, useT } from '../common';
+import { T, useReturnFocus, useT } from '../common';
 
 type Open = () => void;
 
@@ -90,11 +90,16 @@ const GROUPS: Group[] = [
 
 function ShortcutsHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
+  const returnFocus = useReturnFocus(open);
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
-        <Dialog.Content className="sheet sheet-narrow" aria-describedby={undefined}>
+        <Dialog.Content
+          className="sheet sheet-narrow"
+          aria-describedby={undefined}
+          onCloseAutoFocus={returnFocus}
+        >
           <div className="sheet-head">
             <div className="sheet-id">
               <Dialog.Title className="sheet-title">
