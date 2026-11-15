@@ -194,6 +194,14 @@ davranış), RK2b. Birleşmeyi bekleyen öteki dal: `ruflo/kurulum` (Alp'in deny
 
 ---
 
+## 2026-11-15 · vite 8 ve size-limit 14 (`bagimlilik/vite8`, Dependabot #7 ve #8)
+
+vite 8.3.8 (Rolldown), @vitejs/plugin-react 6.3, size-limit ve @size-limit/file 14.3; vitest 4.1
+yerinde. `dist/` yine tek `index.html` (vite-plugin-singlefile 2.3.3), ve küçüldü: ham eşiğin
+5,45 kB, brotli eşiğinin 10,82 kB altında (önce 2,12 kB ve 1,98 kB). `tsc` (iki config),
+`build:site`, `hizli` (1525 yeşil, 4 atlandı), ve Playwright `temel`, `yazdir`, `otomatik`
+87/87 bu makinede; ana E2E'nin gerisi CI'da.
+
 ## 2026-11-15 · Bağımlılıklar: Dependabot'un açık PR'ları (`bagimlilik/actions`)
 
 Tek dalda: setup-node 7, download-artifact 8 (#12, #11), Rust'ın küçükleri, `sha2` 0.11 ve
