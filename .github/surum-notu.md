@@ -32,6 +32,15 @@ Step-by-step install, update and removal:
 
 ---
 
+**Mac.** `Mozaik-mac-arm64.dmg` is for Apple silicon (M1 and later),
+`Mozaik-mac-x86_64.dmg` for Intel; macOS 11 or later. The app is not signed
+by an Apple developer account, so the first launch needs one extra click
+(below). The two `.app.tar.gz` files are what the Mac app downloads when it
+updates itself; you do not need them.
+
 **Kurulum (özet).** İndirin, çift tıklayın. Windows *"bilinmeyen yayıncı"*
-derse **Daha fazla bilgi** → **Yine de çalıştır**. Ayrıntılı Türkçe anlatım
+derse **Daha fazla bilgi** → **Yine de çalıştır**. Mac'te dmg'yi açıp
+Mozaik'i **Uygulamalar**'a sürükleyin ve oradan açın; macOS *"doğrulanamadı"*
+derse **Bitti**, sonra **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de
+Aç**. Bu yalnız ilk açılışta. Ayrıntılı Türkçe anlatım
 zip'in içindeki `OKU.txt` dosyasında, ve programın kendisi Türkçe.

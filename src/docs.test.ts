@@ -117,6 +117,9 @@ const FILES: Set<string> = new Set(
       '../kurulum/**/*',
       '../src-tauri/*.*',
       '../src-tauri/src/**/*',
+      // The Mac bundle's icon and Info.plist (tauri.macos.conf.json).
+      '../src-tauri/icons/*',
+      '../src-tauri/macos/*',
       // `docs/asc/` is 62 MB of screenshots. Lazy, so this is 179 names and
       // not one byte of PNG.
       '../docs/**/*',
@@ -303,15 +306,21 @@ const BARE_EXT = /\.(ts|tsx|js|mjs|cjs|json|md|css|rs|toml|yml|yaml|ps1|cmd|txt|
 /** Produced by a build, so absent from a clean checkout. `dist-exe` and
     `src-tauri/target` joined the list with `npm run exe:linux` (2026-09-24):
     the Linux binary cargo writes and the copy the script puts beside it.
-    `src-tauri/gen` (Tauri's schemas) joined with `dal-temizle`'s cache list. */
+    `src-tauri/gen` (Tauri's schemas) joined with `dal-temizle`'s cache list.
+    `src-tauri/ortools` is the OR-Tools libraries the release (and
+    `scripts/ortools-mac.sh`) download before `tauri build`. */
 const GENERATED_DIR =
-  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|src-tauri\/gen|test-results|playwright-report|node_modules|scratch)\//;
+  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|src-tauri\/gen|src-tauri\/ortools|test-results|playwright-report|node_modules|scratch)\//;
 
 /**
  * Produced by the release workflow rather than held in the repository. The
  * same category as `dist/`, but these have no folder to recognise them by:
  * they are the five assets BUILD.md's own table lists.
  */
+/** Single files a build writes and `.gitignore` keeps out: the Tauri config
+    `scripts/ortools-mac.sh` generates to list the OR-Tools dylibs. */
+const GENERATED_FILE = new Set(['src-tauri/tauri.ortools.json']);
+
 const RELEASE_ASSET = new Set([
   'Mozaik.html',
   'Mozaik.exe',
@@ -354,7 +363,7 @@ function pathShaped(token: string): boolean {
 
 function resolves(token: string): boolean {
   const clean = token.replace(/^\.\//, '');
-  if (GENERATED_DIR.test(clean)) return true;
+  if (GENERATED_DIR.test(clean) || GENERATED_FILE.has(clean)) return true;
   if (FILES.has(clean) || DIRS.has(clean) || DIRS.has(clean + '/')) return true;
   if (!clean.includes('/')) return BY_BASENAME.has(clean);
   // A document may name a file by the part of its path that identifies it:

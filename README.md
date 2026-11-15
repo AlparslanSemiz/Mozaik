@@ -25,6 +25,8 @@ Everything below is a finished file. Nothing to build.
 | **[Mozaik.html](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.html)** | Double-click it. Opens in your browser. This is the real delivery. |
 | **[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-Windows-kurulum.zip)** | Unzip, double-click `Kur.cmd`. Adds a desktop shortcut and a local address. |
 | **[Mozaik.exe](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
+| **[Mozaik-mac-arm64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-arm64.dmg)** | Mac with Apple silicon (M1 and later). Drag Mozaik into Applications. Read [the first launch](#mac-the-first-launch-needs-one-extra-click) first. |
+| **[Mozaik-mac-x86_64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-x86_64.dmg)** | The same, for an Intel Mac. macOS 11 or later on both. |
 
 Or use it without downloading anything:
 **<https://alparslansemiz.github.io/Mozaik/>** works offline after
@@ -48,6 +50,34 @@ costs money and this project does not have one. So:
 * If a scanner flags it, a false-positive report helps everyone:
   [Microsoft](https://www.microsoft.com/en-us/wdsi/filesubmission) ·
   [Google Safe Browsing](https://safebrowsing.google.com/safebrowsing/report_error/).
+
+### Mac: the first launch needs one extra click
+
+The Mac app is signed only "ad hoc", not by an Apple developer account, so
+macOS refuses the first launch and has to be told once that you trust it.
+Updates are still checked against this project's own signature before they
+are installed. In Turkish, step by step:
+
+1. **Hangi dosya?** Apple menüsü → **Bu Mac Hakkında**. "Çip" satırında
+   *Apple M…* yazıyorsa `Mozaik-mac-arm64.dmg`, "İşlemci" satırında *Intel*
+   yazıyorsa `Mozaik-mac-x86_64.dmg`.
+2. İndirilen `.dmg`'ye çift tıklayın, açılan pencerede **Mozaik**'i
+   **Uygulamalar** klasörüne sürükleyin. Sonra dmg'yi çıkarın. Mozaik'i
+   Uygulamalar'a taşımadan açarsanız kendini güncelleyemez.
+3. **Uygulamalar**'dan Mozaik'e çift tıklayın. macOS *"Mozaik açılmadı"* ya
+   da *"Apple, Mozaik'in kötü amaçlı yazılım içermediğini doğrulayamadı"*
+   der. **Bitti**'ye basın (Çöp Sepeti'ne Taşı'ya değil).
+4. Apple menüsü → **Sistem Ayarları** → **Gizlilik ve Güvenlik**. Aşağıda,
+   Güvenlik başlığının altında *"Mozaik, tanınmış bir geliştiriciden
+   olmadığı için engellendi"* satırı var: **Yine de Aç**'a basın, parolanızı
+   ya da Touch ID'nizi verin, çıkan soruda yine **Yine de Aç** deyin.
+   (macOS 11–14'te Mozaik'e sağ tıklayıp **Aç** demek de olur.)
+5. Bu yalnız bir kez. İlk kayıtta Mozaik Belgeler klasörüne yazmak için izin
+   ister (*"Ders Programı" klasörü*): **İzin Ver**.
+
+Plans are written to `~/Documents/Ders Programı`, like the Windows program
+writes to `Documents\Ders Programı`. Updating works as on Windows:
+**Ayarlar → Hakkında → Güncellemeleri denetle**.
 
 ## The four delivery routes
 

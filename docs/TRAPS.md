@@ -290,6 +290,25 @@ etiket hiçbir şey tetiklemez. Karşı önlem: arşiv etiketleri `arsiv/<dal>` 
 o adda bir etiket itilmez: `surum.yml` derler, numara `package.json`'la uyuşmadığı için
 yayın adımında durur, ama iki derleme boşa koşar.
 
+### 157 · Bir arşivin adındaki işletim sistemi sürümü, en düşük sürümü değildir
+OR-Tools v9.15'in Mac arşivleri `or-tools_arm64_macOS-26.2_cpp_v9.15.6755.tar.gz` adını
+taşıyor. Ad okunarak Mac sürümünün en düşük macOS'u 26.2 yazılacaktı, yani babanın ya da bir
+öğretmenin birkaç yıllık Mac'i dışarıda kalacaktı. Ölçüldü 2026-11-15: arşivdeki 241 dylib'in
+hepsi `LC_BUILD_VERSION minos 11.0` (`otool -l`), 26.2 yalnız derlendiği SDK. Karşı önlem: en
+düşük sürüm adından değil ikilinin kendisinden okunur: `scripts/ortools-mac.sh` her dylib'in
+`minos`'unu okuyup 11.0 değilse durur, `tauri.macos.conf.json` 11.0 diyor ve `surum.yml`'in mac işi
+paketin `LSMinimumSystemVersion`'ına bakıyor. OR-Tools yükseltilip `minos` yükselirse betik kırmızı
+olur ve karar yeniden verilir.
+
+### 158 · Notarize edilmemiş 99 dylib'in ilk yüklenişi saniyeler sürer
+Ölçüldü 2026-11-15, bu Mac'te: `cpsat.rs`'in küçük model testi CP-SAT'ı ilk kez yüklediğinde
+15,4 s sürdü, aynı dosyalarla ikinci koşuda 0,5 s. Çapraz derlenen Intel kopyası Rosetta'da ilk
+yüklemede 78,8 s. macOS her yeni dylib'i ilk açılışta denetliyor (Rosetta'da bir de çeviriyor),
+ve kütüphane 99 dosya, 53 MB. `cpsat_var` eş zamanlı bir komuttu, yani Tauri onu ana iş
+parçacığında koşturuyordu: ilk öneri aramasında pencere bu süre boyunca donardı. Karşı önlem:
+`cpsat_var` async ve yüklemeyi bekleme havuzunda yapıyor (`cpsat.rs`). Bir sonraki adım ölçmek:
+babanın türünden bir Mac'te ilk aramanın süresi (TODO B7.42).
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1465,7 +1484,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1480,6 +1499,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 156, yeni bir tuzak 157'den devam eder. Test stratejisi
+büyük kullanılan numara 158, yeni bir tuzak 159'dan devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.
