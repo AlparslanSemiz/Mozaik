@@ -32,13 +32,33 @@
 // list and refuses the writes. The user lifts it: opening a file over the
 // plan, deleting it, or opening a whole library over it (`explicitly`).
 
-import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../../pure/io';
+import { LIBRARY_KEY, adoptOrphans, parseLibrary, planKey, type Library } from '../../pure/io';
 import { safely } from '../../leaf/preference';
 import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);
+}
+
+/**
+ * The directory as the program opens it: `readLibrary`, with every plan whose
+ * key is in storage but in no entry put back (`adoptOrphans`). At startup
+ * only: elsewhere a plan being deleted is briefly in neither, and must stay gone.
+ */
+export function readLibraryAtStart(): Library {
+  // `length` and `key(i)`, the Storage interface itself: `Object.keys` is not
+  // guaranteed to list a Storage's entries.
+  const keys =
+    safely(() => {
+      const out: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key !== null) out.push(key);
+      }
+      return out;
+    }) ?? [];
+  return adoptOrphans(readLibrary(), keys);
 }
 
 export function writeLibrary(lib: Library): void {

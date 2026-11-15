@@ -68,6 +68,8 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
                 exe: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
                 boyut: 3_742_584,
                 sha256: null,
+                kurulum: false,
+                imza: null,
               };
             }
             return {
@@ -77,6 +79,8 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
               exe: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
               boyut: s.boyut,
               sha256: '0'.repeat(64),
+              kurulum: false,
+              imza: 'untrusted comment: deneme',
             };
           }
           if (cmd === 'download_update') return 3_742_584;

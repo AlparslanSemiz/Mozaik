@@ -73,7 +73,15 @@ export type ExeDurum =
   | { ad: 'bos' }
   | { ad: 'bakiliyor' }
   | { ad: 'guncel' }
-  | { ad: 'var'; surum: string; tarih: string; adres: string; boyut: number; ozet: string }
+  | {
+      ad: 'var';
+      surum: string;
+      tarih: string;
+      adres: string;
+      boyut: number;
+      ozet: string;
+      imza: string | null;
+    }
   | { ad: 'indiriliyor' }
   | { ad: 'hazir'; surum: string }
   | { ad: 'hata'; mesaj: string };
@@ -182,6 +190,7 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
                 boyut: c.boyut,
                 // update.rs offers no download without a digest (`karar`).
                 ozet: c.sha256 ?? '',
+                imza: c.imza,
               }
             : { ad: 'guncel' },
         );
@@ -194,7 +203,7 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
     const su = sonuc.current;
     if (su.ad !== 'var') return;
     setDurum({ ad: 'indiriliyor' });
-    desktopDownload(su.adres, su.boyut, su.ozet).then(
+    desktopDownload(su.adres, su.boyut, su.ozet, su.imza).then(
       () => setDurum({ ad: 'hazir', surum: su.surum }),
       (e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }),
     );

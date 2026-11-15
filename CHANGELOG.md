@@ -36,6 +36,7 @@ release is incomplete, the entry says so.
 
 - In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.
 - A notice that happened to be on screen ("Backup loaded.") no longer comes out on every printed page.
+- If the list of plans read empty when the program opened, it used to be replaced by a single "1. plan", and every other plan, though still saved, could no longer be opened. The program now finds those plans and lists them again as "Recovered plan 1, 2, …".
 - When two lessons that must not share a day are both pinned on the same day, "Fill automatically" no longer searches for a minute and then shows an empty list of ways: the panel says at once which two lessons are pinned and that one of them has to move, and Check says it too.
 - The program now checks that a downloaded update is exactly the published file (its SHA-256 digest), not only that it is a whole Windows program of the right size. A published version without a digest is not downloaded; the program says where to get it by hand.
 - When the plan open last time can no longer be read, the first plan that can be read opens instead of an empty one, every time the program starts; the unreadable plan is kept exactly as it was, and one line says which plan it was. In Settings → Plans and backup such a plan now reads "unreadable" instead of "no data", shows no counts, and deleting it says that its text goes too.

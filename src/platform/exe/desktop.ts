@@ -178,6 +178,10 @@ export interface UpdateCevap {
   boyut: number;
   /** The exe's SHA-256 as published; update.rs refuses a download without it. */
   sha256: string | null;
+  /** `exe` is the installer rather than the standalone program (update.rs, `karar`). */
+  kurulum: boolean;
+  /** The chosen file's minisign signature; update.rs installs nothing unsigned. */
+  imza: string | null;
 }
 
 function bridge(): Invoke {
@@ -192,8 +196,13 @@ export function desktopCheck(current: string): Promise<UpdateCevap> {
 }
 
 /** Downloads it NEXT TO the running program and stops there. */
-export function desktopDownload(url: string, boyut: number, sha256: string): Promise<number> {
-  return bridge()<number>('download_update', { url, boyut, sha256 });
+export function desktopDownload(
+  url: string,
+  boyut: number,
+  sha256: string,
+  imza: string | null,
+): Promise<number> {
+  return bridge()<number>('download_update', { url, boyut, sha256, imza });
 }
 
 /**

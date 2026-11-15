@@ -277,6 +277,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           url: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
           boyut: 1,
           sha256: '0'.repeat(64),
+          imza: null,
         });
         return 'indirdi';
       } catch (e) {
@@ -298,6 +299,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           url: 'https://example.com/releases/latest/download/Mozaik.exe',
           boyut: 1,
           sha256: '0'.repeat(64),
+          imza: null,
         });
         return 'indirdi';
       } catch (e) {

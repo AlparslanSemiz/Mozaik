@@ -28,7 +28,15 @@
   },
   "bundle": {
     "active": true,
-    "targets": [],
+    "targets": ["nsis"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "nsis/kancalar.nsh",
+        "languages": ["Turkish"],
+        "displayLanguageSelector": false
+      }
+    },
     "icon": ["../site/icon-192.png", "../site/icon-512.png", "../kurulum/icon.ico"]
   }
 }
