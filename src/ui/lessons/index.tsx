@@ -18,7 +18,7 @@
 // beside the hours is the aSc "Lessons/week + Single" pair the reader asked
 // for by name: pick the total first, then how it falls apart.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { type Id, type State } from '../../leaf/model';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import type { LessonMode } from '../../platform/prefs';
@@ -81,13 +81,19 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // them. Not through `query.facets`: the ribbon and the chip row would then be
   // two writers of one value, and clearing the chip would leave the strip
   // saying something the list no longer does.
-  const scope =
-    mode === 'all' || focused === undefined
-      ? state.lessons
-      : state.lessons.filter((x) =>
-          mode === 'teacher' ? x.teacherId === focused.id : x.classId === focused.id,
-        );
-  const shown = applyList(scope, query, listCfg);
+  const scope = useMemo(
+    () =>
+      mode === 'all' || focused === undefined
+        ? state.lessons
+        : state.lessons.filter((x) =>
+            mode === 'teacher' ? x.teacherId === focused.id : x.classId === focused.id,
+          ),
+    [mode, focused, state.lessons],
+  );
+  // The box answers each key at once, the rows follow a moment later: on the
+  // weak machine drawing the list again was up to a fifth of a second a key.
+  const listed = useDeferredValue(query);
+  const shown = useMemo(() => applyList(scope, listed, listCfg), [scope, listed, listCfg]);
   const order = useRowOrder({
     kind: 'lessons',
     // Hand-sorting means dragging row 3 to row 1 OF THE ARRAY, and in a focused
@@ -95,9 +101,30 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
     // `state.lessons`. `ListTools` already explains the lock it puts up.
     count: mode === 'all' ? state.lessons.length : 0,
     items: state.lessons,
-    query,
+    query: listed,
     change,
   });
+  const { grip } = order;
+  // The same elements while only the box changed, so React skips the rows.
+  const rows = useMemo(
+    () =>
+      shown.map((x, i) => {
+        const group = state.classes.find((c) => c.id === x.classId);
+        const teacher = state.teachers.find((t) => t.id === x.teacherId);
+        const rowName = `${group?.name ?? '?'} · ${teacher?.short ?? '?'}`;
+        return (
+          <LessonRow
+            key={x.id}
+            state={state}
+            change={change}
+            lesson={x}
+            rowName={rowName}
+            grip={grip(i, rowName)}
+          />
+        );
+      }),
+    [shown, state, change, grip],
+  );
 
   const modeNoun = mode === 'teacher' ? 'öğretmen' : 'sınıf';
 
@@ -178,23 +205,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                   <th className="w-col-md" />
                 </tr>
               </thead>
-              <tbody ref={order.bodyRef}>
-                {shown.map((x, i) => {
-                  const group = state.classes.find((c) => c.id === x.classId);
-                  const teacher = state.teachers.find((t) => t.id === x.teacherId);
-                  const rowName = `${group?.name ?? '?'} · ${teacher?.short ?? '?'}`;
-                  return (
-                    <LessonRow
-                      key={x.id}
-                      state={state}
-                      change={change}
-                      lesson={x}
-                      rowName={rowName}
-                      grip={order.grip(i, rowName)}
-                    />
-                  );
-                })}
-              </tbody>
+              <tbody ref={order.bodyRef}>{rows}</tbody>
             </table>
           </div>
         )}
