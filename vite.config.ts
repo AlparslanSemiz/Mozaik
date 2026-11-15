@@ -79,7 +79,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    // `forks` is Vitest 3's default pool and the only one this repo uses.
+    // `forks` is Vitest 3's default pool. Stryker's runner forces `threads`,
+    // so a local `npm run mutasyon` on Node 25+ still lacks jsdom's storage;
+    // `haftalik.yml` runs it on Node 22, where nothing is missing.
     poolOptions: { forks: { execArgv: NODE_ARGS } },
     include: ['src/**/*.test.{ts,tsx}'],
     // Vitest hands every stylesheet over as an empty string, `?raw` included,
