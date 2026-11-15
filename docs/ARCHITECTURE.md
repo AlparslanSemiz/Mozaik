@@ -228,7 +228,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Commands.tsx` | paletin komut listesi |
 | `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes` |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/index.tsx` | Dersler |
 | `ui/availability/Availability.tsx` | Müsaitlik |

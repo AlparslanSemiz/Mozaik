@@ -1598,7 +1598,9 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 `size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
 değişmez, ekran 0 piksel.
 
-- [ ] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
+- [x] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
+      Bitti (2026-11-15, `refactor/rf24-rf25`): liste `Teachers.tsx`'te, ekleme bloğu
+      `TeacherForm.tsx`, satır `TeacherRow.tsx`, cinsiyet seçenekleri `genders.ts`.
 - [ ] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
       kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
 - [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
