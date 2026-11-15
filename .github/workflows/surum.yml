@@ -253,6 +253,23 @@ jobs:
       # `__SURUM__` odur (scripts/surum.mjs), yani exe kendini o numarayla
       # tanıtır. Etiket ondan başkaysa iş burada durur — yayınlanmış ama
       # kendini asla güncel sayamayan bir exe, hiç yayınlamamaktan kötüdür.
+      # İMZA (güvenlik denetimi 2026-11-15). Özet aynı Release'ten geliyor, yani
+      # dosyanın eksiksiz indiğini söylüyor ama bizim olduğunu söylemiyor; imza
+      # söylüyor. Anahtarın gizli yarısı depo sırrı MOZAIK_IMZA_ANAHTARI, açık
+      # yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
+      # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
+      - name: Sign the two programs
+        env:
+          ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
+        run: |
+          test -n "$ANAHTAR" || { echo "MOZAIK_IMZA_ANAHTARI sırrı tanımlı değil" >&2; exit 1; }
+          sudo apt-get install -y -qq minisign >/dev/null
+          gizli=$(mktemp -d); chmod 700 "$gizli"
+          umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig
+          rm -rf "$gizli"
+
       - name: Build surum.json
         env:
           ETIKET: ${{ inputs.tag || github.ref_name }}
@@ -301,6 +318,8 @@ jobs:
               kurulum: process.argv[5],
               kurulum_boyut: Number(process.argv[6]),
               kurulum_sha256: process.argv[7],
+              imza: fs.readFileSync('imza-exe.minisig', 'utf8'),
+              kurulum_imza: fs.readFileSync('imza-kurulum.minisig', 'utf8'),
             }, null, 2) + '\n');
           " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
