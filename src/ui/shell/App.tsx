@@ -179,9 +179,10 @@ export default function App() {
   // inside, so after a live language switch the memo would keep the old words
   // until the next edit (e2e/dil.spec.ts).
   //
-  // Deferred: the chip is a summary, and on the weak machine its report was
-  // the larger half of the freeze after every drop and undo. The grid paints
-  // the move first and the chip follows in a render React may interrupt.
+  // Deferred: the chip (and the Kontrol strip and the palette, which read the
+  // same status) is a summary, and on the weak machine its report was the
+  // larger half of the freeze after every drop and undo. The grid paints the
+  // move first and the status follows in a render React may interrupt.
   const { dil } = useLang();
   const settled = useDeferredValue(state);
   const status = useMemo(() => {

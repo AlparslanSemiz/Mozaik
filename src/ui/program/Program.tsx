@@ -1,7 +1,8 @@
 // The main screen. Wires the grid, the lesson pool and the dragging together.
 //
 // Performance contract (for the slow machine):
-//   - `rows` and `cards` are useMemo'd, recomputed only when the state changes.
+//   - `rows` are useMemo'd on the state; `cards` follow it a moment late
+//     (`useDeferredValue`), so a drop paints the grid before the tray.
 //   - A row that draws as before keeps its object (`keepSameRows`) and the
 //     cell handlers keep their identity (`useSteady`), so a drop redraws the
 //     one or two rows it touched and not ~2100 cells (pitfall 10).
@@ -27,6 +28,7 @@ import {
   applyDrop,
   dropMap,
   removeBlock,
+  pendingBlocks,
   placementKey,
   setBlockPinned,
   pinScopeCells,
@@ -414,6 +416,11 @@ function Program({
 
       const lesson = ix.lessonById.get(lessonId);
       if (lesson === undefined) return;
+      // The tray follows the plan a moment late (`trayState`), so a card can
+      // still be on it for a block the plan no longer owes: the lesson was just
+      // completed, or its 2 went down and it owes a 1. Asked of the plan on
+      // screen, or the drop would place hours nobody asked for.
+      if (source === null && !pendingBlocks(state, lesson).includes(Math.max(1, size))) return;
 
       const sourceRef: BlockRef | null =
         source === null ? null : { ...source, lessonId, size: Math.max(1, size) };
