@@ -1886,6 +1886,17 @@ const EN: Sozluk = {
   "{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.": "Variant {ad} deleted, with its {n} placed {n:hour|hours}.",
   "Program baştan dizildi.": "The timetable was laid out from scratch.",
   "Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.": "The timetable was laid out from scratch; {n} pinned {n:hour|hours} stayed in place.",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "The plan \"{plan}\" cannot be read, so no plan is being written to the folder.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**The plan opened empty on this computer, but the {klasor} folder holds a fuller plan file:** {dosya}, {ogretmen} {ogretmen:teacher|teachers} and {ders} {ders:lesson|lessons}. Nothing is written to the folder until you choose.",
+  "Belgelerim'deki son kaydı aç": "Open the last save in Documents",
+  "Boş başla": "Start empty",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**The plan shrank a lot:** {ogretmen} {ogretmen:teacher|teachers} and {ders} {ders:lesson|lessons} are left, and the last plan file in the folder has {eskiOgretmen} {eskiOgretmen:teacher|teachers} and {eskiDers} {eskiDers:lesson|lessons}. That file was kept; the new state was written separately as **{dosya}**.",
+  "Yeni hâlini asıl dosya yap": "Make the new state the main file",
+  "{ne} Son silmeyi geri almak için:": "{ne} To undo the last deletion:",
+  "Geri getir": "Bring back",
+  "Son silme geri alındı.": "The last deletion was undone.",
+  "son silmeden önceki hâl": "the plan before the last deletion",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
 };
 
 registerSozluk("en", EN);

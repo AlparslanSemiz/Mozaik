@@ -5,6 +5,7 @@ import { health } from '../../pure/feasibility';
 import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
 import {
   GoToProvider,
+  KeepBeforeProvider,
   UndoIfProvider,
   useAnnounce,
   useDialogs,
@@ -40,6 +41,8 @@ import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
+import { parseBundle } from '../../pure/io';
+import type { State } from '../../leaf/model';
 
 // The shell: the tabs, the top bar, the long-lived state and the keyboard.
 // What each of those is made of lives beside this file (ARCHITECTURE, "React
@@ -67,6 +70,9 @@ export default function App() {
     saveTrouble,
     unreadable,
     setAside,
+    lastDelete,
+    keepBefore: keepInStore,
+    openFolderCopy,
   } = useStore(announce);
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -232,9 +238,53 @@ export default function App() {
     toggleMotion,
   });
 
+  // Before a deletion: the open plan goes to the storage's one slot and, with
+  // a folder, to the day's `silmeden-once` file (TODO SD1). Both, because the
+  // undo itself lives in memory and a wiped profile takes the slot with it.
+  const keepInFolder = folder.keepBefore;
+  const keepBefore = useCallback(
+    (before: State, label: string) => {
+      keepInStore(before, label);
+      keepInFolder(before);
+    },
+    [keepInStore, keepInFolder],
+  );
+
+  // The state from before the last deletion of an earlier session, offered
+  // once, on a strip: a reader who has trouble seeing would miss a toast.
+  const [lastDeleteOpen, setLastDeleteOpen] = useState(lastDelete !== null);
+  const restoreLastDelete = () => {
+    if (lastDelete === null) return;
+    setLastDeleteOpen(false);
+    const said = t('Son silme geri alındı.');
+    // What the restore replaces is kept too, but not offered at the next
+    // start: that offer would be "undo the undo".
+    keepInStore(state, said, true);
+    keepInFolder(state);
+    const next = replaceState(lastDelete.state, said);
+    if (next === null) notify(said, 'info');
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+  };
+
+  // The folder's fuller copy after an empty start (useFolder's `bulundu`).
+  const openFolderCopyNow = () => {
+    if (folder.status.kind !== 'bulundu') return;
+    const bundle = parseBundle(folder.status.copy.text);
+    const opened = bundle === null ? null : openFolderCopy(bundle);
+    if (opened === null || opened.ok === 0) {
+      notify(t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'), 'info');
+      return;
+    }
+    folder.release();
+    notify(t('{acilan} plan açıldı.', { acilan: opened.ok }), 'info');
+  };
+
   const fileChosen = openPlanFile({
     state,
-    loadState,
+    loadState: (next: State) => {
+      keepBefore(state, t('Plan dosyası açıldı.'));
+      loadState(next);
+    },
     t,
     confirm,
     alert,
@@ -254,208 +304,214 @@ export default function App() {
        A custom property's SCOPE is part of its contract (pitfall 52). */
     <GoToProvider value={goTo}>
       <UndoIfProvider value={undoIf}>
-        <div className="app" ref={appRef} data-section={tab}>
-          {/* The first Tab stop: from here to the first thing in the content
+        <KeepBeforeProvider value={keepBefore}>
+          <div className="app" ref={appRef} data-section={tab}>
+            {/* The first Tab stop: from here to the first thing in the content
             was 23 to 28 Tabs through the top bar and the strip (DENETIM
             KS27). Not a hash link: the address is the file's, and the
             content box is what has to take focus, not a scroll position. */}
-          <a
-            className="skip-link"
-            href="#icerik"
-            onClick={(event) => {
-              event.preventDefault();
-              mainRef.current?.focus();
-            }}
-          >
-            {t('İçeriğe geç')}
-          </a>
-          {/* ONE row: which document, where you are, what you did, and the file.
+            <a
+              className="skip-link"
+              href="#icerik"
+              onClick={(event) => {
+                event.preventDefault();
+                mainRef.current?.focus();
+              }}
+            >
+              {t('İçeriğe geç')}
+            </a>
+            {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
-          <Topbar
-            tab={tab}
-            goTab={goTab}
-            changelogUnseen={changelogUnseen}
-            status={status}
-            state={state}
-            plans={plans}
-            undo={undo}
-            redo={redo}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            notify={notify}
-            fileInput={fileInput}
-            fileChosen={fileChosen}
-            setPaletteOpen={setPaletteOpen}
-            openShortcuts={openShortcuts}
-            ribbon={ribbon}
-            toggleRibbon={toggleRibbon}
-            theme={theme}
-            toggleTheme={toggleTheme}
-          />
+            <Topbar
+              tab={tab}
+              goTab={goTab}
+              changelogUnseen={changelogUnseen}
+              status={status}
+              state={state}
+              plans={plans}
+              undo={undo}
+              redo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              notify={notify}
+              fileInput={fileInput}
+              fileChosen={fileChosen}
+              setPaletteOpen={setPaletteOpen}
+              openShortcuts={openShortcuts}
+              ribbon={ribbon}
+              toggleRibbon={toggleRibbon}
+              theme={theme}
+              toggleTheme={toggleTheme}
+            />
 
-          {/* Row two: the tools of whichever section is open. A named region
+            {/* Row two: the tools of whichever section is open. A named region
             around it, because a toolbar is not a landmark: outside `<header>`
             and `<main>` the strip had no place in a screen reader's list of
             regions (axe `region`, on every screen). `display: contents`, so
             the box changes nothing on screen. */}
-          <section className="ribbon-band" aria-label={t('Araç şeridi')}>
-            <Ribbon
-              ui={ui}
-              open={ribbon}
-              state={state}
-              change={change}
-              manageProgram={manageProgram}
-              viewProgram={viewProgram}
-              solver={solver}
-              programMask={programMask}
-              setProgramMask={setProgramMask}
-              density={density}
-              setDensity={setDensity}
-              availClock={availClock}
-              setAvailClock={setAvailClock}
-              theme={theme}
-              setTheme={setTheme}
-              programColor={programColor}
-              setProgramColor={setProgramColor}
-              changelogUnseen={changelogUnseen}
-              planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
-              status={status}
-            />
-          </section>
-
-          <InspectorProvider state={state} change={change}>
-            <LessonEditProvider state={state} change={change}>
-              <Commands
-                open={paletteOpen}
-                setOpen={setPaletteOpen}
-                state={state}
+            <section className="ribbon-band" aria-label={t('Araç şeridi')}>
+              <Ribbon
                 ui={ui}
-                go={goTab}
-                sections={TABS}
-                actions={paletteActions}
+                open={ribbon}
+                state={state}
+                change={change}
+                manageProgram={manageProgram}
+                viewProgram={viewProgram}
+                solver={solver}
+                programMask={programMask}
+                setProgramMask={setProgramMask}
+                density={density}
+                setDensity={setDensity}
+                availClock={availClock}
+                setAvailClock={setAvailClock}
+                theme={theme}
+                setTheme={setTheme}
+                programColor={programColor}
+                setProgramColor={setProgramColor}
+                changelogUnseen={changelogUnseen}
+                planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
+                status={status}
               />
-              <div className="workspace">
-                <Notices
-                  canSave={canSave}
-                  saveTrouble={saveTrouble}
-                  unreadable={unreadable}
-                  setAside={setAside}
-                  update={update}
-                  updateHidden={updateHidden}
-                  setUpdateHidden={setUpdateHidden}
-                  folder={folder}
-                  goTab={goTab}
-                  ui={ui}
-                />
+            </section>
 
-                {/* The scroll container lives HERE, not in the seven tab components: they
+            <InspectorProvider state={state} change={change}>
+              <LessonEditProvider state={state} change={change}>
+                <Commands
+                  open={paletteOpen}
+                  setOpen={setPaletteOpen}
+                  state={state}
+                  ui={ui}
+                  go={goTab}
+                  sections={TABS}
+                  actions={paletteActions}
+                />
+                <div className="workspace">
+                  <Notices
+                    canSave={canSave}
+                    saveTrouble={saveTrouble}
+                    unreadable={unreadable}
+                    setAside={setAside}
+                    update={update}
+                    updateHidden={updateHidden}
+                    setUpdateHidden={setUpdateHidden}
+                    folder={folder}
+                    openFolderCopy={openFolderCopyNow}
+                    lastDelete={lastDeleteOpen ? lastDelete : null}
+                    restoreLastDelete={restoreLastDelete}
+                    closeLastDelete={() => setLastDeleteOpen(false)}
+                    goTab={goTab}
+                    ui={ui}
+                  />
+
+                  {/* The scroll container lives HERE, not in the seven tab components: they
             all used to render their own `.main` and one of them had to opt out
             of scrolling (the grid scrolls inside itself).
 
             `lessons.length > 0` is not decoration: with no lessons the Program
             tab shows a paragraph of instructions instead of a grid, and
             `no-overflow` (overflow: hidden, padding: 0) would clip it. */}
-                {/* Program is the expensive exception to the ordinary conditional
+                  {/* Program is the expensive exception to the ordinary conditional
             tabs: Activity hides it, tears down its effects and prepares hidden
             updates at low priority without throwing away the ızgara DOM or
             its scroll position. Keeping `<main>` itself stable is essential;
             a key here would remount the Activity boundary too. */}
-                {/* `tabIndex={-1}`: focusable by code, not a Tab stop. The skip
+                  {/* `tabIndex={-1}`: focusable by code, not a Tab stop. The skip
                   link lands here, and so does a closing dialog whose opener
                   is gone (`returnFocus.ts`). */}
-                <main
-                  ref={mainRef}
-                  id="icerik"
-                  tabIndex={-1}
-                  className={
-                    tab === 'program' && state.lessons.length > 0
-                      ? 'main no-overflow'
-                      : 'main scroll-fade'
-                  }
-                >
-                  {tab === 'setup' && (
-                    <Setup state={state} change={change} plans={plans} step={ui.step} />
-                  )}
-                  {tab === 'availability' && (
-                    <Availability
-                      state={state}
-                      change={change}
-                      kind={ui.kind}
-                      chosen={ui.chosen}
-                      setChosen={ui.setChosen}
-                      showHeat={ui.showHeat}
-                    />
-                  )}
-                  {tab === 'lessons' && (
-                    <Lessons
-                      state={state}
-                      change={change}
-                      mode={ui.lessonMode}
-                      focus={ui.lessonFocus}
-                      setFocus={ui.setLessonFocus}
-                    />
-                  )}
-                  <Activity mode={tab === 'program' ? 'visible' : 'hidden'} name="Program grid">
-                    <Program
-                      active={tab === 'program'}
-                      state={state}
-                      change={change}
-                      solver={solver}
-                      view={ui.view}
-                      mask={programMask}
-                      setMask={setProgramMask}
-                      poolSort={ui.poolSort}
-                      setPoolSort={ui.setPoolSort}
-                      poolFilter={ui.poolFilter}
-                      setPoolFilter={ui.setPoolFilter}
-                      colorMode={programColor}
-                    />
-                  </Activity>
-                  {tab === 'check' && <Check state={state} view={ui.checkView} ui={ui} />}
-                  {tab === 'print' && (
-                    <Print
-                      state={state}
-                      excluded={printExcluded}
-                      setExcluded={setPrintExcluded}
-                      scope={ui.scope}
-                      colored={ui.colored}
-                      options={printOptions}
-                      setOptions={(next) => {
-                        setPrintOptions(next);
-                        writePrintOptions(next);
-                      }}
-                    />
-                  )}
-                  {tab === 'settings' && (
-                    <Settings
-                      state={state}
-                      change={change}
-                      replaceState={replaceState}
-                      plans={plans}
-                      folder={folder}
-                      update={update}
-                      scale={scale}
-                      setScale={setScale}
-                      density={density}
-                      setDensity={setDensity}
-                      uiDensity={uiDensity}
-                      setUiDensity={setUiDensity}
-                      ribbonAuto={ribbonAuto}
-                      setRibbonAuto={setRibbonAuto}
-                      theme={theme}
-                      setTheme={setTheme}
-                      motion={motion}
-                      setMotion={setMotion}
-                      section={ui.section}
-                      onChangelogSeen={() => setChangelogUnseen(false)}
-                    />
-                  )}
-                </main>
-              </div>
-            </LessonEditProvider>
-          </InspectorProvider>
-        </div>
+                  <main
+                    ref={mainRef}
+                    id="icerik"
+                    tabIndex={-1}
+                    className={
+                      tab === 'program' && state.lessons.length > 0
+                        ? 'main no-overflow'
+                        : 'main scroll-fade'
+                    }
+                  >
+                    {tab === 'setup' && (
+                      <Setup state={state} change={change} plans={plans} step={ui.step} />
+                    )}
+                    {tab === 'availability' && (
+                      <Availability
+                        state={state}
+                        change={change}
+                        kind={ui.kind}
+                        chosen={ui.chosen}
+                        setChosen={ui.setChosen}
+                        showHeat={ui.showHeat}
+                      />
+                    )}
+                    {tab === 'lessons' && (
+                      <Lessons
+                        state={state}
+                        change={change}
+                        mode={ui.lessonMode}
+                        focus={ui.lessonFocus}
+                        setFocus={ui.setLessonFocus}
+                      />
+                    )}
+                    <Activity mode={tab === 'program' ? 'visible' : 'hidden'} name="Program grid">
+                      <Program
+                        active={tab === 'program'}
+                        state={state}
+                        change={change}
+                        solver={solver}
+                        view={ui.view}
+                        mask={programMask}
+                        setMask={setProgramMask}
+                        poolSort={ui.poolSort}
+                        setPoolSort={ui.setPoolSort}
+                        poolFilter={ui.poolFilter}
+                        setPoolFilter={ui.setPoolFilter}
+                        colorMode={programColor}
+                      />
+                    </Activity>
+                    {tab === 'check' && <Check state={state} view={ui.checkView} ui={ui} />}
+                    {tab === 'print' && (
+                      <Print
+                        state={state}
+                        excluded={printExcluded}
+                        setExcluded={setPrintExcluded}
+                        scope={ui.scope}
+                        colored={ui.colored}
+                        options={printOptions}
+                        setOptions={(next) => {
+                          setPrintOptions(next);
+                          writePrintOptions(next);
+                        }}
+                      />
+                    )}
+                    {tab === 'settings' && (
+                      <Settings
+                        state={state}
+                        change={change}
+                        replaceState={replaceState}
+                        plans={plans}
+                        folder={folder}
+                        update={update}
+                        scale={scale}
+                        setScale={setScale}
+                        density={density}
+                        setDensity={setDensity}
+                        uiDensity={uiDensity}
+                        setUiDensity={setUiDensity}
+                        ribbonAuto={ribbonAuto}
+                        setRibbonAuto={setRibbonAuto}
+                        theme={theme}
+                        setTheme={setTheme}
+                        motion={motion}
+                        setMotion={setMotion}
+                        section={ui.section}
+                        onChangelogSeen={() => setChangelogUnseen(false)}
+                      />
+                    )}
+                  </main>
+                </div>
+              </LessonEditProvider>
+            </InspectorProvider>
+          </div>
+        </KeepBeforeProvider>
       </UndoIfProvider>
     </GoToProvider>
   );

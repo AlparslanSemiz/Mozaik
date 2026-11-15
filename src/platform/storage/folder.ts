@@ -93,6 +93,29 @@ export function rescueName(now: Date): string {
 }
 
 /**
+ * Where a write that would shrink the plan sharply goes instead of over the
+ * live file: `ders-programi-kurtarma-2026-11-16.json` (`saveInto`, `SHRINK`).
+ * One per day, rewritten through the day: the state it holds is the newest,
+ * and the live file it stands beside keeps the larger one. `DAILY` does not
+ * match it, so the prune never touches it.
+ */
+export function shrinkName(now: Date): string {
+  return `ders-programi-kurtarma-${dayStamp(now)}.json`;
+}
+
+/**
+ * The open plan as it was before the day's last deletion, as a plan file
+ * (`ders-programi-silmeden-once-2026-11-16.json`): "Dosyadan aç" opens it.
+ * Written before every deletion that asks no question (TODO SD1). One a day
+ * and rewritten through it, because the exe removes nothing but a daily
+ * backup (`remove_in`, src-tauri/src/lib.rs), so a new name per deletion would
+ * pile up in Belgelerim for good.
+ */
+export function beforeDeleteName(now: Date): string {
+  return `ders-programi-silmeden-once-${dayStamp(now)}.json`;
+}
+
+/**
  * Which daily backups to delete, oldest first.
  *
  * Only names this program wrote are ever considered. The folder my father
@@ -110,16 +133,37 @@ export function prunable(
   names: string[],
   keep: number = KEEP_DAILY,
   full: (name: string) => boolean = () => true,
+  spare: string | null = null,
 ): string[] {
   const ours = names.filter((name) => DAILY.test(name)).sort(); // ISO-shaped: sorts by date
   const old: string[] = [];
   let kept = 0;
   for (let i = ours.length - 1; i >= 0; i--) {
     const name = ours[i]!;
-    if (kept >= keep) old.unshift(name);
-    else if (full(name)) kept++;
+    if (kept >= keep) {
+      if (name !== spare) old.unshift(name);
+    } else if (full(name)) kept++;
   }
   return old;
+}
+
+/**
+ * The daily the prune never deletes: the one with the most work in it
+ * (`workOf`: every list's rows and every placed hour), the newest of equals.
+ * Counting only "holds work" was not enough: a wiped profile and one teacher
+ * made each new day's backup "full", and ten small days pushed out every real
+ * backup (the audit of 2026-11-16, measured: 0 of 10 left).
+ */
+export function largest(sizes: ReadonlyMap<string, number>): string | null {
+  let best: string | null = null;
+  let most = 0;
+  for (const [name, size] of [...sizes].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    if (size > 0 && size >= most) {
+      best = name;
+      most = size;
+    }
+  }
+  return best;
 }
 
 /** Every list a plan's work is in, today's names and v1's Turkish ones. */
@@ -134,6 +178,56 @@ const WORK = [
   'dersler',
 ];
 
+/** How much work a bundle holds, summed over its plans. */
+export interface Work {
+  /** Rows in the four lists: rooms, teachers, classes, lessons. */
+  lists: number;
+  teachers: number;
+  lessons: number;
+  /** Placed hours, in every seçenek. */
+  placed: number;
+}
+
+const count = (value: unknown): number =>
+  Array.isArray(value)
+    ? value.length
+    : typeof value === 'object' && value !== null
+      ? Object.keys(value).length
+      : 0;
+
+/**
+ * How much work this bundle's text holds. Null when it is not a bundle this
+ * can read. Raw, like everything in this file: the four lists (today's names
+ * and v1's), and the placements of every seçenek (`programs`) or of the one
+ * grid an older plan had (`placements`, v1's `yerlesim`).
+ */
+export function workOf(text: string): Work | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return null;
+  }
+  const plans = (raw as { plans?: unknown } | null)?.plans;
+  if (!Array.isArray(plans)) return null;
+  const work: Work = { lists: 0, teachers: 0, lessons: 0, placed: 0 };
+  for (const plan of plans as unknown[]) {
+    const state = (plan as { state?: Record<string, unknown> } | null)?.state;
+    if (typeof state !== 'object' || state === null) continue;
+    for (const list of WORK) work.lists += Array.isArray(state[list]) ? count(state[list]) : 0;
+    work.teachers += count(state.teachers) + count(state.ogretmenler);
+    work.lessons += count(state.lessons) + count(state.dersler);
+    if (Array.isArray(state.programs)) {
+      for (const program of state.programs as unknown[]) {
+        work.placed += count((program as { placements?: unknown } | null)?.placements);
+      }
+    } else {
+      work.placed += count(state.placements) + count(state.yerlesim);
+    }
+  }
+  return work;
+}
+
 /**
  * Does this bundle's text hold any work: a room, a teacher, a class or a
  * lesson in any plan? Null when it is not a bundle this can read.
@@ -144,20 +238,18 @@ const WORK = [
  * stay in a file that does not know what a State is.
  */
 export function holdsWork(text: string): boolean | null {
-  let raw: unknown;
-  try {
-    raw = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  const plans = (raw as { plans?: unknown } | null)?.plans;
-  if (!Array.isArray(plans)) return null;
-  return plans.some((plan: unknown) => {
-    const state = (plan as { state?: Record<string, unknown> } | null)?.state;
-    return WORK.some(
-      (list) => Array.isArray(state?.[list]) && (state[list] as unknown[]).length > 0,
-    );
-  });
+  const work = workOf(text);
+  return work === null ? null : work.lists > 0;
+}
+
+/**
+ * Would writing `now` over a file holding `before` shrink the work sharply?
+ * Under half the rows of the four lists. Placed hours do not count: "Programı
+ * boşalt" and "Baştan diz" take every one of them away on purpose, and a
+ * guard they set off would keep the live file stale for good.
+ */
+export function shrinks(before: Work | null, now: Work | null): boolean {
+  return before !== null && now !== null && now.lists * 2 < before.lists;
 }
 
 // ------------------------------------------------------- is it even here
@@ -311,6 +403,9 @@ export interface WriteResult {
   written: string[];
   /** Daily backups deleted this time. */
   pruned: string[];
+  /** Set when the write would have shrunk the work sharply (`shrinks`): the
+      live file and today's backup were kept, and the bundle went to `file`. */
+  shrunk?: { file: string; before: Work; now: Work };
 }
 
 /**
@@ -328,6 +423,15 @@ export interface WriteResult {
  * nothing: a file that is not there, or one as empty. It never prunes, and it
  * writes no rescue copy. An empty start in the exe used to put an empty bundle
  * over a full live file and a full backup of today (A2).
+ *
+ * A bundle that holds under half the rows of the live file or of today's
+ * backup (`shrinks`) goes over neither: it is written to the day's rescue
+ * file (`shrinkName`) and the caller says so on screen, until the user says
+ * the smaller plan is the one to keep (`allowShrink`). One teacher typed into
+ * a wiped profile used to go over the whole school in the live file (the
+ * audit of 2026-11-16).
+ *
+ * The prune never deletes the daily with the most work in it (`largest`).
  */
 export async function saveInto(
   dir: FileSystemDirectoryHandle,
@@ -335,10 +439,29 @@ export async function saveInto(
   now: Date,
   prune: boolean,
   rescue: string | null = null,
+  allowShrink = false,
 ): Promise<WriteResult> {
   const daily = dailyName(now);
   const result: WriteResult = { written: [], pruned: [] };
-  const work = holdsWork(text) === true;
+  const mine = workOf(text);
+  const work = mine !== null && mine.lists > 0;
+  if (work && !allowShrink) {
+    let before: Work | null = null;
+    for (const name of [MAIN_NAME, daily]) {
+      const held = await readText(dir, name);
+      const there = held === null ? null : workOf(held);
+      if (there !== null && (before === null || there.lists > before.lists)) before = there;
+    }
+    if (shrinks(before, mine)) {
+      const file = shrinkName(now);
+      for (const name of rescue === null ? [file] : [file, rescue]) {
+        await writeText(dir, name, text);
+        result.written.push(name);
+      }
+      result.shrunk = { file, before: before!, now: mine };
+      return result;
+    }
+  }
   for (const name of rescue === null || !work ? [MAIN_NAME, daily] : [MAIN_NAME, daily, rescue]) {
     if (!work && !(await emptyMayGo(dir, name))) continue;
     await writeText(dir, name, text);
@@ -349,13 +472,16 @@ export async function saveInto(
   const names: string[] = [];
   for await (const name of dir.keys()) names.push(name);
   const full = new Set<string>();
+  const sizes = new Map<string, number>();
   for (const name of names.filter((n) => DAILY.test(n))) {
     // A backup that cannot be read now (open in another program) is not
     // counted as full; it is kept unless ten full ones are newer.
     const held = await readText(dir, name).catch(() => null);
-    if (held !== null && holdsWork(held) === true) full.add(name);
+    const there = held === null ? null : workOf(held);
+    if (there !== null && there.lists > 0) full.add(name);
+    sizes.set(name, there === null ? 0 : there.lists + there.placed);
   }
-  for (const old of prunable(names, KEEP_DAILY, (name) => full.has(name))) {
+  for (const old of prunable(names, KEEP_DAILY, (name) => full.has(name), largest(sizes))) {
     try {
       await dir.removeEntry(old);
       result.pruned.push(old);
@@ -365,4 +491,46 @@ export async function saveInto(
     }
   }
   return result;
+}
+
+/** Writes the open plan as it was before a deletion (`beforeDeleteName`). */
+export async function saveBefore(
+  dir: FileSystemDirectoryHandle,
+  planText: string,
+  now: Date,
+): Promise<string> {
+  const name = beforeDeleteName(now);
+  await writeText(dir, name, planText);
+  return name;
+}
+
+/** A bundle in the folder, for the empty start's offer (`newestInFolder`). */
+export interface FolderCopy {
+  name: string;
+  text: string;
+  work: Work;
+}
+
+/**
+ * The copy in the folder an empty start offers to open: the live file, unless
+ * it holds under half the rows of the fullest daily backup (then that daily,
+ * the newest of equals). Null when no file there holds work. Throws when the
+ * folder cannot be read, like `readText`.
+ */
+export async function newestInFolder(dir: FileSystemDirectoryHandle): Promise<FolderCopy | null> {
+  const read = async (name: string): Promise<FolderCopy | null> => {
+    const text = await readText(dir, name).catch(() => null);
+    const work = text === null ? null : workOf(text);
+    return text !== null && work !== null && work.lists > 0 ? { name, text, work } : null;
+  };
+  const main = await read(MAIN_NAME);
+  const names: string[] = [];
+  for await (const name of dir.keys()) if (DAILY.test(name)) names.push(name);
+  let daily: FolderCopy | null = null;
+  for (const name of names.sort()) {
+    const copy = await read(name);
+    if (copy !== null && (daily === null || copy.work.lists >= daily.work.lists)) daily = copy;
+  }
+  if (main !== null && !shrinks(daily?.work ?? null, main.work)) return main;
+  return daily ?? main;
 }

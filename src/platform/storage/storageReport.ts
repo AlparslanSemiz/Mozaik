@@ -19,7 +19,14 @@
 // which keys were written and requires each one in the report, and it also
 // reads this file and fails if a key is written out by hand.
 
-import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from '../../pure/io';
+import {
+  BACKUP_COUNT,
+  BEFORE_DELETE_KEY,
+  backupKey,
+  LIBRARY_KEY,
+  planKey,
+  type Library,
+} from '../../pure/io';
 import { isDesktop } from '../exe';
 import { t } from '../../leaf/i18n';
 import { PREFERENCE_ROWS, safely } from '../../leaf/preference';
@@ -113,6 +120,11 @@ export function storageReport(lib: Library): StorageReport {
       chars: charsAt(backupKey(i)),
     });
   }
+  rows.push({
+    key: BEFORE_DELETE_KEY,
+    what: t('son silmeden önceki hâl'),
+    chars: charsAt(BEFORE_DELETE_KEY),
+  });
   // Every preference key, from the one list their modules take them from. A
   // key that is written and not named here once hid for weeks, twice (the
   // drawer's height and the strip, then the print options), and the one thing

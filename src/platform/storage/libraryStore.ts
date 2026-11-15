@@ -32,7 +32,14 @@
 // list and refuses the writes. The user lifts it: opening a file over the
 // plan, deleting it, or opening a whole library over it (`explicitly`).
 
-import { LIBRARY_KEY, adoptOrphans, parseLibrary, planKey, type Library } from '../../pure/io';
+import {
+  BEFORE_DELETE_KEY,
+  LIBRARY_KEY,
+  adoptOrphans,
+  parseLibrary,
+  planKey,
+  type Library,
+} from '../../pure/io';
 import { safely } from '../../leaf/preference';
 import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
@@ -179,12 +186,21 @@ function mayOverwrite(id: Id): boolean {
  */
 export function writePlanText(id: Id, text: string): boolean {
   if (writesClosed() || !mayWritePlan(id) || !mayOverwrite(id)) return false;
-  return (
+  const put = () =>
     safely(() => {
       localStorage.setItem(planKey(id), text);
       return true;
-    }) === true
-  );
+    }) === true;
+  if (put()) return true;
+  // Full: the copy from before the last deletion gives its room to the plan
+  // itself, which always comes first (`BEFORE_DELETE_KEY`).
+  const dropped =
+    safely(() => {
+      if (localStorage.getItem(BEFORE_DELETE_KEY) === null) return false;
+      localStorage.removeItem(BEFORE_DELETE_KEY);
+      return true;
+    }) === true;
+  return dropped && put();
 }
 
 export function dropPlanText(id: Id): void {

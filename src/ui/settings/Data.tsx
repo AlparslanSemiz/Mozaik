@@ -34,6 +34,7 @@ import {
   useDialogs,
   useT,
   useToast,
+  useKeepBefore,
   useUndoIf,
   WRONG_FILE,
 } from '../common';
@@ -94,6 +95,7 @@ export default function Data({
   const { confirm } = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const loadSample = useLoadSample();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
@@ -125,6 +127,7 @@ export default function Data({
       return;
     }
     const said = t('Bu plandaki her şey silindi.');
+    keepBefore(state, said);
     const next = replaceState(emptyState(), said);
     if (next === null) notify(said, 'info');
     else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
