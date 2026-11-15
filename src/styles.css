@@ -2194,11 +2194,34 @@ table.grid thead tr:nth-child(2) th {
   line-height: var(--lh-tight);
 }
 
-/* The bell time under the lesson number. Tiny on purpose: it is a reminder,
-   the lesson number is what the eye navigates by. */
+/* The bell time under the lesson number. A reminder, the lesson number is what
+   the eye navigates by — but a reminder still has to be READ.
+
+   It was 12px with nothing between one heading and the next, and since the
+   clock is what sets the column's min-content (pitfall 37), "09:00" filled its
+   column wall to wall: the row read "09:0009:5010:40", 1px apart. Measured
+   2026-11-15 on the sample school at 1920, 1536 (%125) and 960 (%200): the
+   smallest gap between two clocks was 1.0px at every one. Now one step up the
+   ladder and with its own air on both sides, so the gap is the padding twice
+   plus the rule whatever the scale (4.25px, against 1.0). The padding is on
+   the clock and not the `th`: the hour number above it is narrower and needs
+   none. It costs width, and that is said out loud: the clock IS the column's
+   floor, so Rahat's week went from 2516px to about 3000px at 1920. Rahat
+   already scrolled sideways; Sığdır, which hides the clock, is unchanged. */
+table.grid .hour-clock {
+  padding-inline: var(--space-1);
+}
+
+/* And the hairline between two bell times steps up to --line, so the gap has
+   a rule in it the eye can find. Only on the hour row: down the body the
+   hourly rhythm stays on the hairline (see `table.grid th, td`). */
+table.grid thead tr:nth-child(2) th {
+  border-right-color: var(--line);
+}
+
 .hour-clock {
   display: block;
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   color: var(--muted);
 }
 
@@ -2213,12 +2236,15 @@ table.grid thead tr:nth-child(2) th {
    leaning in. Horizontal scrolling was already how the week is read at
    "rahat"; here there is simply more of it. */
 :root[data-density='ferah'] {
-  --cell-w: 2.875rem;
+  /* 3.5rem since 2026-11-15: the bell time at 13px with its own air made
+     Rahat's column 42px wide, and at 2.875rem (37px) Ferah was no wider than
+     Rahat any more — the step existed and did nothing. */
+  --cell-w: 3.5rem;
   --cell-h: 2.75rem;
 }
 
 :root[data-density='ferah'] .card-bottom {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   opacity: 1;
 }
 
@@ -2656,7 +2682,7 @@ table.grid tbody td {
    The bottom line is left where it is: it is the room letter or the subject
    short, a second-order fact, and growing both would just be zoom. */
 table.grid tbody td.block-wide .card-top {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-base);
 }
 
 /* The two-card drawing has NOT gone away — a block whose two hours straddle the
@@ -2690,12 +2716,18 @@ table.grid tbody td.unavailable {
     var(--hatch) 3px,
     var(--hatch) 6px
   );
-  color: var(--bad);
-  /* Match Availability's closed-hour mark exactly; the shared red, size and
-     weight make the same state read the same way while this grid keeps its
-     denser hatch. */
-  font-size: var(--fs-2xl);
-  font-weight: 700;
+  /* GREY here, and one step smaller than Müsaitlik's. It used to match that
+     screen's mark exactly — red, 25px, bold — and on a timetable with the
+     school's closed hours drawn in, the loudest thing in the grid was the
+     hours with NO lesson: a column of red crosses out-shouting the cards.
+     It also crossed the channel: on this grid red means "this drop is
+     refused" (DECISIONS, Müsaitlik's red cross is argued for THAT screen,
+     where nothing is ever refused). The hatch is the state and it carries it
+     in grayscale; the cross is now its label, in --muted (5.97:1 light,
+     6.52:1 dark on --closed) at the body's size and above. */
+  color: var(--muted);
+  font-size: var(--fs-lg);
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -2898,14 +2930,33 @@ table.grid tbody td:hover > .card-pin,
   outline-offset: -1px;
 }
 
+/* The card's two lines, and the second one is NOT a quieter ink any more.
+   Both were 12px, and the room letter / subject short underneath sat in
+   --on-color-sub, which on the 36 palette colours measures 4.71:1 at worst —
+   under the 7:1 the reader's rows hold, on the one surface he reads most.
+   --on-color clears 7.3:1 on every palette colour (palette.test.ts), so the
+   hierarchy is carried by size and weight instead: 14px bold over 13px
+   regular. Sığdır keeps its own 12px base and its fit ratio below, because
+   its contract is the whole week in the box.
+
+   The LINE BOX does not grow with the letters: it is the one the lines had
+   at 12px (12px x --lh-base = 18px at %100), written out because `.card`'s
+   `font: inherit` would otherwise hand them 1.5 x their new size and every
+   row would come out 4.5px taller. It is also exactly Sığdır's line box, so
+   switching density moves no row (gorunum.spec.ts, "satır kutusu"). */
+.card-top,
+.card-bottom {
+  line-height: calc(var(--fs-xs) * var(--lh-base));
+}
+
 .card-top {
-  font-size: var(--fs-xs);
+  font-size: var(--fs-md);
   font-weight: 700;
 }
 
 .card-bottom {
-  font-size: var(--fs-xs);
-  color: var(--on-color-sub);
+  font-size: var(--fs-sm);
+  color: var(--on-color);
 }
 
 /* rowspan is still NOT used (a bug factory in a dynamic table): the merge above
@@ -3454,7 +3505,8 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 .pool-card .counter {
   font-size: var(--fs-xs);
-  color: var(--on-color-sub);
+  /* Not --on-color-sub: 4.71:1 on the palette's worst colour, see .card-bottom. */
+  color: var(--on-color);
 }
 
 /* A double is drawn twice as wide as a single, because that is what it is about

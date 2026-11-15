@@ -637,8 +637,11 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     expect(contrast(style.color, t['--closed']!)).toBeGreaterThanOrEqual(4.5);
     expect(style.backgroundImage).toContain('repeating-linear-gradient');
 
-    // Program now uses the exact same red, size and weight as Availability;
-    // the hatch remains the non-colour channel on both tables.
+    // Availability keeps its big red cross: there the screen only says open
+    // or closed. Program does NOT share it any more (2026-11-15): on this grid
+    // red means "refused", and a column of red crosses out-shouted the lessons.
+    // Its mark is the quiet ink, never red, and still the size of the text
+    // beside it (asserted above). The hatch is the state on both tables.
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     const avail = await page
       .locator('table.availability td.closed')
@@ -653,9 +656,10 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
         };
       });
     expect(avail.size).toBeGreaterThanOrEqual(15);
-    expect(style.size).toBeCloseTo(avail.size, 1);
-    expect(style.color).toBe(avail.color);
-    expect(style.weight).toBe(avail.weight);
+    expect(style.size, 'Program çarpısı Müsaitlik kadar bağırıyor').toBeLessThan(avail.size);
+    expect(style.color, 'Program çarpısı kırmızı: orada kırmızı "reddedildi" demek').not.toBe(
+      avail.color,
+    );
     expect(avail.backgroundImage).toContain('repeating-linear-gradient');
   });
 });
