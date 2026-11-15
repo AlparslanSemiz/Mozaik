@@ -1981,18 +1981,21 @@ yapıldı (WORKLOG 2026-11-15): koyu temada Çıktı kâğıdı, bildirimin kâ�
 panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların adı ve
 `.chip-count` kontrastı, Danışman'ın aynı cümleyi bir kez yazması. Gerisi:
 
-- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** Yapıldı (2026-11-15,
-      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt` sormuyor,
-      bildirim 8 s ve "Geri al" (`undo-if`: yalnız kendi adımı tepedeyken). Kalan: `Baştan diz`
-      hâlâ soruyor, çünkü sonucu çözücü bitince ayrı bir adım; KS26 (30 adımlık tavan) açık. Ders silme
-      (`LessonRow`), öğretmen silme, `Baştan diz` ve `Programı boşalt` hâlâ soruyor, ikisinin
-      sorusu kendi metninde "Ctrl+Z ile geri alınabilir" diyor. Yapılmadı, çünkü iş küçük değil:
-      `Toasts.tsx` bilerek eylemsiz ("bir Geri al düğmesi geri al yığınına uzanmalı, ve yığın
-      başka bir düzenlemede ilerler; yanlış değişikliği sessizce geri alan bir düğme hiç
-      olmamasından kötü"). Önce yığının bir adımını kimlikle bilmek (bildirimin düğmesi yalnız
-      o adım hâlâ tepedeyse çalışsın), sonra dört çağrı yeri, ve soruyu cevaplayan E2E testleri
-      (`answerDialog` 16 dosyada). KS26 (30 adımlık tavan sessizce bitiyor) bununla birlikte.
-      Karar: bildirimin süresi (rapor 8–10 sn diyor, bugünkü bildirim 6 sn).
+- [~] **SD1 · Geri alınabilen silmelerde soru yerine "Geri al" bildirimi.** İlk dilim (2026-11-15,
+      `kullanim/geri-al`, Alp: "her şeyi yap"): ders silme, öğretmen silme ve `Programı boşalt`
+      sormuyor, bildirim "Geri al" taşıyor (`undo-if`: yalnız kendi adımı tepedeyken). İkinci
+      dilim (2026-11-15, `erisim/geri-al`, birleşmedi, klavye ve okuma denetimi): sınıf, derslik,
+      kullanılmayan branş ve seçenek silme, `Baştan diz` sormuyor; `Her şeyi sil` tek soru sorup
+      geri alınabilen bir adım oluyor ("Son kez soruyorum" gitti), dolu planın yerine örnek okul
+      da öyle. Bildirim 10 s, fare üstünde ya da odak içindeyken süresi duruyor; yalnız en yeni
+      bildirim "Geri al" taşıyor, o da arada başka bir değişiklik olduysa bunu söylüyor. `Sil`'den
+      sonra odak sonraki (son satırda önceki, liste boşsa ekleme kutusuna) satırın `Sil`'ine
+      gidiyor, bildirim ekran okuyucuya "Geri almak için Ctrl+Z" diyor, Ctrl+Z "Geri alındı: …"
+      diyor. Seçenek değiştirmek geri al geçmişini artık silmiyor ve kendisi bir adım değil (geçmiş
+      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
+      `Dosyadan aç` geçmişi hâlâ siliyor (bilerek, soru soruyor); bildirime klavyeyle doğrudan
+      gidecek bir kısayol yok (F6 tarayıcının; odak `Geri al`dan sonra geldiği yere dönüyor);
+      Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol edilmez" diyor.
 - [x] **SD2 · "Sıkışık" rozeti yük ile açık saat eşitken de çıkıyor.** Bitti (2026-11-15,
       `kullanim/sikisik`, Alp: "her düzeltmeyi yap"): öneri uygulandı, sınıfta `classCapacityLevel`,
       liste süzgeci satırın kendi seviyesini okuyor. "Haftanın doluluğu" satırları duruyor (ayrı karar). Tam dolu kursta 20

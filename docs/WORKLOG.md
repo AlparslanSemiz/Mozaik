@@ -45,6 +45,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Kullanım: öneri paneli tek yol + "Başka yollar"; koyu temada Çıktı okunur; 146 etiketsiz kutu;
   sınıfta sahte "Sıkışık" yok (SD2); ders/öğretmen silme ve "Programı boşalt" sormuyor, "Geri al"
   bildirimi (`undo-if`, SD1).
+- Dalda, birleşmedi: `erisim/geri-al` (`metin/tek-ad`'ın üstünde) SD1'in kalanını yapıyor: sınıf,
+  derslik, branş, seçenek silme ve `Baştan diz` sormuyor, `Her şeyi sil` tek soru; bildirim 10 s
+  ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -61,7 +64,7 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
 
-**Açık teknik işler (TODO):** `Baştan diz` hâlâ soruyor (SD1'in kalanı); capability daraltma ve
+**Açık teknik işler (TODO):** capability daraltma ve
 CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
@@ -71,6 +74,65 @@ weeklyHours) eski formülle ve ikinci bakışa girmiyor.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-15 · Geri al ve bildirim, klavye ve okuma denetiminin bulguları (`erisim/geri-al`, TODO SD1)
+
+`metin/tek-ad`'ın üstünde (o önce birleşecek). Denetimin dokuz bulgusu (sondaları scratch
+`denetim/mesaj/` ve `denetim/klavye/`):
+
+- Bildirimin süresi fare üstündeyken ve odak içindeyken duruyor (odaktaki "Geri al" 8,5 s'de
+  kayboluyordu); eylemli bildirim 10 s (SD1'in açık bıraktığı 8 ile 10 arasında 10).
+- `Sil`'den sonra odak `<body>`'ye düşüyordu ve bildirimin düğmesi 301 Tab uzaktaydı. Odak artık
+  silinmeden önce sonraki satırın `Sil`'ine (son satırda öncekine, liste boşalınca ekleme
+  kutusuna) geçiyor (`ui/common/deleteFocus.ts`); bildirim ekran okuyucuya "Geri almak için
+  Ctrl+Z" diyor, Ctrl+Z boş bir tek satırlık kutuda da çalışıyor. Program ızgarasının silmesine
+  dokunulmadı.
+- Eski bildirimin "Geri al"ı hiçbir şey yapmadan kapanıyordu (`undo-if`). Yalnız en yeni eylemli
+  bildirim düğme taşıyor; o da geri alamazsa (arada başka değişiklik) bunu söylüyor.
+- Seçenek değiştirmek geri al geçmişini siliyordu (`program-change` `past: []`). Geçmiş bütün
+  durumları tuttuğu için güvenli: seçenek eklemek, adlandırmak, silmek sıradan bir adım,
+  seçeneğe geçmek adım değil (`view`, yalnız bakmak 30 adımı doldurmasın ve ileri alı silmesin
+  diye), geri almak değişikliğin yapıldığı seçeneği geri getiriyor (`undo.test.ts`). Plan
+  değiştirmek ve `Dosyadan aç` hâlâ siliyor.
+- Seçenek silme, sınıf, derslik ve kullanılmayan branş silme ve `Baştan diz` sormuyor; bildirim
+  ne gittiğini sayıyor (`deletionNotice` dört türü de söylüyor, `deletionQuestion` kalktı).
+  Derslik cümlesi "derslik çakışması artık kontrol edilmeyecek" yerine "Bu sınıflar artık aynı
+  saate konabilir."; seçenek cümlesi "0 sabitleme" demiyor. `Baştan diz`'in sonucu zaten tek adım,
+  bildirim çözücü bitince (`useSolver` `start`'ın üçüncü argümanı), yalnız sonuç gerçekten
+  yerine konduysa: aynı haftaya varan koşu hiçbir şey değiştirmiyor ve bildirim vermiyor,
+  durdurulan koşu da vermiyor (sonuç çubuğu söylüyor).
+- `Her şeyi sil` tek soru ("Son kez soruyorum" gitti) ve geri alınabilen bir adım
+  (`replaceState`: `thawPlan` + sıradan değişiklik); dolu planın yerine örnek okul hep geri
+  alınabiliyordu, sorusu "Geri alınamaz" diyordu, artık bildirim "Geri al" taşıyor. Okunamayan
+  (donmuş) bir planda `Her şeyi sil` eskisi gibi yükleme kalıyor: geri alma boş yer tutucuyu
+  çözülmüş hâlde geri getirir ve otomatik kayıt onu okunamayan metnin üstüne yazardı.
+- "Geri al"a basınca odak bildirimden önce olduğu yere dönüyor.
+- Ctrl+Z ve bildirimin düğmesi ekran okuyucuya "Geri alındı: …" diyor; değişikliğin adı
+  `undo.ts`'te durumun kendisine bağlı bir `WeakMap`'te (`undoLabel`), adı olmayanda "Geri alındı."
+
+İnceleme (taze bağlamlı alt ajan) yedi bulgu verdi, altısı ayrı commit'te düzeldi: donmuş
+planda `Her şeyi sil` geri alınabilir olursa okunamayan metnin üstüne boş yer tutucu yazılırdı
+(veri kaybı sınıfı, düzeltildi: orada yükleme kalıyor); kaldırılan bildirim fareyi "üstünde"
+bırakıp süreyi sonsuza durduruyordu; `Baştan diz` bildirimi sonuç yerine konmasa da çıkıyordu;
+Ctrl+Z her boş kutuda planı geri alıyordu (artık yalnız ekleme kutusunda); `Geri al`dan sonra
+odak kayboluyordu; Branşlar'da boş listenin ekleme kutusu yanlış panelde aranabiliyordu.
+Yedincisi (seçeneğe bakmak geçmişi dolduruyor) de alındı: `view`.
+
+Koşulan: `npx tsc --noEmit -p .` ve `-p e2e/tsconfig.json` 0, `npx eslint src` 0, prettier,
+`npx vite build` 1 228,97 kB, `npm run boyut` sınırın 1,03 kB altında, Playwright
+(`--workers=2`) `liste`, `kurulum`, `ayarlar`, `otomatik`, `program`, `temel`, `serit`,
+`zebra`, `iki-kopya`, `musaitlik`, `yazdir` 402/402. `npm run hizli`: makinenin yükü 50–70
+iken yedi test süre aşımına düştü (`linuxKur`, `relax` küçük dünyalar, `App`, `sentences`,
+`programScreen`); `--testTimeout=120000` ile yeniden koşunca `App`, `sentences`,
+`programScreen` yeşil, `relax.test.ts`'in "derslik darboğazı" kendi 30 s sınırında hâlâ
+düşüyor ve bu dal `pure/relax`'a dokunmuyor; dokunulan birim testleri (`undo`, `entities`,
+`storeContract`, `i18n`) yeşil. Tıklama testi: `dist/index.html` `file://`, 1920×1080, örnek
+okul; derslik silme, fare üstünde 11 s, `Her şeyi sil` (scratch `geri-al/`, dört görüntü).
+Kilit yok (`flock` bu Mac'te yok), ölçümler kirli. Koşulmayan: tam süit, Stryker, exe.
+
+Kalan: Okul → Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol
+edilmez" diyor (bu işin dışında kaldı); aynı haftaya varan `Baştan diz` bir şey değiştirmiyor
+ve yalnız sonuç çubuğu konuşuyor; KS26.
 
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 
