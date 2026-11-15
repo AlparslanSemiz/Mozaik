@@ -14,7 +14,6 @@
 
 import type { State } from '../../leaf/model';
 import { EXE_FOLDER } from '../../platform/exe';
-import { readBundlePlans, readPlanFile } from '../../pure/io';
 import {
   type FolderRun,
   downloadBundle,
@@ -26,16 +25,16 @@ import {
 import type { UpdateRun } from '../../platform/update';
 import { emptyState } from '../../pure/entities';
 import { activePlacements } from '../../pure/grid';
-import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
 import {
+  type BundleNote,
   GoButton,
   type PlanControls,
   T,
   useDialogs,
+  useOpenBundle,
   useT,
   useToast,
   useUndoIf,
-  WRONG_FILE,
 } from '../common';
 import { useLoadSample } from '../plans';
 import { useRef, useState } from 'react';
@@ -95,14 +94,10 @@ export default function Data({
   const notify = useToast();
   const undoIf = useUndoIf();
   const loadSample = useLoadSample();
+  const openBundle = useOpenBundle(plans);
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
-  const [note, setNote] = useState<{
-    bad: boolean;
-    text: string;
-    /** The refusal is "update first": the note carries the way there. */
-    update?: boolean;
-  } | null>(null);
+  const [note, setNote] = useState<BundleNote | null>(null);
 
   const report = storageReport(plans.library);
   const planCount = plans.library.plans.length;
@@ -148,108 +143,8 @@ export default function Data({
     const file = e.target.files?.[0];
     e.target.value = ''; // so the same file can be picked again
     if (file === undefined) return;
-
-    const text = await file.text();
-    const bundle = parseBundle(text);
-    if (bundle === null) {
-      const version = bundleVersionOf(text);
-      // Only a single plan is sent to the top bar, even one it will refuse with
-      // a reason of its own (incomplete, newer). A bundle cut short is not a
-      // single plan, and "use Dosyadan aç" sent the reader the wrong way
-      // (TODO B7.35).
-      const single = readPlanFile(text);
-      const isPlan = 'state' in single || single.problem !== 'okunamadi';
-      const newer = version !== null && version !== BUNDLE_VERSION;
-      setNote({
-        bad: true,
-        update: newer,
-        text: newer
-          ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
-          : isPlan
-            ? t(
-                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
-              )
-            : [t('Bu dosya okunamadı') + '.', ...WRONG_FILE.map((k) => t(k))].join(' '),
-      });
-      return;
-    }
-
-    // Read before asking (TB8): the question counts what will really happen,
-    // and a file with not one readable plan is never offered as a replacement.
-    const read = readBundlePlans(bundle);
-    // A plan a newer program wrote needs the program updated, not a better
-    // file: it is counted apart and never called incomplete (TODO B7.34).
-    const yeni = read.newer.length;
-    if (read.plans.length === 0) {
-      setNote({
-        bad: true,
-        update: yeni > 0,
-        text:
-          yeni > 0
-            ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
-            : t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
-      });
-      return;
-    }
-    const eksik = read.unreadable.length - yeni;
-    // A plan here whose counterpart in the file is unreadable stays.
-    const stays = plans.library.plans.filter((p) => read.unreadable.includes(p.id)).length;
-    const replaced = t(
-      'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
-      { buradaki: planCount - stays, gelen: read.plans.length },
-    );
-    if (
-      !(await confirm({
-        title: t('Bu bilgisayardaki bütün planların yerine geçecek'),
-        body: [
-          replaced,
-          eksik > 0 ? t('Dosyadaki {eksik} plan eksik ya da bozuk, açılmayacak.', { eksik }) : '',
-          yeni > 0
-            ? t(
-                "Dosyadaki {yeni} plan Mozaik'in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik'i güncelleyin.",
-                { yeni },
-              )
-            : '',
-        ]
-          .filter((x) => x !== '')
-          .join(' '),
-        confirmLabel: t('Hepsini değiştir'),
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-
-    const { ok, failed, unreadable } = plans.replaceLibrary(bundle);
-    // With storage full and not one plan written, nothing changed either, but
-    // the reason is the storage, and the note below says so.
-    if (ok === 0 && failed === 0) {
-      setNote({
-        bad: true,
-        text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
-      });
-      return;
-    }
-    const opened =
-      failed > 0
-        ? t(
-            '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
-            { acilan: ok, yazilamayan: failed },
-          )
-        : eksik > 0
-          ? t('{acilan} plan açıldı, {eksik} plan eksik ya da bozuk olduğu için açılmadı.', {
-              acilan: ok,
-              eksik,
-            })
-          : t('{acilan} plan açıldı.', { acilan: ok });
-    setNote({
-      bad: failed > 0 || unreadable > 0,
-      update: yeni > 0,
-      text:
-        yeni > 0
-          ? `${opened} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
-          : opened,
-    });
+    const { note: said } = await openBundle(await file.text());
+    if (said !== null) setNote(said);
   }
 
   // "BÜTÜN PLANLAR TEK DOSYADA" — written out here so both doors can hold it.
