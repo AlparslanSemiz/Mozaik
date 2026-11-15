@@ -84,7 +84,12 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   // value read inside a callback that runs later is a value that may be gone).
   const settle = useRef<((answer: boolean | string | null) => void) | null>(null);
 
+  // A question that arrives while another is on screen replaces it, and the
+  // one it replaces is answered "no" rather than left waiting forever: the
+  // move to the new address asks without a click (useMove.ts), and a caller
+  // whose promise never settles never says what it did (review, 2026-11-16).
   const askBoolean = useCallback((next: Pending) => {
+    settle.current?.(null);
     return new Promise<boolean>((resolve) => {
       settle.current = (answer) => resolve(answer === true);
       setPending(next);
@@ -99,6 +104,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       },
       prompt: (options) => {
         setPromptValue(options.defaultValue ?? '');
+        settle.current?.(null);
         return new Promise<string | null>((resolve) => {
           settle.current = (answer) => resolve(typeof answer === 'string' ? answer : null);
           setPending({ kind: 'prompt', options });

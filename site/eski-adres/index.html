@@ -1,10 +1,17 @@
 <!doctype html>
 <!--
   The OLD address, alparslansemiz.github.io/ders-programi/. Published from its
-  own repository, not by site.yml (BUILD.md, "Eski adres"). It removes the old
-  service worker and sends the reader to Mozaik on the SAME origin, where the
-  plans the old app kept are still readable: localStorage is per origin, not
-  per path. From there Mozaik itself moves them on to the new address.
+  own repository, not by site.yml (BUILD.md, "Eski adres").
+
+  It removes the old service worker, then:
+  - with no plans on this origin, it sends the reader to /Mozaik/;
+  - with plans here and the new address not answering yet, it sends the reader
+    to /Mozaik/ too: same origin, so the plans are read there;
+  - with plans here and the new address answering (Pages already redirects
+    /Mozaik/ there), following that redirect would leave the plans behind on
+    this origin. So it stays, and offers the same move Mozaik itself offers
+    (platform/storage/move.ts: the same three messages, origins spelled out),
+    and the plans as one all-plans file. Nothing here deletes a plan.
 -->
 <html lang="tr">
   <head>
@@ -16,7 +23,7 @@
       body {
         font: 1.25rem/1.5 system-ui, sans-serif;
         margin: 3rem auto;
-        max-width: 36rem;
+        max-width: 40rem;
         padding: 0 1rem;
         color: #1b1f2a;
         background: #f4f5f7;
@@ -25,17 +32,170 @@
         color: #2e4ba8;
         font-weight: 600;
       }
+      button {
+        font: inherit;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem 0.5rem 0 0;
+        border-radius: 0.5rem;
+        border: 1px solid #2e4ba8;
+        background: #2e4ba8;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.ikincil {
+        background: #fff;
+        color: #2e4ba8;
+      }
+      [hidden] {
+        display: none;
+      }
     </style>
+  </head>
+  <body>
+    <p id="yonlen">Mozaik artık burada değil. <a href="/Mozaik/">Mozaik'i açın</a>.</p>
+    <div id="tasi" hidden>
+      <p>
+        <b>Mozaik yeni adresine taşındı:</b>
+        <a href="https://mozaik.alparslansemiz.com/">https://mozaik.alparslansemiz.com/</a>.
+        Planlarınız bu tarayıcıda burada duruyor. Oraya götürmek için <b>Planları taşı</b>
+        düğmesine basın; burada da kalırlar.
+      </p>
+      <button id="tasiDugme">Planları taşı</button>
+      <button id="dosyaDugme" class="ikincil">Bütün planları dosyaya kaydet</button>
+      <p id="durum" role="status"></p>
+    </div>
     <script>
       (function () {
-        var hedef = '/Mozaik/';
+        var ESKI = 'https://alparslansemiz.github.io';
+        var YENI = 'https://mozaik.alparslansemiz.com';
+        var TAG = 'mozaik-tasima';
+
         function git() {
-          location.replace(hedef);
+          location.replace('/Mozaik/');
         }
+        function soyle(metin) {
+          document.getElementById('durum').textContent = metin;
+        }
+
+        // The plans on this origin, read the way Mozaik's library is laid
+        // out (DATA.md, "Depolama anahtarları"): plan "1" under the historical
+        // key, the others under ders-programi-plan-<id>.
+        function paket() {
+          var lib = null;
+          try {
+            lib = JSON.parse(localStorage.getItem('ders-programi-planlar'));
+          } catch (e) {}
+          if (!lib || !Array.isArray(lib.plans)) {
+            lib = { activeId: '1', plans: [{ id: '1', name: 'Plan 1', draft: false }] };
+          }
+          var plans = [];
+          lib.plans.forEach(function (p) {
+            var key = p.id === '1' ? 'ders-programi' : 'ders-programi-plan-' + p.id;
+            var text = localStorage.getItem(key);
+            if (text === null) return;
+            var state;
+            try {
+              state = JSON.parse(text);
+            } catch (e) {
+              return;
+            }
+            plans.push({ id: p.id, name: p.name, draft: p.draft === true, state: state });
+          });
+          if (plans.length === 0) return null;
+          return JSON.stringify({
+            bundleVersion: 1,
+            savedAt: new Date().toISOString(),
+            activeId: lib.activeId,
+            plans: plans,
+          });
+        }
+
+        function dosyaya(text) {
+          var url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+          var a = document.createElement('a');
+          var d = new Date();
+          var iki = function (n) {
+            return (n < 10 ? '0' : '') + n;
+          };
+          a.href = url;
+          a.download =
+            'ders-programi-tumu-' + d.getFullYear() + '-' + iki(d.getMonth() + 1) + '-' +
+            iki(d.getDate()) + '-' + iki(d.getHours()) + iki(d.getMinutes()) + '.json';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(function () {
+            URL.revokeObjectURL(url);
+          }, 30000);
+          soyle(
+            'Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → Tümünü dosyadan aç ile açın.',
+          );
+        }
+
+        function tasi(text) {
+          var w = window.open(YENI + '/?tasima=1', '_blank');
+          if (!w) return dosyaya(text);
+          var gitti = false;
+          var bitti = false;
+          soyle('Yeni adres açıldı. Oradaki soruyu cevaplayın.');
+          function dinle(e) {
+            if (bitti || e.origin !== YENI || e.source !== w) return;
+            var d = e.data;
+            if (!d || d.tur !== TAG || d.v !== 1) return;
+            if (d.adim === 'hazir' && !gitti) {
+              gitti = true;
+              w.postMessage({ tur: TAG, v: 1, adim: 'paket', paket: text }, YENI);
+            } else if (d.adim === 'sonuc' && gitti) {
+              bitti = true;
+              removeEventListener('message', dinle);
+              if (d.durum === 'acildi') {
+                soyle('Planlar yeni adrese taşındı. Bundan sonra Mozaik’i yeni adresinden açın.');
+              } else if (d.durum === 'vazgecildi') {
+                soyle('Hiçbir plan taşınmadı.');
+              } else {
+                dosyaya(text);
+              }
+            }
+          }
+          addEventListener('message', dinle);
+          setTimeout(function () {
+            if (!gitti && !bitti) {
+              bitti = true;
+              removeEventListener('message', dinle);
+              dosyaya(text);
+            }
+          }, 60000);
+        }
+
+        function devam() {
+          var text = null;
+          try {
+            text = paket();
+          } catch (e) {}
+          if (text === null || typeof fetch !== 'function') return git();
+          // Does the new address answer? Before the move it has no certificate
+          // and this fails: /Mozaik/ is still on this origin, so go there.
+          fetch(YENI + '/manifest.webmanifest', { cache: 'no-store', credentials: 'omit' })
+            .then(function (r) {
+              return r.ok ? r.json() : null;
+            })
+            .then(function (m) {
+              if (!m || m.name !== 'Mozaik') return git();
+              document.getElementById('yonlen').hidden = true;
+              document.getElementById('tasi').hidden = false;
+              document.getElementById('tasiDugme').onclick = function () {
+                tasi(paket() || text);
+              };
+              document.getElementById('dosyaDugme').onclick = function () {
+                dosyaya(paket() || text);
+              };
+            })
+            .catch(git);
+        }
+
         if ('serviceWorker' in navigator) {
-          // The page's own guard beside the worker's: if the old worker is
-          // still in charge it is removed from here too, and the redirect
-          // waits for that so the next load is not served from its cache.
+          // The page's own guard beside the worker's: the old worker is
+          // removed from here too, before anything else happens.
           navigator.serviceWorker
             .getRegistrations()
             .then(function (list) {
@@ -49,14 +209,11 @@
                   }),
               );
             })
-            .then(git, git);
+            .then(devam, devam);
         } else {
-          git();
+          devam();
         }
       })();
     </script>
-  </head>
-  <body>
-    <p>Mozaik artık burada değil. <a href="/Mozaik/">Mozaik'i açın</a>.</p>
   </body>
 </html>

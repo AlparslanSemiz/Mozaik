@@ -53,6 +53,22 @@ async function serve(context: BrowserContext, base: string) {
   });
 }
 
+/** The old address's stub, as its own repository will publish it. */
+const STUB = new URL('/ders-programi/', ESKI).toString();
+async function serveStub(context: BrowserContext) {
+  await context.route(`${STUB}**`, async (route) => {
+    const path = new URL(route.request().url()).pathname.slice('/ders-programi/'.length);
+    const file = path === '' ? 'index.html' : path;
+    await route.fulfill({
+      status: 200,
+      body: readFileSync(resolve('site/eski-adres', file)),
+      headers: {
+        'content-type': file.endsWith('.js') ? 'text/javascript' : 'text/html; charset=utf-8',
+      },
+    });
+  });
+}
+
 async function openSample(page: Page, url: string) {
   await page.goto(url);
   await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
@@ -170,5 +186,45 @@ test.describe('Yeni adrese taşıma', () => {
     await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
     await page.waitForTimeout(1000);
     await expect(strip(page)).toHaveCount(0);
+  });
+
+  test('eski /ders-programi/ sayfası: yeni adres cevap verince planları kendisi taşıyor', async ({
+    context,
+    page,
+  }) => {
+    // A reader from the ders-programi days: plans on the old origin, and
+    // /Mozaik/ already redirected away, so following it would leave them behind.
+    await serve(context, ESKI);
+    await serve(context, YENI);
+    await serveStub(context);
+    await openSample(page, ESKI);
+    await page.goto(STUB);
+    await expect(page.getByText('Mozaik yeni adresine taşındı')).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe('/ders-programi/');
+
+    const popup = context.waitForEvent('page');
+    await page.getByRole('button', { name: 'Planları taşı' }).click();
+    const yeni = await popup;
+    await expect(yeni.locator('.dlg')).toContainText('Eski adresteki planlar buraya gelsin mi?');
+    await answerDialog(yeni);
+    await expect(yeni.locator('.dlg')).toContainText('1 plan açıldı.');
+    await expect
+      .poll(() => yeni.evaluate(() => localStorage.getItem('ders-programi') ?? ''))
+      .toContain('Örnek Kurs');
+    await expect(page.getByRole('status')).toContainText('Planlar yeni adrese taşındı');
+  });
+
+  test('eski /ders-programi/ sayfası: yeni adres yokken aynı kökendeki /Mozaik/e gidiyor', async ({
+    context,
+    page,
+  }) => {
+    await serve(context, ESKI);
+    await serveStub(context);
+    await context.route(`${YENI}**`, (route) => route.abort('connectionrefused'));
+    beklenenHata(page, /ERR_CONNECTION_REFUSED|Failed to load resource/);
+    await openSample(page, ESKI);
+    await page.goto(STUB);
+    await page.waitForURL(ESKI);
+    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
   });
 });

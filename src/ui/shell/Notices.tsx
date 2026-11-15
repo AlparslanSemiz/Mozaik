@@ -51,6 +51,10 @@ export default function Notices({
   const t = useT();
   const ms = move.state;
   const moving = ms?.ad === 'bekliyor' || ms?.ad === 'soruldu';
+  // The button goes only while the window is still being opened. Once the
+  // plans are sent the new window may be reloaded or left alone, and its
+  // answer then never comes; the reader must be able to start again.
+  const opening = ms?.ad === 'bekliyor';
   const moved = ms?.ad === 'bitti' && ms.durum === 'acildi';
   return (
     <>
@@ -77,7 +81,7 @@ export default function Notices({
               {YENI_SITE}
             </a>
           </span>
-          {!moving && !moved && (
+          {!opening && !moved && (
             <span className="update-acts">
               <button className="btn primary" onClick={move.start}>
                 {t('Planları taşı')}

@@ -5,6 +5,7 @@
 // and writes nothing before its own question is answered.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { YENI_KOKEN } from '../../leaf/app';
 import type { State } from '../../leaf/model';
 import {
   bundleText,
@@ -39,6 +40,8 @@ export function useMoveOut(plans: PlanControls, peek: () => State): MoveOut {
   useEffect(() => {
     const on = () => setLive(newAddressLive());
     window.addEventListener(NEW_ADDRESS_EVENT, on);
+    // The probe may have answered between the first render and this effect.
+    on();
     return () => {
       window.removeEventListener(NEW_ADDRESS_EVENT, on);
       stop.current();
@@ -57,7 +60,9 @@ export function useMoveOut(plans: PlanControls, peek: () => State): MoveOut {
         // plans go into the same file "Tümünü dosyaya kaydet" writes, and the
         // strip says where to open it. Not when the reader closed the window
         // or said no there: a download nobody asked for is a surprise.
-        const failed = s.ad === 'acilamadi' || (s.ad === 'bitti' && s.durum === 'okunamadi');
+        const failed =
+          s.ad === 'acilamadi' ||
+          (s.ad === 'bitti' && (s.durum === 'okunamadi' || s.durum === 'eksik'));
         if (failed) {
           const q = held.current;
           downloadBundle(q.plans.library, q.plans.planId, q.peek());
@@ -79,7 +84,11 @@ export function useMoveIn(plans: PlanControls): void {
   held.current = { openBundle, alert, t };
   // Read once: the parameter is taken out of the address below, and a second
   // run of the effect (StrictMode) must still know it was there.
-  const [asked] = useState(() => moveRequested(window.location.search));
+  // And only AT the new address: anywhere else (the old origin, the local
+  // install, a test server) a ?tasima=1 is somebody else's link.
+  const [asked] = useState(
+    () => window.location.origin === YENI_KOKEN && moveRequested(window.location.search),
+  );
 
   useEffect(() => {
     if (!asked) return;

@@ -115,6 +115,23 @@ describe('readMoveMessage · üç denetim, her biri kendi başına', () => {
   });
 });
 
+describe('sonuc · eksik kalan taşıma kendi cevabını taşıyor', () => {
+  it('eksik kabul ediliyor, sayı tam sayıya ve sıfırın üstüne çekiliyor', () => {
+    const src = {};
+    expect(
+      readMoveMessage(
+        {
+          origin: YENI_KOKEN,
+          source: src,
+          data: { tur: TAG, v: 1, adim: 'sonuc', durum: 'eksik', acilan: -3 },
+        },
+        YENI_KOKEN,
+        src,
+      ),
+    ).toEqual({ tur: TAG, v: 1, adim: 'sonuc', durum: 'eksik', acilan: 0 });
+  });
+});
+
 describe('sendPlans · eski adresin ucu', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());

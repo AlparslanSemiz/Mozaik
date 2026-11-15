@@ -122,7 +122,12 @@ describe('site/eski-adres/sw.js · eski adresin kendini silen işçisi', () => {
       clients: {
         claim: () => Promise.resolve(),
         matchAll: () =>
-          Promise.resolve([{ navigate: (u: string) => (navigated.push(u), Promise.resolve()) }]),
+          Promise.resolve([
+            {
+              url: 'https://ornek.test/ders-programi/',
+              navigate: (u: string) => (navigated.push(u), Promise.resolve()),
+            },
+          ]),
       },
     });
     let wait: Promise<unknown> = Promise.resolve();
@@ -133,7 +138,8 @@ describe('site/eski-adres/sw.js · eski adresin kendini silen işçisi', () => {
     });
     await wait;
     expect(deleted).toEqual(['ders-programi-v1']);
-    expect(navigated).toEqual(['/Mozaik/']);
+    // Reloaded onto the stub page, which decides where to go (index.html).
+    expect(navigated).toEqual(['https://ornek.test/ders-programi/']);
     expect(unregistered).toBe(true);
     expect(h.fetch).toBeUndefined();
   });

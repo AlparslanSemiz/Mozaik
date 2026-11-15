@@ -100,7 +100,7 @@ export function forgetFileRecord(): void {
   cached = null;
 }
 
-/** A plan file was just handed to the browser. */
+/** A plan file was just handed to the browser (a cancelled save dialog counts too: the page cannot tell). */
 export function markFileSaved(now: number = Date.now()): void {
   write({ saved: now, changedSince: null });
 }

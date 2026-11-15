@@ -43,8 +43,8 @@ export type MoveMessage =
   | { tur: typeof TAG; v: typeof V; adim: 'paket'; paket: string }
   | { tur: typeof TAG; v: typeof V; adim: 'sonuc'; durum: MoveOutcome; acilan: number };
 
-/** What the receiving page did with the plans. */
-export type MoveOutcome = 'acildi' | 'vazgecildi' | 'okunamadi';
+/** What the receiving page did with the plans. `eksik`: some did not fit there. */
+export type MoveOutcome = 'acildi' | 'eksik' | 'vazgecildi' | 'okunamadi';
 
 interface Incoming {
   origin: string;
@@ -70,7 +70,14 @@ export function readMoveMessage(e: Incoming, origin: string, source: unknown): M
   }
   if (d.adim === 'sonuc') {
     const durum = d.durum;
-    if (durum !== 'acildi' && durum !== 'vazgecildi' && durum !== 'okunamadi') return null;
+    if (
+      durum !== 'acildi' &&
+      durum !== 'eksik' &&
+      durum !== 'vazgecildi' &&
+      durum !== 'okunamadi'
+    ) {
+      return null;
+    }
     const acilan = typeof d.acilan === 'number' && Number.isInteger(d.acilan) ? d.acilan : 0;
     return { tur: TAG, v: V, adim: 'sonuc', durum, acilan: Math.max(0, acilan) };
   }

@@ -29,7 +29,8 @@ export interface BundleNote {
 
 export interface BundleResult {
   /** What happened, for the page that sent the plans. */
-  outcome: 'acildi' | 'vazgecildi' | 'okunamadi';
+  /** `eksik`: some plans did not fit in storage; the sender keeps a file too. */
+  outcome: 'acildi' | 'eksik' | 'vazgecildi' | 'okunamadi';
   /** How many plans landed. */
   opened: number;
   /** The line to show; null when the reader said no and nothing changed. */
@@ -146,7 +147,7 @@ export function useOpenBundle(plans: PlanControls) {
               })
             : t('{acilan} plan açıldı.', { acilan: ok });
       return {
-        outcome: 'acildi',
+        outcome: failed > 0 ? 'eksik' : 'acildi',
         opened: ok,
         note: {
           bad: failed > 0 || unreadable > 0,
