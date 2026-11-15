@@ -1,6 +1,6 @@
 // Step: the school-wide rule limits and what each one does when breached.
 
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
 import { type RuleLevel, type RuleName, paletteColor } from '../../leaf/model';
 import { buildIndex, findViolations, type Violation } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
@@ -71,6 +71,8 @@ export default function Rules({ state, change }: PanelProps) {
   // The daily rule is the one with three layers, and the middle one is new.
   const customClasses = state.classes.filter((c) => c.maxSameLessonPerDay !== null);
 
+  const idBase = useId();
+
   const perRule = useMemo(() => {
     const n: Partial<Record<Violation['rule'], number>> = {};
     for (const v of violations) n[v.rule] = (n[v.rule] ?? 0) + 1;
@@ -98,13 +100,19 @@ export default function Rules({ state, change }: PanelProps) {
               {RULE_ROWS.map((rule) => (
                 <tr key={rule.name}>
                   <td>
-                    {t(rule.label)}
+                    {/* The number box has no label of its own: the rule's name
+                        in this cell IS its label, so the box points here. */}
+                    <span id={`${idBase}-${rule.name}`}>{t(rule.label)}</span>
                     <br />
-                    <span className="hint">{t(rule.hint)}</span>
+                    <span className="hint" id={`${idBase}-${rule.name}-ipucu`}>
+                      {t(rule.hint)}
+                    </span>
                   </td>
                   <td>
                     <input
                       type="number"
+                      aria-labelledby={`${idBase}-${rule.name}`}
+                      aria-describedby={`${idBase}-${rule.name}-ipucu`}
                       min={0}
                       max={16}
                       className="num"

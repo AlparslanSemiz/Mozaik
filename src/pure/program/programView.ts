@@ -247,6 +247,69 @@ export function buildRows(
     .filter((row) => row.mask !== 'hidden');
 }
 
+function sameCell(a: GridCell | null, b: GridCell | null): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  return (
+    a.lessonId === b.lessonId &&
+    a.top === b.top &&
+    a.bottom === b.bottom &&
+    a.color === b.color &&
+    a.continues === b.continues &&
+    a.conflict === b.conflict &&
+    a.pinned === b.pinned &&
+    a.mask === b.mask &&
+    a.mark === b.mark
+  );
+}
+
+function sameRow(a: GridRow, b: GridRow): boolean {
+  if (
+    a.id !== b.id ||
+    a.kind !== b.kind ||
+    a.name !== b.name ||
+    a.secondary !== b.secondary ||
+    a.color !== b.color ||
+    a.mask !== b.mask ||
+    a.cells.length !== b.cells.length ||
+    a.closed.length !== b.closed.length
+  ) {
+    return false;
+  }
+  for (let i = 0; i < a.cells.length; i++) {
+    if (!sameCell(a.cells[i] ?? null, b.cells[i] ?? null)) return false;
+  }
+  for (let i = 0; i < a.closed.length; i++) {
+    if (a.closed[i] !== b.closed[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * `next`, with every row that draws exactly as before replaced by the row
+ * object it was last time — and `prev` itself if nothing changed at all.
+ *
+ * `buildRows` makes every row new, and the grid's rows are memoised on their
+ * identity (pitfall 10): without this one drop redrew all of them, ~2100
+ * cells, and on the weak machine that was most of a quarter-second freeze.
+ * Comparing is a few thousand field reads; drawing a row is 84 cells.
+ */
+export function keepSameRows(prev: GridRow[] | null, next: GridRow[]): GridRow[] {
+  if (prev === null) return next;
+  const before = new Map(prev.map((row) => [row.id, row]));
+  let changed = prev.length !== next.length;
+  const out = next.map((row, i) => {
+    const old = before.get(row.id);
+    if (old !== undefined && sameRow(old, row)) {
+      if (prev[i] !== old) changed = true;
+      return old;
+    }
+    changed = true;
+    return row;
+  });
+  return changed ? out : prev;
+}
+
 /**
  * The preview's marks (TODO B5.11): on the week a way would make, the teacher
  * hours it opens and the cells whose lesson is new there. Opened wins where a
@@ -724,18 +787,25 @@ export interface BarRun {
 /**
  * The single line under the toolbar. Returns the text and the class that
  * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
+ *
+ * `text` is what the line ANNOUNCES (it sits in a live region) and `counter`
+ * is what it only shows. They are apart because the run's counter changes
+ * many times a second: in the live region it was a screen reader reading
+ * "12/40 kart" over itself until the run ended. Now the start is said once,
+ * the result once, and the counter ticks beside them in silence.
  */
 export function describeBar(
   solver: BarRun,
   view: View,
   t: Translate,
   current: { applied: boolean; result: boolean },
-): { text: string; level: string } {
+): { text: string; level: string; counter?: string } {
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
-      text:
-        t('Otomatik diziliyor… {yerlesen}/{toplam} kart · {sure} sn', {
+      text: t('Otomatik diziliyor…'),
+      counter:
+        t('{yerlesen}/{toplam} kart · {sure} sn', {
           yerlesen: p.placedBlocks,
           toplam: p.totalBlocks,
           sure: seconds(p.elapsedMs),

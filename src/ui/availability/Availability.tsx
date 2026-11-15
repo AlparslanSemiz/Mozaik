@@ -8,7 +8,7 @@
 // The three kinds share ONE grid and one dictionary: ids are unique across
 // teachers, classes and rooms, so only the entity list at the top changes.
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import {
   sharedPeriods,
@@ -28,6 +28,7 @@ import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../../leaf/i18n';
 import type { Kind, StepId } from '../../platform/prefs';
+import { attachRoving } from '../../platform/dom';
 import { GoButton, T } from '../common';
 
 interface Props {
@@ -144,6 +145,38 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
   // the tab stays open (Ctrl+Z, "Dosyadan aç") must not change the hook count.
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
+  // The sheet from the keyboard (DENETIM KS19): one Tab stop, the arrows walk
+  // the headers and the hours, Space or Enter flips the one under focus. The
+  // cells were plain <td>s with a pointerdown and nothing could reach them.
+  const sheet = useRef<HTMLDivElement>(null);
+  const empty = selected === undefined;
+  useEffect(() => {
+    const box = sheet.current;
+    if (box === null) return undefined;
+    const buttonIn = (cell: HTMLTableCellElement | undefined) =>
+      cell?.querySelector<HTMLElement>('button') ?? null;
+    return attachRoving(box, {
+      item: (from) => from.closest<HTMLElement>('table.availability button'),
+      first: () => box.querySelector<HTMLElement>('tbody td button'),
+      move: (from, e) => {
+        const cell = from.closest<HTMLTableCellElement>('th, td');
+        const table = from.closest('table');
+        const row = cell?.parentElement as HTMLTableRowElement | null;
+        if (cell == null || table === null || row == null) return null;
+        let r = row.rowIndex;
+        let c = cell.cellIndex;
+        if (e.key === 'ArrowRight') c++;
+        else if (e.key === 'ArrowLeft') c--;
+        else if (e.key === 'ArrowDown') r++;
+        else if (e.key === 'ArrowUp') r--;
+        else if (e.key === 'Home') c = 1;
+        else if (e.key === 'End') c = row.cells.length - 1;
+        else return null;
+        return buttonIn(table.rows[r]?.cells[c]) ?? from;
+      },
+    });
+  }, [empty]);
+
   // A column header carries one time; where the days disagree it stays empty.
   const clocks = useMemo(
     () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
@@ -214,6 +247,24 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
     change((d) => setAvailability(d, entityId, cells, !allClosed));
   }
 
+  /** One cell from the keyboard: Space or Enter on its button. */
+  function toggleCell(day: number, hour: number) {
+    const closed = isClosed(day, hour);
+    change((d) => setAvailability(d, entityId, [{ day, hour }], !closed));
+  }
+
+  /** What a cell is called: the hour, and the state in this kind's own word. */
+  const cellName = (day: string, hour: number, closed: boolean) =>
+    t('{gun} {n}. saat', { gun: dayLabel(day), n: hour + 1 }) +
+    ', ' +
+    (kind === 'teacher'
+      ? closed
+        ? t('müsait değil')
+        : t('müsait')
+      : closed
+        ? t('kapalı')
+        : t('açık'));
+
   /** Column header: that lesson across the whole week. */
   function toggleHour(hour: number) {
     const allClosed = state.settings.days.every((_, g) => isClosed(g, hour));
@@ -244,19 +295,31 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
             {t(HINT[kind])}
           </p>
 
-          <div className="scroll-x">
-            <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
+          <div className="scroll-x" ref={sheet}>
+            <table
+              className="availability"
+              role="grid"
+              aria-label={t('{kim} · müsait olmayan saatler', { kim: selected.full })}
+              onPointerUp={endPaint}
+              onPointerLeave={endPaint}
+            >
               <thead>
                 <tr>
                   <th className="corner-head" />
                   {state.settings.hours.map((hour, s) => (
-                    <th
-                      key={s}
-                      onClick={() => toggleHour(s)}
-                      title={t('Haftanın bu saatini değiştir')}
-                    >
-                      {hour}
-                      <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
+                    <th key={s}>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="av-head"
+                        onClick={() => toggleHour(s)}
+                        // Named by its own number (label in name, WCAG 2.5.3), the
+                        // sentence is the description, as on the day headings.
+                        title={t('Haftanın bu saatini değiştir')}
+                      >
+                        {hour}
+                        <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
+                      </button>
                     </th>
                   ))}
                 </tr>
@@ -264,11 +327,18 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
               <tbody>
                 {state.settings.days.map((day, g) => (
                   <tr key={g}>
-                    <th
-                      onClick={() => toggleDay(g)}
-                      title={t('{gun}: bütün günü değiştir', { gun: dayLabel(day.name) })}
-                    >
-                      {shortDay(day.name)}
+                    <th scope="row">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="av-head"
+                        onClick={() => toggleDay(g)}
+                        // Named "Sal", as it reads; the sentence is the
+                        // description (label in name, WCAG 2.5.3).
+                        title={t('{gun}: bütün günü değiştir', { gun: dayLabel(day.name) })}
+                      >
+                        {shortDay(day.name)}
+                      </button>
                     </th>
                     {state.settings.hours.map((_, s) => (
                       <td
@@ -289,7 +359,23 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                           if (pending !== null) continuePaint(g, s);
                         }}
                       >
-                        {shownClosed(g, s) ? '×' : ''}
+                        {/* A real control: aria-pressed is the state, the name
+                            says it in words. The pointer still paints through
+                            the cell's own handlers; a mouse click (detail > 0)
+                            is that paint, so only the keyboard's click toggles
+                            here, or one click would flip the hour twice. */}
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          className="av-cell"
+                          aria-pressed={shownClosed(g, s)}
+                          aria-label={cellName(day.name, s, shownClosed(g, s))}
+                          onClick={(e) => {
+                            if (e.detail === 0) toggleCell(g, s);
+                          }}
+                        >
+                          {shownClosed(g, s) ? '×' : ''}
+                        </button>
                       </td>
                     ))}
                   </tr>
@@ -385,7 +471,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more
               precise on paper and less predictable in practice. */}
-          <div className="entity-list" aria-label={t('Müsaitlik listesi')}>
+          <div className="entity-list" role="group" aria-label={t('Müsaitlik listesi')}>
             {list.map((x) => (
               <button
                 key={x.id}
@@ -410,8 +496,24 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                   className="entity-count"
                   title={t('{acik} açık saat, {yuk} saat ders', { acik: x.open, yuk: x.load })}
                 >
-                  {x.open}/{x.load}
-                  {x.open < x.load && ' ⚠'}
+                  <span aria-hidden="true">
+                    {x.open}/{x.load}
+                    {x.open < x.load && ' ⚠'}
+                  </span>
+                  {/* "48/0" read aloud is two numbers and a slash. */}
+                  <span className="sr-only">
+                    {kind === 'teacher'
+                      ? t('{acik} saat müsait, {yuk} saat ders yüklenmiş', {
+                          acik: x.open,
+                          yuk: x.load,
+                        })
+                      : t('{acik} saat açık, {yuk} saat ders yüklenmiş', {
+                          acik: x.open,
+                          yuk: x.load,
+                        })}
+                    {x.open < x.load &&
+                      `, ${t('{n} saat fazla, bu program dizilemez.', { n: x.load - x.open })}`}
+                  </span>
                 </span>
               </button>
             ))}

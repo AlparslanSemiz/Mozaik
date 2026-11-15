@@ -57,7 +57,10 @@ async function gridMetrics(page: import('@playwright/test').Page) {
     if (head !== null) {
       const klon = head.cloneNode(true) as HTMLElement;
       klon.style.cssText = 'position:absolute;left:-9999px;top:0;width:max-content';
-      document.body.appendChild(klon);
+      // In its own row, not in <body>: the clock's air (`table.grid
+      // .hour-clock`, 2026-11-15) is scoped to the grid, and a clone outside
+      // the table measured the heading 1.75px narrower than it is drawn.
+      head.parentElement!.appendChild(klon);
       headWants = klon.getBoundingClientRect().width;
       klon.remove();
     }

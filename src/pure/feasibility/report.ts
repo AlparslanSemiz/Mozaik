@@ -1,16 +1,17 @@
 // Kontrol's whole report: capacity, what cannot be placed, and advice.
 
-import { t } from '../../leaf/i18n';
+import { aktifDil } from '../../leaf/i18n';
 import type { State } from '../../leaf/model';
-import { buildIndex, closedConflicts, findViolations } from '../constraints';
+import { type Index, buildIndex, closedConflicts, findViolations } from '../constraints';
 import { buildAdvice } from './advice';
 import { buildCapacity } from './capacity';
 import type { Report, Unplaceable } from './levels';
 import { commonestBlock, lessonName } from './naming';
+import { stuckReason } from './stuck';
 
-export function buildReport(d: State): Report {
-  const ix = buildIndex(d);
-  const { teachers, classes, rooms } = buildCapacity(d);
+export function buildReport(d: State, ix: Index = buildIndex(d)): Report {
+  const capacity = buildCapacity(d);
+  const { teachers, classes, rooms } = capacity;
 
   // Lessons that are still incomplete and have no valid slot left at all.
   const unplaceable: Unplaceable[] = [];
@@ -22,14 +23,15 @@ export function buildReport(d: State): Report {
     const summary = commonestBlock(d, ix, lesson.id, true);
     if (summary.anyValid) continue;
 
+    // The cause that BINDS, not the commonest blocked cell: that vote was won
+    // by the class's own closed hours on every row (TODO SD4, stuck.ts).
+    const why = stuckReason(d, ix, lesson.id, capacity);
     unplaceable.push({
       lessonId: lesson.id,
       name: lessonName(ix, lesson.id),
       missing,
-      message: t('{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}', {
-        n: missing,
-        sebep: summary.reason,
-      }),
+      message: why.message,
+      fix: why.fix,
     });
   }
 
@@ -37,7 +39,8 @@ export function buildReport(d: State): Report {
   const advice = buildAdvice(d, ix);
 
   const rows = [...teachers, ...classes, ...rooms];
-  const stranded = closedConflicts(d, ix).length;
+  // LESSONS, not hours: a two-hour block on a closed hour is one thing to move.
+  const stranded = new Set(closedConflicts(d, ix).map((c) => c.lessonId)).size;
   const hasProblem =
     stranded > 0 ||
     unplaceable.length > 0 ||
@@ -46,4 +49,19 @@ export function buildReport(d: State): Report {
   const tight = !hasProblem && rows.some((x) => x.level === 'tight');
 
   return { teachers, classes, rooms, unplaceable, violations, advice, stranded, hasProblem, tight };
+}
+
+/**
+ * The report of the plan on screen, built once per plan and language.
+ *
+ * Two readers ask for the same plan: the health chip after every change and
+ * Kontrol when its tab opens. Each built its own, and on the weak machine one
+ * of them is a frame and a half. One slot and not a map: only the plan on
+ * screen is ever asked about, and a State is never changed in place in the UI.
+ */
+let last: { d: State; dil: string; report: Report } | null = null;
+export function sharedReport(d: State, ix?: Index): Report {
+  const dil = aktifDil();
+  if (last?.d !== d || last.dil !== dil) last = { d, dil, report: buildReport(d, ix) };
+  return last.report;
 }

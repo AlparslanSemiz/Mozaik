@@ -23,6 +23,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, TriangleAlert } from 'lucide-react';
+import { useReturnFocus } from './returnFocus';
 import { useT } from './T';
 
 export interface ConfirmOptions {
@@ -115,6 +116,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     resolve?.(answer);
   }
 
+  const returnFocus = useReturnFocus(pending !== null);
   const danger = pending?.kind === 'confirm' && pending.options.danger === true;
   const warn = pending?.kind === 'alert' && pending.options.tone === 'warn';
 
@@ -135,6 +137,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           <Dialog.Content
             className={`dlg${danger ? ' danger' : ''}`}
             role={danger ? 'alertdialog' : 'dialog'}
+            onCloseAutoFocus={returnFocus}
             aria-describedby={pending?.options.body === undefined ? undefined : 'dlg-body'}
           >
             {pending !== null && (

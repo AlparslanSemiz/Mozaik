@@ -121,7 +121,7 @@ madde.
 | Ö41 | Ctrl+Z yalnız metin kutularında susturulsun | DK8 |
 | Ö9 | Sabitli kart bir kenar işaretiyle ayrılsın, raptiye en az 24 px olsun | PRINCIPLES "Kullanılabilirlik" |
 | Ö44 | Çeviri sözlüğünde iki anlamlı Türkçe metne bağlam eki | DK12 |
-| Ö47 | "İçeriğe geç" bağlantısı ve şeritle içerik arasında bir kısayol | ölçüm KS27 |
+| Ö47 | "İçeriğe geç" bağlantısı ve şeritle içerik arasında bir kısayol (İçeriğe geç yapıldı, 2026-11-15) | ölçüm KS27 |
 | Ö1 | Rahat'ta saat başlığı arayla yazılsın ya da yalnız numara kalsın | ölçüm KS1 |
 | Ö42 | "Taslak olarak kaydet" ne yaptığını söylesin ve kullanıcıyı yerinde bıraksın | KS23 |
 
@@ -1889,6 +1889,8 @@ aracı: bir sekmeye ya da bir komuta tek hamlede gidiliyor. Odak halkası her ye
   derslik ekledikten sonra şeritteki Branşlar'a 24 Tab (sayfanın sonundan başa dolanarak),
   Program'da ilk karta 28 Tab. İçeriğe atlama bağlantısı yok, ve Enter'la bir şey
   eklendikten sonra odak kutuda kaldığı için şeride dönmek sayfayı dolaşmak demek.
+  **Kısmen yapıldı (2026-11-15, `erisim/anlam`):** ilk Tab durağı "İçeriğe geç", içerik
+  alanına götürüyor, ve kapanan her diyalog odağı açana veriyor. F6 gibi bir dönüş kısayolu yok.
 - Müsaitlik klavyeyle hiç girilemiyor (KS19). Tur bu yüzden müsaitliksiz yapıldı.
 - Izgarada odak kart başına iki durak (KS8), kart menüden ya da Delete ile kaldırılınca
   odak `body`'ye düşüyor (KS9).

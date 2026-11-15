@@ -46,7 +46,10 @@ export interface Unplaceable {
   lessonId: Id;
   name: string;
   missing: number;
+  /** The binding cause, with no day or hour in it, so equal causes group (stuck.ts). */
   message: string;
+  /** Whose availability would make room, when one is to blame. */
+  fix: { kind: 'teacher' | 'class' | 'room'; id: Id } | null;
 }
 
 /**
@@ -68,7 +71,10 @@ export interface Report extends Capacity {
   violations: Violation[];
   /** aSc's "Advisor" — data that will not BLOCK a build but is worth a look. */
   advice: Advice[];
-  /** Lessons sitting on an hour that was closed after they were placed (pitfall 16). */
+  /**
+   * LESSONS sitting on an hour that was closed after they were placed (pitfall
+   * 16). It counted hours, and a two-hour block was "2 ders" (2026-11-15).
+   */
   stranded: number;
   /**
    * Something blocks the build: a lesson with no place, a broken rule at

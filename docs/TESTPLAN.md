@@ -262,8 +262,12 @@ kutu iskeleti.
 
 ### Erişilebilirlik taraması
 
-`e2e/erisim.spec.ts`, `@axe-core/playwright` ile, on bir ekranda: yedi sekmenin
-altısı, Ayarlar'ın beş bölümü ve boş proje. Renk kontrastı kuralı **kapalı**,
+`e2e/erisim.spec.ts`, `@axe-core/playwright` ile, on sekiz ekranda: Okul'un dört
+adımı ayrı ayrı, öteki beş sekme, Ayarlar'ın beş bölümü, boş proje ve boş Program,
+Kontrol, Çıktı (2026-11-15'e kadar Okul'un yalnız açılış adımı taranıyordu, ve
+öğretmen ile sınıf satırlarının 70 etiketsiz kutusu hiç sayılmamıştı). Aynı dosyanın
+"91. Odak" bölümü taramanın göremediğini ölçer: ilk Tab'ın "İçeriğe geç" olduğunu ve
+kapanan bir diyaloğun odağı açana verdiğini. Renk kontrastı kuralı **kapalı**,
 çünkü `renk.spec.ts` onu zaten elle ve daha iyi ölçüyor (WCAG oranı artı CIE Lab
 ΔE, ve ΔE'yi bir tarayıcı sormaz).
 

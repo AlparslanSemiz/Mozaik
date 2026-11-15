@@ -33,8 +33,10 @@ Yedi sekme, bu sırayla. Alt+1'den Alt+7'ye kadar bu sırayla açılırlar.
 Okul yalnız listeleri, Ayarlar yalnız ayarları tutar: dönem başında doldurulan
 şeyle yılda bir dokunulan şey aynı ekranda durmuyor. Dersler kendi sekmesi, çünkü
 en çok kullanılan ekran ve bir sihirbazın dördüncü adımından geçilerek varılmıyor.
-Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). 1280 pikselin altında
-sekme etiketleri gizlenir ve erişilebilir ad kalır.
+Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). Üst bar dar kalınca (%100'de
+yaklaşık 1320 piksellik bir barın altında, yani 1366'da yan yana, 1280'de alt alta;
+programın kendi ölçeğiyle birlikte) sekme etiketi simgenin
+altına iner ve bir basamak küçülür; gizlenmez (2026-11-15).
 
 ## Üst çubuk
 
@@ -46,7 +48,7 @@ klavye kısayolları, araç şeridi aç kapa, tema.
 - **Durum çipi** her sekmede sorunu adıyla söyler ve Kontrol'e götürür.
 - **Plan seçici** tek plan varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve ancak iki plan olunca beliren bir kutu planların var olduğunu öğretemezdi. Plan yaratan, adlandıran ve silen her şey Ayarlar → Planlar ve yedek'te, çünkü üst çubuk bir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak kalıyor. `Sıfırla` da bu yüzden Ayarlar'da.
 - **Dosyaya kaydet** ve **dosyadan aç** üst çubukta, çünkü veri kaybına karşı önlem görünür olmalı. İkisi tek bir plan yazar ve okur, bir paketi reddedip yolunu gösterir (tuzak 30).
-- Çubuk daralırken önce boşluk, sonra çipin cümlesi (noktası kalır, çünkü ekran meşgulken yok olan bir durum güvenilmez bir durum), sonra belge adı feda edilir. Sekmeler feda edilmez (tuzak 48).
+- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı; sekme etiketleri simgenin altına iner ve "Dosyaya kaydet" ile "Dosyadan aç" iki satıra kırılır. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Bu da yetmezse çubuk ikinci bir satıra geçer; sayfa yana kaymaz. Sekmeler feda edilmez (tuzak 48).
 
 ## Araç şeridi
 
@@ -69,9 +71,9 @@ test koruyamaz.
 1. Yedi sekmenin yedisi de şerit çizer ve şeritler aynı yükseklikte, %100'de de %150'de de. Yüksekliği sekmeyle gelip giden bir şerit altındaki her şeyi zıplatır.
 2. Her şerit bir başlıkla (`.ribbon-label`) açılır: düğmelerin hangi soruyu cevapladığı. Bir değer taşıyan grup `.ribbon-value` kullanır, çünkü başlık büyük harfli ve soluk, ve bir adı o sesle okumak onu başlık gibi gösteriyor.
 3. Gruplar `<Sep/>` ile, sağa yaslanan grup `<Spacer/>` ile ayrılır.
-4. Her düğmede bir simge ve bir kelime olur. Simge tek başına ilk seferde okunmaz ve iki test katmanında ada dönüşmez (tuzak 56), kelime tek başına bir düğmeyi komşusundan bir bakışta ayırmaya yetmez, göz önce şekli buluyor. İkisinin de bulunma sebebi bir ölçeğe bağlı değil: hangi ölçekte olursa olsun düğme ikisini birden taşır. Tek istisnası 6. maddenin son adımı, ve orada da giden şey çizim, ad değil. Üç varlık türünün simgesi `KIND_ICON`'dan, gerisi `lucide-react`'ten gelir.
+4. Her düğmede bir simge ve bir kelime olur. Simge tek başına ilk seferde okunmaz ve iki test katmanında ada dönüşmez (tuzak 56), kelime tek başına bir düğmeyi komşusundan bir bakışta ayırmaya yetmez, göz önce şekli buluyor. İkisinin de bulunma sebebi bir ölçeğe bağlı değil: hangi ölçekte olursa olsun düğme ikisini birden taşır. 2026-11-15'ten beri istisnası yok: 6. maddenin son adımı da kelimeyi küçültür, silmez. Üç varlık türünün simgesi `KIND_ICON`'dan, gerisi `lucide-react`'ten gelir.
 5. Şeritteki her kontrol aynı yükseklikte (`--ribbon-h`). Yükseklik şeride değil kontrole verilir, çünkü sabit yükseklikli bir şerit kendine verileni ortalar ve uzun bir düğmeyi saklar.
-6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri gider, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Kelime feda edilirken simge ve erişilebilir ad kalır: verilen şey bir çizim, bir ad değil (tuzak 56), ve bu yüzden kelime `display: none` ile değil yazı boyu sıfırlanarak gider, metin düğümü erişilebilirlik ağacında durur. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
+6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri bir basamak küçülür ve iç boşlukları daralır, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Son adım 2026-11-15'e kadar kelimeyi yazı boyunu sıfırlayarak siliyordu (ad erişilebilirlik ağacında kalıyordu, tuzak 56); %150'de 1024 piksel ya da %200'de şerit yalnız simgeydi ve az gören biri için ezberlenecek bir simge kelimeden zordu. En dar kutuda (%200, 960 piksel) bir iki uzun kelime üç noktayla kısalabilir. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
 
 Seçili bir seçeneği renk söyler, yazı kalınlığı değil: eşit sütunlu bir grupta
 kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydırır
@@ -128,6 +130,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 - Izgarada satır gün, sütun ders, çünkü bu bir günü okuma ekranı (aSc'nin "Time off" penceresi de öyle). Sağda varlık listesi.
 - Kapalı saat büyük, kırmızı bir çarpıyla ve taramayla işaretlenir. Kararın gerekçesi kapsamdı: Program ızgarasında kırmızı "bu bırakma reddedildi" demek, Müsaitlik'te ise ne bırakma ne ret var ve ekranın söylediği tek şey açık ya da kapalı. Tarama da duruyor, çünkü renk tek başına bir durum taşımıyor. 2.0.2'den beri Program ızgarası da kapalı saatlerde aynı çarpıyı kullanıyor (`styles.css`), yani bu kapsam gerekçesi bugün tarihsel.
+- Her hücre ve her başlık bir düğme (`aria-pressed` hücrenin durumu, adı "Salı 3. saat, müsait değil"), tablo `role="grid"` ve tek bir Tab durağı: oklar hücreler ve başlıklar arasında gezer, Space ya da Enter saati, başlıkta bütün günü ya da saati değiştirir. Fareyle boyama hücrenin kendi `pointerdown`'ında kaldı; düğmenin `click`'i yalnız klavyeden gelince (`e.detail === 0`) çalışır, yoksa bir tık saati iki kez çevirirdi.
 - Satırlar Program ızgarasınınkinden uzun. "Haftanın darlığı" ısı tablosu (`table.availability.heat`) aynı iskeleti kullanır ama bir müsaitlik programı değil, tıklanacak hücresi yok ve kısa satırlarla kalır.
 - Başlıkta ders numarası, altında başlangıç saati. Saat şeritteki `Saatler` ile kapatılır, ve kapalıyken yerini korur, yani tablonun boyu değişmez (tuzak 102 ve 103).
 
@@ -161,7 +164,9 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 ### Sürükleme ve bırakma
 
-- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır: odaklı kartta Enter ve Space kartın sağ tık menüsünü açar, kısayol ekranının dediği gibi. 2026-09-26'ya kadar dersi sessizce havuza gönderiyorlardı. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
+- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir ve odağı aynı hücrede bırakır. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır: odaklı kartta Enter ve Space kartın sağ tık menüsünü açar, kısayol ekranının dediği gibi. 2026-09-26'ya kadar dersi sessizce havuza gönderiyorlardı. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
+- **Klavyeyle taşıma** (2026-11-15): havuz kartında Enter, Space ya da T, ızgaradaki kartta T ya da menünün `Taşı`'sı kartı alır. Aynı sürükleme, aynı harita ve aynı boyama (`drag.ts` `startKeys`), yalnız el farklı: ← → hedefi bir saat, Ctrl+← → bırakılabilecek bir sonraki saate, ↑ ↓ komşu güne götürür, Enter bırakır, Esc ve Tab vazgeçer. Gerekçe çubuğu cümlenin önüne yeri yazar ("Salı 3. saat: …"). Odak alındığı yerde kalır; ızgaradan taşınan kart bırakılınca yeni yerinde odaklanır, havuzdan gelen bir sonraki kart için havuzda kalır.
+- **Izgara tek Tab durağı** (`gridKeys.ts`, `roving.ts`): durak `.grid-wrap`'in kendisi, Tab gelince odağı son ya da ilk hücreye verir. Oklar hücreden hücreye (satır başı ilk saatin solunda), Home ve End satırın ucuna, Ctrl ile ilk ya da son satıra, PageUp ve PageDown on satır. Kartlar, raptiyeler ve satır başı düğmeleri `tabIndex=-1`; raptiyenin tuşu P. Boş hücre ancak odak alınca odaklanabilir olur ve ad alır ("Salı 3. saat, MÇ, boş"), yoksa iki bin hücre her satır çiziminde öder.
 - Sürüklerken hedef satırın tamamı zayıf bir katmanla, imlecin altındaki blok güçlü bir katmanla boyanır: yeşil bırakılabilir, sarı uyarı ya da bir şey kaybedilecek, kırmızı engel. Hedefin dışındaki görünür alan iki düz gölgeleme düzlemiyle karartılır. Reddin sebebi sabit yükseklikli bir satırda yazılır (`.reason-bar`).
 - Başka bir kartın üstüne bırakmak takas edebilir, sınıfın kendi dersinin üstüne bırakmak onu havuza döndürebilir. Kuralları [DATA.md](DATA.md)'de.
 - Hedef ekran dışındaysa ızgara kenara gelince kayar.
@@ -172,7 +177,7 @@ Menünün şekli bir kural: üst düzeyde elin sık uzandığı şey, kapıları
 nadir olan.
 
 ```
-Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
+Taşı · Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
 ────
 Dersi buraya sabitle  (ya da Sabitlemeyi kaldır)
 Toplu sabitle   ▸  Satırı · Sütunu · Günü
@@ -187,14 +192,14 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 ### Sabitleme
 
 - Kartın köşesinde bir raptiye düğmesi var. Kartın kardeşi, çocuğu değil, çünkü kart bir `<button>` ve düğme içinde düğme geçersiz HTML, ve konumlanma bağlamı hücre. Bu yüzden sağ tık menüsü (`openMenu`) hedefini karttan değil hücreden bulur.
-- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, 2026-09-25'te kullanıcı "dururken görünmez"i seçti ([DECISIONS.md](DECISIONS.md)).
+- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. Bir Tab durağı değil: klavyede odaklı kartta P, ya da menünün kalemi. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, 2026-09-25'te kullanıcı "dururken görünmez"i seçti ([DECISIONS.md](DECISIONS.md)).
 - Sabitli olduğunu bir renk değil bir simge söyler, çünkü ızgaranın renkleri zaten bırakılabilir, uyarı, engel ve kapalı demek.
 - Sabitlenmiş kart sürüklenmez ve Delete'e cevap vermez, "Havuza kaldır" kapalıdır, `Baştan diz` ve `Programı boşalt` onu yerinde bırakır. Kuralları DATA.md'de.
 
 ### Otomatik dizme
 
 Şeritte iki düğme var: `Otomatik diz (N kart)` bekleyen dersleri dizer, `Baştan diz`
-(onaylı) ızgarayı boşaltıp yeniden dizer. Bir ayarı yok: "sabaha yay" gibi tercihler
+(sormadan, bildirimi `Geri al` taşır) ızgarayı boşaltıp yeniden dizer. Bir ayarı yok: "sabaha yay" gibi tercihler
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de
 duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yazılır:
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
@@ -288,6 +293,15 @@ uyarıları, ya da öğretmenler, sınıflar ve derslikler için kapasite. Sorun
 yokken de bir cevap verir. Kapasite tablosu Okul'un Özet'iyle aynı çizim
 (`CapacityRows`).
 
+Her sorun satırının gidecek bir yeri var, çünkü yalnız neyin yanlış olduğunu söyleyen
+bir rapor okuyanı ne yapacağıyla baş başa bırakıyordu (2026-11-15). Kapalı saatte kalan
+ders, kaç saati olursa olsun tek satır: dersin adı, saatleri ve kimin kapattığı, sonda
+`Göster` (Program'a geçer, kartı ortaya kaydırıp odaklar ve bir an işaretler) ve
+`Müsaitlik'te aç` (kapatanın satırını açar). Kural ihlalinde `Göster` o günün ilk kartına
+gider. Yerleşemeyen dersler bağlayan sebebe göre tek satır, dersler altında düğme olarak,
+her biri kartı havuzda işaretler; sebep bir kişinin ya da yerin açık saati yetmiyorsa
+`Müsaitlik'te aç` da var. Gizli bir satırdaki kart bulunamazsa bunu bir bildirim söyler.
+
 ## Çıktı
 
 - **Sayfa başına bir sınıf ya da öğretmen:** satır gün, sütun ders, A4 yatay, `table-layout: fixed`, sütunlar eşit. Ana ızgaranın bütün haftası tek tablo olarak basılmaz (tuzak 8).
@@ -319,7 +333,7 @@ okuyanlarla aynı.
 ## Diyaloglar, bildirimler ve boş ekranlar
 
 - **Her soru** `useDialogs()` üstünden sorulur (`confirm`, `alert`), `window.confirm` ve `window.alert` kullanılmıyor. Geri alınamaz uyarılar `role="alertdialog"`.
-- **Silmeden önce onay sorulur**, ve cümle ne kaybedileceğini sayar: "A dersliği silinecek. 4 sınıfın dersliği boşalacak (410, 411, 510, 511)…" Dosyadan aç'ın sorusu da dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
+- **Geri alınabilen silme sormaz** (TODO SD1): öğretmen, sınıf, derslik, ders, kullanılmayan branş, seçenek, `Programı boşalt` ve `Baştan diz` hemen olur, ve bildirim ne gittiğini sayar ve `Geri al` taşır: "A dersliği silindi, 4 sınıfın dersliği boşaldı (410, 411, 510, 511). Bu sınıflar artık aynı saate konabilir." Bildirim 10 s durur, fare üstündeyken ya da odak içindeyken süresi işlemez; `Geri al` yalnız en yeni bildirimde, arada başka bir değişiklik olduysa bunu söyler. `Sil`'den sonra odak sonraki satırın `Sil`'ine geçer (son satırda öncekine, liste boşaldıysa ekleme kutusuna), ve Ctrl+Z ekran okuyucuya neyi geri aldığını söyler. `Her şeyi sil` ve dolu planın yerine örnek okul bir kez sorar, sonra aynı bildirimi verir. Dosyadan aç'ın sorusu dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
 - **Olan biteni** kısa bir bildirim satırı söyler (`useToast()`), ve bir hamlede ne kaybedildiyse adıyla yazar.
 - **Boş ekranlar yönlendirir:** "Henüz ders yok" değil, nereden başlanacağı, ve oraya götüren bir düğme (2026-11-15; önceden sekme adları kalın yazılıp tıklanmıyordu, [DENETIM.md](DENETIM.md), P19). Program, Kontrol, Çıktı ve Dersler eksik ilk adımın düğmesini (`Öğretmen ekle`, `Sınıf ekle`, `Ders gir`) ve okul adı boşken `Okul adını ve zili gir`i gösterir, Müsaitlik seçili türün `… ekle`sini (`common/NextStep.tsx`, `common/GoTo.tsx`). "Mozaik'i güncelleyin" diyen her yer (Dosyadan aç, Tümünü dosyadan aç, açılıştaki şerit) Ayarlar → Hakkında'ya götüren `Güncellemeye bak` düğmesini taşır. Boş bir plana dosya açmak soru sormaz: kaybedilecek bir şey yok (`isEmptyPlan`).
 - **Ctrl+K komut paleti** her yere gider, her şeyi bulur, sık yapılan işleri yapar. `?` tuşu klavye kısayolları ekranını açar.

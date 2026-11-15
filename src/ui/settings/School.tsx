@@ -191,7 +191,9 @@ export default function School({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th className="w-col-xs" />
+                <th className="w-col-xs">
+                  <span className="visually-hidden">{t('Ders günü')}</span>
+                </th>
                 <th>{t('Gün')}</th>
                 <th className="w-col-2xl">{t('Öğle arası')}</th>
               </tr>

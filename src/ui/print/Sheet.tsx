@@ -18,7 +18,7 @@ export default function Sheet({ sheet, head, colored, stamped }: Props) {
   const t = useT();
   return (
     <div className="print-page">
-      <h3>
+      <h2>
         {/* Big line: what the sheet is. Small line: whose it is. The two used
             to be one long left-aligned string, which on paper read as a
             caption rather than a title. */}
@@ -27,7 +27,7 @@ export default function Sheet({ sheet, head, colored, stamped }: Props) {
           {sheet.title}
         </span>
         {sheet.sub === '' ? null : <span className="p-title-sub">{sheet.sub}</span>}
-      </h3>
+      </h2>
       <table className="print">
         <thead>
           <tr>

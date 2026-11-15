@@ -7,7 +7,8 @@ import type { Id, State } from '../../leaf/model';
  */
 export interface PanelProps {
   state: State;
-  change: (apply: (d: State) => State) => void;
+  /** `label` names the change for the "Geri alındı: …" after Ctrl+Z. */
+  change: (apply: (d: State) => State, label?: string) => void;
 }
 
 /**

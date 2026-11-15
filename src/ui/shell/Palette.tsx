@@ -18,7 +18,7 @@ import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Search } from 'lucide-react';
 import { fold } from '../../pure/listview';
-import { useT } from '../common';
+import { useReturnFocus, useT } from '../common';
 
 export interface Command {
   id: string;
@@ -44,6 +44,7 @@ const LIMIT = 40;
 
 export default function Palette({ open, onOpenChange, commands }: Props) {
   const t = useT();
+  const returnFocus = useReturnFocus(open);
   const [text, setText] = useState('');
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -108,7 +109,12 @@ export default function Palette({ open, onOpenChange, commands }: Props) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
-        <Dialog.Content className="palette" aria-describedby={undefined} onKeyDown={onKeyDown}>
+        <Dialog.Content
+          className="palette"
+          aria-describedby={undefined}
+          onKeyDown={onKeyDown}
+          onCloseAutoFocus={returnFocus}
+        >
           <Dialog.Title className="hidden">{t('Komut paleti')}</Dialog.Title>
           <div className="palette-search">
             <Search size={18} strokeWidth={2} aria-hidden="true" />

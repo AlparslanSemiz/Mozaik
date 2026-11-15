@@ -6,7 +6,7 @@
 
 import { dayLabel } from '../../leaf/lang';
 import type { Settings } from '../../leaf/model';
-import { attachGridChrome, attachGridFit } from '../../platform/dom';
+import { attachGridChrome, attachGridFit, attachGridKeys } from '../../platform/dom';
 import { dayPeriods } from '../../pure/entities';
 import type { GridRow, MaskMode, MenuTarget } from '../../pure/program';
 import { useT } from '../common';
@@ -27,6 +27,8 @@ interface Props {
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
   onCellPin: (rowId: string, day: number, hour: number) => void;
+  /** T on a focused card: pick the block up from the keyboard. */
+  onCellPick: (rowId: string, day: number, hour: number) => void;
   /**
    * A right click landed on a placed card: which one. Called BEFORE the menu
    * opens, so whatever `menu` draws can be about this block.
@@ -52,6 +54,7 @@ function GridInner({
   onCellRemove,
   onCellMoveStart,
   onCellPin,
+  onCellPick,
   onMenu,
   menuOpen,
   onMenuOpenChange,
@@ -82,9 +85,11 @@ function GridInner({
     if (wrap === null) return undefined;
     const detachChrome = attachGridChrome(wrap);
     const detachFit = attachGridFit(wrap);
+    const detachKeys = attachGridKeys(wrap);
     return () => {
       detachChrome();
       detachFit();
+      detachKeys();
     };
   }, []);
 
@@ -155,7 +160,12 @@ function GridInner({
     <div className="grid-wrap" ref={wrapRef}>
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <table className="grid" style={columns}>
+          {/* role=grid: the arrows belong to the table (platform/dom/gridKeys.ts),
+              and a screen reader in browse mode would otherwise keep them. */}
+          <table className="grid" role="grid" style={columns}>
+            <caption className="sr-only">
+              {t('Haftalık dersler')} · {firstColumnTitle}
+            </caption>
             {/* Explicit columns make `table-layout: fixed` an actual contract.
                 In Sığdır the table owns exactly the container width; card text
                 may ellipsize, but it cannot impose a min-content floor. */}
@@ -249,6 +259,7 @@ function GridInner({
                   onCellRemove={onCellRemove}
                   onCellMoveStart={onCellMoveStart}
                   onCellPin={onCellPin}
+                  onCellPick={onCellPick}
                 />
               ))}
             </tbody>
@@ -276,6 +287,7 @@ function sameGridProps(a: Props, b: Props): boolean {
     a.onCellRemove === b.onCellRemove &&
     a.onCellMoveStart === b.onCellMoveStart &&
     a.onCellPin === b.onCellPin &&
+    a.onCellPick === b.onCellPick &&
     a.onMenu === b.onMenu &&
     a.menuOpen === b.menuOpen &&
     a.onMenuOpenChange === b.onMenuOpenChange &&

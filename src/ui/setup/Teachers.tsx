@@ -1,7 +1,7 @@
 // Step: the teachers. Every teacher has exactly ONE subject (docs/WORKLOG.md);
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import { duplicateShorts, subjectOptions } from '../../pure/entities';
 import type { Id } from '../../leaf/model';
@@ -19,21 +19,46 @@ export default function Teachers({ state, change }: PanelProps) {
   // asked for both halves of this: "listeleri ... grupça filtreleyebilelim"
   // and "sıralama ... branşa göre, isme göre vesaire".
   const listCfg = useMemo(() => teacherListConfig(state, t), [state, t]);
-  const shown = applyList(state.teachers, query, listCfg);
+  // The box answers each key at once, the rows follow a moment later: on the
+  // weak machine drawing the list again was up to a fifth of a second a key.
+  const listed = useDeferredValue(query);
+  const shown = useMemo(
+    () => applyList(state.teachers, listed, listCfg),
+    [state.teachers, listed, listCfg],
+  );
   const order = useRowOrder({
     kind: 'teachers',
     count: state.teachers.length,
     items: state.teachers,
-    query,
+    query: listed,
     change,
   });
   // Which rows have been ASKED the second-subject question and answered "yes"
   // but not yet picked one. Nothing is written to `State` until a subject is
   // chosen, so a mis-click costs a click back and not a data change.
   const [opening, setOpening] = useState<ReadonlySet<Id>>(new Set());
-  const subjects = subjectOptions(state);
+  const subjects = useMemo(() => subjectOptions(state), [state]);
 
   const clashes = duplicateShorts(state.teachers);
+
+  // The same elements while only the box changed, so React skips the rows.
+  const { grip } = order;
+  const rows = useMemo(
+    () =>
+      shown.map((teacher, i) => (
+        <TeacherRow
+          key={teacher.id}
+          state={state}
+          change={change}
+          teacher={teacher}
+          grip={grip(i, teacher.name)}
+          subjects={subjects}
+          opening={opening}
+          setOpening={setOpening}
+        />
+      )),
+    [shown, state, change, grip, subjects, opening],
+  );
 
   return (
     <>
@@ -118,23 +143,12 @@ export default function Teachers({ state, change }: PanelProps) {
                     {t('Günde ↓')}
                   </th>
                   <th className="w-col-sm">{t('Ders saati')}</th>
-                  <th className="w-col-md" />
+                  <th className="w-col-md">
+                    <span className="visually-hidden">{t('İşlemler')}</span>
+                  </th>
                 </tr>
               </thead>
-              <tbody ref={order.bodyRef}>
-                {shown.map((teacher, i) => (
-                  <TeacherRow
-                    key={teacher.id}
-                    state={state}
-                    change={change}
-                    teacher={teacher}
-                    grip={order.grip(i, teacher.name)}
-                    subjects={subjects}
-                    opening={opening}
-                    setOpening={setOpening}
-                  />
-                ))}
-              </tbody>
+              <tbody ref={order.bodyRef}>{rows}</tbody>
             </table>
           </div>
         )}

@@ -1,11 +1,12 @@
 import { Activity, useCallback, useEffect, useRef, useState } from 'react';
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
 import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
 import {
   GoToProvider,
   UndoIfProvider,
+  useAnnounce,
   useDialogs,
   useToast,
   useLang,
@@ -47,14 +48,18 @@ import { openPlanFile } from './openPlanFile';
 
 export default function App() {
   const t = useT();
+  const announce = useAnnounce();
   const {
     state,
     change,
     manageProgram,
+    viewProgram,
+    peek,
     undo,
     undoIf,
     redo,
     loadState,
+    replaceState,
     canUndo,
     canRedo,
     plans,
@@ -62,7 +67,7 @@ export default function App() {
     saveTrouble,
     unreadable,
     setAside,
-  } = useStore();
+  } = useStore(announce);
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -149,7 +154,7 @@ export default function App() {
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
-  const solver = useSolver(change);
+  const solver = useSolver(change, peek);
   // The folder my father picked, if he picked one (task B4). Here for the
   // same reason as the solver: a pending write must not die because a tab
   // changed. It works on EVERY route in Chromium — file:// included, where
@@ -197,11 +202,17 @@ export default function App() {
   // `dil` although `health` does not take it: its sentences are translated
   // inside, so after a live language switch the memo would keep the old words
   // until the next edit (e2e/dil.spec.ts).
+  //
+  // Deferred: the chip (and the Kontrol strip and the palette, which read the
+  // same status) is a summary, and on the weak machine its report was the
+  // larger half of the freeze after every drop and undo. The grid paints the
+  // move first and the status follows in a render React may interrupt.
   const { dil } = useLang();
+  const settled = useDeferredValue(state);
   const status = useMemo(() => {
     void dil;
-    return health(state);
-  }, [state, dil]);
+    return health(settled);
+  }, [settled, dil]);
 
   useShortcuts(setPaletteOpen, goTab, openShortcuts);
 
@@ -244,6 +255,20 @@ export default function App() {
     <GoToProvider value={goTo}>
       <UndoIfProvider value={undoIf}>
         <div className="app" ref={appRef} data-section={tab}>
+          {/* The first Tab stop: from here to the first thing in the content
+            was 23 to 28 Tabs through the top bar and the strip (DENETIM
+            KS27). Not a hash link: the address is the file's, and the
+            content box is what has to take focus, not a scroll position. */}
+          <a
+            className="skip-link"
+            href="#icerik"
+            onClick={(event) => {
+              event.preventDefault();
+              mainRef.current?.focus();
+            }}
+          >
+            {t('İçeriğe geç')}
+          </a>
           {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
@@ -269,28 +294,35 @@ export default function App() {
             toggleTheme={toggleTheme}
           />
 
-          {/* Row two: the tools of whichever section is open. */}
-          <Ribbon
-            ui={ui}
-            open={ribbon}
-            state={state}
-            change={change}
-            manageProgram={manageProgram}
-            solver={solver}
-            programMask={programMask}
-            setProgramMask={setProgramMask}
-            density={density}
-            setDensity={setDensity}
-            availClock={availClock}
-            setAvailClock={setAvailClock}
-            theme={theme}
-            setTheme={setTheme}
-            programColor={programColor}
-            setProgramColor={setProgramColor}
-            changelogUnseen={changelogUnseen}
-            planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
-            status={status}
-          />
+          {/* Row two: the tools of whichever section is open. A named region
+            around it, because a toolbar is not a landmark: outside `<header>`
+            and `<main>` the strip had no place in a screen reader's list of
+            regions (axe `region`, on every screen). `display: contents`, so
+            the box changes nothing on screen. */}
+          <section className="ribbon-band" aria-label={t('Araç şeridi')}>
+            <Ribbon
+              ui={ui}
+              open={ribbon}
+              state={state}
+              change={change}
+              manageProgram={manageProgram}
+              viewProgram={viewProgram}
+              solver={solver}
+              programMask={programMask}
+              setProgramMask={setProgramMask}
+              density={density}
+              setDensity={setDensity}
+              availClock={availClock}
+              setAvailClock={setAvailClock}
+              theme={theme}
+              setTheme={setTheme}
+              programColor={programColor}
+              setProgramColor={setProgramColor}
+              changelogUnseen={changelogUnseen}
+              planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
+              status={status}
+            />
+          </section>
 
           <InspectorProvider state={state} change={change}>
             <LessonEditProvider state={state} change={change}>
@@ -329,8 +361,13 @@ export default function App() {
             updates at low priority without throwing away the ızgara DOM or
             its scroll position. Keeping `<main>` itself stable is essential;
             a key here would remount the Activity boundary too. */}
+                {/* `tabIndex={-1}`: focusable by code, not a Tab stop. The skip
+                  link lands here, and so does a closing dialog whose opener
+                  is gone (`returnFocus.ts`). */}
                 <main
                   ref={mainRef}
+                  id="icerik"
+                  tabIndex={-1}
                   className={
                     tab === 'program' && state.lessons.length > 0
                       ? 'main no-overflow'
@@ -375,7 +412,7 @@ export default function App() {
                       colorMode={programColor}
                     />
                   </Activity>
-                  {tab === 'check' && <Check state={state} view={ui.checkView} />}
+                  {tab === 'check' && <Check state={state} view={ui.checkView} ui={ui} />}
                   {tab === 'print' && (
                     <Print
                       state={state}
@@ -394,7 +431,7 @@ export default function App() {
                     <Settings
                       state={state}
                       change={change}
-                      loadState={loadState}
+                      replaceState={replaceState}
                       plans={plans}
                       folder={folder}
                       update={update}

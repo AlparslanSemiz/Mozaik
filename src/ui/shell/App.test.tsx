@@ -216,6 +216,12 @@ describe('uygulama açılıyor', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
     click(button('Çıktı'));
+    // The tab draws the first pages at once and the rest a frame at a time;
+    // whatever has not arrived yet is drawn before the printer is asked.
+    expect(container.querySelectorAll('.print-page').length).toBeGreaterThan(0);
+    act(() => {
+      window.dispatchEvent(new Event('beforeprint'));
+    });
     expect(container.querySelectorAll('.print-page')).toHaveLength(20);
   });
 
