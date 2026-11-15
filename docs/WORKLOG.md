@@ -614,6 +614,17 @@ kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde
 
 ---
 
+## 2026-11-15 · Açılışta plan dizini ezilmiyor (`fix/kutuphane-acilis`)
+
+Güvenlik ve veri denetiminin bulgusu, doğrulandı: `useStore.ts`'in `initialBox`'ı dizini
+(`ders-programi-planlar`) okuyup koşulsuz geri yazıyordu, ve anahtar boş ya da bozuk okununca
+`parseLibrary` tek planlı varsayılanı veriyordu. Öteki planlar anahtarlarında kalıyor ama
+hiçbir girdi onları göstermiyor, günün yedekleri de tek planla yazılıyordu (TRAPS 108'in boş
+okuması, dizin yarısı). Düzeltme: açılışta `readLibraryAtStart`, deponun `ders-programi-plan-*`
+anahtarlarından dizinde olmayanları "Geri gelen plan N" diye geri koyuyor (`adoptOrphans`).
+Yalnız açılışta: silinmekte olan bir plan bir an ikisinde de yok. Gerileme testi
+`okunamayan.test.tsx`; düzeltme geri alınınca kırmızı (elle mutasyon).
+
 ## 2026-11-15 · Zincir `main`'e: boyut eşiği (`rk2-bozuk-iliski`, PR #22)
 
 Bugünkü `main` (#16–#19) alındı; tek çakışma `Teachers.tsx`: zincirin e-posta alanı #18'in
