@@ -317,6 +317,10 @@ const GENERATED_DIR =
  * same category as `dist/`, but these have no folder to recognise them by:
  * they are the five assets BUILD.md's own table lists.
  */
+/** Single files a build writes and `.gitignore` keeps out: the Tauri config
+    `scripts/ortools-mac.sh` generates to list the OR-Tools dylibs. */
+const GENERATED_FILE = new Set(['src-tauri/tauri.ortools.json']);
+
 const RELEASE_ASSET = new Set([
   'Mozaik.html',
   'Mozaik.exe',
@@ -359,7 +363,7 @@ function pathShaped(token: string): boolean {
 
 function resolves(token: string): boolean {
   const clean = token.replace(/^\.\//, '');
-  if (GENERATED_DIR.test(clean)) return true;
+  if (GENERATED_DIR.test(clean) || GENERATED_FILE.has(clean)) return true;
   if (FILES.has(clean) || DIRS.has(clean) || DIRS.has(clean + '/')) return true;
   if (!clean.includes('/')) return BY_BASENAME.has(clean);
   // A document may name a file by the part of its path that identifies it:
