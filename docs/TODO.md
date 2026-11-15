@@ -1012,7 +1012,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `git fetch ~/GitHub/Mozaikler/_arsiv/dallar-2026-10-24-3.bundle refs/remotes/origin/klasorleme:refs/heads/klasorleme`.
       Testleri o dalda `swap`, `bar`, `rows` ve `pool` test dosyaları (`git ls-tree -r
       klasorleme`); main'de karşılıkları
-      `src/constraints.test.ts` (takas), `src/programView.test.ts` ve `src/programScreen.test.tsx`.
+      `src/pure/constraints/constraints.test.ts` (takas), `src/pure/program/programView.test.ts` ve `src/ui/program/programScreen.test.tsx`.
       Eksik olanlar:
       - takas: kaynak blok sabitliyse takas yok (main yalnız sabit hedefi soruyor);
       - takas: Uyar seviyesindeki bir kuralın uyarısı takas cümlesine ` · ` ile ekleniyor;
