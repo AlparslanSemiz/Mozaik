@@ -1031,17 +1031,24 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     row: number,
     day: number,
     only: number,
+    /** The same count with nothing moving, read once per move (`dayCounts`). */
+    whole: number,
   ): boolean {
     if (limit <= 0) return true;
     // Count first: on most cells the limit is nowhere near, and then nothing
-    // has to be listed, sorted or pushed out.
-    let count = 0;
-    for (let h = 0; h < hourCount; h++) {
-      const id = cells[row + h]!;
-      if (id === EMPTY || (only >= 0 && id !== only)) continue;
-      const rec = movableAt(id, day * hourCount + h);
-      if (rec !== null && out.has(rec)) continue;
-      count++;
+    // has to be listed, sorted or pushed out. The day's count does not depend
+    // on the cell, so it comes in whole and only the hours of the blocks
+    // already moving are taken off: each counted hour has exactly one owner,
+    // so walking the owners' own hours finds every hour to drop, once.
+    let count = whole;
+    for (const rec of out) {
+      if (rec.day !== day) continue;
+      const size = items[rec.item]!.block;
+      for (let h = rec.hour; h < rec.hour + size; h++) {
+        const id = cells[row + h]!;
+        if (id === EMPTY || (only >= 0 && id !== only)) continue;
+        if (movableAt(id, day * hourCount + h) === rec) count--;
+      }
     }
     if (count + block <= limit) return true;
     const movable: Rec[] = [];
@@ -1058,6 +1065,26 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       count -= items[rec.item]!.block;
     }
     return count + block <= limit;
+  }
+
+  /** Per day, this move's lesson hours on its class row and its teacher's busy hours. */
+  const sameOnDay = new Int32Array(dayCount);
+  const teacherOnDay = new Int32Array(dayCount);
+  function dayCounts(index: number): void {
+    const li = itemLesson[index]!;
+    const classRow = lessonClass[li]! * cellCount;
+    const teacherRow = lessonTeacher[li]! * cellCount;
+    for (let day = 0; day < dayCount; day++) {
+      let same = 0;
+      let busy = 0;
+      for (let h = 0; h < hourCount; h++) {
+        const cell = day * hourCount + h;
+        if (classCell[classRow + cell] === li) same++;
+        if (teacherCell[teacherRow + cell] !== EMPTY) busy++;
+      }
+      sameOnDay[day] = same;
+      teacherOnDay[day] = busy;
+    }
   }
 
   /**
@@ -1108,8 +1135,26 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
     const dayStart = day * hourCount;
     const ok =
-      trim(out, sameLimit[index]!, block, classCell, classRow + dayStart, day, li) &&
-      trim(out, dayLimit[index]!, block, teacherCell, teacherRow + dayStart, day, -1);
+      trim(
+        out,
+        sameLimit[index]!,
+        block,
+        classCell,
+        classRow + dayStart,
+        day,
+        li,
+        sameOnDay[day]!,
+      ) &&
+      trim(
+        out,
+        dayLimit[index]!,
+        block,
+        teacherCell,
+        teacherRow + dayStart,
+        day,
+        -1,
+        teacherOnDay[day]!,
+      );
     if (!ok) return null;
     // A lesson this one may not share a day with (B5.3): all of its blocks on
     // this day go too, or the cell is closed if one of them may not move.
@@ -1141,6 +1186,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     let ties = 0;
     let anyRoom = false;
     const tabuRow = index * cellCount;
+    dayCounts(index);
 
     for (let cell = 0; cell < cellCount; cell++) {
       const out = evictions(index, cell);
