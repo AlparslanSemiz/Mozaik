@@ -123,8 +123,9 @@ export default function GridMenu({
         {menuAt !== null && (
           <>
             {/* The keyboard's way to move a block (KS8): the same pick-up a
-                drag makes, walked with the arrows. After the menu has closed
-                and handed focus back to the card, so Esc can return it there. */}
+                drag makes, walked with the arrows. Started on the next task,
+                once the menu has closed; Radix may still be handing focus back, so
+                a cancel finds the card by its cell (Program.tsx onCancel). */}
             <ContextMenu.Item
               className="menu-item"
               disabled={

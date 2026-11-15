@@ -190,7 +190,7 @@ test.describe('96. Klavyeyle müsaitlik', () => {
 
     // Up to the hour's heading: Enter closes that hour across the week.
     await page.keyboard.press('ArrowUp');
-    await expect(page.locator(':focus')).toHaveAttribute('aria-label', /2\. saat: bütün hafta/);
+    await expect(page.locator(':focus')).toHaveAttribute('title', /Haftanın bu saatini/);
     await page.keyboard.press('Enter');
     await expect(closed).toHaveCount(6);
 

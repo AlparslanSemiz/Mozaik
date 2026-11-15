@@ -62,7 +62,15 @@ export function focusCellSoon(rowId: string, day: number, hour: number): void {
       const row = [...(wrap?.querySelectorAll<HTMLTableRowElement>('tbody tr') ?? [])].find(
         (r) => r.dataset.rowId === rowId,
       );
-      const cell = row?.querySelector<Cell>(`td[data-day="${day}"][data-hour="${hour}"]`) ?? null;
+      // By containment: the hour may now sit inside a merged block (pitfall 85).
+      const cell =
+        row === undefined
+          ? null
+          : (rowCells(row).find((c) => {
+              const first = Number(c.dataset.hour);
+              const span = Math.max(1, Number(c.dataset.span) || 1);
+              return Number(c.dataset.day) === day && first <= hour && hour < first + span;
+            }) ?? null);
       const covering = cell ?? (row === undefined ? null : cellAtColumn(row, -1));
       const to = covering === null ? null : target(covering);
       if (wrap === null || to === null) return;
@@ -90,8 +98,10 @@ function labelEmpty(wrap: HTMLElement, el: HTMLElement) {
   // the row and nothing else in the sentence would say so.
   const who = el.closest('tr')?.querySelector('.row-head .inspect')?.textContent ?? '';
   const parts = [place, who, own === '' ? t('boş') : own].filter((x) => x !== '');
-  el.setAttribute('aria-label', parts.join(', '));
+  const said = parts.join(', ');
+  el.setAttribute('aria-label', said);
   el.dataset.kbdLabel = own;
+  el.dataset.kbdSaid = said;
 }
 
 export function attachGridKeys(wrap: HTMLElement): () => void {
@@ -173,9 +183,14 @@ export function attachGridKeys(wrap: HTMLElement): () => void {
     const el = e.target as HTMLElement;
     const own = el.dataset.kbdLabel;
     if (el.tagName !== 'TD' || own === undefined) return;
-    if (own === '') el.removeAttribute('aria-label');
-    else el.setAttribute('aria-label', own);
+    // Only if the name is still ours: React may have written its own while the
+    // cell had focus (an hour opened by Ctrl+Z), and that one stays.
+    if (el.getAttribute('aria-label') === el.dataset.kbdSaid) {
+      if (own === '') el.removeAttribute('aria-label');
+      else el.setAttribute('aria-label', own);
+    }
     delete el.dataset.kbdLabel;
+    delete el.dataset.kbdSaid;
   }
   wrap.addEventListener('focusout', focusout);
 

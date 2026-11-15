@@ -1769,7 +1769,6 @@ const EN: Sozluk = {
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} picked up. Choose the target cell with the arrow keys; Enter drops it, Esc cancels.",
   "Taşımadan vazgeçildi.": "Move cancelled.",
   "{ders} yerleşti: {yer}.": "{ders} placed: {yer}.",
-  "{n}. saat: bütün haftayı değiştir": "Hour {n}: toggle the whole week",
   "{acik} saat müsait, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} available, {yuk} {yuk:hour|hours} of lessons loaded",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} open, {yuk} {yuk:hour|hours} of lessons loaded",
   "Izgaraya gir, bir daha basınca çık": "Enter the grid; press again to leave it",

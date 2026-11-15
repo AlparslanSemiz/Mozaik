@@ -1793,7 +1793,6 @@ const FR: Sozluk = {
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} pris. Choisissez la cellule cible avec les flèches ; Entrée dépose, Échap annule.",
   "Taşımadan vazgeçildi.": "Déplacement annulé.",
   "{ders} yerleşti: {yer}.": "{ders} placé : {yer}.",
-  "{n}. saat: bütün haftayı değiştir": "{n}e heure : basculer toute la semaine",
   "{acik} saat müsait, {yuk} saat ders yüklenmiş": "{acik} {acik:heure disponible|heures disponibles}, {yuk} {yuk:heure|heures} de cours prévues",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:heure ouverte|heures ouvertes}, {yuk} {yuk:heure|heures} de cours prévues",
   "Izgaraya gir, bir daha basınca çık": "Entrer dans la grille ; appuyer encore pour en sortir",

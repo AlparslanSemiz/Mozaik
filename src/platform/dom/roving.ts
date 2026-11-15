@@ -33,6 +33,10 @@ export function focusItem(item: HTMLElement): void {
 
 export function attachRoving(box: HTMLElement, opts: RovingOptions): () => void {
   let last: HTMLElement | null = null;
+  // A click on something in the box that cannot take focus (padding, the
+  // scrollbar, a cell not yet focusable) focuses the box itself. That is not
+  // Tab arriving, and handing focus on would scroll to the last cell.
+  let pressed = false;
   box.tabIndex = 0;
 
   const go = (item: HTMLElement) => {
@@ -43,6 +47,7 @@ export function attachRoving(box: HTMLElement, opts: RovingOptions): () => void 
   function focusin(e: FocusEvent) {
     const target = e.target as Element;
     if (target === box) {
+      if (pressed) return;
       const to = last !== null && last.isConnected && box.contains(last) ? last : opts.first();
       if (to !== null) go(to);
       return;
@@ -70,9 +75,18 @@ export function attachRoving(box: HTMLElement, opts: RovingOptions): () => void 
     if (to !== from) go(to);
   }
 
+  function pointerdown() {
+    pressed = true;
+    setTimeout(() => {
+      pressed = false;
+    }, 0);
+  }
+
   box.addEventListener('focusin', focusin);
   box.addEventListener('keydown', keydown);
+  box.addEventListener('pointerdown', pointerdown, { capture: true });
   return () => {
+    box.removeEventListener('pointerdown', pointerdown, { capture: true });
     box.removeEventListener('focusin', focusin);
     box.removeEventListener('keydown', keydown);
   };

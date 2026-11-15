@@ -235,7 +235,12 @@ function Program({
       // Said, and focus kept on the grid: the card that had it is gone, and
       // focus used to fall to <body> with nothing heard (DENETIM KS9).
       notify(t('{ders} havuza kaldırıldı.', { ders: lessonName(ix, removed) }));
-      focusCellSoon(rowId, day, found.hour);
+      // Only when focus was on the grid or in its menu, i.e. on the card being
+      // removed: a removal asked from anywhere else does not pull focus here.
+      const active = document.activeElement;
+      if (active?.closest('.grid-wrap, [role=menu]') != null) {
+        focusCellSoon(rowId, day, found.hour);
+      }
     },
     [change, classAt, notify, state, t, ix],
   );
@@ -406,8 +411,9 @@ function Program({
             ders: name,
           }),
           onRefuse: notify,
-          onCancel: () => {
+          onCancel: (byTab) => {
             notify(t('Taşımadan vazgeçildi.'));
+            if (byTab) return;
             if (origin?.isConnected === true && origin !== document.body) origin.focus();
             else if (source !== null) focusCellSoon(rowId, source.day, source.hour);
           },

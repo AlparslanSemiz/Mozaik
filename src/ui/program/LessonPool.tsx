@@ -302,7 +302,8 @@ function LessonPool({
   }, []);
 
   function pick(e: React.KeyboardEvent) {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    // A held key repeats: one press, one pick-up.
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key.toLowerCase();
     if (key !== 'enter' && key !== ' ' && key !== 't') return;
     const card = (e.target as Element).closest<HTMLElement>('.pool-card[tabindex]');

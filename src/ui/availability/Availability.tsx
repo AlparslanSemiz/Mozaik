@@ -301,7 +301,8 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                         tabIndex={-1}
                         className="av-head"
                         onClick={() => toggleHour(s)}
-                        aria-label={t('{n}. saat: bütün haftayı değiştir', { n: s + 1 })}
+                        // Named by its own number (label in name, WCAG 2.5.3), the
+                        // sentence is the description, as on the day headings.
                         title={t('Haftanın bu saatini değiştir')}
                       >
                         {hour}

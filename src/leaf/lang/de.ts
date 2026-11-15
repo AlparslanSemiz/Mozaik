@@ -1785,7 +1785,6 @@ const DE: Sozluk = {
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} aufgenommen. Zielzelle mit den Pfeiltasten wählen; Enter legt ab, Esc bricht ab.",
   "Taşımadan vazgeçildi.": "Verschieben abgebrochen.",
   "{ders} yerleşti: {yer}.": "{ders} gesetzt: {yer}.",
-  "{n}. saat: bütün haftayı değiştir": "{n}. Stunde: ganze Woche umschalten",
   "{acik} saat müsait, {yuk} saat ders yüklenmiş": "{acik} {acik:Stunde|Stunden} verfügbar, {yuk} {yuk:Stunde|Stunden} Unterricht geplant",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:Stunde|Stunden} offen, {yuk} {yuk:Stunde|Stunden} Unterricht geplant",
   "Izgaraya gir, bir daha basınca çık": "In das Raster wechseln, erneut drücken zum Verlassen",

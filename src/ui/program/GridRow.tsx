@@ -212,7 +212,8 @@ export const Row = memo(function Row({
                 );
               }}
               onKeyDown={(e) => {
-                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                // A held key repeats: one press, one pick-up.
+                if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
                 const key = e.key.toLowerCase();
                 if (e.key === 'Delete' || e.key === 'Backspace') {
                   e.preventDefault();

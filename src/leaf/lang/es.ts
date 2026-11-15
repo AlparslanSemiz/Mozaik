@@ -1785,7 +1785,6 @@ const ES: Sozluk = {
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} tomada. Elija la celda de destino con las flechas; Intro la suelta, Esc cancela.",
   "Taşımadan vazgeçildi.": "Movimiento cancelado.",
   "{ders} yerleşti: {yer}.": "{ders} colocada: {yer}.",
-  "{n}. saat: bütün haftayı değiştir": "{n}.ª hora: cambiar toda la semana",
   "{acik} saat müsait, {yuk} saat ders yüklenmiş": "{acik} {acik:hora disponible|horas disponibles}, {yuk} {yuk:hora|horas} de clase cargadas",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hora abierta|horas abiertas}, {yuk} {yuk:hora|horas} de clase cargadas",
   "Izgaraya gir, bir daha basınca çık": "Entrar en la cuadrícula; pulse otra vez para salir",

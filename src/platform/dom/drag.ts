@@ -70,8 +70,8 @@ export interface KeyMove {
   intro: string;
   /** Enter on a refused cell: the reason, said again. */
   onRefuse: (why: string) => void;
-  /** Ended without a drop: Esc, Tab, a click, or no row to aim at. */
-  onCancel: () => void;
+  /** Ended without a drop: Esc, Tab, a click or another key. `byTab`: focus is already leaving. */
+  onCancel: (byTab: boolean) => void;
   /** Let go on a droppable cell, after `drop()` has run. */
   onDrop: (day: number, hour: number) => void;
 }
@@ -649,9 +649,9 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
         }
       }
     }
-    const end = () => {
+    const end = (byTab = false) => {
       finish();
-      keys.onCancel();
+      keys.onCancel(byTab);
     };
     if (stops.length === 0) {
       // The row is hidden, or the week has no hour long enough. Nothing to aim at.
@@ -716,7 +716,13 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       // pressed before the → of Ctrl+→.
       if (k === 'Control' || k === 'Shift' || k === 'Alt' || k === 'Meta') return;
       if (k === 'Tab') {
-        end();
+        end(true);
+        return;
+      }
+      // The Enter that picked the card up, held down: it must not drop it too.
+      if (e.repeat && (k === 'Enter' || k === ' ')) {
+        e.preventDefault();
+        e.stopPropagation();
         return;
       }
       if (k === 'Escape') end();
