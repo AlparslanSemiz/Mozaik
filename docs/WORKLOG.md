@@ -246,6 +246,18 @@ aynı 11'i `origin/main`'in temiz kopyasında da kırmızı, Node 26'nın `local
 `otomatik` 15/15 (uzun test 2,3 dk). `scripts/agir.sh` bu makinede koşmuyor (`flock` yok), Playwright
 doğrudan ve tek oturumda koşuldu. **Koşulmayan.** Ana E2E'nin geri kalanı, WebKit, gerçek exe (CI'da).
 
+## 2026-11-15 · Güvenlik sertleştirmesi (`guvenlik/sertlestirme`, B7.39)
+
+`teslim/kurulum-paketi`'nden (PR #20) açıldı, ondan sonra birleşir. Güvenlik ve veri
+denetiminin küçük maddeleri, her biri kendi commit'inde ve testiyle: klasör yazımında
+`sync_all` (V2), boyut 0'ın reddi (G4), `.eski`'nin sayfa yüklenince silinmesi (V9;
+kaynaktan okuyan test, çağrı `run`'ın başına geri taşınınca kırmızı ölçüldü), `remove_file`'ın
+yalnız günlük yedek adı (G7), `.yeni` ve kurulumun atomik yazımı (V10), `eski-kopya.txt`
+sınırının testleri (V8), action'ların SHA ile sabitlenmesi (G5) ve Dependabot'ta cargo.
+Capability ve CSP değiştirilmedi, gerekçe ve öneri TODO B7.39'da. Koşulan: `cargo test`
+(macOS), `cargo clippy` (iki eski uyarı, bu dalın değil), `tsc --noEmit`, `kontrat`, `surum`
+ve `docs` testleri. Windows'ta ve gerçek exe'de koşulmadı.
+
 ---
 
 ## 2026-10-24 gece · Zincir `main`'e bağlandı, (A) ve gerçek güncelleme akışı
@@ -669,6 +681,29 @@ Konsol hatası yok.
 kanıtı (E2E, kilit altında), tıklama testi. **Koşulmayan.** Tam E2E yerelde (CI'da).
 
 ---
+
+## 2026-11-15 · Test ve CI bakımı (`bakim/test-ci`)
+
+Denetimin test ve CI bulguları (TODO B7.39–B7.41).
+
+- **Node 26.** Node 25'ten beri `globalThis.localStorage` bir getter ve `--localstorage-file`
+  verilmeyince `undefined`; vitest 3'ün jsdom ortamı global'de zaten olan anahtarı kopyalamıyor.
+  `emptyStart`, `otherWindow` ve `rowOrder` bu yüzden kırmızıydı (veri kaybı sınıfının gerileme
+  testleri dahil). `vite.config.ts` Node ≥ 25'te `execArgv`'ye
+  `--no-experimental-webstorage` veriyor, Node 22'de (CI, `.nvmrc`) hiçbir şey değişmiyor.
+- **`agir.test.ts`** `describe.skipIf(process.platform !== 'linux')`: betik `flock`, `/proc`,
+  `setsid` istiyor, macOS'ta test aracın eksikliğini ölçüyordu. CI Linux, orada koşmaya devam.
+- **Hijyen.** `.gitignore`'a `.claude/worktrees/` ve `.playwright-mcp/`; üç eski döküm
+  `git rm --cached` ile izlemeden çıktı.
+- **CI.** `e2e`, `e2e-arama` ve `e2e-ek` işleri `~/.cache/ms-playwright`'ı `actions/cache@v6` ile
+  önbellekliyor, anahtar `@playwright/test`'in kurulu sürümü. `playwright install` duruyor,
+  isabette indirmeden dönüyor. Kazanç beklentisi iş başına 8–9 s; ilk koşu önbelleği yazar.
+- **`otomatik.spec.ts:254`** ölçüldü, değiştirilmedi (TODO B7.41): bugünün 24 koşusunda 2,4–5,8
+  dk; `hiz/sat-yayilim`'den sonra medyan 2,8 dk, en yavaşı 420 s sınırının %66'sı (önce %83).
+
+Doğrulama (bu Mac, Node 26.13.1): `tsc --noEmit` 0, `eslint src` 0, `npm run sinir` 0 ihlal,
+`npm run hizli` 1525 geçti ve 4 atlandı (yalnız `agir.test.ts`), belge kapısı yeşil.
+Koşulmayan: E2E ve CI'ın önbellek isabeti (dalın CI'ında).
 
 ## 2026-11-15 · Açılışta plan dizini ezilmiyor (`fix/kutuphane-acilis`)
 

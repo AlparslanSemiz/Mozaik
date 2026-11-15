@@ -73,6 +73,9 @@ scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kura
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
+CI Node 22'de koşar ve `.nvmrc` aynı sürümü söyler. Node 25 ve sonrası kendi
+`localStorage`'ını tanımlayıp jsdom'unkini gölgeler; `vite.config.ts` bu sürümlerde test
+süreçlerine `--no-experimental-webstorage` verir, yerelde Node 26 da çalışır.
 Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 
 `knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
@@ -255,9 +258,13 @@ runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` d
 sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO B7.29).
 `surum.yml`'in Windows işi `windows-latest`'te.
 
-Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
+Dependabot (`.github/dependabot.yml`, 2026-09-12) bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
-yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda.
+yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda. Üç ekosisteme
+bakar: npm (haftalık), `src-tauri`'nin cargo'su ve iş akışlarının eylemleri (aylık).
+Üçüncü taraf eylemler (`dtolnay/rust-toolchain`, `Swatinem/rust-cache`) tam commit
+SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15); `stable` bir dal
+olduğu için rust-toolchain'in SHA'sını Dependabot tazelemez, elle güncellenir.
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
 yeşil bir `main` push'unda yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
@@ -527,7 +534,9 @@ doğrular (özet 2026-10-24'ten beri; özeti olmayan bir manifestteki yeni sür�
 elle indirme adresi söylenir), adresin yalnız bu deponun Release öneklerinden gelmesine izin
 verir, takası çalışan programın kendi
 dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
-yarıda kalırsa eski programı yerine geri koyar. İndirme ve takas yalnız
+yarıda kalırsa eski programı yerine geri koyar. `.eski` yeni sürümün sayfası
+yüklendikten sonra silinir, açılışın ilk satırında değil: pencere açamayan bir yeni sürüm
+geri dönülecek kopyayı silmemiş olur. İndirme ve takas yalnız
 Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya
 Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi onu
 kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
