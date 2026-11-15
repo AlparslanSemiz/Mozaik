@@ -72,6 +72,64 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-15 · İlk açılış, giriş korumaları ve mesajlar (`kullanim/ilk-acilis`, TODO SD7)
+
+`metin/tek-ad` (PR #44) üstünde, birleşmedi. Denetimin akış bulguları (1366×768 ve 1920×1080,
+yaşlı ve teknik olmayan bir kullanıcı gözüyle):
+
+- **Başlarken** (`setup/Checklist.tsx`): dokuz adım (Okul adı ve saatler → Derslikler → Branşlar
+  → Öğretmenler → Sınıflar → Dersler → Müsaitlik → Otomatik diz → Yazdır), her biri plandan
+  işaretleniyor ve oraya götüren bir düğmesi var. Müsaitlik isteğe bağlı: kapalı bir saat ya da
+  yerleşmiş bir kart onu geçilmiş sayar. Yazdır planda iz bırakmadığı için Çıktı'daki düğmeye
+  basılınca bu makinede işaretleniyor. Açık, dar, kapalı ve "yazdırıldı" tek bir yeni tercih
+  anahtarında (`ders-programi-ilk-adimlar`, "Veriler nerede" tablosunda, DATA). Dersi olan planda
+  kendiliğinden tek satır. Varsayılan hafta (Salı–Pazar × 12) değişmedi: dershane, DATA
+  "Varsayılanlar" ve `bell.test.ts` bilerek böyle; ilk adım onu yazarak görünür kılıyor.
+- **Gitme düğmeleri** (`common/GoTo.tsx`, `NextStep.tsx`): App'teki `goTo` (sekme, Okul adımı,
+  Ayarlar bölümü) bir context; boş ekranlar, Başlarken, "Güncellemeye bak" onu kullanıyor.
+  Düğme sözleri sekme adı taşımıyor (tuzak 49: `name: 'Ayarlar'`, `'Müsaitlik'`, `'Saatler'`
+  sorguları alt dizgeyle eşleşir).
+- **Dersler:** açık saati aşan sınıf ve öğretmen girerken kırmızı kutuda sayılarıyla
+  (`buildCapacity`), sağdaki listede kırmızı kenar ve kalın sayaç. Ekle'den sonra saat 4'e,
+  dağılım tek saatlere dönüyor (DECISIONS). Branşsız öğretmende Ekle ve Enter "Önce bir branş
+  seçin." diyor; düğme yalnız ad boşken kilitli.
+- **Dosyadan aç:** boş plana (`isEmptyPlan`: liste, branş, okul adı, kapalı saat, hiçbir
+  seçenekte kart yok) sormadan açıyor. E2E'nin `loadWorld`/`openFixture`'ı ve `temel.spec.ts`
+  artık `openedWithoutQuestion` bekliyor, `gercek-exe.spec.ts` ikisini de kabul ediyor.
+- **Mesajlar:** yanlış dosya (`common/wrongFile.ts`, Excel'den yapıştır'ı da söylüyor), daha yeni
+  dosya (`Güncellemeye bak` → Ayarlar → Hakkında; Dosyadan aç, Tümünü dosyadan aç, açılış
+  şeridi), iki pencere, açılışta okunamayan plan, boş taslak, Rust'ta takas ve indirme hataları
+  (`update.rs`, sistemin cevabı parantezde). Sözler: "= haftada N saat", Müsaitlik sayaçlarının
+  açıklaması ve `Bütün haftayı aç/kapat`, öğretmen tablosunun kural başlıkları tablonun altında,
+  `Otomatik diz (N kart)`, yazdırma ipucu Chrome'un kendi sözleriyle.
+- **1366:** öğretmen adımında sağ sütun 98rem'in (1568 px) altında, yani 1366 ve 1536'da listenin altına iniyor; baskı
+  önizlemesi `safe center` ile soldan kesilmiyor ve dar tepside (`@container`) %85/75/65'e
+  küçülüyor, yalnız ekranda; Program sığmayan haftada boş çubuğa Sığdır'ı ekliyor
+  (`useWeekCut.ts`).
+
+Koordinasyon: `Check.tsx`'e (Kontrol dalının) yalnız boş ekrana tek satır `NextStep`;
+`Availability.tsx`'te yalnız metin satırları ve boş ekran. Ara commit'lerde sözlük testi kırmızı
+(çeviriler son commit'te), uç yeşil.
+
+**Boyut.** Ham `dist/index.html` 1 256 539 B (`main` 1 229 155), brotli 291,52 kB (eşiğin 476 B altında); artışın çoğu dört
+sözlükteki ~50 yeni cümle. Eşik 1 230 000 → 1 260 000 B. `file://` açılışı, CPU 4× yavaş, 7 koşu
+`loadEventEnd` medyanı (kirli, makine meşgul): `main` 203 ms, bu dal 229 ms.
+
+İnceleme (taze bağlamlı alt ajan) altı bulgu verdi, altısı da düzeldi: `isEmptyPlan` elle
+kurulmuş ayarları, ikinci seçeneği ve sabitlemeyi de sayıyor, geri alınacak bir şey varken soru
+yine soruluyor (ilk hâli bir zil ayarını ve geri al geçmişini sessizce silebilirdi); baskı
+önizlemesinin `container`'ı yalnız `@media screen`'de; Başlarken daraltılınca teklif kalıyor;
+aşım uyarısı başka sınıfa geçince eski dersi taşımıyor; çift export; ARCHITECTURE satırları.
+
+**Koşulan.** `tsc` (uygulama ve e2e) 0, `eslint .` 0, prettier, `npx vite build`, `npm run boyut`
+(ham 3,05 kB, brotli 476 B altında), `cargo test` 59/59, `npm run hizli` 1562 geçti, 4 atlandı (yük altındaki ilk koşuda zaman aşımları, tek başına yeşil). E2E `--workers=2`:
+bos-ekran, dersler, temel (69/69), kurulum, liste, musaitlik, palet, panel, planlar, okunamayan,
+iki-kopya, yazdir, serit, dil, erisim, kontrol, baski-secenek (274/274), program, otomatik,
+izgara, zebra, kabuk, gorunum (209/215; altı kırmızı düzeltilip kabuk, zebra, temel, bos-ekran,
+yazdir, dersler ve program:1441 yeniden 184/184). Tıklama testi 1366×768 ve 1920×1080, sahte
+veri, `dist/index.html` `file://`. **Koşulmayan:** `gercek-exe`, `guncelleme-exe` (exe ister;
+`dosyaAcildi` iki yolu da kabul ediyor), site süiti, Stryker, bütün E2E.
+
 ## 2026-11-15 · Her kavrama tek ad (`metin/tek-ad`, TODO SD3)
 
 Alp'in SD3 kararı (bir ad iki kavramı taşımaz) arayüzün bütün metnine uygulandı; harita

@@ -2030,6 +2030,23 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
       ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
       klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
+- [~] **SD7 · İlk açılış, giriş korumaları ve mesajlar** (denetim akışı, 2026-11-15,
+      `kullanim/ilk-acilis`, `metin/tek-ad` üstünde). Yazıldı, birim testleri ve dokunulan E2E
+      yeşil, birleşmedi (WORKLOG 2026-11-15). Yapılan: Başlarken dokuz adımlık, plandan
+      işaretlenen, daraltılıp kapatılabilen bir liste; boş ekranlarda eksik adıma götüren düğme;
+      Dersler'de açık saati aşan sınıf ve öğretmen girerken söyleniyor ve sağdaki listede kırmızı;
+      Ekle'den sonra haftalık saat 4'e dönüyor; branşsız öğretmen "Önce bir branş seçin" diyor;
+      boş plana dosya açmak sormuyor; "güncelleyin" diyen her yerde `Güncellemeye bak`; yanlış
+      dosya, iki pencere, açılışta okunamayan plan, boş taslak ve güncellemenin Rust hataları düz
+      cümle; "= haftada N saat", Müsaitlik sayacı ve `Bütün haftayı aç/kapat`, öğretmen
+      tablosunun kural başlıkları, `Otomatik diz (N kart)`, yazdırma ipucu; 1366'da öğretmen
+      tablosu ve baskı önizlemesi sığıyor, Program sığmayan haftada Sığdır'ı söylüyor.
+      **Kalan:** (1) kapatılan Başlarken'i geri açmanın yolu yok (yeni bir planda da kapalı kalır;
+      Ayarlar → Hakkında'ya bir `Başlarken'i göster` düğmesi önerilir); (2) Yazdır adımı yalnız
+      Çıktı'daki düğmeyle işaretlenir, Ctrl+P'yi görmez; (3) varsayılan hafta Salı–Pazar × 12
+      bilerek kaldı (dershane, DATA "Varsayılanlar", `bell.test.ts`), yalnız Başlarken'in ilk
+      adımı onu yazıyor; (4) boyut eşiği 1 230 000 → 1 260 000 B (sözlükler, ölçüm WORKLOG'da); brotli eşiğe 476 B kaldı;
+      (5) `Check.tsx`'in boş ekranına tek satır (`NextStep`) eklendi, Kontrol dalıyla çakışabilir.
 - [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
       e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
