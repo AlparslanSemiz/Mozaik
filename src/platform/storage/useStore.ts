@@ -129,6 +129,8 @@ export function useStore() {
     dispatch({ type: 'program-change', apply });
   }, []);
   const undo = useCallback(() => dispatch({ type: 'undo' }), []);
+  /** Undo only while `expected` is the present: a notice's "Geri al" (undo.ts, SD1). */
+  const undoIf = useCallback((expected: State) => dispatch({ type: 'undo-if', expected }), []);
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
   // A load is "Dosyadan aç" or "Her şeyi sil", each behind its own question:
   // the user has put something in this plan's place, so a plan this copy
@@ -271,6 +273,7 @@ export function useStore() {
     change,
     manageProgram,
     undo,
+    undoIf,
     redo,
     loadState,
     // Exposed for the two callers that leave the page without unloading it:

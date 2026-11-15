@@ -9,10 +9,13 @@
  *
  * Deliberately NOT a Radix Toast. That package is 19.6 KB and what it buys is
  * swipe-to-dismiss, a focus hotkey and the machinery for toasts that carry
- * ACTIONS. These carry none: an undo button here would have to reach into the
- * undo stack, and the stack has moved on the moment anything else is edited —
- * a "Geri al" that quietly reverses the wrong change is worse than no button.
- * So: an `aria-live` region, a list, and CSS.
+ * actions. So: an `aria-live` region, a list, and CSS.
+ *
+ * ONE kind of action, since 2026-11-15 (TODO SD1): a deletion that Ctrl+Z
+ * can reverse no longer asks first; it happens, and its notice carries a
+ * "Geri al" button. The button undoes only the exact state it names
+ * (`undo-if` in pure/undo/undo.ts), so after any other edit it does nothing
+ * rather than reverse the wrong change.
  */
 import {
   createContext,
@@ -29,13 +32,20 @@ import { useT } from './T';
 
 export type ToastTone = 'ok' | 'info' | 'warn';
 
+/** A button on a notice: its label and what it does. */
+export interface ToastAction {
+  label: string;
+  run: () => void;
+}
+
 interface Toast {
   id: number;
   text: string;
   tone: ToastTone;
+  action?: ToastAction;
 }
 
-type Notify = (text: string, tone?: ToastTone) => void;
+type Notify = (text: string, tone?: ToastTone, action?: ToastAction) => void;
 
 const ToastContext = createContext<Notify | null>(null);
 
@@ -47,6 +57,8 @@ export function useToast(): Notify {
 
 /** Long enough to read a sentence twice; the reader has trouble seeing. */
 const LIFETIME = 6000;
+/** A notice with a button stays longer: reading it AND reaching for it (SD1). */
+const ACTION_LIFETIME = 8000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const t = useT();
@@ -64,12 +76,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const notify = useCallback<Notify>(
-    (text, tone = 'ok') => {
+    (text, tone = 'ok', action) => {
       const id = next.current++;
-      setItems((list) => [...list, { id, text, tone }]);
+      setItems((list) => [
+        ...list,
+        action === undefined ? { id, text, tone } : { id, text, tone, action },
+      ]);
       timers.current.set(
         id,
-        window.setTimeout(() => drop(id), LIFETIME),
+        window.setTimeout(() => drop(id), action === undefined ? LIFETIME : ACTION_LIFETIME),
       );
     },
     [drop],
@@ -105,6 +120,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               )}
             </span>
             <span className="toast-text">{toast.text}</span>
+            {toast.action !== undefined && (
+              <button
+                className="btn toast-action"
+                onClick={() => {
+                  toast.action?.run();
+                  drop(toast.id);
+                }}
+              >
+                {toast.action.label}
+              </button>
+            )}
             <button className="toast-close" aria-label={t('Kapat')} onClick={() => drop(toast.id)}>
               <X size={14} strokeWidth={2.4} />
             </button>

@@ -29,6 +29,14 @@ export type Action =
   | { type: 'change'; apply: (d: State) => State }
   | { type: 'program-change'; apply: (d: State) => State }
   | { type: 'undo' }
+  /**
+   * Undo, but only while `expected` is still the present: the "Geri al" of a
+   * notice (Toasts.tsx). The notice stays on screen for seconds, and any edit
+   * in between moves the stack on; a button that then undid THAT edit instead
+   * would quietly reverse the wrong change (usability review, TODO SD1). So
+   * the button names the exact state it undoes, and is a no-op otherwise.
+   */
+  | { type: 'undo-if'; expected: State }
   | { type: 'redo' }
   | { type: 'load'; state: State }
   | { type: 'switch'; id: Id; state: State };
@@ -53,6 +61,9 @@ export function reduce(box: Box, action: Action): Box {
       if (next === box.present) return box;
       return { ...box, present: next, past: [], future: [] };
     }
+    case 'undo-if':
+      if (box.present !== action.expected) return box;
+      return reduce(box, { type: 'undo' });
     case 'undo': {
       const previous = box.past[box.past.length - 1];
       if (previous === undefined) return box;
