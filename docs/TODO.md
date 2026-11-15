@@ -1364,7 +1364,10 @@ bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
 - [ ] **`heading-order` · Program'da 1, Çıktı'da 1.** Kart panelinin ve baskı
       sayfasının başlığı `h3`, ondan önce gelen bir `h2` yok. Baskı sayfasında
       `h3`'ün bir gerekçesi olabilir (kâğıtta punto), ama düzey ile punto ayrı şeyler.
-- [ ] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+- [~] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+      Program'daki kapandı (2026-11-15, `erisim/klavye-izgara`): havuz ve ızgara birer Tab
+      durağı, oklar içinde geziyor, sürükleme `program.spec.ts` ve `hareket.spec.ts`'te yeşil.
+      Hakkında'nın yan paneli açık.
       Ciddi seviye. Fareyle kaydırılan ama klavyeyle odaklanamayan bir kutu, yani
       içeriğinin bir kısmına klavyeyle hiç ulaşılamıyor. Çare `tabindex="0"`, ve
       havuzda bunun sürükleme ile etkileşimi ölçülmeden dokunulmaz (tuzak 13).
@@ -1455,6 +1458,9 @@ ve yerini doğru davranışı soran bir teste bıraktı.
 **2026-09-27: on üçü de kapandı**, her biri kendi commit'inde, kullanıcının DK8, DK9,
 DK11, DK5, DK12 ve DK6 için verdiği kararlarla (DECISIONS 2026-09-27). Kullanım
 kolaylığı sorunları (KS) ve öneriler (Ö) DENETIM.md'de açık, TODO'ya henüz taşınmadı.
+**2026-11-15: KS8, KS9 ve KS19 kapandı** (`erisim/klavye-izgara`, WORKLOG): ızgara ve
+Müsaitlik tek Tab durağı ve oklar, kart klavyeyle alınıp bırakılıyor, Delete'ten sonra odak
+hücrede; Ö12 ve Ö33 yapıldı (`e2e/klavye.spec.ts`).
 
 Elle denetimin ürettiği kusurlar. Her birinin tekrar üreten adımları, beklenen ve olan,
 ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı bölümde.
@@ -2019,8 +2025,8 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
 - [ ] **SD5 · Öteki öneriler** (raporun 5, 7, 9–13 ve 16–19): tek kişinin programını
       yazdırmak 5 tıklama, süzgeç çiplerini `Süz` arkasına katlamak, Dağılım'ın varsayılanı,
       Görünüm ile Hakkında'nın metni, Program'daki kırmızı ✗, Kurallar'da "0" ile "Kapalı",
-      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", havuz kartına
-      klavye yolu, en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
+      ızgara ekseni ve rengin hatırlanması, şerit için `region`, "İçeriğe geç", ~~havuz kartına
+      klavye yolu~~ (yapıldı 2026-11-15, `erisim/klavye-izgara`), en küçük yazı 14 px. Her biri bir tasarım kararı, sıra sende.
 - [ ] **SD6 · Okul'daki etiketsiz kutular.** Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
       e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de

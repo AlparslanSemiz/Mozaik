@@ -73,6 +73,59 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-15 · Izgara ve Müsaitlik klavyeyle (`erisim/klavye-izgara`, DENETIM KS8, KS9, KS19)
+
+Klavye ve ekran okuyucu denetiminin bulguları. Program'da bir ders klavyeyle hiç konamıyordu
+(havuz kartları odaklanamıyordu, boş hücreler de), ızgara 414 Tab durağıydı (kart ve raptiye),
+Müsaitlik'e klavyeyle hiç girilemiyordu.
+
+- **Klavyeyle taşıma.** `drag.ts`'e ikinci bir el: `startKeys`. Aynı `dropMap` (bir kez,
+  tuzak 2), aynı satır boyaması, aynı gerekçe çubuğu; hayalet yok, hedef oklarla gezer
+  (← → saat, Ctrl+← → bırakılabilecek sonraki saat, ↑ ↓ gün, Home End), Enter bırakır, Esc,
+  Tab, tık ya da Ctrl'li bir tuş vazgeçer. Tuşlar `window`'da `capture` ile, yalnız ele
+  alınanlar durdurulur. Çubuk yeri cümlenin önüne yazar ("Salı 3. saat: …"), ilk yazmada
+  ne alındığı ve tuşlar. Havuzda Enter, Space ya da T; ızgarada T ve menünün yeni ilk kalemi
+  `Taşı`. Izgaradaki kartta Enter ve Space menüyü açmaya devam ediyor (kullanıcının
+  2026-09-26 kararı, §8d), Enter Enter `Taşı`.
+- **Tek Tab durağı** (`platform/dom/roving.ts`, `gridKeys.ts`): durak kutunun kendisi, Tab
+  gelince odağı son ya da ilk hücreye verir, Shift+Tab'da kutu bir anlığına sıradan çıkar.
+  Hücreler `tabIndex=-1` ve hiç değişmez, odak gezerken hiçbir şey yeniden çizilmez. Sütun
+  `data-col`'un kapsamından bulunur (tuzak 85). P raptiyeyi çevirir. Havuz ve Müsaitlik de
+  aynı yardımcıyla tek durak.
+- **Ad ve odak.** Kartın adı parçalardan: gün, saat, satır, üst, alt, işaret, sabitlik, çakışma
+  (çakışma önce yalnız `title`'daydı, boş `alt` "412B SAY , …" bırakıyordu). Kapalı hücre "×"
+  yerine "kapalı" / "müsait değil" okunur (`aria-label`, yalnız kapalı hücrelerde). Boş hücre
+  adını ve `tabindex`'ini ancak odak alınca alır. Tablo `role="grid"` ve görünmez başlıklı.
+  Delete ve "Havuza kaldır"dan sonra odak aynı hücrede (`focusCellSoon`) ve bildirim
+  "… havuza kaldırıldı". `.grid-wrap`'e `scroll-padding` (yapışkan başlıklar), odaklanan hücre
+  `scrollIntoView({ nearest })`.
+- **Müsaitlik.** Her hücre `aria-pressed`'li bir düğme ("Salı 3. saat, müsait değil"), başlıklar
+  düğme, boyama hücrenin `pointerdown`'ında kaldı; düğmenin `click`'i yalnız klavyede
+  (`detail === 0`). `table.availability th:focus-visible` ölüydü, düğmeye taşındı. Sayaç
+  "48/0" sözle okunur, varlık listesi ve `LessonPicker` `role="group"`.
+- Kısayol ekranı: Ctrl+Shift+Z, Backspace, havuz tutamağı, Esc ve bütün yeni tuşlar.
+- axe: Program'ın `scrollable-region-focusable`'ı kalktı. İlk denemede havuz kartının ve gün
+  başlığının `aria-label`'ı görünen yazıyı içermiyordu (`label-content-name-mismatch`, 50 + 6
+  düğüm); ad kartın kendi yazısı, uzun cümle `title` oldu.
+
+**Ölçüm** (`scratch/olc-klavye.mjs`, tam dolu kurs 199 kart, 4× CPU, görünüm değiştirme 30
+kez, CDP `TaskDuration`). Kirli: macOS, makinede başka ajanlar koşuyordu. İlk hâl (her hücreye
+`tabIndex`, kapalı hücreye iki `span`) belirgin pahalıydı (görev 371 ms, yanındaki taban 289);
+o iki şey tembelleşti. Son hâl: görev 218,6 / 220,3 ms, taban 208,5 (ilk ısınma koşusu 282);
+script 59 / 55 ms, stil ve yerleşim aynı. Ok tuşu başına ~30 ms, iki kare, yeniden çizim yok.
+Tab durağı 416 → 1.
+
+**Boyut.** Ham `dist/index.html` 1 229 155 → 1 249 005 B (JS +18,7 kB: yarısı dört dilin yeni
+cümleleri, yarısı klavye yolu), eşik 1 230 000'i aştı. `file://` açılışı, CPU 4×, 8 koşu
+dönüşümlü (`scratch/olc-acilis.mjs`, kirli, yük ~30–60): `main` 462 ms, bu dal 461 ms. Ham eşik
+1 260 000 B; brotli 291,56 / 292 kB, değişmedi.
+
+**Koşulan.** `tsc` (uygulama, e2e), eslint, `npm run hizli`, `vite build`, `boyut`; E2E erisim,
+izgara, program, musaitlik, hareket, kayma, temel, palet, renk, dil, metin ve yeni `klavye`
+(224 geçti; `kayma.spec.ts:129` bu Mac'te tabanda da kırmızı, kaydırma çubuğu yer kaplamıyor).
+
+---
+
 ## 2026-11-15 · Eski dallar birleşti (`eski/birlestirme`)
 
 `birlesme-sonrasi` ve `ozellik/belge-temizlik` (yalnız belgeler, `main`'in hâli korunarak),

@@ -128,6 +128,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 - Izgarada satır gün, sütun ders, çünkü bu bir günü okuma ekranı (aSc'nin "Time off" penceresi de öyle). Sağda varlık listesi.
 - Kapalı saat büyük, kırmızı bir çarpıyla ve taramayla işaretlenir. Kararın gerekçesi kapsamdı: Program ızgarasında kırmızı "bu bırakma reddedildi" demek, Müsaitlik'te ise ne bırakma ne ret var ve ekranın söylediği tek şey açık ya da kapalı. Tarama da duruyor, çünkü renk tek başına bir durum taşımıyor. 2.0.2'den beri Program ızgarası da kapalı saatlerde aynı çarpıyı kullanıyor (`styles.css`), yani bu kapsam gerekçesi bugün tarihsel.
+- Her hücre ve her başlık bir düğme (`aria-pressed` hücrenin durumu, adı "Salı 3. saat, müsait değil"), tablo `role="grid"` ve tek bir Tab durağı: oklar hücreler ve başlıklar arasında gezer, Space ya da Enter saati, başlıkta bütün günü ya da saati değiştirir. Fareyle boyama hücrenin kendi `pointerdown`'ında kaldı; düğmenin `click`'i yalnız klavyeden gelince (`e.detail === 0`) çalışır, yoksa bir tık saati iki kez çevirirdi.
 - Satırlar Program ızgarasınınkinden uzun. "Haftanın darlığı" ısı tablosu (`table.availability.heat`) aynı iskeleti kullanır ama bir müsaitlik programı değil, tıklanacak hücresi yok ve kısa satırlarla kalır.
 - Başlıkta ders numarası, altında başlangıç saati. Saat şeritteki `Saatler` ile kapatılır, ve kapalıyken yerini korur, yani tablonun boyu değişmez (tuzak 102 ve 103).
 
@@ -161,7 +162,9 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 ### Sürükleme ve bırakma
 
-- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır: odaklı kartta Enter ve Space kartın sağ tık menüsünü açar, kısayol ekranının dediği gibi. 2026-09-26'ya kadar dersi sessizce havuza gönderiyorlardı. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
+- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir ve odağı aynı hücrede bırakır. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır: odaklı kartta Enter ve Space kartın sağ tık menüsünü açar, kısayol ekranının dediği gibi. 2026-09-26'ya kadar dersi sessizce havuza gönderiyorlardı. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
+- **Klavyeyle taşıma** (2026-11-15): havuz kartında Enter, Space ya da T, ızgaradaki kartta T ya da menünün `Taşı`'sı kartı alır. Aynı sürükleme, aynı harita ve aynı boyama (`drag.ts` `startKeys`), yalnız el farklı: ← → hedefi bir saat, Ctrl+← → bırakılabilecek bir sonraki saate, ↑ ↓ komşu güne götürür, Enter bırakır, Esc ve Tab vazgeçer. Gerekçe çubuğu cümlenin önüne yeri yazar ("Salı 3. saat: …"). Odak alındığı yerde kalır; ızgaradan taşınan kart bırakılınca yeni yerinde odaklanır, havuzdan gelen bir sonraki kart için havuzda kalır.
+- **Izgara tek Tab durağı** (`gridKeys.ts`, `roving.ts`): durak `.grid-wrap`'in kendisi, Tab gelince odağı son ya da ilk hücreye verir. Oklar hücreden hücreye (satır başı ilk saatin solunda), Home ve End satırın ucuna, Ctrl ile ilk ya da son satıra, PageUp ve PageDown on satır. Kartlar, raptiyeler ve satır başı düğmeleri `tabIndex=-1`; raptiyenin tuşu P. Boş hücre ancak odak alınca odaklanabilir olur ve ad alır ("Salı 3. saat, MÇ, boş"), yoksa iki bin hücre her satır çiziminde öder.
 - Sürüklerken hedef satırın tamamı zayıf bir katmanla, imlecin altındaki blok güçlü bir katmanla boyanır: yeşil bırakılabilir, sarı uyarı ya da bir şey kaybedilecek, kırmızı engel. Hedefin dışındaki görünür alan iki düz gölgeleme düzlemiyle karartılır. Reddin sebebi sabit yükseklikli bir satırda yazılır (`.reason-bar`).
 - Başka bir kartın üstüne bırakmak takas edebilir, sınıfın kendi dersinin üstüne bırakmak onu havuza döndürebilir. Kuralları [DATA.md](DATA.md)'de.
 - Hedef ekran dışındaysa ızgara kenara gelince kayar.
@@ -172,7 +175,7 @@ Menünün şekli bir kural: üst düzeyde elin sık uzandığı şey, kapıları
 nadir olan.
 
 ```
-Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
+Taşı · Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
 ────
 Dersi buraya sabitle  (ya da Sabitlemeyi kaldır)
 Toplu sabitle   ▸  Satırı · Sütunu · Günü
@@ -187,7 +190,7 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 ### Sabitleme
 
 - Kartın köşesinde bir raptiye düğmesi var. Kartın kardeşi, çocuğu değil, çünkü kart bir `<button>` ve düğme içinde düğme geçersiz HTML, ve konumlanma bağlamı hücre. Bu yüzden sağ tık menüsü (`openMenu`) hedefini karttan değil hücreden bulur.
-- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, 2026-09-25'te kullanıcı "dururken görünmez"i seçti ([DECISIONS.md](DECISIONS.md)).
+- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. Bir Tab durağı değil: klavyede odaklı kartta P, ya da menünün kalemi. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, 2026-09-25'te kullanıcı "dururken görünmez"i seçti ([DECISIONS.md](DECISIONS.md)).
 - Sabitli olduğunu bir renk değil bir simge söyler, çünkü ızgaranın renkleri zaten bırakılabilir, uyarı, engel ve kapalı demek.
 - Sabitlenmiş kart sürüklenmez ve Delete'e cevap vermez, "Havuza kaldır" kapalıdır, `Baştan diz` ve `Programı boşalt` onu yerinde bırakır. Kuralları DATA.md'de.
 
