@@ -49,6 +49,7 @@ export function settingsStrip({
               key={s.id}
               className={step === undefined ? 'btn' : 'btn step'}
               aria-pressed={s.id === ui.section}
+              data-empty={step === undefined ? undefined : step.count(state) === 0}
               onClick={() => ui.setSection(s.id)}
             >
               {step === undefined ? (

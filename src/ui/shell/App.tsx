@@ -157,8 +157,13 @@ export default function App() {
         setPeople(place.tab, place.people);
       if (place.focus !== undefined) setLessonFocus(place.focus);
       setTab(place.tab);
-      if (place.problems !== undefined)
-        setProblems({ lesson: place.problems === true ? null : place.problems });
+      // Going anywhere else closes the list: its own buttons (an empty plan's
+      // "Öğretmen ekle") lead out of it.
+      setProblems(
+        place.problems === undefined
+          ? null
+          : { lesson: place.problems === true ? null : place.problems },
+      );
     },
     [setSection, setPeople, setLessonFocus, setTab],
   );
