@@ -30,6 +30,7 @@ import {
   hourLabels,
   lessonSubject,
   setTeacherLimit,
+  setWholeWeek,
   shortDay,
   subjectKey,
   subjectLabel,
@@ -49,13 +50,17 @@ import {
   useDialogs,
   useKeepBefore,
   useReturnFocus,
+  useGoTo,
   useT,
   useToast,
   useUndoIf,
 } from '../common';
 import { PrintOne, SendTeacher } from '../print';
+import { DayDialog } from '../dated';
+import { addAway, coverCount, isAway } from '../../pure/dated';
+import { dayStamp } from '../../leaf/app';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Printer, Trash2, X } from 'lucide-react';
+import { CalendarX, Printer, Trash2, X } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { GENDERS, NewClass, NewTeacher } from './NewPerson';
 import { KIND_ICON } from './steps';
@@ -93,9 +98,13 @@ export function Inspector({
   const returnFocus = useReturnFocus(target !== null);
   const { confirm } = useDialogs();
   const toast = useToast();
+  const goTo = useGoTo();
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const [printing, setPrinting] = useState(false);
+  /** "Gelmiyor…": the date page, this person away on it. */
+  const [awayOn, setAwayOn] = useState<string | null>(null);
+  const [made, setMade] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const emailBox = useRef<HTMLInputElement>(null);
   // Where the keyboard goes after Sil: the next person's name in the list,
@@ -206,6 +215,7 @@ export function Inspector({
     setShown(target);
     setWeekOpen(null);
     setPrinting(false);
+    setAwayOn(null);
   }
   const week = useMemo(
     () => (target !== null && target.id !== '' ? entityWeek(state, target.kind, target.id) : null),
@@ -473,7 +483,11 @@ export function Inspector({
         >
           {target.kind === 'teacher'
             ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
-            : t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')}
+            : target.kind === 'class'
+              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
+              : t(
+                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+                )}
         </p>
         <AvailGrid
           key={target.id}
@@ -488,6 +502,17 @@ export function Inspector({
               : t('{kim} · kapalı saatler', { kim: view.facts.name })
           }
         />
+        {/* Müsaitlik's two whole-week buttons came here with its grid (K1,
+            2026-11-16): somebody who comes one day a week is closed in two
+            clicks, not seventy. */}
+        <div className="form-row">
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, false))}>
+            {t('Bütün haftayı aç')}
+          </button>
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, true))}>
+            {t('Bütün haftayı kapat')}
+          </button>
+        </div>
         {stranded > 0 && (
           <div className="warn-box">
             {t('Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.', {
@@ -506,11 +531,37 @@ export function Inspector({
             <h3 className="sheet-h">
               {target.kind === 'teacher' ? t('Verdiği dersler') : t('Aldığı dersler')}
             </h3>
-            {lessons.length === 0 ? (
-              <p className="hint">
-                <T k="Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin." />
-              </p>
-            ) : (
+            {/* Where this person's lessons are ENTERED: the lesson form of
+                its tab, open on this person (K1). Closing the page first,
+                because the form is under it. */}
+            <p>
+              <button
+                className="btn"
+                onClick={() => {
+                  onClose();
+                  goTo({
+                    tab: target.kind === 'teacher' ? 'teachers' : 'classes',
+                    people: 'lessons',
+                    focus: target.id,
+                  });
+                  // The name that opened this page is gone with the list, so
+                  // the keyboard goes where the work now is: the form's first
+                  // box. After the sheet's own close has run.
+                  requestAnimationFrame(() =>
+                    requestAnimationFrame(() =>
+                      document
+                        .querySelector<HTMLElement>(
+                          'main .add-panel select:not(:disabled), main .add-panel input:not(:disabled)',
+                        )
+                        ?.focus(),
+                    ),
+                  );
+                }}
+              >
+                {t('Ders gir')}
+              </button>
+            </p>
+            {lessons.length > 0 && (
               <table className="sheet-lessons">
                 <tbody>
                   {lessons.map((x) => {
@@ -693,6 +744,7 @@ export function Inspector({
     );
   }
 
+  const covers = coverCount(state, target?.id ?? '', dayStamp(new Date()));
   const fresh = target !== null && target.id === '';
   const missing = target !== null && !fresh && view === null;
   const printable = target !== null && !fresh && !missing && target.kind !== 'room';
@@ -757,6 +809,19 @@ export function Inspector({
                       <Printer size={16} strokeWidth={2} aria-hidden="true" />
                       {t('Yazdır')}
                     </button>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const today = dayStamp(new Date());
+                        // Only an absence made here moves with the page's date.
+                        setMade(!isAway(state, target.id, today));
+                        change((d) => addAway(d, target.id, today));
+                        setAwayOn(today);
+                      }}
+                    >
+                      <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
+                      {t('Gelmiyor…')}
+                    </button>
                     {teacherOf !== undefined && (
                       <SendTeacher
                         key={teacherOf.id}
@@ -765,6 +830,11 @@ export function Inspector({
                         onMissing={() => emailBox.current?.focus()}
                       />
                     )}
+                    {teacherOf !== undefined && covers[0] > 0 && (
+                      <span className="sheet-said hint">
+                        {t('İkame: bu hafta {m}, toplam {n} saat', { m: covers[1], n: covers[0] })}
+                      </span>
+                    )}
                   </div>
                 )}
                 <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
@@ -772,6 +842,14 @@ export function Inspector({
                 </Dialog.Close>
               </div>
               {body(target)}
+              <DayDialog
+                state={state}
+                change={change}
+                date={awayOn}
+                setDate={setAwayOn}
+                person={made ? target.id : undefined}
+                onClose={() => setAwayOn(null)}
+              />
               {printing && printable && (
                 <PrintOne
                   state={state}

@@ -5,7 +5,7 @@ import { type ClassGroup, type Id, type State, type Teacher, paletteColor } from
 import { useMemo } from 'react';
 import { weeklyLoad } from '../../pure/entities';
 import { buildCapacity } from '../../pure/feasibility';
-import { GoButton, T, useT } from '../common';
+import { GoButton, useT } from '../common';
 import { KIND_ICON } from '../program';
 
 interface Props {
@@ -14,10 +14,9 @@ interface Props {
   picking: Array<Teacher | ClassGroup>;
   focused: Teacher | ClassGroup | undefined;
   setFocus: (next: Id) => void;
-  modeNoun: string;
 }
 
-export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun }: Props) {
+export function LessonPicker({ state, mode, picking, focused, setFocus }: Props) {
   const t = useT();
   // A row whose hours do not fit its week is red here, beside the form that
   // filled it: the same numbers as Okul → Özet and Kontrol (`buildCapacity`).
@@ -86,11 +85,11 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, modeNoun
       </div>
       {picking.length === 0 && (
         <p className="hint">
-          <T k="Henüz {ne} yok. **Okul** sekmesinden ekleyin." vars={{ ne: t(modeNoun) }} />{' '}
+          {mode === 'teacher' ? t('Henüz öğretmen yok.') : t('Henüz sınıf yok.')}{' '}
           {mode === 'teacher' ? (
-            <GoButton to={{ tab: 'setup', step: 'teachers' }}>{t('Öğretmen ekle')}</GoButton>
+            <GoButton to={{ tab: 'teachers', people: 'list' }}>{t('Öğretmen ekle')}</GoButton>
           ) : (
-            <GoButton to={{ tab: 'setup', step: 'classes' }}>{t('Sınıf ekle')}</GoButton>
+            <GoButton to={{ tab: 'classes', people: 'list' }}>{t('Sınıf ekle')}</GoButton>
           )}
         </p>
       )}

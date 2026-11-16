@@ -34,7 +34,10 @@ test.describe('93. Kapanırken bekleyen kayıt', () => {
     // throws (CI, 2026-10-09). Nothing is due in that second.
     await page.clock.pauseAt(now + 1_000);
 
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Kapanış1');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();

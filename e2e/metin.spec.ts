@@ -21,12 +21,20 @@
 // keep their dashes.
 
 import { expect, test } from './kapan';
-import { openSettings, openWithSample } from './helpers';
+import {
+  goTab,
+  openLessons,
+  openProblems,
+  openSettings,
+  openSetup,
+  openWithSample,
+} from './helpers';
 
-const SEKMELER = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
+// The five tasks of K1 (2026-11-16), every list and section in them, the
+// three ways round the lessons, and the problem list the chip opens.
+const SEKMELER = ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri'];
 const ADIMLAR = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar'];
-// Dersler is a tab now, and its three modes draw three different screens.
-const DERS_MODLARI = ['Sınıftan', 'Öğretmenden', 'Genel'];
+const DERS_MODLARI = ['class', 'teacher', 'all'] as const;
 const BOLUMLER = ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında'];
 
 test.describe('80. Ekranda okunan metin', () => {
@@ -44,28 +52,24 @@ test.describe('80. Ekranda okunan metin', () => {
     };
 
     for (const sekme of SEKMELER) {
-      await page.getByRole('button', { name: sekme, exact: true }).click();
+      await goTab(page, sekme);
       await bak(sekme);
-
-      if (sekme === 'Okul') {
-        for (const adim of ADIMLAR) {
-          await page.locator('.ribbon .step', { hasText: adim }).click();
-          await bak(`Okul → ${adim}`);
-        }
-      }
-      if (sekme === 'Dersler') {
-        for (const mod of DERS_MODLARI) {
-          await page.getByRole('button', { name: mod, exact: true }).click();
-          await bak(`Dersler → ${mod}`);
-        }
-      }
-      if (sekme === 'Ayarlar') {
-        for (const bolum of BOLUMLER) {
-          await openSettings(page, bolum);
-          await bak(`Ayarlar → ${bolum}`);
-        }
-      }
     }
+    for (const adim of ADIMLAR) {
+      await openSetup(page, adim);
+      await bak(`Liste → ${adim}`);
+    }
+    for (const mod of DERS_MODLARI) {
+      await openLessons(page, mod);
+      await bak(`Dersler → ${mod}`);
+    }
+    for (const bolum of BOLUMLER) {
+      await openSettings(page, bolum);
+      await bak(`Okul bilgileri → ${bolum}`);
+    }
+    await openProblems(page);
+    await bak('Sorun listesi');
+    await page.keyboard.press('Escape');
 
     const tekil = [...new Set(bulunan)];
     expect(tekil, `uzun çizgi taşıyan ${tekil.length} satır:\n${tekil.join('\n')}`).toEqual([]);
@@ -106,28 +110,24 @@ test.describe('80. Ekranda okunan metin', () => {
     };
 
     for (const sekme of SEKMELER) {
-      await page.getByRole('button', { name: sekme, exact: true }).click();
+      await goTab(page, sekme);
       await bak(sekme);
-
-      if (sekme === 'Okul') {
-        for (const adim of ADIMLAR) {
-          await page.locator('.ribbon .step', { hasText: adim }).click();
-          await bak(`Okul → ${adim}`);
-        }
-      }
-      if (sekme === 'Dersler') {
-        for (const mod of DERS_MODLARI) {
-          await page.getByRole('button', { name: mod, exact: true }).click();
-          await bak(`Dersler → ${mod}`);
-        }
-      }
-      if (sekme === 'Ayarlar') {
-        for (const bolum of BOLUMLER) {
-          await openSettings(page, bolum);
-          await bak(`Ayarlar → ${bolum}`);
-        }
-      }
     }
+    for (const adim of ADIMLAR) {
+      await openSetup(page, adim);
+      await bak(`Liste → ${adim}`);
+    }
+    for (const mod of DERS_MODLARI) {
+      await openLessons(page, mod);
+      await bak(`Dersler → ${mod}`);
+    }
+    for (const bolum of BOLUMLER) {
+      await openSettings(page, bolum);
+      await bak(`Okul bilgileri → ${bolum}`);
+    }
+    await openProblems(page);
+    await bak('Sorun listesi');
+    await page.keyboard.press('Escape');
 
     const tekil = [...new Set(uzun)];
     expect(
@@ -148,15 +148,20 @@ test.describe('80. Ekranda okunan metin', () => {
     // gösterme orada"). The separator is unaffected by that and still has to
     // be defended, so it is asserted where it still belongs — a row that says
     // BOTH things needs the dot between them.
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    // The subject in brackets is the SHORT form now (asked for 2026-08-29:
-    // "öğretmenler listelerde branşlarda kısaltmalar"). What this test defends
-    // is the dot, not the length of what stands either side of it.
-    await expect(page.getByText('MÇ · Mehmet Çelik (Mat)').first()).toBeVisible();
+    // Müsaitlik's list went with K1 (2026-11-16); Ctrl+K names a teacher the
+    // same way. What this test defends is the dot, not the length of what
+    // stands either side of it.
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('Mehmet');
+    await expect(page.locator('.palette').getByText('MÇ · Mehmet Çelik').first()).toBeVisible();
+    await page.keyboard.press('Escape');
 
     // And the empty cell still says "there is nothing here" rather than
     // looking like a rendering fault.
-    await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.ribbon .btn', { hasText: 'Kurallar' }).first().click();
     await expect(page.locator('table td.num', { hasText: /^–$/ }).first()).toBeVisible();
   });

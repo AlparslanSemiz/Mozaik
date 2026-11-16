@@ -36,6 +36,106 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · İkame ve hafta istisnası: taban haftanın üstünde tarihli bir katman (`ozellik/ikame`, şema v18)
+
+**Karar (Alp'in önceliği "İkame ve hafta istisnası").** Taban hafta saf kalır: tarihli her
+değişiklik `State.dated`'da, iki listede durur. `absent` bir öğretmenin ya da sınıfın bir tarih
+aralığında gelmediğini, `covers` o tarihte bir sınıfın bir saatine kimin girdiğini (ya da
+`null`, "boş geçsin") söyler. Izgara, havuz, Kontrol, kâğıt ve çözücü onu okumaz; bir tarih
+geçince kayıt bir şey değiştirmez (kendiliğinden biter) ama silinmez, çünkü ikameler öğretmenin
+adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
+
+- **Hafta istisnası.** Gezi ya da sınav haftası bir sınıfın o günlerde gelmemesi: dersleri ikame
+  istemez, öğretmenleri boş sayılır. Tek bir ders de yalnız o tarih boş geçer ya da aynı günün
+  boş bir saatine taşınır (`Cover.to`, koordinatörün kararı, aynı v18); taşıma başka güne değil,
+  çünkü o tarihin sayfası tek günün sayfası ve hedef saati sınıfı ve öğretmeni boş olan saatler.
+  Izgara o haftayı önerinin önizlemesiyle aynı yoldan, salt okunur ve işaretli çizer;
+  düzenlenen hep temel hafta (`Temel haftaya dön`).
+- **Öneri sırası:** o saatte ders vermeyen, başka bir saate ikame girmemiş, kendi saatlerinde
+  müsait ve o gün gelmeyen olmayan öğretmenler; önce aynı branş (birinci ya da ikinci), sonra bu
+  hafta en az ikameye girmiş, sonra o gün zaten okulda olan. Seçim babanındır; Mozaik kimseyi
+  kendiliğinden atamaz.
+- **Girişler:** kişi sayfasında `Gelmiyor…` (bugün, sayfadaki tarih değişince tek günlük yokluk
+  o güne taşınır) ve Program şeridinde tek bir tarih çipi (`Bugün kim yok?`, bu hafta değişiklik
+  varsa `Bu hafta: 18–22 Kasım, 3 değişiklik`). Tarih sayfasının tek ana düğmesi `Yazdır`
+  (İkame listesi). Yerleri yeni dosyalarda (`ui/dated/`), aşama 3B'nin sekmelerine ve şeridine
+  dokunmadan: çip Program şeridine tek satırla giriyor, 3B onu yeni şeride taşır.
+- **Şema v18, ve eski kopya.** Alan sürüm artırılmadan eklenseydi eski kopya dosyayı açar ve ilk
+  kayıtta alanı silerdi; artırıldığı için eski kopya "daha yeni bir sürüm" der ve dokunmaz.
+- **Bırakılan:** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı ve bütçe yüzünden
+  çıkarıldı (koordinatör: şimdilik yok); dersi ızgarada sürükleyerek taşımak yok, taşıma tarih
+  sayfasının seçicisinden.
+- **Gönderme:** İkame listesi bugün yalnız basılıyor (Yazdır'dan PDF de). WhatsApp ve e-posta
+  "gönder" işiyle (aşama 4).
+### 2026-11-16 · Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan (Sadeleşme aşama 3B, K1–K3)
+
+**Değişen (K1).** Yedi yer yerine beş iş, bu sırayla ve Alt+1..5: **Program · Öğretmenler ·
+Sınıflar · Yazdır ve gönder · Okul bilgileri**. Eski sekmelerin içeriğinin gittiği yer LAYOUT
+"Sekmeler"de tablo olarak. Kısaca: Okul'un dört listesinden Öğretmenler ve Sınıflar kendi
+sekmesi, Derslikler ve Branşlar Okul bilgileri'nin bölümü; Dersler iki kapıdan, Öğretmenler ve
+Sınıflar şeritlerinin `Dersler` düğmesi (o kişinin ders formu ve listesi), genel liste ikisinin
+Daha fazla'sında (`Bütün dersler tek listede`), kişi sayfasında da `Ders gir`; Ayarlar'ın beş
+bölümü ve iki liste Okul bilgileri'nde tek şeritte (`Zil ve günler · Derslikler · Branşlar ·
+Kurallar · Görünüm`, Planlar ve yedek ile Hakkında Daha fazla'da). Başlarken Okul bilgileri'nin
+okul verisi bölümlerinin başında; boş plan oraya açılır. **Gerekçe.** Babanın "neyin nerede
+olduğunu anlayamıyorum"u: sekmeler bir işi değil bir veri türünü adlandırıyordu, ve bir öğretmenin
+işi dört sekmeye dağılıyordu.
+
+- **Müsaitlik sekmesi kalktı**, kişi sayfasına katlandı (aşama 2'den beri ızgara orada). Okul
+  geneli bir düzenleme yolu **bırakılmadı**: saatler kişi kişi girilir ve listeden sayfaya bir
+  tıklama; gerçek bir "herkesi birden düzenle" işi bulunmadı. Sekmenin iki kısayolu, `Bütün
+  haftayı aç` ve `Bütün haftayı kapat`, kişi sayfasına geldi. "Haftanın darlığı" ısı tablosu
+  kalktı: yalnız okunan bir özetti; takılmanın sebebini sorun listesi kişinin adıyla söylüyor ve
+  yük tabloları orada. Saatleri gösterme tercihi (`ders-programi-musaitlik-saat`) kalktı: kişi
+  sayfası saatleri hep gösteriyor; eski bir değer okunmuyor, Veriler nerede'de tarihsel satır.
+- **Sekme kimlikleri saklanmıyor**: açılış veriye göre seçiliyor (ders varsa Program, yoksa Okul
+  bilgileri). Taşınacak kayıtlı bir sekme yok; eski yedi kimliğin yeni yeri `toolState.ts`'teki
+  `OLD_TAB`'ta.
+
+**Değişen (K2).** Program → Daha fazla → `Bu programın kopyası` yeni bir **plan** açar (açık
+planın verisi ve haftası) ve üst çubuğun plan seçicisi onunla görünür. Seçenek menüsü (seçim,
+kopya, boş seçenek, yeniden adlandır, sil) ve şeritteki `Seçenek` okuması kalktı; ekranda yalnız
+"plan" var. Veri modeli değişmedi (`programs[]`). Birden çok seçenek taşıyan eski bir dosya
+açılır: her seçeneği üst çubuk seçicisinde planın adının altında bir satır ("Plan 1 · Seçenek
+2"); açık olan Daha fazla'da `Ayrı plan yap` ile kendi adını taşıyan bir plan olur (bir kopya,
+eskisi yerinde kalır; sonra her plan gibi Planlar ve yedek'te adlandırılır) ya da silinir. **Bilerek kabul edilen.** Kopya ayrı bir plan olduğu için
+sonradan eklenen bir öğretmen öbürüne geçmez; iki dizilişi karşılaştırmak veri girildikten sonra
+yapılan bir iş.
+
+**Değişen (K3).** Kontrol sekmesi kalktı. Durum çipi sorun listesini açar (sağdan bir sayfa,
+`ProblemList.tsx`): hüküm, haftanın sayıları, kapalı saatte kalan dersler, kural ihlalleri,
+yerleşemeyen dersler, İpuçları, ve Daha fazla'da üç yük tablosu; satırların `Göster`'i listeyi
+kapatıp Program'da gösterir, `Müsaitlik'te aç` `Sayfasını aç` oldu. Havuzdaki dersin sağ tık
+menüsünün başında `Neden yerleşmedi?` listeyi o dersin satırında açar (sebep ve kimin sayfası),
+ızgaranın satırındaki "Ayrıntı: Kontrol sekmesi." yazısı `Ayrıntı` düğmesi oldu.
+
+**Ters çevirdikleri.** LAYOUT "Sekmeler" (yedi sekme, "Okul yalnız listeleri, Ayarlar yalnız
+ayarları tutar"), "Durum çipi … Kontrol'e götürür", LAYOUT "Kontrol" ve "Müsaitlik" bölümleri,
+Program şeridinin `Seçenek` grubu; DECISIONS 2026-08-27 "Dersler kendi sekmesi", 2026-08-28 "İki
+sekme ve bir bölüm yeniden adlandırıldı" ve "Branşlar Okul'a, Ayarlar beş bölüm" (üçü silindi,
+bu dosyanın kuralı; Branşlar'ın gerekçesi, öğretmen listeden branş seçer, bölüm sırasında
+yaşıyor).
+
+### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
+
+- **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama
+  saydamdır (`data-fitting`, `opacity: 0`), `gridFit` iki tabanını ilk boyamadan sonraki karede
+  yazar ve saydamlığı kaldırır (~2 kare). Kabuk
+  ve havuz önce, ızgara ~2 kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
+  Son hâl (taban, sütunlar, tablo genişliği, çekmece boyu) iki derlemede aynı, 1920 ve 1366'da
+  ölçüldü. Her Grid bağlanışında böyle (açılıştan başka bir yeniden bağlanış da tabloyu ~2 kare
+  boş gösterir; önceden bir kare tabansız çiziyordu). Gerekçe: aynı iki yazı ilk karede ~270 ms, ilk boyamadan sonra ~35 ms (4× CPU, tuzak 221).
+- **Ayrıca.** İki taban arka arkaya okunup sonra yazılıyor (araya yazı girince tablo bir kez daha
+  yerleşiyordu); Plex açılışta isteniyor (tuzak 220); ilk React çizimi `startTransition` içinde.
+- **Denendi, bırakıldı.** (1) `@property … inherits: false` ile `--cell-min`/`--head-min`: stil
+  geçişi kısalmadı, çünkü onlardan türeyen `--cell-w` miras kalıyor. (2) Çekmecenin `fit`'ini
+  rAF'a almak: ilk yerleşim ilk kareye kayıyor ve ikinci yerleşimle aynı göreve düşüyor, en uzun
+  görev büyüyor. (3) Tabanları depoda saklayıp ilk yerleşimden önce yazmak: ikinci yerleşimi
+  tümden kaldırırdı, ama yeni bir depolama anahtarı (Veriler nerede satırı, dört dilde etiket)
+  ister ve CI'ın taze profilli ölçümü onu hiç göremez; açık soru olarak WORKLOG'da.
+
+---
+
 ### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
 
 - **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",
@@ -156,13 +256,13 @@ bir ana düğme, az kullanılan her şey her ekranda aynı köşedeki tek bir "D
   bugünkü yedi sekmenin (Okul, Müsaitlik, Dersler, Program, Kontrol, Çıktı, Ayarlar) yerine.
   Ters çevirdiği: LAYOUT "Sekmeler" (yedi sekme, "Okul yalnız listeleri, Ayarlar yalnız ayarları
   tutar"), DECISIONS 2026-08-27 "Dersler kendi sekmesi", 2026-08-28 "İki sekme ve bir bölüm yeniden
-  adlandırıldı". Aşama 3.
+  adlandırıldı". Aşama 3B'de yapıldı (yukarıdaki kayıt).
 - **K2 · Plan ve Seçenek tek kavram:** gündelik ekranda yalnız "plan"; ikinci diziliş "Bu programın
   kopyası" ile açılır ve ancak o zaman görünür. Ters çevirdiği: TODO SD3'ün terim haritasındaki
-  ayrı **seçenek** kavramı, LAYOUT "Program" şeridinin `Seçenek` grubu. Aşama 3.
+  ayrı **seçenek** kavramı, LAYOUT "Program" şeridinin `Seçenek` grubu. Aşama 3B'de yapıldı.
 - **K3 · Kontrol sekmesi kalkar:** sorunlar durum çipinin açtığı listede, yerleşmeyen derse
   tıklayınca neden ve çözüm. Ters çevirdiği: LAYOUT "Kontrol" ve "Durum çipi … Kontrol'e götürür".
-  Aşama 3.
+  Aşama 3B'de yapıldı.
 - **K4a · Yeni adlar:** "Otomatik diz (N kart)" → "Programı yap", "Baştan diz" → "Yeniden yap",
   "Danışman" → "İpuçları", kural seviyesi "Engel / Uyarı" → "Kesin / Tercih", "N saat havuzda" →
   "N saat yerleşmedi". **K4b · ekranda "kart" yerine "ders"**: iç adlar, veri ve dosya adları
@@ -2276,27 +2376,6 @@ seçiliyor, değilse İngilizce (commit `a1f3c1a`). **Gerekçe.** Beş sözlük
 tamamlanınca yedek, en çok kişinin okuyabildiği dil oldu. E2E süiti `kapan.ts`'te
 Türkçeye sabitli.
 
-### 2026-08-28 · İki sekme ve bir bölüm yeniden adlandırıldı
-
-**Değişen.** `Kurulum` sekmesi `Okul`, `Yazdır` sekmesi `Çıktı`, Ayarlar'ın
-`Okul ve zil` bölümü `Zil ve günler` oldu. **Gerekçe.** İlk sekme okulun dört listesini
-tutuyor, bir kurulum değil. `Yazdır` adlar arasındaki tek fiildi. Üçüncüsü zorunluydu: bir
-düğme adı üç piksel ötedeki sekmenin adını taşıyamıyor (tuzak 49 ve 74).
-
-### 2026-08-28 · Branşlar Okul'a, Ayarlar beş bölüm
-
-**Değişen.** Branşlar Ayarlar'dan Okul'un dört listesinden biri oldu. Ayarlar beş
-bölüme indi: `Zil ve günler · Kurallar · Görünüm · Planlar ve yedek · Hakkında`.
-Okul listelerinin önündeki sıra numaraları kalktı. Yeni bir proje boş branş
-listesiyle doğuyor, gömülü branşlar bir teklif panelinde duruyor. "Kurulum durumu"
-paneli silindi. **Gerekçe.** Branş eklemek, yarısı yazılmış bir öğretmeni bırakıp
-bir sekme öteye gitmek demekti. Liste sırası bağımlılık zinciri: sınıf bir dersliği
-gösterir, öğretmen listeden branş seçer. Sıra numaraları kimsenin saymadığı bir
-sırayı sayıyordu, çünkü her liste her an açık (kullanıcı isteği). Tohumlanmış
-branş listesinde teklif paneli her yeni projede boştu, yani işe yaradığı tek ekranda
-işe yaramıyordu. `Program hakkında` adı alınmadı, çünkü `Program` sorgusuna da cevap
-verirdi.
-
 ### 2026-08-28 · Denendi: Kontrol şeridinde süzgeç
 
 **Denenen.** 2026-08-27'de Kontrol'e şerit gelince şerit raporu süzüyordu:
@@ -2346,16 +2425,10 @@ ağaç istenen vakaların yarısını çözer ve branş listesine ikinci bir ver
 sokardı. Branşın adı değil bayrak saklanıyor, çünkü ad öğretmenin branşı
 düzeltilince sessizce saparak ikinci bir gerçek olurdu.
 
-### 2026-08-27 · Dersler kendi sekmesi
+### 2026-08-27 · Şerit her sekmede ve bir standardı var
 
-**Değişen.** Dersler Kurulum'un dördüncü adımından çıkıp yedinci sekme oldu.
-**Gerekçe.** Kullanıcı: *"hocaları onu bunu ayarlıyorsun ama ders en önemli kısım"*.
-En çok kullanılan ekrana bir sihirbazın dördüncü adımından geçilerek varılmıyor.
-
-### 2026-08-27 · Şerit yedi sekmede ve bir standardı var
-
-**Değişen.** Araç şeridi yedi sekmenin yedisinde çiziliyor ve beş maddelik bir
-şekli var ([LAYOUT.md](LAYOUT.md)). **Gerekçe.** Şekli olmayan bir şeyi hiçbir test
+**Değişen.** Araç şeridi her sekmede çiziliyor ve beş maddelik bir şekli var
+([LAYOUT.md](LAYOUT.md)). **Gerekçe.** Şekli olmayan bir şeyi hiçbir test
 koruyamaz. Kontrol okunan bir rapor ve ona yapılacak bir şey az, ama şeritsiz bir Kontrol
 ekranı zıplatır: şeridin yüksekliği sekmeyle gelip gittiği için
 Kontrol'e her girişte altındaki her şey 45 px zıplıyordu.

@@ -77,7 +77,7 @@ async function geometry(page: Page) {
 }
 
 async function go(page: Page, tab: string) {
-  await page.getByRole('button', { name: tab, exact: true }).click();
+  await page.locator('.tabstrip').getByRole('button', { name: tab, exact: true }).click();
   await expect(page.locator('.ribbon')).toBeVisible();
   await page.waitForTimeout(150);
 }
@@ -91,12 +91,11 @@ async function press(page: Page, index: number) {
   return name;
 }
 
-// Kontrol is not here and cannot be: its four buttons go somewhere, they do
-// not hold a position, so there is no `aria-pressed` on that strip at all.
-const TABS = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Çıktı', 'Ayarlar'] as const;
+// The problem list is not here: its head is in a dialog, not a strip (K3).
+const TABS = ['Öğretmenler', 'Sınıflar', 'Program', 'Yazdır ve gönder', 'Okul bilgileri'] as const;
 
 test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
-  test('altı şeritte de seçenekler arasında geçmek düğmeleri OYNATMIYOR', async ({ page }) => {
+  test('beş şeritte de seçenekler arasında geçmek düğmeleri OYNATMIYOR', async ({ page }) => {
     await openWithSample(page);
 
     for (const tab of TABS) {
@@ -133,7 +132,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     await page.setViewportSize({ width: 1920, height: 900 });
     await openWithSample(page);
 
-    await go(page, 'Ayarlar');
+    await go(page, 'Okul bilgileri');
 
     const section = async (name: string) => {
       await page.locator('.ribbon .btn', { hasText: name }).first().click();
@@ -146,7 +145,9 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
       return geometry(page);
     };
 
-    const fits = await section('Zil ve günler');
+    // Görünüm fits since K6 (no density panel); Kurallar's tables overflow.
+    // Zil ve günler carries Başlarken since K1, so it is not the short one.
+    const fits = await section('Görünüm');
     const overflows = await section('Kurallar');
 
     // TWO GUARDS BEFORE THE ASSERTION, and neither is optional.
@@ -157,7 +158,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     // take room: with `--hide-scrollbars` — the default every other spec in
     // this suite runs under — it takes none, and a bar of zero pixels can never
     // take any away.
-    expect(fits.overflowing, '"Zil ve günler" taşıyor — çift seçilmeli').toBe(false);
+    expect(fits.overflowing, '"Görünüm" taşıyor — çift seçilmeli').toBe(false);
     expect(overflows.overflowing, '"Kurallar" taşmıyor — çift seçilmeli').toBe(true);
     expect(
       overflows.gutter,

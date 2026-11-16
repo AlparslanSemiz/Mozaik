@@ -18,6 +18,7 @@ import {
   openWithSample,
   mainList,
   settledMotion,
+  openPerson,
 } from './helpers';
 
 const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');
@@ -118,9 +119,10 @@ test.describe('49. Liste araçları', () => {
 
     // Bir öğretmeni bütünüyle kapatmak örnekteki uygun öğretmenlerin yanına
     // kesin bir “İmkânsız” sınır örneği koyar.
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
     await openSetup(page, 'Öğretmenler');
+    const sheet = await openPerson(page, 0);
+    await sheet.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
+    await page.keyboard.press('Escape');
     await checkLoadFacet(page, await rows(page).count());
 
     // Yüksüz yeni kayıtlar “Boş” sınıfını görünür yapar. Diğer kayıtların

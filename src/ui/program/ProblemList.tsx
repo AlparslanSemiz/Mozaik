@@ -1,7 +1,18 @@
-// Feasibility check (v0.5). The answer to "why can this timetable not be built?"
-// This is the thing aSc does not do and that hurts most at the school.
+// The problem list: the answer to "why can this timetable not be built?",
+// opened by the status chip over whatever is on screen (Sadeleşme, K3,
+// 2026-11-16). This is the thing aSc does not do and that hurts most at the
+// school.
+//
+// It was the Kontrol TAB until then, and a tab is a destination: asking "am I
+// still all right?" meant leaving the grid. Everything that tab had is here,
+// and LAYOUT, "Sorun listesi" says where each part went: the verdict, the
+// week's numbers, lessons on a closed hour, rule breaches and unplaceable
+// lessons (each with Göster, and Sayfasını aç where a person's hours are the
+// cause), the İpuçları, and the three load tables behind Daha fazla.
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { Lightbulb, TriangleAlert, X } from 'lucide-react';
 import { CapacityRows } from '../lists';
 import { buildIndex, closedConflicts } from '../../pure/constraints';
 import {
@@ -9,6 +20,7 @@ import {
   type Cell,
   groupStranded,
   groupUnplaceable,
+  type health,
   lessonName,
   type ReportRow,
   sharedReport,
@@ -19,21 +31,28 @@ import type { Id, State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
 import { pinnedRelationBreaches } from '../../pure/constraints';
 import type { CheckView, ToolState } from '../../platform/prefs';
-import { NextStep, T, useT, useToast } from '../common';
+import { MoreMenu, MoreRadio, NextStep, T, useReturnFocus, useT, useToast } from '../common';
+import { useInspect } from './Inspector';
 import { revealCell, revealPoolCard } from './reveal';
 
 interface Props {
   state: State;
-  /** Which part of the report the strip has chosen. */
-  view: CheckView;
-  /**
-   * Where "Göster" and "Müsaitlik'te aç" go. Three audits found the same
-   * thing: Kontrol said what was wrong and gave nothing to click (2026-11-15).
-   */
-  ui: Pick<ToolState, 'setTab' | 'setKind' | 'setChosen' | 'setPoolFilter'>;
+  status: ReturnType<typeof health>;
+  /** Open, and on which lesson if a pool card's "Neden yerleşmedi?" asked. */
+  open: { lesson: Id | null } | null;
+  onClose: () => void;
+  /** Where "Göster" goes, and which part of the list is on screen. */
+  ui: Pick<ToolState, 'setTab' | 'setPoolFilter' | 'checkView' | 'setCheckView'>;
 }
 
-/** "Göster" and "Müsaitlik'te aç", side by side at the end of a row. */
+/** The three load tables. Behind Daha fazla: they are read about never. */
+const LOADS: Array<{ id: CheckView; label: string }> = [
+  { id: 'teachers', label: 'Öğretmen yükleri' },
+  { id: 'classes', label: 'Sınıf yükleri' },
+  { id: 'rooms', label: 'Derslik yükleri' },
+];
+
+/** "Göster" and "Sayfasını aç", side by side at the end of a row. */
 function RowActions({
   show,
   open,
@@ -41,7 +60,7 @@ function RowActions({
 }: {
   show?: (() => void) | undefined;
   open?: (() => void) | undefined;
-  /** Says WHOSE row opens, so two buttons in one row are not both "aç". */
+  /** Says WHOSE page opens, so two buttons in one row are not both "aç". */
   openLabel?: string | undefined;
 }) {
   const t = useT();
@@ -54,7 +73,7 @@ function RowActions({
       )}
       {open !== undefined && (
         <button type="button" className="btn" onClick={open} title={openLabel}>
-          {t("Müsaitlik'te aç")}
+          {t('Sayfasını aç')}
         </button>
       )}
     </td>
@@ -62,10 +81,10 @@ function RowActions({
 }
 
 /**
- * The Danışman's notes, one row per kind (DENETIM KS22, Ö38). On the full
- * course the same sentence stood five times with only the lesson's name
- * changing; now a kind that repeats is one sentence with the names under it,
- * and a kind that occurs once keeps its own full sentence.
+ * The İpuçları, one row per kind (DENETIM KS22, Ö38). On the full course the
+ * same sentence stood five times with only the lesson's name changing; now a
+ * kind that repeats is one sentence with the names under it, and a kind that
+ * occurs once keeps its own full sentence.
  */
 function adviceRows(advice: Advice[]): Advice[][] {
   const byCode = new Map<Advice['code'], Advice[]>();
@@ -89,16 +108,7 @@ const GROUPED: Record<Advice['code'], string> = {
     "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; Mozaik'in deneyebileceği tek şekil bu:",
 };
 
-/**
- * One capacity panel, drawn FULL WIDTH as the whole page.
- *
- * It used to be one of three stacked in a sticky right rail, reached by strip
- * buttons that called `scrollIntoView`. That rail is pinned to the top of the
- * scrollport and has its own `overflow-y`, so the page never moved and the
- * buttons did nothing — with no pressed state to say a choice had been made.
- * Now the strip chooses WHICH panel exists, so a click always changes the
- * screen and there is nothing left to scroll past.
- */
+/** One load table, the whole width of the list. */
 function Section({
   id,
   title,
@@ -132,11 +142,111 @@ function Section({
   );
 }
 
-export default function Check({ state, view, ui }: Props) {
+export default function ProblemList({ state, status, open, onClose, ui }: Props) {
+  const t = useT();
+  const returnFocus = useReturnFocus(open !== null);
+  // An action that takes the reader somewhere puts the focus there itself.
+  const leaving = useRef(false);
+  return (
+    <Dialog.Root open={open !== null} onOpenChange={(o) => !o && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dlg-overlay" />
+        <Dialog.Content
+          className="sheet problem-list"
+          aria-describedby={undefined}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            // Into the list, or onto the lesson a pool card asked about (its
+            // row is drawn by now; the Report marks it).
+            const box = e.currentTarget as HTMLElement | null;
+            const chip =
+              open?.lesson == null
+                ? null
+                : box?.querySelector<HTMLElement>(`[data-lesson="${CSS.escape(open.lesson)}"]`);
+            (chip ?? box)?.focus();
+          }}
+          onCloseAutoFocus={(e) => {
+            if (leaving.current) {
+              leaving.current = false;
+              e.preventDefault();
+              return;
+            }
+            returnFocus(e);
+          }}
+        >
+          <div className="sheet-head">
+            <div className="sheet-id">
+              <Dialog.Title className="sheet-title">{t('Programın durumu')}</Dialog.Title>
+            </div>
+            <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
+              <X size={18} strokeWidth={2.2} />
+            </Dialog.Close>
+          </div>
+          {/* Which part of the list, the way the strips say it: a segment
+              for the two everyday parts, the load tables behind Daha fazla. */}
+          <div className="form-row sheet-views" role="group" aria-label={t('Göster')}>
+            <button
+              className="btn"
+              aria-pressed={ui.checkView === 'problems'}
+              onClick={() => ui.setCheckView('problems')}
+            >
+              <TriangleAlert size={16} strokeWidth={2} aria-hidden="true" />
+              {t('Sorunlar ({n})', { n: status.problems })}
+            </button>
+            <button
+              className="btn"
+              aria-pressed={ui.checkView === 'advisor'}
+              onClick={() => ui.setCheckView('advisor')}
+            >
+              <Lightbulb size={16} strokeWidth={2} aria-hidden="true" />
+              {t('İpuçları ({n})', { n: status.advice })}
+            </button>
+            <MoreMenu>
+              <MoreRadio
+                value={LOADS.some((l) => l.id === ui.checkView) ? ui.checkView : ''}
+                onChange={(id) => ui.setCheckView(id as CheckView)}
+                options={LOADS.map((l) => ({ id: l.id, label: t(l.label) }))}
+              />
+            </MoreMenu>
+          </div>
+          {open !== null && (
+            <Report
+              state={state}
+              view={ui.checkView}
+              lesson={open.lesson}
+              leave={(go) => {
+                leaving.current = true;
+                onClose();
+                go();
+              }}
+              ui={ui}
+            />
+          )}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+function Report({
+  state,
+  view,
+  lesson,
+  leave,
+  ui,
+}: {
+  state: State;
+  view: CheckView;
+  lesson: Id | null;
+  /** Closes the list, then goes. */
+  leave: (go: () => void) => void;
+  ui: Props['ui'];
+}) {
   const t = useT();
   const notify = useToast();
-  // One index for the whole tab, and the report the health chip already built
-  // for this plan (`sharedReport`): opening Kontrol built both again.
+  const inspect = useInspect();
+  // One index for the whole list, and the report the health chip already built
+  // for this plan (`sharedReport`).
   const ix = useMemo(() => buildIndex(state), [state]);
   const report = useMemo(() => sharedReport(state, ix), [state, ix]);
   const conflicts = useMemo(() => closedConflicts(state, ix), [state, ix]);
@@ -161,59 +271,60 @@ export default function Check({ state, view, ui }: Props) {
     [report, state, ix],
   );
 
-  // The tab switch first, then the reveal: Program is kept alive in an
-  // Activity, so the kart exists and only has to become visible (reveal.ts).
-  const show = (cell: Cell) => {
-    ui.setTab('program');
-    revealCell([cell.classId, cell.teacherId], cell.day, cell.hour, (found) => {
-      if (!found) notify(t('Ders ızgarada görünmüyor; satırı gizli olabilir.'));
+  // A pool card asked "why": its lesson's button in the list takes the focus
+  // and the mark, next to the reason and the way out. A lesson that is merely
+  // not laid out yet has no row of its own; the week's line above says what
+  // to press.
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (lesson === null) return;
+    const chip = body.current?.querySelector<HTMLElement>(`[data-lesson="${CSS.escape(lesson)}"]`);
+    if (chip === null || chip === undefined) return;
+    chip.scrollIntoView({ block: 'center' });
+    chip.setAttribute('data-reveal', '');
+  }, [lesson]);
+
+  // Program stays alive in an Activity, so the card exists and only has to
+  // become visible (reveal.ts).
+  const show = (cell: Cell) =>
+    leave(() => {
+      ui.setTab('program');
+      revealCell([cell.classId, cell.teacherId], cell.day, cell.hour, (found) => {
+        if (!found) notify(t('Ders ızgarada görünmüyor; satırı gizli olabilir.'));
+      });
     });
-  };
-  const showInPool = (lessonId: Id) => {
-    // A pool narrowed to one subject would hide the very card asked for.
-    ui.setPoolFilter('');
-    ui.setTab('program');
-    revealPoolCard(lessonId, (found) => {
-      if (!found) notify(t('Ders havuzda görünmüyor; havuz kapalı olabilir.'));
+  const showInPool = (lessonId: Id) =>
+    leave(() => {
+      // A pool narrowed to one subject would hide the very card asked for.
+      ui.setPoolFilter('');
+      ui.setTab('program');
+      revealPoolCard(lessonId, (found) => {
+        if (!found) notify(t('Ders havuzda görünmüyor; havuz kapalı olabilir.'));
+      });
     });
-  };
-  const openAvailability = (who: Target) => {
-    ui.setKind(who.kind);
-    ui.setChosen(who.id);
-    ui.setTab('availability');
-  };
+  // The hours live on the person's page since K5; a room has one too.
+  const openPage = (who: Target) => leave(() => inspect(who.kind, who.id));
   const whoName = (who: Target): string =>
     who.kind === 'teacher'
-      ? (ix.teacherById.get(who.id)?.short ?? '?')
+      ? (ix.teacherById.get(who.id)?.name ?? '?')
       : who.kind === 'class'
         ? t('{ad} sınıfı', { ad: ix.classById.get(who.id)?.name ?? '?' })
         : t('{ad} dersliği', { ad: ix.roomById.get(who.id)?.name ?? '?' });
-  const openLabel = (who: Target) => t("{kim} için Müsaitlik'i açar", { kim: whoName(who) });
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
   ).length;
 
   if (state.lessons.length === 0) {
     return (
-      <>
-        <div className="empty-screen">
-          {/* The screen's heading, for a reader who moves by headings. */}
-          <h2 className="visually-hidden">{t('Kontrol')}</h2>
-          <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
-          <T k="Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
-          <NextStep state={state} />
-        </div>
-      </>
+      <div className="empty-screen">
+        <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
+        <NextStep state={state} />
+      </div>
     );
   }
 
   return (
-    // A READING WIDTH, and it is not decoration. Dropping the two-column layout
-    // gave every table the whole 1900 px, so "Yerleşmiş saat" and "433 / 433"
-    // ended up at opposite ends of the monitor with a metre of nothing between
-    // them — and the number wrapped. A report is read, not scanned; 68rem is
-    // about as wide as a four-column table can be and still be one object.
-    <div className="check-page">
+    <div className="check-page" ref={body}>
       {!report.hasProblem ? (
         <div className="panel">
           <div className="ok-box">
@@ -253,22 +364,9 @@ export default function Check({ state, view, ui }: Props) {
         </div>
       )}
 
-      {/* ONE VIEW AT A TIME, chosen by the strip.
-          It used to be two fixed columns with the three capacity panels in a
-          sticky right rail, and the strip's four buttons called
-          `scrollIntoView` at them. The rail is pinned to the top of the
-          scrollport and scrolls inside itself, so three of those four buttons
-          could not move anything; the fourth had ~9 % of a screen to travel.
-          Nothing was pressed, nothing moved, and nothing said so.
-
-          Choosing which panel EXISTS makes the click and the screen the same
-          event — and it takes the page from something you scroll to something
-          you read. */}
-      {/* Where the week stands. It is the question you come to this tab with
-          and the one it never answered: everything else here is about what
-          COULD go wrong, and this is what is actually done. */}
+      {/* Where the week stands: what is actually done, beside everything
+          else here that is about what COULD go wrong. */}
       <div className="panel">
-        <h2>{t('Programın durumu')}</h2>
         <table className="stat">
           <tbody>
             <tr>
@@ -301,7 +399,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-kapali">
               <h2>{t('Kapalı saatte ders ({n})', { n: stranded.length })}</h2>
               <p className="hint">
-                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Dersi açık bir saate sürükleyin ya da saati Müsaitlik'te açın." />
+                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Dersi açık bir saate sürükleyin ya da saati kişinin sayfasında açın." />
               </p>
               <table className="list">
                 <thead>
@@ -326,8 +424,8 @@ export default function Check({ state, view, ui }: Props) {
                         <td>{s.reason}</td>
                         <RowActions
                           show={() => show(first)}
-                          open={who === undefined ? undefined : () => openAvailability(who)}
-                          openLabel={who === undefined ? undefined : openLabel(who)}
+                          open={who === undefined ? undefined : () => openPage(who)}
+                          openLabel={who === undefined ? undefined : whoName(who)}
                         />
                       </tr>
                     );
@@ -340,11 +438,11 @@ export default function Check({ state, view, ui }: Props) {
           {report.violations.length > 0 && (
             <div className="panel kontrol-sorun">
               <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
-              {/* Two sources, two sentences: the limits live in Ayarlar →
-                  Kurallar, a relation on the lesson's own sheet (B5.3). */}
+              {/* Two sources, two sentences: the limits live in Okul bilgileri
+                  → Kurallar, a relation on the lesson's own sheet (B5.3). */}
               {report.violations.some((v) => v.rule !== 'notSameDay') && (
                 <p className="hint">
-                  <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
+                  <T k="Program, **Okul bilgileri → Kurallar**'da girdiğiniz sınırları aşıyor." />
                 </p>
               )}
               {report.violations.some((v) => v.rule === 'notSameDay') && (
@@ -395,7 +493,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-yerlesemeyen">
               <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
               <p className="hint">
-                <T k="Bu derslere konacak hücre kalmamış. Dersin adı onu havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir dersi taşıyın." />
+                <T k="Bu derslere konacak hücre kalmamış. Dersin adı onu havuzda gösterir; yer açmak için kişinin sayfasında saat açın ya da bir dersi taşıyın." />
               </p>
               <table className="list">
                 <thead>
@@ -415,6 +513,7 @@ export default function Check({ state, view, ui }: Props) {
                               key={u.lessonId}
                               type="button"
                               className="chip lesson-chip"
+                              data-lesson={u.lessonId}
                               onClick={() => showInPool(u.lessonId)}
                             >
                               {u.name}
@@ -426,8 +525,8 @@ export default function Check({ state, view, ui }: Props) {
                         </div>
                       </td>
                       <RowActions
-                        open={g.fix === null ? undefined : () => openAvailability(g.fix!)}
-                        openLabel={g.fix === null ? undefined : openLabel(g.fix)}
+                        open={g.fix === null ? undefined : () => openPage(g.fix!)}
+                        openLabel={g.fix === null ? undefined : whoName(g.fix)}
                       />
                     </tr>
                   ))}
@@ -447,10 +546,7 @@ export default function Check({ state, view, ui }: Props) {
       )}
 
       {/* aSc's "Danışman" (Advisor): data that will not BLOCK a build but is
-          worth a second look. Kept apart from the `problems` view above on
-          purpose — aSc's own strip carries "Doğrulama" and "Danışman" as two
-          separate buttons, and the "Sorun görünmüyor" box only answers the
-          first question. */}
+          worth a second look, apart from the problems on purpose. */}
       {view === 'advisor' && (
         <div className="panel">
           <h2>{t('İpuçları ({n})', { n: report.advice.length })}</h2>
@@ -460,40 +556,33 @@ export default function Check({ state, view, ui }: Props) {
           {report.advice.length === 0 ? (
             <p className="hint">{t('İpucu yok.')}</p>
           ) : (
-            // Bounded and scrolled in place — the pattern CapacityRows already
-            // uses (`.stat-scroll`): a list that grows with the school must not
-            // push the rest of the page down with it.
-            <div className="stat-scroll">
-              <table className="list">
-                <thead>
-                  <tr>
-                    <th className="w-col-lg">{t('Durum')}</th>
-                    <th>{t('Açıklama')}</th>
+            <table className="list">
+              <thead>
+                <tr>
+                  <th className="w-col-lg">{t('Durum')}</th>
+                  <th>{t('Açıklama')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adviceRows(report.advice).map((group) => (
+                  <tr key={group[0]!.key}>
+                    <td>
+                      <span className="badge tight">{t('Not')}</span>
+                    </td>
+                    <td>
+                      {group.length === 1 ? (
+                        group[0]!.message
+                      ) : (
+                        <>
+                          {t(GROUPED[group[0]!.code], { n: group.length })}{' '}
+                          <span className="hint inline">{group.map((a) => a.who).join(', ')}</span>
+                        </>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {adviceRows(report.advice).map((group) => (
-                    <tr key={group[0]!.key}>
-                      <td>
-                        <span className="badge tight">{t('Not')}</span>
-                      </td>
-                      <td>
-                        {group.length === 1 ? (
-                          group[0]!.message
-                        ) : (
-                          <>
-                            {t(GROUPED[group[0]!.code], { n: group.length })}{' '}
-                            <span className="hint inline">
-                              {group.map((a) => a.who).join(', ')}
-                            </span>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       )}

@@ -120,18 +120,24 @@ function click(el: Element) {
 }
 
 describe('uygulama açılıyor', () => {
-  it('veri yokken Okul sekmesiyle açılır ve yol gösterir', () => {
+  it('veri yokken Okul bilgileri sekmesiyle açılır ve yol gösterir', () => {
     render();
     expect(container.textContent).toContain('Başlarken');
     expect(container.textContent).toContain('Derslikler');
     expect(button('Örnek okulu yükle')).toBeTruthy();
   });
 
-  it('altı sekmenin hepsi hata vermeden çizilir', () => {
+  it('beş sekmenin hepsi hata vermeden çizilir', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
 
-    for (const label of ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar']) {
+    for (const label of [
+      'Program',
+      'Öğretmenler',
+      'Sınıflar',
+      'Yazdır ve gönder',
+      'Okul bilgileri',
+    ]) {
       click(button(label));
       expect(container.querySelector('.main')).not.toBeNull();
     }
@@ -211,17 +217,21 @@ describe('uygulama açılıyor', () => {
     expect(cards()).toHaveLength(span);
   });
 
-  it('Kontrol sekmesi sorun yoksa bunu açıkça söyler', () => {
+  // The Kontrol tab is the status chip's list since K3 (2026-11-16); the
+  // list is a dialog, drawn outside the app's own box.
+  it('durum çipinin listesi sorun yoksa bunu açıkça söyler', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
-    click(button('Kontrol'));
-    expect(container.textContent).toContain('Sorun görünmüyor');
+    click(button('Programın durumu'));
+    expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
+      'Sorun görünmüyor',
+    );
   });
 
-  it('Çıktı sekmesi her sınıf için bir sayfa üretir', () => {
+  it('Yazdır ve gönder sekmesi her sınıf için bir sayfa üretir', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
-    click(button('Çıktı'));
+    click(button('Yazdır ve gönder'));
     // The tab draws the first pages at once and the rest a frame at a time;
     // whatever has not arrived yet is drawn before the printer is asked.
     expect(container.querySelectorAll('.print-page').length).toBeGreaterThan(0);
@@ -258,13 +268,15 @@ describe('uygulama açılıyor', () => {
     expect(container.querySelectorAll('table.grid .card')).toHaveLength(1);
   });
 
-  it('Ayarlar sekmesinin bölümleri çiziliyor', () => {
+  it('Okul bilgileri sekmesinin bölümleri çiziliyor', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
-    click(button('Ayarlar'));
+    click(button('Okul bilgileri'));
 
     for (const [section, text] of [
       ['Zil ve günler', 'Zil ve günler'],
+      ['Derslikler', 'Yeni derslik'],
+      ['Branşlar', 'Yeni branş'],
       ['Kurallar', 'Öğretmen art arda'],
     ] as const) {
       click(button(section));
@@ -289,7 +301,7 @@ describe('uygulama açılıyor', () => {
     }
   });
 
-  it('Sıfırla üst çubukta değil, Ayarlar altında', () => {
+  it('Sıfırla üst çubukta değil, Okul bilgileri altında', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
     const topbar = container.querySelector('.topbar')!;

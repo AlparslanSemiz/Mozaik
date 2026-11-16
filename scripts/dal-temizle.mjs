@@ -8,12 +8,12 @@
 // decided in dal-plan.mjs; this file only gathers the inputs and acts.
 //
 // Nothing is deleted before it is kept somewhere else, in this order:
-//   1. one `git bundle` with every tip about to go, in ~/GitHub/Mozaikler/_arsiv/,
+//   1. one `git bundle` with every tip about to go, in ~/dev/Mozaik-arsiv/,
 //      and `git bundle verify` on it; a failed verify stops everything;
 //   2. a LOCAL tag `arsiv/<branch>` per tip. Lightweight on purpose:
 //      `--follow-tags` pushes annotated tags only, so these stay home even then;
 //   3. each worktree's ignored files that are not a cache (scratch/ above all)
-//      moved to ~/GitHub/Mozaikler/_arsiv/<branch>/, because `git worktree
+//      moved to ~/dev/Mozaik-arsiv/<branch>/, because `git worktree
 //      remove` deletes ignored files without a word;
 //   4. only then `git worktree remove` (never --force), the local branch, and
 //      `git push origin --delete` for the remote one.
@@ -45,7 +45,7 @@ import {
 import { git as gitKomut } from './git-komut.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const ARSIV = join(homedir(), 'GitHub', 'Mozaikler', '_arsiv');
+const ARSIV = join(homedir(), 'dev', 'Mozaik-arsiv');
 const uygula = process.argv.slice(2).includes('--uygula');
 
 function dur(mesaj, ...cozum) {

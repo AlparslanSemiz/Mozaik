@@ -35,7 +35,7 @@ import {
   type Index,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { Help, NextStep, useToast, T, useT } from '../common';
+import { Help, NextStep, useGoTo, useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -72,6 +72,8 @@ import PreviewBar from './PreviewBar';
 import GridMenu from './GridMenu';
 import PoolMenu from './PoolMenu';
 import { usePreview } from './usePreview';
+import { WeekBar, useShownWeek } from '../dated';
+import { weekView } from '../../pure/dated';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -164,6 +166,9 @@ function Program({
   // the entity sheet is the one that edits an entity, and from a card it is
   // the only way to reach the axis the grid is NOT drawn along.
   const inspect = useInspect();
+  // The status chip's problem list, from the bar's "Ayrıntı" and the pool
+  // card's "Neden yerleşmedi?" (K3).
+  const goTo = useGoTo();
 
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
@@ -196,7 +201,23 @@ function Program({
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
   const advice = solver.advice;
-  const { preview, setPreview, stale, previewed, diff, shown } = usePreview(state, advice);
+  const {
+    preview,
+    setPreview,
+    stale,
+    previewed,
+    diff: suggestedDiff,
+    shown: suggested,
+  } = usePreview(state, advice);
+  // A dated week (v18) is drawn the way a suggestion is previewed: a copy laid
+  // over the grid, marked, never edited. A suggestion's preview goes first.
+  const week = useShownWeek();
+  const dated = useMemo(
+    () => (week === null || previewed !== null ? null : weekView(state, week)),
+    [state, week, previewed],
+  );
+  const shown = suggested ?? dated?.state ?? null;
+  const diff = suggestedDiff ?? dated?.diff ?? null;
   const colorOf = useCallback<ColorOf>(
     (d, lesson) => programColorIndex(d, lesson, colorMode),
     [colorMode],
@@ -235,12 +256,13 @@ function Program({
     total: poolTotal,
   } = useMemo(
     // In the preview the tray is the suggested week's too: what it leaves
-    // waiting, which for a way that builds the week is nothing.
+    // waiting, which for a way that builds the week is nothing. A dated week
+    // leaves the tray the base week's: what it waits for has not changed.
     () =>
-      shown === null || shownIx === null
+      suggested === null || shownIx === null
         ? buildPool(trayState, trayIx, view, poolSort, poolFilter, colorOf, t)
-        : buildPool(shown, shownIx, view, poolSort, poolFilter, colorOf, t),
-    [shown, shownIx, trayState, trayIx, view, poolSort, poolFilter, colorOf, t],
+        : buildPool(suggested, shownIx, view, poolSort, poolFilter, colorOf, t),
+    [suggested, shownIx, trayState, trayIx, view, poolSort, poolFilter, colorOf, t],
   );
   // The branches with something still waiting (see `waitingSubjects`).
   const poolSubjects = useMemo(() => waitingSubjects(trayState), [trayState]);
@@ -525,7 +547,7 @@ function Program({
               sentence below says what is missing, the heading says where. */}
           <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
-          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
+          <T k="Önce **Öğretmenler** ve **Sınıflar** sekmelerinde öğretmenleri ve sınıfları, sonra her sınıfın derslerini girin." />
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda bekliyor olacak.')}
@@ -579,7 +601,9 @@ function Program({
           !solver.running && (
             <span className="bar-actions">
               {solver.result !== null && solver.result.stuck.length > 0 && (
-                <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
+                <button className="btn" onClick={() => goTo({ tab: 'program', problems: true })}>
+                  {t('Ayrıntı')}
+                </button>
               )}
               <button className="btn" onClick={solver.clear}>
                 {t('Tamam')}
@@ -602,6 +626,7 @@ function Program({
         />
       )}
 
+      {dated !== null && week !== null && <WeekBar state={state} week={week} />}
       {previewed !== null && preview !== null && diff !== null && (
         <PreviewBar
           previewed={previewed}
@@ -656,7 +681,7 @@ function Program({
           filter={poolFilter}
           setFilter={setPoolFilter}
           subjects={poolSubjects}
-          onStart={cardStart}
+          onStart={shown === null ? cardStart : still}
           onPick={shown === null ? cardPick : still}
           onMenu={setPoolMenuLessonId}
           menuOpen={active && poolMenuOpen}
@@ -667,6 +692,7 @@ function Program({
               container={menuPortalRef.current}
               editLesson={editLesson}
               inspect={inspect}
+              why={(id) => goTo({ tab: 'program', problems: id })}
             />
           }
         />

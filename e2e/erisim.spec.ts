@@ -19,7 +19,16 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from './kapan';
-import { open, openPerson, openSettings, openSetup, openWithSample } from './helpers';
+import {
+  open,
+  openPerson,
+  openSettings,
+  openSetup,
+  openWithSample,
+  goTab,
+  openProblems,
+  openLessons,
+} from './helpers';
 
 /** Rules switched off, each with the reason it is off. */
 const KAPALI = [
@@ -42,9 +51,6 @@ const KAPALI = [
  * corner and the five day bands' dividers) and Müsaitlik's two corners.
  */
 const BILINEN: Record<string, Record<string, number>> = {
-  // One since 2026-11-16: the paint grid's corner is named (`AvailGrid.tsx`),
-  // the heat table's is not yet.
-  Müsaitlik: { 'empty-table-header': 1 },
   Program: { 'empty-table-header': 6 },
 };
 
@@ -117,14 +123,25 @@ test.describe('90. Erişilebilirlik taraması', () => {
     karsilastir('Program', await tara(page));
   });
 
-  for (const sekme of ['Kontrol', 'Çıktı']) {
-    test(`${sekme}, dolu veriyle`, async ({ page }) => {
-      await openWithSample(page);
-      await page.getByRole('button', { name: sekme, exact: true }).click();
-      await expect(page.locator('.main')).toBeVisible();
-      karsilastir(sekme, await tara(page));
-    });
-  }
+  test('Yazdır ve gönder, dolu veriyle', async ({ page }) => {
+    await openWithSample(page);
+    await goTab(page, 'Yazdır ve gönder');
+    await expect(page.locator('.main')).toBeVisible();
+    karsilastir('Yazdır ve gönder', await tara(page));
+  });
+
+  // The Kontrol tab became the status chip's list (K3, 2026-11-16): every
+  // part of it, the load tables included.
+  test('Sorun listesi, dolu veriyle', async ({ page }) => {
+    await openWithSample(page);
+    const list = await openProblems(page);
+    karsilastir('Sorun listesi', await tara(page));
+    await list.getByRole('button', { name: /^İpuçları/ }).click();
+    karsilastir('Sorun listesi · İpuçları', await tara(page));
+    await list.locator('.more-menu').click();
+    await page.getByRole('menuitemradio', { name: 'Öğretmen yükleri' }).click();
+    karsilastir('Sorun listesi · Öğretmen yükleri', await tara(page));
+  });
 
   // Every Okul step, not only the one the tab opens on: the teacher and class
   // rows, where most of the unnamed boxes were, are two steps away from the
@@ -156,13 +173,12 @@ test.describe('90. Erişilebilirlik taraması', () => {
     });
   }
 
-  test('Müsaitlik ve Dersler, dolu veriyle', async ({ page }) => {
+  test('Dersler, üç yoldan da dolu veriyle', async ({ page }) => {
     await openWithSample(page);
 
-    for (const sekme of ['Müsaitlik', 'Dersler']) {
-      await page.getByRole('button', { name: sekme, exact: true }).click();
-      await expect(page.locator('.main')).toBeVisible();
-      karsilastir(sekme, await tara(page));
+    for (const mode of ['class', 'teacher', 'all'] as const) {
+      await openLessons(page, mode);
+      karsilastir(`Dersler · ${mode}`, await tara(page));
     }
   });
 
@@ -184,13 +200,15 @@ test.describe('90. Erişilebilirlik taraması', () => {
 
   // The three screens that have nothing to show on a new project still owe
   // the reader a heading for what will be there.
-  test('boş proje: Program, Kontrol ve Çıktı', async ({ page }) => {
+  test('boş proje: Program, Yazdır ve gönder, sorun listesi', async ({ page }) => {
     await open(page);
-    for (const sekme of ['Program', 'Kontrol', 'Çıktı']) {
-      await page.getByRole('button', { name: sekme, exact: true }).click();
+    for (const sekme of ['Program', 'Yazdır ve gönder']) {
+      await goTab(page, sekme);
       await expect(page.locator('.main')).toBeVisible();
       karsilastir(`Boş ${sekme}`, await tara(page));
     }
+    await openProblems(page);
+    karsilastir('Boş sorun listesi', await tara(page));
   });
 });
 

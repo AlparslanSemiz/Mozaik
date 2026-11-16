@@ -147,7 +147,10 @@ test.describe('74. Nereye kaydedilsin', () => {
     await page.getByRole('button', { name: 'Klasör seç…' }).click();
     await expect(page.getByText(/klasörüne yazıldı/)).toBeVisible();
 
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Zk1');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -163,7 +166,10 @@ test.describe('74. Nereye kaydedilsin', () => {
   test('ONBİRİNCİ gün en eskisini siliyor, YABANCI dosyalara dokunmuyor', async ({ page }) => {
     await fakePicker(page);
     await page.goto('/');
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Zk1');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -309,7 +315,10 @@ test.describe('74. Nereye kaydedilsin', () => {
     // throws (CI, 2026-10-09). Nothing is due in that second.
     await page.clock.pauseAt(now + 1_000);
 
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Kapanış2');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
