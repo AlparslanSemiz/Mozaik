@@ -51,6 +51,30 @@ test.describe('52. Komut paleti', () => {
       'Okul bilgileri',
     );
     await expect(page.getByRole('group', { name: 'Tema', exact: true })).toBeVisible();
+
+    // Hakkında is behind a Daha fazla; "güncelleme" finds it.
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('güncelleme');
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
+  });
+
+  // Windows UI Automation's Invoke and a screen reader's default action are a
+  // click with no pointer before it; Radix opens on pointerdown and keys only,
+  // so that click used to open nothing (kurulum-windows, 2026-11-16).
+  test('Daha fazla, işaretçisiz bir tıklamayla da açılıyor ve kalemi seçiliyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
+    await page.locator('.ribbon .more-menu').evaluate((b) => (b as HTMLButtonElement).click());
+    const item = page.getByRole('menuitemradio', { name: 'Hakkında' });
+    await expect(item).toBeVisible();
+    await item.evaluate((el) => (el as HTMLElement).click());
+    await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
   });
 
   test('sekmeye gidiyor', async ({ page }) => {

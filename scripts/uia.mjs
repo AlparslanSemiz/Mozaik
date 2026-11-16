@@ -12,7 +12,8 @@
 // name a person reads on it. The upgrade gate (scripts/guncelleme-eski.mjs)
 // uses this to make the old version's data with the old version's own hands.
 //
-// A button is pressed through its Invoke pattern, a tab through SelectionItem;
+// A button or a menu item (menuitemradio may arrive as RadioButton) is pressed
+// through its Invoke pattern, a tab through SelectionItem;
 // anything that offers neither gets a real mouse click on its centre, with the
 // window brought to the front first. Windows only.
 
@@ -54,7 +55,7 @@ while ((Get-Date) -lt $son) {
       } catch { continue }
       if ([string]::IsNullOrWhiteSpace($ad)) { continue }
       $gorulen += "$tur '$ad'"
-      if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem') { continue }
+      if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem|RadioButton|CheckBox') { continue }
       if (-not (Uyar $ad) -or -not $acik) { continue }
       $o = $null
       if ($e.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$o)) {
