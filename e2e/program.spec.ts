@@ -2272,6 +2272,10 @@ test.describe('86. Sabitleme', () => {
       })
       .toBeGreaterThan(0);
     const state = JSON.parse(await savedText(page)) as Saved;
+    // A drop pins (2026-11-16) and `dragAndDropLoose` unpins it again, but the
+    // debounced write can hold either; these tests are about programs, not
+    // pins, so the first program starts unpinned whatever storage caught.
+    state.programs[0]!.pinned = {};
     state.programs.push({ id: 'ikinci', name: 'Seçenek 2', placements: {}, pinned: {} });
     await loadWorld(page, state);
     return page.locator('.topbar .plan-picker');

@@ -766,6 +766,17 @@ export function Inspector({
         <Dialog.Content
           className="sheet"
           aria-describedby={undefined}
+          // Esc while the date window ("Bugün yok…") is open closes THAT
+          // window and only it. Pressed before the inner layer has registered
+          // as the top one, the key reached this page and closed it under the
+          // window (e2e/ikame.spec.ts, 2 of 3 runs); whichever layer gets it
+          // now, the result is the same.
+          onEscapeKeyDown={(e) => {
+            if (awayOn === null) return;
+            e.preventDefault();
+            setAwayOn(null);
+            setAsking(false);
+          }}
           // Into the page, not onto its first button: that is Yazdır, and an
           // Enter meant for the list would print. A new page's name box takes
           // the focus itself (`autoFocus`).
