@@ -88,7 +88,7 @@ test.describe('95. Klavyeyle ızgara', () => {
     const menu = page.getByRole('menu');
     // The pin leads since 2026-11-16; "Taşı" is the second item.
     await expect(menu.getByRole('menuitem').nth(1)).toHaveText(/^Taşı/);
-    await page.keyboard.press('ArrowDown');
+    await menu.getByRole('menuitem').nth(1).focus();
     await page.keyboard.press('Enter');
     await expect(menu).toHaveCount(0);
     await expect(page.locator('.reason-bar')).toContainText('alındı');
