@@ -106,6 +106,16 @@ başka bir anahtar, davranış değişikliği olurdu.
 
 ---
 
+### 2026-11-16 · Lisans MIT'ten PolyForm Noncommercial 1.0.0'a (`lisans/polyform`)
+
+**Ne.** Bu commit'ten sonraki kod PolyForm Noncommercial License 1.0.0 altında (`LICENSE`, `package.json`, `src-tauri/Cargo.toml`, README). v2.2.0 ve öncesi MIT olarak kalır; yayınlanmış sürümlerin lisansı geri alınamaz. IBM Plex bildirimi `NOTICE`'e taşındı.
+
+**Gerekçe.** Alp'in kararı: Mozaik ileride ticari kurumlara ("Mozaik Kurum") lisansla satılacak; kişiler, öğretmenler, kâr amacı gütmeyen ve kamu eğitim kurumları ücretsiz kullanır. Ticari lisans için iletişim: alparslansemiz.com/en/contact/.
+
+### 2026-11-16 · Web adresinde ziyaret sayımı: Cloudflare Web Analytics, yalnız sitede (`web-analitik`)
+
+Alp tüm sitelerimizde ziyaret ölçümü istedi ("mozaike de kur"). Neden: uygulamayı bizden başka açan var mı, bilinmiyordu (GitHub'da dış iz yok, Pages ziyaret saymıyor). Ne: `vite.site.config.ts` içindeki satır içi betik, yalnız `adres.json`'daki yeni kökende Cloudflare'in çerezsiz beacon'ını ekler. Gönderilen: sayfa adresi, gelinen sayfa, tarayıcı, ülke ve yüklenme süreleri (Web Vitals); programdan hiçbir şey. Neden böyle: `dist/index.html` (çift tıklanan) hiç almaz, site yine tek dosya kalır (`site.yml`'in `<script src=` denetimi), ağ yoksa ya da engellenirse beacon yüklenmez ve hiçbir şey değişmez, açılış ona bağlı değil. Servis çalışanı yalnız kendi kökenini işlediği için beacon önbelleğe girmez. Denenmeyen: `<script src>` ile eklemek (tek dosya denetimini gevşetirdi), çift tıklanan dosyaya koymak (orada ağ isteği hiç yok, `site.spec.ts`).
+
 ### 2026-11-16 · Eyotek kalktı
 
 **Ne.** Eyotek'e gönderme ve Eyotek turu yapılmayacak: baba artık Eyotek kullanmıyor (Alp).

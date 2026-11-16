@@ -1,7 +1,7 @@
 // Moving to the Linux app (TODO B7.28): the plans leave the site's origin and
 // arrive in a copy of dist/index.html under file://, in a Chrome profile of
 // its own. Nothing carries them across but the one-file bundle, and the steps
-// README.md gives are exactly the ones below:
+// docs/INSTALL.md gives are exactly the ones below:
 //
 //   old copy (the site, over http)   Ayarlar → Planlar ve yedek → Bütün planları dosyaya kaydet
 //   new copy (file://, empty store)  Ayarlar → Planlar ve yedek → Bütün planları dosyadan aç

@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Changed
+
+- Licence: from this commit on Mozaik is under the PolyForm Noncommercial License 1.0.0 (free for personal use, teachers, public and non-profit schools; commercial use needs a licence). Releases up to v2.2.0 remain under the MIT License.
+
 ### Added
 
 - A lesson you drop or swap by hand is pinned where you put it, so "Kalanı diz" and "Yeniden yap" leave it alone; the notice says so and "Geri al" undoes the move and the pin together. A drop onto a cell that refuses now says why, in a notice and on the bar, instead of nothing.

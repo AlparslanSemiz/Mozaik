@@ -217,6 +217,12 @@ durmaz, yalnız site derlemesinde bir `transformIndexHtml` eklentisiyle eklenir
 çevrimdışı iddiası okunarak doğrulanabilir kalır ve `site.spec.ts` tam olarak
 bunu ölçer (tuzak 32).
 
+Aynı eklenti site derlemesine bir ziyaret sayacı da koyar: satır içi bir betik,
+yalnız `adres.json`'daki yeni kökende Cloudflare Web Analytics beacon'ını
+`document.createElement` ile ekler. Etiket çalışma anında kurulduğu için
+`site.yml`'in `<script src=` denetimi bilerek geçer: sayfa yine tek dosya, beacon
+isteğe bağlı ve yüklenemezse hiçbir şey değişmez (DECISIONS 2026-11-16).
+
 Site derlemesinde `<link rel="icon">` yok: `index.html` favicon'u `data:` URI
 olarak taşıyor ve bu iki derlemede de geçerli. İkinci bir bağlantı `<head>`
 sırasında kazanır ve sekmeye ayrıntılı işareti getirirdi.
@@ -477,7 +483,7 @@ sahte bir ev dizininde.
 Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfası veriyor,
 `showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
 ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
-siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
+siteyi kullanan biri için taşıma, [INSTALL.md](INSTALL.md)'de.
 
 ### Linux
 
@@ -500,7 +506,7 @@ açılır (karar kaydında). Yalnız x86_64.
 (glibc 2.35): Ubuntu 22.04 ve 24.04, Debian 12, Fedora 36 ve sonrası açar, Debian 11 açmaz.
 `scripts/linux-paket.sh` programın istediği en yüksek glibc'yi okur ve 2.35'i geçerse durur.
 AppImage açılmak için FUSE ister; Ubuntu 22.04'ten beri `libfuse2` kurulu gelmeyebilir
-(README, "Linux").
+(INSTALL.md, "Linux: one file, the AppImage").
 
 ```sh
 scripts/ortools-linux.sh              # OR-Tools 9.15, özeti sabit; src-tauri/ortools/ ve tauri.ortools.json

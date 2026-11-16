@@ -3,6 +3,7 @@ name = "ders-programi"
 version = "2.2.0"
 description = "Weekly school timetable builder"
 authors = ["Alparslan"]
+license = "PolyForm-Noncommercial-1.0.0"
 edition = "2021"
 # Raised from 1.77.2 for reqwest 0.13, which `tauri` already pulls in. Pinning
 # the old floor would have resolved a SECOND copy of reqwest into the tree
