@@ -2190,6 +2190,27 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       birleşmedi; WORKLOG): beş görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve
       Sınıflar'ın şeridine, Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir
       plan (K2), Kontrol çipin açtığı sorun listesi (K3). Sonra babanın bir oturumu izlenir.
+- [ ] **SD9 · Daha fazla menüsü ekran okuyucuyla ve Windows UI Automation'la (2026-11-16,
+      `sade/asama-3b`).** `kurulum-windows`'ta Okul bilgileri → More (fareyle açıldı) → About
+      menü kaleminin Invoke'u bölümü değiştirmedi (Chromium'un erişilebilirlik "varsayılan
+      eylemi"; yerelde düz bir `click()` ve gerçek tıklama çalışıyor, sebep bulunamadı). Betik
+      artık o zaman pencereyi yazdırıp Hakkında'ya Ctrl+K "update" ile gidiyor. Yapılacak:
+      Windows'ta NVDA ve Narrator ile Daha fazla'yı açıp bir kalemi seçmek; kalem seçmiyorsa
+      Radix menü kaleminin varsayılan eylemine cevap vermesi (ya da kalemi gerçek bir düğme
+      yapmak). Betiğin yazdırdığı ağaç ilk ipucu.
+
+- [~] **SD9 · İkame ve hafta istisnası (Alp'in önceliği, 2026-11-16).** Yazıldı
+      (`ozellik/ikame`, `sade/asama-3a`'nın üstünde, birleşmedi; DECISIONS "İkame ve hafta
+      istisnası", WORKLOG): şema v18 `dated` (gelmeyen öğretmen ya da sınıf, tarih aralığıyla;
+      saat saat ikame ya da boş geçsin), kişi sayfasında `Gelmiyor…`, Program şeridinde tarih
+      çipi, tarih sayfası ve İkame listesinin Yazdır'ı, öğretmen sayfasında ikame sayısı,
+      `Bu haftanın değişikliklerini sil`; tek bir dersi yalnız o tarih boş geçirmek ya da aynı günün
+      başka saatine taşımak (`Bir dersi değiştir…`, `N. saate`), ve ızgarada o haftanın
+      işaretli görünüşü (`Programda göster`, `Temel haftaya dön`). Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
+      v18) ve E2E (`e2e/ikame.spec.ts`, axe dahil) yeşil. **Kalan:** (1) tatil günü (bir tarihin
+      bütün dersleri) yok; taşıma yalnız aynı günün başka saatine, ızgarada sürüklemeyle değil;
+      (2) İkame listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle (`DayDialog.tsx`'teki
+      TODO); (3) brotli 3B'nin üstüne +3,5 kB (WORKLOG).
 
 ## §9. Ham notlar
 

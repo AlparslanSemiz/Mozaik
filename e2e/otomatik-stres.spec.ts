@@ -57,7 +57,9 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
 
       // The page never froze: the status chip still opens its list.
       await openProblems(page);
-      await expect(page.getByRole('dialog').getByRole('button', { name: /^Sorunlar/ })).toBeVisible();
+      await expect(
+        page.getByRole('dialog').getByRole('button', { name: /^Sorunlar/ }),
+      ).toBeVisible();
     });
   }
 

@@ -10,7 +10,7 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          model/* · i18n/* · lang/* · preference/* · app/*
    |
 src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
-                   grid/* · program/* · paper/* · io/* · listview/* · lists/* · forms/* · undo/*
+                   grid/* · program/* · paper/* · io/* · listview/* · lists/* · forms/* · undo/* · dated/*
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · exe/* · changelog · update
    |
@@ -28,8 +28,8 @@ de okuyan `preferences.test.ts`).
 
 Her kaynak dosya bir katmanın altındaki bir klasörde, yani bir pakette durur (2026-10-24);
 en derin `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda.
-Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/forms/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/forms/`, `pure/undo/`, `pure/dated/`, `pure/worlds/`, `platform/prefs/`,
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/`, `ui/dated/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -118,6 +118,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/entities/deleting.ts` | bir silmenin neyi götüreceği, sormadan önce (`deletionQuestion`, tuzak 4) |
 | `pure/entities/inspect.ts` | tek bir öğretmen, sınıf ya da dersliğin haftası ve bilgileri (`entityWeek`, `entityFacts`) |
 | `pure/entities/answers.ts` | öneriye verilen cevaplar (`answerYes`, `answerNo`, `forbids`, `dropAnswer`) |
+| `pure/dated/dated.ts` | taban haftanın üstündeki tarihli katman (şema v18): tarihin gün sütunu (`dayOf`), gelmeyenler (`addAway`, `moveAway`, `setAwayEnd`), ikame (`setCover`, `coverRows` ile önerilerin sırası, `coverCount`), haftanın sayısı, adı ve geri alınması (`weekChanges`, `weekLabel`, `clearWeek`); çözücü ve ızgara onu okumaz |
 | `pure/entities/relations.ts` | aynı gün olmasın ilişkileri |
 | `pure/solver/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/relax/index.ts` | öneri aramasının giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey; `sat.ts` ve dosyaların paylaştığı yardımcılar paketin içinde kalır |
@@ -239,7 +240,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/setup/` | dört liste ve Başlarken: `index.tsx` (`Setup` bir liste ve Özet'i, `Start` Başlarken ve ilk açılış teklifleri), `Checklist` (Başlarken'in beş işi), `Rooms`, `Subjects`, `Teachers` ve `Classes` (düz yazı listeler; satırı `PersonRow`, adı kişi sayfasını açar) |
 | `ui/program/InspectorSheet.tsx` | kişi sayfası (2026-11-16, K5): öğretmenin, sınıfın ya da dersliğin bilgileri, gelemediği saatler, dersleri, sınırları, Yazdır, Gönder ve Sil; boş kimlikle `NewPerson.tsx`'in yeni öğretmen ya da sınıf formu |
 | `ui/common/AvailGrid.tsx` | bir varlığın boyanan kapalı saat ızgarası; kişi sayfası çizer |
-| `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Yazdır ve gönder'in seçimlerine dokunmadan |
+| `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Yazdır ve gönder'in seçimlerine dokunmadan; `usePrintNow`, İkame listesi de onunla basılır |
+| `ui/dated/DayDialog.tsx` | tarih sayfası (v18): bir tarihin gelmeyenleri, ikame seçicileri, İkame listesinin Yazdır'ı ve haftayı geri alma |
+| `ui/dated/DateChip.tsx` | Program şeridindeki tarih çipi: `Bugün kim yok?` ya da bu haftanın değişiklikleri, bugünün tarih sayfasını açar |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve sorun listesi aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler (Öğretmenler ve Sınıflar şeritlerinin `Dersler`'i): `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, kişi sayfası (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |

@@ -27,7 +27,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pencereyiKapat } from './pencere-kapat.mjs';
-import { uiaBas } from './uia.mjs';
+import { uiaBas, uiaTus } from './uia.mjs';
 import { windowsTemizle, windowsYerleri } from './webdriver.mjs';
 import { sunucuBaslat } from './yerel-sunucu.mjs';
 
@@ -178,7 +178,18 @@ try {
   console.log(uiaBas(ADLAR.dahaFazla, { tam: true }));
   console.log(uiaBas(ADLAR.hakkinda, { tam: true }));
   // Waits for Hakkında to be drawn: the press above has to have opened it.
-  console.log(uiaBas(ADLAR.denetle, { tam: true, sureMs: 60_000 }));
+  // On the runner the menu item's Invoke has left the section where it was
+  // (kurulum-windows, 2026-11-16, TODO SD9); then the window's names are
+  // printed for the record and Hakkında is reached the way a person with a
+  // keyboard does: Ctrl+K, "update" (the English label, "See the update"),
+  // Enter.
+  try {
+    console.log(uiaBas(ADLAR.denetle, { tam: true, sureMs: 15_000 }));
+  } catch (e) {
+    console.log(`Hakkında menüden açılmadı; pencere:\n${e.message}`);
+    console.log(uiaTus(['{ESC}', '^k', 'update', '{ENTER}']));
+    console.log(uiaBas(ADLAR.denetle, { tam: true, sureMs: 60_000 }));
+  }
   console.log(uiaBas(ADLAR.kurulum, { tam: true, sureMs: 60_000 }));
   console.log(uiaBas(ADLAR.kur, { tam: true, sureMs: 120_000 }));
 

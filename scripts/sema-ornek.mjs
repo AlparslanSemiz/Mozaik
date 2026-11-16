@@ -173,6 +173,29 @@ function v17() {
   };
 }
 
+/**
+ * Today's shape (v18): v17 and the dated layer. MÇ is away on Tuesday 17
+ * November 2026 and AV covers his first hour in 510; class 511 is away on a
+ * trip for three days. The second hour has no cover chosen yet.
+ */
+function v18() {
+  return {
+    ...v17(),
+    schemaVersion: 18,
+    dated: {
+      absent: [
+        { id: 'tMC', from: '2026-11-17', to: '2026-11-17' },
+        { id: 'c511', from: '2026-11-17', to: '2026-11-19' },
+      ],
+      covers: [
+        { date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' },
+        // That week only, 510's Wednesday third hour moves to the sixth.
+        { date: '2026-11-18', classId: 'c510', hour: 2, teacherId: null, to: 5 },
+      ],
+    },
+  };
+}
+
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
 /** The single program's grid, as every version before v12 stored it: at the top. */
@@ -187,9 +210,14 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v17 with fourteen steps undone.
+ * key. The chain is applied in order, so v3 is v18 with fifteen steps undone.
  */
 const DOWN = {
+  17: (raw) => {
+    // v18 brought the dated layer. Below it a file has none.
+    raw.schemaVersion = 17;
+    delete raw.dated;
+  },
   16: (raw) => {
     // v17 brought the teacher's address. Below it a teacher has none.
     raw.schemaVersion = 16;
@@ -319,13 +347,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v17();
-writeFileSync(join(OUT, 'v17.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v18();
+writeFileSync(join(OUT, 'v18.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`17 örnek dosya yazıldı: ${OUT}`);
+console.log(`18 örnek dosya yazıldı: ${OUT}`);

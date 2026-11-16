@@ -1,7 +1,8 @@
 // The Linux install script and its launcher (TODO B7.28), run for real in a
-// home directory made up for each test. Nothing here touches ~/GitHub/Mozaikler/Mozaik
-// or ~/.local/share/mozaik: the scripts read $HOME, and $HOME is a temporary
-// folder holding a small git repository in the place of the real checkout.
+// home directory made up for each test. Nothing here touches ~/dev/Mozaik or
+// ~/.local/share/mozaik: the install script builds from the repository it sits
+// in, so each test copies it into a small git repository under a temporary
+// $HOME and runs that copy.
 //
 // What has to hold, from the decisions of 2026-10-10:
 //   - it builds only from main, clean, and not from a worktree,
@@ -18,6 +19,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   utimesSync,
@@ -67,12 +69,12 @@ function paket(icerik: string): string {
 }
 
 /**
- * A stand-in for ~/GitHub/Mozaikler/Mozaik: on main, clean, with the two files the
- * script copies from it, and a node_modules newer than the lock so that
+ * A stand-in for ~/dev/Mozaik: on main, clean, with the install script itself
+ * and the two files it copies, and a node_modules newer than the lock so that
  * `npm ci` is not run.
  */
 function depo(ev: string, icerik = '<!doctype html><title>Mozaik</title>v1'): string {
-  const d = join(ev, 'GitHub', 'Mozaikler', 'Mozaik');
+  const d = join(ev, 'dev', 'Mozaik');
   mkdirSync(join(d, 'scripts'), { recursive: true });
   mkdirSync(join(d, 'site'), { recursive: true });
   mkdirSync(join(d, 'node_modules'), { recursive: true });
@@ -82,6 +84,7 @@ function depo(ev: string, icerik = '<!doctype html><title>Mozaik</title>v1'): st
   writeFileSync(join(d, '.gitignore'), 'dist/\nnode_modules/\n');
   writeFileSync(join(d, 'package.json'), paket(icerik));
   writeFileSync(join(d, 'package-lock.json'), '{}\n');
+  copyFileSync(KUR, join(d, 'scripts', 'linux-kur.sh'));
   copyFileSync(BASLAT, join(d, 'scripts', 'linux-mozaik.sh'));
   copyFileSync(resolve('site/icon-512.png'), join(d, 'site', 'icon-512.png'));
   writeFileSync(join(d, 'node_modules', '.package-lock.json'), '{}\n');
@@ -98,8 +101,12 @@ function ortam(ev: string, ek: Record<string, string> = {}): NodeJS.ProcessEnv {
   return env;
 }
 
-function kur(ev: string) {
-  return spawnSync('bash', [KUR], { env: ortam(ev), encoding: 'utf8' });
+/** Runs the copy of the install script inside the stand-in checkout `d`. */
+function kur(ev: string, d = join(ev, 'dev', 'Mozaik')) {
+  return spawnSync('bash', [join(d, 'scripts', 'linux-kur.sh')], {
+    env: ortam(ev),
+    encoding: 'utf8',
+  });
 }
 
 const appDir = (ev: string) => join(ev, '.local', 'share', 'mozaik', 'app');
@@ -187,6 +194,43 @@ describe.skipIf(process.platform === 'win32')('Linux kurulum betiği', () => {
     const r = kur(ev);
     expect(r.status).toBe(3);
     expect(r.stderr).toContain('worktree');
+    expect(existsSync(appDir(ev))).toBe(false);
+  });
+
+  it('kendi deposundan derliyor, depo nerede durursa dursun', () => {
+    const ev = yeniEv();
+    const d = depo(ev);
+    const baska = join(ev, 'baska', 'yer');
+    mkdirSync(join(ev, 'baska'), { recursive: true });
+    renameSync(d, baska);
+    const r = kur(ev, baska);
+    expect(r.status, r.stderr).toBe(0);
+    expect(readFileSync(join(appDir(ev), 'kaynak.txt'), 'utf8')).toContain(
+      `commit ${git(baska, 'rev-parse', 'HEAD')}`,
+    );
+  });
+
+  it('kurulu olandan eski bir main’i kurmuyor', () => {
+    const ev = yeniEv();
+    const d = depo(ev);
+    writeFileSync(join(d, 'package.json'), paket('<!doctype html>v2'));
+    git(d, 'commit', '-q', '-am', 'iki');
+    expect(kur(ev).status).toBe(0);
+    git(d, 'reset', '-q', '--hard', 'HEAD~1');
+    const r = kur(ev);
+    expect(r.status).toBe(8);
+    expect(r.stderr).toContain('daha yeni');
+    expect(readFileSync(join(appDir(ev), 'index.html'), 'utf8')).toBe('<!doctype html>v2');
+  });
+
+  it('bir git deposunun içinde değilse reddediyor', () => {
+    const ev = yeniEv();
+    const d = join(ev, 'kopya');
+    mkdirSync(join(d, 'scripts'), { recursive: true });
+    copyFileSync(KUR, join(d, 'scripts', 'linux-kur.sh'));
+    const r = kur(ev, d);
+    expect(r.status).toBe(3);
+    expect(r.stderr).toContain('git deposu değil');
     expect(existsSync(appDir(ev))).toBe(false);
   });
 

@@ -18,6 +18,7 @@ import { activePlacements, activeProgram, keepPinnedOnly, removeProgram } from '
 import { sanitize, togglePinAll } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
 import { classIcon, teacherIcon } from '../program';
+import { DateChip } from '../dated';
 import { MoreItem, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
 import type { State } from '../../leaf/model';
@@ -221,6 +222,11 @@ export function programStrip({
           </button>
         )}
       </Group>
+
+      {/* The dated layer's one door (v18): today, who is away, and this
+          week's changes once there are any. Not a part of the base week. */}
+      <Sep />
+      <DateChip state={state} change={change} />
 
       <Spacer />
 

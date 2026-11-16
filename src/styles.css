@@ -2187,6 +2187,15 @@ table.grid {
   table-layout: fixed;
 }
 
+/* Until gridFit.ts has measured the first floor, in the frame after the
+   first paint (about two frames): the table is laid out and keeps its room, it
+   is only not drawn without the widths it is about to get. Opacity and not
+   `visibility`: a hidden cell cannot take focus and has no innerText, and
+   Kontrol's Göster mounts Program and focuses a card in the same moment. */
+.grid-wrap[data-fitting] table.grid {
+  opacity: 0;
+}
+
 /* THE CAGE IS GONE, and this is the single change that stops the timetable
    reading as a spreadsheet. Every one of the ~2100 cells used to be ruled in
    --line (#c9ced6) on two sides, so the eye counted BOXES. The hour boundary
@@ -7456,6 +7465,19 @@ table.person-list tbody tr {
 .sheet-foot {
   padding-top: var(--space-4);
   border-top: 1px solid var(--hairline);
+}
+
+/* The Program strip's date chip once this week has changes (DateChip.tsx):
+   a heavier line and word, never a colour alone. */
+.btn.dated-on {
+  border: 2px solid var(--accent);
+  font-weight: 600;
+}
+
+/* The date page's boxes are hit as easily as its buttons (44 px). */
+.dated input,
+.dated select {
+  min-height: 2.75rem;
 }
 
 /* Yazdır from the page: one sheet, drawn under <body> only while the print

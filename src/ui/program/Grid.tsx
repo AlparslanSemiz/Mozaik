@@ -15,7 +15,7 @@ import {
 import { dayPeriods } from '../../pure/entities';
 import type { GridRow, MenuTarget } from '../../pure/program';
 import { useT } from '../common';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import type React from 'react';
 import { Row } from './GridRow';
 import * as ContextMenu from '@radix-ui/react-context-menu';
@@ -87,13 +87,18 @@ function GridInner({
     const wrap = wrapRef.current;
     if (wrap === null) return undefined;
     const detachChrome = attachGridChrome(wrap);
-    const detachFit = attachGridFit(wrap);
     const detachKeys = attachGridKeys(wrap);
     return () => {
       detachChrome();
-      detachFit();
       detachKeys();
     };
+  }, []);
+  // Before the first layout, not after it: the fit hides the table until its
+  // first floor (gridFit.ts), and hiding it after the drawer's layout effect
+  // has laid the page out cost a second style pass over the whole grid.
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    return wrap === null ? undefined : attachGridFit(wrap);
   }, []);
 
   // Counts, not widths: the stylesheet derives --cell-w from the box it

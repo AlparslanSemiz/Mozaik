@@ -155,6 +155,41 @@ function readRelations(x: unknown): Relation[] {
   });
 }
 
+/**
+ * v18: absences and covers. As with the answers, an entry that does
+ * not read is dropped alone; whether its teacher, class or hour still exists
+ * is `sanitize`'s question.
+ */
+function readDated(x: unknown): State['dated'] {
+  const box = asMap<unknown>(x);
+  const day = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const id = (v: unknown): v is string => typeof v === 'string' && v !== '';
+  const rows = (k: string) => asArray<unknown>(box[k], []).map((v) => asMap<unknown>(v));
+  return {
+    absent: rows('absent').flatMap((a) =>
+      id(a['id']) && day(a['from']) && day(a['to']) && a['from'] <= a['to']
+        ? [{ id: a['id'], from: a['from'], to: a['to'] }]
+        : [],
+    ),
+    covers: rows('covers').flatMap((c) =>
+      day(c['date']) &&
+      id(c['classId']) &&
+      typeof c['hour'] === 'number' &&
+      (c['teacherId'] === null || id(c['teacherId']))
+        ? [
+            {
+              date: c['date'],
+              classId: c['classId'],
+              hour: c['hour'],
+              teacherId: c['teacherId'],
+              ...(typeof c['to'] === 'number' ? { to: c['to'] } : {}),
+            },
+          ]
+        : [],
+    ),
+  };
+}
+
 function asLevel(x: unknown, fallback: RuleLevel): RuleLevel {
   return x === 'off' || x === 'warn' || x === 'block' ? x : fallback;
 }
@@ -318,6 +353,7 @@ function migrateV2toV3(raw: LegacyV2): State {
     activeProgramId: DEFAULT_PROGRAM_ID,
     answers: { accepted: [], refused: [] },
     relations: [],
+    dated: { absent: [], covers: [] },
   };
 }
 
@@ -436,6 +472,7 @@ export function parseState(text: string): State | null {
     version === 14 ||
     version === 15 ||
     version === 16 ||
+    version === 17 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -554,6 +591,8 @@ export function parseState(text: string): State | null {
       // v15. Every file below it predates the answers, and none is right.
       answers: readAnswers((raw as { answers?: unknown }).answers),
       relations: readRelations((raw as { relations?: unknown }).relations),
+      // v18. Every file below it has no dated changes, and none is right.
+      dated: readDated((raw as { dated?: unknown }).dated),
     };
   } else {
     return null; // an unknown (newer) version is not guessed at
