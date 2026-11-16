@@ -64,7 +64,7 @@ export const Row = memo(function Row({
   // the app, so this cannot be what re-renders 25 rows of 84 cells (pitfall 10).
   const inspect = useInspect();
   const t = useT();
-  const closedWord = row.kind === 'teacher' ? t('müsait değil') : t('kapalı');
+  const closedWord = t('kapalı');
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
     for (let s = 0; s < hourCount; s++) {
@@ -237,13 +237,15 @@ export const Row = memo(function Row({
               // column the card stands in. The conflict used to be in the
               // title only.
               aria-label={[
+                // The words drawn on the card come first (WCAG 2.5.3), then
+                // where it stands.
+                top,
+                cell.bottom,
                 t('{gun} {n}. saat', {
                   gun: dayLabel(settings.days[g]?.name ?? ''),
                   n: spans ? `${s + 1}–${s + span}` : s + 1,
                 }),
                 row.name,
-                top,
-                cell.bottom,
                 cell.mark === 'opened'
                   ? t('açılan öğretmen saatinde')
                   : cell.mark === 'moved'
@@ -267,7 +269,12 @@ export const Row = memo(function Row({
               <span className="card-top">
                 {row.kind === 'teacher' ? <ClassName name={top} /> : top}
               </span>
-              {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
+              {cell.bottom !== '' && (
+                <>
+                  {' '}
+                  <span className="card-bottom">{cell.bottom}</span>
+                </>
+              )}
               {cell.mark === 'opened' && (
                 <span className="card-mark" aria-hidden="true">
                   +
@@ -307,11 +314,11 @@ export const Row = memo(function Row({
               aria-label={
                 cell.pinned
                   ? t('{ust} {alt}: sabitlemeyi kaldır', {
-                      ust: cell.top,
+                      ust: top,
                       alt: cell.bottom,
                     })
                   : t('{ust} {alt}: buraya sabitle', {
-                      ust: cell.top,
+                      ust: top,
                       alt: cell.bottom,
                     })
               }

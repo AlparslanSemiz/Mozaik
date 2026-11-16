@@ -13,7 +13,7 @@
 // `menuitemcheckbox`, so the suite and a screen reader find them by name.
 
 import type React from 'react';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronDown, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useT } from './T';
@@ -51,6 +51,7 @@ export function MoreMenu({
   // Radix already handled changes nothing.
   const [open, setOpen] = useState(false);
   const pointer = useRef(false);
+  const newsId = useId();
   return (
     <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger asChild>
@@ -66,6 +67,8 @@ export function MoreMenu({
             else setOpen(true);
           }}
           {...(ariaLabel === undefined ? {} : { 'aria-label': t(ariaLabel) })}
+          // The unread mark is drawn only; this says it, after the name.
+          {...(dot ? { 'aria-describedby': newsId } : {})}
         >
           {icon}
           {t(label)}
@@ -73,6 +76,11 @@ export function MoreMenu({
           {dot && <span className="ribbon-dot" aria-hidden="true" />}
         </button>
       </DropdownMenu.Trigger>
+      {dot && (
+        <span id={newsId} hidden>
+          {t('Yeni sürüm notu var')}
+        </span>
+      )}
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="menu" align={align} sideOffset={5} collisionPadding={8}>
           {children}

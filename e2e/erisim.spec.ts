@@ -46,13 +46,10 @@ const KAPALI = [
  * Reading the list: an entry is not an excuse. It is a finding waiting for a
  * decision, and the decision goes in docs/TODO.md before the entry leaves.
  *
- * What is left is the empty corner and divider headers of two grids whose
- * markup belongs to other work (TODO §8e): the Program grid (`Grid.tsx`, the
- * corner and the five day bands' dividers) and Müsaitlik's two corners.
+ * Nothing is left on the list: the Program grid's lunch-break column headers
+ * (`Grid.tsx`) now carry a hidden "Öğle arası", the last empty headers.
  */
-const BILINEN: Record<string, Record<string, number>> = {
-  Program: { 'empty-table-header': 6 },
-};
+const BILINEN: Record<string, Record<string, number>> = {};
 
 interface Bulgu {
   id: string;

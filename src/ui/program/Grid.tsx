@@ -200,7 +200,9 @@ function GridInner({
                             key={`break-${g}`}
                             className={visibleDay % 2 === 1 ? 'break-col band' : 'break-col'}
                             title={t('Öğle arası')}
-                          />,
+                          >
+                            <span className="sr-only">{t('Öğle arası')}</span>
+                          </th>,
                         ]
                       : []),
                     <th

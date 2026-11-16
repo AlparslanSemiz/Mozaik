@@ -1802,6 +1802,7 @@ const EN: Sozluk = {
   "Hep görünsün": "Always shown",
   "Kaydırınca gizlensin": "Hide on scroll",
   "Kural aşımları": "Rule breaches",
+  "Yeni sürüm notu var": "There is a new release note",
 };
 
 registerSozluk("en", EN);

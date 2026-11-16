@@ -167,6 +167,9 @@ export default function Topbar({
             data-section={dest.id}
             aria-current={tab === dest.id}
             aria-label={t(dest.label)}
+            // Said after the name, not inside it: the name stays what the tab
+            // is called, and the dot is no longer silent.
+            aria-describedby={dest.id === 'school' && changelogUnseen ? 'tab-news' : undefined}
             title={t(dest.label)}
             onClick={() => goTab(dest.id)}
           >
@@ -177,7 +180,12 @@ export default function Topbar({
               the moment the folded notes in Okul bilgileri → Hakkında are opened
               (`Changelog`'s onToggle), not on a bare tab click. */}
             {dest.id === 'school' && changelogUnseen && (
-              <span className="tab-dot" aria-hidden="true" />
+              <>
+                <span className="tab-dot" aria-hidden="true" />
+                <span id="tab-news" hidden>
+                  {t('Yeni sürüm notu var')}
+                </span>
+              </>
             )}
           </button>
         ))}

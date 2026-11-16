@@ -1821,6 +1821,7 @@ const FR: Sozluk = {
   "Hep görünsün": "Toujours visible",
   "Kaydırınca gizlensin": "Masquer au défilement",
   "Kural aşımları": "Règles enfreintes",
+  "Yeni sürüm notu var": "Il y a une nouvelle note de version",
 };
 
 registerSozluk("fr", FR);

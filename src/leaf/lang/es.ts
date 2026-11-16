@@ -1816,6 +1816,7 @@ const ES: Sozluk = {
   "Hep görünsün": "Siempre visible",
   "Kaydırınca gizlensin": "Ocultar al desplazar",
   "Kural aşımları": "Reglas incumplidas",
+  "Yeni sürüm notu var": "Hay una nota de versión nueva",
 };
 
 registerSozluk("es", ES);
