@@ -1564,7 +1564,7 @@ describe('entityFacts', () => {
     expect(facts.links[0]).toBe('Branşı: Matematik');
     expect(facts.links[1]).toContain('1 dersi var');
     expect(facts.links[1]).toContain('510');
-    const placed = facts.rows.find((r) => r.label === 'Yerleşti')!;
+    const placed = facts.rows.find((r) => r.label === 'Yerleşmiş saat')!;
     expect(placed.value).toBe('2 / 4');
     // Half the lesson is still in the pool, and that is worth flagging where
     // the number is read rather than only in Kontrol.

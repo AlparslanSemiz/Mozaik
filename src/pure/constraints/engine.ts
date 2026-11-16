@@ -126,7 +126,7 @@ export function blockerDetail(
       const otherSubject = other && ix.teacherById.get(other.teacherId)?.subject;
       return {
         code: 'classBusy',
-        message: t('{sinif} sınıfının {gun} {saat} saatinde {ders} var', {
+        message: t('{sinif} sınıfının {gun} {saat}. saatte {ders} var', {
           sinif: group.name,
           gun: dayName(),
           saat: hourName,
@@ -139,7 +139,7 @@ export function blockerDetail(
     if (d.unavailable[closedKey(group.id, day, h)] !== undefined) {
       return {
         code: 'classClosed',
-        message: t('{sinif} sınıfı {gun} {saat} saatinde kapalı', {
+        message: t('{sinif} sınıfı {gun} {saat}. saatte kapalı', {
           sinif: group.name,
           gun: dayName(),
           saat: hourName,
@@ -151,7 +151,7 @@ export function blockerDetail(
     if (d.unavailable[closedKey(teacher.id, day, h)] !== undefined) {
       return {
         code: 'teacherClosed',
-        message: t('{kim} {gun} {saat} saatinde kapalı', {
+        message: t('{kim}, {gun} {saat}. saatte kapalı', {
           kim: teacher.short,
           gun: dayName(),
           saat: hourName,
@@ -166,7 +166,7 @@ export function blockerDetail(
       const otherClass = other && ix.classById.get(other.classId);
       return {
         code: 'teacherBusy',
-        message: t('{kim} {gun} {saat} saatinde {sinif} sınıfında', {
+        message: t('{kim}, {gun} {saat}. saatte {sinif} sınıfında', {
           kim: teacher.short,
           gun: dayName(),
           saat: hourName,
@@ -184,7 +184,7 @@ export function blockerDetail(
         const otherClass = other && ix.classById.get(other.classId);
         return {
           code: 'roomBusy',
-          message: t('{derslik} dersliğinde {gun} {saat} saatinde {sinif} var', {
+          message: t('{derslik} dersliğinde {gun} {saat}. saatte {sinif} var', {
             derslik: roomName,
             gun: dayName(),
             saat: hourName,
@@ -197,7 +197,7 @@ export function blockerDetail(
       if (d.unavailable[closedKey(group.roomId, day, h)] !== undefined) {
         return {
           code: 'roomClosed',
-          message: t('{derslik} dersliği {gun} {saat} saatinde kapalı', {
+          message: t('{derslik} dersliği {gun} {saat}. saatte kapalı', {
             derslik: roomName,
             gun: dayName(),
             saat: hourName,

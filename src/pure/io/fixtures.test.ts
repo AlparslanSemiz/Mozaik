@@ -724,8 +724,8 @@ describe('şema örnekleri — eksik ve bozuk alanlar', () => {
 });
 
 // THE ENVELOPE A REAL BACKUP ARRIVES IN (TP6, K2). Every file above is made up,
-// and the two real plans next to them are bare plans. What "Tümünü dosyadan
-// aç" reads is a bundle: `savedAt`, `activeId`, a named plan with its `draft`
+// and the two real plans next to them are bare plans. What "Bütün planları
+// dosyadan aç" reads is a bundle: `savedAt`, `activeId`, a named plan with its `draft`
 // flag, and inside it a v14 plan. This is the newest real one, the
 // 2026-09-04 bundle, with its names taken from `tam-dolu-kurs.json` by
 // `scripts/adsiz-paket.mjs` (same school, same ids). The numbers below are

@@ -68,7 +68,7 @@ test.describe('48. Varlık paneli', () => {
     await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
 
     const sheet = page.locator('.sheet');
-    const placed = sheet.locator('.sheet-facts > div', { hasText: 'Yerleşti' });
+    const placed = sheet.locator('.sheet-facts > div', { hasText: 'Yerleşmiş saat' });
     await expect(placed).toHaveClass(/tight/);
     await expect(placed.locator('dd')).toHaveText(/^0 \/ \d+$/);
 

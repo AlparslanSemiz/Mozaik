@@ -760,7 +760,7 @@ export function describeBar(
 
   if (done.stuck.length === 0) {
     return {
-      text: t('Program yapıldı: {n} saat yerleşti.', {
+      text: t('Kalan dizildi: {n} saat yerleşti.', {
         n: Object.keys(activePlacements(done.state)).length,
       }),
       level: 'ok',
@@ -768,18 +768,19 @@ export function describeBar(
   }
 
   const worst = done.stuck[0]!;
-  const others =
-    done.stuck.length > 1 ? t(' (ve {n} ders daha)', { n: done.stuck.length - 1 }) : '';
+  // Hours all through, as everywhere else on the screen: the strip, the pool
+  // and the chip count hours, and a "7/9 ders" beside "1 saat yerleşemedi"
+  // made the reader convert.
+  const left = done.stuck.slice(1).reduce((n, row) => n + row.missing, 0);
+  const others = left > 0 ? t(' (ve {n} saat daha)', { n: left }) : '';
+  const counts = {
+    yerlesen: Object.keys(activePlacements(done.state)).length,
+    toplam: done.state.lessons.reduce((n, lesson) => n + lesson.weeklyHours, 0),
+  };
   const head =
     done.phase === 'cancelled'
-      ? t('Durduruldu. {yerlesen}/{toplam} ders yerleşti.', {
-          yerlesen: done.placedBlocks,
-          toplam: done.totalBlocks,
-        })
-      : t('{yerlesen}/{toplam} ders yerleşti.', {
-          yerlesen: done.placedBlocks,
-          toplam: done.totalBlocks,
-        });
+      ? t('Durduruldu. {yerlesen} / {toplam} saat yerleşti.', counts)
+      : t('{yerlesen} / {toplam} saat yerleşti.', counts);
   return {
     text: t('{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.', {
       bas: head,

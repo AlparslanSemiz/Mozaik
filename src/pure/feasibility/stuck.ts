@@ -222,7 +222,7 @@ export function groupStranded(
 }
 
 /**
- * "Salı 10 saatinde", or "Salı 10, 11 · Çarşamba 3 saatlerinde": every hour
+ * "Salı 10. saatte", or "Salı 10, 11 · Çarşamba 3. saatlerde": every hour
  * once, each day named once. One hour keeps closed.ts's own words.
  */
 function when(d: State, hours: ClosedConflict[]): string {
@@ -234,8 +234,8 @@ function when(d: State, hours: ClosedConflict[]): string {
     else seen.push(name);
   }
   const named = [...days].map(([day, names]) => ({ gun: dayName(d, day), saat: names.join(', ') }));
-  if (hours.length === 1 && named[0] !== undefined) return t('{gun} {saat} saatinde', named[0]);
-  return t('{zaman} saatlerinde', {
+  if (hours.length === 1 && named[0] !== undefined) return t('{gun} {saat}. saatte', named[0]);
+  return t('{zaman}. saatlerde', {
     zaman: named.map((x) => `${x.gun} ${x.saat}`).join(' · '),
   });
 }
@@ -247,7 +247,7 @@ function dayName(d: State, day: number): string {
 /** closed.ts's three sentences, with every hour the one closer closed. */
 function closerSentence(ix: Index, who: Target, at: string): string {
   if (who.kind === 'teacher') {
-    return t('{kim} {ne_zaman} kapalı', {
+    return t('{kim}, {ne_zaman} kapalı', {
       kim: ix.teacherById.get(who.id)?.short ?? '?',
       ne_zaman: at,
     });

@@ -69,7 +69,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
       // 4. The bar says something a person can act on.
       const bar = page.locator('.reason-bar');
       if (world.want.solved) {
-        await expect(bar).toContainText('Program yapıldı');
+        await expect(bar).toContainText('Kalan dizildi');
         await expect(page.locator('.pool-card')).toHaveCount(0);
         for (const lesson of world.state.lessons) {
           expect(hoursOf(saved, lesson.id), `${world.name}: ${lesson.id}`).toBe(lesson.weeklyHours);

@@ -13,7 +13,7 @@ const TWO_TEACHERS = [
 
 describe('groupStranded', () => {
   it('iki saatlik dersi tek satır sayar ve iki saati de adlandırır', () => {
-    // The audit's case: "AY Çarşamba 1 saatinde kapalı" twice, under
+    // The audit's case: "AY, Çarşamba 1. saatte kapalı" twice, under
     // a heading that said "2 ders" for one lesson.
     const d = makeWorld({
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 }],
@@ -24,7 +24,7 @@ describe('groupStranded', () => {
     const rows = groupStranded(d, ix, closedConflicts(d, ix));
     expect(rows).toHaveLength(1);
     expect(rows[0]!.cells.map((c) => c.hour)).toEqual([0, 1]);
-    expect(rows[0]!.reason).toBe('MÇ Salı 1, 2 saatlerinde kapalı');
+    expect(rows[0]!.reason).toBe('MÇ, Salı 1, 2. saatlerde kapalı');
     expect(rows[0]!.closedBy).toEqual([{ kind: 'teacher', id: 'oMC' }]);
     expect(buildReport(d).stranded).toBe(1);
     expect(health(d).message).toContain('1 ders kapalı saatte');
@@ -38,7 +38,7 @@ describe('groupStranded', () => {
     });
     const ix = buildIndex(d);
     const [row] = groupStranded(d, ix, closedConflicts(d, ix));
-    expect(row!.reason).toBe('MÇ Salı 1 saatinde kapalı; 510 sınıfı Salı 3 saatinde kapalı');
+    expect(row!.reason).toBe('MÇ, Salı 1. saatte kapalı; 510 sınıfı Salı 3. saatte kapalı');
     expect(row!.closedBy.map((x) => x.kind)).toEqual(['teacher', 'class']);
   });
 

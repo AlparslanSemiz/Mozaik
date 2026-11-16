@@ -38,7 +38,7 @@ test.describe('22. Otomatik dizme', () => {
 
     await autoFill(page);
 
-    await expect(page.locator('.reason-bar')).toContainText('Program yapıldı');
+    await expect(page.locator('.reason-bar')).toContainText('Kalan dizildi');
     await expect(page.locator('.pool-card')).toHaveCount(0);
     expect(await placedHours(page)).toBeGreaterThan(400);
   });
@@ -118,7 +118,7 @@ test.describe('22. Otomatik dizme', () => {
     await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
     const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(`Program yapıldı: ${placed!}`);
+    await expect(bar).toContainText(`Kalan dizildi: ${placed!}`);
     const first = await week();
     expect(first).not.toBe(before);
     // One undo step brings the week before back.
@@ -327,9 +327,9 @@ test.describe('22. Otomatik dizme', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
-    await expect(bar).toContainText('Program yapıldı');
+    await expect(bar).toContainText('Kalan dizildi');
     await page.keyboard.press('Control+z');
-    await expect(bar).not.toContainText('Program yapıldı');
+    await expect(bar).not.toContainText('Kalan dizildi');
   });
 
   // DK5: Durdur during the suggestion search used to leave "Sınıfların
@@ -375,7 +375,7 @@ test.describe('22. Otomatik dizme', () => {
       // The bar still says what happened; the panel says what to do about it.
       const bar = page.locator('.reason-bar.bad');
       await expect(bar).toContainText('yerleşemedi', { timeout: 60_000 });
-      await expect(bar).not.toContainText('sınıfı Salı 1 saatinde kapalı');
+      await expect(bar).not.toContainText('sınıfı Salı 1. saatte kapalı');
       const panel = page.locator('.panel.suggestions');
       await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
       const fewest = panel.locator('li[data-family="teacherHours"]');

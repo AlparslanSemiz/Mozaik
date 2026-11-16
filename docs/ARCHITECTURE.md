@@ -170,7 +170,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
 | `platform/prefs/theme.ts` | tema, açık ya da koyu; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
-| `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
+| `platform/prefs/ribbon.ts` | düğme satırı: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
@@ -225,7 +225,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `ui/ribbon/index.tsx` | sekmeye göre araç şeridi: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
+| `ui/ribbon/index.tsx` | sekmeye göre düğme satırı: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
 | `ui/ribbon/parts.tsx` | şeritlerin ortak parçaları (`Group`, `Sep`, `Spacer`, `ICON`) ve şerit fonksiyonlarının aldığı `StripContext`. Şeritler bileşen değil fonksiyon: sekme değişince React aynı `.ribbon` öğesini yeniden kullanır |
 | `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `ProgramStrip`, `PeopleStrip` (Öğretmenler ve Sınıflar), `PrintStrip`, `SettingsStrip` (Okul bilgileri) |
 | `ui/common/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |

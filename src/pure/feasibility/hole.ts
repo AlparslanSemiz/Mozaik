@@ -67,10 +67,10 @@ export function holeReason(d: State, ix: Index, lessonId: Id): string | null {
           );
           return siblings
             ? t(
-                'Tek başına {gun} {saat} saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor',
+                'Tek başına {gun} {saat}. saate sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor',
                 where,
               )
-            : t('{gun} {saat} saatine sığıyor, arama oraya varmadan durdu', where);
+            : t('{gun} {saat}. saate sığıyor, arama oraya varmadan durdu', where);
         }
         const seen = counts.get(found.code);
         if (seen === undefined) counts.set(found.code, { count: 1, message: found.message });

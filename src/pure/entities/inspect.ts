@@ -156,7 +156,7 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     rows: [
       { label: t('Ders'), value: t('{n} saat', { n: load }), tight: load > open },
       {
-        label: t('Yerleşti'),
+        label: t('Yerleşmiş saat'),
         value: `${placed} / ${load}`,
         tight: placed < load,
       },

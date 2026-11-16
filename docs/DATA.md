@@ -133,7 +133,7 @@ Bu bilgisayarın deposundaki bir plan üç cevaptan birini verir: yok, okundu, o
 geçişinde ve silmeden sonra açılan planda ekrana boş bir yer tutucu gelir, kırmızı şerit
 nedenini söyler, ve ne otomatik kayıt ne klasör o anahtarın üstüne yazar. Dondurmayı yalnız
 kullanıcının açık bir eylemi kaldırır: "Dosyadan aç" ya da "Her şeyi sil" ile o planın yerine
-bir şey koymak, planı Planlar'dan silmek, ya da "Tümünü dosyadan aç". 2026-10-24'e kadar
+bir şey koymak, planı Planlar'dan silmek, ya da "Bütün planları dosyadan aç". 2026-10-24'e kadar
 okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i,
 tuzak 153).
 
@@ -210,7 +210,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-arayuz-yogunluk` | arayüzün yoğunluğu, aynı sebeple tarihsel |
 | `ders-programi-havuz` | havuz çekmecesi açık mı |
 | `ders-programi-havuz-boy` | havuz çekmecesinin boyu, rem |
-| `ders-programi-serit` | araç şeridi açık mı |
+| `ders-programi-serit` | düğme satırı açık mı |
 | `ders-programi-serit-gizle` | şerit kaydırınca gizlensin mi |
 | `ders-programi-musaitlik-saat` | Müsaitlik'te saatlerin gösterilmesi, 2026-11-16'dan beri okunmuyor (K1, sekme kalktı; kişi sayfası saati hep gösterir); tarihsel |
 | `ders-programi-hareket` | hareket (`tam`, `az`, `kapali`) |
@@ -242,7 +242,7 @@ Sitede iş taşıyan ilk değişiklikte bir kez `navigator.storage.persist()` is
 
 Depo kökene bağlı: aynı tarayıcıda `alparslansemiz.github.io` ile
 `mozaik.alparslansemiz.com` iki ayrı depo. Eski adresten yeni adrese geçiş planları bir
-paket olarak kopyalar ve yeni adres Tümünü dosyadan aç'ın sorusuyla sorar
+paket olarak kopyalar ve yeni adres Bütün planları dosyadan aç'ın sorusuyla sorar
 (`move.ts`, [BUILD.md](BUILD.md) "Alan adına geçiş"); eski adresteki anahtarlar yerinde
 kalır.
 
@@ -302,7 +302,7 @@ her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden ge�
 bozuk ya da daha yeni bir plan açılmaz ve buradaki aynı kimlikli plan kalır. Açılmayacak
 planları onay sorusu sayar; daha yeni bir programın yazdığı planları ayrı sayar ve onlar için
 programın güncellenmesini söyler, "eksik ya da bozuk" demez (`newer`, TODO B7.34). Hiçbir plan
-okunamıyorsa soru sorulmaz ve hiçbir şey değişmez. Paket olmayan bir dosya "Tümünü dosyadan
+okunamıyorsa soru sorulmaz ve hiçbir şey değişmez. Paket olmayan bir dosya "Bütün planları dosyadan
 aç"a verilince üst çubuğa yalnız tek bir plansa yollanır (üst çubuğun kendi gerekçesiyle
 reddedeceği eksik ya da yeni bir plan da); yarım kalmış ya da JSON olmayan dosya için
 "okunamadı" denir (TODO B7.35).
@@ -341,7 +341,7 @@ klasöre yazılmadan önce klasöre bakılır (`newestInFolder`): canlı dosya, 
 yoksa en dolu günlük; bakılırken de hiçbir şey yazılmaz. Orada iş varsa (`workOf`: dört listenin
 satırları, öğretmen, ders ve yerleşmiş saatler) klasöre hiçbir şey yazılmaz, Ayarlar'ın klasör
 satırı kırmızıdır ve bir şerit dosyanın adını, öğretmen ve ders sayısını söyler,
-iki düğmeyle: "Belgelerim'deki son kaydı aç" dosyayı "Tümünü dosyadan aç" gibi açar (okunamayan
+iki düğmeyle: "Belgelerim'deki son kaydı aç" dosyayı "Bütün planları dosyadan aç" gibi açar (okunamayan
 dondurulmuş bir plan anahtarında kalır), "Boş başla" yazmayı serbest bırakır. İş taşıyan bir yazım
 canlı dosyanın ya da günün yedeğinin dört liste satırının yarısının altına düşürüyorsa (`shrinks`;
 yerleşim sayılmaz, "Programı boşalt" bilerek siler) ikisine de yazılmaz: paket günün kurtarma

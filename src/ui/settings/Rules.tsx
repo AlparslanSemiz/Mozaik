@@ -190,7 +190,7 @@ export default function Rules({ state, change }: PanelProps) {
                 <tr>
                   <th>{t('Öğretmen')}</th>
                   <th className="num">{t('Art arda')}</th>
-                  <th className="num">{t('Günde en çok')}</th>
+                  <th className="num">{t('Günde en fazla')}</th>
                   <th className="num">{t('Günde en az')}</th>
                 </tr>
               </thead>

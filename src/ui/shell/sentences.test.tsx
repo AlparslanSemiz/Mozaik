@@ -182,16 +182,16 @@ describe('cümle · engelin sebebi', () => {
 
     expect(cumleler).toMatchInlineSnapshot(`
       {
-        "classBusy": "510 sınıfının Salı 1 saatinde Matematik var",
-        "classClosed": "510 sınıfı Çarşamba 1 saatinde kapalı",
+        "classBusy": "510 sınıfının Salı 1. saatte Matematik var",
+        "classClosed": "510 sınıfı Çarşamba 1. saatte kapalı",
         "dayEnd": "2 saatlik ders güne sığmıyor",
         "maxConsecutive": "AV art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
         "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
-        "roomBusy": "A dersliğinde Salı 1 saatinde 510 var",
-        "roomClosed": "A dersliği Çarşamba 1 saatinde kapalı",
-        "teacherBusy": "MÇ Salı 1 saatinde 510 sınıfında",
-        "teacherClosed": "MÇ Çarşamba 1 saatinde kapalı",
+        "roomBusy": "A dersliğinde Salı 1. saatte 510 var",
+        "roomClosed": "A dersliği Çarşamba 1. saatte kapalı",
+        "teacherBusy": "MÇ, Salı 1. saatte 510 sınıfında",
+        "teacherClosed": "MÇ, Çarşamba 1. saatte kapalı",
       }
     `);
   });
@@ -261,9 +261,9 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-havuz · havuz çekmecesi tercihi",
         "ders-programi-havuz-boy · havuz çekmecesinin boyu",
         "ders-programi-serit · düğme satırı tercihi",
-        "ders-programi-serit-gizle · şerit kaydırınca gizlensin mi",
-        "ders-programi-musaitlik-saat · müsaitlikte saat gösterimi",
-        "ders-programi-hareket · hareket (animasyon) tercihi",
+        "ders-programi-serit-gizle · düğme satırı kaydırınca gizlensin mi",
+        "ders-programi-musaitlik-saat · kişi sayfasında saat gösterimi (artık kullanılmıyor)",
+        "ders-programi-hareket · ekran hareketleri tercihi",
         "ders-programi-tanitim · örnek okul satırı görüldü mü",
         "ders-programi-ilk-adimlar · Başlarken listesi açık mı",
         "ders-programi-baski · kâğıt seçenekleri",

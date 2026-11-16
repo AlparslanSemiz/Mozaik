@@ -295,7 +295,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
 
     const closed = await hover(page, 0, 0);
     await expect(closed).toHaveClass(/drop-blocked/);
-    await expect(page.locator('.reason-bar')).toContainText('510 sınıfı Salı 1 saatinde kapalı');
+    await expect(page.locator('.reason-bar')).toContainText('510 sınıfı Salı 1. saatte kapalı');
 
     const free = await hover(page, 0, 1);
     await expect(free).toHaveClass(/drop-ok/);
@@ -316,7 +316,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
     await expect(await hover(page, 0, 0)).toHaveClass(/drop-blocked/);
-    await expect(page.locator('.reason-bar')).toContainText('A dersliği Salı 1 saatinde kapalı');
+    await expect(page.locator('.reason-bar')).toContainText('A dersliği Salı 1. saatte kapalı');
     await page.mouse.up();
   });
 
