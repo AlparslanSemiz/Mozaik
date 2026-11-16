@@ -87,14 +87,14 @@ export default function Notices({
         <div className="update-bar" role="status">
           <span>
             {move.toFile ? (
-              <T k="**Yeni adres planları alamadı.** Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → **Tümünü dosyadan aç** ile açın." />
+              <T k="**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın." />
             ) : moved ? (
-              <T k="**Planlar yeni adrese taşındı.** Bundan sonra Mozaik'i yeni adresinden açın:" />
+              <T k="**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:" />
             ) : moving ? (
               <T k="Yeni adres açıldı. Oradaki soruyu cevaplayın." />
             ) : (
               <>
-                <T k="**Mozaik yeni adresine taşındı.** Planlarınızı oraya götürmek için **Planları taşı** düğmesine basın; burada da kalırlar." />
+                <T k="**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır." />
                 {(ms?.ad === 'kapandi' || (ms?.ad === 'bitti' && ms.durum === 'vazgecildi')) &&
                   ` ${t('Hiçbir plan taşınmadı.')}`}
               </>

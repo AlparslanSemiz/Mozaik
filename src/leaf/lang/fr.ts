@@ -1930,23 +1930,10 @@ const FR: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan à l’identifiant manquant ou répété : {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Ce plan plus petit remplace le dernier fichier de plan du dossier. L’ancien état reste dans les sauvegardes quotidiennes.",
-  // Moving to the new address and the plan-file reminder (2026-11-16).
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
   "son plan dosyasının tarihi":
     "date du dernier fichier de plan",
-  "Eski adresteki planlar buraya gelsin mi?":
-    "Ramener ici les plans de l’ancienne adresse ?",
-  "**Yeni adres planları alamadı.** Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → **Tümünü dosyadan aç** ile açın.":
-    "**La nouvelle adresse n’a pas pu recevoir les plans.** Tous les plans ont été écrits dans un fichier de plan (Téléchargements). À la nouvelle adresse, ouvrez-le avec Réglages → Plans et sauvegarde → **Tout ouvrir depuis un fichier**.",
-  "**Planlar yeni adrese taşındı.** Bundan sonra Mozaik'i yeni adresinden açın:":
-    "**Les plans sont passés à la nouvelle adresse.** Désormais, ouvrez Mozaik à sa nouvelle adresse :",
-  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
-    "La nouvelle adresse est ouverte. Répondez à la question là-bas.",
-  "**Mozaik yeni adresine taşındı.** Planlarınızı oraya götürmek için **Planları taşı** düğmesine basın; burada da kalırlar.":
-    "**Mozaik a déménagé à une nouvelle adresse.** Pour y emporter vos plans, appuyez sur **Déplacer les plans** ; ils restent aussi ici.",
-  "Hiçbir plan taşınmadı.":
-    "Aucun plan n’a été déplacé.",
-  "Planları taşı":
-    "Déplacer les plans",
   "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
     "**Ce plan n’a pas de fichier de plan.** Ce que vous avez fait n’est que dans ce navigateur.",
   "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":

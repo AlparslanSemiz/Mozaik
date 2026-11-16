@@ -1906,23 +1906,10 @@ const EN: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Nothing is written to the folder until you choose.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
-  // Moving to the new address and the plan-file reminder (2026-11-16).
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
   "son plan dosyasının tarihi":
     "date of the last plan file",
-  "Eski adresteki planlar buraya gelsin mi?":
-    "Bring the plans from the old address here?",
-  "**Yeni adres planları alamadı.** Bütün planlar bir plan dosyasına yazıldı (İndirilenler). Yeni adreste Ayarlar → Planlar ve yedek → **Tümünü dosyadan aç** ile açın.":
-    "**The new address could not take the plans.** All plans were written to a plan file (Downloads). At the new address, open it with Settings → Plans and backup → **Open all from file**.",
-  "**Planlar yeni adrese taşındı.** Bundan sonra Mozaik'i yeni adresinden açın:":
-    "**The plans have moved to the new address.** From now on, open Mozaik at its new address:",
-  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
-    "The new address has opened. Answer the question there.",
-  "**Mozaik yeni adresine taşındı.** Planlarınızı oraya götürmek için **Planları taşı** düğmesine basın; burada da kalırlar.":
-    "**Mozaik has moved to a new address.** To take your plans there, press **Move plans**; they also stay here.",
-  "Hiçbir plan taşınmadı.":
-    "No plan was moved.",
-  "Planları taşı":
-    "Move plans",
   "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
     "**This plan has no plan file.** What you have done is only in this browser.",
   "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
