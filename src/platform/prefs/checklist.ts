@@ -50,6 +50,17 @@ export function writeChecklist(next: ChecklistPref): void {
   checklistPreference.write(next);
 }
 
+/** The event a Başlarken on screen listens for (`openChecklist`). */
+export const CHECKLIST_REOPEN = 'mozaik-baslarken';
+
+/** "? → Başlarken" and Okul's Daha fazla: shows the list again, from
+ *  anywhere. A Checklist on screen hears the event; one mounted later reads
+ *  the preference. */
+export function openChecklist(): void {
+  writeChecklist({ ...readChecklist(), show: 'acik' });
+  window.dispatchEvent(new Event(CHECKLIST_REOPEN));
+}
+
 /** Called by Çıktı's Yazdır button: the last step ticks itself. */
 export function markPrinted(): void {
   const now = readChecklist();
