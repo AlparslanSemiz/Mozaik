@@ -23,7 +23,7 @@ import {
   taughtOn,
   weekChanges,
 } from '../../pure/dated';
-import { useAnnounce, useReturnFocus, useT } from '../common';
+import { sheetHead, useAnnounce, useReturnFocus, useT } from '../common';
 import { usePrintNow } from '../print';
 
 type Change = (apply: (d: State) => State, label?: string) => void;
@@ -136,7 +136,7 @@ export function DayDialog({
           }}
           onCloseAutoFocus={returnFocus}
         >
-          <div className="sheet-head">
+          <div className="sheet-head" ref={sheetHead}>
             <div className="sheet-id">
               <Dialog.Title className="sheet-title">{title}</Dialog.Title>
               <span className="sheet-kind">{t('İkame listesi')}</span>

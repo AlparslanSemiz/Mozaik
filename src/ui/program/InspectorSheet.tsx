@@ -55,6 +55,7 @@ import {
   MoreMenu,
   MoreSep,
   MoreSub,
+  sheetHead,
   T,
   useDialogs,
   useKeepBefore,
@@ -831,7 +832,7 @@ export function Inspector({
         >
           {target === null ? null : (
             <>
-              <div className="sheet-head">
+              <div className="sheet-head" ref={sheetHead}>
                 <span
                   className={(view?.facts.short.length ?? 0) > 3 ? 'sheet-mark long' : 'sheet-mark'}
                   style={
