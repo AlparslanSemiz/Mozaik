@@ -103,6 +103,37 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
 
+## 2026-11-16 · Açılışın ana iş parçacığı (`hiz/acilis`)
+
+`origin/main` + `olcum/acilis` (PR #77, `acilis.yml`). Ölçüm Chromium'da CDP izi ve
+`scripts/acilis-olc.mjs` ile, 4× CPU, `file://`, babanın haftası (`tam-dolu-kurs-dizili.json`).
+Mac yüklüydü (yük 15–28), sayılar yalnız göreli; temiz sayı CI'ın.
+
+**Büyük görevler neydi** (tabandaki iz, 4×): (a) React'in ilk çizimi + commit + çekmecenin
+yerleşim etkisinin (`LessonPool` `fit`) zorladığı ilk yerleşim, tek görev ~435–460 ms (script
+~140, stil+yerleşim ~280); (b) ilk kare ~780 ms: `gridFit` `--cell-min`'i yazıp `--head-min`'i
+ölçerken tabloyu baştan yerleştirdi (stil 3348 öğe ~100–130 + yerleşim ~230), `--head-min` yazısı
+karenin kendi geçişinde bir daha (~320), `--wrap-w` bir stil geçişi daha (~37); (c) Plex `data:`
+yüzü ancak ilk yerleşimde istendiği için ~700 ms sonra geliyor, sayfa ve tabanlar bir kez daha
+(tuzak 220). Script derleme ve durumun ayrıştırılması küçük (EvaluateScript ~30, `parseState` ~17,
+sağlık raporu ~38, zaten paylaşılan tek kopya). Gizli sekmeler çizilmiyor.
+
+**Ne değişti:** iki taban önce okunup sonra yazılıyor; ilk taban ilk boyamadan sonra, tablo o
+kareye kadar `data-fitting` ile gizli, `gridFit` yerleşim etkisinde tutturuluyor (tuzak 221);
+`document.fonts.load` açılışta; ilk çizim `startTransition` içinde. `acilis-olc.mjs`'in `izgara`'sı
+artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son geometri iki derlemede aynı
+(`--cell-min` 32px, `--head-min` 73px, tablo 2410×695, bütün `col` genişlikleri, 1920 ve 1366).
+
+**Yerel, 9 dönüşümlü koşu, medyan (taban → dal, ms):** enUzun 682 → 278 (−59 %), tbt 1481 → 416
+(−72 %), uzun 1731 → 766, fcp 1580 → 928, izgara (görünür) 1204 → 1031 (−14 %), load değişmedi
+sayılır. Dal izinde görevler: 64 + 37 (çizim dilimleri), ~290–310 (commit + ilk yerleşim, en
+uzunu), 66 (ilk kare), 126 (tabanlar + açılış). CI sayısı: yazılacak (taban medyanları
+#77'nin koşusundan: load 383–405, fcp ~1000, izgara ~890–940, tbt ~770–820, enUzun ~460–490).
+
+**Kalan.** En uzun görev artık sayfanın ilk tam yerleşimi (~290 ms yerelde): 3348 öğenin ilk
+stili ve tablo. 200 ms'nin altı ya ızgaranın DOM'unu inceltmek (2937 öğe) ya da tabanları depoda
+saklayıp ilk yerleşimden önce yazmak ister (DECISIONS'ta (3); karar bekliyor).
+
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 
 `origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,
