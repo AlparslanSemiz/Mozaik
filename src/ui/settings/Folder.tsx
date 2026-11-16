@@ -24,24 +24,28 @@ export function Folder({ folder }: { folder: FolderRun }) {
 
   return (
     <div className="panel">
-      {s.kind === 'yok' ? (
+      {/* In the exe the sentence is not help but the answer to "where is
+          my work", so it stays on view; in a browser the offer's
+          explanation is behind the "?" (Sadeleşme, 2026-11-16). */}
+      {s.kind === 'yok' || folder.fixed ? (
         <h2>{t('Nereye kaydedilsin')}</h2>
       ) : (
         <HelpHead topic="Nereye kaydedilsin">
           <p>
-            {folder.fixed ? (
-              <T
-                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            ) : (
-              <T
-                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            )}
+            <T
+              k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
+              vars={{ gun: KEEP_DAILY }}
+            />
           </p>
         </HelpHead>
+      )}
+      {folder.fixed && s.kind !== 'yok' && (
+        <p className="hint">
+          <T
+            k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
+            vars={{ gun: KEEP_DAILY }}
+          />
+        </p>
       )}
 
       {s.kind === 'yok' ? (

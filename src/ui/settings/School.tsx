@@ -20,7 +20,7 @@ import {
   type SettingsLoss,
 } from '../../pure/entities';
 import type { Day, State } from '../../leaf/model';
-import { useDialogs, Field, type PanelProps, T, useT } from '../common';
+import { useDialogs, Field, HelpHead, type PanelProps, T, useT } from '../common';
 
 /**
  * The week with one weekday added or removed, in calendar order, or null when
@@ -246,12 +246,13 @@ export default function School({ state, change }: PanelProps) {
         </div>
 
         <div className="panel">
-          <h2>{t('Günün saatleri')}</h2>
-          <p className="hint">
-            {t(
-              'Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.',
-            )}
-          </p>
+          <HelpHead topic="Günün saatleri">
+            <p>
+              {t(
+                'Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.',
+              )}
+            </p>
+          </HelpHead>
           <div className="form-row">
             <Field label={t('Günlük saat sayısı')}>
               <input
@@ -372,10 +373,13 @@ export default function School({ state, change }: PanelProps) {
           are still being typed. */}
       <aside>
         <div className="panel">
-          <h2>{t('Zil saatleri')}</h2>
-          <p className="hint">
-            {t('Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.')}
-          </p>
+          <HelpHead topic="Zil saatleri">
+            <p>
+              {t(
+                'Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.',
+              )}
+            </p>
+          </HelpHead>
 
           {/* Twelve lessons and their breaks, and on a short window that is
               taller than the panel: the one box here that can outgrow the
