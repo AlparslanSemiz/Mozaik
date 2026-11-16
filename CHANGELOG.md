@@ -73,6 +73,9 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- In the .exe, downloading an update no longer gives up after five minutes in all, which a slow line could never beat for the 31 MB installer: it stops only when no data arrives for a minute, and Settings → About shows how far it is.
+- "Yeni hâlini asıl dosya yap" now applies to that one save. A later deletion of most of the plan in the same session is again kept out of the folder's main file.
+- Rescue and before-deletion files in the folder no longer pile up: the newest ten of each kind are kept.
 - If the app opens empty while the folder (Belgelerim\Ders Programı in the .exe) holds a fuller plan file, a strip says so, with "Belgelerim'deki son kaydı aç" (open it) and "Boş başla" (start empty); nothing is written to the folder until one is pressed. Before this, a wiped app profile opened empty, the first teacher typed in went over the whole school in the folder's main file and today's backup, and on each following day one more real daily backup was pruned.
 - A change that would leave the plan with under half the rooms, teachers, classes and lessons of the folder's last file no longer goes over it: it is written to that day's rescue file (`ders-programi-kurtarma-YYYY-MM-DD.json`) and a strip says so, with buttons to open the folder's copy or, after a question, keep the smaller plan. The daily backup with the most work in it is never pruned.
 - Deletions that ask no question (class, room, subject, option, teacher, lesson, "Empty the timetable", "Lay out again"), "Delete everything", the sample school over a plan and "Open from file" now keep the plan as it was before them. After a reload, if the plan has not changed since, a strip offers it once: "Son silmeyi geri almak için: Geri getir". Before this their undo lived only in memory and a reload lost it. In a folder the copy is also written as that day's `ders-programi-silmeden-once-YYYY-MM-DD.json`.

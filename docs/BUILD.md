@@ -796,11 +796,14 @@ yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini ke
 yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
-taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. Kurulmamış bir kopyaya
+taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. İndirmenin toplam süre
+sınırı yok: bağlantıya 20 s, hiç bayt gelmeyen 60 s'de bırakılır, Ayarlar yüzdeyi gösterir
+(2026-11-16'ya kadar toplam 300 s'ydi, tuzak 172). Kurulmamış bir kopyaya
 kurulum aynı sürümde de önerilir (`gecis`, `windows_karari`; 2026-11-16): sahadaki 2.2.0 tek
 dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 161). Güncellemeden sonraki
 ilk açılışta şerit bunu bir kez söyler (`guncelleme_durumu`, ağsız). "Şimdi kur" kurulumu
-kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kurulum-bekleyici.exe`)
+kendisi çalıştırmaz: kurulumun kendi taze geçici klasörüne kopyalanan bir bekleyici
+(`Mozaik-kurulum-bekleyici.exe`, `bekleyici_yolu`; 2026-11-16'ya kadar sabit bir `%TEMP%` yolu)
 programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
 ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 163). Eski dosya
 silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,
