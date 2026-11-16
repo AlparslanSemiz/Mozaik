@@ -207,11 +207,18 @@ export const CP_FULL_SECONDS = 20;
  * closed on 4 workers in 120 s, with this list and cpModel.ts it closed in
  * 1.1-2.3 s (MEASURED 2026-11-15, 3 seeds, kirli). Names are OR-Tools
  * v9.15's; a version bump checks them.
+ *
+ * THE ORDER IS THE POINT (2026-11-16). CP-SAT fills its workers from this
+ * list in order, so with fewer workers than names the tail is what goes, and
+ * a two-core machine (the father's may be one; `relaxPool.ts` asks with at
+ * least two) would have run `default_lp` and `max_lp_sym` without `core`. So
+ * the two proof-giving ones come first. Read from the audit, not measured on
+ * two workers.
  */
 export const CP_PROOF_SUBSOLVERS: readonly string[] = [
-  'default_lp',
   'max_lp_sym',
   'core',
+  'default_lp',
   'quick_restart',
 ];
 /**

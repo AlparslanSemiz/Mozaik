@@ -70,7 +70,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `leaf/model/email.ts` | öğretmenin e-posta adresi (şema v17): saklanan adresin temizliği (`cleanEmail`), tek adrese benzerlik (`looksLikeEmail`) ve `mailto:` bağlantısı (`mailtoUrl`) |
 | `leaf/model/keys.ts` | sözlük anahtarları, motorun dosyaları ile `rules.ts` birbirini import etmesin diye |
 | `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
-| `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
+| `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi, ve derlenmiş dosyanın paketli sözlüğünü ilk istenişte açan `sozlukOf`. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
 | `leaf/preference/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
 | `leaf/lang/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
 | `leaf/model/subjects.ts` | bir şeyin hangi branştan olduğu |
