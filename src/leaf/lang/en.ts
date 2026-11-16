@@ -1906,6 +1906,14 @@ const EN: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Nothing is written to the folder until you choose.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
+
+  // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Another layout",
+  "Program yeniden dizildi, {n} saat yer değiştirdi.": "Laid out again; {n} {n:hour|hours} moved.",
+  "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim}: {yuk} hours of lessons, {acik} available; {fazla} more must be opened",
+  "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} hours of lessons, {acik} open; {fazla} more must be opened",
+  "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Room {derslik}: {yuk} hours of lessons, {acik} open; open {fazla} more or move a class to another room",
+  "{bir} ile {iki} aynı güne konmamalı: {n1} + {n2} gün gerekiyor, {g} gün var": "{bir} and {iki} may not share a day: {n1} + {n2} days are needed, there are {g}",
   // The plan-file reminder and the move to the new address (2026-11-16).
   "son plan dosyasının tarihi":
     "date of the last plan file",

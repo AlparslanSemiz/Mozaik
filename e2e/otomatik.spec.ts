@@ -91,13 +91,37 @@ test.describe('22. Otomatik dizme', () => {
     await expect(cards).toHaveCount(first - 1);
   });
 
+  test('"Başka bir dizilim" aynı kartlarla başka bir hafta diziyor', async ({ page }) => {
+    await openWithSample(page);
+    await autoFill(page);
+    const bar = page.locator('.reason-bar');
+    // "N kart yerleşti": the count of cards, not of drawn pieces (a double
+    // over the long break is drawn in two).
+    const placed = /\d+ kart yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
+    expect(placed).toBeDefined();
+    const week = () =>
+      page
+        .locator('table.grid td[data-row]')
+        .evaluateAll((tds) => tds.map((td) => td.textContent ?? '').join('|'));
+    const before = await week();
+
+    await page.getByRole('button', { name: 'Başka bir dizilim' }).click();
+    const notice = page.locator('.toast', { hasText: 'baştan dizildi' });
+    await expect(notice).toBeVisible({ timeout: 30_000 });
+    await expect(bar).toContainText(`Program dizildi. ${placed!}`);
+    expect(await week()).not.toBe(before);
+    // One undo step brings the week before back.
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect.poll(week).toBe(before);
+  });
+
   test('havuz boşken "Otomatik diz" kapalı', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
     await expect(page.getByRole('button', { name: /^Otomatik diz/ })).toBeDisabled();
   });
 
-  test('yerleşemeyen dersin sebebini blocker cümlesiyle söylüyor', async ({ page }) => {
+  test('yerleşemeyen dersin sebebini öğretmenin açığıyla söylüyor', async ({ page }) => {
     await openWithSample(page);
 
     // Close one teacher's whole week: their lessons have nowhere to go.
@@ -112,7 +136,8 @@ test.describe('22. Otomatik dizme', () => {
 
     const bar = page.locator('.reason-bar');
     await expect(bar).toContainText('yerleşemedi');
-    await expect(bar).toContainText('müsait değil');
+    // The shortfall itself (2026-11-16), not one closed hour of it.
+    await expect(bar).toContainText(/\d+ saat ders, 0 müsait saat; \d+ saat açılmalı/);
     await expect(bar).toContainText('Ayrıntı: Kontrol sekmesi.');
   });
 
