@@ -2,7 +2,7 @@
 // plan is written from then on.
 
 import { type FolderRun, KEEP_DAILY, MAIN_NAME, storageKind } from '../../platform/storage';
-import { T, useT } from '../common';
+import { HelpHead, T, useT } from '../common';
 
 /**
  * "Nereye kaydedilsin" (task B4).
@@ -24,7 +24,21 @@ export function Folder({ folder }: { folder: FolderRun }) {
 
   return (
     <div className="panel">
-      <h2>{t('Nereye kaydedilsin')}</h2>
+      <HelpHead topic="Nereye kaydedilsin">
+        <p>
+          {folder.fixed ? (
+            <T
+              k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
+              vars={{ gun: KEEP_DAILY }}
+            />
+          ) : (
+            <T
+              k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
+              vars={{ gun: KEEP_DAILY }}
+            />
+          )}
+        </p>
+      </HelpHead>
 
       {s.kind === 'yok' ? (
         <>
@@ -36,7 +50,7 @@ export function Folder({ folder }: { folder: FolderRun }) {
               screen makes both copies read like boilerplate (and made a test
               ambiguous — pitfall 49). */}
           <p className="hint">
-            <T k="O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare." />
+            <T k="O zamana kadar üst çubuktaki **Kaydet** tek çare." />
           </p>
         </>
       ) : (
@@ -46,19 +60,6 @@ export function Folder({ folder }: { folder: FolderRun }) {
               that costs a click and a permission; in the exe it has already
               happened, and a "Klasör seç…" button there would be three
               controls that cannot mean anything. */}
-          <p className="hint">
-            {folder.fixed ? (
-              <T
-                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            ) : (
-              <T
-                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            )}
-          </p>
 
           {!folder.fixed && (
             <div className="form-row">

@@ -10,7 +10,7 @@
 // twenty classes.
 
 import { useMemo } from 'react';
-import { useDialogs, type PlanControls, T, useT } from '../common';
+import { HelpHead, useDialogs, type PlanControls, T, useT } from '../common';
 import { emptyState, planSummary } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/io';
 import { loadPlan, unreadablePlan } from '../../platform/storage';
@@ -87,18 +87,19 @@ export default function Plans({ state, plans }: Props) {
 
   return (
     <div className="panel">
-      <h2>{t('Planlar ({n})', { n: library.plans.length })}</h2>
-      <p className="hint">
-        <T k="Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir." />
-      </p>
+      <HelpHead topic={t('Planlar ({n})', { n: library.plans.length })}>
+        <p>
+          <T k="Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir." />
+        </p>
+        <p>
+          <T k="Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır." />
+        </p>
+      </HelpHead>
 
       {/* The way to ADD one comes before the list of what there is — the rule
           every setup step already follows, and the only panel in the app that
           had it the other way round. */}
       <h3>{t('Yeni plan')}</h3>
-      <p className="hint">
-        <T k="Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır." />
-      </p>
       <div className="form-row">
         <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
           {t('Boş plan')}

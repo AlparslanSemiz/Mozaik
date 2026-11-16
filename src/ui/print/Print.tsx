@@ -34,7 +34,7 @@ import {
   type PrintOptions,
 } from '../../platform/prefs';
 import Sheet from './Sheet';
-import { NextStep, T, useT } from '../common';
+import { HelpHead, NextStep, T, useT } from '../common';
 import MailPanel from './MailPanel';
 
 interface Props {
@@ -297,10 +297,11 @@ export default function Print({
 
       <aside>
         <div className="panel no-print">
-          <h2>{t('Çıktı')}</h2>
-          <p className="hint">
-            <T k="Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin." />
-          </p>
+          <HelpHead topic="Çıktı">
+            <p>
+              <T k="Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin." />
+            </p>
+          </HelpHead>
           {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
               button stayed, because the page COUNT comes from the tick lists
               right below it. */}
@@ -350,10 +351,9 @@ export default function Print({
             the reader's own adjustment on top of it. One knob would have had
             no room for "biraz daha büyük olsun". */}
         <div className="panel no-print">
-          <h2>{t('Sayfa düzeni')}</h2>
-          <p className="hint">
-            {t('Bir A4 kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun.')}
-          </p>
+          <HelpHead topic="Sayfa düzeni">
+            <p>{t('Bir A4 kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun.')}</p>
+          </HelpHead>
 
           <h3>{t('Bir kâğıda kaç program')}</h3>
           <div className="form-row">
@@ -369,10 +369,10 @@ export default function Print({
               </button>
             ))}
           </div>
+          {/* The sheet count is on the Yazdır button and only there: one
+              count per screen (Sadeleşme, 2026-11-16). */}
           <p className="hint">
             {t(PER_SHEET_LABELS.find((x) => x.value === options.perSheet)?.hint ?? '')}
-            {' · '}
-            <T k="**{n}** kâğıt" vars={{ n: Math.ceil(pageCount / options.perSheet) }} />
           </p>
 
           <h3>{t('Kâğıttaki yazı')}</h3>
@@ -395,8 +395,9 @@ export default function Print({
             buttons do not fit a strip that is already measured for spill at
             150%, and this is a term-long decision, not a per-glance one. */}
         <div className="panel no-print">
-          <h2>{t('Sayfada ne olsun')}</h2>
-          <p className="hint">{t('İşareti kaldırılan şey kâğıda basılmaz.')}</p>
+          <HelpHead topic="Sayfada ne olsun">
+            <p>{t('İşareti kaldırılan şey kâğıda basılmaz.')}</p>
+          </HelpHead>
           <div className="form-col">
             {PRINT_OPTION_LABELS.map((x) => (
               <label key={x.id} className="pick-item">

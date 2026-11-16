@@ -86,7 +86,7 @@ const GROUPED: Record<Advice['code'], string> = {
   teacherManyBlockedDays:
     '{n} öğretmenin müsait günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
   lessonManyBlocks:
-    '{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu:',
+    "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; Mozaik'in deneyebileceği tek şekil bu:",
 };
 
 /**
@@ -166,7 +166,7 @@ export default function Check({ state, view, ui }: Props) {
   const show = (cell: Cell) => {
     ui.setTab('program');
     revealCell([cell.classId, cell.teacherId], cell.day, cell.hour, (found) => {
-      if (!found) notify(t('Kart ızgarada görünmüyor; satırı gizli olabilir.'));
+      if (!found) notify(t('Ders ızgarada görünmüyor; satırı gizli olabilir.'));
     });
   };
   const showInPool = (lessonId: Id) => {
@@ -174,7 +174,7 @@ export default function Check({ state, view, ui }: Props) {
     ui.setPoolFilter('');
     ui.setTab('program');
     revealPoolCard(lessonId, (found) => {
-      if (!found) notify(t('Kart havuzda görünmüyor; havuz kapalı olabilir.'));
+      if (!found) notify(t('Ders havuzda görünmüyor; havuz kapalı olabilir.'));
     });
   };
   const openAvailability = (who: Target) => {
@@ -192,9 +192,6 @@ export default function Check({ state, view, ui }: Props) {
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
   ).length;
-  const capacity = state.classes.length * state.settings.days.length * state.settings.hours.length;
-  const fillPercent = capacity === 0 ? 0 : Math.round((placed / capacity) * 100);
-  const freeSlots = Math.max(0, capacity - placed);
 
   if (state.lessons.length === 0) {
     return (
@@ -220,7 +217,11 @@ export default function Check({ state, view, ui }: Props) {
       {!report.hasProblem ? (
         <div className="panel">
           <div className="ok-box">
-            {report.tight ? (
+            {/* "Program dizilebilir" read wrong once it HAD been: a laid-out
+                week was told it could be laid out (Sadeleşme, 2026-11-16). */}
+            {totalWanted > 0 && placed >= totalWanted ? (
+              <T k="**Program tamam.** Bütün dersler yerleşti ve kurallara uyuyor." />
+            ) : report.tight ? (
               <T k="**Sorun görünmüyor.** Bazı öğretmenlerin müsait saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
             ) : (
               <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
@@ -236,7 +237,7 @@ export default function Check({ state, view, ui }: Props) {
             {stranded.length > 0 && (
               <div>
                 <T
-                  k="**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** kartı bulur."
+                  k="**{ders} dersin {saat} saati kapalı saatte kaldı.** Aşağıdaki **Göster** onu ızgarada bulur."
                   vars={{ ders: stranded.length, saat: strandedHours }}
                 />
               </div>
@@ -282,20 +283,12 @@ export default function Check({ state, view, ui }: Props) {
                 {doneLessons} / {state.lessons.length}
               </td>
             </tr>
-            <tr>
-              <td>{t('Haftanın doluluğu')}</td>
-              <td className="num">%{fillPercent}</td>
-            </tr>
-            <tr>
-              <td>{t('Boş kalan sınıf saati')}</td>
-              <td className="num">{freeSlots}</td>
-            </tr>
           </tbody>
         </table>
         {placed < totalWanted && (
           <p className="hint">
             <T
-              k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile dizebilirsiniz."
+              k="Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz."
               vars={{ n: totalWanted - placed }}
             />
           </p>
@@ -308,7 +301,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-kapali">
               <h2>{t('Kapalı saatte ders ({n})', { n: stranded.length })}</h2>
               <p className="hint">
-                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Kartı açık bir saate sürükleyin ya da saati Müsaitlik'te açın." />
+                <T k="Saatler ders konduktan **sonra** kapatıldı, hiçbir ders silinmedi. Dersi açık bir saate sürükleyin ya da saati Müsaitlik'te açın." />
               </p>
               <table className="list">
                 <thead>
@@ -364,7 +357,7 @@ export default function Check({ state, view, ui }: Props) {
                   in the panel, in one sentence. */}
               {pinnedBreaks > 0 && (
                 <p className="hint">
-                  <T k="İkisi de **sabitlenmişse** **Otomatik diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
+                  <T k="İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
                 </p>
               )}
               <table className="list">
@@ -382,7 +375,7 @@ export default function Check({ state, view, ui }: Props) {
                       <tr key={v.key}>
                         <td>
                           <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                            {v.level === 'block' ? t('Engel') : t('Uyarı')}
+                            {v.level === 'block' ? t('Kesin') : t('Tercih')}
                           </span>
                         </td>
                         <td>{v.message}</td>
@@ -402,7 +395,7 @@ export default function Check({ state, view, ui }: Props) {
             <div className="panel kontrol-sorun" id="kontrol-yerlesemeyen">
               <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
               <p className="hint">
-                <T k="Bu derslere konacak hücre kalmamış. Ders adı kartı havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir kartı taşıyın." />
+                <T k="Bu derslere konacak hücre kalmamış. Dersin adı onu havuzda gösterir; yer açmak için Müsaitlik'te saat açın ya da bir dersi taşıyın." />
               </p>
               <table className="list">
                 <thead>
@@ -460,12 +453,12 @@ export default function Check({ state, view, ui }: Props) {
           first question. */}
       {view === 'advisor' && (
         <div className="panel">
-          <h2>{t('Danışman notları ({n})', { n: report.advice.length })}</h2>
+          <h2>{t('İpuçları ({n})', { n: report.advice.length })}</h2>
           <p className="hint">
             {t('Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.')}
           </p>
           {report.advice.length === 0 ? (
-            <p className="hint">{t('Danışmanın söyleyecek bir şeyi yok.')}</p>
+            <p className="hint">{t('İpucu yok.')}</p>
           ) : (
             // Bounded and scrolled in place — the pattern CapacityRows already
             // uses (`.stat-scroll`): a list that grows with the school must not

@@ -186,14 +186,15 @@ export default function ListTools<T>({
           {notice}
         </span>
 
+        {/* Only while a search or a group narrows the list: the plain total
+            is already on the strip or in the heading, and one count per
+            screen is the rule since Sadeleşme phase 1 (2026-11-16). */}
         <span className="list-count" aria-live="polite">
-          {filtering ? (
+          {filtering && (
             <T
               k="**{gorunen}** / {sayim}"
               vars={{ gorunen: shown, sayim: t(countKey, { n: items.length }) }}
             />
-          ) : (
-            t(countKey, { n: items.length })
           )}
         </span>
 

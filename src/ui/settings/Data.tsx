@@ -29,6 +29,7 @@ import { activePlacements } from '../../pure/grid';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/io';
 import {
   GoButton,
+  HelpHead,
   type PlanControls,
   T,
   useDialogs,
@@ -39,7 +40,7 @@ import {
 } from '../common';
 import { useLoadSample } from '../plans';
 import { useRef, useState } from 'react';
-import { Build, Changelog } from './About';
+import { Build, Changelog, TechRows } from './About';
 import { Folder } from './Folder';
 import Plans from './Plans';
 
@@ -257,17 +258,18 @@ export default function Data({
   // it is drawn in the plans section.
   const bundlePanel = (
     <div className="panel">
-      <h2>{t('Bütün planlar tek dosyada')}</h2>
-      <p
-        className="hint"
-        title={t(
-          'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.',
-        )}
-      >
-        <T k="Üst çubuktaki **Dosyaya kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
-      </p>
+      <HelpHead topic="Bütün planlar tek dosyada">
+        <p>
+          <T k="Üst çubuktaki **Kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
+        </p>
+        <p>
+          {t(
+            'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.',
+          )}
+        </p>
+      </HelpHead>
       <div className="form-row">
-        <button className="btn primary" onClick={saveAll}>
+        <button className="btn" onClick={saveAll}>
           {t('Tümünü dosyaya kaydet ({n} plan)', { n: planCount })}
         </button>
         <button
@@ -302,7 +304,14 @@ export default function Data({
   // because it is the same noun: every plan, in one place.
   const planDataPanel = (
     <div className="panel">
-      <h2>{t('Bu planın verisi')}</h2>
+      <HelpHead topic="Bu planın verisi">
+        <p>
+          <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
+        </p>
+        <p>
+          <T k="**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir." />
+        </p>
+      </HelpHead>
 
       {/* The sample school's home. It used to live only on the Kurulum
             screen, where it could only ever be reached by an EMPTY project —
@@ -310,9 +319,6 @@ export default function Data({
             work had no way back to it. Kurulum still offers it once, on a
             first run; this is where it stays. */}
       <h3>{t('Örnek okul verisi')}</h3>
-      <p className="hint">
-        <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
-      </p>
       <div className="form-row">
         <button
           className="btn"
@@ -324,9 +330,6 @@ export default function Data({
       </div>
 
       <h3>{t('Sıfırla')}</h3>
-      <p className="hint">
-        <T k="**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir." />
-      </p>
       <div className="form-row">
         <button className="btn danger" onClick={reset} title={t('Her şeyi siler')}>
           {t('Her şeyi sil')}
@@ -335,13 +338,20 @@ export default function Data({
     </div>
   );
 
-  // A Tab stop of its own: in the side rail this panel scrolls inside itself
-  // (`.cols > aside > .panel:only-child`), and the part below the fold was
-  // out of the keyboard's reach (axe `scrollable-region-focusable`).
+  // "TEKNİK BİLGİLER", collapsed (Sadeleşme, phase 1, 2026-11-16): storage
+  // keys, sizes and the search's threads are a developer's reading, and they
+  // were the longest panel on a screen he opens to see the version. Still
+  // here, one click away, for the day somebody has to ask "where is it".
+  // A Tab stop of its own once open: in the side rail this panel scrolls
+  // inside itself, and the part below the fold was out of the keyboard's
+  // reach (axe `scrollable-region-focusable`).
   const wherePanel = (
-    <div className="panel focus-scroll" tabIndex={0} role="group" aria-labelledby="veriler-nerede">
-      <h2 id="veriler-nerede">{t('Veriler nerede')}</h2>
-      {/* The exe changes what is TRUE here, not just the wording. On the
+    <details className="panel tech-details">
+      <summary>{t('Teknik bilgiler')}</summary>
+      <div className="focus-scroll" tabIndex={0} role="group" aria-labelledby="veriler-nerede">
+        <TechRows />
+        <h2 id="veriler-nerede">{t('Veriler nerede')}</h2>
+        {/* The exe changes what is TRUE here, not just the wording. On the
             three browser routes the storage below is the only copy until
             somebody saves a file, and "tarama verilerini temizle" can take
             it. In the exe the same storage exists, but a copy of everything
@@ -349,86 +359,88 @@ export default function Data({
             sentence that ends "taşınan tek şey dosyaya kaydettiğinizdir"
             would be a lie there, and it is the one sentence on this screen
             that a person acts on. */}
-      <p className="hint">
-        {storageKind() === 'exe' ? (
-          <T
-            k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
-            vars={{ klasor: EXE_FOLDER }}
-          />
-        ) : (
-          <>
-            {storageKind() === 'file'
-              ? t('Bu tarayıcının bu bilgisayardaki deposunda duruyor.')
-              : t('Tarayıcının bu site için ayırdığı depoda duruyor.')}{' '}
-            <T k="Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**." />
-          </>
-        )}
-      </p>
-      {/* WHICH store. "The browser's store for this site" leaves out the
+        <p className="hint">
+          {storageKind() === 'exe' ? (
+            <T
+              k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
+              vars={{ klasor: EXE_FOLDER }}
+            />
+          ) : (
+            <>
+              {storageKind() === 'file'
+                ? t('Bu tarayıcının bu bilgisayardaki deposunda duruyor.')
+                : t('Tarayıcının bu site için ayırdığı depoda duruyor.')}{' '}
+              <T k="Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**." />
+            </>
+          )}
+        </p>
+        {/* WHICH store. "The browser's store for this site" leaves out the
             one word somebody would need to act on it, and there are three
             stores on this machine that look identical on screen: the
             double-clicked file, the local install and the site. Anybody
             running two routes has two programs and no way to tell — until
             half a term is in the wrong one. The way ACROSS is named here
             because it is the same two buttons in both directions. */}
-      {storageKind() !== 'exe' && (
-        <p className="hint">
-          <T
-            k="Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**."
-            vars={{ adres: storageAddress() }}
-          />
-        </p>
-      )}
-      {/* The one habit, spelled out. It used to be a sentence across the
+        {storageKind() !== 'exe' && (
+          <p className="hint">
+            <T
+              k="Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**."
+              vars={{ adres: storageAddress() }}
+            />
+          </p>
+        )}
+        {/* The one habit, spelled out. It used to be a sentence across the
             top bar on every screen; it belongs next to the report that says
             where the data actually lives, and the bar it left had six
             destinations to hold instead. */}
-      <p className="hint">
-        <T k="Mozaik **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
-      </p>
-      <table className="stat">
-        <thead>
-          <tr>
-            <th>{t('Anahtar')}</th>
-            <th>{t('Ne')}</th>
-            <th className="num">{t('Yer')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.rows.map((row) => (
-            <tr key={row.key}>
-              <td>
-                <code>{row.key}</code>
-              </td>
-              <td>{row.what}</td>
-              <td className="num">{size(row.chars)}</td>
+        <p className="hint">
+          <T k="Mozaik **kendiliğinden** saklıyor; **Kaydet** onun yanına gelir, yerine değil." />
+        </p>
+        <table className="stat">
+          <thead>
+            <tr>
+              <th>{t('Anahtar')}</th>
+              <th>{t('Ne')}</th>
+              <th className="num">{t('Yer')}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="hint">
-        <T
-          k="Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**."
-          vars={{ yer: size(report.totalChars) }}
-        />
-      </p>
-      {/* A row would be a lie in the "Yer" column: the table counts
+          </thead>
+          <tbody>
+            {report.rows.map((row) => (
+              <tr key={row.key}>
+                <td>
+                  <code>{row.key}</code>
+                </td>
+                <td>{row.what}</td>
+                <td className="num">{size(row.chars)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="hint">
+          <T
+            k="Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**."
+            vars={{ yer: size(report.totalChars) }}
+          />
+        </p>
+        {/* A row would be a lie in the "Yer" column: the table counts
             localStorage characters, and a directory handle is not text —
             it is the one thing only structured clone can carry, which is
             why it lives in IndexedDB. Left out entirely it would be the
             one key this report does not name. */}
-      <p className="hint">
-        <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
-      </p>
-    </div>
+        <p className="hint">
+          <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
+        </p>
+      </div>
+    </details>
   );
 
   const backupsPanel = (
     <div className="panel">
-      <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
-      <p className="hint">
-        <T k="Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
-      </p>
+      <HelpHead topic="Bu bilgisayardaki otomatik yedekler">
+        <p>
+          <T k="Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
+        </p>
+      </HelpHead>
       {backups.length === 0 ? (
         <p className="hint">
           {t('Henüz otomatik yedek yok; ilki Mozaik bir daha açılınca alınır.')}

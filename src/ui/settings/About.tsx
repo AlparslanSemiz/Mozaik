@@ -53,9 +53,33 @@ function searchLine(t: Translate): string {
     : t('Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn', { ilk, sure });
 }
 
-export function Build({ update }: { update: UpdateRun }) {
+/** The search's threads and the storage address: under "Teknik bilgiler"
+ *  since 2026-11-16, not in the version panel he reads. */
+export function TechRows() {
   const t = useT();
   const adres = storageAddress();
+  return (
+    <table className="stat">
+      <tbody>
+        <tr>
+          <td>{t('Öneri araması')}</td>
+          <td>{searchLine(t)}</td>
+        </tr>
+        {adres !== '' && (
+          <tr>
+            <td>{t('Adres')}</td>
+            <td>
+              <code>{adres}</code>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
+export function Build({ update }: { update: UpdateRun }) {
+  const t = useT();
 
   return (
     <div className="panel">
@@ -72,18 +96,6 @@ export function Build({ update }: { update: UpdateRun }) {
             <td>{t('Nasıl açıldı')}</td>
             <td>{routeName()}</td>
           </tr>
-          <tr>
-            <td>{t('Öneri araması')}</td>
-            <td>{searchLine(t)}</td>
-          </tr>
-          {adres !== '' && (
-            <tr>
-              <td>{t('Adres')}</td>
-              <td>
-                <code>{adres}</code>
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
 
@@ -135,14 +147,18 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
   return (
     <div className="panel">
       <h2>{t('Yenilikler')}</h2>
-      <p className="hint">
-        <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
-      </p>
-      <ul>
-        {entry.items.map((line) => (
-          <li key={line}>{t(line)}</li>
-        ))}
-      </ul>
+      {/* Collapsed since 2026-11-16 (Sadeleşme): the notes are read once,
+          and open they were the longest text on the screen. */}
+      <details>
+        <summary>
+          <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
+        </summary>
+        <ul>
+          {entry.items.map((line) => (
+            <li key={line}>{t(line)}</li>
+          ))}
+        </ul>
+      </details>
 
       {older.length > 0 && (
         <details>

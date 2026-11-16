@@ -29,7 +29,7 @@ import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 import { t } from '../../leaf/i18n';
 import type { Kind, StepId } from '../../platform/prefs';
 import { attachRoving } from '../../platform/dom';
-import { GoButton, T } from '../common';
+import { GoButton, HelpHead, T } from '../common';
 
 interface Props {
   state: State;
@@ -396,13 +396,14 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
             hours does not need the school-wide reading under it. */}
         {showHeat && (
           <div className="panel">
-            <h2>{t('Haftanın darlığı')}</h2>
-            <p className="hint">
-              <T
-                k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
-                vars={{ ne: t(KIND_WORD[kind]) }}
-              />
-            </p>
+            <HelpHead topic="Haftanın darlığı">
+              <p>
+                <T
+                  k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
+                  vars={{ ne: t(KIND_WORD[kind]) }}
+                />
+              </p>
+            </HelpHead>
             <div className="scroll-x">
               <table className="availability heat">
                 <thead>
@@ -465,8 +466,9 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
           somebody. Here every row carries it. */}
       <aside>
         <div className="panel">
-          <h2>{t('Kimin saatleri')}</h2>
-          <p className="hint">{t('Sağdaki sayılar: açık saat / ders saati.')}</p>
+          <HelpHead topic="Kimin saatleri">
+            <p>{t('Sağdaki sayılar: açık saat / ders saati.')}</p>
+          </HelpHead>
 
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more
