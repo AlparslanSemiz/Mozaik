@@ -132,6 +132,13 @@ da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzg
 - **Çözücünün saati:** tam `npm test`'te `solver.test`'in "Roboders'teki saatlerle" testi
   varsayılan 15 s'lik bütçeyle yükte iki blok eksik kaldı (iş 18,5 s sürdü). Bütçe 600 s
   (durma kuralı hamle sayıyor), test sınırı 120 s.
+- **Tam E2E (`--workers=2`, 34 dk, yük 42-135):** 765 geçti, 7 düştü. `liste.spec` sıralaması
+  ertelenmiş render'ı okuyordu (düzeldi, `toPass`, 5/5); `erisim.spec`'in dört axe taraması
+  30 s'yi aştı, tek başına geçti (`test.slow()`). Kalan: `kayma.spec.ts:129` bu Mac'te her
+  koşuda kırmızı (macOS'un yer kaplamayan kaydırma çubuğu, test kendisi "hiçbir şey
+  ölçmüyor" diyor; CI Linux'ta yeşil), `otomatik.spec.ts:258` @arama 420 s'yi aştı (B7.41).
+- **Tam `npm test`:** iki koşu üst üste bindi (benim hatam), `relaxFullCourse` ve
+  `relaxLaidOut` 120-240 s sınırlarını aştı; bunlara dokunulmadı, ölçülmedi.
 
 Belgeler: TRAPS 170 ve 171 (159–165 alınmış, açık dallar da numara beklediği için 170'ten başlandı), TESTPLAN
 "Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.

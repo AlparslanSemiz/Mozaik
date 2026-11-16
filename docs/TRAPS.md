@@ -1444,6 +1444,9 @@ Aynı testin ikinci düşüşü yüklü makinede 30 s'lik test sınırıydı: `d
 satırın görünen her hücresine fareyi götürüp 40 ms bekliyordu, CI'da test 11-13 s
 sürüyordu. Sürükleme satırın cevabını başta bir kez boyuyor (`can-ok`), yardımcı artık
 yalnız o hücreleri deniyor ve sabit beklemenin yerine vurgunun boyanmasını bekliyor.
+Öğretmenler listesinin sıralaması da aynı ertelemeyle geliyor (`Teachers.tsx`):
+`liste.spec.ts`'in sıralama testi seçimden hemen sonra okuyup eski sırayı buldu (CI'da
+bir kez, yerelde tam süitte bir kez); iddiaları artık `toPass` ile yeniden deneniyor.
 Kural: **bir ekranın ertelenmiş parçası, başka bir parçanın değiştiğini gördükten sonra
 da tek seferde okunmaz, kendi değeri beklenir.**
 
@@ -1600,7 +1603,9 @@ mutasyonda (13 ms) yeşil kalırdı. Aynı gece tam süitte `solver.test.ts`'in 
 saatlerle haftanın tamamını diziyor"u iki blok eksik kaldı: sınır değil, sonuç düştü,
 çünkü test çözücünün varsayılan 15 s'lik saatiyle koşuyordu ve yükte iş 18,5 s sürdü. İddia
 "bu hafta dizilebilir"; çözücünün hamle sayan durma kuralı umutsuz onarımı zaten bitiriyor,
-o yüzden bütçe 600 s, yanındaki "olduğu gibi kurulamıyor" testindeki gibi. Kural: **belirli ama ağır bir test sınırını
+o yüzden bütçe 600 s, yanındaki "olduğu gibi kurulamıyor" testindeki gibi. E2E'de aynı
+sınıf: `erisim.spec.ts`'in dolu veriyle axe taramaları tek başına 8-25 s, tam süitte dördü
+30 s'yi aştı; taramalar `test.slow()` ile. Kural: **belirli ama ağır bir test sınırını
 gerekçesiyle kendisi söyler; bir süre eşiği birim testinde yalnız aynı anda ölçülen
 bir karşılaştırmaya karşı durur (TESTPLAN TP15); sonucu saate bağlı bir işin "yapabilir"
 iddiası saati kapatarak sınanır.**
