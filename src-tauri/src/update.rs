@@ -578,10 +578,26 @@ pub fn kurulu_program(yerel: &Path, simdiki: &Path, surum: &str) -> Option<PathB
 pub const KURULUM_BEKLE: &str = "--kurulum-bekle";
 /// The flag the old copy is started again with when the installer did not finish.
 pub const KURULUM_OLMADI: &str = "--kurulum-olmadi";
-/// The waiter's file, in the temporary folder: a copy of this program under a
-/// name the installer does not close. Tauri's installer closes every running
-/// `Mozaik.exe` before it copies, and the waiter has to outlive that.
+/// The waiter's file: a copy of this program under a name the installer does
+/// not close, in the installer's own fresh folder (`bekleyici_yolu`). The
+/// installer closes every running `Mozaik.exe` (the `mainBinaryName`) before
+/// it copies, and the waiter has to outlive that.
 pub const BEKLEYICI_ADI: &str = "Mozaik-kurulum-bekleyici.exe";
+
+/// Where the waiter is copied to: beside the installer, in the folder
+/// `yeni_gecici_klasor` made for it, so it is removed with that folder. Until
+/// 2026-11-16 it went to a fixed `%TEMP%\Mozaik-kurulum-bekleyici.exe`, a name
+/// anything else of this user could sit on between the copy and the start,
+/// and a shared folder Windows searches for the DLLs a program loads (review
+/// 2026-11-16). `None` with no folder of its own: the installer then runs alone.
+pub fn bekleyici_yolu(kurulum: &Path) -> Option<PathBuf> {
+    let klasor = kurulum.parent()?;
+    let bizim = klasor
+        .file_name()
+        .and_then(|a| a.to_str())
+        .is_some_and(|a| a.starts_with(GECICI_ONEK));
+    bizim.then(|| klasor.join(BEKLEYICI_ADI))
+}
 
 /// What the waiter was told.
 #[derive(Debug, PartialEq, Eq)]
@@ -1138,6 +1154,8 @@ pub async fn download_update(
         // The folders earlier downloads left are removed first: each holds a
         // 31 MB installer that has already run, or never will.
         eski_gecici_klasorleri_sil(&std::env::temp_dir());
+        // Where the waiter used to be copied, before it moved into the folder.
+        let _ = fs::remove_file(std::env::temp_dir().join(BEKLEYICI_ADI));
         let hedef = yeni_gecici_klasor(&std::env::temp_dir())
             .map_err(|e| format!("Kurulum için geçici klasör açılamadı: {e}"))?
             .join(KURULUM_ADI);
@@ -1325,10 +1343,11 @@ fn kurulumu_baslat(
     ozet: &str,
 ) -> Result<(), String> {
     let kurulu = kurulu_mu(exe);
-    let bekleyici = std::env::temp_dir().join(BEKLEYICI_ADI);
-    let _ = fs::remove_file(&bekleyici);
-    let mut komut = match fs::copy(exe, &bekleyici) {
-        Ok(_) => {
+    let bekleyici = bekleyici_yolu(kurulum)
+        .ok_or_else(|| std::io::Error::other("kurulumun kendi klasörü yok"))
+        .and_then(|b| fs::copy(exe, &b).map(|_| b));
+    let mut komut = match bekleyici {
+        Ok(bekleyici) => {
             let mut k = std::process::Command::new(&bekleyici);
             k.arg(KURULUM_BEKLE).arg(kurulum).arg(exe).arg(ozet);
             if kurulu {
@@ -1418,6 +1437,21 @@ mod tests {
         assert!(!eski.exists());
         assert!(kok.0.join("baska").is_dir());
         assert!(kok.0.join("Mozaik-kurulum-dosya").is_file());
+    }
+
+    #[test]
+    fn the_waiter_goes_into_the_installers_own_folder() {
+        let kok = Scratch::new("bekleyici");
+        let klasor = yeni_gecici_klasor(&kok.0).unwrap();
+        let kurulum = klasor.join(KURULUM_ADI);
+        assert_eq!(bekleyici_yolu(&kurulum), Some(klasor.join(BEKLEYICI_ADI)));
+        // So the next download's sweep removes it with the installer.
+        fs::write(klasor.join(BEKLEYICI_ADI), b"MZ").unwrap();
+        eski_gecici_klasorleri_sil(&kok.0);
+        assert!(!klasor.exists());
+        // Never the shared temporary folder itself.
+        assert_eq!(bekleyici_yolu(&kok.0.join(KURULUM_ADI)), None);
+        assert_eq!(bekleyici_yolu(Path::new(KURULUM_ADI)), None);
     }
 
     #[test]
