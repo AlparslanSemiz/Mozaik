@@ -101,9 +101,8 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
-    // "N ders yerleşti": the count of blocks, not of drawn pieces (a double
-    // over the long break is drawn in two).
-    const placed = /\d+ ders yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
+    // "N saat yerleşti": hours, the one unit the screen counts in.
+    const placed = /\d+ saat yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
     expect(placed).toBeDefined();
     const week = () =>
       page
@@ -116,7 +115,7 @@ test.describe('22. Otomatik dizme', () => {
     await page.getByRole('menuitem', { name: 'Başka bir program yap' }).click();
     const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(`Program yapıldı. ${placed!}`);
+    await expect(bar).toContainText(`Program yapıldı: ${placed!}`);
     expect(await week()).not.toBe(before);
     // One undo step brings the week before back.
     await notice.getByRole('button', { name: 'Önceki programa dön' }).click();

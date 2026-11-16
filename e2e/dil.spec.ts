@@ -147,7 +147,7 @@ test.describe('82. Dil', () => {
     await list.locator('.more-menu').click();
     await page.getByRole('menuitemradio', { name: 'Teacher loads' }).click();
     const metin = await list.innerText();
-    expect(metin).toContain('available');
+    expect(metin).toContain('open hours');
     expect(metin).not.toContain('müsait');
   });
 

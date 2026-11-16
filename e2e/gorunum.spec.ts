@@ -668,7 +668,7 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
   test('kart sınıfın tam adını söylüyor, ilk kelimesini çiziyor', async ({ page }) => {
     await loadWorld(page, dizili());
     const card = page.locator('table.grid .card', { hasText: '411A' }).first();
-    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
+    await expect(card).toHaveAttribute('aria-label', /^411A SAY, /);
     await expect(card.locator('.card-top')).toHaveText('411A SAY');
     await expect(card.locator('.card-top')).toHaveJSProperty('innerText', '411A');
   });

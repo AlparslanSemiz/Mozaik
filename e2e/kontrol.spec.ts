@@ -315,7 +315,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
     });
     await expect(
-      page.getByRole('dialog').getByRole('button', { name: /^İpuçları \(\d+\)$/ }),
+      page.getByRole('dialog').getByRole('button', { name: /^İpuçları( \(\d+\))?$/ }),
     ).toBeVisible();
   });
 });

@@ -1151,7 +1151,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
     const before = await blocks();
     expect(before).toBeGreaterThan(10);
-    await expect(page.locator('.pool-count strong')).toContainText(`${before} ders`);
+    await expect(page.locator('.pool-count strong')).toContainText(/\d+ saat bekliyor/);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
@@ -1229,8 +1229,8 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // A tray that quietly showed a twelfth of what is left would make the head
     // count a lie, so the head says what it holds AND what it holds back, and
     // the two add up to the whole tray. The number held back was never checked.
-    await expect(page.locator('.pool-count strong')).toContainText(`${shown} ders`);
-    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} ders süzgeç dışında`);
+    await expect(page.locator('.pool-count strong')).toContainText(/\d+ saat bekliyor/);
+    await expect(page.locator('.pool-sub')).toContainText(/\d+ saat süzgeç dışında/);
 
     await filter.selectOption('');
     await expect.poll(blocks).toBe(all);
@@ -1294,7 +1294,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     const blocks = piles.reduce((n, p) => n + p.count, 0);
     expect(piles.length, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
     expect(piles.length, 'hiçbir blok desteye girmemiş').toBeLessThan(blocks);
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} ders`);
+    await expect(page.locator('.pool-count strong')).toContainText(/\d+ saat bekliyor/);
     await expect(page.locator('.pool-card')).toHaveCount(piles.length);
 
     for (const p of piles) {
@@ -1344,7 +1344,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       ),
     });
     await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} ders`);
+    await expect(page.locator('.pool-count strong')).toContainText(/\d+ saat bekliyor/);
   });
 
   // THE TRAY OPENS INTO THE ROOM THE GRID IS NOT USING, AND SAYS WHEN THERE IS

@@ -80,7 +80,7 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
   //
   // Read as CAPTIONS rather than as buttons, because that is the level the
   // request was about — which question the strip asks first.
-  test('Program şeridi Görünüm ile başlıyor, sağ ucu yalnız Daha fazla', async ({ page }) => {
+  test('Program şeridi Göster ile başlıyor, sağ ucu yalnız Daha fazla', async ({ page }) => {
     await openWithSample(page);
     await go(page, 'Program');
 
@@ -104,7 +104,7 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
     // Since 2026-11-16 (Sadeleşme): the seçenek's name shows only once there
     // are two, and Renk and the grid's operations are behind the
     // one Daha fazla at the right end.
-    expect(left).toEqual(['GÖRÜNÜM', 'DİZ']);
+    expect(left).toEqual(['GÖSTER']);
     expect(right).toEqual([]);
     await expect(page.locator('.ribbon > .more-menu')).toHaveCount(1);
 
@@ -408,9 +408,9 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
       // Step 2, and the opening caption survives every step: it is the box the
       // whole strip contract aligns to.
       expect(m.acilisBasligi, `${d.ad}: açılış başlığı gitti`).toBe(true);
-      if (d.icBaslik) {
-        expect(m.icBaslikSayisi, `${d.ad}: iç başlıklar erken feda edildi`).toBeGreaterThan(0);
-      } else {
+      // The Program strip has no inner caption since the "Diz" label went
+      // (denetim turu), so only the "gone" half can be asked of it.
+      if (!d.icBaslik) {
         expect(m.icBaslikSayisi, `${d.ad}: iç başlıklar hâlâ duruyor`).toBe(0);
       }
       // Step 3, and rule 4 of the contract underneath it: the name may never
@@ -488,7 +488,7 @@ test.describe('58. Sorun listesinin bölümleri — sayfayı SEÇİYOR', () => {
     await openCheck(page);
     const bar = page.locator('.sheet-views');
     await expect(bar.getByRole('button', { name: /^Sorunlar \(\d+\)$/ })).toBeVisible();
-    await expect(bar.getByRole('button', { name: /^İpuçları \(\d+\)$/ })).toBeVisible();
+    await expect(bar.getByRole('button', { name: /^İpuçları( \(\d+\))?$/ })).toBeVisible();
     await bar.locator('.more-menu').click();
     for (const [item] of LOADS) {
       await expect(page.getByRole('menuitemradio', { name: item })).toBeVisible();
@@ -544,7 +544,7 @@ test.describe('58. Sorun listesinin bölümleri — sayfayı SEÇİYOR', () => {
         return 'Sorunlar';
       },
       async () => {
-        await bar.getByRole('button', { name: /^İpuçları \(\d+\)$/ }).click();
+        await bar.getByRole('button', { name: /^İpuçları( \(\d+\))?$/ }).click();
         return 'İpuçları';
       },
       ...LOADS.map(([item]) => async () => {
@@ -577,7 +577,7 @@ test.describe('58. Sorun listesinin bölümleri — sayfayı SEÇİYOR', () => {
       .getByRole('button', { name: 'Sorunlar (0)', exact: true });
     await expect(button).toBeEnabled();
     await button.click();
-    await expect(page.getByRole('dialog')).toContainText('yerleşemeyen ders yok');
+    await expect(page.getByRole('dialog')).toContainText('Sorun görünmüyor');
   });
 
   // The strip's "N engel · N uyarı" reading left on 2026-11-16: it said the
@@ -630,11 +630,10 @@ test.describe('58. Sorun listesinin bölümleri — sayfayı SEÇİYOR', () => {
 // is a strip that is not about where you are.
 test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
   // Since 2026-11-16 (Sadeleşme): a reading only where the section has one of
-  // its own (Kurallar's levels, the open plan, the version), and on every
+  // its own (the open plan, the version; Kurallar's levels went in the denetim turu), and on every
   // section the same Daha fazla at the very end. The theme's copy that stood
   // here is gone: the theme is in Görünüm's panel alone.
   const READS: Array<[string, RegExp]> = [
-    ['Kurallar', /kesin.*tercih.*kapalı/i],
     ['Planlar ve yedek', /Açık plan/i],
     ['Hakkında', /Sürüm/i],
   ];

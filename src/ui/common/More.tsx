@@ -74,13 +74,14 @@ export function MoreMenu({
           {t(label)}
           <ChevronDown size={15} aria-hidden="true" focusable="false" className="more-caret" />
           {dot && <span className="ribbon-dot" aria-hidden="true" />}
+          {/* Hidden nodes are left out of the button's name; the description still reads it. */}
+          {dot && (
+            <span id={newsId} hidden>
+              {t('Yeni sürüm notu var')}
+            </span>
+          )}
         </button>
       </DropdownMenu.Trigger>
-      {dot && (
-        <span id={newsId} hidden>
-          {t('Yeni sürüm notu var')}
-        </span>
-      )}
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="menu" align={align} sideOffset={5} collisionPadding={8}>
           {children}
