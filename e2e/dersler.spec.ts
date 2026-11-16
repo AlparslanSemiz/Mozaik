@@ -37,17 +37,18 @@ test.describe('69. Dersler', () => {
     }
   });
 
-  // The person page's "Ders gir" opens the lesson form on that person.
-  test('kişi sayfasının Ders gir düğmesi formu o kişide açıyor', async ({ page }) => {
+  // A lesson is added on the person's page itself (walkthrough, 2026-11-16).
+  test('kişi sayfasında ders sayfadan çıkmadan ekleniyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
     const sheet = await openPerson(page, '411');
-    await sheet.getByRole('button', { name: 'Ders gir', exact: true }).click();
-    await expect(sheet).toBeHidden();
-    await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText('Dersler');
-    await expect(page.locator('.ribbon .ribbon-value')).toContainText('411');
-    // ...and the keyboard is in the form, not on <body>.
-    await expect(page.locator('main .add-panel :focus')).toHaveCount(1);
+    const rows = sheet.locator('table.sheet-lessons tr');
+    const before = await rows.count();
+    await sheet.getByRole('combobox', { name: 'Öğretmen', exact: true }).selectOption({ index: 1 });
+    await sheet.getByRole('spinbutton', { name: 'Haftalık saat', exact: true }).fill('2');
+    await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(rows).toHaveCount(before + 1);
+    await expect(sheet).toBeVisible();
   });
 
   // The shortening the reader asked for by name: "tek bir sınıf için ders
@@ -61,13 +62,18 @@ test.describe('69. Dersler', () => {
     // The class picker is gone from the form and the teacher one is still there.
     await expect(page.locator('.form-row').getByLabel('Sınıf', { exact: true })).toHaveCount(0);
     await expect(page.locator('.form-row').getByLabel('Öğretmen', { exact: true })).toBeVisible();
-    await expect(page.locator('.form-row').getByLabel('Branş', { exact: true })).toBeVisible();
     await expect(
-      page.locator('.form-row .field-label', { hasText: /^Branş$/ }),
+      page.locator('.form-row').getByLabel('Branşa göre süz', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator('.form-row .field-label', { hasText: /^Branşa göre süz$/ }),
       'Sınıftan formunda seçicinin önünde ayrıca Branş yazmamalı',
     ).toHaveCount(0);
     await expect(
-      page.locator('.form-row').getByLabel('Branş', { exact: true }).locator('option[value=""]'),
+      page
+        .locator('.form-row')
+        .getByLabel('Branşa göre süz', { exact: true })
+        .locator('option[value=""]'),
     ).toHaveText('Tüm branşlar');
 
     // Which one is open is said in the strip and in the heading, and the list
@@ -95,7 +101,7 @@ test.describe('69. Dersler', () => {
     await openLessons(page, 'all');
 
     await expect(
-      page.locator('.form-row .field-label', { hasText: /^Branş$/ }),
+      page.locator('.form-row .field-label', { hasText: /^Branşa göre süz$/ }),
       'Genel formun görünür Branş etiketi korunmalı',
     ).toBeVisible();
 
@@ -238,14 +244,14 @@ test.describe('69. Dersler', () => {
     const split = page.locator('.form-row .split-pick');
     await split.focus();
     await page.keyboard.press('Enter');
-    const list = page.getByRole('listbox', { name: 'Dağılım' });
+    const list = page.getByRole('listbox', { name: 'Haftaya dağılış' });
     await expect(list, 'Enter listeyi açmadı').toBeVisible();
     await expect(mainList(page).locator('tbody tr')).toHaveCount(before);
 
     await list.getByRole('option', { name: /2\+1/ }).focus();
     await page.keyboard.press('Enter');
     await expect(list).toHaveCount(0);
-    await expect(split).toHaveAccessibleName('Dağılım: 2+1');
+    await expect(split).toHaveAccessibleName('Haftaya dağılış: 2+1');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(before);
 
     // And Enter in the row still adds, with the split just picked.
@@ -313,7 +319,9 @@ test.describe('69. Dersler', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(before + 1);
 
     await expect(hours).toHaveValue('4');
-    await expect(page.locator('.form-row .split-pick')).toHaveAccessibleName('Dağılım: 1+1+1+1');
+    await expect(page.locator('.form-row .split-pick')).toHaveAccessibleName(
+      'Haftaya dağılış: 1+1+1+1',
+    );
   });
 
   // 9A with 54 lesson hours and 48 open ones was accepted without a word: the

@@ -58,8 +58,10 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
     saat: hours,
   });
 
-  // The school's first missing part, in the order the lists depend on each
-  // other: a class names a room, a teacher picks a subject.
+  // The school's first missing part. People first: a teacher's page adds a
+  // new branch itself, and a class may have no room, so after the name the
+  // button said "Derslik ekle" to a course that has none to add (walkthrough,
+  // 2026-11-16). Rooms are counted, not asked for.
   const missing: Array<{ to: Place; action: string }> = [];
   if (name === '') {
     missing.push({
@@ -67,17 +69,14 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       action: t('Okul adını ve zili gir'),
     });
   }
-  if (d.rooms.length === 0) {
-    missing.push({ to: { tab: 'school', section: 'rooms' }, action: t('Derslik ekle') });
-  }
-  if (d.settings.subjects.length === 0) {
-    missing.push({ to: { tab: 'school', section: 'subjects' }, action: t('Branş ekle') });
-  }
   if (d.teachers.length === 0) {
     missing.push({ to: { tab: 'teachers', people: 'list' }, action: t('Öğretmen ekle') });
   }
   if (d.classes.length === 0) {
     missing.push({ to: { tab: 'classes', people: 'list' }, action: t('Sınıf ekle') });
+  }
+  if (d.settings.subjects.length === 0) {
+    missing.push({ to: { tab: 'school', section: 'subjects' }, action: t('Branş ekle') });
   }
   const lists = t('{d} derslik · {b} branş · {o} öğretmen · {s} sınıf', {
     d: d.rooms.length,

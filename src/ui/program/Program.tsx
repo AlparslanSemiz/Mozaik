@@ -90,6 +90,8 @@ interface Props {
   poolFilter: string;
   setPoolFilter: (next: string) => void;
   colorMode: ProgramColorMode;
+  /** The status chip's problem count, for the pool's head. */
+  problems: number;
 }
 
 /**
@@ -156,6 +158,7 @@ function Program({
   poolFilter,
   setPoolFilter,
   colorMode,
+  problems,
 }: Props) {
   const t = useT();
   const indexOf = useRecentIndex();
@@ -675,6 +678,7 @@ function Program({
         <LessonPool
           cards={cards}
           completed={completed}
+          problems={problems}
           total={poolTotal}
           sort={poolSort}
           setSort={setPoolSort}

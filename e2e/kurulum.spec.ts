@@ -157,10 +157,11 @@ test.describe('12. Branş kısaltmaları', () => {
     // spoke two vocabularies about one subject. Asked for in one line:
     // "program kısmında branşlar kısaltmalar olsun sol tarafta".
     await page.getByRole('button', { name: 'Öğretmen görünümü' }).click();
+    // The short form leads the head's second line, under the surname (2026-11-16).
     const head = page
       .locator('tbody tr', {
-        has: page.locator('.row-head .inspect', {
-          hasText: new RegExp(`^${teacher}$`),
+        has: page.locator('.row-head .secondary', {
+          hasText: new RegExp(`^${teacher} · `),
         }),
       })
       .locator('.row-head .secondary');
@@ -384,8 +385,9 @@ test.describe('30. Kurulum — düzenleme', () => {
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // "Fzk", not "Fizik": the row head reads the subject SHORT, the same string
-    // the cells of its own row carry.
-    await expect(page.getByRole('rowheader', { name: 'YA Fzk' })).toBeVisible();
+    // the cells of its own row carry. The surname first, the short form under
+    // it (2026-11-16).
+    await expect(page.getByRole('rowheader', { name: 'Ad YA · Fzk' })).toBeVisible();
   });
 
   test('öğretmen sınırı: boş kutu okul varsayılanını kullanıyor', async ({ page }) => {
@@ -891,20 +893,24 @@ test.describe('63. Öğretmende cinsiyet', () => {
 
     // The rows are text since 2026-11-16 (K5): the order is read from the
     // names, the genders from the saved plan.
-    const names = await mainList(page)
-      .locator('tbody tr')
-      .evaluateAll((els) => els.map((e) => e.getAttribute('data-row-name') ?? ''));
     const saved = JSON.parse(await savedText(page)) as {
       teachers: Array<{ name: string; gender: string }>;
     };
-    const values = names.map((n) => saved.teachers.find((t) => t.name === n)?.gender ?? '?');
-    // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
-    expect(values).toEqual(
-      [...values].sort((a, b) => {
-        const label = (v: string) => (v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın');
-        return label(a).localeCompare(label(b), 'tr');
-      }),
-    );
+    const label = (v: string) => (v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın');
+    // Polled: the list is a deferred render, and under load the first read
+    // still had the old order (2026-11-16).
+    await expect
+      .poll(async () => {
+        const names = await mainList(page)
+          .locator('tbody tr')
+          .evaluateAll((els) => els.map((e) => e.getAttribute('data-row-name') ?? ''));
+        const values = names.map((n) => saved.teachers.find((t) => t.name === n)?.gender ?? '?');
+        // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
+        return values.every(
+          (v, i) => i === 0 || label(values[i - 1]!).localeCompare(label(v), 'tr') <= 0,
+        );
+      })
+      .toBe(true);
   });
 
   test('Kurulum özeti dağılımı SAYIYOR', async ({ page }) => {
@@ -929,10 +935,21 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await expect(page.getByText('2 satır okundu.')).toBeVisible();
     // Scoped to the preview: the textarea still holds the pasted text and
     // would match the same words.
-    const preview = page.locator('.paste-preview li');
-    await expect(preview.first()).toHaveText('Nazlı Er (NE) · Fizik · Kadın');
+    // A table since 2026-11-16: one column per pasted column, under its choice.
+    const preview = page.locator('.paste-preview tbody tr');
+    expect(await preview.first().locator('td').allInnerTexts()).toEqual([
+      'Nazlı Er',
+      'NE',
+      'Fizik',
+      'Kadın',
+    ]);
     // The three-column row is not an error, and says nothing it does not know.
-    await expect(preview.nth(1)).toHaveText('Okan Su (OS) · Kimya');
+    expect(await preview.nth(1).locator('td').allInnerTexts()).toEqual([
+      'Okan Su',
+      'OS',
+      'Kimya',
+      '–',
+    ]);
   });
 
   // Pitfall 33's shape, and it happened again while this column was being

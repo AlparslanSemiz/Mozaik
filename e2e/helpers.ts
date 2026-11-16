@@ -1013,11 +1013,21 @@ export async function openWithSampleTheme(page: Page, theme: 'light' | 'dark') {
  */
 export async function chooseScale(page: Page, percent: number) {
   await openSettings(page, 'Görünüm');
-  await page.getByRole('button', { name: `%${percent}`, exact: true }).click();
-  await expect(page.getByRole('button', { name: `%${percent}`, exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  // Four named steps since 2026-11-16; any other value a stored preference
+  // may still hold is set the way an older version stored it.
+  const name = { 100: 'Normal', 115: 'Büyük', 130: 'Daha büyük', 150: 'Çok büyük' }[percent];
+  if (name === undefined) {
+    await page.evaluate((v) => {
+      localStorage.setItem('ders-programi-olcek', String(v));
+      document.documentElement.style.setProperty('--ui-scale', String(v));
+    }, percent / 100);
+    return;
+  }
+  const step = page
+    .getByRole('group', { name: 'Yazı büyüklüğü' })
+    .getByRole('button', { name, exact: true });
+  await step.click();
+  await expect(step).toHaveAttribute('aria-pressed', 'true');
 }
 
 /**

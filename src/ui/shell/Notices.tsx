@@ -246,14 +246,17 @@ export default function Notices({
       {/* THE LAST DELETION OF AN EARLIER SESSION, ONCE (TODO SD1). Its undo
       lived in memory; the state before it waited in one slot. */}
       {lastDelete !== null && (
-        <div className="save-warning" role="status">
-          {t('{ne} Son silmeyi geri almak için:', { ne: lastDelete.label })}{' '}
-          <button className="btn primary" onClick={restoreLastDelete}>
-            {t('Geri getir')}
-          </button>{' '}
-          <button className="btn" onClick={closeLastDelete}>
-            {t('Kapat')}
-          </button>
+        // Neutral, not red: nothing is wrong, an offer is made.
+        <div className="update-bar" role="status">
+          <span>{t('{ne} Son silmeyi geri almak için:', { ne: lastDelete.label })}</span>
+          <span className="update-acts">
+            <button className="btn primary" onClick={restoreLastDelete}>
+              {t('Geri getir')}
+            </button>
+            <button className="btn" onClick={closeLastDelete}>
+              {t('Kapat')}
+            </button>
+          </span>
         </div>
       )}
 

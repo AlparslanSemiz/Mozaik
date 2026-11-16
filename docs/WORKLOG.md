@@ -25,6 +25,9 @@ kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). Aşama 3A (K6 tek ızgar
 sabitleme ve geçici görünüm yok, K8 Eski hâline dön) `main`'de (b44b59a). `sade/asama-3b` aşama
 2'nin ve `main`'in üstünde beş görev sekmesini (K1), ikinci dizilişin bir plan olmasını (K2) ve
 Kontrol'ün çipin sorun listesine geçmesini (K3) taşıyor, birleşmedi (aşağıda tarihli girdi).
+`sade/inceleme` onun üstünde babanın gözüyle yapılan kullanılabilirlik turunun on bulgusunu
+düzeltiyor (ana düğme, Excel sütunları, adlar, yazı büyüklüğü, dar üst bar…), İkame ve
+Öğretmene gönder'den sonra birleşecek, birleşmedi.
 
 **Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
 önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
@@ -141,6 +144,48 @@ CP-SAT'ın "bir süre iyileşmezse dur" kuralı C API'de yapılamıyor (çözüm
 yok), yerine tavan. Formüller artık kullanılmayınca bırakılıyor: Node tepe RSS 560 → 283 MB
 (2 CPU), CP-SAT süreci en çok 62 MB; yerelde sonuçlar aynı. Yerel süreler kirli,
 ölçülmedi sayılır.
+
+## 2026-11-16 · Izgaranın DOM'u inceldi (`hiz/acilis-2`)
+
+`hiz/acilis`'ten sonra en uzun görev ızgaranın ilk yerleşimiydi. Babanın haftasında ızgaranın
+içi (sayım, süre değil): 2937 öğe, 1196 metin düğümü; bunların 669'u kapalı saatlerin "×"'i,
+597 öğe de 199 kartın her birindeki iğnenin `<svg>`'si ve iki `<path>`'i (fareyle gelinmeden
+saydam). Çarpı artık `td.unavailable`'ın arka planında iki çizgi, iğne düğmenin `::before`'unda
+bir maske (tuzak 222, DECISIONS). Sonra: metin düğümü 527, SVG 0. Görünüş: çarpı ve iğne
+1920'de, açık ve koyu temada, 2× yakın çekimle eskisiyle yan yana bakıldı; iğne aynı, çarpı
+glifin ölçüsünde (0,44em, ~0,12em çizgi). E2E: `renk.spec.ts`'in çarpı testi metin yerine
+`aria-label`'a ve iki çizgiye bakıyor.
+
+**Not edilen.** Kartın rengi satır içi `background` kısaltmasıyla yazılıyor; kısaltma
+`background-image`'ı da sıfırladığı için `.card.conflict`'in kaması ve `.mark-opened`'ın
+taraması büyük olasılıkla hiç görünmüyor (doğrulanmadı). Sınıfa taşımak onları görünür yapar,
+bu bir görünüş kararı.
+
+**CI:** yazılacak (aynı koşunun taban ve dal sütunu).
+
+## 2026-11-16 · Babanın gözüyle kullanılabilirlik turu (`sade/inceleme`)
+
+`sade/asama-3b`'nin (PR #80) üstünde, birleşmedi; İkame ve Öğretmene gönder önce birleşecek
+(tarih çipine, yazdırma/gönderme koduna ve şemaya dokunulmadı). Karar DECISIONS "Babanın
+gözüyle kullanılabilirlik turu".
+
+**Yapılan.** (1) `ProgramStrip`: bekleyen yok + sorun var → ana düğme `Yeniden yap`; havuzun
+başı `{n} sorun` (`LessonPool`'a `problems`). (2) `teacherColumns` + `parseTeachers(text, known,
+cols)` (`pure/io/import.ts`), `Paste`'in `columns` önizleme tablosu. (3) `surname()`, satır başı
+soyadı + kısa ad, kartta `full` (≤ 3 harf/saat), seçicilerde "Ad Soyad · Branş". (4)
+`keepBefore(…, quiet)` yeniden dizmelerde; nötr şerit. (5) `SCALE_STEPS`, `nearestStep`, `?` →
+Yazı büyüklüğü, Ctrl+K `Yazıyı büyüt`. (6) `@container bar (max-width: 75em)`: sekmeler ikinci
+satır. (7) `health.level` bekleyen saatte `tight`. (8) `Branşa göre süz`, `Haftaya dağılış` (anahtar
+her yerde değişti) ve örnek. (9) gün tablosunda zil aralığı, `Ders süresi (dakika)`, Başlarken
+derslik sormuyor. (10) kişi sayfasında dersler kapalı saatlerin üstünde, `AddLesson` satırı.
+Küçükler: `.sheet-mark` uzun kısa adda büyür ve küçülür, `Her şeyi sil` kendi panelinde, menü ve
+sekme 14 px, Dosyadan aç sorusunun cümlesi, Dosya ▾ ipuçları, Hakkında'da sitede düğme yok, tek
+tarih.
+
+**Ölçülen.** Üst bar, örnek okul (`scratch/bar.mjs`): 1366 %100/%115 ve 1920 %100–%150 tek
+satır; 1366 %130/%150 önce `?` ikinci satıra düşüyordu (bar 91/105 px), şimdi sekmeler kendi
+satırında (76/87 px), sayfa yana kaymıyor. Boyut: `npm run boyut` önce 1 157 480 B / brotli
+299 040 B, sonra 1 154 391 B / 298 847 B (−193 B brotli; `main` ile birleşmiş sonuç raporda).
 
 ## 2026-11-16 · Checkout yeri `~/dev/Mozaik` (`duzen/checkout-yeri`)
 
@@ -333,8 +378,23 @@ artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son ge
 tbt 1469 → 384 (−74 %), uzun 1719 → 684 (−60 %), fcp 1556 → 908 (−42 %), izgara (görünür)
 1180 → 987 (−16 %), load 265 → 280 (gürültü içinde). Dal izinde görevler: 52–59 + 33 (çizim
 dilimleri), 250–290 (commit + ilk yerleşim, en uzunu), 75–86 (ilk kare), 118–129 (tabanlar,
-saydamlık kalkar). CI sayısı: yazılacak (taban medyanları
-#77'nin koşusundan: load 383–405, fcp ~1000, izgara ~890–940, tbt ~770–820, enUzun ~460–490).
+saydamlık kalkar). **CI** (`acilis.yml`, koşu 43875433229, taban `dddf572` → dal `f5a993f`, 9 koşu, medyan ms):
+load 479 → 485, fcp 2848 → 1648 (−42 %), hazir 2129 → 1502, izgara 2129 → 1881 (−12 %), uzun
+3192 → 1483, tbt 2892 → 1083 (−63 %), enUzun 1372 → 541 (−61 %).
+
+**Runner'lar aynı hızda değil.** Aynı uygulama kodu (`b44b59a` ile `dddf572` arasında `src/`
+değişmedi) üç koşuda izgara 1272 (43852956170), 1206 (43859573891) ve 2129 (43875433229) ölçtü;
+load 335 / 317 / 479. Aşama 3A'dan önceki `fd6e18e` 943 ölçmüştü (43852010083, load 405). Yani
+3A'nın açılışa eklediği aynı hızdaki runner'da ~%30, iki kat değil; iki koşunun sayısı ancak aynı
+koşunun taban ve dal sütunu olarak karşılaştırılır.
+
+**Kalan en uzun görev** (yerel iz, 4×): commit ile sayfanın ilk tam yerleşimi tek görevde,
+~250–290 ms; bunun ~13 ms'i `gridFit`'in okumaları, gerisi 3348 öğenin ilk stili ve tablonun ilk
+yerleşimi. **Denendi, bırakıldı:** Program'ın gövdesini ilk boyamaya kadar
+`content-visibility: hidden` tutup ızgarayı boyamadan sonra ilk kez yerleştirmek. Tek izde ilk
+yerleşim ucuzlamadı (159 + 340 ms tek karede), üstelik `gridChrome`'un `scrollTop` okuması kilitli
+gövdeyi commit'te zorla yerleştirdi (308 ms). Tuzak 221'deki ucuzluk tabanın SONRAKİ yazılarına
+ait: ızgara bir kez çizildikten sonra.
 
 **Kalan.** En uzun görev artık sayfanın ilk tam yerleşimi (~290 ms yerelde): 3348 öğenin ilk
 stili ve tablo. 200 ms'nin altı ya ızgaranın DOM'unu inceltmek (2937 öğe) ya da tabanları depoda

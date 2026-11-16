@@ -17,14 +17,15 @@ import {
   ListChecks,
   Save,
   Search as SearchIcon,
+  Type,
 } from 'lucide-react';
 import { APP_NAME, tarihYazisi } from '../../leaf/app';
 import type { State } from '../../leaf/model';
-import type { Tab } from '../../platform/prefs';
+import { nearestStep, SCALE_STEPS, type Tab } from '../../platform/prefs';
 import { downloadBackup } from '../../platform/storage';
 import type { health } from '../../pure/feasibility';
 import type { PlanControls } from '../common';
-import { MoreItem, MoreMenu, MoreSep, useT } from '../common';
+import { MoreItem, MoreMenu, MoreRadio, MoreSep, MoreSub, useT } from '../common';
 import { BrandMark, ICON } from './icons';
 import { TABS } from './tabs';
 
@@ -58,6 +59,9 @@ interface Props {
   openOldCopies: () => void;
   /** The last plan file's day, YYYY-MM-DD; null when this browser never wrote one. */
   lastFileDay: string | null;
+  /** "?" → Yazı büyüklüğü: the same four steps as Görünüm. */
+  scale: number;
+  chooseScale: (next: number) => void;
 }
 
 export default function Topbar({
@@ -84,6 +88,8 @@ export default function Topbar({
   switchProgram,
   openOldCopies,
   lastFileDay,
+  scale,
+  chooseScale,
 }: Props) {
   const t = useT();
   const save = () => {
@@ -125,10 +131,12 @@ export default function Topbar({
         <MoreItem icon={<CopyPlus size={15} />} onSelect={copyForNewTerm}>
           {t('Yeni dönem için kopyala')}
         </MoreItem>
-        <MoreItem icon={<History size={15} />} onSelect={openOldCopies}>
+        {/* Two ways back, told apart where they are chosen (walkthrough,
+            2026-11-16): this plan's own days, or every plan and its files. */}
+        <MoreItem icon={<History size={15} />} hint={t('son 7 gün')} onSelect={openOldCopies}>
           {t('Eski hâline dön')}
         </MoreItem>
-        <MoreItem icon={<Library size={15} />} onSelect={openPlans}>
+        <MoreItem icon={<Library size={15} />} hint={t('bütün planlar')} onSelect={openPlans}>
           {t('Planlar ve yedek')}
         </MoreItem>
         <MoreSep />
@@ -263,9 +271,7 @@ export default function Topbar({
         className="btn topbar-text"
         onClick={save}
         title={[
-          t(
-            'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
-          ),
+          t('Mozaik kendiliğinden saklıyor; dosya taşımak ve saklamak için.'),
           // When the last one left this browser (fileSaved.ts): the one fact
           // that says how much a cleared browser would take with it.
           lastFileDay === null
@@ -297,6 +303,15 @@ export default function Topbar({
         <MoreItem icon={<Keyboard size={15} />} hint="?" onSelect={openShortcuts}>
           {t('Klavye kısayolları')}
         </MoreItem>
+        {/* Where somebody who cannot read the screen looks for help: the
+            text size was only in Okul bilgileri → Görünüm (walkthrough, 2026-11-16). */}
+        <MoreSub icon={<Type size={15} />} label={t('Yazı büyüklüğü')}>
+          <MoreRadio
+            value={String(nearestStep(scale))}
+            onChange={(id) => chooseScale(Number(id))}
+            options={SCALE_STEPS.map(([v, name]) => ({ id: String(v), label: t(name) }))}
+          />
+        </MoreSub>
         <MoreItem icon={<ListChecks size={15} />} onSelect={openChecklist}>
           {t('Başlarken')}
         </MoreItem>

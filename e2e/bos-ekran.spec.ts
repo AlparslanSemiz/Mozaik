@@ -133,11 +133,9 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await expect(list.locator('li[data-step="school"]')).not.toHaveClass(/done/);
     await expect(list).toContainText('0 / 5 adım');
 
-    await list.getByRole('button', { name: 'Derslik ekle' }).click();
-    await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText('Derslikler');
-    await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(list.getByRole('button', { name: 'Branş ekle' })).toBeVisible();
+    // People next, not rooms: a course may have none (walkthrough, 2026-11-16).
+    await expect(list.getByRole('button', { name: 'Öğretmen ekle' })).toBeVisible();
+    await expect(list.getByRole('button', { name: 'Derslik ekle' })).toHaveCount(0);
 
     // A teacher does not make it go away.
     await expect(list).toBeVisible();

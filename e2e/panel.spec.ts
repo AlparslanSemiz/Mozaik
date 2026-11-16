@@ -27,7 +27,8 @@ test.describe('48. Varlık paneli', () => {
 
     const sheet = page.locator('.sheet');
     await expect(sheet).toBeVisible();
-    await expect(sheet.locator('.sheet-mark')).toHaveText(who);
+    // The row head reads the surname since 2026-11-16; the sheet's title is the whole name.
+    await expect(sheet.locator('.sheet-title')).toContainText(who);
     await expect(sheet.locator('.sheet-kind')).toHaveText('Öğretmen');
 
     // Folded on the person page since 2026-11-16 (K5); one click unfolds it.
@@ -308,7 +309,10 @@ test.describe('87. Panelden düzenleme', () => {
     await short.blur();
     await page.keyboard.press('Escape');
 
-    await expect(page.locator('table.grid .row-head .inspect', { hasText: 'ZZ' })).toHaveCount(1);
+    // Under the surname since 2026-11-16, first on the head's second line.
+    await expect(
+      page.locator('table.grid .row-head .secondary', { hasText: /^ZZ · / }),
+    ).toHaveCount(1);
     expect(before).not.toBe('ZZ');
   });
 

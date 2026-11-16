@@ -5,6 +5,7 @@
 
 import { useCallback, useState } from 'react';
 import {
+  applyScale,
   applyMotion,
   applyRibbon,
   applyTheme,
@@ -62,6 +63,12 @@ export function useMachinePrefs() {
     setMotion(next);
   }, [motion]);
 
+  // The "?" menu and Ctrl+K's "Yazıyı büyüt" choose a step too.
+  const chooseScale = useCallback((next: number) => {
+    applyScale(next);
+    setScale(next);
+  }, []);
+
   const toggleTheme = useCallback(() => {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
@@ -75,6 +82,7 @@ export function useMachinePrefs() {
     setTheme,
     scale,
     setScale,
+    chooseScale,
     programColor,
     setProgramColor,
     motion,

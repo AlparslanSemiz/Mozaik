@@ -36,6 +36,50 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Izgaranın kapalı saati ve iğnesi çizimle, metin ve SVG değil (`hiz/acilis-2`)
+
+- **Ne değişti.** Kapalı saatin "×"'i hücrenin arka planında iki çizgi; kartın iğnesi düğmenin
+  `::before`'unda bir maske. Anlam aynı yerde: hücrenin `aria-label`'ı ("kapalı" / "müsait değil"),
+  düğmenin `aria-label`'ı ve `aria-pressed`'i. Baskıda ve zorunlu renklerde çarpı yine glif
+  (arka plan orada çizilmez). Çarpı glife ölçülerek çizildi, piksel piksel aynı değil (tuzak 222).
+- **Bırakılan.** Kartların satır içi `background` stilini sınıfa çevirmek: satır içi kısaltma
+  `background-image`'ı da sıfırlıyor, yani bir sınıfa taşımak `.card.conflict`'in köşe kamasını
+  ve `.mark-opened`'ın taramasını bugün olmadıkları biçimde görünür yapabilir; bu bir görünüş
+  kararı, hız işinin içinde verilmedi (WORKLOG).
+
+---
+
+### 2026-11-16 · Babanın gözüyle kullanılabilirlik turu: on bulgu (`sade/inceleme`)
+
+Baba gibi tıklanan bir turun bulguları, Alp hepsini onayladı. Ters çevirdikleri ve seçilen yol:
+
+- **Ana düğme hep işe yarar.** Bekleyen ders yokken hafta bozuksa (kapalı saatte ders, kesin kural ihlali) `Programı yap` sönük durmuyor,
+  yerinde `Yeniden yap` (sabitlenen yerinde kalır); havuzun başı çipin sorun sayısını söyler.
+  Durum çipi bekleyen saat varken sarı (2026-11-15'ten beri "sorun değil" diye yeşildi).
+- **Yeniden dizmek bir silme değil.** `Yeniden yap`, `Başka bir dizilim` ve yer değiştiren
+  `Programı yap` silmeden-önce yuvasına yine yazar ama yuva sonraki açılışta
+  önerilmez (`quiet`); bildirimleri `Önceki programa dön` der. Gerçek silmenin şeridi nötr renkte.
+- **Excel yapıştırmada sütunlar tanınır.** Başlık satırı ya da hücreler (bilinen branş, ≤ 4 harf
+  büyük harf kısa ad, E/K, adres); hücrelerin söylemediği eski sıraya düşer ama hiçbir zaman
+  "Kısa ad"a. Önizleme eklenecek olanın tablosu, sütun başına seçimle.
+- **Ad, baş harf değil.** Satır başında soyadı (on harfe kadar), kartta saat başına üç harf
+  sığıyorsa soyadı; öğretmen seçicileri "Ad Soyad · Branş". Ölçülen taban (`--cell-min`) bu
+  yüzden büyümesin diye sığma bir harf bütçesiyle karar veriliyor, ölçülerek değil.
+- **Yazı büyüklüğü dört adlı basamak** (%100/%115/%130/%150), Görünüm'de, `?` menüsünde ve
+  Ctrl+K'de. Kayıtlı eski değer (örn. %80) **en yakına çekilmiyor**, olduğu gibi çiziliyor ve en
+  yakın basamak basılı görünüyor: babanın makinesinde %80 Windows ölçeklemesine karşı seçilmişti
+  ve kendiliğinden büyüyen ekran istenmeyen bir sürpriz olurdu.
+- **Dar üst bar bilerek iki satır:** 75em altında sekmeler kendi satırına geçer, `?` tek başına
+  alta düşmez.
+- **Başlarken'de derslik sorulmuyor:** okulu tanıt'ın düğmesi addan sonra öğretmene gider.
+- Hakkında'da `Her şeyi sil` kendi panelinde; sitede `Güncellemeleri denetle` yok (kendini
+  günceller), exe'de var; sürümün tek tarihi Sürüm satırında.
+
+**Bedeli.** Boyut ≤ 0 B brotli şartıyla: Teknik bilgiler'den iki geliştirici cümlesi, örnek
+okulun boş plandaki soru gövdesi, Müsaitlik ızgarasının paragraf ipucu (başlıkların kendi
+`title`'ı var), Planlar'ın geri al cümlesi, Bütün planlar'ın içindekiler cümlesi ve yedi ölü CSS
+kuralı kalktı.
+
 ### 2026-11-16 · Öğretmene PDF ve WhatsApp: dosyayı sayfa yazar, göndereni kullanıcı (B3.4, `ozellik/gonder`)
 
 **Alp'in onayı, öntanımlar dahil:** her kâğıtta tarih açık, renk açık.

@@ -71,7 +71,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     // Both patterns still end at 19:10 — there is exactly one long break.
     await expect(preview.locator('tbody tr').last()).toContainText('19:10');
 
-    const lengthBox = page.getByLabel('Saat (dk)');
+    const lengthBox = page.getByLabel('Ders süresi (dakika)');
     await lengthBox.fill('45');
     await lengthBox.blur();
     await expect(preview).toContainText('09:00–09:45');
@@ -152,7 +152,7 @@ test.describe('15. Okul bilgileri sekmesi', () => {
     await expect(firstHour).toHaveAttribute('title', /^09:00–/);
 
     await openSettings(page, 'Zil ve günler');
-    const lessonMinutes = page.getByLabel('Saat (dk)');
+    const lessonMinutes = page.getByLabel('Ders süresi (dakika)');
     await lessonMinutes.fill('45');
     await lessonMinutes.blur();
 

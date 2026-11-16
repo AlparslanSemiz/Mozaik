@@ -46,6 +46,8 @@ import { useT } from '../common';
 interface Props {
   cards: PoolCard[];
   completed: number;
+  /** The status chip's problem count: "Hepsi yerleşti" beside "1 sorun" read as done. */
+  problems: number;
   /** Blocks waiting BEFORE the filter, so the head can say "12 / 99". */
   total: number;
   sort: PoolSort;
@@ -156,6 +158,7 @@ function groupStacks(stacks: CardStack[]): CardGroup[] {
 function LessonPool({
   cards,
   completed,
+  problems,
   total,
   sort,
   setSort,
@@ -388,7 +391,9 @@ function LessonPool({
         <span className="pool-count">
           {cards.length === 0 ? (
             <>
-              <strong>{t('Hepsi yerleşti')}</strong>
+              <strong>
+                {problems > 0 ? t('{n} sorun', { n: problems }) : t('Hepsi yerleşti')}
+              </strong>
               <span className="pool-sub">{t('{n} dersin tamamı programda', { n: completed })}</span>
             </>
           ) : (
@@ -556,6 +561,7 @@ function samePoolProps(a: Props, b: Props): boolean {
   return (
     a.cards === b.cards &&
     a.completed === b.completed &&
+    a.problems === b.problems &&
     a.total === b.total &&
     a.sort === b.sort &&
     a.setSort === b.setSort &&

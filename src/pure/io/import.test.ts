@@ -5,6 +5,7 @@ import {
   makeShort,
   parseTeachers,
   parseClasses,
+  teacherColumns,
 } from './import';
 
 describe('splitGrid', () => {
@@ -109,6 +110,43 @@ describe('parseTeachers', () => {
     );
     expect(errors).toEqual([]);
     expect(accepted.map((x) => x.email)).toEqual(['ayse@', 'murat@okul.com']);
+  });
+});
+
+describe('teacherColumns', () => {
+  // The walkthrough of 2026-11-16: "Ad · Branş" put the branch in Kısa ad.
+  it('iki sütunlu "Ad · Branş" yapıştırmada branş Kısa ad olmuyor', () => {
+    const { accepted, errors } = parseTeachers('Ayşe Demir\tFizik\nMehmet Kaya\tRobotik');
+    expect(errors).toEqual([]);
+    expect(accepted.map((x) => [x.short, x.subject])).toEqual([
+      ['AD', 'Fizik'],
+      ['MK', 'Robotik'],
+    ]);
+  });
+
+  it('başlık satırı sütunları adlandırıyor: Adı ve Soyadı tek ad', () => {
+    const text = 'Adı\tSoyadı\tDers\tKısa\nAyşe\tDemir\tFizik\tAYD';
+    expect(teacherColumns(splitGrid(text), []).cols).toEqual(['name', 'name', 'subject', 'short']);
+    expect(parseTeachers(text).accepted[0]).toMatchObject({
+      name: 'Ayşe Demir',
+      short: 'AYD',
+      subject: 'Fizik',
+    });
+  });
+
+  it('bilinmeyen başlıklı sütun da başlık satırını başlık yapıyor, o sütun yok sayılıyor', () => {
+    const text = 'Ad Soyad\tBranş\tTelefon\nAyşe Demir\tFizik\t555 12 12';
+    expect(teacherColumns(splitGrid(text), []).cols).toEqual(['name', 'subject', 'skip']);
+    expect(parseTeachers(text).accepted.map((x) => x.name)).toEqual(['Ayşe Demir']);
+  });
+
+  it('kısa büyük harfli sütun kısa ad, seçilen sütunlar tahmini geçersiz kılıyor', () => {
+    const text = 'Ayşe Demir\tFİZ\tAD';
+    expect(teacherColumns(splitGrid(text), []).cols).toEqual(['name', 'short', 'subject']);
+    expect(parseTeachers(text, [], ['name', 'subject', 'skip']).accepted[0]).toMatchObject({
+      short: 'AD',
+      subject: 'FİZ',
+    });
   });
 });
 

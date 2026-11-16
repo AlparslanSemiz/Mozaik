@@ -796,6 +796,18 @@ etkisinde tutturulur ki gizleme ilk yerleşimden önce gelsin, sonra gelince bir
 stil geçişi daha. Ölçü `scripts/acilis-olc.mjs` (`enUzun`, `izgara` artık görünür
 ızgarayı sayar).
 
+
+### 222 · Görünmeyen kutu da ilk açılışta yerleşir
+Izgaranın her kapalı saati bir "×" metniydi (babanın haftasında 669 metin düğümü,
+her biri açılışta şekillendirilip yerleşiyor) ve her kartın sabitleme düğmesi
+fareyle üstüne gelinene kadar saydam olduğu hâlde içinde bir `<svg>` ve iki
+`<path>` taşıyordu (199 kart × 3 kutu). Saydam ya da sönük olmak yerleşimden
+kurtarmaz. Çare: çarpı `td.unavailable`'ın arka planında iki çizgi (glifin ölçüsü:
+0,44em kare, ~0,12em çizgi, `currentColor`; baskıda ve zorunlu renklerde yine glif),
+iğne düğmenin `::before`'u üstünde bir maske. Izgaradaki metin düğümü 1196'dan
+527'ye, SVG kutusu 597'den 0'a. Ölçü `scripts/acilis-olc.mjs` (CI), görünüş
+`renk.spec.ts` "kapalı saatin çarpısı".
+
 ## Düzen ölçümü ve hangi kutuya bakıldığı
 
 **Kural.** Bir düzen iddiası gerçek tarayıcıda, onu dolduran gerçek veriyle, ve
@@ -1745,7 +1757,7 @@ iddiası saati kapatarak sınanır.**
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172, 177, 178 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176, 220, 221 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176, 220, 221, 222 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142, 179 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
@@ -1758,7 +1770,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 179 (177 ve 178 açık dallarda), yeni bir tuzak 180'den devam eder; 220 ve 221 `hiz/acilis`'in (açık dallar çakışmasın diye 220'den). 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
+büyük kullanılan numara 179 (177 ve 178 açık dallarda), yeni bir tuzak 180'den devam eder; 220 ve 221 `hiz/acilis`'in, 222 `hiz/acilis-2`'nin (açık dallar çakışmasın diye 220'den). 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

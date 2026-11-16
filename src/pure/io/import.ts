@@ -11,7 +11,7 @@
 export { makeShort } from '../entities';
 import { MAX_BLOCK, type Gender, cleanEmail, looksLikeEmail } from '../../leaf/model';
 import { t } from '../../leaf/i18n';
-import { makeShort, parseGender } from '../entities';
+import { defaultSubjects, makeShort, parseGender } from '../entities';
 
 export interface ParseResult<T> {
   accepted: T[];
@@ -80,51 +80,117 @@ export interface TeacherRow {
   email: string;
 }
 
+/** What a pasted teacher column is read as; `skip` is "Yok say". */
+export type TeacherColumn = 'name' | 'short' | 'subject' | 'subject2' | 'gender' | 'email' | 'skip';
+
+/** The order a list without a header is read in when its cells say nothing. */
+const TEACHER_ORDER: TeacherColumn[] = ['name', 'short', 'subject', 'gender', 'subject2', 'email'];
+
+/** A header cell's column, by the word it starts with; `ikinci` before `branş`. */
+function headColumn(cell: string): TeacherColumn | null {
+  const w = cell.toLocaleLowerCase('tr');
+  const starts = (...xs: string[]) => xs.some((x) => w.startsWith(x));
+  if (starts('kısa', 'kisa')) return 'short';
+  if (starts('ikinci')) return 'subject2';
+  if (starts('branş', 'brans') || w === 'ders' || w === 'alan') return 'subject';
+  if (starts('cinsiyet')) return 'gender';
+  if (starts('e-posta', 'eposta', 'e-mail', 'email')) return 'email';
+  // Whole words only: "Adem Yılmaz" on the first row is a teacher.
+  return /^(ad|adı|soyad|soyadı|ad soyad|adı soyadı|isim|öğretmen|ogretmen)$/.test(w)
+    ? 'name'
+    : null;
+}
+
+const isAddress = (cell: string | undefined) => looksLikeEmail(cleanEmail(cell));
+
 /**
- * Columns: Ad · Kısaltma · Branş · Cinsiyet · İkinci branş · E-posta
- *
- * Columns four to six each arrived after the ones before them and each stays
- * OPTIONAL: a list pasted in an older, shorter shape reads `undefined` there,
- * which becomes "not stated", "no second subject" and "no address".
- * Nobody has to re-paste anything.
- *
- * The second subject is APPENDED rather than slotted in beside the first,
- * which would read better and would silently turn every existing four-column
- * paste into a list of teachers whose second subject is "Erkek".
- *
- * The address (schema v17) is the sixth column by the same rule, and it is
- * also found by its SHAPE wherever it sits after the name: a school's own
- * sheet puts it where it likes, and a cell holding one address is never a
- * short form, a subject or a gender. Every such cell is then read as empty in
- * its own column, so "ali@okul.com" in column four is not a gender and in
- * column five is not a second subject; the first one is the address. A sixth cell that is not an address is kept
- * as typed, the way the table keeps it, and Çıktı does not offer to send.
+ * What each pasted column is, and whether the first row is a header. A header
+ * row names them (Ad, Adı, Soyadı, Kısa ad, Branş, Ders…). Without one the
+ * cells do: a column of known subject names is the branch, short upper-case
+ * cells (≤ 4) the short form, E/K the gender, addresses the e-mail. Only what
+ * the cells leave open falls to the old order (Ad · Kısaltma · Branş ·
+ * Cinsiyet · İkinci branş · E-posta), and never to "Kısa ad": a two-column
+ * "Ad · Branş" paste used to put the branch there (walkthrough, 2026-11-16).
+ * The reader can change any of them in the preview.
  */
-export function parseTeachers(text: string): ParseResult<TeacherRow> {
+export function teacherColumns(
+  grid: string[][],
+  known: string[],
+): { cols: TeacherColumn[]; header: boolean } {
+  const width = Math.max(0, ...grid.map((r) => r.length));
+  const first = grid[0] ?? [];
+  const named = first.map(headColumn);
+  const filled = first.filter((c) => c !== '').length;
+  // A header by its first cell or by most of its cells: "Ad Soyad · Branş ·
+  // Telefon" is one, and its unknown column is skipped.
+  if (named[0] === 'name' || named.filter((c) => c !== null).length * 2 > filled) {
+    return { cols: Array.from({ length: width }, (_, k) => named[k] ?? 'skip'), header: true };
+  }
+  const subjects = new Set(known.map((x) => x.toLocaleLowerCase('tr')));
+  const cols: TeacherColumn[] = ['name'];
+  const free = (c: TeacherColumn) => !cols.includes(c);
+  for (let k = 1; k < width; k++) {
+    const cells = grid.map((r) => r[k] ?? '').filter((c) => c !== '');
+    const values = cells.filter((c) => !isAddress(c));
+    const all = (test: (v: string) => boolean) => values.length > 0 && values.every(test);
+    const legacy = TEACHER_ORDER[k];
+    let col: TeacherColumn;
+    if (values.length === 0) col = cells.length > 0 ? 'email' : (legacy ?? 'skip');
+    else if (
+      values.filter((v) => subjects.has(v.toLocaleLowerCase('tr'))).length * 2 >=
+      values.length
+    )
+      col = free('subject') ? 'subject' : 'subject2';
+    else if (all((v) => parseGender(v) !== '')) col = 'gender';
+    else if (free('short') && all((v) => [...v].length <= 4 && v === v.toLocaleUpperCase('tr')))
+      col = 'short';
+    else if (legacy !== undefined && legacy !== 'short') col = legacy;
+    else col = free('subject') ? 'subject' : 'subject2';
+    cols.push(free(col) ? col : 'skip');
+  }
+  return { cols, header: false };
+}
+
+/**
+ * One row per teacher, read by `given` columns or by `teacherColumns`. Every
+ * column past the name is OPTIONAL: an older, shorter paste reads "not
+ * stated", "no second subject" and "no address". Two name columns (Adı ·
+ * Soyadı) are one name. A cell holding one address is never a short form, a
+ * subject or a gender, whichever column it sits in: the first one is the
+ * address, and a cell of the e-mail column that is not one is kept as typed.
+ */
+export function parseTeachers(
+  text: string,
+  known: string[] = defaultSubjects(),
+  given?: TeacherColumn[],
+): ParseResult<TeacherRow> {
   const accepted: TeacherRow[] = [];
   const errors: string[] = [];
+  const grid = splitGrid(text);
+  const found = teacherColumns(grid, known);
+  const cols = given ?? found.cols;
 
-  for (const [i, cells] of splitGrid(text).entries()) {
-    if (i === 0 && isHeader(cells, ['ad', 'ad soyad', 'isim', 'öğretmen', 'ogretmen'])) continue;
-    const name = cells[0] ?? '';
+  for (const [i, cells] of grid.entries()) {
+    if (i === 0 && found.header) continue;
+    const of = (c: TeacherColumn) =>
+      cells.filter((x, k) => x !== '' && cols[k] === c && (c === 'email' || !isAddress(x)));
+    const name = of('name').join(' ');
     if (name === '') continue;
-
-    const address = (k: number) => k > 0 && looksLikeEmail(cleanEmail(cells[k]));
-    const at = cells.findIndex((_, k) => address(k));
-    const cell = (k: number) => (address(k) ? '' : (cells[k] ?? ''));
-
-    const subject = cell(2);
+    const subject = of('subject')[0] ?? '';
     if (subject === '')
       errors.push(t('{n}. satır: "{ad}" için branş boş.', { n: i + 1, ad: name }));
 
     accepted.push({
       name,
       // If the short form is left empty, derive it: "Mehmet Çelik" -> "MÇ"
-      short: cell(1) || makeShort(name),
+      short: of('short')[0] ?? makeShort(name),
       subject,
-      gender: parseGender(cell(3)),
-      subject2: cell(4),
-      email: cleanEmail(at > 0 ? cells[at] : cells[5]),
+      gender: parseGender(of('gender')[0] ?? ''),
+      subject2: of('subject2')[0] ?? '',
+      email: cleanEmail(
+        cells.find((x, k) => cols[k] !== 'skip' && cols[k] !== 'name' && isAddress(x)) ??
+          of('email')[0],
+      ),
     });
   }
   return { accepted, errors };

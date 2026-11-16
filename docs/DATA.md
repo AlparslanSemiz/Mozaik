@@ -354,14 +354,16 @@ dolu günlüğü (`largest`, eşitlerde en yenisi) hiç silmez. 2026-11-16'ya ka
 tek öğretmen canlı dosyanın ve günün yedeğinin üstüne yazılıyor, tek öğretmenli günlükler de dolu
 sayıldığı için on günde on gerçek yedeğin hepsi budanıyordu (denetim 2026-11-16, tuzak 159).
 
-Sorusuz her silmeden önce (sınıf, derslik, branş, seçenek, öğretmen, ders, `Programı boşalt`,
-`Baştan diz`), `Her şeyi sil`, dolu planın yerine örnek okul ve `Dosyadan aç` öncesinde açık plan
-`ders-programi-silmeden-once`'ya yazılır (tek yuva, boş ve dondurulmuş plan yazılmaz), seçilen
+Sorusuz her silmeden önce (sınıf, derslik, branş, seçenek, öğretmen, ders, `Programı boşalt`),
+`Her şeyi sil`, dolu planın yerine örnek okul ve `Dosyadan aç` öncesinde açık plan
+`ders-programi-silmeden-once`'ya yazılır; `Yeniden yap`, `Başka bir dizilim` ve yer değiştiren
+`Programı yap` öncesi de yazılır ama bir silme olmadıkları için sonraki açılışta önerilmez
+(`quiet`, 2026-11-16) (tek yuva, boş ve dondurulmuş plan yazılmaz), seçilen
 klasörde de günün `ders-programi-silmeden-once-YYYY-AA-GG.json` dosyasına (tek plan dosyası, gün
 içinde her silmede yeniden yazılır; budama bunların en yeni on gününü bırakır). Silmeden sonraki ilk otomatik kayıt yuvaya planın o hâlinin parmak izini yazar
 (`noteAfter`). Sonraki açılış, yuva açılan plana aitse, görülmemişse, açılan plandan farklıysa ve
 plan silmeden sonra değişmemişse (parmak izi tutuyorsa) bir kez bir şerit gösterir; değiştiyse
-geri getirmek sonraki işi de silerdi, yuva sessizce kalır. Şerit: "… Son silmeyi geri almak için: Geri getir". Geri getirmek geri
+geri getirmek sonraki işi de silerdi, yuva sessizce kalır. Şerit (nötr, kırmızı değil): "… Son silmeyi geri almak için: Geri getir". Geri getirmek geri
 alınabilen bir adım; yerine geçtiği hâl de yuvaya yazılır ama bir daha önerilmez. Depo doluysa
 yuva yer açar: kendi yazımı reddedilen yuva silinir (eskisi "son silme" diye önerilmesin), planın
 reddedilen otomatik kaydı yuvayı silip bir kez daha dener (`writePlanText`).
