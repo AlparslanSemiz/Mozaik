@@ -1,5 +1,5 @@
 // Pinning the whole week at once: every cell of every placed block, and the
-// toggle that pins or unpins them together ("Tüm programı sabitle"). Pinning a
+// toggle that pins or unpins them together ("Bütün dersleri sabitle"). Pinning a
 // row, a day or a column at once went on 2026-11-16 (Sadeleşme K7); one block
 // is still pinned on its own card.
 

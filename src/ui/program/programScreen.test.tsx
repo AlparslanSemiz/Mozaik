@@ -473,7 +473,7 @@ describe('Program ızgarası', () => {
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",
           "pool": [
-            "1 ders bekliyor2 saat · sürükleyip bırakın",
+            "2 saat bekliyorsürükleyip bırakın",
             "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           ],
         },
@@ -485,7 +485,7 @@ describe('Program ızgarası', () => {
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",
           "pool": [
-            "1 ders bekliyor2 saat · sürükleyip bırakın",
+            "2 saat bekliyorsürükleyip bırakın",
             "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           ],
         },
@@ -507,50 +507,50 @@ describe('ders havuzu', () => {
     expect(out).toMatchInlineSnapshot(`
       {
         "class/left": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "2 saat kaldı: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           "1 saat kaldı: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/name": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146) L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/row": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146) L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/size": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "2 saatlik dersler: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           "1 saatlik dersler: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "class/subject": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "Kimya: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
           "Matematik: L1:1:MÇ510 SAY4/5#rgb(195, 162, 205)",
         ],
         "teacher/left": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "2 saat kaldı: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "1 saat kaldı: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/name": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "MÇ: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/row": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "MÇ: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
           "AY: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
         ],
         "teacher/size": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "2 saatlik dersler: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "1 saatlik dersler: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
         "teacher/subject": [
-          "2 ders bekliyor3 saat · sürükleyip bırakın",
+          "3 saat bekliyorsürükleyip bırakın",
           "Kimya: L3:2:510 SAYAY0/2#rgb(159, 242, 146)",
           "Matematik: L1:1:510 SAYMÇ4/5#rgb(195, 162, 205)",
         ],
@@ -571,12 +571,12 @@ describe('ders havuzu', () => {
           "subject=Branşa göre",
           "size=Uzun dersler önce",
           "left=En çok kalan",
-          "=Tüm branşlar",
+          "=Bütün branşlar",
           "kimya=Kimya",
           "matematik=Matematik",
         ],
         "pool": [
-          "1 ders bekliyor1 ders süzgeç dışında · sürükleyip bırakın",
+          "2 saat bekliyor1 saat süzgeç dışında · sürükleyip bırakın",
           "510 SAY: L3:2:AY510 SAY0/2#rgb(159, 242, 146)",
         ],
       }
@@ -640,8 +640,8 @@ describe('araç çubuğunun altındaki satır', () => {
         "reason-bar :: Yerleşmiş dersi sürükleyerek taşıyın.",
         "reason-bar :: Yerleşmiş dersi sürükleyerek taşıyın.",
         "reason-bar busy :: Program yapılıyor… | 3/9 ders · 1,2 sn",
-        "reason-bar ok :: Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.",
-        "reason-bar ok :: Program yapıldı. 9 ders yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
+        "reason-bar ok :: Öneri uygulandı ve program dizildi.",
+        "reason-bar ok :: Program yapıldı: 8 saat yerleşti.",
         "reason-bar bad :: 7/9 ders yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. Öğretmen dolu (ve 1 ders daha).",
         "reason-bar warn :: Durduruldu. 7/9 ders yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. x.",
       ]

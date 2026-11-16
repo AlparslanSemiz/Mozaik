@@ -304,7 +304,7 @@ describe('solve — tıkanma', () => {
     expect(stuck.name).toContain('511');
     // The shortfall, not one closed hour of it (audit 2026-11-16): opening
     // "Pazartesi 1" alone would not be enough.
-    expect(stuck.reason).toBe('AV: 2 saat ders, 0 müsait saat; 2 saat açılmalı');
+    expect(stuck.reason).toBe('AV: 2 saat ders, 0 açık saat; 2 saat açılmalı');
 
     // What DID fit is still there and still legal.
     expectLegal(result.state);
@@ -688,7 +688,7 @@ describe('iyileştirme — gerçek haftalar', () => {
     }, 60_000);
   }
 
-  it('Başka bir dizilim: her tohum başka, aynı tohum aynı hafta', () => {
+  it('Başka bir program yap: her tohum başka, aynı tohum aynı hafta', () => {
     const d = emptied(sampleState());
     const run = (seed: number) => solve(d, { keepPlaced: false, seed, budgetMs: 600_000 }).state;
     const weeks = [0, 1, 2].map(run);

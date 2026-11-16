@@ -18,7 +18,7 @@
 // Every message is checked three ways before it is believed: the ORIGIN is the
 // one expected (never a wildcard, on either side, sending or receiving), the
 // SOURCE is the very window this side opened or was opened by, and the DATA has
-// exactly the shape below. The payload is the same text "Tümünü dosyaya kaydet"
+// exactly the shape below. The payload is the same text "Bütün planları dosyaya kaydet"
 // writes, so the receiver reads it with the same reader as a file a stranger
 // handed over (`parseBundle`, `readBundlePlans`): a message is never trusted
 // further than a file would be.

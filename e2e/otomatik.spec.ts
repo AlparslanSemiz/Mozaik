@@ -97,7 +97,7 @@ test.describe('22. Otomatik dizme', () => {
     await expect(cards).toHaveCount(first - 1);
   });
 
-  test('"Başka bir dizilim" aynı derslerle başka bir hafta diziyor', async ({ page }) => {
+  test('"Başka bir program yap" aynı derslerle başka bir hafta diziyor', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
@@ -113,7 +113,7 @@ test.describe('22. Otomatik dizme', () => {
 
     // In the strip's Daha fazla, beside Yeniden yap (Sadeleşme, 2026-11-16).
     await openMore(page);
-    await page.getByRole('menuitem', { name: 'Başka bir dizilim' }).click();
+    await page.getByRole('menuitem', { name: 'Başka bir program yap' }).click();
     const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
     await expect(bar).toContainText(`Program yapıldı. ${placed!}`);
@@ -144,7 +144,7 @@ test.describe('22. Otomatik dizme', () => {
     const bar = page.locator('.reason-bar');
     await expect(bar).toContainText('yerleşemedi');
     // The shortfall itself (2026-11-16), not one closed hour of it.
-    await expect(bar).toContainText(/\d+ saat ders, 0 müsait saat; \d+ saat açılmalı/);
+    await expect(bar).toContainText(/\d+ saat ders, 0 açık saat; \d+ saat açılmalı/);
     // ...and the way to the list that says the rest (K3, 2026-11-16).
     await bar.getByRole('button', { name: 'Ayrıntı', exact: true }).click();
     await expect(
@@ -339,7 +339,7 @@ test.describe('22. Otomatik dizme', () => {
       const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
       const refused = `${who} ${day}`;
       await question.getByRole('button', { name: /^Olmaz/ }).click();
-      await page.getByRole('menuitem', { name: `${day} hiç müsait değil` }).click();
+      await page.getByRole('menuitem', { name: `${day} günü kapalı` }).click();
       await expect(panel).toContainText('Cevaplarınız:');
       await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {

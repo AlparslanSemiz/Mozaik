@@ -82,7 +82,7 @@ export function openPlanFile({
             body: t(
               "Bu Mozaik onu açamıyor. Önce Mozaik'i güncelleyin, sonra dosyayı yeniden açın.",
             ),
-            confirmLabel: t('Güncellemeye bak'),
+            confirmLabel: t('Güncellemeleri denetle'),
             cancelLabel: t('Kapat'),
           })
         ) {
@@ -95,7 +95,7 @@ export function openPlanFile({
         tone: 'warn',
         body: bundle
           ? t(
-              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
+              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki "Bütün planları dosyadan aç" düğmesini kullanın.',
             )
           : WRONG_FILE.map((k) => t(k)).join(' '),
       });

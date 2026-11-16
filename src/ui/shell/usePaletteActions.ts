@@ -123,7 +123,7 @@ export function usePaletteActions({
         // Hakkında is behind a Daha fazla; "güncelleme" is what an older
         // reader types for it.
         id: 'update',
-        label: t('Güncellemeye bak'),
+        label: t('Güncellemeleri denetle'),
         hint: `${school} → ${t('Hakkında')}`,
         extra: 'güncelleme güncelle yeni sürüm indir hakkında versiyon',
         run: () => goTo({ tab: 'school', section: 'about' }),
@@ -131,7 +131,7 @@ export function usePaletteActions({
       {
         id: 'backup',
         label: t('Planlar ve yedek'),
-        hint: school,
+        hint: `${school} → ${t('Daha fazla')}`,
         extra: 'yedek klasör plan otomatik yedekler tümünü ayarlar',
         run: () => goTo({ tab: 'school', section: 'plans' }),
       },
@@ -188,7 +188,7 @@ export function usePaletteActions({
       },
       {
         id: 'ribbon',
-        label: ribbon ? t('Araç şeridini gizle') : t('Araç şeridini göster'),
+        label: ribbon ? t('Düğme satırını gizle') : t('Düğme satırını göster'),
         run: toggleRibbon,
       },
       {

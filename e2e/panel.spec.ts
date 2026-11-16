@@ -68,15 +68,13 @@ test.describe('48. Varlık paneli', () => {
     await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
 
     const sheet = page.locator('.sheet');
-    const placed = sheet.locator('.sheet-facts > div', { hasText: 'Programa yerleşmiş' });
+    const placed = sheet.locator('.sheet-facts > div', { hasText: 'Yerleşti' });
     await expect(placed).toHaveClass(/tight/);
-    await expect(placed.locator('dd')).toHaveText(/^0 \/ \d+ saat$/);
+    await expect(placed.locator('dd')).toHaveText(/^0 \/ \d+$/);
 
     // ...and the load itself is not flagged, because the week is open enough
     // to hold it. A panel that painted everything amber would say nothing.
-    await expect(
-      sheet.locator('.sheet-facts > div', { hasText: 'Haftalık ders yükü' }),
-    ).not.toHaveClass(/tight/);
+    await expect(sheet.locator('.sheet-facts > div', { hasText: 'Ders' })).not.toHaveClass(/tight/);
   });
 
   test('derslikten açılınca hangi sınıfların paylaştığını ADLARIYLA söylüyor', async ({ page }) => {

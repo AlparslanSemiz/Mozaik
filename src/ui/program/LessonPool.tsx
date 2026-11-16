@@ -45,10 +45,9 @@ import { useT } from '../common';
 
 interface Props {
   cards: PoolCard[];
-  completed: number;
   /** The status chip's problem count: "Hepsi yerleşti" beside "1 sorun" read as done. */
   problems: number;
-  /** Blocks waiting BEFORE the filter, so the head can say "12 / 99". */
+  /** Hours waiting BEFORE the filter, so the head can say what it holds back. */
   total: number;
   sort: PoolSort;
   setSort: (next: PoolSort) => void;
@@ -157,7 +156,6 @@ function groupStacks(stacks: CardStack[]): CardGroup[] {
 
 function LessonPool({
   cards,
-  completed,
   problems,
   total,
   sort,
@@ -178,7 +176,7 @@ function LessonPool({
   // one lesson's whole remainder once per card it still has out.
   const remainingHours = cards.reduce((sum, c) => sum + c.size, 0);
   const groups = groupStacks(stackCards(cards));
-  const narrowed = filter !== '' && total !== cards.length;
+  const narrowed = filter !== '' && total !== remainingHours;
   // Read from storage on every mount, so the tab switch that unmounts this
   // component cannot lose either setting (pitfall 18 does not apply to a
   // preference that lives outside React).
@@ -394,23 +392,22 @@ function LessonPool({
               <strong>
                 {problems > 0 ? t('{n} sorun', { n: problems }) : t('Hepsi yerleşti')}
               </strong>
-              <span className="pool-sub">{t('{n} dersin tamamı programda', { n: completed })}</span>
             </>
           ) : (
             <>
-              {/* Counts BLOCKS: a 2+1 lesson leaves two here. Called "ders"
-                  on screen since K4b (2026-11-16, "kart" → "ders"); the count
-                  is the tray's, not Dersler's lesson count. */}
-              <strong>{t('{n} ders bekliyor', { n: cards.length })}</strong>
+              {/* Hours, the one unit the screen counts in (denetim turu): a
+                  "ders" count here would be a third number beside Dersler's
+                  and the status chip's. */}
+              <strong>{t('{n} saat bekliyor', { n: remainingHours })}</strong>
               <span className="pool-sub">
                 {/* Narrowed, the head says so with the number it is hiding.
                     A tray that quietly shows a twelfth of what is left would
                     make "hepsi yerleşti" a lie one click away. */}
                 {narrowed
-                  ? t('{n} ders süzgeç dışında · sürükleyip bırakın', {
-                      n: total - cards.length,
+                  ? t('{n} saat süzgeç dışında · sürükleyip bırakın', {
+                      n: total - remainingHours,
                     })
-                  : t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
+                  : t('sürükleyip bırakın')}
               </span>
             </>
           )}
@@ -447,7 +444,7 @@ function LessonPool({
                   aria-label={t('Havuz süzgeci')}
                   onChange={(e) => setFilter(e.target.value)}
                 >
-                  <option value="">{t('Tüm branşlar')}</option>
+                  <option value="">{t('Bütün branşlar')}</option>
                   {subjects.map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -560,7 +557,6 @@ function LessonPool({
 function samePoolProps(a: Props, b: Props): boolean {
   return (
     a.cards === b.cards &&
-    a.completed === b.completed &&
     a.problems === b.problems &&
     a.total === b.total &&
     a.sort === b.sort &&

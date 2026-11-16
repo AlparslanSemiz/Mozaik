@@ -29,7 +29,7 @@ async function firstTeacher(page: Page) {
 
 // A list that fills up again while the page is reachable (Ctrl+Z): the
 // teacher comes back with his grid.
-test.describe('10. Gelemediği saatler: liste geri doluyor', () => {
+test.describe('10. Kapalı saatler: liste geri doluyor', () => {
   test('silinen öğretmen Ctrl+Z ile geri gelince çizelge çiziliyor', async ({ page }) => {
     await loadWorld(page, makeWorld({ days: 2, hours: 3 }), 'Öğretmenler');
     await openSetup(page, 'Öğretmenler');
@@ -42,7 +42,7 @@ test.describe('10. Gelemediği saatler: liste geri doluyor', () => {
   });
 });
 
-test.describe('10. Gelemediği saatler çizelgesi', () => {
+test.describe('10. Kapalı saatler çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
     await openWithSample(page);
     const { sheet, table } = await firstTeacher(page);

@@ -3,7 +3,7 @@
 // development machine: whether the workers open there, and how long a search
 // takes, is only known once he runs one. So every search leaves a line here,
 // the last twenty are kept, Hakkında shows the newest, and every bundle file
-// (the daily backup, "Tümünü dosyaya kaydet") carries them (bundle.ts).
+// (the daily backup, "Bütün planları dosyaya kaydet") carries them (bundle.ts).
 //
 // A machine preference, not the plan's data: it is about this computer.
 

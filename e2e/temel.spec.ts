@@ -622,7 +622,7 @@ test.describe('29. Hata yolları', () => {
     expect(said).toContain('Bu dosya daha yeni bir sürümle yazılmış');
     expect(said).toContain("Mozaik'i güncelleyin");
     expect(said).not.toContain('okunamadı');
-    // The answer is a button: "Güncellemeye bak" opens Ayarlar → Hakkında.
+    // The answer is a button: "Güncellemeleri denetle" opens Ayarlar → Hakkında.
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
       'Okul bilgileri',

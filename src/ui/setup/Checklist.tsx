@@ -52,7 +52,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
   const placed = Object.keys(activePlacements(d)).length;
   const closed = Object.keys(d.unavailable).length;
   const name = d.settings.schoolName.trim();
-  const week = t('{ilk}–{son}, günde {saat} ders', {
+  const week = t('{ilk}–{son}, günde {saat} saat', {
     ilk: dayLabel(first),
     son: dayLabel(last),
     saat: hours,
@@ -96,7 +96,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       done: missing.length === 0,
       detail:
         name === ''
-          ? t('Okul adı boş. Şu an: {hafta}. Doğru değilse değiştirin.', { hafta: week })
+          ? t('Okul adı boş. Hafta: {hafta}.', { hafta: week })
           : `${name} · ${week} · ${lists}`,
       to: school.to,
       action: school.action,
@@ -113,7 +113,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       // Optional: a school where everyone can come every hour has nothing to
       // close. Placing the first lesson is taken as having passed it.
       id: 'availability',
-      name: t('Gelemediği saatleri işaretle'),
+      name: t('Kapalı saatleri işaretle'),
       done: closed > 0 || placed > 0,
       detail:
         closed > 0

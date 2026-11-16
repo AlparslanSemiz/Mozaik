@@ -191,7 +191,7 @@ describe('cümle · engelin sebebi', () => {
         "roomBusy": "A dersliğinde Salı 1 saatinde 510 var",
         "roomClosed": "A dersliği Çarşamba 1 saatinde kapalı",
         "teacherBusy": "MÇ Salı 1 saatinde 510 sınıfında",
-        "teacherClosed": "MÇ Çarşamba 1 saatinde müsait değil",
+        "teacherClosed": "MÇ Çarşamba 1 saatinde kapalı",
       }
     `);
   });
@@ -211,14 +211,14 @@ describe('cümle · engelin sebebi', () => {
       {
         "danisman": [
           "lessonNeedsMoreDays · 510 · MÇ Matematik haftada 3 kez konacak ama yalnızca 2 gün var; en az bir günde iki kez görülecek.",
-          "teacherManyBlockedDays · MÇ yalnızca 2 günde müsait ama bir dersi haftada 3 kez konacak; bir güne iki kez düşebilir.",
+          "teacherManyBlockedDays · MÇ yalnızca 2 günde açık ama bir dersi haftada 3 kez konacak; bir güne iki kez düşebilir.",
         ],
         "derslik": [
           "impossible · A dersliğini 2 sınıf paylaşıyor (510, 511) ve toplam 8 saat ders var. Haftada 6 saati açık, 2 saat fazla.",
         ],
         "ogretmen": [
-          "tight · MÇ 6 saat müsait, 6 saat ders yüklenmiş. Zor olacak.",
-          "ok · AV 6 saat müsait, 2 saat ders yüklenmiş.",
+          "tight · MÇ 6 saat açık, 6 saat ders yüklenmiş. Zor olacak.",
+          "ok · AV 6 saat açık, 2 saat ders yüklenmiş.",
         ],
         "sinif": [
           "ok · 510 sınıfı: açık olan 6 saatin 4 saati dolu.",
@@ -260,7 +260,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-arayuz-yogunluk · arayüz yoğunluğu tercihi",
         "ders-programi-havuz · havuz çekmecesi tercihi",
         "ders-programi-havuz-boy · havuz çekmecesinin boyu",
-        "ders-programi-serit · araç şeridi tercihi",
+        "ders-programi-serit · düğme satırı tercihi",
         "ders-programi-serit-gizle · şerit kaydırınca gizlensin mi",
         "ders-programi-musaitlik-saat · müsaitlikte saat gösterimi",
         "ders-programi-hareket · hareket (animasyon) tercihi",

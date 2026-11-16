@@ -187,7 +187,7 @@ test.describe('96. Klavyeyle müsaitlik', () => {
     await page.keyboard.press('Space');
     const second = sheet.locator('tbody tr').first().locator('td button').nth(1);
     await expect(second).toHaveAttribute('aria-pressed', 'true');
-    await expect(second).toHaveAttribute('aria-label', /2\. saat, müsait değil/);
+    await expect(second).toHaveAttribute('aria-label', /2\. saat, kapalı/);
     await expect(closed).toHaveCount(1);
 
     // Up to the hour's heading: Enter closes that hour across the week.

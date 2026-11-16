@@ -78,7 +78,7 @@ export default function Classes({ state, change }: PanelProps) {
                 <th className="w-col-xl">{t('Ad')}</th>
                 <th>{t('Derslik')}</th>
                 <th>{t('Ders saati')}</th>
-                <th>{t('Durum')}</th>
+                <th>{t('Kapalı gün')}</th>
               </tr>
             </thead>
             <tbody ref={order.bodyRef}>

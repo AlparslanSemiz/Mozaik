@@ -168,11 +168,14 @@ function MailButton({
 function WhatsappButton({
   url,
   name,
+  label = 'WhatsApp',
   save,
   missing,
 }: {
   url: string | null;
   name?: string;
+  /** The visible words: the person page says what pressing does. */
+  label?: string;
   save: Save;
   missing: () => void;
 }) {
@@ -186,7 +189,7 @@ function WhatsappButton({
       }}
     >
       <MessageCircle size={16} strokeWidth={2} aria-hidden="true" />
-      WhatsApp
+      {label}
     </button>
   );
 }
@@ -242,7 +245,7 @@ export function SendTeacher({
     <>
       {why === null ? (
         <MailButton url={url} setSaid={setSaid} save={save}>
-          {t('Gönder')}
+          {t('E-postayla gönder')}
         </MailButton>
       ) : (
         <button
@@ -254,11 +257,12 @@ export function SendTeacher({
           }}
         >
           <Mail size={16} strokeWidth={2} aria-hidden="true" />
-          {t('Gönder')}
+          {t('E-postayla gönder')}
         </button>
       )}
       <WhatsappButton
         url={whatsappLink(teacher, t)}
+        label={t('WhatsApp’la gönder')}
         save={save}
         missing={() => {
           setSaved(null);
@@ -299,19 +303,19 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
     [state, ix, spans, t],
   );
   const save = saver(state, 'teacher', colored, t, setSaved, setSaid);
+  // Twenty-five rows saying "adres yok" were the loudest thing in the panel:
+  // those with neither address nor number are one sentence under the list.
+  const noAddress = rows.filter((r) => r.why === 'adres yok');
+  const listed = rows.filter((r) => r.why !== 'adres yok' || r.wa !== null);
 
   return (
     <div className="panel no-print mail-panel">
       <h2>{t('Gönder')}</h2>
-      <p className="hint">
-        {t(
-          'Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
-        )}
-      </p>
+      <p className="hint">{t('Program e-posta uygulamanızda açılır; siz gönderirsiniz.')}</p>
       {/* Above the list: the row pressed may be the first of twenty-five. */}
       <MailSaid said={said} saved={saved} />
       <ul className="mail-list">
-        {rows.map(({ teacher, why, url, wa }) => (
+        {listed.map(({ teacher, why, url, wa }) => (
           <li key={teacher.id} className="mail-row">
             <span className="row-dot" style={{ background: paletteColor(teacher.color) }} />
             {/* The full name since 2026-11-16 (Sadeleşme): "MÇ" says who only
@@ -325,7 +329,7 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
                 {teacher.email}
               </span>
             )}
-            {why !== null ? (
+            {why === 'adres yok' ? null : why !== null ? (
               <span className="muted-inline">{t(why)}</span>
             ) : (
               <MailButton
@@ -349,6 +353,9 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
           </li>
         ))}
       </ul>
+      {noAddress.length > 0 && (
+        <p className="hint">{t('{n} öğretmenin e-posta adresi yok.', { n: noAddress.length })}</p>
+      )}
     </div>
   );
 }

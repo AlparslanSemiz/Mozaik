@@ -126,13 +126,13 @@ export default function Summary({
           <T k="Okulun listesinde **bulunmayan** hazır branşlar; eklemek için tıklayın." />
         </p>
         {ready.length === 0 ? (
-          <div className="ok-box">{t('Gömülü tablodaki branşların hepsi listenizde.')}</div>
+          <div className="ok-box">{t('Hazır branşların hepsi listede.')}</div>
         ) : (
           <>
             <div className="form-row">
               <button
                 className="btn"
-                title={t('Gömülü tablodaki bütün branşları listeye ekler')}
+                title={t('Hazır branşların hepsini listeye ekler')}
                 onClick={() => change((d) => ready.reduce((acc, name) => addSubject(acc, name), d))}
               >
                 {t('Hepsini ekle')}
@@ -177,7 +177,7 @@ export default function Summary({
             element it is an object literal, not a comment. */}
         {unused.length > 0 && (
           <p className="hint data-hint">
-            {t('Hiçbir öğretmende kullanılmayan {n} branş var: {hangileri}. Silinebilirler.', {
+            {t('Kullanılmayan {n} branş: {hangileri}.', {
               n: unused.length,
               hangileri: unused.map(subjectLabel).join(', '),
             })}
@@ -257,7 +257,7 @@ export default function Summary({
         <h2>{t('Özet')}</h2>
         <h3>{t('Öğretmen yükü')}</h3>
         <p className="hint">
-          <T k="Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz." />
+          <T k="Öğretmenin açık saati, ona yüklenen ders saatinden az olamaz." />
         </p>
         {/* Above the table, not below it: under twenty-five rows this line is
             a screen away from the heading it belongs to. */}
@@ -276,7 +276,6 @@ export default function Summary({
           label={t('Öğretmen yükü')}
           empty={t('Henüz öğretmen yok.')}
           problemsFirst
-          openLabel="Müsait"
         />
         {subjects.length > 0 && (
           <>

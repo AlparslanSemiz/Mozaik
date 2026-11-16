@@ -41,7 +41,7 @@ export interface SolverOptions {
   budgetMs: number;
   /**
    * Which of the many legal weeks to look for. 0 is the week this data has
-   * always given; "Başka bir dizilim" asks for another number on every press.
+   * always given; "Başka bir program yap" asks for another number on every press.
    */
   seed: number;
   /**
@@ -1315,7 +1315,7 @@ function createSearch(
       // Which sentence tells the reader what to DO about it?
       //
       // When nothing fits at all, blocker() names the wall itself — "AV Salı 1
-      // saatinde müsait değil", "en fazla 1 saat görmeli — burada 2 saat olur" —
+      // saatinde kapalı", "en fazla 1 saat görmeli — burada 2 saat olur" —
       // and that is as concrete as it gets. When SOME of the lesson fits, the
       // grid ends up full of its own blocks and blocker() then reports "the
       // class is busy", which reads like a clash somebody could shuffle away.

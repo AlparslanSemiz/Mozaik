@@ -1,7 +1,7 @@
 // One date over the base week (schema v18): who is not coming, who takes
 // their hours ("ikame"). A class away is a trip or an exam. Its one
 // primary button prints the İkame listesi. Opened from the Program strip's
-// date chip and from a person page's "Gelmiyor…".
+// date chip and from a person page's "Bugün yok…".
 //
 // Every choice is written at once, as one undo step, and only to the dated
 // layer: the base week, the grid and the solver never see it.
@@ -62,7 +62,7 @@ export function DayDialog({
   /** The date shown; `null` is closed. */
   date: string | null;
   setDate: (iso: string) => void;
-  /** Opened by this person's "Gelmiyor…": a new date moves their one-day absence. */
+  /** Opened by this person's "Bugün yok…": a new date moves their one-day absence. */
   person?: Id | undefined;
   onClose: () => void;
   /** Draws the date's week on the Program grid (the strip's chip only). */

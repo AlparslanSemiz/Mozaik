@@ -675,7 +675,7 @@ function idsWhole(state: State): boolean {
 }
 
 /**
- * What "Tümünü dosyadan aç" makes of each plan in a bundle: the top bar's rule,
+ * What "Bütün planları dosyadan aç" makes of each plan in a bundle: the top bar's rule,
  * one plan at a time. Until 2026-10-23 the bundle path read each plan with the
  * tolerant `parseState`, so a plan with its teacher or lesson list missing
  * opened as an empty one and took the plan this computer had with it (TODO

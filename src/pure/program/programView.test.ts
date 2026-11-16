@@ -84,8 +84,9 @@ describe('havuz', () => {
     const ix = buildIndex(d);
     const all = buildPool(d, ix, 'class', 'row', '', byTeacher, t);
     const fizik = buildPool(d, ix, 'class', 'row', 'fizik', byTeacher, t);
-    expect([all.total, all.completed, all.cards.length]).toEqual([5, 0, 5]);
-    expect([fizik.total, fizik.cards.map((c) => c.lessonId)]).toEqual([5, ['L2', 'L2']]);
+    // `total` counts hours: the head says hours, never lessons.
+    expect([all.total, all.completed, all.cards.length]).toEqual([8, 0, 5]);
+    expect([fizik.total, fizik.cards.map((c) => c.lessonId)]).toEqual([8, ['L2', 'L2']]);
 
     // L2 laid out whole (2+1 on the first day): it counts as done, not waiting.
     const done = replaceActiveGrid(d, {
@@ -97,7 +98,7 @@ describe('havuz', () => {
     });
     const rest = buildPool(done, buildIndex(done), 'class', 'row', '', byTeacher, t);
     expect([rest.total, rest.completed, new Set(rest.cards.map((c) => c.lessonId))]).toEqual([
-      3,
+      5,
       1,
       new Set(['L1']),
     ]);
@@ -216,7 +217,7 @@ describe('araç çubuğunun altındaki satır', () => {
     };
     expect(describeBar(said, 'class', t, { applied: false, result: false }).level).toBe('');
     expect(describeBar(said, 'class', t, { applied: false, result: true }).text).toMatch(
-      /^Program yapıldı\. 2 ders/,
+      /^Program yapıldı: \d+ saat yerleşti\.$/,
     );
     expect(describeBar(said, 'class', t, { applied: true, result: true }).text).toMatch(
       /^Öneri uygulandı/,

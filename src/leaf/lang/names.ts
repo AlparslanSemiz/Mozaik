@@ -4,7 +4,7 @@
  *
  * A LEAF, below `constraints.ts` — and that is the whole reason it exists as
  * its own file rather than staying in `entities.ts`. `blocker()` writes "MÇ
- * Salı 3 saatinde müsait değil" and has to be able to draw that day name in the
+ * Salı 3 saatinde kapalı" and has to be able to draw that day name in the
  * interface language; `entities.ts` already imports `constraints.ts`, so
  * anything BOTH of them need has to live below both. The same shape as
  * `keys.ts`, `subjects.ts` and `blocks.ts`.

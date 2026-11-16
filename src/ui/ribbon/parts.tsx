@@ -88,11 +88,11 @@ export function Spacer() {
  * other, so the only thing grouping them was the hairline. Now the inside gap
  * is smaller than the outside one and the group reads as a group.
  */
-export function Group({ label, children }: { label: string; children: React.ReactNode }) {
+export function Group({ label, children }: { label?: string; children: React.ReactNode }) {
   const t = useT();
   return (
     <>
-      <span className="ribbon-label">{t(label)}</span>
+      {label !== undefined && <span className="ribbon-label">{t(label)}</span>}
       <span className="ribbon-group">{children}</span>
     </>
   );

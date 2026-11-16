@@ -48,7 +48,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
 ];
 
 const LEVEL_LABEL: Record<RuleLevel, string> = {
-  off: 'Kapalı',
+  off: 'Yok',
   warn: 'Tercih',
   block: 'Kesin',
 };
@@ -104,7 +104,7 @@ export default function Rules({ state, change }: PanelProps) {
               <tr>
                 <th>{t('Kural')}</th>
                 <th className="w-col-lg">{t('Saat')}</th>
-                <th className="w-col-lg">{t('Ne yapsın')}</th>
+                <th className="w-col-lg">{t('Seviye')}</th>
                 <th className="w-col-md">{t('Şu an')}</th>
               </tr>
             </thead>
@@ -151,16 +151,16 @@ export default function Rules({ state, change }: PanelProps) {
                       — and this is the screen where you pick it. */}
                   <td>
                     {state.settings.rules[rule.name] === 'off' ? (
-                      <span className="hint">{t('Kapalı')}</span>
+                      <span className="hint">–</span>
                     ) : (perRule[rule.name] ?? 0) === 0 ? (
-                      <span className="badge ok">{t('Uyan yok')}</span>
+                      <span className="badge ok">{t('Aşan yok')}</span>
                     ) : (
                       <span
                         className={`badge ${
                           state.settings.rules[rule.name] === 'block' ? 'impossible' : 'tight'
                         }`}
                       >
-                        {perRule[rule.name]} yer
+                        {t('{n} aşım', { n: perRule[rule.name] ?? 0 })}
                       </span>
                     )}
                   </td>
@@ -190,8 +190,8 @@ export default function Rules({ state, change }: PanelProps) {
                 <tr>
                   <th>{t('Öğretmen')}</th>
                   <th className="num">{t('Art arda')}</th>
-                  <th className="num">{t('Günde ↑')}</th>
-                  <th className="num">{t('Günde ↓')}</th>
+                  <th className="num">{t('Günde en çok')}</th>
+                  <th className="num">{t('Günde en az')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -271,7 +271,7 @@ export default function Rules({ state, change }: PanelProps) {
 
       <aside>
         <div className="panel">
-          <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
+          <h2>{t('Aşımlar ({n})', { n: violations.length })}</h2>
           <p className="hint">
             <T k="**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz." />
           </p>
@@ -279,11 +279,14 @@ export default function Rules({ state, change }: PanelProps) {
               is the box in this panel that gives ground: in a right rail the
               list scrolls and the sentence above it stays where it was. */}
           {violations.length === 0 ? (
-            <div className="ok-box">
-              {t('Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.')}
-            </div>
+            <div className="ok-box">{t('Hiçbir sınır aşılmıyor.')}</div>
           ) : (
-            <div className="stat-scroll">
+            <div
+              className="stat-scroll focus-scroll"
+              tabIndex={0}
+              role="group"
+              aria-label={t('Kural aşımları')}
+            >
               <table className="stat">
                 <thead>
                   <tr>

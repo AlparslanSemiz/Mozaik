@@ -37,7 +37,6 @@ export function settingsStrip({
   changelogUnseen,
   planName,
 }: StripContext): React.ReactElement {
-  const rules = Object.values(state.settings.rules);
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul bilgileri')}>
       <Group label="Bölüm">
@@ -69,25 +68,7 @@ export function settingsStrip({
 
       {/* What this section is about: a reading, never a second copy of a
           control under it. */}
-      {ui.section === 'rules' ? (
-        <Group label="Seviye">
-          <span className="ribbon-value">
-            <span
-              className={`badge ${rules.filter((r) => r === 'block').length > 0 ? 'impossible' : 'ok'}`}
-            >
-              {t('{n} kesin', { n: rules.filter((r) => r === 'block').length })}
-            </span>
-            <span
-              className={`badge ${rules.filter((r) => r === 'warn').length > 0 ? 'tight' : 'ok'}`}
-            >
-              {t('{n} tercih', { n: rules.filter((r) => r === 'warn').length })}
-            </span>
-            <span className="badge ok">
-              {t('{n} kapalı', { n: rules.filter((r) => r === 'off').length })}
-            </span>
-          </span>
-        </Group>
-      ) : ui.section === 'plans' ? (
+      {ui.section === 'plans' ? (
         <Group label="Açık plan">
           <span className="ribbon-value">{planName}</span>
         </Group>

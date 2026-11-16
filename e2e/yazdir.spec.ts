@@ -345,7 +345,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
       .click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     for (const n of [0, 1, 2]) await list.locator('.pick-item').nth(n).locator('input').check();
     await expect(page.locator('.print-page')).toHaveCount(3);
 
@@ -395,7 +395,7 @@ test.describe('21. Yazdırmada seçim', () => {
     await expect(pages).toHaveCount(20); // everything is on by default
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     await expect(pages).toHaveCount(0);
     await expect(page.getByRole('button', { name: /^Yazdır \(/ })).toBeDisabled();
     await expect(page.locator('.warn-box')).toContainText('Hiçbir sayfa seçili değil');
@@ -423,11 +423,11 @@ test.describe('21. Yazdırmada seçim', () => {
     await page.locator('.ribbon').getByRole('button', { name: 'Öğretmenler', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Öğretmenler' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     await list.locator('.pick-item').first().locator('input').check();
     await expect(page.locator('.print-page')).toHaveCount(1);
 
-    await list.getByRole('button', { name: 'Tümü' }).click();
+    await list.getByRole('button', { name: 'Hepsini seç' }).click();
     await expect(page.locator('.print-page')).toHaveCount(25);
   });
 
@@ -440,7 +440,7 @@ test.describe('21. Yazdırmada seçim', () => {
       .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
       .click();
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
     await expect(page.locator('.print-page')).toHaveCount(1);
 
@@ -463,7 +463,7 @@ test.describe('21. Yazdırmada seçim', () => {
       .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
       .click();
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
 
     const pdf = await page.pdf({ format: 'A4', landscape: true, printBackground: true });
@@ -593,7 +593,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
       .click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     for (const n of [0, 1, 2]) await list.locator('.pick-item').nth(n).locator('input').check();
     await expect(page.locator('.print-page')).toHaveCount(3);
 
@@ -1102,7 +1102,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
       .click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     for (const n of [0, 1, 2, 3]) await list.locator('.pick-item').nth(n).locator('input').check();
     await expect(page.locator('.print-page')).toHaveCount(4);
 
@@ -1240,7 +1240,9 @@ test.describe('Çıktı: öğretmene e-postayla', () => {
     expect(body).toContain('\r\n');
 
     const row = (who: string) => panel.locator('.mail-row', { hasText: who });
-    await expect(row('AV')).toContainText('adres yok');
+    // No address and no number: no row, one sentence under the list.
+    await expect(row('AV')).toHaveCount(0);
+    await expect(panel).toContainText('1 öğretmenin e-posta adresi yok.');
     await expect(row('KB')).toContainText('programı boş');
   });
 });
@@ -1366,7 +1368,7 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
     expect(await page.title()).toBe(before);
 
     // One page chosen: the file is that class's.
-    await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
+    await page.getByRole('button', { name: 'Hiçbirini seçme' }).first().click();
     const first = page.locator('.pick-item').first();
     const name = ((await first.textContent()) ?? '').trim();
     await first.locator('input').check();
@@ -1383,7 +1385,7 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
       .locator('.tabstrip')
       .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
       .click();
-    await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
+    await page.getByRole('button', { name: 'Hiçbirini seçme' }).first().click();
     await page.locator('.pick-item').first().locator('input').check();
     const pdf = (await page.pdf({ preferCSSPageSize: true, printBackground: false })).toString(
       'latin1',

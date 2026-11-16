@@ -86,14 +86,14 @@ function k4(): State {
 }
 
 describe('tıkanınca açık söyleniyor', () => {
-  it('öğretmenin açığı: kaç saat ders, kaç müsait saat, kaç saat açılmalı', () => {
+  it('öğretmenin açığı: kaç saat ders, kaç açık saat, kaç saat açılmalı', () => {
     const d = k1();
-    expect(shortfalls(d).get('oMC')).toBe('MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı');
+    expect(shortfalls(d).get('oMC')).toBe('MÇ: 18 saat ders, 15 açık saat; 3 saat açılmalı');
     const r = solve(d, { keepPlaced: false });
     expect(r.phase).toBe('stuck');
     // Every lesson MÇ holds up says it, and they come first.
     for (const s of r.stuck.filter((x) => x.name.includes('MÇ'))) {
-      expect(s.reason).toBe('MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı');
+      expect(s.reason).toBe('MÇ: 18 saat ders, 15 açık saat; 3 saat açılmalı');
     }
     expect(r.stuck[0]!.reason).toContain('MÇ: 18 saat ders');
   }, 30_000);

@@ -251,7 +251,7 @@ describe('blocker — sert kısıtlar', () => {
     d.unavailable[closedKey('oMC', 0, 0)] = 1;
     const reason = why(d, 'x1', 0, 0);
     expect(reason).toContain('MÇ');
-    expect(reason).toContain('müsait değil');
+    expect(reason).toContain('kapalı');
   });
 
   it('öğretmen başka sınıftayken engeller ve hangi sınıf olduğunu söyler', () => {
@@ -861,7 +861,7 @@ describe('closedConflicts', () => {
 
     const found = closedConflicts(closed, buildIndex(closed));
     expect(found).toHaveLength(1);
-    expect(found[0]!.reason).toBe('MÇ Pazartesi 1 saatinde müsait değil');
+    expect(found[0]!.reason).toBe('MÇ Pazartesi 1 saatinde kapalı');
     expect(found[0]!.lessonId).toBe('x1');
     // The whole point: nothing is removed.
     expect(activeProgram(closed).placements['s510|0|0']).toBe('x1');

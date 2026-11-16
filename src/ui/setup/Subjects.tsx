@@ -60,12 +60,23 @@ interface RowProps extends PanelProps {
   grip: ReactElement;
   onRemove: (button: HTMLElement) => void;
   onRename: (next: string) => void;
+  /** The built-in short's column: drawn only while some row differs from it. */
+  showDefault: boolean;
 }
 
 /** "No overrides at all", for asking what a subject's short would be. */
 const BLANK_SHORTS = { subjectShorts: {} } as Settings;
 
-function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }: RowProps) {
+function SubjectRow({
+  subject,
+  state,
+  change,
+  inList,
+  grip,
+  onRemove,
+  onRename,
+  showDefault,
+}: RowProps) {
   const t = useT();
   const current = subjectShort(state.settings, subject);
   // The default AS DRAWN, not the one an override is compared against.
@@ -128,9 +139,11 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
           blank header, so the label was written once per subject and the
           column itself was never named. Where the box already holds the
           default the cell carries the empty-cell mark, a SHORT dash. */}
-      <td className="hint" title={t("Mozaik'te gömülü olan kısaltma")}>
-        {current === shown ? '–' : shown}
-      </td>
+      {showDefault && (
+        <td className="hint" title={t('Hazır kısaltma')}>
+          {current === shown ? '–' : shown}
+        </td>
+      )}
       <td>
         {/* The same action cell as the other three lists. `.form-row` is what
             puts `Sil` on the right edge (`table.list td > .form-row` justifies
@@ -170,6 +183,11 @@ export default function Subjects({ state, change }: PanelProps) {
   // name. The strays get their own <tbody> for the same reason: `rowDrag` finds
   // its target by index among the tbody's children.
   const strays = options.filter((x) => !listed.has(subjectKey(x)));
+  // A column of dashes says nothing: the built-in short shows up only once a
+  // row's own short differs from it.
+  const showDefault = [...state.settings.subjects, ...strays].some(
+    (x) => subjectShort(state.settings, x) !== subjectShort(BLANK_SHORTS, x),
+  );
   const order = useRowOrder({
     kind: 'subjects',
     count: state.settings.subjects.length,
@@ -314,7 +332,7 @@ export default function Subjects({ state, change }: PanelProps) {
                   "Mat" or a dash, so the width is the HEADING's now, and
                   "Varsayılan" is ten characters — sm's 10ch leaves nothing for
                   the cell padding. */}
-                <th className="w-col-md">{t('Varsayılan')}</th>
+                {showDefault && <th className="w-col-md">{t('Varsayılan')}</th>}
                 <th className="w-col-md">
                   <span className="visually-hidden">{t('İşlemler')}</span>
                 </th>
@@ -328,6 +346,7 @@ export default function Subjects({ state, change }: PanelProps) {
                   state={state}
                   change={change}
                   inList
+                  showDefault={showDefault}
                   grip={order.grip(i, subject)}
                   onRemove={(button) => void remove(subject, button)}
                   onRename={(next) => void rename(subject, next)}
@@ -343,6 +362,7 @@ export default function Subjects({ state, change }: PanelProps) {
                     state={state}
                     change={change}
                     inList={false}
+                    showDefault={showDefault}
                     // A stray is read-only, so this is never reached — the prop is
                     // required so a new row site cannot forget it.
                     onRename={() => undefined}

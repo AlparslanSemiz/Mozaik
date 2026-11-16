@@ -58,7 +58,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     activeProgram(d).placements[placementKey('s510', 1, 2)] = 'x1';
     d = closeHours(d, 'oMC', [[1, 2]]);
     expect(illegalBlocks(d)).toHaveLength(1);
-    expect(illegalBlocks(d)[0]?.reason).toContain('müsait değil');
+    expect(illegalBlocks(d)[0]?.reason).toContain('kapalı');
   });
 
   // The auditor re-asks about each block with the block's OWN length. Since v7
@@ -76,7 +76,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     d = closeHours(d, 'oMC', [[0, 1]]);
     const bad = illegalBlocks(d);
     expect(bad).toHaveLength(1);
-    expect(bad[0]?.reason).toContain('müsait değil');
+    expect(bad[0]?.reason).toContain('kapalı');
   });
 
   // …and the mirror image: a 2+1 lesson whose SINGLE sits on a closed hour. If
@@ -115,7 +115,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     const bad = illegalBlocks(d);
     expect(bad).toHaveLength(1);
     expect(bad[0]?.size).toBe(3);
-    expect(bad[0]?.reason).toContain('müsait değil');
+    expect(bad[0]?.reason).toContain('kapalı');
   });
 
   // The LAST hour of a triple. An auditor that walked two hours per block — the

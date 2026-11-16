@@ -37,11 +37,7 @@ export function PersonRow({ state, kind, id, name, color, grip, cells }: Props) 
   });
   const over = weeklyLoad(state, kind, id) - openHours(state, id);
   const status = [
-    wholeDays.length === 0
-      ? ''
-      : kind === 'teacher'
-        ? t('{gunler} gelmiyor', { gunler: wholeDays.join(', ') })
-        : t('{gunler} kapalı', { gunler: wholeDays.join(', ') }),
+    wholeDays.length === 0 ? '' : wholeDays.join(', '),
     partial === 0 ? '' : t('{n} saat kapalı', { n: partial }),
   ]
     .filter(Boolean)

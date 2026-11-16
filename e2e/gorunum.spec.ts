@@ -264,7 +264,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     await chooseScale(page, 100);
   });
 
-  // "Hareket ve Dil solda olmalı." Both were in the right rail, which on this
+  // "Ekran hareketleri ve Dil solda olmalı." Both were in the right rail, which on this
   // screen is the one column that is NOT about the screen: the rail holds the
   // sample rows you judge the size by, and two settings had been parked beside
   // it. Now the rail holds one panel and the settings are all in one column, in
@@ -272,7 +272,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   //
   // The test asks WHICH COLUMN, not which pixel: a panel's x is a layout
   // detail, its parent is the decision.
-  test('Hareket ve Dil SOL sütunda, rayda yalnız örnek var', async ({ page }) => {
+  test('Ekran hareketleri ve Dil SOL sütunda, rayda yalnız örnek var', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Görünüm');
 
@@ -288,9 +288,9 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
       return { left: titles(left), rail: titles(rail) };
     });
 
-    expect(where.left, JSON.stringify(where)).toContain('Hareket');
+    expect(where.left, JSON.stringify(where)).toContain('Ekran hareketleri');
     expect(where.left, JSON.stringify(where)).toContain('Dil');
-    expect(where.rail, JSON.stringify(where)).not.toContain('Hareket');
+    expect(where.rail, JSON.stringify(where)).not.toContain('Ekran hareketleri');
     expect(where.rail, JSON.stringify(where)).not.toContain('Dil');
     // ...and the rail is down to one panel, which is the shape
     // `.cols > aside > .panel:only-child` is written for: what gives ground
@@ -352,7 +352,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
       .click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
-    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();
     for (const n of [0, 1, 2]) await list.locator('.pick-item').nth(n).locator('input').check();
 
     // Every size that lands on paper, read the way the page paints it.
@@ -674,7 +674,7 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
   });
 });
 
-test.describe('50. Gelemediği saatlerde saat gösterimi', () => {
+test.describe('50. Kapalı saatlerde saat gösterimi', () => {
   // The Müsaitlik tab and its "Saatler" switch went with K1 (2026-11-16): the
   // grid lives on the person's page, which always shows the bell, because
   // "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock times. The stored

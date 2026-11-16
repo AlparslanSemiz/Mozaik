@@ -3,8 +3,8 @@
 // its own. Nothing carries them across but the one-file bundle, and the steps
 // README.md gives are exactly the ones below:
 //
-//   old copy (the site, over http)   Ayarlar → Planlar ve yedek → Tümünü dosyaya kaydet
-//   new copy (file://, empty store)  Ayarlar → Planlar ve yedek → Tümünü dosyadan aç
+//   old copy (the site, over http)   Ayarlar → Planlar ve yedek → Bütün planları dosyaya kaydet
+//   new copy (file://, empty store)  Ayarlar → Planlar ve yedek → Bütün planları dosyadan aç
 //
 // The new copy is a second browser context: its own storage, like the new
 // profile, and file:// like the launcher opens it. It runs under the site
@@ -31,7 +31,7 @@ interface PaketPlan {
 async function tumunuKaydet(page: Page): Promise<{ plans: PaketPlan[] }> {
   await openPlans(page);
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click();
+  await page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click();
   const path = (await (await wait).path())!;
   return JSON.parse(await readFile(path, 'utf8')) as { plans: PaketPlan[] };
 }

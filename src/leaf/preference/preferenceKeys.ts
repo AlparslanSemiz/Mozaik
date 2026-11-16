@@ -53,7 +53,7 @@ export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: UI_DENSITY_KEY, label: 'arayüz yoğunluğu tercihi' },
   { key: DOCK_KEY, label: 'havuz çekmecesi tercihi' },
   { key: DOCK_H_KEY, label: 'havuz çekmecesinin boyu' },
-  { key: RIBBON_KEY, label: 'araç şeridi tercihi' },
+  { key: RIBBON_KEY, label: 'düğme satırı tercihi' },
   { key: RIBBON_AUTO_KEY, label: 'şerit kaydırınca gizlensin mi' },
   { key: AVAIL_CLOCK_KEY, label: 'müsaitlikte saat gösterimi' },
   { key: MOTION_KEY, label: 'hareket (animasyon) tercihi' },

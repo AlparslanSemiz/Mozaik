@@ -53,7 +53,7 @@ export function LessonPicker({ state, mode, picking, focused, setFocus }: Props)
                 tooMuch === undefined
                   ? undefined
                   : mode === 'teacher'
-                    ? t('{yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.', {
+                    ? t('{yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.', {
                         yuk: tooMuch.load,
                         acik: tooMuch.capacity,
                         fazla: tooMuch.load - tooMuch.capacity,

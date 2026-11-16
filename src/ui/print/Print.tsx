@@ -258,10 +258,10 @@ export default function Print({
             {t('{ne} ({secili}/{toplam})', { ne: t(title), secili: chosen, toplam: items.length })}
           </b>
           <button className="btn" onClick={() => setAll(kind, true)}>
-            {t('Tümü')}
+            {t('Hepsini seç')}
           </button>
           <button className="btn" onClick={() => setAll(kind, false)}>
-            {t('Hiçbiri')}
+            {t('Hiçbirini seçme')}
           </button>
         </div>
         <div className="pick-items">
@@ -346,9 +346,7 @@ export default function Print({
           </div>
           {/* Before the print window, where it is read: Chromium's own
               word for its destination. */}
-          <p className="hint">
-            <T k="Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın." />
-          </p>
+          <p className="hint">{t('PDF için yazdırma penceresinde «PDF olarak kaydet»i seçin.')}</p>
 
           {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
               normal request and used to mean printing all 45 pages and throwing

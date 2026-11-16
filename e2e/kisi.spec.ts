@@ -64,7 +64,7 @@ test.describe('Kişi sayfası', () => {
     await expect(sheet).toBeVisible();
     await expect.poll(() => sheet.evaluate((d) => d.contains(document.activeElement))).toBe(true);
     // Everything about the person, in the order the work is done.
-    for (const h of ['Bilgiler', 'Gelemediği saatler', 'Verdiği dersler', 'Sınırları']) {
+    for (const h of ['Bilgiler', 'Kapalı saatler', 'Verdiği dersler', 'Sınırları']) {
       await expect(sheet.getByRole('heading', { name: h })).toBeVisible();
     }
     await page.keyboard.press('Escape');
@@ -91,7 +91,7 @@ test.describe('Kişi sayfası', () => {
   }) => {
     await openTeachers(page);
     await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
-    const grid = page.getByRole('grid', { name: /Mehmet Çelik · müsait olmayan saatler/ });
+    const grid = page.getByRole('grid', { name: /Mehmet Çelik · kapalı saatler/ });
     // The bell times are on, whatever Müsaitlik's own switch says.
     const clock = grid.locator('thead .hour-clock').first();
     await expect(clock).toBeVisible();
@@ -99,7 +99,7 @@ test.describe('Kişi sayfası', () => {
 
     let before = await settledText(page);
     await grid
-      .getByRole('button', { name: /1\. saat, müsait$/ })
+      .getByRole('button', { name: /1\. saat, açık$/ })
       .first()
       .click();
     let saved = await savedState(page, before);
@@ -108,7 +108,7 @@ test.describe('Kişi sayfası', () => {
     // One Tab stop, the arrows inside, Space flips.
     before = await savedText(page);
     await grid
-      .getByRole('button', { name: /1\. saat, müsait değil$/ })
+      .getByRole('button', { name: /1\. saat, kapalı$/ })
       .first()
       .focus();
     await page.keyboard.press('ArrowRight');
@@ -171,13 +171,15 @@ test.describe('Kişi sayfası', () => {
   }) => {
     await openTeachers(page);
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
-    const send = page.getByRole('dialog').getByRole('link', { name: 'Gönder', exact: true });
+    const send = page
+      .getByRole('dialog')
+      .getByRole('link', { name: 'E-postayla gönder', exact: true });
     await expect(send).toHaveAttribute('href', /^mailto:ayse@ornek\.com/);
     await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
     const sheet = page.getByRole('dialog');
-    await sheet.getByRole('button', { name: 'Gönder', exact: true }).click();
+    await sheet.getByRole('button', { name: 'E-postayla gönder', exact: true }).click();
     await expect(sheet.getByRole('status')).toContainText('e-posta adresini yazın');
     await expect(sheet.getByRole('textbox', { name: 'E-posta' })).toBeFocused();
   });
@@ -248,7 +250,7 @@ test.describe('Kişi sayfası', () => {
     await sheet.getByRole('combobox', { name: 'Branş', exact: true }).selectOption('Fizik');
     await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'Zeynep Ak' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Gelemediği saatler' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Kapalı saatler' })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'Zeynep Ak', exact: true })).toBeVisible();
   });
@@ -263,7 +265,7 @@ test.describe('Kişi sayfası', () => {
     await expect(sheet.getByRole('heading', { name: 'Kapalı saatler' })).toBeVisible();
     await expect(sheet.locator('table.sheet-lessons')).toContainText('Ayşe Yılmaz');
     await expect(sheet.getByRole('button', { name: 'Yazdır', exact: true })).toBeVisible();
-    await expect(sheet.getByRole('button', { name: 'Gönder' })).toHaveCount(0);
+    await expect(sheet.getByRole('button', { name: 'E-postayla gönder' })).toHaveCount(0);
   });
 
   // B3.4, the WhatsApp half: the PDF is saved and the chat opens in ONE
@@ -282,7 +284,7 @@ test.describe('Kişi sayfası', () => {
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
     const sheet = page.getByRole('dialog');
     const download = page.waitForEvent('download');
-    await sheet.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    await sheet.getByRole('button', { name: 'WhatsApp’la gönder', exact: true }).click();
     const file = await download;
     const day = new Date().toLocaleDateString('sv-SE');
     expect(file.suggestedFilename()).toBe(`Mozaik – Ayşe Yılmaz – ${day}.pdf`);
@@ -297,7 +299,7 @@ test.describe('Kişi sayfası', () => {
 
     await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
     const other = page.getByRole('dialog');
-    await other.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    await other.getByRole('button', { name: 'WhatsApp’la gönder', exact: true }).click();
     await expect(other.getByRole('status')).toContainText('telefon numarasını yazın');
     const phone = other.getByRole('textbox', { name: 'Telefon' });
     await expect(phone).toBeFocused();
@@ -311,7 +313,7 @@ test.describe('Kişi sayfası', () => {
     await phone.blur();
     const saved = await savedState(page, before);
     expect(saved.teachers.find((x) => x.id === 'tMC')?.phone).toBe('+90 (555) 000-00-02');
-    await other.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    await other.getByRole('button', { name: 'WhatsApp’la gönder', exact: true }).click();
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { acilan: string }).acilan))
       .toMatch(/^https:\/\/wa\.me\/905550000002\?text=/);
@@ -325,7 +327,7 @@ test.describe('Kişi sayfası', () => {
     const sheet = page.getByRole('dialog');
     // The mailto: itself is not followed: there is no mail program here.
     await page.route('mailto:*', (route) => route.abort());
-    const send = sheet.getByRole('link', { name: 'Gönder', exact: true });
+    const send = sheet.getByRole('link', { name: 'E-postayla gönder', exact: true });
     await send.evaluate((a) => a.addEventListener('click', (e) => e.preventDefault()));
     const download = page.waitForEvent('download');
     await send.click();

@@ -105,7 +105,7 @@ export function health(d: State): Health {
   // The sentence names the loudest thing and counts it. "Sorun var" would
   // send somebody to Kontrol to find out what; this tells them before they go.
   const parts: string[] = [];
-  if (blocked > 0) parts.push(t('{n} kural ihlali', { n: blocked }));
+  if (blocked > 0) parts.push(t('{n} kural aşımı', { n: blocked }));
   if (stranded > 0) parts.push(t('{n} ders kapalı saatte', { n: stranded }));
   if (report.unplaceable.length > 0)
     parts.push(t('{n} ders sığmıyor', { n: report.unplaceable.length }));

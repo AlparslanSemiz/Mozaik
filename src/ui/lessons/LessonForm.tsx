@@ -154,7 +154,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
     for (const r of capacity.teachers) {
       if (teacherIds.has(r.id) && r.load > r.capacity) {
         lines.push(
-          t('{ad}: {yuk} saat ders, {acik} müsait saat. {fazla} saat haftaya sığmaz.', {
+          t('{ad}: {yuk} saat ders, {acik} açık saat. {fazla} saat haftaya sığmaz.', {
             ad: r.name,
             yuk: r.load,
             acik: r.capacity,
@@ -260,7 +260,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
                 value={subjectValue}
                 onChange={(e) => chooseSubject(e.target.value)}
               >
-                {mode !== 'teacher' && <option value="">{t('Tüm branşlar')}</option>}
+                {mode !== 'teacher' && <option value="">{t('Bütün branşlar')}</option>}
                 {subjectPool.map((name) => (
                   <option key={name} value={name}>
                     {subjectLabel(name)}
@@ -274,7 +274,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
                   value={subjectValue}
                   onChange={(e) => chooseSubject(e.target.value)}
                 >
-                  <option value="">{t('Tüm branşlar')}</option>
+                  <option value="">{t('Bütün branşlar')}</option>
                   {subjectPool.map((name) => (
                     <option key={name} value={name}>
                       {subjectLabel(name)}

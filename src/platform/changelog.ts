@@ -46,7 +46,7 @@ export const SURUM_NOTLARI: SurumNotu[] = [
     version: '2.1.1',
     date: '2026-09-01',
     items: [
-      'Program araç şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.',
+      'Program düğme satırında Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.',
       'Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.',
       'Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.',
       "Mozaik'in penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.",

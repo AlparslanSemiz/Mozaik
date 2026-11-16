@@ -407,7 +407,7 @@ export function buildPool(
     const className = group?.name ?? '?';
     const teacherShort = teacher?.short ?? '?';
     const subject = lessonSubject(d, lesson);
-    total += owed.length;
+    total += owed.reduce((a, b) => a + b, 0);
     // The filter narrows by BRANCH, and it is applied after `total` so the
     // head can say "12 / 99" rather than pretending the rest went away.
     if (filter !== '' && subjectKey(subject) !== filter) continue;
@@ -707,7 +707,7 @@ export function describeBar(
 
   if (solver.applied !== null && current.applied) {
     return {
-      text: t('Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.'),
+      text: t('Öneri uygulandı ve program dizildi.'),
       level: 'ok',
     };
   }
@@ -733,9 +733,8 @@ export function describeBar(
 
   if (done.stuck.length === 0) {
     return {
-      text: t('Program yapıldı. {n} ders yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
-        n: done.placedBlocks,
-        sure: seconds(done.elapsedMs),
+      text: t('Program yapıldı: {n} saat yerleşti.', {
+        n: Object.keys(activePlacements(done.state)).length,
       }),
       level: 'ok',
     };

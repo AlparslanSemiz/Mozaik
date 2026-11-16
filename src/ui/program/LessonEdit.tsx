@@ -133,8 +133,8 @@ function LessonSheet({
         title: t('Ders {ad} sınıfına taşınsın mı?', { ad: to.name }),
         body:
           preview.returned === 0 && preview.unpinned === 0
-            ? t('Yerleşmiş saatler olduğu gibi taşınır. Ctrl+Z ile geri alınabilir.')
-            : t('{n} ders havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.', {
+            ? t('Yerleşmiş saatler olduğu gibi taşınır.')
+            : t('{n} ders havuza döner, {s} sabitleme kalkar.', {
                 n: preview.returned,
                 s: preview.unpinned,
               }),
@@ -167,8 +167,8 @@ function LessonSheet({
         title: t('Ders {kim} öğretmenine geçsin mi?', { kim: to.short }),
         body:
           preview.returned === 0
-            ? t('Yerleşmiş saatler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.')
-            : t('{n} ders havuza döner. Ctrl+Z ile geri alınabilir.', { n: preview.returned }),
+            ? t('Yerleşmiş saatler olduğu gibi kalır.')
+            : t('{n} ders havuza döner.', { n: preview.returned }),
         confirmLabel: t('Aktar'),
         danger: preview.returned > 0,
       }))

@@ -57,7 +57,7 @@ export function useMoveOut(plans: PlanControls, peek: () => State): MoveOut {
       onState: (s) => {
         setState(s);
         // The window never answered, or it could not read what it got: the
-        // plans go into the same file "Tümünü dosyaya kaydet" writes, and the
+        // plans go into the same file "Bütün planları dosyaya kaydet" writes, and the
         // strip says where to open it. Not when the reader closed the window
         // or said no there: a download nobody asked for is a surprise.
         const failed =

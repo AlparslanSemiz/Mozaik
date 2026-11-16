@@ -45,13 +45,13 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
 ];
 
 /**
- * Which "Başka bir dizilim" this is: every press asks the search for the next
+ * Which "Başka bir program yap" this is: every press asks the search for the next
  * seed, so the same data gives a new week each time, and the same sequence of
  * weeks after a reload. Module-level and not a hook: `programStrip` is called
  * as a function, once per render of whichever strip is open.
  */
 let anotherSeed = 0;
-/** The week the last "Başka bir dizilim" put on the grid. */
+/** The week the last "Başka bir program yap" put on the grid. */
 let anotherMade: State | null = null;
 
 export function programStrip({
@@ -72,7 +72,7 @@ export function programStrip({
 }: StripContext): React.ReactElement {
   const { pending, placed, pinnedHours, gridEmpty, allPinned } = strip ?? describeStrip(state);
   const currentProgram = activeProgram(state);
-  /** "Yeniden yap" and "Başka bir dizilim" say the same thing when they land. */
+  /** "Yeniden yap" and "Başka bir program yap" say the same thing when they land. */
   const relaidNotice = (next: State) => {
     const said =
       pinnedHours === 0
@@ -115,7 +115,7 @@ export function programStrip({
     keepBefore(state, t('Program yeniden yapıldı.'), true);
     solver.start(state, { keepPlaced: false }, relaidNotice);
   };
-  // "Başka bir dizilim" (2026-11-16, main): the same rules, another of the
+  // "Başka bir program yap" (2026-11-16, main): the same rules, another of the
   // many weeks they allow, a different one on every press. Behind Daha fazla
   // beside Yeniden yap: the screen's one primary is "Programı yap".
   const another = () => {
@@ -166,7 +166,7 @@ export function programStrip({
       {/* What am I looking at: the axis. FIRST, in its old place ("öğretmen
           ve sınıftan seçimleri en solda eski yerinde olmalı"). A segment,
           never a fill: the screen's one filled button is the next one. */}
-      <Group label="Görünüm">
+      <Group label="Göster">
         {VIEWS.map((v) => (
           <button
             key={v.id}
@@ -190,7 +190,7 @@ export function programStrip({
           behind Daha fazla, because emptying a laid-out week in one click is
           not the click that should be next to the everyday one, unless the
           week is broken in a way a rebuild mends (below). */}
-      <Group label="Diz">
+      <Group>
         {solver.running || solver.advice?.searching === true ? (
           <button className="btn danger" onClick={solver.stop}>
             <Square {...ICON} />
@@ -243,7 +243,7 @@ export function programStrip({
           disabled={(placed === 0 && pending === 0) || busy}
           onSelect={another}
         >
-          {t('Başka bir dizilim')}
+          {t('Başka bir program yap')}
         </MoreItem>
         <MoreSep />
         {/* A second arrangement is a second PLAN (K2, 2026-11-16): one word
@@ -271,7 +271,7 @@ export function programStrip({
           disabled={gridEmpty || busy}
           onSelect={() => change(togglePinAll)}
         >
-          {allPinned ? t('Tüm sabitlemeleri kaldır') : t('Tüm programı sabitle')}
+          {allPinned ? t('Bütün sabitlemeleri kaldır') : t('Bütün dersleri sabitle')}
         </MoreItem>
         <MoreSep />
         <MoreItem

@@ -1036,13 +1036,14 @@ export async function chooseScale(page: Page, percent: number) {
  * The three names are short and generic, so `exact: true` — "Az" is inside
  * "Azalt" and every other word in the section (pitfall 49).
  */
-export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
+export async function chooseMotion(page: Page, name: 'Açık' | 'Az' | 'Kapalı') {
   await openSettings(page, 'Görünüm');
-  await page.getByRole('button', { name, exact: true }).click();
-  await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  // The theme has an "Açık" of its own: the group says which one.
+  const step = page
+    .getByRole('group', { name: 'Ekran hareketleri', exact: true })
+    .getByRole('button', { name, exact: true });
+  await step.click();
+  await expect(step).toHaveAttribute('aria-pressed', 'true');
 }
 
 /**
@@ -1074,7 +1075,7 @@ export async function placedHours(page: Page): Promise<number> {
  * PAINTED value waits for this first.
  *
  * `a.finished` and not a fixed sleep: the durations are a setting (Ayarlar →
- * Görünüm → Hareket), so a number here would be wrong at two of the three
+ * Görünüm → Ekran hareketleri), so a number here would be wrong at two of the three
  * steps. Animations that never finish are filtered out rather than waited on,
  * and the whole wait is capped.
  */

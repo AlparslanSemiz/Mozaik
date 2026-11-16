@@ -60,7 +60,7 @@ const THEMES: Array<{ id: Theme; label: string }> = [
 
 /** The three steps, in the order they reduce. */
 const MOTIONS: Array<{ id: Motion; label: string }> = [
-  { id: 'tam', label: 'Tam' },
+  { id: 'tam', label: 'Açık' },
   { id: 'az', label: 'Az' },
   { id: 'kapali', label: 'Kapalı' },
 ];
@@ -168,46 +168,40 @@ export default function Appearance({
             on 2026-11-16 and lives here and in Ctrl+K), and whether it slips
             away while reading — off unless chosen, since the same day. */}
         <div className="panel">
-          <HelpHead topic="Araç şeridi">
+          <HelpHead topic="Düğme satırı">
             <p>
-              <T k="Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
+              <T k="Sekmelerin altındaki düğme satırı, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
             </p>
           </HelpHead>
+          {/* Three ways, one row: "always there", "away while reading" and
+              "never" are the same two stored switches as before (is it drawn,
+              does it fold on scroll), picked in one press. */}
           {segmented(
-            'Araç şeridi',
+            'Düğme satırı',
             [
-              { id: 'acik', label: t('Görünsün') },
-              { id: 'kapali', label: t('Gizlensin') },
+              { id: 'hep', label: t('Hep görünsün') },
+              { id: 'kaydir', label: t('Kaydırınca gizlensin') },
+              { id: 'gizli', label: t('Gizlensin') },
             ],
-            ribbon ? 'acik' : 'kapali',
+            !ribbon ? 'gizli' : ribbonAuto ? 'kaydir' : 'hep',
             (id) => {
-              if ((id === 'acik') !== ribbon) toggleRibbon();
+              if ((id === 'gizli') === ribbon) toggleRibbon();
+              if (id !== 'gizli' && (id === 'kaydir') !== ribbonAuto) {
+                applyRibbonAuto(id === 'kaydir');
+                setRibbonAuto(id === 'kaydir');
+              }
             },
           )}
-          <div className="form-row">
-            <button
-              className="btn"
-              aria-pressed={ribbonAuto}
-              onClick={() => {
-                applyRibbonAuto(!ribbonAuto);
-                setRibbonAuto(!ribbonAuto);
-              }}
-            >
-              {/* One label, and the state is `aria-pressed`: a label that
-                  renamed itself read as a double negative when not pressed. */}
-              {t('Kaydırınca gizlenir')}
-            </button>
-          </div>
         </div>
 
         <div className="panel">
-          <HelpHead topic="Hareket">
+          <HelpHead topic="Ekran hareketleri">
             <p>
               <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez." />
             </p>
             <ul>
               <li>
-                <T k="**Tam.** Tasarlandığı gibi." />
+                <T k="**Açık.** Tasarlandığı gibi." />
               </li>
               <li>
                 <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır." />
@@ -221,7 +215,7 @@ export default function Appearance({
             </p>
           </HelpHead>
           {segmented(
-            'Hareket',
+            'Ekran hareketleri',
             MOTIONS.map((m) => ({ id: m.id, label: t(m.label) })),
             motion,
             (id) => chooseMotion(id as Motion),
@@ -247,7 +241,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Örnek')}</h2>
           <p className="hint">
-            <T k="Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir." />
+            <T k="Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa yazıyı bir basamak küçültün." />
           </p>
           {teachers.length === 0 ? (
             <p className="hint">
@@ -256,7 +250,12 @@ export default function Appearance({
           ) : (
             /* IN A SCROLL BOX: this is the rail's ONLY panel, the shape
                `.cols > aside > .panel:only-child` is written for. */
-            <div className="stat-scroll">
+            <div
+              className="stat-scroll focus-scroll"
+              tabIndex={0}
+              role="group"
+              aria-label={t('Örnek')}
+            >
               <table className="list">
                 <thead>
                   <tr>

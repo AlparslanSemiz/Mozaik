@@ -175,7 +175,7 @@ export default function School({ state, change }: PanelProps) {
           </p>
 
           <div className="form-row">
-            <Field label={t('Okul adı (yazdırılan sayfaların başlığında görünür)')} wide>
+            <Field label={t('Okul adı (kâğıtların başında)')} wide>
               <input
                 type="text"
                 className="grow"
@@ -324,7 +324,7 @@ export default function School({ state, change }: PanelProps) {
                 </select>
               </span>
             </div>
-            <Field label={t('Ders süresi (dakika)')}>
+            <Field label={t('Ders süresi (dk)')}>
               <input
                 type="number"
                 min={5}
@@ -363,7 +363,7 @@ export default function School({ state, change }: PanelProps) {
           </div>
 
           <div className="form-row spaced">
-            <Field label={t('Saat adları (virgülle; boş kalan numarasını alır)')} wide>
+            <Field label={t('Saat adları (virgülle ayırın)')} wide>
               <input
                 // Rebuilt when the stored names change (an undo, say), since
                 // an uncontrolled box does not follow its defaultValue.
@@ -398,7 +398,12 @@ export default function School({ state, change }: PanelProps) {
               taller than the panel: the one box here that can outgrow the
               screen is the one that scrolls. */}
           {patterns.length > 0 && (
-            <div className="stat-scroll">
+            <div
+              className="stat-scroll focus-scroll"
+              tabIndex={0}
+              role="group"
+              aria-label={t('Zil saatleri')}
+            >
               <table className="list bell-preview">
                 <thead>
                   <tr>

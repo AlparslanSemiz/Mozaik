@@ -18,7 +18,7 @@
 // and the properties hold it to never throwing.
 //
 // FUZZ_RUNS raises the run count (the nightly run); the default keeps the file
-// to a few seconds. The "Tümünü dosyadan aç" reader (`readBundlePlans`) came
+// to a few seconds. The "Bütün planları dosyadan aç" reader (`readBundlePlans`) came
 // with TB8's fix (2026-10-23): one broken plan beside an intact one, and the
 // intact one always opens while the broken one is refused or whole.
 
@@ -312,7 +312,7 @@ describe('fuzz · Excel’den yapıştırma (import.ts)', () => {
   });
 });
 
-describe('fuzz · "Tümünü dosyadan aç" (readBundlePlans, TB8)', () => {
+describe('fuzz · "Bütün planları dosyadan aç" (readBundlePlans, TB8)', () => {
   const root = load('src/fixtures/v16.json');
   /** Two plans: a broken one first, the intact school second. */
   const bundleOf = (x: Json) => {

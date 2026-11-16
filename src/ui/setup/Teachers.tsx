@@ -148,7 +148,7 @@ export default function Teachers({ state, change }: PanelProps) {
                 <th>{t('Kısa ad')}</th>
                 <th>{t('Branş')}</th>
                 <th className="num">{t('Ders saati')}</th>
-                <th>{t('Durum')}</th>
+                <th>{t('Kapalı gün')}</th>
               </tr>
             </thead>
             <tbody ref={order.bodyRef}>{rows}</tbody>

@@ -11,7 +11,7 @@ export function printStrip({ ui, t }: StripContext): React.ReactElement {
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Yazdır ve gönder')}>
       {/* The two kinds of sheet are drawn with the same two symbols they carry
           in Kurulum, Müsaitlik and the entity panel — one drawing per thing. */}
-      <Group label="İçerik">
+      <Group label="Göster">
         <button
           className="btn"
           aria-pressed={ui.scope === 'teachers'}

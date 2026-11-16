@@ -85,7 +85,7 @@ function dropCovers(d: State, id: Id, from: string, to: string): State {
   return put(d, { covers });
 }
 
-/** `id`'s one-day absence on `from` moved to `to`: "Gelmiyor…" and then the date. */
+/** `id`'s one-day absence on `from` moved to `to`: "Bugün yok…" and then the date. */
 export function moveAway(d: State, id: Id, from: string, to: string): State {
   const absent = d.dated.absent.filter((a) => !(a.id === id && a.from === from && a.to === from));
   return addAway(dropCovers(put(d, { absent }), id, from, from), id, to);

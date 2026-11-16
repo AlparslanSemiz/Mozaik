@@ -21,15 +21,13 @@ interface Props {
   change: (apply: (d: State) => State) => void;
   /** Teacher, class or room: ids are unique across all three. */
   entityId: Id;
-  /** "müsait" for a teacher, "açık" for a class or a room. */
-  teacher: boolean;
   /** The table's accessible name. */
   label: string;
   /** Always show the bell times, whatever Müsaitlik's own switch says. */
   clock?: boolean;
 }
 
-export function AvailGrid({ state, change, entityId, teacher, label, clock = false }: Props) {
+export function AvailGrid({ state, change, entityId, label, clock = false }: Props) {
   const t = useT();
   // Nothing is applied until the drag ends: painting 40 cells must not create
   // 40 separate undo steps.
@@ -108,7 +106,7 @@ export function AvailGrid({ state, change, entityId, teacher, label, clock = fal
   const cellName = (day: string, hour: number, closed: boolean) =>
     t('{gun} {n}. saat', { gun: dayLabel(day), n: hour + 1 }) +
     ', ' +
-    (teacher ? (closed ? t('müsait değil') : t('müsait')) : closed ? t('kapalı') : t('açık'));
+    (closed ? t('kapalı') : t('açık'));
 
   return (
     <div className="scroll-x" ref={sheet}>

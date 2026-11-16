@@ -4,7 +4,7 @@
 // shortfall.test.ts.
 //
 // WHY. The stuck sentence used to be `blocker()`'s verdict on one cell — "MÇ
-// Perşembe 6 saatinde müsait değil" — when the reason was that MÇ teaches 18
+// Perşembe 6 saatinde kapalı" — when the reason was that MÇ teaches 18
 // hours and is open for 15. That sends the reader to one hour of one day, and
 // opening it is not enough (audit 2026-11-16). The shortfall is the sentence
 // that says what to do and how much of it.
@@ -52,7 +52,7 @@ export function shortfalls(d: State): Map<Id, string> {
       d.lessons.filter((l) => l.teacherId === x.id),
       [x.id],
       (yuk, acik) =>
-        t('{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı', {
+        t('{kim}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı', {
           kim: x.short,
           yuk,
           acik,

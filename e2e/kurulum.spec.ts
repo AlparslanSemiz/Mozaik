@@ -214,16 +214,18 @@ test.describe('12. Branş kısaltmaları', () => {
 
     // The built-in short is a COLUMN now, not a sentence repeated on every
     // row: the word "varsayılan" is the heading and the cell holds the value
-    // alone, or the empty-cell dash where the box already carries it.
+    // alone, and it is drawn only while some row differs from it.
     const note = row.locator('td.hint');
     await input.fill('Zzz');
     await input.blur();
     await expect(note).toHaveText(original);
     await expect(page.getByRole('columnheader', { name: 'Varsayılan' })).toBeVisible();
 
+    // Back to the default, the column has nothing to say and goes away.
     await input.fill(original);
     await input.blur();
-    await expect(note).toHaveText('–');
+    await expect(note).toHaveCount(0);
+    await expect(page.getByRole('columnheader', { name: 'Varsayılan' })).toHaveCount(0);
     await expect(row).not.toContainText('varsayılan');
   });
 });

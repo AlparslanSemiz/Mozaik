@@ -72,7 +72,7 @@ async function go(page: Page, tab: string) {
   await settledMotion(page);
 }
 
-test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
+test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
   // THE ORDER OF THE PROGRAM STRIP, asked for by name: "öğretmen ve sınıftan
   // seçimleri en solda eski yerinde olmalı". The program library arrived at the
   // head of the strip in the round before this one and pushed the view switch a
@@ -441,7 +441,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
   }) => {
     await openWithSample(page);
     await openSettings(page, 'Görünüm');
-    const group = page.getByRole('group', { name: 'Araç şeridi', exact: true });
+    const group = page.getByRole('group', { name: 'Düğme satırı', exact: true });
     await group.getByRole('button', { name: 'Gizlensin', exact: true }).click();
 
     for (const tab of TABS) {
@@ -450,7 +450,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     }
 
     await openSettings(page, 'Görünüm');
-    await group.getByRole('button', { name: 'Görünsün', exact: true }).click();
+    await group.getByRole('button', { name: 'Hep görünsün', exact: true }).click();
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.ribbon')).toBeVisible();
   });

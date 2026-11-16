@@ -75,7 +75,7 @@ export function collectStates(library: Library, planId: Id, present: State): Rec
   return out;
 }
 
-/** The all-plans file's text: what "Tümünü dosyaya kaydet" writes and the move sends. */
+/** The all-plans file's text: what "Bütün planları dosyaya kaydet" writes and the move sends. */
 export function bundleText(library: Library, planId: Id, present: State): string {
   return buildBundle(library, collectStates(library, planId, present), searchLog());
 }

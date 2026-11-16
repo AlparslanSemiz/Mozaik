@@ -24,19 +24,19 @@ export function buildCapacity(d: State): Capacity {
     const level = capacityLevel(capacity, load);
     const message =
       level === 'impossible'
-        ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. {fazla} saat fazla.', {
+        ? t('{kim} {acik} saat açık, {yuk} saat ders yüklenmiş. {fazla} saat fazla.', {
             kim: x.short,
             acik: capacity,
             yuk: load,
             fazla: load - capacity,
           })
         : level === 'tight'
-          ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. Zor olacak.', {
+          ? t('{kim} {acik} saat açık, {yuk} saat ders yüklenmiş. Zor olacak.', {
               kim: x.short,
               acik: capacity,
               yuk: load,
             })
-          : t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş.', {
+          : t('{kim} {acik} saat açık, {yuk} saat ders yüklenmiş.', {
               kim: x.short,
               acik: capacity,
               yuk: load,

@@ -1,6 +1,6 @@
 // İkame and the dated layer (schema v18, 2026-11-16).
 //
-// A teacher is not coming on a date: their page's "Gelmiyor…" opens that
+// A teacher is not coming on a date: their page's "Bugün yok…" opens that
 // date, their hours are listed with the teachers free then, and the one
 // chosen lands in the saved plan without touching the base week. The Program
 // strip's chip says the week has a change; the substitute's page counts it;
@@ -49,14 +49,14 @@ test.describe('İkame', () => {
     });
   });
 
-  test('Gelmiyor… o günü açıyor, seçilen ikame kayda giriyor, taban hafta değişmiyor', async ({
+  test('Bugün yok… o günü açıyor, seçilen ikame kayda giriyor, taban hafta değişmiyor', async ({
     page,
   }) => {
     await loadWorld(page, world(), 'Öğretmenler');
     await openSetup(page, 'Öğretmenler');
     const before = await settledText(page);
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
-    await page.getByRole('button', { name: 'Gelmiyor…' }).click();
+    await page.getByRole('button', { name: 'Bugün yok…' }).click();
 
     const day = page.getByRole('dialog', { name: 'Salı 17 Kasım' });
     await expect(day).toBeVisible();

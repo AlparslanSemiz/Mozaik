@@ -184,7 +184,7 @@ export function sozlukOf(dil: Dil): Sozluk | undefined {
 
 // ------------------------------------------------------------ the language
 //
-// `constraints.ts` writes "MÇ Salı 3 saatinde müsait değil", `entities.ts`
+// `constraints.ts` writes "MÇ Salı 3 saatinde kapalı", `entities.ts`
 // writes what a deletion costs, `feasibility.ts` writes the Kontrol report.
 // None of them can call `useT()`: they are pure functions that know nothing
 // about React, and threading a `t` parameter through them would put a second

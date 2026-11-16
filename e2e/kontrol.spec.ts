@@ -178,7 +178,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     const panel = page.locator('.panel', { hasText: 'Yerleşemeyen dersler' });
     await expect(panel).toContainText('510 · MÇ Matematik');
     // The numbers that bind, not a sample closed cell (TODO SD4).
-    await expect(panel).toContainText('MÇ 0 saat müsait, 1 saat ders yüklenmiş. 1 saat fazla.');
+    await expect(panel).toContainText('MÇ 0 saat açık, 1 saat ders yüklenmiş. 1 saat fazla.');
   });
 
   test('art arda sınırı aşan program ihlal olarak sayılıyor', async ({ page }) => {
@@ -188,7 +188,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     });
 
-    const panel = page.locator('.panel', { hasText: 'Kural ihlalleri' });
+    const panel = page.locator('.panel', { hasText: 'Kural aşımları' });
     await expect(panel).toContainText('art arda');
     await expect(panel.locator('.badge.impossible')).toBeVisible();
   });
@@ -199,7 +199,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1 }],
       placements: { 's510|0|0': 'x1', 's510|0|2': 'x1' },
     });
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('Salı günü');
+    await expect(page.locator('.panel', { hasText: 'Kural aşımları' })).toContainText('Salı günü');
   });
 
   test('günde en az kuralı yalnız burada yakalanıyor ve Uyarı olarak', async ({ page }) => {
@@ -211,7 +211,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       placements: { 's510|0|0': 'x1' },
     });
 
-    const panel = page.locator('.panel', { hasText: 'Kural ihlalleri' });
+    const panel = page.locator('.panel', { hasText: 'Kural aşımları' });
     await expect(panel).toContainText('en az');
     await expect(panel.locator('.badge.tight')).toBeVisible();
   });
@@ -222,9 +222,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     });
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
-      '510 sınıfı',
-    );
+    await expect(page.locator('.panel', { hasText: 'Kural aşımları' })).toContainText('510 sınıfı');
   });
 
   test('kapalı saatte kalan ders sayılıyor ve sebebi yazıyor', async ({ page }) => {
@@ -235,7 +233,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     });
 
     const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
-    await expect(panel).toContainText('MÇ Salı 1 saatinde müsait değil');
+    await expect(panel).toContainText('MÇ Salı 1 saatinde kapalı');
     await expect(panel).toContainText('hiçbir ders silinmedi');
     // DK7: the verdict and the strip said "Sorun görünmüyor" and "0 engel"
     // while the chip was red and this panel counted the lesson.
@@ -289,7 +287,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       .getByRole('button', { name: /^İpuçları/ })
       .click();
     const panel = page.locator('.panel', { hasText: 'İpuçları' });
-    await expect(panel).toContainText('MÇ yalnızca 1 günde müsait');
+    await expect(panel).toContainText('MÇ yalnızca 1 günde açık');
     await expect(panel).toContainText('bir güne iki kez düşebilir');
   });
 
@@ -479,7 +477,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     const rows = panel.locator('tbody tr');
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('511 · AV Fizik');
-    await expect(rows.first()).toContainText('AV Salı 3, 4 saatlerinde müsait değil');
+    await expect(rows.first()).toContainText('AV Salı 3, 4 saatlerinde kapalı');
 
     await rows.first().getByRole('button', { name: 'Göster' }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toHaveAttribute(
@@ -508,7 +506,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     await expect(page.getByRole('dialog', { name: 'Programın durumu' })).toBeHidden();
     const sheet = page.getByRole('dialog');
     await expect(sheet.locator('.sheet-mark')).toHaveText('AV');
-    await expect(sheet.getByRole('heading', { name: 'Gelemediği saatler' })).toBeVisible();
+    await expect(sheet.getByRole('heading', { name: 'Kapalı saatler' })).toBeVisible();
     // The button that opened the page went with the list; the keyboard goes
     // back to where the list was opened from, the status chip.
     await page.keyboard.press('Escape');
@@ -530,7 +528,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     await page.getByRole('menuitem', { name: 'Neden yerleşmedi?' }).click();
     const list = page.getByRole('dialog', { name: 'Programın durumu' });
     await expect(list.locator('.lesson-chip[data-lesson="y2"]')).toBeFocused();
-    await expect(list.locator('#kontrol-yerlesemeyen')).toContainText('AV 0 saat müsait');
+    await expect(list.locator('#kontrol-yerlesemeyen')).toContainText('AV 0 saat açık');
     await expect(
       list.locator('#kontrol-yerlesemeyen').getByRole('button', { name: 'Sayfasını aç' }),
     ).toBeVisible();
@@ -554,7 +552,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     await expect(panel.locator('h2')).toHaveText('Yerleşemeyen dersler (2)');
     await expect(panel.locator('tbody tr')).toHaveCount(1);
     await expect(panel.locator('tbody tr')).toContainText(
-      'AV 0 saat müsait, 2 saat ders yüklenmiş. 2 saat fazla.',
+      'AV 0 saat açık, 2 saat ders yüklenmiş. 2 saat fazla.',
     );
     const chips = panel.locator('.lesson-chip');
     await expect(chips).toHaveCount(2);
@@ -571,7 +569,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
       placements: { 's510|1|1': 'x1', 's510|1|2': 'x1' },
     });
     await page
-      .locator('.panel', { hasText: 'Kural ihlalleri' })
+      .locator('.panel', { hasText: 'Kural aşımları' })
       .getByRole('button', { name: 'Göster' })
       .first()
       .click();

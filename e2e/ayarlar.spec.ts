@@ -71,7 +71,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     // Both patterns still end at 19:10 — there is exactly one long break.
     await expect(preview.locator('tbody tr').last()).toContainText('19:10');
 
-    const lengthBox = page.getByLabel('Ders süresi (dakika)');
+    const lengthBox = page.getByLabel('Ders süresi (dk)');
     await lengthBox.fill('45');
     await lengthBox.blur();
     await expect(preview).toContainText('09:00–09:45');
@@ -152,7 +152,7 @@ test.describe('15. Okul bilgileri sekmesi', () => {
     await expect(firstHour).toHaveAttribute('title', /^09:00–/);
 
     await openSettings(page, 'Zil ve günler');
-    const lessonMinutes = page.getByLabel('Ders süresi (dakika)');
+    const lessonMinutes = page.getByLabel('Ders süresi (dk)');
     await lessonMinutes.fill('45');
     await lessonMinutes.blur();
 
@@ -364,8 +364,8 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
 
     // What was allowed through is listed in the problem list.
     const list = await openProblems(page);
-    await expect(list.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
-    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
+    await expect(list.getByRole('heading', { name: /Kural aşımları/ })).toBeVisible();
+    await expect(list.locator('.panel', { hasText: 'Kural aşımları' })).toContainText(
       'MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.',
     );
   });
@@ -658,8 +658,8 @@ test.describe('33. Ayarlar — kurallar', () => {
     // grid the world arrived with is untouched, no drag needed.
     const list = await openProblems(page);
     await list.getByRole('button', { name: /^Sorunlar/ }).click();
-    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('MÇ');
-    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('boşlukta');
+    await expect(list.locator('.panel', { hasText: 'Kural aşımları' })).toContainText('MÇ');
+    await expect(list.locator('.panel', { hasText: 'Kural aşımları' })).toContainText('boşlukta');
   });
 
   test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {
@@ -667,8 +667,8 @@ test.describe('33. Ayarlar — kurallar', () => {
     await openSettings(page, 'Kurallar');
     // This screen is a flowing `.panel-grid`, not two fixed columns, so the
     // live count is no longer "the aside" — it is the panel that says so.
-    const live = page.locator('.panel', { hasText: 'Şu anki ihlaller' });
-    await expect(live).toContainText('Şu anki ihlaller');
+    const live = page.locator('.panel', { hasText: 'Aşımlar' });
+    await expect(live).toContainText('Aşımlar');
     await expect(live.locator('.ok-box')).toBeVisible();
   });
 

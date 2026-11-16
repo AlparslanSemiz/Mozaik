@@ -40,7 +40,7 @@ export interface Cell {
  * act on. In order, the first that holds:
  *
  * 1. somebody's open hours cannot hold their load at all — the capacity row's
- *    own sentence ("AY 20 saat müsait, 24 saat ders yüklenmiş. 4 saat fazla."),
+ *    own sentence ("AY 20 saat açık, 24 saat ders yüklenmiş. 4 saat fazla."),
  *    which every lesson of that teacher shares and so groups under;
  * 2. the class has no empty open hour left;
  * 3. it has some, and each is counted by what keeps THIS lesson out of it: the
@@ -102,7 +102,7 @@ export function stuckReason(
   const room = (counts.get('roomBusy') ?? 0) + (counts.get('roomClosed') ?? 0);
   const rule = (counts.get('rule') ?? 0) + (counts.get('relatedDay') ?? 0);
   const parts: string[] = [];
-  if (away > 0) parts.push(t('{kim} {n} saatinde müsait değil', { kim: teacher.short, n: away }));
+  if (away > 0) parts.push(t('{kim} {n} saatinde kapalı', { kim: teacher.short, n: away }));
   if (elsewhere > 0) {
     parts.push(t('{n} saatinde {kim} başka sınıfta', { n: elsewhere, kim: teacher.short }));
   }
@@ -182,7 +182,7 @@ export interface StrandedLesson {
 
 /**
  * `closedConflicts` is one entry per HOUR, and Kontrol drew it that way: a
- * two-hour block was two identical rows ("AY Çarşamba 1 saatinde müsait değil"
+ * two-hour block was two identical rows ("AY Çarşamba 1 saatinde kapalı"
  * twice) under a heading that counted hours as lessons. Grouped here by lesson,
  * and each closer is named once with every hour it closed.
  */
@@ -247,7 +247,7 @@ function dayName(d: State, day: number): string {
 /** closed.ts's three sentences, with every hour the one closer closed. */
 function closerSentence(ix: Index, who: Target, at: string): string {
   if (who.kind === 'teacher') {
-    return t('{kim} {ne_zaman} müsait değil', {
+    return t('{kim} {ne_zaman} kapalı', {
       kim: ix.teacherById.get(who.id)?.short ?? '?',
       ne_zaman: at,
     });

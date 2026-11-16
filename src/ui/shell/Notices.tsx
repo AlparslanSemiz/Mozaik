@@ -87,7 +87,7 @@ export default function Notices({
         <div className="update-bar" role="status">
           <span>
             {move.toFile ? (
-              <T k="**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın." />
+              <T k="**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Bütün planları dosyadan aç** ile açın." />
             ) : moved ? (
               <T k="**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:" />
             ) : moving ? (
@@ -185,7 +185,7 @@ export default function Notices({
                   ui.setSection('about');
                 }}
               >
-                {t('Güncellemeye bak')}
+                {t('Güncellemeleri denetle')}
               </button>
             </>
           ) : (
@@ -324,7 +324,7 @@ export default function Notices({
             vars={{ kod: update.kurulum.olmadi }}
           />{' '}
           <button className="btn" onClick={guncellemeyeBak}>
-            {t('Güncellemeye bak')}
+            {t('Güncellemeleri denetle')}
           </button>
         </div>
       )}

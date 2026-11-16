@@ -151,7 +151,7 @@ export function blockerDetail(
     if (d.unavailable[closedKey(teacher.id, day, h)] !== undefined) {
       return {
         code: 'teacherClosed',
-        message: t('{kim} {gun} {saat} saatinde müsait değil', {
+        message: t('{kim} {gun} {saat} saatinde kapalı', {
           kim: teacher.short,
           gun: dayName(),
           saat: hourName,

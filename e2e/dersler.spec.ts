@@ -74,7 +74,7 @@ test.describe('69. Dersler', () => {
         .locator('.form-row')
         .getByLabel('Branşa göre süz', { exact: true })
         .locator('option[value=""]'),
-    ).toHaveText('Tüm branşlar');
+    ).toHaveText('Bütün branşlar');
 
     // Which one is open is said in the strip and in the heading, and the list
     // underneath holds only that class's lessons.

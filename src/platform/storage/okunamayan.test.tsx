@@ -242,7 +242,7 @@ describe('okunamayan plan · kullanıcının açık eylemi', () => {
     expect(localStorage.getItem(BASE_KEY)).toBe(NEWER);
   });
 
-  it('"Tümünü dosyadan aç" okunamayan planın yerine dosyadakini yazıyor', async () => {
+  it('"Bütün planları dosyadan aç" okunamayan planın yerine dosyadakini yazıyor', async () => {
     localStorage.setItem(BASE_KEY, NEWER);
     const { get, act, settle } = await mount();
     const { parseBundle } = await import('../../pure/io');

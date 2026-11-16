@@ -318,7 +318,7 @@ test.describe('2. Sürükle-bırak', () => {
       await expect(closed).toHaveClass(/drop-blocked/);
 
       const reason = await page.locator('.reason-bar').textContent();
-      expect(reason).toContain('müsait değil');
+      expect(reason).toContain('kapalı');
       // The message must be concrete, not an empty "there is a clash"
       expect(reason).not.toContain('Çakışma var');
 
@@ -1829,7 +1829,7 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await grabCard(page, 'AV');
     const cell = await hover(page, 0, 0);
     await expect(cell).toHaveClass(/drop-blocked/);
-    await expect(page.locator('.reason-bar')).toContainText('müsait değil');
+    await expect(page.locator('.reason-bar')).toContainText('kapalı');
     await page.mouse.up();
   });
 });
@@ -2185,11 +2185,14 @@ test.describe('86. Sabitleme', () => {
     const cards = page.locator('table.grid .card');
     const count = await cards.count();
     await openGridMenu(page);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Tüm programı sabitle' }).click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Bütün dersleri sabitle' }).click();
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(count);
 
     await openGridMenu(page);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Tüm sabitlemeleri kaldır' }).click();
+    await page
+      .locator('.menu')
+      .getByRole('menuitem', { name: 'Bütün sabitlemeleri kaldır' })
+      .click();
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(0);
   });
 

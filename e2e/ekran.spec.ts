@@ -35,7 +35,7 @@ const OUT = 'test-results/ekran';
  * nothing. That is the point of it.
  *
  * `a.finished` and not a fixed sleep: the durations are a setting now
- * (Ayarlar → Görünüm → Hareket), so a number here would be wrong for two of the
+ * (Ayarlar → Görünüm → Ekran hareketleri), so a number here would be wrong for two of the
  * three steps. Animations that never finish are filtered out rather than
  * waited on, and the whole wait is capped — a picture is not worth a hang.
  */

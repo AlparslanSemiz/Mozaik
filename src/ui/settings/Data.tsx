@@ -163,14 +163,14 @@ export default function Data({
       </HelpHead>
       <div className="form-row">
         <button className="btn" onClick={saveAll}>
-          {t('Tümünü dosyaya kaydet ({n} plan)', { n: planCount })}
+          {t('Bütün planları dosyaya kaydet ({n} plan)', { n: planCount })}
         </button>
         <button
           className="btn"
           onClick={() => bundleInput.current?.click()}
           title={t('Bu bilgisayardaki bütün planların yerine dosyadakiler geçer')}
         >
-          {t('Tümünü dosyadan aç')}
+          {t('Bütün planları dosyadan aç')}
         </button>
         <input
           ref={bundleInput}
@@ -185,7 +185,9 @@ export default function Data({
         <p className={note.bad ? 'hint bad' : 'hint'} role="status">
           {note.text}{' '}
           {note.update === true && (
-            <GoButton to={{ tab: 'school', section: 'about' }}>{t('Güncellemeye bak')}</GoButton>
+            <GoButton to={{ tab: 'school', section: 'about' }}>
+              {t('Güncellemeleri denetle')}
+            </GoButton>
           )}
         </p>
       )}

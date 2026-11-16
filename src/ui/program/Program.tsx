@@ -253,11 +253,7 @@ function Program({
   // tray last drew until that render runs, so the memos below hit their cache.
   const trayState = useDeferredValue(state);
   const trayIx = useMemo(() => indexOf(trayState), [indexOf, trayState]);
-  const {
-    cards,
-    completed,
-    total: poolTotal,
-  } = useMemo(
+  const { cards, total: poolTotal } = useMemo(
     // In the preview the tray is the suggested week's too: what it leaves
     // waiting, which for a way that builds the week is nothing. A dated week
     // leaves the tray the base week's: what it waits for has not changed.
@@ -677,7 +673,6 @@ function Program({
 
         <LessonPool
           cards={cards}
-          completed={completed}
           problems={problems}
           total={poolTotal}
           sort={poolSort}

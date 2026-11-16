@@ -154,21 +154,16 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     links,
     lessons,
     rows: [
-      { label: t('Haftalık ders yükü'), value: t('{n} saat', { n: load }), tight: load > open },
+      { label: t('Ders'), value: t('{n} saat', { n: load }), tight: load > open },
       {
-        label: kind === 'teacher' ? t('Müsait saat') : t('Açık saat'),
-        value: `${open} / ${week}`,
-        tight: open < load,
-      },
-      {
-        label: t('Programa yerleşmiş'),
-        value: t('{yerlesen} / {toplam} saat', { yerlesen: placed, toplam: load }),
+        label: t('Yerleşti'),
+        value: `${placed} / ${load}`,
         tight: placed < load,
       },
       {
-        label: kind === 'teacher' ? t('Müsait değil') : t('Kapalı saat'),
-        value: t('{n} saat', { n: week - open }),
-        tight: false,
+        label: t('Açık saat'),
+        value: `${open} / ${week}`,
+        tight: open < load,
       },
     ],
   });

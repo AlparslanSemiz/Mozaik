@@ -294,7 +294,7 @@ const DUNYA: Liste[] = [
     tek: true,
   },
   { ad: 'Kapalı saatte ders', git: kontrol(/^Sorunlar/), satir: panelRows('Kapalı saatte ders') },
-  { ad: 'Kural ihlalleri', git: kontrol(/^Sorunlar/), satir: panelRows('Kural ihlalleri') },
+  { ad: 'Kural aşımları', git: kontrol(/^Sorunlar/), satir: panelRows('Kural aşımları') },
   {
     ad: 'Yerleşemeyen dersler',
     git: kontrol(/^Sorunlar/),
@@ -327,9 +327,9 @@ const DUNYA: Liste[] = [
     satir: panelRows('Kendi sınırı olan sınıflar'),
   },
   {
-    ad: 'Şu anki ihlaller',
+    ad: 'Aşımlar',
     git: (p) => openSettings(p, 'Kurallar'),
-    satir: panelRows('Şu anki ihlaller'),
+    satir: panelRows('Aşımlar'),
   },
 ];
 

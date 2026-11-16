@@ -5,7 +5,7 @@
 // --dur would have shipped silently.
 //
 // Since 2026-08-27 there is a SECOND switch and it is the reader's: Ayarlar →
-// Görünüm → Hareket, three steps. The two are not the same thing and the
+// Görünüm → Ekran hareketleri, three steps. The two are not the same thing and the
 // relationship between them is the contract worth testing — the machine
 // preference is a FLOOR, so the setting can go further than the machine asked
 // but never less far.
@@ -54,7 +54,7 @@ function ms(value: string): number {
   return value.trim().endsWith('ms') ? n : n * 1000;
 }
 
-test.describe('14. Hareket', () => {
+test.describe('14. Ekran hareketleri', () => {
   test('azaltılmış hareket isteyen makinede bütün süreler sıfırlanıyor', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page);
@@ -201,7 +201,7 @@ test.describe('14. Hareket', () => {
     expect(moving).toBe(true);
   });
 
-  test('MAKİNE tercihi bir TABAN — "Tam" seçili olsa bile ezemiyor', async ({ page }) => {
+  test('MAKİNE tercihi bir TABAN — "Açık" seçili olsa bile ezemiyor', async ({ page }) => {
     // The contract, and the one assertion here that is about an ordering rather
     // than a value: [data-motion] is written BEFORE the @media block, at equal
     // specificity, so the machine wins. A reader who has asked their computer
@@ -209,7 +209,7 @@ test.describe('14. Hareket', () => {
     // program — the setting may only go FURTHER than the machine asked.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openWithSample(page);
-    await chooseMotion(page, 'Tam');
+    await chooseMotion(page, 'Açık');
 
     const still = await levers(page);
     expect(still.durs.map(ms)).toEqual([0, 0, 0]);
@@ -219,17 +219,18 @@ test.describe('14. Hareket', () => {
     expect(still.pop).toBe('1');
 
     // ...and the button still tells the truth about what was chosen.
-    await expect(page.getByRole('button', { name: 'Tam', exact: true })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    await expect(
+      page
+        .getByRole('group', { name: 'Ekran hareketleri', exact: true })
+        .getByRole('button', { name: 'Açık', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('makine hareket istemiyorsa varsayılan KAPALI — düğme yalan söylemiyor', async ({
     page,
   }) => {
     // First read follows the system, like the theme does. A button reading
-    // "Tam" on a machine where nothing moves would be a lie, and the reader
+    // "Açık" on a machine where nothing moves would be a lie, and the reader
     // would go looking for a broken program instead of a system setting.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page);

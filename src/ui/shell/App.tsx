@@ -503,7 +503,7 @@ export default function App() {
             and `<main>` the strip had no place in a screen reader's list of
             regions (axe `region`, on every screen). `display: contents`, so
             the box changes nothing on screen. */}
-            <section className="ribbon-band" aria-label={t('Araç şeridi')}>
+            <section className="ribbon-band" aria-label={t('Düğme satırı')}>
               <Ribbon
                 ui={ui}
                 /* Okul bilgileri chooses its sections in the strip, and the

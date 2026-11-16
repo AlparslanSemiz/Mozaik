@@ -105,7 +105,7 @@ export function Inspector({
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const [printing, setPrinting] = useState(false);
-  /** "Gelmiyor…": the date page, this person away on it. */
+  /** "Bugün yok…": the date page, this person away on it. */
   const [awayOn, setAwayOn] = useState<string | null>(null);
   const [made, setMade] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
@@ -158,7 +158,7 @@ export function Inspector({
           placed === 0
             ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
             : t(
-                'Programdaki {n} ders yeni öğretmenin müsait saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
+                'Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
                 { n: placed },
               ),
         confirmLabel: t('Aktar'),
@@ -571,17 +571,15 @@ export function Inspector({
         {/* THE HOURS IT CANNOT COME, the Müsaitlik grid itself, with the bell
             times on: "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock
             times, not lesson numbers. Its own heading names it per kind. */}
-        <h3 className="sheet-h">
-          {target.kind === 'teacher' ? t('Gelemediği saatler') : t('Kapalı saatler')}
-        </h3>
+        <h3 className="sheet-h">{t('Kapalı saatler')}</h3>
         {/* Müsaitlik's own sentence. The day and hour headings say what
             they do in their own titles; a paragraph's tooltip was never
             hovered (2026-11-16). */}
         <p className="hint">
           {target.kind === 'teacher'
-            ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
+            ? t('Gelemediği saatlere tıklayın.')
             : target.kind === 'class'
-              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
+              ? t('Ders olmayacak saatlere tıklayın.')
               : t(
                   'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
                 )}
@@ -591,13 +589,10 @@ export function Inspector({
           state={state}
           change={change}
           entityId={target.id}
-          teacher={target.kind === 'teacher'}
           clock
-          label={
-            target.kind === 'teacher'
-              ? t('{kim} · müsait olmayan saatler', { kim: storedName })
-              : t('{kim} · kapalı saatler', { kim: view.facts.name })
-          }
+          label={t('{kim} · kapalı saatler', {
+            kim: target.kind === 'teacher' ? storedName : view.facts.name,
+          })}
         />
         {/* Müsaitlik's two whole-week buttons came here with its grid (K1,
             2026-11-16): somebody who comes one day a week is closed in two
@@ -817,7 +812,7 @@ export function Inspector({
                       }}
                     >
                       <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
-                      {t('Gelmiyor…')}
+                      {t('Bugün yok…')}
                     </button>
                     {teacherOf !== undefined && (
                       <SendTeacher
@@ -917,6 +912,7 @@ function AddLesson({
         value={hours}
         onChange={(e) => setHours(e.target.value)}
       />
+      <span className="muted-inline">{t('saat')}</span>
       <button
         className="btn"
         disabled={other === ''}

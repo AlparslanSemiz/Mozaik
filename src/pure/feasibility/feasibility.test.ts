@@ -225,7 +225,7 @@ describe('buildReport — yerleşemeyenler', () => {
     expect(report.unplaceable).toHaveLength(1);
     expect(report.unplaceable[0]!.missing).toBe(2);
     // The numbers that bind, not a sample closed cell (TODO SD4, stuck.ts).
-    expect(report.unplaceable[0]!.message).toContain('MÇ 0 saat müsait, 2 saat ders yüklenmiş');
+    expect(report.unplaceable[0]!.message).toContain('MÇ 0 saat açık, 2 saat ders yüklenmiş');
     expect(report.unplaceable[0]!.fix).toEqual({ kind: 'teacher', id: 'oMC' });
     expect(report.hasProblem).toBe(true);
   });
@@ -284,7 +284,7 @@ describe('commonestBlock', () => {
 
     const found = commonestBlock(d, buildIndex(d), 'x1');
     expect(found.anyValid).toBe(false);
-    expect(found.reason).toContain('müsait değil');
+    expect(found.reason).toContain('kapalı');
   });
 
   it('stopAtFirstValid erken çıkıyor ama cevabı değiştirmiyor', () => {
@@ -310,7 +310,7 @@ describe('holeReason', () => {
     const ix = buildIndex(d);
 
     expect(commonestBlock(d, ix, 'x1').reason).toContain('510 sınıfı');
-    expect(holeReason(d, ix, 'x1')).toBe('MÇ Pazartesi 3 saatinde müsait değil');
+    expect(holeReason(d, ix, 'x1')).toBe('MÇ Pazartesi 3 saatinde kapalı');
   });
 
   it('boş saatler bloğa uymuyorsa şekli söylüyor', () => {

@@ -150,7 +150,7 @@ test.describe('62. Sayfada ne olsun', () => {
 
     // Only the busiest class, so the count below is about the stamp and not
     // about how many sheets the sample makes.
-    await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
+    await page.getByRole('button', { name: 'Hiçbirini seçme' }).first().click();
     await page.locator('.pick-item').first().locator('input').check();
 
     await page.emulateMedia({ media: 'print' });

@@ -1,7 +1,7 @@
 // Putting the plans of an all-plans file in place of the plans here, behind
 // one question.
 //
-// Two doors use it: "Tümünü dosyadan aç" in Ayarlar → Planlar ve yedek, and
+// Two doors use it: "Bütün planları dosyadan aç" in Ayarlar → Planlar ve yedek, and
 // the new address receiving the plans from the old one (platform/storage/
 // move.ts). The second is not trusted further than the first: the same text,
 // the same reader, the same count of what will really happen, and the same

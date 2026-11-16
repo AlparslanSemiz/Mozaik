@@ -103,7 +103,7 @@ const GROUPED: Record<Advice['code'], string> = {
   lessonNeedsMoreDays:
     '{n} ders haftada günden çok kez konacak; en az bir günde iki kez görülecek:',
   teacherManyBlockedDays:
-    '{n} öğretmenin müsait günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
+    '{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
   lessonManyBlocks:
     "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; Mozaik'in deneyebileceği tek şekil bu:",
 };
@@ -130,14 +130,7 @@ function Section({
     <div className="panel" id={id}>
       <h2>{title}</h2>
       <p className="hint">{description}</p>
-      <CapacityRows
-        rows={rows}
-        label={title}
-        empty={empty}
-        problemsFirst
-        colorOf={colorOf}
-        openLabel={id === 'kontrol-ogretmenler' ? 'Müsait' : 'Açık'}
-      />
+      <CapacityRows rows={rows} label={title} empty={empty} problemsFirst colorOf={colorOf} />
     </div>
   );
 }
@@ -199,7 +192,7 @@ export default function ProblemList({ state, status, open, onClose, ui }: Props)
               onClick={() => ui.setCheckView('advisor')}
             >
               <Lightbulb size={16} strokeWidth={2} aria-hidden="true" />
-              {t('İpuçları ({n})', { n: status.advice })}
+              {status.problems === 0 ? t('İpuçları') : t('İpuçları ({n})', { n: status.advice })}
             </button>
             <MoreMenu>
               <MoreRadio
@@ -310,9 +303,6 @@ function Report({
       : who.kind === 'class'
         ? t('{ad} sınıfı', { ad: ix.classById.get(who.id)?.name ?? '?' })
         : t('{ad} dersliği', { ad: ix.roomById.get(who.id)?.name ?? '?' });
-  const doneLessons = state.lessons.filter(
-    (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
-  ).length;
 
   if (state.lessons.length === 0) {
     return (
@@ -333,9 +323,9 @@ function Report({
             {totalWanted > 0 && placed >= totalWanted ? (
               <T k="**Program tamam.** Bütün dersler yerleşti ve kurallara uyuyor." />
             ) : report.tight ? (
-              <T k="**Sorun görünmüyor.** Bazı öğretmenlerin müsait saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
+              <T k="**Sorun görünmüyor.** Bazı öğretmenlerin açık saati ya da bazı sınıf ve dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
             ) : (
-              <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
+              <T k="**Sorun görünmüyor.** Öğretmen, sınıf ve derslik açık saatleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
             )}
           </div>
         </div>
@@ -373,12 +363,6 @@ function Report({
               <td>{t('Yerleşmiş saat')}</td>
               <td className="num">
                 {placed} / {totalWanted}
-              </td>
-            </tr>
-            <tr>
-              <td>{t('Tamamlanan ders')}</td>
-              <td className="num">
-                {doneLessons} / {state.lessons.length}
               </td>
             </tr>
           </tbody>
@@ -437,7 +421,7 @@ function Report({
 
           {report.violations.length > 0 && (
             <div className="panel kontrol-sorun">
-              <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
+              <h2>{t('Kural aşımları ({n})', { n: report.violations.length })}</h2>
               {/* Two sources, two sentences: the limits live in Okul bilgileri
                   → Kurallar, a relation on the lesson's own sheet (B5.3). */}
               {report.violations.some((v) => v.rule !== 'notSameDay') && (
@@ -534,14 +518,6 @@ function Report({
               </table>
             </div>
           )}
-
-          {!report.hasProblem && stranded.length === 0 && (
-            <div className="panel">
-              <p className="hint">
-                {t('Kapalı saatte ders, kural ihlali ya da yerleşemeyen ders yok.')}
-              </p>
-            </div>
-          )}
         </>
       )}
 
@@ -597,7 +573,7 @@ function Report({
           rows={report.teachers}
           empty={t('Henüz öğretmen yok.')}
           colorOf={(id) => state.teachers.find((x) => x.id === id)?.color ?? null}
-          description={t('Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz.')}
+          description={t('Öğretmenin açık saat sayısı, ona yüklenen ders saatinden az olamaz.')}
         />
       )}
       {view === 'classes' && (

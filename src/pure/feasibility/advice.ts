@@ -78,7 +78,7 @@ export function buildAdvice(d: State, ix: Index): Advice[] {
       code: 'teacherManyBlockedDays',
       who: teacher.short,
       message: t(
-        '{kim} yalnızca {acik} günde müsait ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.',
+        '{kim} yalnızca {acik} günde açık ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.',
         { kim: teacher.short, acik: openDays, n: maxNeeded },
       ),
     });

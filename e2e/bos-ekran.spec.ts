@@ -112,7 +112,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await expect(list.locator('li.done')).toHaveCount(0);
     await expect(list).toContainText('0 / 5 adım');
     // The first step names the default week, so a wrong one is seen.
-    await expect(list.locator('li[data-step="school"]')).toContainText('Salı–Pazar, günde 12 ders');
+    await expect(list.locator('li[data-step="school"]')).toContainText('Salı–Pazar, günde 12 saat');
 
     await list.getByRole('button', { name: 'Okul adını ve zili gir' }).click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(

@@ -345,7 +345,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await twoPlans(page);
 
     const { name, text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
     // The -tumu- marker is the only thing separating the two file kinds in
     // Explorer, so it is asserted, not assumed.
@@ -375,7 +375,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await openPlans(page);
 
     const { text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
 
     // Now destroy it: switch away and delete the plan entirely.
@@ -414,7 +414,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
   test('üst çubuğa paket verilince UYARIYOR ve hiçbir şey değişmiyor', async ({ page }) => {
     await twoPlans(page);
     const { text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
 
     // The top bar's own file input — the one next to "Dosyadan aç".
@@ -425,7 +425,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     });
     const said = await answerDialog(page);
 
-    await expect.poll(() => said).toContain('Tümünü dosyadan aç');
+    await expect.poll(() => said).toContain('Bütün planları dosyadan aç');
     // Nothing was replaced: both plans still there, still on the same one.
     await expect(picker(page).locator('option')).toHaveCount(2);
     await expect(picker(page)).toHaveValue(await picker(page).inputValue());
@@ -442,7 +442,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     expect(before).toBeGreaterThan(0);
     await openPlans(page);
     const { text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
     const bundle = JSON.parse(text) as { plans: Array<{ state: Record<string, unknown> }> };
     delete bundle.plans[0]!.state['teachers'];
@@ -473,7 +473,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await openWithSample(page);
     await openPlans(page);
     const { text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
     await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
       name: 'ders-programi-tumu-yarim.json',
@@ -496,7 +496,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await openWithSample(page);
     await openPlans(page);
     const { text } = await grab(page, () =>
-      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+      page.getByRole('button', { name: /Bütün planları dosyaya kaydet/ }).click(),
     );
     const bundle = JSON.parse(text) as { plans: Array<{ state: Record<string, unknown> }> };
     bundle.plans[0]!.state['schemaVersion'] = 99;
@@ -513,7 +513,9 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await expect(page.locator('.dlg')).toHaveCount(0);
   });
 
-  test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
+  test('tek plan dosyası "Bütün planları dosyadan aç"a verilince reddediliyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
     const single = await grab(page, () =>
       page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }).click(),

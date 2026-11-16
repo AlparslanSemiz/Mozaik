@@ -1564,8 +1564,8 @@ describe('entityFacts', () => {
     expect(facts.links[0]).toBe('Branşı: Matematik');
     expect(facts.links[1]).toContain('1 dersi var');
     expect(facts.links[1]).toContain('510');
-    const placed = facts.rows.find((r) => r.label === 'Programa yerleşmiş')!;
-    expect(placed.value).toBe('2 / 4 saat');
+    const placed = facts.rows.find((r) => r.label === 'Yerleşti')!;
+    expect(placed.value).toBe('2 / 4');
     // Half the lesson is still in the pool, and that is worth flagging where
     // the number is read rather than only in Kontrol.
     expect(placed.tight).toBe(true);
@@ -1576,8 +1576,8 @@ describe('entityFacts', () => {
     // Close the whole week for the teacher: 0 open hours against 4 of load.
     d = setWholeWeek(d, d.teachers[0]!.id, true);
     const facts = entityFacts(d, 'teacher', d.teachers[0]!.id)!;
-    expect(facts.rows.find((r) => r.label === 'Haftalık ders yükü')!.tight).toBe(true);
-    expect(facts.rows.find((r) => r.label === 'Müsait saat')!.value).toBe(
+    expect(facts.rows.find((r) => r.label === 'Ders')!.tight).toBe(true);
+    expect(facts.rows.find((r) => r.label === 'Açık saat')!.value).toBe(
       `0 / ${d.settings.days.length * d.settings.hours.length}`,
     );
   });

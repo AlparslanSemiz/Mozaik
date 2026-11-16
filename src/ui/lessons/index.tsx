@@ -200,7 +200,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                   <th className="w-col-lg">{t('Haftalık saat')}</th>
                   <th className="w-col-lg">{t('Haftaya dağılış')}</th>
                   <th className="w-col-md" title={t('Bu ders bir günde en fazla kaç saat')}>
-                    {t('Günde ↑')}
+                    {t('Günde en çok')}
                   </th>
                   <th className="w-col-md">
                     <span className="visually-hidden">{t('İşlemler')}</span>

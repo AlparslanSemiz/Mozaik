@@ -1,7 +1,7 @@
 /**
  * What a file Mozaik did not write is told: what it is not, which file to pick
  * instead, and where an Excel list goes. The top bar's "Dosyadan aç" and
- * Ayarlar's "Tümünü dosyadan aç" say the same thing, so it is written once.
+ * Ayarlar's "Bütün planları dosyadan aç" say the same thing, so it is written once.
  *
  * It used to be "Mozaik'in kaydettiği bir .json plan dosyası seçin", and an
  * .xlsx picked by mistake got it too: a file extension is not something he

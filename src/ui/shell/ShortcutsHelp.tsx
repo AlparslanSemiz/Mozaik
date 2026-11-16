@@ -97,7 +97,7 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    title: 'Gelemediği saatler',
+    title: 'Kapalı saatler',
     rows: [
       { keys: '← → ↑ ↓', desc: 'Hücreden hücreye git' },
       { keys: 'Space Enter', desc: 'Saati aç veya kapat, başlıkta bütün günü veya saati' },

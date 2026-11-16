@@ -366,7 +366,7 @@ describe('veriler nerede — depo raporu', () => {
       ['ders-programi-arayuz-yogunluk', 'arayüz yoğunluğu tercihi'],
       ['ders-programi-havuz', 'havuz çekmecesi tercihi'],
       ['ders-programi-havuz-boy', 'havuz çekmecesinin boyu'],
-      ['ders-programi-serit', 'araç şeridi tercihi'],
+      ['ders-programi-serit', 'düğme satırı tercihi'],
       ['ders-programi-serit-gizle', 'şerit kaydırınca gizlensin mi'],
       ['ders-programi-musaitlik-saat', 'müsaitlikte saat gösterimi'],
       ['ders-programi-hareket', 'hareket (animasyon) tercihi'],
