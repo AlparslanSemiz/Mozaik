@@ -1938,6 +1938,29 @@ const FR: Sozluk = {
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif} : {yuk} heures de cours, {acik} ouvertes ; il faut en ouvrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Salle {derslik} : {yuk} heures de cours, {acik} ouvertes ; en ouvrir {fazla} ou passer une classe dans une autre salle",
   "{bir} ile {iki} aynı güne konmamalı: {n1} + {n2} gün gerekiyor, {g} gün var": "{bir} et {iki} pas le même jour : il faut {n1} + {n2} jours, il y en a {g}",
+  // The plan-file reminder and the move to the new address (2026-11-16).
+  "son plan dosyasının tarihi":
+    "date du dernier fichier de plan",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Ce plan n’a pas de fichier de plan.** Ce que vous avez fait n’est que dans ce navigateur.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Le dernier fichier de plan date du {tarih}.** Ce que vous avez fait depuis n’est que dans ce navigateur.",
+  "Son plan dosyası: {tarih}.":
+    "Dernier fichier de plan : {tarih}.",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "Ramener ici les plans de l’ancienne adresse ?",
+  "**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın.":
+    "**Les plans ont été écrits dans un fichier de plan** (Téléchargements). À la nouvelle adresse, ouvrez-le avec **Tout ouvrir depuis un fichier**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:":
+    "**Les plans sont passés à la nouvelle adresse.** Désormais, utilisez-la :",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "La nouvelle adresse est ouverte. Répondez à la question là-bas.",
+  "**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır.":
+    "**Mozaik a déménagé à une nouvelle adresse.** Vos plans restent aussi ici.",
+  "Hiçbir plan taşınmadı.":
+    "Aucun plan n’a été déplacé.",
+  "Planları taşı":
+    "Déplacer les plans",
 };
 
 registerSozluk("fr", FR);

@@ -2,13 +2,24 @@
 // that a new build is waiting. Each one says it where it failed, in words, and
 // the ones that can be acted on carry their button.
 
-import { surumEtiketi } from '../../leaf/app';
+import { surumEtiketi, tarihYazisi, YENI_SITE } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
 import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
 import { useState } from 'react';
 
 import { T, useT } from '../common';
+import type { MoveOut } from './useMove';
+
+/** The file reminder, decided in App (it knows the route and the folder). */
+export interface FileReminder {
+  /** Up: unsaved changes older than a week, and no folder writing a copy. */
+  due: boolean;
+  /** The last plan file's date, YYYY-MM-DD, or null when there never was one. */
+  savedDay: string | null;
+  save: () => void;
+  hide: () => void;
+}
 
 interface Props {
   canSave: boolean;
@@ -29,6 +40,8 @@ interface Props {
   closeLastDelete: () => void;
   goTab: (tab: Tab) => void;
   ui: { setSection: (section: SectionId) => void };
+  move: MoveOut;
+  reminder: FileReminder;
 }
 
 export default function Notices({
@@ -47,8 +60,19 @@ export default function Notices({
   closeLastDelete,
   goTab,
   ui,
+  move,
+  reminder,
 }: Props) {
   const t = useT();
+  const ms = move.state;
+  const moving = ms?.ad === 'bekliyor' || ms?.ad === 'soruldu';
+  // The button goes only while the window is still being opened. Once the
+  // plans are sent the new window may be reloaded or left alone, and its
+  // answer then never comes; the reader must be able to start again.
+  const opening = ms?.ad === 'bekliyor';
+  const moved = ms?.ad === 'bitti' && ms.durum === 'acildi';
+  // Another strip that asks for something is up: the file reminder waits.
+  const quiet = move.live || (update.ready && !updateHidden) || saveTrouble !== null || !canSave;
   const [kurulumGizli, setKurulumGizli] = useState(false);
   const guncellemeyeBak = () => {
     goTab('settings');
@@ -56,6 +80,39 @@ export default function Notices({
   };
   return (
     <>
+      {/* THE SITE MOVED (DECISIONS 2026-11-16). Only at the old address and
+      only once the new one answers (move.ts). The plans stay here too: the
+      button copies, it does not move anything out from under anybody. */}
+      {move.live && (
+        <div className="update-bar" role="status">
+          <span>
+            {move.toFile ? (
+              <T k="**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın." />
+            ) : moved ? (
+              <T k="**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:" />
+            ) : moving ? (
+              <T k="Yeni adres açıldı. Oradaki soruyu cevaplayın." />
+            ) : (
+              <>
+                <T k="**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır." />
+                {(ms?.ad === 'kapandi' || (ms?.ad === 'bitti' && ms.durum === 'vazgecildi')) &&
+                  ` ${t('Hiçbir plan taşınmadı.')}`}
+              </>
+            )}{' '}
+            <a href={YENI_SITE} target="_blank" rel="noreferrer">
+              {YENI_SITE}
+            </a>
+          </span>
+          {!opening && !moved && (
+            <span className="update-acts">
+              <button className="btn primary" onClick={move.start}>
+                {t('Planları taşı')}
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+
       {!canSave && (
         <div className="save-warning">
           ⚠{' '}
@@ -266,6 +323,35 @@ export default function Notices({
           <button className="btn" onClick={guncellemeyeBak}>
             {t('Güncellemeye bak')}
           </button>
+        </div>
+      )}
+
+      {/* CHANGES NO PLAN FILE HOLDS, FOR A WEEK (web audit, 2026-11-16). On a
+      browser with no folder to write to, the browser's own storage is the
+      only copy, and Safari clears it after seven days without a visit. Once,
+      gently: "Sonra" puts it away for the session, and a file clears it.
+      It waits while another strip asks for an action (a new build, the move,
+      a save that failed): one request at a time, and those come first. */}
+      {reminder.due && !quiet && (
+        <div className="update-bar" role="status">
+          <span>
+            {reminder.savedDay === null ? (
+              <T k="**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor." />
+            ) : (
+              <T
+                k="**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor."
+                vars={{ tarih: tarihYazisi(reminder.savedDay) }}
+              />
+            )}
+          </span>
+          <span className="update-acts">
+            <button className="btn primary" onClick={reminder.save}>
+              {t('Dosyaya kaydet')}
+            </button>
+            <button className="btn" onClick={reminder.hide}>
+              {t('Sonra')}
+            </button>
+          </span>
         </div>
       )}
 

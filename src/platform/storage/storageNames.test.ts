@@ -64,6 +64,7 @@ describe('depo adları düz metne karşı', () => {
       'ders-programi-program-rengi',
       'ders-programi-serit',
       'ders-programi-serit-gizle',
+      'ders-programi-son-dosya',
       'ders-programi-tanitim',
       'ders-programi-tema',
       'ders-programi-yenilik-gorulen',

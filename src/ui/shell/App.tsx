@@ -14,7 +14,18 @@ import {
   useT,
   type Place,
 } from '../common';
-import { useStore, storageWorks, useFolder } from '../../platform/storage';
+import {
+  askToKeep,
+  downloadBackup,
+  isoDay,
+  markChanged,
+  reminderDue,
+  storageKind,
+  storageWorks,
+  useFileRecord,
+  useFolder,
+  useStore,
+} from '../../platform/storage';
 import {
   useToolState,
   readPrintOptions,
@@ -41,6 +52,7 @@ import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
+import { useMoveIn, useMoveOut } from './useMove';
 import { parseBundle } from '../../pure/io';
 import type { State } from '../../leaf/model';
 
@@ -194,6 +206,38 @@ export default function App() {
   const [updateHidden, setUpdateHidden] = useState(false);
   const { confirm, alert } = useDialogs();
   const notify = useToast();
+
+  // WHAT NO PLAN FILE HOLDS (web audit, 2026-11-16). The first change after
+  // a plan file is remembered (fileSaved.ts), and the first change that holds
+  // work asks the browser to keep this site's storage (persist.ts). A plan
+  // switch is not a change, and neither is the first render.
+  const seen = useRef({ planId: plans.planId, state });
+  useEffect(() => {
+    const was = seen.current;
+    seen.current = { planId: plans.planId, state };
+    if (was.planId !== plans.planId || was.state === state) return;
+    markChanged();
+    if (state.teachers.length + state.classes.length + state.lessons.length > 0) askToKeep();
+  }, [plans.planId, state]);
+  const fileRecord = useFileRecord();
+  const [reminderHidden, setReminderHidden] = useState(false);
+  // Only where nothing else keeps a second copy: not the exe (its folder is
+  // always written), and not while a chosen folder is being written.
+  const noSecondCopy =
+    storageKind() !== 'exe' && (folder.status.kind === 'yok' || folder.status.kind === 'secilmedi');
+  const reminder = {
+    due: !reminderHidden && noSecondCopy && reminderDue(fileRecord),
+    savedDay: fileRecord.saved === null ? null : isoDay(fileRecord.saved),
+    save: () => {
+      downloadBackup(state);
+      notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+    },
+    hide: () => setReminderHidden(true),
+  };
+  // Moving the plans to the new address: the old end and the new end
+  // (useMove.ts). Each does nothing on any other page.
+  const move = useMoveOut(plans, peek);
+  useMoveIn(plans);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const openShortcuts = useShortcutsHelp();
   // Read once at mount (a fresh profile has never seen any version, so this
@@ -363,6 +407,7 @@ export default function App() {
               toggleRibbon={toggleRibbon}
               theme={theme}
               toggleTheme={toggleTheme}
+              lastFileDay={reminder.savedDay}
             />
 
             {/* Row two: the tools of whichever section is open. A named region
@@ -423,6 +468,8 @@ export default function App() {
                     closeLastDelete={() => setLastDeleteOpen(false)}
                     goTab={goTab}
                     ui={ui}
+                    move={move}
+                    reminder={reminder}
                   />
 
                   {/* The scroll container lives HERE, not in the seven tab components: they

@@ -1930,6 +1930,29 @@ const DE: Sozluk = {
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} müssen geöffnet werden",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Raum {derslik}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} öffnen oder eine Klasse in einen anderen Raum legen",
   "{bir} ile {iki} aynı güne konmamalı: {n1} + {n2} gün gerekiyor, {g} gün var": "{bir} und {iki} nicht am selben Tag: {n1} + {n2} Tage nötig, {g} vorhanden",
+  // The plan-file reminder and the move to the new address (2026-11-16).
+  "son plan dosyasının tarihi":
+    "Datum der letzten Plandatei",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Für diesen Plan gibt es keine Plandatei.** Was Sie getan haben, ist nur in diesem Browser.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Die letzte Plandatei ist vom {tarih}.** Was Sie seitdem getan haben, ist nur in diesem Browser.",
+  "Son plan dosyası: {tarih}.":
+    "Letzte Plandatei: {tarih}.",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "Die Pläne von der alten Adresse hierher holen?",
+  "**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın.":
+    "**Die Pläne wurden in eine Plandatei geschrieben** (Downloads). Öffnen Sie sie an der neuen Adresse mit **Alle aus Datei öffnen**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:":
+    "**Die Pläne sind an die neue Adresse umgezogen.** Verwenden Sie von jetzt an diese:",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "Die neue Adresse wurde geöffnet. Beantworten Sie dort die Frage.",
+  "**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır.":
+    "**Mozaik ist an eine neue Adresse umgezogen.** Ihre Pläne bleiben auch hier.",
+  "Hiçbir plan taşınmadı.":
+    "Kein Plan wurde umgezogen.",
+  "Planları taşı":
+    "Pläne umziehen",
 };
 
 registerSozluk("de", DE);

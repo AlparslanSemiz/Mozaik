@@ -1930,6 +1930,29 @@ const ES: Sozluk = {
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} horas de clase, {acik} abiertas; hay que abrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Aula {derslik}: {yuk} horas de clase, {acik} abiertas; abrir {fazla} más o pasar un grupo a otra aula",
   "{bir} ile {iki} aynı güne konmamalı: {n1} + {n2} gün gerekiyor, {g} gün var": "{bir} y {iki} no el mismo día: hacen falta {n1} + {n2} días, hay {g}",
+  // The plan-file reminder and the move to the new address (2026-11-16).
+  "son plan dosyasının tarihi":
+    "fecha del último archivo de plan",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Este plan no tiene archivo de plan.** Lo que ha hecho solo está en este navegador.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**El último archivo de plan es del {tarih}.** Lo que ha hecho desde entonces solo está en este navegador.",
+  "Son plan dosyası: {tarih}.":
+    "Último archivo de plan: {tarih}.",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "¿Traer aquí los planes de la dirección anterior?",
+  "**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın.":
+    "**Los planes se escribieron en un archivo de plan** (Descargas). En la nueva dirección, ábralo con **Abrir todos desde archivo**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:":
+    "**Los planes se han trasladado a la nueva dirección.** A partir de ahora, use esa:",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "Se ha abierto la nueva dirección. Responda allí a la pregunta.",
+  "**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır.":
+    "**Mozaik se ha trasladado a una nueva dirección.** Sus planes también se quedan aquí.",
+  "Hiçbir plan taşınmadı.":
+    "No se trasladó ningún plan.",
+  "Planları taşı":
+    "Trasladar planes",
 };
 
 registerSozluk("es", ES);

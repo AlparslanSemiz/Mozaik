@@ -265,6 +265,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-baski · kâğıt seçenekleri",
         "ders-programi-yenilik-gorulen · görülen sürüm notu",
         "ders-programi-oneri-olcum · öneri aramasının ölçümleri",
+        "ders-programi-son-dosya · son plan dosyasının tarihi",
       ]
     `);
   });

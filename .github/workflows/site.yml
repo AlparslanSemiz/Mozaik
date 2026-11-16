@@ -38,6 +38,8 @@ jobs:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -64,6 +66,20 @@ jobs:
         with:
           path: dist-site
 
+      # The same folder, for the new address's own repository (`yeni-adres`
+      # below), now with the CNAME a branch-deployed Pages site takes its
+      # domain from. After the Pages artifact on purpose: the old address
+      # carries no CNAME. The host name comes from the one file that holds
+      # the addresses (src/leaf/app/adres.json).
+      - name: CNAME for the new address
+        run: node -e 'process.stdout.write(new URL(require("./src/leaf/app/adres.json").yeni).hostname + "\n")' > dist-site/CNAME
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-site
+          path: dist-site
+          retention-days: 1
+
   deploy:
     needs: build
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
@@ -73,3 +89,72 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  # THE NEW ADDRESS (DECISIONS 2026-11-16, BUILD.md "Alan adına geçiş").
+  # mozaik.alparslansemiz.com is served by its OWN repository,
+  # AlparslanSemiz/mozaik-site, Pages from the `gh-pages` branch, and never by
+  # a custom domain on this one: GitHub would then 301 the old address
+  # alparslansemiz.github.io/Mozaik/ there, and the copy at the old origin,
+  # the only page that can read the plans kept there, would stop being served.
+  # So the old address keeps its deploy above, and this job pushes the same
+  # build, plus the CNAME a branch-deployed Pages site reads its domain from,
+  # to the other repository.
+  #
+  # No GITHUB_TOKEN rights: the push goes over SSH with that repository's
+  # deploy key. The key is a secret of the `mozaik-site` ENVIRONMENT, not of
+  # the repository, and that environment admits `main` only (BUILD.md,
+  # "Yayın güvenliği"): a workflow on any other branch cannot read it. A
+  # job-level environment is also the only way a called workflow sees an
+  # environment secret, so ci.yml passes nothing. Without the secret the job
+  # says so and stops green.
+  yeni-adres:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    environment: mozaik-site
+    permissions: {}
+    steps:
+      - id: anahtar
+        env:
+          KEY: ${{ secrets.MOZAIK_SITE_DEPLOY_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::notice::MOZAIK_SITE_DEPLOY_KEY yok: yeni adres yayınlanmadı (BUILD.md, Alan adına geçiş)"
+            echo "var=hayir" >> "$GITHUB_OUTPUT"
+          else
+            echo "var=evet" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.anahtar.outputs.var == 'evet'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-site
+          path: dist-site
+
+      - if: steps.anahtar.outputs.var == 'evet'
+        name: Push to mozaik-site:gh-pages
+        env:
+          KEY: ${{ secrets.MOZAIK_SITE_DEPLOY_KEY }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          anahtar="$HOME/.ssh/mozaik_site"
+          # Gone on every exit, the failed ones too. Never printed.
+          trap 'rm -f "$anahtar"' EXIT
+          printf '%s\n' "$KEY" > "$anahtar"
+          unset KEY
+          # GitHub's published host key (docs.github.com, "GitHub's SSH key
+          # fingerprints"), pinned rather than fetched with ssh-keyscan.
+          echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i $anahtar -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          cd dist-site
+          test -s CNAME
+          touch .nojekyll
+          git init -q -b gh-pages
+          git -c user.name='mozaik-ci' -c user.email='mozaik-ci@users.noreply.github.com' add -A
+          git -c user.name='mozaik-ci' -c user.email='mozaik-ci@users.noreply.github.com' commit -q -m "Site: $SHA"
+          # One commit, replaced each time: the branch is a published folder,
+          # its history is this repository's.
+          git push -q --force git@github.com:AlparslanSemiz/mozaik-site.git gh-pages

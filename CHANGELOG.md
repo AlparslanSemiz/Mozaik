@@ -23,6 +23,8 @@ release is incomplete, the entry says so.
 - "Başka bir dizilim" (Another layout) next to "Baştan diz" lays out a different week under the same rules on every press; "Geri al" brings the week before back.
 - When "Otomatik diz" cannot fit a card into the week as it stands (after a lesson's split or teacher was changed, say), it lays the unpinned week out again close to the old one and says how many hours moved: on the sample school 17 of 433 cells change, where "Baştan diz" changes 418.
 - When the layout gets stuck because someone has more lessons than open hours, the bar says so first, with the numbers: "AY: 18 hours of lessons, 15 available; 3 more must be opened"; the same for a class and for a room two classes share, and for two lessons that may not share a day but need more days than the week has.
+- The site is moving to its own address, mozaik.alparslansemiz.com. A copy opened at the old address says so once the new one answers, and "Move plans" copies every plan there; the new address asks before it puts them in place, and nothing is deleted at the old one. If the new address cannot take them, all plans are saved to a plan file instead.
+- The "Save to file" button's tooltip says when the last plan file was saved. In a browser that does not write to a chosen folder, one strip appears when changes have gone a week without a plan file; "Later" hides it for the session.
 
 - "Getting started" on the School tab is now a checklist of nine steps, from the school's name, days and bell times to printing. Each step ticks itself from the plan and has a button that takes you there; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next step, can be closed, and goes away by itself when every step is done. It no longer disappears when the first teacher is added.
 - Lessons warns while you enter them when a class or teacher gets more lesson hours than open hours ("9A: 54 lesson hours, 48 open hours. 6 hours do not fit the week."), and the class or teacher is marked red in the list on the right.
@@ -81,6 +83,10 @@ release is incomplete, the entry says so.
 - When a plan's saved text is not even JSON, the folder line now turns red and names the plan instead of the folder silently not being written.
 - "Open all from file" names the plans it skips because they have no id or repeat an earlier one's, instead of dropping them without a word.
 - The plan list is no longer rewritten at every start, and fields a newer copy of Mozaik put in it are kept.
+- On the site, Mozaik asks the browser to keep its storage (`persist`) after the first real change, so it is not cleared when space runs low or, in Safari, after a week without a visit.
+- A site update could store the previous version under the new version's name for up to ten minutes; the service worker now asks past the browser's cache.
+- Saving a plan file could fail in some Safari versions, because the file's address was released in the same moment as the click.
+
 - Check counted a lesson on closed hours once per hour, so one two-hour lesson read "2 lessons" in the heading and in the top bar.
 - Closing a dialog (search, keyboard shortcuts, a question, a teacher's or class's panel, a lesson's window) with Esc or a button puts the keyboard back where it was, on the button or card that opened it, instead of at the top of the page. If that is gone, the keyboard lands in the screen's content.
 - In the dark theme the Print preview is drawn on light paper again, as it prints; the lesson names on the coloured cells were hard to read.

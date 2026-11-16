@@ -15,7 +15,17 @@
 import { buildBundle, backupFileName, bundleFileName, type Library } from '../../pure/io';
 import { loadPlan } from './planStore';
 import { searchLog } from '../search';
+import { markFileSaved } from './fileSaved';
 import type { Id, State } from '../../leaf/model';
+
+/**
+ * How long the object URL outlives the click. Revoking it in the same tick
+ * (as this did until 2026-11-16) lets some WebKit builds drop the download:
+ * the click only STARTS it, and the browser reads the blob afterwards. Half a
+ * minute is long past any read of a file this size, and the blob is freed
+ * when the page goes anyway.
+ */
+export const REVOKE_AFTER = 30_000;
 
 /** Hands the browser a file to save. Both file kinds go through here. */
 function download(name: string, text: string): void {
@@ -27,7 +37,8 @@ function download(name: string, text: string): void {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER);
+  markFileSaved();
 }
 
 export function downloadBackup(d: State): void {
@@ -55,6 +66,11 @@ export function collectStates(library: Library, planId: Id, present: State): Rec
     if (state !== null) out[plan.id] = state;
   }
   return out;
+}
+
+/** The all-plans file's text: what "Tümünü dosyaya kaydet" writes and the move sends. */
+export function bundleText(library: Library, planId: Id, present: State): string {
+  return buildBundle(library, collectStates(library, planId, present), searchLog());
 }
 
 export function downloadBundle(library: Library, planId: Id, present: State): number {

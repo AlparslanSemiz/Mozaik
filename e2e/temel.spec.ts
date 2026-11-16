@@ -86,6 +86,39 @@ test.describe('5. Yedek ve şema göçü', () => {
     expect(file.suggestedFilename()).toMatch(/^ders-programi-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
   });
 
+  test('indirmenin blob adresi tıklamadan sonra da okunuyor, ve tarihi düğmede', async ({
+    page,
+  }) => {
+    // Web audit, 2026-11-16: the object URL was revoked in the same tick as
+    // the click, and some WebKit builds read the blob AFTER the click, so the
+    // download came out empty or not at all. The URL now lives on for half a
+    // minute; this reads it back right after the click, which a same-tick
+    // revoke would fail.
+    await page.addInitScript(() => {
+      const real = URL.createObjectURL.bind(URL);
+      (window as unknown as { __bloblar: string[] }).__bloblar = [];
+      URL.createObjectURL = (b: Blob | MediaSource) => {
+        const url = real(b);
+        (window as unknown as { __bloblar: string[] }).__bloblar.push(url);
+        return url;
+      };
+    });
+    await openWithSample(page);
+    const kaydet = page.getByRole('button', { name: 'Dosyaya kaydet', exact: true });
+    await expect(kaydet).not.toHaveAttribute('title', /Son plan dosyası/);
+    const download = page.waitForEvent('download');
+    await kaydet.click();
+    await download;
+    const text = await page.evaluate(async () => {
+      const urls = (window as unknown as { __bloblar: string[] }).__bloblar;
+      const res = await fetch(urls[urls.length - 1]!);
+      return res.text();
+    });
+    expect(JSON.parse(text)).toHaveProperty('schemaVersion');
+    // The day of that file, in the button's own tooltip (fileSaved.ts).
+    await expect(kaydet).toHaveAttribute('title', /Son plan dosyası: \d{1,2} \S+ \d{4}\./);
+  });
+
   test('rename öncesi indirilmiş (v1) yedek hâlâ açılıyor', async ({ page }) => {
     // The one test that proves the schemaVersion 1 -> 2 migration works on the
     // real path: a backup file downloaded before the rename, picked through the
