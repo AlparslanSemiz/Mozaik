@@ -1,14 +1,15 @@
-// Sığdır: the week sized to the box, and a card line that does not fit drawn
-// smaller, not cut.
+// The week sized to the box, and a card line that does not fit drawn smaller,
+// not cut. Since 2026-11-16 (K6) this is the grid's only layout; it was the
+// "Sığdır" density.
 //
-// Sığdır derives the column from the box (styles.css), so a card is as wide as
+// The stylesheet derives the column from the box, so a card is as wide as
 // the week allows and no wider. The father's class names are "411A SAY" and
 // his subject shorts "Mat1": at 1920 a one-hour card is 24.5px and holds three
 // characters at 12px, and at Windows %125 (1536 CSS px) it is 19.2px and not
 // even "310" (21px) goes in. Measured on 2026-09-26: 204 of 211 cards on his
 // (anonymised) week and 315 of 374 on the sample school at %125 read "4…".
 //
-// The user chose (2026-09-26): only in Sığdır, only the line that does not
+// The user chose (2026-09-26): only the line that does not
 // fit, and never below 9px at the default scale. This writes a ratio, not a
 // size — `--fit` — and styles.css multiplies the line's own size by it while
 // holding the line HEIGHT at the unshrunk size, so a row never changes height
@@ -17,7 +18,7 @@
 // Pure DOM and attached once, like gridChrome.ts and for the same reason
 // (pitfall 1): nothing here goes through React. It runs when what it measures
 // can change — the table's text (a React commit), the box (a resize, the tab
-// coming back into view), the density or the scale (attributes on <html>),
+// coming back into view), the scale (attributes on <html>),
 // and the embedded font arriving — and never during a drag, which changes
 // classes only and is not observed.
 
@@ -64,13 +65,6 @@ function fit(table: HTMLElement, fitted: Fitted) {
   if (table.getClientRects().length === 0) return;
 
   const root = document.documentElement;
-  if (root.dataset.density !== 'sigdir') {
-    for (const line of table.querySelectorAll<HTMLElement>('[style*="--fit"]')) {
-      line.style.removeProperty('--fit');
-    }
-    return;
-  }
-
   const scale = Number.parseFloat(getComputedStyle(root).getPropertyValue('--ui-scale')) || 1;
   const floor = FLOOR_PX * Math.min(1, scale);
   const range = document.createRange();
@@ -123,7 +117,7 @@ export function attachGridFit(wrap: HTMLElement): () => void {
     const table = wrap.querySelector<HTMLElement>('table.grid');
     if (table !== null) fit(table, fitted);
   };
-  // `fresh`: the size every ratio multiplies has changed (density, scale, the
+  // `fresh`: the size every ratio multiplies has changed (scale, the
   // font), so no line's last fit says anything any more.
   const schedule = (fresh = false) => {
     if (fresh) fitted = new WeakMap();
@@ -171,7 +165,7 @@ export function attachGridFit(wrap: HTMLElement): () => void {
   const prefs = new MutationObserver(() => schedule(true));
   prefs.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-density', 'style'],
+    attributeFilter: ['style'],
   });
   void document.fonts?.ready.then(() => schedule(true));
   schedule();

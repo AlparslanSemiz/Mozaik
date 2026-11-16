@@ -10,9 +10,7 @@
 export const THEME_KEY = 'ders-programi-tema';
 export const LANG_KEY = 'ders-programi-dil';
 export const SCALE_KEY = 'ders-programi-olcek';
-export const DENSITY_KEY = 'ders-programi-yogunluk';
 export const PROGRAM_COLOR_KEY = 'ders-programi-program-rengi';
-export const UI_DENSITY_KEY = 'ders-programi-arayuz-yogunluk';
 export const DOCK_KEY = 'ders-programi-havuz';
 export const DOCK_H_KEY = 'ders-programi-havuz-boy';
 export const RIBBON_KEY = 'ders-programi-serit';
@@ -32,6 +30,13 @@ export const FILE_SAVED_KEY = 'ders-programi-son-dosya';
  * stop being the answer to "is all of it in here?".
  */
 const SIDEBAR_KEY = 'ders-programi-kenar';
+
+/**
+ * The same for the two densities, gone on 2026-11-16 (Sadeleşme K6): the grid
+ * fits the box by itself. A saved value is never read again and never removed.
+ */
+const DENSITY_KEY = 'ders-programi-yogunluk';
+const UI_DENSITY_KEY = 'ders-programi-arayuz-yogunluk';
 
 export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: THEME_KEY, label: 'tema tercihi' },

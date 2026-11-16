@@ -972,48 +972,6 @@ export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
 }
 
 /**
- * Ayarlar → Görünüm'den bir yoğunluk basamağı seçer.
- *
- * SCOPED TO ITS GROUP since 2026-08-27, when the one density split into two
- * ("Izgara yoğunluğu" and "Arayüz yoğunluğu"). Both offer Ferah / Rahat /
- * Sığdır, so an unscoped `getByRole` matches two buttons and dies of a
- * strict-mode violation — pitfall 74, from the direction where nothing was
- * renamed at all: a name only has to become AMBIGUOUS, and a second control
- * is enough.
- *
- * The GROUP and not the panel, since 2026-08-28: the two questions share one
- * panel now, so a `.panel` scoped by its heading would find the same box
- * twice and be ambiguous again. `role="group"` with an `aria-label` is what
- * actually separates them on the screen, for a screen reader as much as for
- * this helper — so it is the honest thing to ask.
- */
-async function chooseDensityIn(
-  page: Page,
-  panel: 'Izgara yoğunluğu' | 'Arayüz yoğunluğu',
-  name: 'Ferah' | 'Rahat' | 'Sığdır',
-) {
-  await openSettings(page, 'Görünüm');
-  const box = page.getByRole('group', { name: panel, exact: true });
-  await box.getByRole('button', { name, exact: true }).click();
-  await expect(box.getByRole('button', { name, exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-}
-
-/** Ayarlar → Görünüm'den ızgara yoğunluğunu seçer ve Program'a döner. */
-export async function chooseDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
-  await chooseDensityIn(page, 'Izgara yoğunluğu', name);
-  await page.getByRole('button', { name: 'Program', exact: true }).click();
-  await expect(page.locator('table.grid')).toBeVisible();
-}
-
-/** ...and its twin, which moves the lists and leaves the grid alone. */
-export async function chooseUiDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
-  await chooseDensityIn(page, 'Arayüz yoğunluğu', name);
-}
-
-/**
  * How many lesson HOURS are on the grid.
  *
  * Not `.card` count, and the difference is the point: since 2026-08-27 a
@@ -1082,7 +1040,7 @@ export async function openMore(page: Page): Promise<void> {
   await expect(page.locator('.menu').first()).toBeVisible();
 }
 
-/** Opens a submenu of Daha fazla by the start of its label ("Seçenek", "Renk", "Yoğunluk"). */
+/** Opens a submenu of Daha fazla by the start of its label ("Seçenek", "Renk"). */
 export async function openMoreSub(page: Page, label: RegExp): Promise<void> {
   await openMore(page);
   // From the keyboard: a pointer click on a submenu trigger races Radix's

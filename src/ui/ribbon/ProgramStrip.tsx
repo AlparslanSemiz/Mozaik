@@ -4,10 +4,7 @@ import type React from 'react';
 import {
   Copy,
   Eraser,
-  Eye,
   Library,
-  Maximize2,
-  Minimize2,
   Palette as PaletteIcon,
   Pencil,
   Pin,
@@ -15,13 +12,11 @@ import {
   Play,
   Plus,
   RotateCcw,
-  Rows3,
   Shuffle,
   Square,
   Trash2,
 } from 'lucide-react';
-import { applyDensity, type Density, type ProgramColorMode, type View } from '../../platform/prefs';
-import { setDayMask, setRowMask } from '../../pure/program';
+import type { ProgramColorMode, View } from '../../platform/prefs';
 import {
   activePlacements,
   activeProgram,
@@ -34,11 +29,11 @@ import {
   switchProgram,
   validProgramName,
 } from '../../pure/grid';
-import { sanitize, togglePinScope } from '../../pure/constraints';
+import { sanitize, togglePinAll } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
-import { MoreItem, MoreLabel, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
+import { MoreItem, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
 import type { State } from '../../leaf/model';
 
@@ -63,28 +58,6 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
   { id: 'subject', label: 'Branşa göre' },
 ];
 
-/** Three densities, and the symbols say which way each one goes. */
-const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; why: string }> = [
-  {
-    id: 'ferah',
-    label: 'Ferah',
-    icon: <Maximize2 {...ICON} />,
-    why: 'Hücre en büyük, dersin alt satırı tam boyda',
-  },
-  {
-    id: 'rahat',
-    label: 'Rahat',
-    icon: <Rows3 {...ICON} />,
-    why: 'Hücre geniş, başlangıç saatleri görünür',
-  },
-  {
-    id: 'sigdir',
-    label: 'Sığdır',
-    icon: <Minimize2 {...ICON} />,
-    why: 'Programın tamamı ekrana sığar, başlangıç saatleri gizlenir',
-  },
-];
-
 /**
  * Which "Başka bir dizilim" this is: every press asks the search for the next
  * seed, so the same data gives a new week each time, and the same sequence of
@@ -102,10 +75,6 @@ export function programStrip({
   manageProgram,
   viewProgram,
   solver,
-  programMask,
-  setProgramMask,
-  density,
-  setDensity,
   programColor,
   setProgramColor,
   t,
@@ -115,8 +84,7 @@ export function programStrip({
   keepBefore,
   strip,
 }: StripContext): React.ReactElement {
-  const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
-    strip ?? describeStrip(state, programMask);
+  const { pending, placed, pinnedHours, gridEmpty, allPinned } = strip ?? describeStrip(state);
   const currentProgram = activeProgram(state);
   /** "Yeniden yap" and "Başka bir dizilim" say the same thing when they land. */
   const relaidNotice = (next: State) => {
@@ -202,7 +170,7 @@ export function programStrip({
     // "Geri al" for the whole of it. Nothing on the grid moves until the run
     // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
     keepBefore(state, t('Program yeniden yapıldı.'));
-    solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
+    solver.start(state, { keepPlaced: false }, relaidNotice);
   };
   // "Başka bir dizilim" (2026-11-16, main): the same rules, another of the
   // many weeks they allow, a different one on every press. Behind Daha fazla
@@ -213,7 +181,7 @@ export function programStrip({
     // would push the hand-made week out of the one slot with a week this button
     // made (review, 2026-11-16).
     if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'));
-    solver.start(state, { keepPlaced: false, exclusions, seed: anotherSeed }, (next) => {
+    solver.start(state, { keepPlaced: false, seed: anotherSeed }, (next) => {
       anotherMade = next;
       relaidNotice(next);
     });
@@ -222,7 +190,7 @@ export function programStrip({
   // week is laid out again close to itself. Whatever moved is said, with the
   // undo for it, and the week before is kept where a reload finds it.
   const make = () =>
-    solver.start(state, { keepPlaced: true, exclusions, relay: true }, (next) => {
+    solver.start(state, { keepPlaced: true, relay: true }, (next) => {
       const before = activePlacements(state);
       const after = activePlacements(next);
       let moved = 0;
@@ -249,7 +217,6 @@ export function programStrip({
       { label: t('Geri al'), run: () => undoIf(next) },
     );
   };
-  const maskName = (mode: string) => (mode === 'ghost' ? t('soluk') : t('gizli'));
 
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program')}>
@@ -316,10 +283,9 @@ export function programStrip({
       <Spacer />
 
       {/* EVERYTHING ELSE behind the one door every strip has, at the same
-          right-hand end. The seçenek list, the colour, the density, the
-          bulk pins, the session's set-aside rows and emptying the grid are
-          all rare, and two of them are the kind of click that costs an
-          afternoon. */}
+          right-hand end. The seçenek list, the colour, pinning the whole
+          week and emptying the grid are all rare, and two of them are the
+          kind of click that costs an afternoon. */}
       <MoreMenu>
         <MoreItem icon={<RotateCcw size={15} />} disabled={placed === 0 || busy} onSelect={rebuild}>
           {t('Yeniden yap')}
@@ -369,69 +335,14 @@ export function programStrip({
             options={PROGRAM_COLORS.map((o) => ({ id: o.id, label: t(o.label) }))}
           />
         </MoreSub>
-        <MoreSub icon={<Rows3 size={15} />} label={t('Yoğunluk')}>
-          <MoreRadio
-            value={density}
-            onChange={(next) => {
-              applyDensity(next);
-              setDensity(next);
-            }}
-            options={DENSITIES.map((d) => ({ id: d.id, label: t(d.label) }))}
-          />
-        </MoreSub>
         <MoreSep />
         <MoreItem
           icon={allPinned ? <PinOff size={15} /> : <Pin size={15} />}
           disabled={gridEmpty || busy}
-          onSelect={() => change((d) => togglePinScope(d, { kind: 'all' }))}
+          onSelect={() => change(togglePinAll)}
         >
           {allPinned ? t('Tüm sabitlemeleri kaldır') : t('Tüm programı sabitle')}
         </MoreItem>
-        {/* What is put aside for this session. Only when something is: an
-            empty heading with "(0)" was a line saying nothing. */}
-        {masked > 0 && (
-          <>
-            <MoreSep />
-            <MoreLabel>{t('Geçici görünüm ({n})', { n: masked })}</MoreLabel>
-            {Object.entries(programMask.teachers).map(([id, mode]) => (
-              <MoreItem
-                key={`t-${id}`}
-                icon={<Eye size={15} />}
-                disabled={busy}
-                onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}
-              >
-                {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} · {maskName(mode)}
-              </MoreItem>
-            ))}
-            {Object.entries(programMask.classes).map(([id, mode]) => (
-              <MoreItem
-                key={`c-${id}`}
-                icon={<Eye size={15} />}
-                disabled={busy}
-                onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}
-              >
-                {state.classes.find((group) => group.id === id)?.name ?? id} · {maskName(mode)}
-              </MoreItem>
-            ))}
-            {Object.entries(programMask.days).map(([name, mode]) => (
-              <MoreItem
-                key={`d-${name}`}
-                icon={<Eye size={15} />}
-                disabled={busy}
-                onSelect={() => setProgramMask((m) => setDayMask(m, name))}
-              >
-                {name} · {maskName(mode)}
-              </MoreItem>
-            ))}
-            <MoreItem
-              icon={<Eye size={15} />}
-              disabled={busy}
-              onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
-            >
-              {t('Tümünü geri yükle')}
-            </MoreItem>
-          </>
-        )}
         <MoreSep />
         <MoreItem
           icon={<Eraser size={15} />}

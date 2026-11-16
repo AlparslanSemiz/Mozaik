@@ -11,8 +11,8 @@
 import type React from 'react';
 import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
-import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
-import type { ProgramMask, StripCounts } from '../../pure/program';
+import type { ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
+import type { StripCounts } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
 import { type useDialogs, type useToast, useT } from '../common';
 import type { State as PlanState } from '../../leaf/model';
@@ -30,10 +30,6 @@ export interface RibbonProps {
   /** Another seçenek on screen: not a step of the history (undo.ts, `view`). */
   viewProgram: (fn: (d: State) => State) => void;
   solver: SolverRun;
-  programMask: ProgramMask;
-  setProgramMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
-  density: Density;
-  setDensity: (next: Density) => void;
   /** Müsaitlik's hour labels. A MACHINE preference, so App still owns it —
       only the control moved here, out of Ayarlar → Görünüm. */
   availClock: boolean;

@@ -88,7 +88,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     //
     // The request was about the LEFT end, so that is what is pinned exactly:
     // the captions before the spacer. The right end is read against LAYOUT.md
-    // (Renk, Yoğunluk, Izgara) rather than folded into one list, because a list
+    // (Renk, Izgara) rather than folded into one list, because a list
     // of the whole strip went red on 2026-09-01 when Renk was added on the right
     // and said nothing about the promise on the left.
     const [left, right] = await page.locator('.ribbon').evaluate((bar) => {
@@ -101,7 +101,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       return sides;
     });
     // Since 2026-11-16 (Sadeleşme): the seçenek's name shows only once there
-    // are two, and Renk, Yoğunluk and the grid's operations are behind the
+    // are two, and Renk and the grid's operations are behind the
     // one Daha fazla at the right end.
     expect(left).toEqual(['GÖRÜNÜM', 'DİZ']);
     expect(right).toEqual([]);

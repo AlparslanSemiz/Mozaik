@@ -36,5 +36,5 @@ export {
 } from './drop';
 export { closedConflicts, type ClosedConflict } from './closed';
 export { sanitize } from './sanitize';
-export { pinScopeCells, togglePinScope, type PinScope } from './pins';
+export { allPinCells, togglePinAll } from './pins';
 export * from './rules';

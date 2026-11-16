@@ -439,14 +439,7 @@ const ES: Sozluk = {
   // src/ui/settings/Appearance.tsx
   Tema: "Tema",
   "Yazı büyüklüğü": "Tamaño del texto",
-  Yoğunluk: "Densidad",
   Izgara: "Cuadrícula",
-  "Izgara yoğunluğu": "Densidad de la cuadrícula",
-  Ferah: "Amplio",
-  Rahat: "Cómodo",
-  Sığdır: "Ajustar",
-  "Arayüzün geri kalanı": "El resto de la interfaz",
-  "Arayüz yoğunluğu": "Densidad de la interfaz",
   "Kaydırınca gizlenir": "Se oculta al desplazar",
   Örnek: "Ejemplo",
   Saat: "Hora",
@@ -1257,11 +1250,6 @@ const ES: Sozluk = {
   Görünüm: "Vista",
   Hakkında: "Acerca de",
   "Planlar ve yedek": "Planes y copias de seguridad",
-  "Hücre en büyük, dersin alt satırı tam boyda":
-    "Celda más grande, la línea inferior de la clase a tamaño completo",
-  "Hücre geniş, başlangıç saatleri görünür": "Celda ancha, horas de inicio visibles",
-  "Programın tamamı ekrana sığar, başlangıç saatleri gizlenir":
-    "Todo el horario cabe en la pantalla, las horas de inicio se ocultan",
   Öğretmenden: "Desde un profesor",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Elija un profesor e introduzca seguidas todas las clases que imparte",
@@ -1389,12 +1377,6 @@ const ES: Sozluk = {
   // way every entry here is: `i18n.test.ts` can tell us a key is DEAD, never
   // that one is missing - an untranslated sentence falls back to correct
   // Turkish and says nothing (pitfall 87).
-  " {n} ders geçici kapsam dışında kaldı.":
-    " {n} {n:clase quedó|clases quedaron} fuera del alcance.",
-  " · {n} ders geçici kapsam dışında":
-    " · {n} {n:clase|clases} fuera del alcance",
-  "{gun} geçici olarak kapsam dışında":
-    "{gun} está temporalmente fuera del alcance",
   Seçenek: "Variante",
   "Bu seçeneğin kopyası": "Copia de esta variante",
   "Boş seçenek": "Variante vacía",
@@ -1408,26 +1390,10 @@ const ES: Sozluk = {
   Kaydet: "Guardar",
   "Öğretmeni düzenle": "Editar el profesor",
   "Sınıfı düzenle": "Editar la clase",
-  "Toplu sabitle": "Fijar en bloque",
-  "Satırı sabitle / kaldır": "Fijar / soltar la fila",
-  "Sütunu sabitle / kaldır": "Fijar / soltar la columna",
-  "Günü sabitle / kaldır": "Fijar / soltar el día",
-  "Geçici görünüm": "Apartar por ahora",
-  "Geçici görünüm ({n})": "Apartados ({n})",
-  "Satırı soluklaştır": "Atenuar la fila",
-  "Satırı geri yükle": "Restaurar la fila",
-  "Satırı gizle": "Ocultar la fila",
-  "Günü soluklaştır": "Atenuar el día",
-  "Günü geri yükle": "Restaurar el día",
-  "Günü gizle": "Ocultar el día",
-  "Tümünü geri yükle": "Restaurar todo",
-  soluk: "atenuado",
   gizli: "oculto",
   İşlemler: "Acciones",
   "Tüm programı sabitle": "Fijar todo el horario",
   "Tüm sabitlemeleri kaldır": "Soltar todas las fijaciones",
-  "{n} saat sabitlendi.": "{n} {n:hora fijada|horas fijadas}.",
-  "{n} saatin sabitlemesi kaldırıldı.": "Se soltaron {n} {n:hora|horas}.",
   "{sinif} sınıfının {gun} {saat} saatindeki ders sabitlenmiş":
     "La clase de {sinif} el {gun} a la hora {saat} está fijada",
   "{ust} {alt}: buraya sabitle": "{ust} {alt}: fijar aquí",
@@ -1483,12 +1449,6 @@ const ES: Sozluk = {
     "**Aquí Mozaik nunca se actualiza** y no se conecta a ningún sitio. La última versión:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
     "**Todos los planes** se escriben solos en Documentos; se guardan los últimos {gun} días.",
-  "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
-    "**Amplio.** La celda más grande: la más legible, la que más se desplaza.",
-  "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Cómodo.** Celdas anchas con las horas; el horario no cabe, así que se desplaza.",
-  "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Ajustar.** Todo el horario en una pantalla, a costa de **ocultar las horas**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
     "**Su navegador no puede escribir en una carpeta.** Chrome y Edge sí pueden.",
   "**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz.":
@@ -1501,8 +1461,6 @@ const ES: Sozluk = {
     "Las horas **totales** de los grupos que comparten aula también deben caber en la semana.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "Estos son **sus propios profesores**: si un nombre no cabe, la escala es excesiva.",
-  "Basılan sayfada saatler her üç durumda da yazar.":
-    "La hoja impresa lleva las horas en los tres casos.",
   "Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**.":
     "Otro navegador **no lo ve**, y “borrar datos de navegación” **lo elimina**.",
   "Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır.":
@@ -1541,8 +1499,6 @@ const ES: Sozluk = {
     "Marque los días con clase; la casilla al lado indica el **recreo largo**.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Los grupos sin aula no pasan por esta comprobación.",
-  "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
-    "El **resto** de la pantalla: listas, paneles, cajas. No toca la rejilla.",
   "Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.":
     "A qué hora empieza el día y cuántos minutos duran una hora y un recreo. Los horarios del timbre se calculan a partir de ellos.",
   "Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**":
@@ -1573,8 +1529,6 @@ const ES: Sozluk = {
     "Está en el almacén que el navegador reserva para este sitio.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** en total; el navegador reserva a Mozaik unos **5 MB**.",
-  "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
-    "Solo afecta a la rejilla de **Horario**: tamaño de celda y días visibles.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "El plan nuevo se abre enseguida y el historial de **deshacer** se vacía.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1723,8 +1677,6 @@ const ES: Sozluk = {
     "Cerrar toda la semana",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "Si los colores no salen: en la ventana de impresión, abra **Más ajustes** y marque **Gráficos de fondo**.",
-  "Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.":
-    "La semana entera no cabe; Más → Densidad → Ajustar muestra todos los días.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Clases de la semana",

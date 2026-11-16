@@ -8,7 +8,7 @@
 // each of these runs: the rows and the tray are memoised there, because the
 // grid's memo boundary is the identity of `rows` (pitfall 10).
 //
-// In `pure/program/` since 2026-10-24, beside the mask it reads. It stood at
+// In `pure/program/` since 2026-10-24. It stood at
 // the pure layer's root until then: this file reads `constraints.ts` and
 // `entities.ts`, both of those read the timetable variants, and the variants
 // lived here. They are `pure/grid/` now, so one index no longer closes a cycle.
@@ -21,7 +21,7 @@ import {
   closedKey,
   evictionNotice,
   pendingBlocks,
-  pinScopeCells,
+  allPinCells,
   placedBlocks,
   placementKey,
   swapDoneNotice,
@@ -30,7 +30,6 @@ import {
   type Index,
 } from '../constraints';
 import {
-  dayLabel,
   lessonSubject,
   subjectKey,
   subjectLabel,
@@ -38,26 +37,11 @@ import {
   teacherSubjects,
 } from '../entities';
 import { compareTr } from '../listview';
-import {
-  maskCount,
-  rowMask,
-  solverExclusions,
-  type MaskMode,
-  type ProgramMask,
-  type SolverExclusions,
-} from './programMask';
 import { activePinned, activePlacements } from '../grid';
 import type { SuggestionDiff } from '../relax';
 import type { SolverProgress, SolverResult } from '../solver';
 import type { Vars } from '../../leaf/i18n';
-import {
-  parseCellKey,
-  type Id,
-  type Lesson,
-  type PoolSort,
-  type State,
-  type View,
-} from '../../leaf/model';
+import { type Id, type Lesson, type PoolSort, type State, type View } from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds what it reads. */
 type Translate = (key: string, vars?: Vars) => string;
@@ -86,8 +70,6 @@ export interface GridCell {
    * with a colour — colour alone never carries state here.
    */
   pinned: boolean;
-  /** The block belongs to a temporarily excluded row in the other view. */
-  mask?: MaskMode | undefined;
   /**
    * Only in a suggestion's preview (TODO B5.11): taught in a teacher hour the
    * way opens (a thick line, a hatch and a "+"), or new in this cell (a thin
@@ -108,14 +90,12 @@ export interface GridRow {
   cells: Array<GridCell | null>;
   /** Hours the teacher cannot come. Always false in the class view. */
   closed: boolean[];
-  mask?: MaskMode | undefined;
 }
 
 export function buildRows(
   d: State,
   ix: Index,
   view: View,
-  mask: ProgramMask,
   colorOf: ColorOf,
   t: Translate,
 ): GridRow[] {
@@ -151,100 +131,92 @@ export function buildRows(
   const n = dayCount * hourCount;
 
   if (view === 'teacher') {
-    return d.teachers
-      .map((teacher) => {
-        const cells: Array<GridCell | null> = new Array(n).fill(null);
-        const closed: boolean[] = new Array(n).fill(false);
-
-        for (let g = 0; g < dayCount; g++) {
-          for (let s = 0; s < hourCount; s++) {
-            const i = g * hourCount + s;
-            closed[i] = d.unavailable[closedKey(teacher.id, g, s)] !== undefined;
-
-            const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
-            if (lessonId === undefined) continue;
-            const lesson = ix.lessonById.get(lessonId);
-            const group = ix.classById.get(lesson?.classId ?? '');
-            cells[i] = {
-              lessonId,
-              top: group?.name ?? '?',
-              bottom: roomLetter(ix, group?.roomId),
-              color: lesson === undefined ? teacher.color : colorOf(d, lesson),
-              conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
-              pinned: pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
-              mask: group === undefined ? undefined : mask.classes[group.id],
-              continues:
-                s + 1 < hourCount && group !== undefined && continuesAt(group.id, g, s, lessonId),
-            };
-          }
-        }
-        return {
-          id: teacher.id,
-          kind: 'teacher' as const,
-          name: teacher.short,
-          // Both, because this line IS the teacher — the cells in the row each
-          // name the one subject their own lesson is taught under.
-          //
-          // SHORT, not the full name. This line sits in a column narrow enough
-          // that "Matematik" was being cut to "Matemat…" and a pair of subjects
-          // never showed the second one at all; the cells of the grid have read
-          // the short form all along, so the row head now says what its own row
-          // says. `subjectShort` is the one place that resolves it.
-          secondary: teacherSubjects(teacher)
-            .map((name) => subjectShort(d.settings, name))
-            .join(' · '),
-          color: teacher.color,
-          cells,
-          closed,
-          mask: mask.teachers[teacher.id],
-        };
-      })
-      .filter((row) => row.mask !== 'hidden');
-  }
-
-  return d.classes
-    .map((group) => {
+    return d.teachers.map((teacher) => {
       const cells: Array<GridCell | null> = new Array(n).fill(null);
       const closed: boolean[] = new Array(n).fill(false);
 
       for (let g = 0; g < dayCount; g++) {
         for (let s = 0; s < hourCount; s++) {
           const i = g * hourCount + s;
-          closed[i] =
-            d.unavailable[closedKey(group.id, g, s)] !== undefined ||
-            (group.roomId != null && d.unavailable[closedKey(group.roomId, g, s)] !== undefined);
+          closed[i] = d.unavailable[closedKey(teacher.id, g, s)] !== undefined;
 
-          const lessonId = placements[placementKey(group.id, g, s)];
+          const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
           if (lessonId === undefined) continue;
           const lesson = ix.lessonById.get(lessonId);
-          const teacher = ix.teacherById.get(lesson?.teacherId ?? '');
+          const group = ix.classById.get(lesson?.classId ?? '');
           cells[i] = {
             lessonId,
-            top: teacher?.short ?? '?',
-            // The LESSON's subject, not the teacher's first one: a teacher who
-            // holds two is in this class for exactly one of them.
-            bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
-            color: lesson === undefined ? (teacher?.color ?? 0) : colorOf(d, lesson),
-            conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
-            pinned: pinned[placementKey(group.id, g, s)] !== undefined,
-            mask: teacher === undefined ? undefined : mask.teachers[teacher.id],
-            continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
+            top: group?.name ?? '?',
+            bottom: roomLetter(ix, group?.roomId),
+            color: lesson === undefined ? teacher.color : colorOf(d, lesson),
+            conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
+            pinned: pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
+            continues:
+              s + 1 < hourCount && group !== undefined && continuesAt(group.id, g, s, lessonId),
           };
         }
       }
-      const letter = roomLetter(ix, group.roomId);
       return {
-        id: group.id,
-        kind: 'class' as const,
-        name: group.name,
-        secondary: letter === '' ? t('derslik yok') : t('{ad} dersliği', { ad: letter }),
-        color: group.color,
+        id: teacher.id,
+        kind: 'teacher' as const,
+        name: teacher.short,
+        // Both, because this line IS the teacher — the cells in the row each
+        // name the one subject their own lesson is taught under.
+        //
+        // SHORT, not the full name. This line sits in a column narrow enough
+        // that "Matematik" was being cut to "Matemat…" and a pair of subjects
+        // never showed the second one at all; the cells of the grid have read
+        // the short form all along, so the row head now says what its own row
+        // says. `subjectShort` is the one place that resolves it.
+        secondary: teacherSubjects(teacher)
+          .map((name) => subjectShort(d.settings, name))
+          .join(' · '),
+        color: teacher.color,
         cells,
         closed,
-        mask: mask.classes[group.id],
       };
-    })
-    .filter((row) => row.mask !== 'hidden');
+    });
+  }
+
+  return d.classes.map((group) => {
+    const cells: Array<GridCell | null> = new Array(n).fill(null);
+    const closed: boolean[] = new Array(n).fill(false);
+
+    for (let g = 0; g < dayCount; g++) {
+      for (let s = 0; s < hourCount; s++) {
+        const i = g * hourCount + s;
+        closed[i] =
+          d.unavailable[closedKey(group.id, g, s)] !== undefined ||
+          (group.roomId != null && d.unavailable[closedKey(group.roomId, g, s)] !== undefined);
+
+        const lessonId = placements[placementKey(group.id, g, s)];
+        if (lessonId === undefined) continue;
+        const lesson = ix.lessonById.get(lessonId);
+        const teacher = ix.teacherById.get(lesson?.teacherId ?? '');
+        cells[i] = {
+          lessonId,
+          top: teacher?.short ?? '?',
+          // The LESSON's subject, not the teacher's first one: a teacher who
+          // holds two is in this class for exactly one of them.
+          bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
+          color: lesson === undefined ? (teacher?.color ?? 0) : colorOf(d, lesson),
+          conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
+          pinned: pinned[placementKey(group.id, g, s)] !== undefined,
+          continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
+        };
+      }
+    }
+    const letter = roomLetter(ix, group.roomId);
+    return {
+      id: group.id,
+      kind: 'class' as const,
+      name: group.name,
+      secondary: letter === '' ? t('derslik yok') : t('{ad} dersliği', { ad: letter }),
+      color: group.color,
+      cells,
+      closed,
+    };
+  });
 }
 
 function sameCell(a: GridCell | null, b: GridCell | null): boolean {
@@ -258,7 +230,6 @@ function sameCell(a: GridCell | null, b: GridCell | null): boolean {
     a.continues === b.continues &&
     a.conflict === b.conflict &&
     a.pinned === b.pinned &&
-    a.mask === b.mask &&
     a.mark === b.mark
   );
 }
@@ -270,7 +241,6 @@ function sameRow(a: GridRow, b: GridRow): boolean {
     a.name !== b.name ||
     a.secondary !== b.secondary ||
     a.color !== b.color ||
-    a.mask !== b.mask ||
     a.cells.length !== b.cells.length ||
     a.closed.length !== b.closed.length
   ) {
@@ -365,7 +335,6 @@ export interface PoolCard {
   color: number;
   placed: number;
   total: number;
-  masked?: boolean;
   /** The heading this card stands under. Derived from the chosen order in
       `buildPool`, so the tray SHOWS what the setting did. */
   group: string;
@@ -392,7 +361,6 @@ export function buildPool(
   d: State,
   ix: Index,
   view: View,
-  mask: ProgramMask,
   sort: PoolSort,
   filter: string,
   colorOf: ColorOf,
@@ -407,9 +375,6 @@ export function buildPool(
   );
 
   for (const lesson of d.lessons) {
-    const teacherMode = mask.teachers[lesson.teacherId];
-    const classMode = mask.classes[lesson.classId];
-    if (teacherMode === 'hidden' || classMode === 'hidden') continue;
     // ONE CARD PER BLOCK, not per lesson. A 2+1 lesson is a two-hour card and a
     // one-hour card, and which of them is picked up decides how many cells the
     // drop covers — so the choice has to be a thing on the tray, not a hidden
@@ -443,7 +408,6 @@ export function buildPool(
         color: colorOf(d, lesson),
         placed,
         total: lesson.weeklyHours,
-        masked: teacherMode === 'ghost' || classMode === 'ghost',
         group: '',
       });
     }
@@ -522,25 +486,15 @@ function poolGroup(card: PoolCard, sort: PoolSort, t: Translate): string {
  * the filter compares, and labelled with what the rest of the screen calls
  * it.
  */
-export function waitingSubjects(state: State, mask: ProgramMask): Array<[string, string]> {
+export function waitingSubjects(state: State): Array<[string, string]> {
   const seen = new Map<string, string>();
   for (const lesson of state.lessons) {
-    if (mask.teachers[lesson.teacherId] === 'hidden') continue;
-    if (mask.classes[lesson.classId] === 'hidden') continue;
     if (pendingBlocks(state, lesson).length === 0) continue;
     const name = lessonSubject(state, lesson);
     const key = subjectKey(name);
     if (key !== '' && !seen.has(key)) seen.set(key, subjectLabel(name));
   }
   return [...seen.entries()].sort((a, b) => compareTr(a[1], b[1]));
-}
-
-/** The days the grid draws: every day the mask has not hidden, by index. */
-export function visibleDays(
-  days: State['settings']['days'],
-  dayModes: ProgramMask['days'],
-): number[] {
-  return days.flatMap((day, index) => (dayModes[day.name] === 'hidden' ? [] : [index]));
 }
 
 /**
@@ -591,75 +545,38 @@ export function dropNotice(
         );
 }
 
-/**
- * A day set aside in the temporary view takes no drop: its cells in the drop
- * map are refused with a sentence that says why. Changes `map` in place, the
- * map is the drag's own.
- */
-export function blockMaskedDays(
-  map: Map<string, DropVerdict>,
-  state: State,
-  maskedDays: ProgramMask['days'],
-  t: Translate,
-): void {
-  for (const [key, verdict] of map) {
-    const { day } = parseCellKey(key);
-    const dayName = state.settings.days[day]?.name;
-    if (dayName !== undefined && maskedDays[dayName] !== undefined) {
-      map.set(key, {
-        ...verdict,
-        blocked: t('{gun} geçici olarak kapsam dışında', {
-          gun: dayLabel(dayName),
-        }),
-        warning: null,
-        evicts: [],
-      });
-    }
-  }
-}
-
 // ------------------------------------------------------------------ the right-click menus
 
-/** What a right-click on the grid was about: a card, a row or day heading, or a column. */
-export type MenuTarget =
-  | { kind: 'card'; rowId: Id; day: number; hour: number }
-  | { kind: 'row'; rowId: Id }
-  | { kind: 'day'; day: number }
-  | { kind: 'column'; day: number; hour: number };
+/**
+ * What a right-click on the grid was about: a card. A heading opens nothing
+ * since 2026-11-16 (Sadeleşme K7): its menu held only the bulk pins and the
+ * temporary view, and both are gone.
+ */
+export interface MenuTarget {
+  rowId: Id;
+  day: number;
+  hour: number;
+}
 
 /**
  * What the grid's right-click menu reads about its target, from the state it
  * acts on (the state can move under an open menu: an autosave, an undo, a run).
  */
 export interface MenuFacts {
-  at: Extract<MenuTarget, { kind: 'card' }> | null;
-  rowId: Id | null;
-  day: number | null;
+  at: MenuTarget | null;
   classId: Id | null;
   pinned: boolean;
   lessonId: Id | undefined;
   lesson: Lesson | undefined;
-  /** The card's teacher or class row is set aside in the temporary view. */
-  cellMasked: boolean;
-  rowMode: MaskMode | undefined;
-  dayName: string | undefined;
-  dayMode: MaskMode | undefined;
 }
 
 export function describeMenu(
   state: State,
   ix: Index,
   view: View,
-  mask: ProgramMask,
   menuTarget: MenuTarget | null,
 ): MenuFacts {
-  const menuAt = menuTarget?.kind === 'card' ? menuTarget : null;
-  const menuRowId =
-    menuTarget?.kind === 'row' || menuTarget?.kind === 'card' ? menuTarget.rowId : null;
-  const menuDay =
-    menuTarget?.kind === 'day' || menuTarget?.kind === 'column' || menuTarget?.kind === 'card'
-      ? menuTarget.day
-      : null;
+  const menuAt = menuTarget;
 
   const menuClass =
     menuAt === null ? null : classOfCell(state, view, menuAt.rowId, menuAt.day, menuAt.hour);
@@ -676,75 +593,35 @@ export function describeMenu(
           )
         ];
   const menuLesson = menuLessonId === undefined ? undefined : ix.lessonById.get(menuLessonId);
-  const menuCellMasked =
-    menuLesson !== undefined &&
-    (mask.teachers[menuLesson.teacherId] !== undefined ||
-      mask.classes[menuLesson.classId] !== undefined);
-  const menuRowMode = menuRowId === null ? undefined : rowMask(mask, view, menuRowId);
-  const menuDayName = menuDay === null ? undefined : state.settings.days[menuDay]?.name;
-  const menuDayMode = menuDayName === undefined ? undefined : mask.days[menuDayName];
   return {
     at: menuAt,
-    rowId: menuRowId,
-    day: menuDay,
     classId: menuClass,
     pinned: menuPinned,
     lessonId: menuLessonId,
     lesson: menuLesson,
-    cellMasked: menuCellMasked,
-    rowMode: menuRowMode,
-    dayName: menuDayName,
-    dayMode: menuDayMode,
   };
-}
-
-/** The tray card's menu: which lesson, which row of the open view, and its mode. */
-export function poolMenuFacts(
-  ix: Index,
-  view: View,
-  mask: ProgramMask,
-  poolMenuLessonId: Id | null,
-): { lesson: Lesson | undefined; rowId: Id | null; rowMode: MaskMode | undefined } {
-  const poolMenuLesson =
-    poolMenuLessonId === null ? undefined : ix.lessonById.get(poolMenuLessonId);
-  const poolMenuRowId =
-    poolMenuLesson === undefined
-      ? null
-      : view === 'teacher'
-        ? poolMenuLesson.teacherId
-        : poolMenuLesson.classId;
-  const poolMenuRowMode = poolMenuRowId === null ? undefined : rowMask(mask, view, poolMenuRowId);
-  return { lesson: poolMenuLesson, rowId: poolMenuRowId, rowMode: poolMenuRowMode };
 }
 
 // ------------------------------------------------------------------ the tool strip
 
 /** What the Program strip's buttons count and whether they are enabled. */
 export interface StripCounts {
-  /** What the automatic run leaves out because rows are set aside. */
-  exclusions: SolverExclusions;
-  /** "Programı yap"'s count: blocks still in the tray, rows set aside excluded. */
+  /** "Programı yap"'s count: blocks still in the tray. */
   pending: number;
   /** Placed hours that are NOT pinned: what "Yeniden yap" and "Programı boşalt" take away. */
   placed: number;
   pinnedHours: number;
   /** The active grid holds no placement at all. */
   gridEmpty: boolean;
-  /** Rows and days set aside in the temporary view. */
-  masked: number;
   /** Every placed cell is pinned, so the pin item offers to unpin them all. */
   allPinned: boolean;
 }
 
-export function describeStrip(state: State, mask: ProgramMask): StripCounts {
-  const exclusions = solverExclusions(mask);
-  const excludedTeachers = new Set(exclusions.teacherIds);
-  const excludedClasses = new Set(exclusions.classIds);
-  const pending = state.lessons
-    .filter(
-      (lesson) => !excludedTeachers.has(lesson.teacherId) && !excludedClasses.has(lesson.classId),
-    )
-    .reduce((sum, lesson) => sum + pendingBlocks(state, lesson).length, 0);
+export function describeStrip(state: State): StripCounts {
+  const pending = state.lessons.reduce(
+    (sum, lesson) => sum + pendingBlocks(state, lesson).length,
+    0,
+  );
   // What the two destructive buttons are ABOUT: the hours that would go.
   // Pinned hours are not among them — nothing takes a pinned block down but
   // unpinning it — so counting them would make both questions overstate what
@@ -753,15 +630,13 @@ export function describeStrip(state: State, mask: ProgramMask): StripCounts {
   const pinned = activePinned(state);
   const pinnedHours = Object.keys(pinned).length;
   const placed = Object.keys(placements).length - pinnedHours;
-  const allPinCells = pinScopeCells(state, { kind: 'all' });
-  const allPinned = allPinCells.length > 0 && allPinCells.every((key) => pinned[key] !== undefined);
+  const pinCells = allPinCells(state);
+  const allPinned = pinCells.length > 0 && pinCells.every((key) => pinned[key] !== undefined);
   return {
-    exclusions,
     pending,
     placed,
     pinnedHours,
     gridEmpty: Object.keys(placements).length === 0,
-    masked: maskCount(mask),
     allPinned,
   };
 }
@@ -804,15 +679,11 @@ export function describeBar(
   if (solver.running && p !== null) {
     return {
       text: t('Program yapılıyor…'),
-      counter:
-        t('{yerlesen}/{toplam} ders · {sure} sn', {
-          yerlesen: p.placedBlocks,
-          toplam: p.totalBlocks,
-          sure: seconds(p.elapsedMs),
-        }) +
-        (p.excludedBlocks > 0
-          ? t(' · {n} ders geçici kapsam dışında', { n: p.excludedBlocks })
-          : ''),
+      counter: t('{yerlesen}/{toplam} ders · {sure} sn', {
+        yerlesen: p.placedBlocks,
+        toplam: p.totalBlocks,
+        sure: seconds(p.elapsedMs),
+      }),
       level: 'busy',
     };
   }
@@ -845,16 +716,10 @@ export function describeBar(
 
   if (done.stuck.length === 0) {
     return {
-      text:
-        t('Program yapıldı. {n} ders yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
-          n: done.placedBlocks,
-          sure: seconds(done.elapsedMs),
-        }) +
-        (done.excludedBlocks > 0
-          ? t(' {n} ders geçici kapsam dışında kaldı.', {
-              n: done.excludedBlocks,
-            })
-          : ''),
+      text: t('Program yapıldı. {n} ders yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
+        n: done.placedBlocks,
+        sure: seconds(done.elapsedMs),
+      }),
       level: 'ok',
     };
   }

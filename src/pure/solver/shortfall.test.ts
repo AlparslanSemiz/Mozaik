@@ -8,8 +8,6 @@ import type { State } from '../../leaf/model';
 import { solve } from './solver';
 import { bindingPair, shortfalls } from './shortfall';
 
-const NONE = { teacherIds: [], classIds: [], dayNames: [] };
-
 /** K1: MÇ teaches three classes 6 hours each, 18, and is open 3 days × 5 = 15. */
 function k1(): State {
   const d = makeWorld({
@@ -90,9 +88,7 @@ function k4(): State {
 describe('tıkanınca açık söyleniyor', () => {
   it('öğretmenin açığı: kaç saat ders, kaç müsait saat, kaç saat açılmalı', () => {
     const d = k1();
-    expect(shortfalls(d, NONE).get('oMC')).toBe(
-      'MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı',
-    );
+    expect(shortfalls(d).get('oMC')).toBe('MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı');
     const r = solve(d, { keepPlaced: false });
     expect(r.phase).toBe('stuck');
     // Every lesson MÇ holds up says it, and they come first.
@@ -115,14 +111,14 @@ describe('tıkanınca açık söyleniyor', () => {
     });
     // 12 open hours hold the 8; the rule (3 a day) is what binds, and
     // blocker()'s own sentence already names it.
-    expect(shortfalls(d, NONE).size).toBe(0);
+    expect(shortfalls(d).size).toBe(0);
     const r = solve(d, { keepPlaced: false });
     expect(r.stuck[0]!.reason).toContain('en fazla 3 saat');
   });
 
   it('paylaşılan dersliğin açığı ve çaresi', () => {
     const d = k3();
-    expect(shortfalls(d, NONE).get('dA')).toBe(
+    expect(shortfalls(d).get('dA')).toBe(
       'A dersliği: 24 saat ders, 20 açık saat; 4 saat açılmalı ya da bir sınıf başka dersliğe geçmeli',
     );
     const r = solve(d, { keepPlaced: false });
@@ -130,16 +126,10 @@ describe('tıkanınca açık söyleniyor', () => {
     for (const s of r.stuck) expect(s.reason).toContain('A dersliği: 24 saat ders');
   }, 30_000);
 
-  it('kapsam dışı gün açık saat sayılmıyor', () => {
-    const d = k3();
-    const ex = { ...NONE, dayNames: [d.settings.days[0]!.name] };
-    expect(shortfalls(d, ex).get('dA')).toContain('16 açık saat; 8 saat');
-  });
-
   it('bağlayan "aynı gün olmasın" ilişkisini adıyla söylüyor', () => {
     const d = k4();
-    expect(shortfalls(d, NONE).size).toBe(0);
-    const pair = bindingPair(d, buildIndex(d), 'x', NONE);
+    expect(shortfalls(d).size).toBe(0);
+    const pair = bindingPair(d, buildIndex(d), 'x');
     expect(pair).toContain('aynı güne konmamalı: 3 + 3 gün gerekiyor, 4 gün var');
     const r = solve(d, { keepPlaced: false });
     expect(r.phase).toBe('stuck');
@@ -154,7 +144,7 @@ describe('tıkanınca açık söyleniyor', () => {
       classes: [{ id: 'a', name: '9A', roomId: null }],
       lessons: [{ id: 'x', classId: 'a', teacherId: 't1', weeklyHours: 4 }],
     });
-    expect(shortfalls(d, NONE).size).toBe(0);
-    expect(bindingPair(d, buildIndex(d), 'x', NONE)).toBeNull();
+    expect(shortfalls(d).size).toBe(0);
+    expect(bindingPair(d, buildIndex(d), 'x')).toBeNull();
   });
 });

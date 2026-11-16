@@ -517,21 +517,18 @@ function LessonPool({
                         }
                       >
                         <div
-                          className={`pool-card${c.masked ? ' masked-scope' : ''}`}
+                          className="pool-card"
                           data-size={c.size}
                           data-lesson={c.lessonId}
                           style={{ background: paletteColor(c.color) }}
-                          onPointerDown={
-                            c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
-                          }
+                          onPointerDown={(e) => onStart(e, c.lessonId, c.size)}
                           // A control now: Enter picks it up, the arrows walk
                           // the tray (one Tab stop, see the effect above).
                           // Named by its own text, the long sentence is the
                           // description: a speech user says what is on the
                           // card (axe label-content-name-mismatch).
                           role="button"
-                          tabIndex={c.masked ? undefined : -1}
-                          aria-disabled={c.masked || undefined}
+                          tabIndex={-1}
                           title={describe}
                         >
                           <span className="card-top">{c.top}</span>

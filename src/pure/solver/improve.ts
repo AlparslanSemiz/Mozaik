@@ -40,8 +40,8 @@
 // Tier 0 counts breaches: a step may trade one for another of the same kind
 // on another teacher when a later tier gains; the count never goes up.
 //
-// Only the blocks the run itself put down move: a pinned cell, a kept one and
-// anything on an excluded row or day stays where it is (`fixed`).
+// Only the blocks the run itself put down move: a pinned cell and a kept one
+// stay where they are (`fixed`).
 //
 // A step must also leave every touched lesson's blocks READING the same off
 // the grid (`placedBlocks`, pitfall 75): the grid keeps no block boundaries,
@@ -68,11 +68,10 @@ export interface ImproveInput {
   placements: Record<string, Id>;
   /** The index `occupy` and `vacate` keep in step with `placements`. */
   ix: Index;
-  /** Cells that may not move: kept, pinned, excluded. */
+  /** Cells that may not move: kept, pinned. */
   fixed: ReadonlySet<string>;
   /** The lessons whose blocks may move at all (the run's own lessons). */
   lessonIds: readonly Id[];
-  isExcludedDay: (day: number) => boolean;
   seed: number;
   /** A week to stay close to (the last tier of the objective). */
   hint?: Record<string, Id> | undefined;
@@ -151,7 +150,7 @@ function isZero(a: Float64Array): boolean {
 }
 
 export function createImprover(input: ImproveInput): Improver {
-  const { work, placements, ix, fixed, isExcludedDay } = input;
+  const { work, placements, ix, fixed } = input;
   const d = work;
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
@@ -349,7 +348,6 @@ export function createImprover(input: ImproveInput): Improver {
     }
     const list: Unit[] = [];
     for (const b of placedBlocks(work, lessons[li]!)) {
-      if (isExcludedDay(b.day)) continue;
       let pinned = false;
       for (let i = 0; i < b.size; i++) {
         if (fixedCell[c * cellCount + b.day * hourCount + b.hour + i] === 1) pinned = true;
@@ -375,7 +373,7 @@ export function createImprover(input: ImproveInput): Improver {
 
   /**
    * lesson -> cell -> 1 where none of its hours can ever be: closed for the
-   * class, the teacher or the room, or an excluded day. Built on demand.
+   * class, the teacher or the room. Built on demand.
    */
   const closedFor = new Map<number, Uint8Array>();
   function closed(li: number): Uint8Array {
@@ -388,7 +386,6 @@ export function createImprover(input: ImproveInput): Improver {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
       if (
-        isExcludedDay(day) ||
         d.unavailable[closedKey(l.classId, day, hour)] !== undefined ||
         d.unavailable[closedKey(l.teacherId, day, hour)] !== undefined ||
         (roomId != null && d.unavailable[closedKey(roomId, day, hour)] !== undefined)

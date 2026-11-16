@@ -23,7 +23,6 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { ReactNode } from 'react';
 import { closedKey, placementKey } from '../../pure/constraints';
-import { EMPTY_PROGRAM_MASK, type ProgramMask } from '../../pure/program/programMask';
 import { activePlacements, replaceActiveGrid } from '../../pure/grid/programs';
 import { makeWorld } from '../../pure/worlds';
 import type { Advice, SolverRun } from '../../platform/search';
@@ -250,7 +249,6 @@ function Providers({ state, children }: { state: State; children: ReactNode }) {
 
 interface ProgramProps {
   view?: View;
-  mask?: ProgramMask;
   poolSort?: PoolSort;
   poolFilter?: string;
   colorMode?: ProgramColorMode;
@@ -267,8 +265,6 @@ function drawProgram(state: State, p: ProgramProps = {}) {
           change={() => undefined}
           solver={p.solver ?? idle()}
           view={p.view ?? 'class'}
-          mask={p.mask ?? EMPTY_PROGRAM_MASK}
-          setMask={() => undefined}
           poolSort={p.poolSort ?? 'row'}
           setPoolSort={() => undefined}
           poolFilter={p.poolFilter ?? ''}
@@ -312,7 +308,6 @@ const text = (el: Element | null | undefined): string => (el?.textContent ?? '')
 function gridLines(): string[] {
   return [...container.querySelectorAll('table.grid tbody tr')].map((tr) => {
     const head = tr.querySelector('th.row-head');
-    const rowMask = tr.className === '' ? '' : ` {${tr.className}}`;
     const cells = [...tr.querySelectorAll<HTMLTableCellElement>('td')].map((td) => {
       if (td.classList.contains('break-col')) return '|';
       const at = `${td.dataset.day}.${td.dataset.hour}${td.colSpan > 1 ? `×${td.colSpan}` : ''}`;
@@ -325,7 +320,7 @@ function gridLines(): string[] {
         `#${card.style.background}${flags === '' ? '' : `[${flags}]`}`
       );
     });
-    return `${text(head?.querySelector('.inspect'))} — ${text(head?.querySelector('.secondary'))}${rowMask}: ${cells.join(' ')}`;
+    return `${text(head?.querySelector('.inspect'))} — ${text(head?.querySelector('.secondary'))}: ${cells.join(' ')}`;
   });
 }
 
@@ -346,9 +341,7 @@ function poolLines(): string[] {
   const out = [text(container.querySelector('.pool-count'))];
   for (const group of container.querySelectorAll('.pool-group')) {
     const cards = [...group.querySelectorAll<HTMLElement>('.pool-card')].map(
-      (c) =>
-        `${c.dataset.lesson}:${c.dataset.size}:${text(c)}` +
-        `${c.classList.contains('masked-scope') ? '[masked]' : ''}#${c.style.background}`,
+      (c) => `${c.dataset.lesson}:${c.dataset.size}:${text(c)}#${c.style.background}`,
     );
     out.push(`${group.getAttribute('aria-label') ?? ''}: ${cards.join(' ')}`);
   }
@@ -433,28 +426,6 @@ describe('Program ızgarası', () => {
     `);
   });
 
-  it('gizlenen satır çizilmez, soluklaşan satır ve öbür eksenin hücresi işaretlenir', () => {
-    const mask: ProgramMask = {
-      teachers: { oZK: 'hidden', oAY: 'ghost' },
-      classes: { s511: 'ghost' },
-      days: {},
-    };
-    drawProgram(world(), { view: 'teacher', mask });
-    expect(gridLines()).toMatchInlineSnapshot(`
-      [
-        "MÇ — Mat: 0.0(day-first masked-scope):511/#rgb(195, 162, 205) 0.1(block-cont):510 SAY/A#rgb(195, 162, 205) | 0.2×2(block-wide block-in):510 SAY/A#rgb(195, 162, 205) 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band):510 SAY/A#rgb(195, 162, 205)[conflict]",
-        "AY — Fzk · Kim {masked-scope}: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0×2(day-first block-wide band masked-scope):511/#rgb(159, 242, 146)[pinned] 1.2(band masked-scope):511/#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
-      ]
-    `);
-    drawProgram(world(), { view: 'class', mask });
-    expect(gridLines()).toMatchInlineSnapshot(`
-      [
-        "510 SAY — A dersliği: 0.0(day-first unavailable):× 0.1(block-cont):MÇ/Mat#rgb(195, 162, 205) | 0.2×2(block-wide block-in):MÇ/Mat#rgb(195, 162, 205) 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band):MÇ/Mat#rgb(195, 162, 205)[conflict]",
-        "511 — derslik yok {masked-scope}: 0.0(day-first):MÇ/Mat#rgb(195, 162, 205) 0.1 | 0.2 0.3 0.4(unavailable):× 1.0×2(day-first block-wide band masked-scope):AY/Fzk#rgb(159, 242, 146)[pinned] 1.2(band masked-scope):AY/Fzk#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
-      ]
-    `);
-  });
-
   it('kart rengi seçilen eksenden: sınıf, derslik ve branş', () => {
     const colours = (['class', 'room', 'subject'] as const).map((colorMode) => {
       drawProgram(world(), { view: 'class', colorMode });
@@ -518,19 +489,6 @@ describe('Program ızgarası', () => {
           ],
         },
       }
-    `);
-  });
-
-  it('gizli gün sütun olarak çizilmez', () => {
-    drawProgram(world(), {
-      view: 'class',
-      mask: { ...EMPTY_PROGRAM_MASK, days: { Salı: 'hidden' } },
-    });
-    expect(gridLines()).toMatchInlineSnapshot(`
-      [
-        "510 SAY — A dersliği: 1.0(day-first) 1.1 1.2 | 1.3 1.4:MÇ/Mat#rgb(195, 162, 205)[conflict]",
-        "511 — derslik yok: 1.0×2(day-first block-wide):AY/Fzk#rgb(159, 242, 146)[pinned] 1.2:AY/Fzk#rgb(159, 242, 146) | 1.3 1.4",
-      ]
     `);
   });
 });
@@ -623,19 +581,6 @@ describe('ders havuzu', () => {
       }
     `);
   });
-
-  it('gizlenen satırın dersi havuzda yok, soluklaşanınki işaretli', () => {
-    drawProgram(world(), {
-      view: 'class',
-      mask: { teachers: { oMC: 'hidden' }, classes: { s510: 'ghost' }, days: {} },
-    });
-    expect(poolLines()).toMatchInlineSnapshot(`
-      [
-        "1 ders bekliyor2 saat · sürükleyip bırakın",
-        "510 SAY: L3:2:AY510 SAY0/2[masked]#rgb(159, 242, 146)",
-      ]
-    `);
-  });
 });
 
 describe('araç çubuğunun altındaki satır', () => {
@@ -646,7 +591,6 @@ describe('araç çubuğunun altındaki satır', () => {
     totalBlocks: 9,
     nodes: 10,
     elapsedMs: 3456,
-    excludedBlocks: 0,
     stuck: [] as Array<{ lessonId: string; name: string; missing: number; reason: string }>,
   };
 
@@ -662,12 +606,11 @@ describe('araç çubuğunun altındaki satır', () => {
     say(
       idle({
         running: true,
-        progress: { placedBlocks: 3, totalBlocks: 9, nodes: 1, elapsedMs: 1234, excludedBlocks: 2 },
+        progress: { placedBlocks: 3, totalBlocks: 9, nodes: 1, elapsedMs: 1234 },
       }),
     );
     say(idle({ applied: way(state) }));
     say(idle({ result: { ...result, state, placedBlocks: 9, stuck: [] } }));
-    say(idle({ result: { ...result, state, placedBlocks: 9, excludedBlocks: 2, stuck: [] } }));
     say(
       idle({
         result: {
@@ -695,10 +638,9 @@ describe('araç çubuğunun altındaki satır', () => {
       [
         "reason-bar :: Yerleşmiş dersi sürükleyerek taşıyın.",
         "reason-bar :: Yerleşmiş dersi sürükleyerek taşıyın.",
-        "reason-bar busy :: Program yapılıyor… | 3/9 ders · 1,2 sn · 2 ders geçici kapsam dışında",
+        "reason-bar busy :: Program yapılıyor… | 3/9 ders · 1,2 sn",
         "reason-bar ok :: Öneri uygulandı ve program dizildi. Ctrl+Z ile geri alabilirsiniz.",
         "reason-bar ok :: Program yapıldı. 9 ders yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz.",
-        "reason-bar ok :: Program yapıldı. 9 ders yerleşti (3,5 sn). Ctrl+Z ile geri alabilirsiniz. 2 ders geçici kapsam dışında kaldı.",
         "reason-bar bad :: 7/9 ders yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. Öğretmen dolu (ve 1 ders daha).",
         "reason-bar warn :: Durduruldu. 7/9 ders yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. x.",
       ]

@@ -431,14 +431,7 @@ const EN: Sozluk = {
   // src/ui/settings/Appearance.tsx
   Tema: "Theme",
   "Yazı büyüklüğü": "Text size",
-  Yoğunluk: "Density",
   Izgara: "Grid",
-  "Izgara yoğunluğu": "Grid density",
-  Ferah: "Roomy",
-  Rahat: "Comfortable",
-  Sığdır: "Fit",
-  "Arayüzün geri kalanı": "The rest of the interface",
-  "Arayüz yoğunluğu": "Interface density",
   "Kaydırınca gizlenir": "Hides on scroll",
   Örnek: "Example",
   Saat: "Hour",
@@ -1242,11 +1235,6 @@ const EN: Sozluk = {
   Görünüm: "View",
   Hakkında: "About",
   "Planlar ve yedek": "Plans and backup",
-  "Hücre en büyük, dersin alt satırı tam boyda":
-    "Largest cell, the lesson's bottom line at full size",
-  "Hücre geniş, başlangıç saatleri görünür": "Wide cell, start times visible",
-  "Programın tamamı ekrana sığar, başlangıç saatleri gizlenir":
-    "The whole timetable fits the screen, start times are hidden",
   Öğretmenden: "From a teacher",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Choose a teacher and enter all the classes they teach, one after another",
@@ -1374,10 +1362,6 @@ const EN: Sozluk = {
   // way every entry here is: `i18n.test.ts` can tell us a key is DEAD, never
   // that one is missing - an untranslated sentence falls back to correct
   // Turkish and says nothing (pitfall 87).
-  " {n} ders geçici kapsam dışında kaldı.":
-    " {n} {n:lesson was|lessons were} left out of scope.",
-  " · {n} ders geçici kapsam dışında": " · {n} {n:lesson|lessons} out of scope",
-  "{gun} geçici olarak kapsam dışında": "{gun} is temporarily out of scope",
   Seçenek: "Variant",
   "Bu seçeneğin kopyası": "A copy of this variant",
   "Boş seçenek": "Empty variant",
@@ -1391,26 +1375,10 @@ const EN: Sozluk = {
   Kaydet: "Save",
   "Öğretmeni düzenle": "Edit teacher",
   "Sınıfı düzenle": "Edit class",
-  "Toplu sabitle": "Pin in bulk",
-  "Satırı sabitle / kaldır": "Pin / unpin the row",
-  "Sütunu sabitle / kaldır": "Pin / unpin the column",
-  "Günü sabitle / kaldır": "Pin / unpin the day",
-  "Geçici görünüm": "Set aside for now",
-  "Geçici görünüm ({n})": "Set aside ({n})",
-  "Satırı soluklaştır": "Fade the row",
-  "Satırı geri yükle": "Bring the row back",
-  "Satırı gizle": "Hide the row",
-  "Günü soluklaştır": "Fade the day",
-  "Günü geri yükle": "Bring the day back",
-  "Günü gizle": "Hide the day",
-  "Tümünü geri yükle": "Bring them all back",
-  soluk: "faded",
   gizli: "hidden",
   İşlemler: "Actions",
   "Tüm programı sabitle": "Pin the whole timetable",
   "Tüm sabitlemeleri kaldır": "Unpin everything",
-  "{n} saat sabitlendi.": "{n} {n:hour|hours} pinned.",
-  "{n} saatin sabitlemesi kaldırıldı.": "{n} {n:hour|hours} unpinned.",
   "{sinif} sınıfının {gun} {saat} saatindeki ders sabitlenmiş":
     "The lesson for {sinif} on {gun}, hour {saat}, is pinned",
   "{ust} {alt}: buraya sabitle": "{ust} {alt}: pin here",
@@ -1466,12 +1434,6 @@ const EN: Sozluk = {
     "**Here Mozaik never updates itself** and connects nowhere. The latest version is at:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
     "**Every plan** is written to Documents by itself; the last {gun} days are kept.",
-  "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
-    "**Roomy.** The largest cell: easiest to read, most scrolling.",
-  "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Comfortable.** Wide cells with the clock times; the timetable does not fit, so you scroll.",
-  "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Fit.** The whole timetable on one screen, and the price is **hiding the clock times**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
     "**Your browser cannot write to a folder.** Chrome and Edge can.",
   "**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz.":
@@ -1484,8 +1446,6 @@ const EN: Sozluk = {
     "The **combined** hours of classes sharing a room must also fit the week.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "These are **your own teachers**: if a name does not fit, the scale is too large.",
-  "Basılan sayfada saatler her üç durumda da yazar.":
-    "The printed sheet carries the clock times in all three cases.",
   "Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**.":
     "Another browser **cannot see** it, and “clear browsing data” **deletes** it.",
   "Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır.":
@@ -1524,8 +1484,6 @@ const EN: Sozluk = {
     "Tick the teaching days; the box beside each says where the **long break** falls.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Classes with no room are not checked this way.",
-  "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
-    "The **rest** of the screen: lists, panels, boxes. The timetable grid is untouched.",
   "Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.":
     "When the day starts, and how many minutes an hour and a break last. The bell times are worked out from these.",
   "Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**":
@@ -1556,8 +1514,6 @@ const EN: Sozluk = {
     "It sits in the store the browser keeps for this site.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** in total; the browser allows Mozaik about **5 MB**.",
-  "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
-    "Affects only the **Timetable** grid: cell size and how many days fit the screen.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "A new plan opens straight away and the **undo** history is cleared.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1706,8 +1662,6 @@ const EN: Sozluk = {
     "Close the whole week",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "If the colours do not print: in the print window, open **More settings** and tick **Background graphics**.",
-  "Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.":
-    "The whole week does not fit; More → Density → Fit shows every day.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Weekly lessons",

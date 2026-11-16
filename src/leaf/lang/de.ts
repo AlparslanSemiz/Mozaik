@@ -438,14 +438,7 @@ const DE: Sozluk = {
   // src/ui/settings/Appearance.tsx
   Tema: "Design",
   "Yazı büyüklüğü": "Schriftgröße",
-  Yoğunluk: "Dichte",
   Izgara: "Raster",
-  "Izgara yoğunluğu": "Rasterdichte",
-  Ferah: "Luftig",
-  Rahat: "Bequem",
-  Sığdır: "Einpassen",
-  "Arayüzün geri kalanı": "Der Rest der Oberfläche",
-  "Arayüz yoğunluğu": "Dichte der Oberfläche",
   "Kaydırınca gizlenir": "Beim Scrollen ausblenden",
   Örnek: "Beispiel",
   Saat: "Stunde",
@@ -1257,12 +1250,6 @@ const DE: Sozluk = {
   Görünüm: "Ansicht",
   Hakkında: "Über",
   "Planlar ve yedek": "Pläne und Sicherung",
-  "Hücre en büyük, dersin alt satırı tam boyda":
-    "Größte Zelle, untere Stundenzeile in voller Größe",
-  "Hücre geniş, başlangıç saatleri görünür":
-    "Breite Zelle, Anfangszeiten sichtbar",
-  "Programın tamamı ekrana sığar, başlangıç saatleri gizlenir":
-    "Der ganze Stundenplan passt auf den Bildschirm, Anfangszeiten werden ausgeblendet",
   Öğretmenden: "Von einer Lehrkraft",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Wählen Sie eine Lehrkraft und tragen Sie alle ihre Klassen nacheinander ein",
@@ -1389,10 +1376,6 @@ const DE: Sozluk = {
   // way every entry here is: `i18n.test.ts` can tell us a key is DEAD, never
   // that one is missing - an untranslated sentence falls back to correct
   // Turkish and says nothing (pitfall 87).
-  " {n} ders geçici kapsam dışında kaldı.":
-    " {n} {n:Stunde blieb|Stunden blieben} außerhalb.",
-  " · {n} ders geçici kapsam dışında": " · {n} {n:Stunde|Stunden} außerhalb",
-  "{gun} geçici olarak kapsam dışında": "{gun} ist vorübergehend außerhalb",
   Seçenek: "Variante",
   "Bu seçeneğin kopyası": "Kopie dieser Variante",
   "Boş seçenek": "Leere Variante",
@@ -1406,27 +1389,10 @@ const DE: Sozluk = {
   Kaydet: "Speichern",
   "Öğretmeni düzenle": "Lehrkraft bearbeiten",
   "Sınıfı düzenle": "Klasse bearbeiten",
-  "Toplu sabitle": "Mehrere anheften",
-  "Satırı sabitle / kaldır": "Zeile anheften / lösen",
-  "Sütunu sabitle / kaldır": "Spalte anheften / lösen",
-  "Günü sabitle / kaldır": "Tag anheften / lösen",
-  "Geçici görünüm": "Vorübergehend ausblenden",
-  "Geçici görünüm ({n})": "Ausgeblendet ({n})",
-  "Satırı soluklaştır": "Zeile abblenden",
-  "Satırı geri yükle": "Zeile zurückholen",
-  "Satırı gizle": "Zeile ausblenden",
-  "Günü soluklaştır": "Tag abblenden",
-  "Günü geri yükle": "Tag zurückholen",
-  "Günü gizle": "Tag ausblenden",
-  "Tümünü geri yükle": "Alle zurückholen",
-  soluk: "abgeblendet",
   gizli: "ausgeblendet",
   İşlemler: "Aktionen",
   "Tüm programı sabitle": "Ganzen Stundenplan anheften",
   "Tüm sabitlemeleri kaldır": "Alle Anheftungen lösen",
-  "{n} saat sabitlendi.": "{n} {n:Stunde|Stunden} angeheftet.",
-  "{n} saatin sabitlemesi kaldırıldı.":
-    "Anheftung von {n} {n:Stunde|Stunden} gelöst.",
   "{sinif} sınıfının {gun} {saat} saatindeki ders sabitlenmiş":
     "Die Stunde von {sinif} am {gun}, {saat}. Stunde, ist angeheftet",
   "{ust} {alt}: buraya sabitle": "{ust} {alt}: hier anheften",
@@ -1482,12 +1448,6 @@ const DE: Sozluk = {
     "**Hier aktualisiert sich Mozaik nie** und verbindet sich nirgends. Neueste Version:",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
     "**Alle Pläne** werden von selbst nach Dokumente geschrieben; die letzten {gun} Tage bleiben.",
-  "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
-    "**Weit.** Die größte Zelle: am besten lesbar, am meisten Scrollen.",
-  "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Bequem.** Breite Zellen mit Uhrzeiten; der Stundenplan passt nicht, also scrollen Sie.",
-  "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Passend.** Der ganze Stundenplan auf einem Bildschirm; der Preis: **Uhrzeiten entfallen**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
     "**Ihr Browser kann nicht in einen Ordner schreiben.** Chrome und Edge können es.",
   "**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz.":
@@ -1500,8 +1460,6 @@ const DE: Sozluk = {
     "Auch die **Gesamtstunden** von Klassen mit gemeinsamem Raum müssen in die Woche passen.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "Das sind **Ihre eigenen Lehrkräfte**: Passt ein Name nicht, ist die Größe zu groß.",
-  "Basılan sayfada saatler her üç durumda da yazar.":
-    "Auf dem gedruckten Blatt stehen die Uhrzeiten in allen drei Fällen.",
   "Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**.":
     "Ein anderer Browser **sieht** es nicht, und „Browserdaten löschen“ **löscht** es.",
   "Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır.":
@@ -1540,8 +1498,6 @@ const DE: Sozluk = {
     "Haken Sie die Unterrichtstage an; das Feld daneben nennt die **Mittagspause**.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Für Klassen ohne Raum entfällt diese Prüfung.",
-  "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
-    "Der **Rest** des Bildschirms: Listen, Panels, Felder. Das Raster bleibt unberührt.",
   "Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.":
     "Wann der Tag beginnt und wie viele Minuten eine Stunde und eine Pause dauern. Die Klingelzeiten werden daraus berechnet.",
   "Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**":
@@ -1572,8 +1528,6 @@ const DE: Sozluk = {
     "Es liegt in dem Speicher, den der Browser für diese Seite hält.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "Insgesamt **{yer}**; der Browser gibt Mozaik etwa **5 MB**.",
-  "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
-    "Betrifft nur das Raster in **Stundenplan**: Zellengröße und sichtbare Tage.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "Ein neuer Plan wird sofort geöffnet und der **Rückgängig**-Verlauf geleert.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1722,8 +1676,6 @@ const DE: Sozluk = {
     "Ganze Woche sperren",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "Wenn die Farben nicht gedruckt werden: Öffnen Sie im Druckfenster **Weitere Einstellungen** und aktivieren Sie **Hintergrundgrafiken**.",
-  "Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.":
-    "Die ganze Woche passt nicht; Mehr → Dichte → Einpassen zeigt alle Tage.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Wochenstunden",

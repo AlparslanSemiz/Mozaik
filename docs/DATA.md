@@ -152,9 +152,8 @@ geçmişi de silmez (2026-11-15'e kadar üçü de geçmişi temizliyordu): geçm
 tuttuğu için geri almak bir hamleyi başka bir alternatife uygulamaz, o alternatifi
 değişikliğiyle birlikte geri getirir.
 
-Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler, `programMask.ts`)
-plan başına ve yalnız bellekte tutulur. Yedeğe ve depoya yazılmıyor, aynı planın
-alternatifleri arasında ortak.
+Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler) 2026-11-16'da kalktı
+(Sadeleşme K7). Yalnız bellekte tutulduğu için hiçbir dosyada ya da depoda izi yok.
 
 ## Değişmeyen kimlikler
 
@@ -185,9 +184,9 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-dil` | arayüz dili |
 | `ders-programi-kenar` | kenar çubuğu tercihi, ray kalktığı için tarihsel |
 | `ders-programi-olcek` | yazı büyüklüğü (`--ui-scale`) |
-| `ders-programi-yogunluk` | ızgara yoğunluğu (`ferah`, `rahat`, `sigdir`) |
+| `ders-programi-yogunluk` | ızgara yoğunluğu, 2026-11-16'dan beri okunmuyor (K6); eski bir kopyanın yazdığı değer yerinde kalır ve tabloda görünür |
 | `ders-programi-program-rengi` | Program kartlarını boyayan varlık |
-| `ders-programi-arayuz-yogunluk` | arayüzün geri kalanının yoğunluğu |
+| `ders-programi-arayuz-yogunluk` | arayüzün yoğunluğu, aynı sebeple tarihsel |
 | `ders-programi-havuz` | havuz çekmecesi açık mı |
 | `ders-programi-havuz-boy` | havuz çekmecesinin boyu, rem |
 | `ders-programi-serit` | araç şeridi açık mı |
@@ -444,7 +443,6 @@ ekler.
 - **Takas.** Izgarada duran bir kart, altında tek bir hedef blok bulunan bir hücreye bırakılıyorsa ve iki hamle de yasalsa (`swapBlocks`), iki kart yer değiştirir. Hedef birden çok bloksa takas ancak o bloklar bırakılan saatleri tam dolduruyorsa (aynı gün, boşluksuz, üst üste binmeden, toplam boy aynı) ve hepsi aynı sırayla kartın eski saatlerine yasal olarak geçebiliyorsa teklif edilir: iki saatlik bir blok, öğretmenin başka sınıftaki iki tek saatiyle yer değiştirebilir (TODO B5.7). Sınıfın kendi dersi ile öğretmenin başka sınıftaki dersi aynı saatteyse bu bir takas değil, hücre reddedilir. Takas denenip reddedildiyse ve hücrenin engeli takas ortağının kendisiyse (öğretmen o saatte o sınıfta), cümle ortağı değil takasın hangi yarısının neden olmadığını söyler: "Takas olmaz, 431 · MÇ eski yerine geçemiyor: E dersliğinde Çarşamba 4 saatinde 430 var".
 - **Havuza döndürme.** Takas yoksa tek bir ret geçersiz kılınabilir: hücrede sınıfın kendi başka dersi varsa o ders havuza döner. Öteki retler başkasıyla ilgili (öğretmen başka sınıfta, derslik dolu, saat kapalı) ve önündeki bloğu havuza atmak onların hiçbirini doğru yapmaz. Oradaki blok sabitlenmişse hücre reddedilir ve sebep cümlesi sabitlemeyi söyler. Havuza döndürdükten sonra da reddedilen bir hücrenin cümlesi o asıl sebep olur, "sınıf dolu" değil. İzin verilen hücre yeşil değil sarı, çünkü izin var ama bir şey kaybediliyor. Bütün hamle tek geri al adımı ve kaybedilen ders bildirimde adıyla yazılır.
 
-Geçici görünümle kapsam dışına alınmış bir güne bırakılamaz.
 
 ### Sabitleme
 

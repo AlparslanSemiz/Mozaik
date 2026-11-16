@@ -3,7 +3,6 @@
 // shapes of a suggestion, a progress report and a result.
 
 import type { Id, Refusal, Relaxation } from '../../leaf/model';
-import type { SolverExclusions } from '../program';
 
 /**
  * One way of changing the data, and what it calls cheap. The first three open
@@ -82,7 +81,6 @@ export interface Suggestion {
 export interface RelaxOptions {
   /** The same as the stuck run's: what it kept is kept here too. */
   keepPlaced: boolean;
-  exclusions: SolverExclusions;
   /**
    * A cap on the whole search, in time. The search itself stops by conflict
    * counts; this is for a machine so slow that those would take too long. Past
@@ -141,7 +139,6 @@ const SEARCH_ORDER: RelaxFamily[] = [
 
 export const DEFAULTS: RelaxOptions = {
   keepPlaced: true,
-  exclusions: { teacherIds: [], classIds: [], dayNames: [] },
   budgetMs: 120_000,
   families: SEARCH_ORDER,
   refused: [],

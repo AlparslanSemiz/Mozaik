@@ -48,7 +48,6 @@ import Topbar from './Topbar';
 import Notices from './Notices';
 import { useMachinePrefs } from './useMachinePrefs';
 import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
-import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
@@ -109,12 +108,8 @@ export default function App() {
     setTheme,
     scale,
     setScale,
-    density,
-    setDensity,
     programColor,
     setProgramColor,
-    uiDensity,
-    setUiDensity,
     availClock,
     setAvailClock,
     motion,
@@ -169,7 +164,6 @@ export default function App() {
   // lists — Print unmounts on every tab change — but unlike them it is
   // remembered between sessions: it is set once a term, not once a printout.
   const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
-  const { programMask, setProgramMask } = useProgramMask(plans.planId, state);
 
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
@@ -294,7 +288,6 @@ export default function App() {
     goTo,
     notify,
     t,
-    programMask,
     openShortcuts,
     openFile: () => fileInput.current?.click(),
     copyForNewTerm,
@@ -450,10 +443,6 @@ export default function App() {
                 manageProgram={manageProgram}
                 viewProgram={viewProgram}
                 solver={solver}
-                programMask={programMask}
-                setProgramMask={setProgramMask}
-                density={density}
-                setDensity={setDensity}
                 availClock={availClock}
                 setAvailClock={setAvailClock}
                 theme={theme}
@@ -552,8 +541,6 @@ export default function App() {
                         change={change}
                         solver={solver}
                         view={ui.view}
-                        mask={programMask}
-                        setMask={setProgramMask}
                         poolSort={ui.poolSort}
                         setPoolSort={ui.setPoolSort}
                         poolFilter={ui.poolFilter}
@@ -586,10 +573,6 @@ export default function App() {
                         update={update}
                         scale={scale}
                         setScale={setScale}
-                        density={density}
-                        setDensity={setDensity}
-                        uiDensity={uiDensity}
-                        setUiDensity={setUiDensity}
                         ribbonAuto={ribbonAuto}
                         setRibbonAuto={setRibbonAuto}
                         ribbon={ribbon}

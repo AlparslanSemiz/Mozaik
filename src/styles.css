@@ -2283,25 +2283,6 @@ table.grid thead tr:nth-child(2) th {
   line-height: var(--lh-tight);
 }
 
-/* The bell time under the lesson number. A reminder, the lesson number is what
-   the eye navigates by — but a reminder still has to be READ.
-
-   It was 12px with nothing between one heading and the next, and since the
-   clock is what sets the column's min-content (pitfall 37), "09:00" filled its
-   column wall to wall: the row read "09:0009:5010:40", 1px apart. Measured
-   2026-11-15 on the sample school at 1920, 1536 (%125) and 960 (%200): the
-   smallest gap between two clocks was 1.0px at every one. Now one step up the
-   ladder and with its own air on both sides, so the gap is the padding twice
-   plus the rule whatever the scale (4.25px, against 1.0). The padding is on
-   the clock and not the `th`: the hour number above it is narrower and needs
-   none. It costs width, and that is said out loud: the clock IS the column's
-   floor, so Rahat's week went from 2516px to 2946px at 1920. Rahat
-   already scrolled sideways; Sığdır, which hides the clock, is unchanged. */
-table.grid .hour-clock {
-  padding-inline: var(--space-1);
-  font-size: var(--fs-sm);
-}
-
 /* And the hairline between two bell times steps up to --line, so the gap has
    a rule in it the eye can find. Only on the hour row: down the body the
    hourly rhythm stays on the hairline (see `table.grid th, td`). */
@@ -2317,61 +2298,17 @@ table.grid thead tr:nth-child(2) th {
   color: var(--muted);
 }
 
-/* --------------------------------------------------- "Ferah": the third step
-   The reader has trouble seeing, and the two densities the grid had were
-   "the grid" and "smaller than the grid". This one goes the other way: a
-   taller, wider cell and the card's second line at full size.
+/* ------------------------------------------- THE GRID FITS THE BOX ITSELF
+   Since 2026-11-16 (Sadeleşme K6) this is the grid's only layout: what was
+   the "Sığdır" density, the whole week in the box. "Ferah" and "Rahat", and
+   the switch between them, are gone; the size of the type is Ayarlar →
+   Görünüm → Yazı büyüklüğü.
 
-   It is NOT a second zoom axis — --ui-scale still moves the whole screen, and
-   this moves the CELL inside it. The trade it offers is honest and visible:
-   fewer days on screen at once, in exchange for a card you can read without
-   leaning in. Horizontal scrolling was already how the week is read at
-   "rahat"; here there is simply more of it. */
-:root[data-density='ferah'] {
-  /* 3.5rem since 2026-11-15: the bell time at 13px with its own air made
-     Rahat's column 42px wide, and at 2.875rem (37px) Ferah was no wider than
-     Rahat any more — the step existed and did nothing. */
-  --cell-w: 3.5rem;
-  --cell-h: 2.75rem;
-}
-
-:root[data-density='ferah'] .card-bottom {
-  font-size: var(--fs-sm);
-  opacity: 1;
-}
-
-/* ------------------------------------------------- "Sığdır": semantic zoom
-   A5. The whole week in the box instead of 2616px of table against 1828px.
-
-   It drops exactly ONE thing, and which thing was MEASURED, not chosen:
-   `--cell-w` was set to 28, 23 and 18px in turn and the cell came out 33.69px
-   every time, because "10:40" in the heading — not the card — was setting the
-   column's min-content. Hiding the card's second line changed nothing;
-   hiding the clock took the table from 2461px to 1728px. Pitfall 37.
-
-   The lesson NUMBER stays: it is what the eye navigates by, and the times are
-   a click away in Ayarlar → Zil ve günler and printed on every sheet.
-
-   SCOPED TO `table.grid`, and the scope is the whole point rather than tidying.
-   Unscoped it also hit Müsaitlik's heading, where the reader has a BUTTON for
-   this ("Göster → Saatler") — so at Sığdır that button flipped `aria-pressed`,
-   wrote `data-avail-clock='acik'`, and nothing on the table moved. Measured
-   before it was written, all three densities, both states:
-
-     rahat  / acik   display: block, visibility: visible   table 1514.8x332
-     sigdir / acik   display: NONE,  visibility: visible   table 1514.8x329.9
-     ferah  / acik   display: block, visibility: visible   table 1514.8x332
-
-   Which also cost the availability rule below the invariant it was written
-   for: `visibility: hidden` reserves the second line box so the two states are
-   the same height BY CONSTRUCTION (pitfall 102), and `display: none` from here
-   took 2.1px of it back. The measurement above is what this rule is FOR — the
-   grid's 2461px -> 1728px (pitfall 37) — and it was never a claim about any
-   other table. The comment on the availability rule already said "the grid's
-   own"; the selector did not (pitfall 77, in CSS). */
-:root[data-density='sigdir'] table.grid .hour-clock {
-  display: none;
-}
+   It drops exactly ONE thing, and which thing was MEASURED, not chosen: the
+   bell time under the hour number ("10:40" set the column's min-content, and
+   hiding it took the table from 2461px to 1728px, pitfall 37). The grid no
+   longer draws it at all; the heading's `title` and every printed sheet still
+   say it. Müsaitlik's heading keeps its own clock and its own button. */
 
 /* And the card's TOP line steps down one notch — measured, the way the clock
    was, and only after the clock stopped being the floor.
@@ -2413,8 +2350,8 @@ table.grid thead tr:nth-child(2) th {
    --lh-tight, every row went 38.5px -> 35px. Measured at 1536 with DPR 1.25
    on the sample school: 315/374 clipped -> 0, counted the way the ellipsis
    itself decides (pitfall 140). */
-:root[data-density='sigdir'] .card-top,
-:root[data-density='sigdir'] .card-bottom {
+:root .card-top,
+:root .card-bottom {
   --fit-base: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
   font-size: calc(var(--fit-base) * var(--fit, 1));
   line-height: calc(var(--fit-base) * var(--lh-base));
@@ -2427,7 +2364,7 @@ table.grid thead tr:nth-child(2) th {
 
 /* The two-hour card's top line keeps its one step up (`td.block-wide`, which
    outranks the rule above), and shrinks from THAT size. */
-:root[data-density='sigdir'] table.grid tbody td.block-wide .card-top {
+:root table.grid tbody td.block-wide .card-top {
   --fit-base: var(--fs-sm);
   font-size: calc(var(--fit-base) * var(--fit, 1));
   line-height: calc(var(--fit-base) * var(--lh-base));
@@ -2436,7 +2373,7 @@ table.grid thead tr:nth-child(2) th {
 /* The row head's second line gives way the same way: the father's class rows
    read "derslik yok" (59px of text in 57px) and his teachers "Mat1 · Mat2",
    and all twenty class heads were clipped at 1920. */
-:root[data-density='sigdir'] table.grid .row-head .secondary {
+:root table.grid .row-head .secondary {
   --fit-base: var(--fs-xs);
   font-size: calc(var(--fit-base) * var(--fit, 1));
   line-height: calc(var(--fit-base) * var(--lh-tight));
@@ -2446,7 +2383,7 @@ table.grid thead tr:nth-child(2) th {
    card and on the class row's head (62px of name in a 57px head). The rest is
    in the markup (Grid.tsx), read by the labels and drawn in the other two
    densities. The user's choice over a short-name field (2026-09-26). */
-:root[data-density='sigdir'] table.grid .name-rest {
+:root table.grid .name-rest {
   display: none;
 }
 
@@ -2456,7 +2393,7 @@ table.grid thead tr:nth-child(2) th {
    came back 79px short of fitting. The clock was INFORMATION and its loss is
    this mode's whole subject; this is a pixel of margin, and losing it costs the
    reader nothing. */
-:root[data-density='sigdir'] table.grid tbody td {
+:root table.grid tbody td {
   padding: 0;
 }
 
@@ -2509,7 +2446,7 @@ table.grid thead tr:nth-child(2) th {
    The --space-4 term reserves border-rounding slack. Even with the explicit
    colgroup Chromium can round the table border one device pixel beyond the
    container at 1366px/%125, hence the final 1px subtraction on table width. */
-:root[data-density='sigdir'] table.grid {
+:root table.grid {
   --rowhead-w: 5rem;
   --break-w: .1875rem;
   --cell-w: max(
@@ -2530,7 +2467,7 @@ table.grid thead tr:nth-child(2) th {
    hinting rounds "410A" at 9px down to 21px, which is why only Windows showed
    it (B7.22, pitfall 146). The other columns pay for it: 7 x 3px over 84 of
    them, 0.25px each. */
-:root[data-density='sigdir'] table.grid col.grid-hour-col.day-first-col {
+:root table.grid col.grid-hour-col.day-first-col {
   width: calc(var(--cell-w) + var(--day-rule-w));
 }
 
@@ -2538,8 +2475,8 @@ table.grid thead tr:nth-child(2) th {
    broke "MÇ / Mat" onto a third line and the row went 38.5px -> 50.6px, so a
    width fix bought itself a vertical regression — measured, and the whole
    point of this round was that the vertical stays untouched. */
-:root[data-density='sigdir'] table.grid tbody th,
-:root[data-density='sigdir'] table.grid tbody th * {
+:root table.grid tbody th,
+:root table.grid tbody th * {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2555,7 +2492,7 @@ table.grid thead tr:nth-child(2) th {
    heads were 2px over at %80 and ellipsised to "G dersliğ…" — a regression
    this round introduced and the teacher view could never have shown, because
    its second line is a three-letter subject short. */
-:root[data-density='sigdir'] table.grid .row-head {
+:root table.grid .row-head {
   padding-inline: 3px !important;
 }
 
@@ -2564,24 +2501,24 @@ table.grid thead tr:nth-child(2) th {
    not as an abbreviation. It steps down one notch instead, the same move the
    card text makes above and for the same reason: this is the one label in the
    grid that is read once and then never again. */
-:root[data-density='sigdir'] table.grid .corner {
+:root table.grid .corner {
   font-size: var(--fs-2xs);
   letter-spacing: 0;
 }
 
-:root[data-density='sigdir'] table.grid col.grid-row-col {
+:root table.grid col.grid-row-col {
   width: var(--rowhead-w);
 }
 
-:root[data-density='sigdir'] table.grid col.grid-break-col {
+:root table.grid col.grid-break-col {
   width: var(--break-w);
 }
 
-:root[data-density='sigdir'] table.grid col.grid-hour-col {
+:root table.grid col.grid-hour-col {
   width: var(--cell-w);
 }
 
-:root[data-density='sigdir'] table.grid thead tr:nth-child(2) th:not(.break-col) {
+:root table.grid thead tr:nth-child(2) th:not(.break-col) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2589,81 +2526,6 @@ table.grid thead tr:nth-child(2) th {
 }
 
 
-/* ------------------------------- The INTERFACE's density, its own axis
-   "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
-   yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
-
-   The switch existed and moved one table. What the reader wants from it is the
-   thing it was never wired to: twenty-five teachers, twenty classes and
-   ninety-nine lessons on screen without scrolling down.
-
-   `data-ui-density` and NOT `data-density` since 2026-08-27, asked for by name:
-   "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
-   farklı olsun." One attribute drove both, and they are not one decision — the
-   grid's step trades days on screen against cell size and hides the bell times
-   at the tight end; this one trades rows in a list against how far apart the
-   controls sit. Wanting the whole week in the box says nothing about wanting a
-   cramped Ayarlar.
-
-   Only the BLOCK padding is touched, never the inline. `th.grip-col` and
-   `td.row-no` set their own left and right to reclaim table width (see
-   pitfall 34), and those rules carry the same specificity as these — a
-   `padding` shorthand here would silently win by coming later in the file and
-   hand the handle column its padding back.
-
-   The 12px floor on screen text is NOT crossed: nothing here changes a font
-   size. What comes out is air, and air is the right thing to spend. */
-:root[data-ui-density='ferah'] table.list th,
-:root[data-ui-density='ferah'] table.list td,
-:root[data-ui-density='ferah'] table.stat th,
-:root[data-ui-density='ferah'] table.stat td {
-  padding-block: 9px;
-}
-
-:root[data-ui-density='sigdir'] table.list th,
-:root[data-ui-density='sigdir'] table.list td,
-:root[data-ui-density='sigdir'] table.stat th,
-:root[data-ui-density='sigdir'] table.stat td {
-  padding-block: 1px;
-}
-
-/* The row's real floor is the CONTROL in it, not the cell around it: a text box
-   at .25rem top and bottom is taller than a 1px cell. Measured on the teacher
-   list, and it is why trimming the cell alone bought almost nothing. */
-:root[data-ui-density='sigdir'] .main input,
-:root[data-ui-density='sigdir'] .main select,
-:root[data-ui-density='sigdir'] .main textarea,
-:root[data-ui-density='sigdir'] .main .btn {
-  padding-block: var(--space-1);
-  /* The leading, not the SIZE. A control's height is its line box plus its
-     padding, and once the padding is at 2px the line box is what is left —
-     --lh-base to --lh-tight is the last thing that can come out of a row
-     without making a letter smaller, and 12px on screen is a floor this
-     program does not cross. */
-  line-height: var(--lh-tight);
-}
-
-:root[data-ui-density='ferah'] .main input,
-:root[data-ui-density='ferah'] .main select,
-:root[data-ui-density='ferah'] .main textarea {
-  padding-block: var(--space-3);
-}
-
-/* The sheet the list sits on, and the strip above it. A panel at --space-6 top
-   and bottom is 48px of margin around a table whose whole complaint is that it
-   does not fit. */
-:root[data-ui-density='sigdir'] .main .panel {
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-:root[data-ui-density='sigdir'] .main .list-tools {
-  gap: var(--space-2);
-}
-
-:root[data-ui-density='ferah'] .main .panel {
-  padding: var(--space-7);
-}
 /* A thick separator between days — so the eye can navigate 84 columns.
    Asked to be clearer (2026-08-26, "günlerin arasındaki boşluk veya fark biraz
    daha belli olmalı") and it got its OWN token rather than a bigger number on
@@ -2989,16 +2851,6 @@ table.grid tbody td:hover > .card-pin,
   margin-left: auto;
   font-size: var(--fs-xs);
   color: var(--muted);
-}
-
-/* A heading INSIDE a menu: what the items under it are about. Quieter than an
-   item and not clickable, so the eye skips it on the way down. */
-.menu-label {
-  padding: var(--space-2) var(--space-3) var(--space-1);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--muted);
-  user-select: none;
 }
 
 .menu-sep {
@@ -4555,21 +4407,6 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
 
 .add-panel-body > .form-row:last-child {
   margin-bottom: 0;
-}
-
-/* Session-only program masks keep their meaning without relying on colour.
-   Opacity says "still here, temporarily inactive"; disabled controls remove
-   the interaction path, and the context menu on the header remains the way
-   back. */
-.grid .masked-scope,
-.pool-card.masked-scope {
-  opacity: 0.42;
-}
-
-.grid .card:disabled,
-.pool-card.masked-scope {
-  cursor: not-allowed;
-  filter: grayscale(0.45);
 }
 
 /* The name of the timetable you are in, riding the button that opens the
