@@ -204,9 +204,9 @@ export default function Print({
       <>
         <div className="empty-screen">
           {/* The screen's heading, for a reader who moves by headings. */}
-          <h2 className="visually-hidden">{t('Çıktı')}</h2>
+          <h2 className="visually-hidden">{t('Yazdır ve gönder')}</h2>
           <strong>{t('Yazdırılacak program yok.')}</strong>
-          <T k="Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin." />
+          <T k="Önce dersleri girip **Program** sekmesinde programı yapın." />
           <NextStep state={state} />
         </div>
       </>
@@ -322,7 +322,7 @@ export default function Print({
           {/* No "Arka plan grafikleri" advice any more: `print-color-adjust:
               exact` prints the colours with that box off too (measured in
               Chromium, 2026-11-16, e2e/yazdir.spec.ts). */}
-          <h2>{t('Çıktı')}</h2>
+          <h2>{t('Yazdır')}</h2>
           {/* "Ne basılsın" moved to the tool strip and "Renkli bas" to its
               Daha fazla; the
               button stayed, because the page COUNT comes from the tick lists

@@ -48,7 +48,7 @@ export function useLoadSample(): LoadSample {
                 { kayip: cost },
               )
             : t(
-                `25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.`,
+                `25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Okul bilgileri → Hakkında → "Her şeyi sil" ile temizleyin.`,
               ),
           confirmLabel: holds ? t('Yerine koy') : t('Yükle'),
           danger: holds,

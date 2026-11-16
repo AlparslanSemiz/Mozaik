@@ -1,38 +1,63 @@
 // WHERE YOU ARE in each tab — one object, owned by App.
 //
 // These values used to live inside the tab components, and switching tabs
-// unmounted them: a glance at Kontrol lost the class view in Program, the
-// teacher you were editing in Müsaitlik, and which list of Kurulum you were
-// filling in. That is exactly
-// the trap that put `printExcluded` and the solver run in App (pitfall 18); the
-// only reason it went unnoticed here is that losing a POSITION is quieter than
-// losing a search.
+// unmounted them: a glance at another tab lost the class view in Program and
+// which list you were filling in. That is exactly the trap that put
+// `printExcluded` and the solver run in App (pitfall 18); the only reason it
+// went unnoticed here is that losing a POSITION is quieter than losing a
+// search.
 //
 // They have to be up here anyway now: the tool strip that shows them is drawn
 // above `<main>`, above the component that used to own them.
 //
-// What is NOT here, and must not move here:
-// Dersler's `lessonMode` / `lessonFocus` belong here for the same reason and
-// go NO FURTHER: they are a position inside a session, not a preference. "Which
-// class am I entering lessons for" is not something a backup should carry to
-// another machine, and it is not worth a schema version.
+// None of it is stored, the open tab included: a start lands on Program when
+// the plan has lessons and on Okul bilgileri when it has none. So the five
+// tabs of 2026-11-16 (Sadeleşme, K1) had no saved tab id to carry over; the
+// seven ids before them live on only as `OLD_TAB`, for anything that still
+// says one.
 //
-//   - Availability's `pending` paint set  — changes dozens of times per second
+// `lessonFocus` belongs here and goes NO FURTHER: it is a position inside a
+// session, not a preference. "Which class am I entering lessons for" is not
+// something a backup should carry to another machine.
+//
+// What is NOT here, and must not move here:
+//   - AvailGrid's `pending` paint set     — changes dozens of times per second
 //     while the pointer is down.
 //   - Program's `dragging` / `reason`     — the whole drag.ts performance
 //     contract rests on those staying out of App's render.
 // Both are transient gestures, not positions.
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Id, PoolSort, View } from '../../leaf/model';
 
-export type Tab = 'setup' | 'availability' | 'lessons' | 'program' | 'check' | 'print' | 'settings';
+/**
+ * The five tasks (Sadeleşme, K1, 2026-11-16), in the order they are drawn.
+ * Before them there were seven places: Okul, Müsaitlik, Dersler, Program,
+ * Kontrol, Çıktı and Ayarlar.
+ */
+export type Tab = 'program' | 'teachers' | 'classes' | 'print' | 'school';
+/** The tab ids before K1 that are not one of the five. */
+export type OldTab = 'setup' | 'availability' | 'lessons' | 'check' | 'settings';
+/** Where each old tab's contents live now (LAYOUT, "Sekmeler"). */
+export const OLD_TAB: Record<OldTab, Tab> = {
+  setup: 'teachers',
+  availability: 'teachers',
+  lessons: 'classes',
+  // The problems are the status chip's list, opened over Program.
+  check: 'program',
+  settings: 'school',
+};
+/** Any tab id, old or new, as one of the five. */
+export function tabOf(id: Tab | OldTab): Tab {
+  return id in OLD_TAB ? OLD_TAB[id as OldTab] : (id as Tab);
+}
 /** Program: which axis the grid rows are. Defined in types.ts, see there. */
 export type { View };
-/** Müsaitlik: whose closed hours are being edited. */
+/** The three kinds a person page is opened for. */
 export type Kind = 'teacher' | 'class' | 'room';
 /**
- * Okul: which of the four lists. Lessons left for a tab of their own.
+ * The four lists. Öğretmenler and Sınıflar are tabs of their own; Derslikler
+ * and Branşlar are sections of Okul bilgileri.
  *
  * The order is the dependency chain, not a wizard: a class points at a room,
  * and a teacher picks a subject off the list, so both of those have to exist
@@ -40,28 +65,27 @@ export type Kind = 'teacher' | 'class' | 'room';
  */
 export type StepId = 'rooms' | 'subjects' | 'teachers' | 'classes';
 /**
- * Dersler: which way round the entry runs.
+ * Öğretmenler and Sınıflar: the list, one person's lessons, or every lesson.
  *
  * "artık sınıftan mı eklemek istiyorsun? öğretmenden mi eklemek istiyorsun
  * genel bakmak mı istiyorsun". A lesson is the one row in this program that
- * belongs to two other lists, so there are two honest ways to walk it and one
- * way to read all of it.
+ * belongs to two other lists, so it is entered from either of them, and the
+ * general list is one door away in both.
  */
+export type PeopleView = 'list' | 'lessons' | 'all';
+/** The lesson form's axis: which list the open tab is, or every lesson. */
 export type LessonMode = 'class' | 'teacher' | 'all';
-/** Ayarlar: which section. */
-export type SectionId = 'school' | 'rules' | 'appearance' | 'plans' | 'about';
+/** Okul bilgileri: which section. */
+export type SectionId =
+  'school' | 'rooms' | 'subjects' | 'rules' | 'appearance' | 'plans' | 'about';
 /** Yazdır: which pages the preview builds. */
 export type Scope = 'classes' | 'teachers' | 'both';
 
 /**
- * WHICH PART of the Kontrol report is on screen.
+ * WHICH PART of the problem list is on screen.
  *
  * A position and not a preference, so it is not stored anywhere — the same
- * contract as `step` and `section`. It replaced four buttons that called
- * `scrollIntoView`: three of them aimed into the sticky right rail, which is
- * pinned to the top of the scrollport and therefore never moved, so pressing
- * them did nothing at all and nothing said so ("alt sekmede bir şeyler
- * seçiyoruz ama değişmiyor").
+ * contract as `section`.
  */
 export type CheckView = 'problems' | 'advisor' | 'teachers' | 'classes' | 'rooms';
 
@@ -72,15 +96,9 @@ export interface ToolState {
   setTab: (next: Tab) => void;
   view: View;
   setView: (next: View) => void;
-  kind: Kind;
-  setKind: (next: Kind) => void;
-  /** Which teacher/class/room is open in Müsaitlik. '' = the first one. */
-  chosen: Id;
-  setChosen: (next: Id) => void;
-  step: StepId;
-  setStep: (next: StepId) => void;
-  lessonMode: LessonMode;
-  setLessonMode: (next: LessonMode) => void;
+  /** Öğretmenler's and Sınıflar's own view, each remembered apart. */
+  people: Record<'teachers' | 'classes', PeopleView>;
+  setPeople: (tab: 'teachers' | 'classes', next: PeopleView) => void;
   /** Which class/teacher the lesson form is filling in. '' = the first one. */
   lessonFocus: Id;
   setLessonFocus: (next: Id) => void;
@@ -90,16 +108,6 @@ export interface ToolState {
   setScope: (next: Scope) => void;
   checkView: CheckView;
   setCheckView: (next: CheckView) => void;
-  /**
-   * Is the "haftanın darlığı" heat table on screen.
-   *
-   * A POSITION, so it lives here and not in `theme.ts`: it says what is being
-   * looked at right now, not how this machine likes its screen. That also
-   * means no new `localStorage` key, and so no new row owed to the "Veriler
-   * nerede" table (docs/ARCHITECTURE.md prefers exactly this trade).
-   */
-  showHeat: boolean;
-  setShowHeat: (next: boolean) => void;
   colored: boolean;
   setColored: (next: boolean) => void;
   poolSort: PoolSort;
@@ -107,6 +115,12 @@ export interface ToolState {
   /** Subject key the tray is narrowed to. '' = all of them. */
   poolFilter: string;
   setPoolFilter: (next: string) => void;
+}
+
+/** The lesson form's axis in a people tab. */
+export function lessonModeOf(tab: 'teachers' | 'classes', people: ToolState['people']): LessonMode {
+  if (people[tab] === 'all') return 'all';
+  return tab === 'teachers' ? 'teacher' : 'class';
 }
 
 /**
@@ -117,41 +131,33 @@ export interface ToolState {
 export function useToolState(firstTab: Tab): ToolState {
   const [tab, setTab] = useState<Tab>(firstTab);
   const [view, setView] = useState<View>('teacher');
-  const [kind, setKind] = useState<Kind>('teacher');
-  const [chosen, setChosen] = useState<Id>('');
-  const [step, setStep] = useState<StepId>('rooms');
-  // 'class' and not 'all': the reader asked for this tab because entering a
-  // single class's lessons was the slow part, and the general list is the one
-  // of the three that was already there.
-  const [lessonMode, setLessonMode] = useState<LessonMode>('class');
+  const [people, setPeopleRaw] = useState<ToolState['people']>({
+    teachers: 'list',
+    classes: 'list',
+  });
   const [lessonFocus, setLessonFocus] = useState<Id>('');
   const [section, setSection] = useState<SectionId>('school');
   const [scope, setScope] = useState<Scope>('classes');
   const [colored, setColored] = useState(true);
   // 'problems' is where a reader arrives with a question, and it is also the
-  // only part of the report that can be empty — an empty problems view is the
+  // only part of the list that can be empty — an empty problems view is the
   // answer "there are none", which is worth landing on.
   const [checkView, setCheckView] = useState<CheckView>('problems');
-  // Open, because it is the half of this screen nobody would think to ask for:
-  // twenty-five teachers all off on Tuesday afternoon is why the solver gets
-  // stuck, and it is invisible one person at a time.
-  const [showHeat, setShowHeat] = useState(true);
   const [poolSort, setPoolSort] = useState<PoolSort>('row');
   const [poolFilter, setPoolFilter] = useState('');
+  const setPeople = useCallback(
+    (which: 'teachers' | 'classes', next: PeopleView) =>
+      setPeopleRaw((was) => (was[which] === next ? was : { ...was, [which]: next })),
+    [],
+  );
 
   return {
     tab,
     setTab,
     view,
     setView,
-    kind,
-    setKind,
-    chosen,
-    setChosen,
-    step,
-    setStep,
-    lessonMode,
-    setLessonMode,
+    people,
+    setPeople,
     lessonFocus,
     setLessonFocus,
     section,
@@ -160,8 +166,6 @@ export function useToolState(firstTab: Tab): ToolState {
     setScope,
     checkView,
     setCheckView,
-    showHeat,
-    setShowHeat,
     colored,
     setColored,
     poolSort,

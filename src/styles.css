@@ -844,13 +844,11 @@ textarea {
 /* Which section's colour this chrome is drawing. One custom property resolved
    from the attribute App writes, so nothing downstream has to know the tab
    names and no colour is ever written in the JSX. */
-[data-section="setup"] { --sec: var(--sec-setup); }
-[data-section="availability"] { --sec: var(--sec-availability); }
-[data-section="lessons"] { --sec: var(--sec-lessons); }
+[data-section="teachers"] { --sec: var(--sec-setup); }
+[data-section="classes"] { --sec: var(--sec-lessons); }
 [data-section="program"] { --sec: var(--sec-program); }
-[data-section="check"] { --sec: var(--sec-check); }
 [data-section="print"] { --sec: var(--sec-print); }
-[data-section="settings"] { --sec: var(--sec-settings); }
+[data-section="school"] { --sec: var(--sec-settings); }
 
 .topbar {
   display: flex;
@@ -1024,7 +1022,7 @@ textarea {
 
 
 .tabstrip {
-  /* SEVEN EQUAL COLUMNS, not seven content-width buttons. Same request and the
+  /* EQUAL COLUMNS, not content-width buttons (five since K1). Same request and the
      same mechanism as `.ribbon-group`: `1fr` in a grid sized by its own content
      is the widest tab's max-content, so "Yazdır" and "Müsaitlik" occupy the
      same box and the strip reads as a row of seven rather than a row of seven
@@ -6934,40 +6932,6 @@ input.search-box:focus-visible {
   max-width: 100%;
 }
 
-/* The clock under each lesson number on the MÜSAİTLİK grid. Off by default
-   (the reader asked for that), and the reason it is worth a switch at all is
-   the same one pitfall 37 measured on the Program grid: the clock is the
-   widest thing in the heading, so it sets the column's floor — and this is a
-   screen you PAINT by dragging across, where a narrower column is a shorter
-   drag. Whoever wants the times has them in Ayarlar → Zil ve günler and on paper. */
-/* HIDDEN, NOT REMOVED — and the difference is the claim the setting makes.
-
-   Turning the clock off is about NOISE, not about room: the reader said he did
-   not want to look at the times, not that he wanted the table shorter. A table
-   that changes height would make that a lie, and `gorunum.spec.ts` 50 measures
-   exactly that.
-
-   `display: none` held only by luck. The heading's height came from the shared
-   cell rule at 2.125rem, which at a 14px root is 29.75px against two 14.4px
-   line boxes — near enough to round equal. The root went to 13px on 2026-08-30
-   and the type did not follow it (re-pinned; 12px is the floor), so the margin
-   went negative and the table grew 2.16px the moment the clock came on.
-
-   Reserving the line costs no arithmetic and cannot drift: the second line box
-   is there in both states, so the two heights are the same BY CONSTRUCTION
-   rather than by a number somebody has to re-derive whenever the root moves
-   (pitfall 36). `toBeHidden()` and `innerText` both still say it is gone.
-
-   The grid draws no `.hour-clock` at all since 2026-11-16 (K6), and that is
-   the opposite case on purpose: there the whole measured point IS the room the
-   line gives back (2461 -> 1728px, pitfall 37). Its old rule was once unscoped
-   and took this heading's second line box too, so the reader's "Saatler"
-   button had nothing left to switch; `gorunum.spec.ts` 50 still measures this
-   heading against the grid. */
-:root:not([data-avail-clock='acik']) table.availability:not(.with-clock) thead .hour-clock {
-  visibility: hidden;
-}
-
 /* The same reserved line for a column whose days disagree about the clock
    (the one after a lunch break that moves). Its span is EMPTY, and an empty
    block makes no line box: that heading had one line where its neighbours had
@@ -7043,7 +7007,10 @@ table.availability thead .hour-clock:empty::before {
 @media (max-width: 1500px) {
   .health-text { display: none; }
   .health-short { display: inline; }
-  .health { flex-shrink: 0; }
+  /* Its own width, not a grown share of the bar: the five tabs of K1 are
+     wider than the seven were, and a share left "433 saat yerleşme" cut at
+     1366 px. The document's name gives way instead. */
+  .health { flex: 0 0 auto; }
 }
 
 /* --------------------------------------------------------- command palette
@@ -7605,9 +7572,9 @@ table.person-list tbody tr {
   height: 2.5rem;
 }
 
-.sheet table.availability td.closed {
-  font-size: var(--fs-lg);
-}
+/* The cross keeps Müsaitlik's size: since 2026-11-16 (K1) this is the only
+   grid closed hours are marked on, and it has to out-speak the Program
+   grid's quiet one (e2e/renk.spec.ts). */
 
 .sheet-more > summary {
   cursor: pointer;

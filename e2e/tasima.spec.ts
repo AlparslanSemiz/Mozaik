@@ -168,7 +168,9 @@ test.describe('Yeni adrese taşıma', () => {
       setInterval(say, 200);
     }, YENI);
     const yeni = await popup;
-    await expect(yeni.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      yeni.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     await yeni.waitForTimeout(1500);
     await expect(yeni.locator('.dlg')).toHaveCount(0);
   });
@@ -183,7 +185,9 @@ test.describe('Yeni adrese taşıma', () => {
     await context.route(`${YENI}**`, (route) => route.abort('connectionrefused'));
     beklenenHata(page, /ERR_CONNECTION_REFUSED|Failed to load resource/);
     await page.goto(ESKI);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     await page.waitForTimeout(1000);
     await expect(strip(page)).toHaveCount(0);
   });
@@ -225,6 +229,8 @@ test.describe('Yeni adrese taşıma', () => {
     await openSample(page, ESKI);
     await page.goto(STUB);
     await page.waitForURL(ESKI);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
   });
 });

@@ -46,7 +46,7 @@ function world(): State {
 }
 
 async function openTeachers(page: import('@playwright/test').Page) {
-  await loadWorld(page, world(), 'Okul');
+  await loadWorld(page, world(), 'Öğretmenler');
   await openSetup(page, 'Öğretmenler');
 }
 
@@ -202,7 +202,7 @@ test.describe('Kişi sayfası', () => {
       teachers: w.teachers.map((t) => (t.id === 'tAY' ? { ...t, subject2: 'Kimya' } : t)),
       lessons: [...w.lessons, { ...w.lessons[0]!, id: 'l3', second: true, weeklyHours: 1 }],
     };
-    await loadWorld(page, two, 'Okul');
+    await loadWorld(page, two, null);
     await openSetup(page, 'Öğretmenler');
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
     const boxes = page.getByRole('spinbutton', { name: /^510 · .* · Haftalık saat$/ });
@@ -222,7 +222,7 @@ test.describe('Kişi sayfası', () => {
           { id: 'dB', name: 'B' },
         ],
       },
-      'Okul',
+      null,
     );
     await openSetup(page, 'Sınıflar');
     await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
@@ -256,7 +256,7 @@ test.describe('Kişi sayfası', () => {
   test('sınıfın sayfası: kapalı saatler, aldığı dersler tam adla, Yazdır; Gönder yok', async ({
     page,
   }) => {
-    await loadWorld(page, world(), 'Okul');
+    await loadWorld(page, world(), 'Öğretmenler');
     await openSetup(page, 'Sınıflar');
     await page.getByRole('button', { name: '510', exact: true }).click();
     const sheet = page.getByRole('dialog', { name: '510 sınıfı' });

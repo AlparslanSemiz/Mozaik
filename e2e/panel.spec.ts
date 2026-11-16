@@ -109,9 +109,9 @@ test.describe('48. Varlık paneli', () => {
     });
     expect(id).not.toBe('');
 
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await chooseEntity(page, id);
-    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    const page1 = await chooseEntity(page, id);
+    await page1.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.locator(`table.grid tbody tr:has(td[data-row="${id}"]) .row-head .inspect`).click();
@@ -201,7 +201,7 @@ test.describe('83. Panelden ders aktarma', () => {
       }),
       'oAV',
     );
-    await loadWorld(page, world, 'Okul');
+    await loadWorld(page, world, null);
     await openSetup(page, 'Öğretmenler');
     await mainList(page).locator('.person-open', { hasText: 'MÇ' }).click();
 

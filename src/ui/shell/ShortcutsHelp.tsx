@@ -57,7 +57,7 @@ const GROUPS: Group[] = [
     title: 'Genel kısayollar',
     rows: [
       { keys: 'Ctrl+K', desc: 'Komut paletini aç/kapat' },
-      { keys: 'Alt+1..7', desc: 'Bir sekmeye git' },
+      { keys: 'Alt+1..5', desc: 'Bir sekmeye git' },
       { keys: 'Ctrl+Z', desc: 'Geri al' },
       { keys: 'Ctrl+Y', desc: 'İleri al' },
       { keys: 'Ctrl+Shift+Z', desc: 'İleri al' },
@@ -97,7 +97,7 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    title: 'Müsaitlik',
+    title: 'Gelemediği saatler',
     rows: [
       { keys: '← → ↑ ↓', desc: 'Hücreden hücreye git' },
       { keys: 'Space Enter', desc: 'Saati aç veya kapat, başlıkta bütün günü veya saati' },

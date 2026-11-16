@@ -15,7 +15,10 @@ import { reopen, dragAndDrop, openWithSample, PDF_YALNIZ_CHROMIUM } from './help
 
 async function openPrint(page: Page) {
   await openWithSample(page);
-  await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+  await page
+    .locator('.tabstrip')
+    .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+    .click();
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -27,7 +30,10 @@ async function openPrint(page: Page) {
 async function openPrintWithALesson(page: Page) {
   await openWithSample(page);
   await dragAndDrop(page);
-  await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+  await page
+    .locator('.tabstrip')
+    .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+    .click();
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -121,7 +127,7 @@ test.describe('62. Sayfada ne olsun', () => {
 
   test('öğretmen sayfasında da branş kapanabiliyor', async ({ page }) => {
     await openPrint(page);
-    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
+    await page.locator('.ribbon').getByRole('button', { name: 'Öğretmenler', exact: true }).click();
     const sub = page.locator('.print-page').first().locator('.p-title-sub');
     await expect(sub).toContainText('Örnek Kurs');
 
@@ -168,7 +174,10 @@ test.describe('62. Sayfada ne olsun', () => {
     await box(page, 'Çıktı tarihi').uncheck();
 
     await reopen(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     await expect(box(page, 'Günün saatleri')).not.toBeChecked();

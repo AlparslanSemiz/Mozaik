@@ -1236,7 +1236,7 @@ describe('dropMap — üstüne bırakma', () => {
         ['en', 'the 510 · MÇ lesson went back to the tray', 'lessons went back to the tray'],
         [
           'de',
-          'das Fach 510 · MÇ ist zurück ins Ablagefach gegangen',
+          'der Unterricht 510 · MÇ ist zurück ins Ablagefach gegangen',
           'sind zurück ins Ablagefach gegangen',
         ],
         ['es', 'la clase 510 · MÇ ha vuelto a la bandeja', 'han vuelto a la bandeja'],

@@ -195,7 +195,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-havuz-boy` | havuz çekmecesinin boyu, rem |
 | `ders-programi-serit` | araç şeridi açık mı |
 | `ders-programi-serit-gizle` | şerit kaydırınca gizlensin mi |
-| `ders-programi-musaitlik-saat` | müsaitlikte saatlerin gösterilmesi |
+| `ders-programi-musaitlik-saat` | Müsaitlik'te saatlerin gösterilmesi, 2026-11-16'dan beri okunmuyor (K1, sekme kalktı; kişi sayfası saati hep gösterir); tarihsel |
 | `ders-programi-hareket` | hareket (`tam`, `az`, `kapali`) |
 | `ders-programi-tanitim` | örnek veri teklifi görüldü mü |
 | `ders-programi-ilk-adimlar` | Okul'daki Başlarken listesi açık mı, daraltılmış mı, kapatılmış mı, ve Yazdır'a basıldı mı; tek bir JSON kaydı |

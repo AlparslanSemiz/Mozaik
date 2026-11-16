@@ -30,6 +30,7 @@ import {
   settledMotion,
   tokens,
   deletePerson,
+  openProblems,
 } from './helpers';
 
 /** The ground a row is painted on: its own, or the panel's when it has none. */
@@ -200,12 +201,6 @@ const ORNEK: Liste[] = [
     secili: '[aria-current="true"]',
   },
   {
-    ad: "Müsaitlik'in listesi",
-    git: (p) => p.getByRole('button', { name: 'Müsaitlik', exact: true }).click(),
-    satir: '.entity-list > .entity',
-    secili: '[aria-current="true"]',
-  },
-  {
     ad: 'Varlık panelinin dersleri',
     git: async (p) => {
       await p.getByRole('button', { name: 'Program', exact: true }).click();
@@ -269,19 +264,20 @@ const ORNEK: Liste[] = [
   },
   {
     ad: 'Çıktı özeti',
-    git: (p) => p.getByRole('button', { name: 'Çıktı', exact: true }).click(),
+    git: (p) =>
+      p.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click(),
     satir: '.panel:has(h2:text-is("Çıktı özeti")) table.stat > tbody > tr',
   },
 ];
 
 const kontrol = (adi: RegExp) => async (p: Page) => {
-  await p.getByRole('button', { name: 'Kontrol', exact: true }).click();
-  await p.locator('.ribbon').getByRole('button', { name: adi }).click();
+  await openProblems(p);
+  await p.getByRole('dialog').getByRole('button', { name: adi }).click();
 };
-// The three load tables are behind Kontrol's Daha fazla since 2026-11-16.
+// The three load tables are behind the problem list's Daha fazla.
 const yuk = (item: string) => async (p: Page) => {
-  await p.getByRole('button', { name: 'Kontrol', exact: true }).click();
-  await p.locator('.ribbon .more-menu').click();
+  await openProblems(p);
+  await p.getByRole('dialog').locator('.more-menu').click();
   await p.getByRole('menuitemradio', { name: item }).click();
 };
 const panelRows = (h2: string, table = 'table') =>
@@ -293,7 +289,7 @@ const DUNYA: Liste[] = [
   {
     ad: 'Programın durumu',
     git: kontrol(/^Sorunlar/),
-    satir: panelRows('Programın durumu'),
+    satir: '.problem-list table.stat > tbody > tr',
     tek: true,
   },
   { ad: 'Kapalı saatte ders', git: kontrol(/^Sorunlar/), satir: panelRows('Kapalı saatte ders') },
@@ -375,7 +371,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
       test(`${theme}: ${l.ad} (sorun listesi) dönüşümlü ve satırda her yazı 7:1`, async ({
         page,
       }) => {
-        await loadWorld(page, listWorld(), 'Kontrol');
+        await loadWorld(page, listWorld());
         if (theme === 'dark') await darkTheme(page);
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await olc(page, l, theme);
@@ -534,7 +530,8 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
 
       // The selected entity: its own ground, --text on it, and the hover ring
       // does not land on it.
-      await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
+      // The lesson form's picker (Müsaitlik's list went with K1).
+      await openLessons(page, 'class');
       await park(page);
       const sel = page.locator('.entity[aria-current="true"]');
       expect((await lowestInk(sel)).ratio, 'seçili satır').toBeGreaterThanOrEqual(7);
@@ -602,7 +599,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     state.settings.subjects = state.settings.subjects.filter(
       (x) => x !== 'Felsefe' && x !== 'Din Kültürü',
     );
-    await loadWorld(page, state, 'Okul');
+    await loadWorld(page, state, null);
     await openSetup(page, 'Branşlar');
     await park(page);
 
@@ -659,7 +656,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     await openWithSample(page);
     const state = JSON.parse(await savedText(page)) as { settings: { subjects: string[] } };
     state.settings.subjects = ['Hiç kimsenin'];
-    await loadWorld(page, state, 'Okul');
+    await loadWorld(page, state, null);
     await openSetup(page, 'Branşlar');
     const bodies = page.locator('.cols > div table.list > tbody');
     await bodies

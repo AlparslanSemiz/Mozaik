@@ -14,7 +14,7 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/pure/worlds';
 import { activePlacements } from '../src/pure/grid';
-import { loadWorld, savedState, settledText } from './helpers';
+import { loadWorld, savedState, settledText, openProblems } from './helpers';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page): Promise<string> {
@@ -76,7 +76,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
         }
       } else {
         await expect(bar).toContainText('yerleşemedi');
-        await expect(bar).toContainText('Ayrıntı: Kontrol sekmesi.');
+        await expect(bar.getByRole('button', { name: 'Ayrıntı', exact: true })).toBeVisible();
         expect(await page.locator('.pool-card').count()).toBeGreaterThan(0);
       }
     });
@@ -136,7 +136,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       expect(activePlacements(saved)[cell]).toBe(lessonId);
     }
     // The one in the closed hour is still there and Kontrol counts it.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     await expect(page.locator('.panel', { hasText: 'Kapalı saatte' }).first()).toBeVisible();
   });
 
@@ -145,7 +145,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       const world = SMALL_WORLDS.find((w) => w.name === name)!;
       await loadWorld(page, world.state);
       await autoFill(page);
-      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+      await openProblems(page);
       await expect(page.locator('.badge', { hasText: /^Kesin$/ })).toHaveCount(0);
     }
   });
@@ -155,7 +155,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
 
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     await expect(page.locator('.panel', { hasText: 'Yerleşemeyen' }).first()).toContainText('511');
   });
 
@@ -164,7 +164,10 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
 
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     expect(await page.locator('.print-page .p-top').count()).toBeGreaterThan(0);
   });

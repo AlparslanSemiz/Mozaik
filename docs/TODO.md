@@ -1332,7 +1332,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       listesinin bugünkü hâli, bir AST taramasıyla: görünür yaklaşık 24 yer, yalnız
       erişilebilir adda 8 yer ve elle yazılmış iki `'tr-TR'` (`Print.tsx:107`, `Data.tsx`).
       Görünür olanlar `App.tsx:835` (taslak eki), `Dialogs.tsx:196` ve `:214` (varsayılan
-      düğme adları), `ribbon/AvailabilityStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
+      düğme adları), `ribbon/PeopleStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
       `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
@@ -1775,7 +1775,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       `transferLesson().returned`'dan (`LessonEdit.tsx` 156), cümleleri de ayrı. Okundu,
       ölçülmedi.
 - [ ] **RK5 Müsaitlik boyamasında her yeni hücre tabloyu yeniden çiziyor olabilir.**
-      `Availability.tsx` 181 sürükleme sırasında her `pointerenter`'da `setPending`
+      `common/AvailGrid.tsx` (eskiden Müsaitlik sekmesinde) sürükleme sırasında her `pointerenter`'da `setPending`
       çağırıyor, tuzak 1'in kuralına aykırı görünüyor. Önce babanın verisinde ve iki
       motorda ölçülür (tuzak 105, 141). Okundu, ölçülmedi.
 - [ ] **RK6 `.main`'in sekme solması büyük ihtimalle koşmuyor, ve test bunu görmüyor.**
@@ -2176,7 +2176,7 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       Çıktı'daki düğmeyle işaretlenir, Ctrl+P'yi görmez; (3) varsayılan hafta Salı–Pazar × 12
       bilerek kaldı (dershane, DATA "Varsayılanlar", `bell.test.ts`), yalnız Başlarken'in ilk
       adımı onu yazıyor; (4) boyut eşiği 1 230 000 → 1 260 000 B (sözlükler, ölçüm WORKLOG'da); brotli eşiğe 476 B kaldı;
-      (5) `hiz/tepki` zinciriyle birleşti (`Check.tsx`, `Availability.tsx`, `App.tsx` iki tarafın davranışıyla).
+      (5) `hiz/tepki` zinciriyle birleşti (o günkü Kontrol ve Müsaitlik ekranları, `App.tsx` iki tarafın davranışıyla).
 - [x] **SD6 · Okul'daki etiketsiz kutular.** Yapıldı (2026-11-15, `erisim/anlam`, §8e'nin
       `label` maddesi). Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki kutular
@@ -2189,13 +2189,13 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
       saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
       tek yerde. Sayfanın WhatsApp'ı ve PDF'i yazıldı (`ozellik/gonder`, 3B'den sonra birleşir; B3.4).
-      **Aşama 3A** yazıldı (`sade/asama-3a`, aşama 2'nin üstünde, birleşmedi; WORKLOG): tek
-      ızgara düzeni (K6), toplu sabitleme ve geçici görünüm yok (K7), Dosya ▾ → Eski hâline
-      dön, son 7 günün kopyası (K8). Alp (b)'yi seçti ve yazıldı: sütun en geniş
-      dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar,
-      kart yazısı en az 11 px; altı kutuda kesik ders 0. Sırada: **aşama 3B** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına
-      katlanır, okul geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe
-      (K3), başka dalda. 2. aşamadan sonra babanın bir oturumu izlenir.
+      **Aşama 3A** `main`'de (b44b59a; WORKLOG): tek ızgara düzeni (K6), toplu sabitleme ve
+      geçici görünüm yok (K7), Dosya ▾ → Eski hâline dön, son 7 günün kopyası (K8); sütun en
+      geniş dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar, kart
+      yazısı en az 11 px. **Aşama 3B** yazıldı (`sade/asama-3b`, aşama 2'nin ve `main`'in üstünde,
+      birleşmedi; WORKLOG): beş görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve
+      Sınıflar'ın şeridine, Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir
+      plan (K2), Kontrol çipin açtığı sorun listesi (K3). Sonra babanın bir oturumu izlenir.
 
 ## §9. Ham notlar
 

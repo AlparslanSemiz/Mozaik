@@ -5,11 +5,9 @@
 
 import { useCallback, useState } from 'react';
 import {
-  applyAvailClock,
   applyMotion,
   applyRibbon,
   applyTheme,
-  readAvailClock,
   readMotion,
   readProgramColor,
   readRibbon,
@@ -35,17 +33,6 @@ export function useMachinePrefs() {
   const setProgramColor = useCallback((next: ProgramColorMode) => {
     writeProgramColor(next);
     setProgramColorRaw(next);
-  }, []);
-  // Applied to the document by main.tsx before the first paint; this copy
-  // exists so the button that flips it can show which way the switch is.
-  const [availClock, setAvailClockRaw] = useState<boolean>(readAvailClock);
-  // The <html> attribute goes with the state, wherever the control lives. It
-  // used to be written by the one button in Ayarlar → Görünüm; that button is
-  // in Müsaitlik's own strip now, and a second caller must not have to know to
-  // do this (the toggle would flip and nothing on the table would change).
-  const setAvailClock = useCallback((next: boolean) => {
-    applyAvailClock(next);
-    setAvailClockRaw(next);
   }, []);
   // Same again for how much the interface is allowed to move.
   const [motion, setMotion] = useState<Motion>(readMotion);
@@ -90,8 +77,6 @@ export function useMachinePrefs() {
     setScale,
     programColor,
     setProgramColor,
-    availClock,
-    setAvailClock,
     motion,
     setMotion,
     ribbon,

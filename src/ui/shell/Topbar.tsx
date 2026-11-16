@@ -50,6 +50,10 @@ interface Props {
   openChecklist: () => void;
   /** Dosya ▾ → Yeni dönem için kopyala. */
   copyForNewTerm: () => void;
+  /** The status chip: the problem list. */
+  openProblems: () => void;
+  /** The open plan's own programs, when an old file holds more than one. */
+  switchProgram: (id: string) => void;
   /** Dosya ▾ → Eski hâline dön (K8). */
   openOldCopies: () => void;
   /** The last plan file's day, YYYY-MM-DD; null when this browser never wrote one. */
@@ -76,6 +80,8 @@ export default function Topbar({
   openAbout,
   openChecklist,
   copyForNewTerm,
+  openProblems,
+  switchProgram,
   openOldCopies,
   lastFileDay,
 }: Props) {
@@ -131,7 +137,7 @@ export default function Topbar({
         </MoreItem>
       </MoreMenu>
 
-      {/* Zone one: WHERE YOU ARE. Seven destinations, one lit, and they come
+      {/* Zone one: WHERE YOU ARE. Five tasks, one lit, and they come
         FIRST: they are the most-clicked thing on the row and the eye starts
         at the left edge. The document identity used to stand here, but the
         name of the school does not change and is not clicked — it was
@@ -160,33 +166,29 @@ export default function Topbar({
             <span className="tab-label">{t(dest.label)}</span>
             {/* An unread release note. Presence only, no count — "something
               changed" is the whole message, the panel says what. Clears
-              the moment the folded notes in Ayarlar → Hakkında are opened
+              the moment the folded notes in Okul bilgileri → Hakkında are opened
               (`Changelog`'s onToggle), not on a bare tab click. */}
-            {dest.id === 'settings' && changelogUnseen && (
+            {dest.id === 'school' && changelogUnseen && (
               <span className="tab-dot" aria-hidden="true" />
             )}
           </button>
         ))}
       </nav>
 
-      {/* Zone one and a half: IS IT ALL RIGHT. Kontrol has always been able
-        to answer this, and that was the problem — it is a destination, so
-        asking cost two navigations and therefore got asked once, at the
-        start. The sentence NAMES the trouble and counts it, because "sorun
-        var" would only send somebody to Kontrol to find out which. */}
+      {/* Zone one and a half: IS IT ALL RIGHT. The sentence NAMES the trouble
+        and counts it, because "sorun var" would only send somebody looking
+        for which; a click opens the list (ProblemList.tsx). */}
       <button
         className={`health ${status.level}`}
-        onClick={() => goTab('check')}
+        /* The problem list itself since K3 (2026-11-16): the Kontrol tab
+           it used to lead to is gone, and the answer to "what is wrong"
+           opens over the screen it was asked from. */
+        onClick={openProblems}
+        aria-haspopup="dialog"
         /* The label carries the sentence even when the bar is too narrow to
-         draw it — and it is an aria-label rather than a title so the
-         accessible name is this and not "Kontrol", which is also the name
-         of a tab three pixels away. */
-        aria-label={t('Programın durumu: {durum}. Ayrıntı için Kontrol.', {
-          durum: status.message,
-        })}
-        title={t('{durum}. Kontrol sekmesini açar', {
-          durum: status.message,
-        })}
+         draw it. */
+        aria-label={`${t('Programın durumu')}: ${status.message}`}
+        title={`${t('Programın durumu')}: ${status.message}`}
       >
         <span className="health-dot" aria-hidden="true" />
         <span className="health-text">{status.message}</span>
@@ -205,19 +207,38 @@ export default function Topbar({
         asking, and the plans themselves are one click away in Dosya ▾. */}
       <div className="topbar-doc">
         <h1 className="app-title">{state.settings.schoolName.trim() || APP_NAME}</h1>
-        {plans.library.plans.length > 1 && (
+        {/* ONE switcher for every arrangement (K2, 2026-11-16): "Bu
+            programın kopyası" makes a plan, so a plan is the only thing
+            there is to switch between. A file from before K2 may still hold
+            several "seçenek" inside one plan; each of them is a row here
+            under its plan's name, so none of them became unreachable. */}
+        {(plans.library.plans.length > 1 || state.programs.length > 1) && (
           <select
             className="plan-picker"
             aria-label={t('Plan')}
             title={t('Planlar arasında geçiş yapar')}
-            value={plans.planId}
-            onChange={(e) => plans.switchPlan(e.target.value)}
+            value={
+              state.programs.length > 1 ? `${plans.planId} ${state.activeProgramId}` : plans.planId
+            }
+            onChange={(e) => {
+              const [plan = '', program] = e.target.value.split(' ');
+              if (plan === plans.planId && program !== undefined) switchProgram(program);
+              else plans.switchPlan(plan);
+            }}
           >
-            {plans.library.plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.draft ? `${p.name} (taslak)` : p.name}
-              </option>
-            ))}
+            {plans.library.plans.map((p) =>
+              p.id === plans.planId && state.programs.length > 1 ? (
+                state.programs.map((program) => (
+                  <option key={program.id} value={`${p.id} ${program.id}`}>
+                    {p.name} · {program.name}
+                  </option>
+                ))
+              ) : (
+                <option key={p.id} value={p.id}>
+                  {p.draft ? `${p.name} (taslak)` : p.name}
+                </option>
+              ),
+            )}
           </select>
         )}
       </div>

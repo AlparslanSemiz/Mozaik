@@ -29,7 +29,7 @@ de okuyan `preferences.test.ts`).
 Her kaynak dosya bir katmanın altındaki bir klasörde, yani bir pakette durur (2026-10-24);
 en derin `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda.
 Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/forms/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
-`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -37,7 +37,7 @@ Testler bu kuralın dışında.
 fabrikası. Yalnız başka bir yaprağı import eder, kuralı aşağıda.
 
 **Saf mantık** React, DOM ve localStorage bilmez. Her dışa aktarılan fonksiyonu
-tarayıcı olmadan test edilebilir, ve sürükleme, çözücü ve Kontrol aynı
+tarayıcı olmadan test edilebilir, ve sürükleme, çözücü ve sorun listesi aynı
 fonksiyonları çağırdığı için bir kural sürüklerken başka, otomatik dizerken
 başka anlama gelemez.
 
@@ -102,8 +102,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/feasibility/hole.ts` | takılan dersin sebebi, deliği adıyla (`holeReason`) |
 | `pure/feasibility/capacity.ts` | öğretmen, sınıf ve dersliğin açık saati ile istenen saati (`buildCapacity`) |
 | `pure/feasibility/advice.ts` | Danışman (`buildAdvice`) |
-| `pure/feasibility/report.ts` | Kontrol'ün bütün raporu (`buildReport`) |
-| `pure/feasibility/stuck.ts` | Kontrol satırlarının gruplanması: kapalı saatte ders ders başına (`groupStranded`), yerleşemeyenler bağlayan sebebe göre (`stuckReason`, `groupUnplaceable`), ihlalin kartı (`violationCell`) |
+| `pure/feasibility/report.ts` | sorun listesinin bütün raporu (`buildReport`) |
+| `pure/feasibility/stuck.ts` | sorun listesi satırlarının gruplanması: kapalı saatte ders ders başına (`groupStranded`), yerleşemeyenler bağlayan sebebe göre (`stuckReason`, `groupUnplaceable`), ihlalin kartı (`violationCell`) |
 | `pure/feasibility/health.ts` | her sekmedeki durum satırı (`health`) |
 | `pure/entities/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/entities/index.ts` | okul verisini değiştiren paketin giriş noktası: bölünmeden önceki tek dosyanın dışa açtığı her şey ve `bell.ts`'in hepsi; dosyaların paylaştığı yardımcılar içeride kalır |
@@ -144,7 +144,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/paper/mail.ts` | aynı öğretmen sayfasının düz metin e-postası ve `mailto:`'su: sınıra (`MAILTO_SINIRI`) sığan en dolu biçim, sığmazsa hiç |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün Kontrol'le paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
+| `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün sorun listesiyle paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
 | `pure/forms/lessonForm.ts` | ders ekleme formunun kuralları: hangi branşlar ve öğretmenler sunulur, birini seçmek ötekine ne yapar (`lessonChoices`, `chooseTeacher`, `chooseSubject`), eklemeden sonra ne kalır (`afterAdd`); taslak ekranın kendi durumunda |
 | `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
 | `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
@@ -171,11 +171,10 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
-| `platform/prefs/availClock.ts` | Müsaitlik ders numarasının altına başlangıç saatini yazar mı; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/stored.ts` | iki yönlü tercihlerin yazılışı (`onOff`) |
-| `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
+| `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Öğretmenler ve Sınıflar'ın görünümü (`people`) ve ders formunun odağı, sorun listesinin bölümü, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`); beş sekme ve eski kimliklerin karşılığı (`OLD_TAB`) |
 | `platform/prefs/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
 | `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
@@ -190,7 +189,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/dom/index.ts` | doğrudan DOM'a yazan etkileşimler paketinin giriş noktası: yedisinin dışarıda kullanılan adları |
 | `platform/dom/drag.ts` | sürükle bırak, Pointer Events ile, ve aynı taşımanın klavye eli (`startKeys`). Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
 | `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
-| `platform/dom/roving.ts` | bir kutuyu tek Tab durağı yapar, oklarla içinde gezdirir (`attachRoving`); Program ızgarası, havuz ve Müsaitlik kullanır |
+| `platform/dom/roving.ts` | bir kutuyu tek Tab durağı yapar, oklarla içinde gezdirir (`attachRoving`); Program ızgarası, havuz ve gelemediği saatler ızgarası kullanır |
 | `platform/dom/gridKeys.ts` | Program ızgarasının okları, boş hücrenin odakta aldığı ad, kaldırmadan sonra odağın döndüğü hücre (`focusCellSoon`) |
 | `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (ızgaranın sütunu ondan türüyor, tuzak 141), ve en geniş dersin yazısından sütunun alt sınırını ölçer (`--cell-min`); hafta sığmazsa ızgara yana kayar |
 | `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
@@ -211,13 +210,13 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
 | `ui/shell/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
 | `ui/shell/App.tsx` | kabuk: neyin ne kadar yaşadığına karar verir (sekme değişince ekranlar sökülür, tuzak 18) ve parçaları bağlar |
-| `ui/shell/tabs.tsx` | yedi sekme ve çizimleri; üst çubuk ve palet aynı listeyi okur |
+| `ui/shell/tabs.tsx` | beş sekme ve çizimleri; üst çubuk ve palet aynı listeyi okur |
 | `ui/shell/icons.tsx` | üst çubuğun dört simgesi ve marka |
 | `ui/shell/Topbar.tsx` | üst çubuk: sekmeler, durum satırı, plan seçici, geri al, dosya, palet, şerit ve tema düğmeleri |
 | `ui/shell/Notices.tsx` | açık sekmenin üstündeki şeritler: kayıt çalışmıyor, depo dolu, başka pencere, okunamayan plan, yeni sürüm, klasör |
 | `ui/shell/useMachinePrefs.ts` | App'in tuttuğu makine tercihi kopyaları ve üç geçiş (şerit, hareket, tema) |
 | `ui/shell/useMainScroll.ts` | şeridin altındaki kaydırılan kutunun iki etkisi: sündürme ve şeridin çekilmesi |
-| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
+| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..5 ve '?' |
 | `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
 | `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır; açık plan boşsa ve geri alınacak bir şey yoksa sormadan açar (`isEmptyPlan`) |
 
@@ -227,7 +226,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `ui/ribbon/index.tsx` | sekmeye göre araç şeridi: hangi şeridin çizildiğine karar verir ve birden çok şeridin okuduğunu (`health`, diyaloglar) hesaplar |
 | `ui/ribbon/parts.tsx` | şeritlerin ortak parçaları (`Group`, `Sep`, `Spacer`, `ICON`) ve şerit fonksiyonlarının aldığı `StripContext`. Şeritler bileşen değil fonksiyon: sekme değişince React aynı `.ribbon` öğesini yeniden kullanır |
-| `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `SetupStrip`, `LessonsStrip`, `AvailabilityStrip`, `ProgramStrip`, `CheckStrip`, `PrintStrip`, `SettingsStrip` |
+| `ui/ribbon/*Strip.tsx` | sekme başına bir şerit: `ProgramStrip`, `PeopleStrip` (Öğretmenler ve Sınıflar), `PrintStrip`, `SettingsStrip` (Okul bilgileri) |
 | `ui/common/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
 | `ui/common/Toasts.tsx` | olan biteni söyleyen kısa satır |
 | `ui/program/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
@@ -235,17 +234,16 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Commands.tsx` | paletin komut listesi |
 | `ui/shell/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/common/T.tsx` | `useT()` ve `<T>` |
-| `ui/common/GoTo.tsx` | bir sekmeye, Okul adımına ya da Ayarlar bölümüne götüren context ve `GoButton` |
+| `ui/common/GoTo.tsx` | bir sekmeye ve içinde Öğretmenler ya da Sınıflar'ın görünümüne, Okul bilgileri'nin bölümüne ya da sorun listesine götüren context ve `GoButton` |
 | `ui/common/NextStep.tsx` | boş ekranların düğmesi: eksik ilk adım ve okul adı boşken zil ve günler |
 | `ui/common/wrongFile.ts` | Mozaik'in kaydetmediği bir dosyaya söylenen iki cümle, iki dosya kapısında aynı |
-| `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Çıktı'da Yazdır'a basıldı mı |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in beş işi), `Rooms`, `Subjects`, `Teachers` ve `Classes` (düz yazı listeler; satırı `PersonRow`, adı kişi sayfasını açar) |
+| `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Yazdır ve gönder'de Yazdır'a basıldı mı |
+| `ui/setup/` | dört liste ve Başlarken: `index.tsx` (`Setup` bir liste ve Özet'i, `Start` Başlarken ve ilk açılış teklifleri), `Checklist` (Başlarken'in beş işi), `Rooms`, `Subjects`, `Teachers` ve `Classes` (düz yazı listeler; satırı `PersonRow`, adı kişi sayfasını açar) |
 | `ui/program/InspectorSheet.tsx` | kişi sayfası (2026-11-16, K5): öğretmenin, sınıfın ya da dersliğin bilgileri, gelemediği saatler, dersleri, sınırları, Yazdır, Gönder ve Sil; boş kimlikle `NewPerson.tsx`'in yeni öğretmen ya da sınıf formu |
-| `ui/common/AvailGrid.tsx` | bir varlığın boyanan kapalı saat ızgarası; Müsaitlik ve kişi sayfası aynı bileşeni çizer |
-| `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Çıktı'nın seçimlerine dokunmadan |
-| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
-| `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
-| `ui/availability/Availability.tsx` | Müsaitlik |
+| `ui/common/AvailGrid.tsx` | bir varlığın boyanan kapalı saat ızgarası; kişi sayfası çizer |
+| `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Yazdır ve gönder'in seçimlerine dokunmadan |
+| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve sorun listesi aynı çizimi kullanıyor) |
+| `ui/lessons/` | Dersler (Öğretmenler ve Sınıflar şeritlerinin `Dersler`'i): `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, kişi sayfası (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menülerini bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
 | `ui/program/GridMenu.tsx` | ızgaranın sağ tık menüsü (kart, satır ya da gün başlığı, sütun); okuduğunu `describeMenu` hesaplar, seçimleri Program'a döner |
@@ -257,17 +255,17 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/Grid.tsx` | ana ızgara, satır başına memo |
 | `ui/program/GridRow.tsx` | ızgaranın bir satırı, kendi başına memo (tuzak 10) |
 | `ui/program/LessonPool.tsx` | havuz |
-| `ui/program/Check.tsx` | Kontrol |
-| `ui/program/reveal.ts` | Kontrol'ün `Göster`i: Program'daki kartı ya da havuzdaki kartı görünür yapıp işaretler (`data-reveal`) |
+| `ui/program/ProblemList.tsx` | sorun listesi: durum çipinin açtığı sayfa (Kontrol sekmesiydi) |
+| `ui/program/reveal.ts` | sorun listesinin `Göster`i: Program'daki kartı ya da havuzdaki kartı görünür yapıp işaretler (`data-reveal`) |
 | `ui/program/Inspector.tsx` | kişi sayfasını açan yol: bağlam, `useInspect()` ve sayfayı çizen provider |
-| `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
-| `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
-| `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
+| `ui/program/steps.tsx` | dört listenin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
+| `ui/print/index.ts` | Yazdır ve gönder paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
+| `ui/print/Print.tsx` | Yazdır ve gönder: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
-| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına e-posta düğmesi ya da neden olmadığı, ve numarası varsa WhatsApp; ikisi de önce PDF'i kaydeder; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı. Kişi sayfasının `Gönder`'i ve `WhatsApp`'ı (`SendTeacher`) ve sınıfın `PDF kaydet`'i (`SavePdf`) aynı yol |
+| `ui/print/MailPanel.tsx` | Yazdır ve gönder'in "E-postayla gönder"i: öğretmen başına e-posta düğmesi ya da neden olmadığı, ve numarası varsa WhatsApp; ikisi de önce PDF'i kaydeder; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı. Kişi sayfasının `Gönder`'i ve `WhatsApp`'ı (`SendTeacher`) ve sınıfın `PDF kaydet`'i (`SavePdf`) aynı yol |
 | `ui/print/send.ts` | bir kişinin PDF'ini İndirilenler'e kaydetmek (`savePdf`) ve WhatsApp sohbetini açmak (`whatsappLink`, `openWhatsapp`; exe'de `whatsapp_ac`) |
 | `ui/print/usePrintTitle.ts` | yazdırma penceresi açıkken sayfanın adı kaydedilecek dosyanın adı |
-| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
+| `ui/settings/` | Okul bilgileri (Derslikler ve Branşlar dışındaki bölümler): `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
 | `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
 | `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
 | `ui/plans/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
@@ -292,7 +290,7 @@ için Vite budar, `dist/index.html`'e girmez.
 
 Çakışma, sınır, kapasite ya da blok hesabı saf mantık katmanında yazılır.
 Program şeridindeki "Otomatik diz (N)"in N'i ve iki yıkıcı sorunun saydığı saatler `programView.ts`'teki `describeStrip`'ten,
-Kontrol'ün sayıları `pure/feasibility/`'ten gelir. Program'ın satırları, havuzu ve
+Sorun listesinin sayıları `pure/feasibility/`'ten gelir. Program'ın satırları, havuzu ve
 araç çubuğunun altındaki satır `programView.ts`'te hesaplanır; ne zaman
 hesaplanacakları `Program.tsx`'te kalır, çünkü `Grid`'in memo sınırı `rows`'un
 kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.

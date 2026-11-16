@@ -160,7 +160,7 @@ export default function Appearance({
               )}
             </p>
             <p>
-              <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde." />
+              <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Yazdır ve gönder** sekmesinde." />
             </p>
           </HelpHead>
           {segmented(
@@ -258,7 +258,7 @@ export default function Appearance({
           </p>
           {teachers.length === 0 ? (
             <p className="hint">
-              <T k="Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir." />
+              <T k="Henüz öğretmen yok. **Öğretmenler** sekmesinden ekleyin; burası o listeyi gösterir." />
             </p>
           ) : (
             /* IN A SCROLL BOX: this is the rail's ONLY panel, the shape

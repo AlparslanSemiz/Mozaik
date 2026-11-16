@@ -1,0 +1,120 @@
+# `file://` açılışının ölçümü, sessiz bir runner'da: taban (main ile ortak ata)
+# ve dal ayrı ayrı derlenir, `scripts/acilis-olc.mjs` ikisini Chromium'da CPU 4×
+# yavaşlatılmış, dönüşümlü 9 koşuyla açar, babanın haftası depoda. Tablo işin
+# özetine, ham sayılar artefakta. Yerel ölçüm makine yüklüyken okunamıyordu
+# (WORKLOG: "kirli"); buradaki sayı WORKLOG'a runner'ın adı ve koşu numarasıyla yazılır.
+#
+# Kapı değil: iş kırmızı olmaz (`continue-on-error`), yavaşlama `::warning::`
+# olarak görünür (eşik %15, isteğe bağlı bütçe). Push'ta değil, src/'ye dokunan
+# PR'da ve elle koşar.
+name: acilis
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package-lock.json'
+      - 'scripts/acilis-olc.mjs'
+      - '.github/workflows/acilis.yml'
+  workflow_dispatch:
+    inputs:
+      taban:
+        description: 'Karşılaştırılacak dal (ortak ata alınır)'
+        default: main
+      kosu:
+        description: 'Dönüşümlü koşu sayısı'
+        default: '9'
+      butce:
+        description: 'Dalın hazir medyanı için bütçe, ms (0: yok)'
+        default: '0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acilis-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  olc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: dal
+          fetch-depth: 0
+          # PR'ın birleşme commit'i değil, dalın kendisi.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      # The measuring script itself comes from the workflow's own commit, not
+      # from the branch: a branch cut before the script existed has none
+      # (PR #80, 2026-11-16: "Cannot find module dal/scripts/acilis-olc.mjs"),
+      # and both sides should be measured by the same script anyway.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: olcer
+          sparse-checkout: scripts/acilis-olc.mjs
+          sparse-checkout-cone-mode: false
+      - name: Taban
+        id: taban
+        env:
+          TABAN: ${{ github.event.pull_request.base.ref || inputs.taban || 'main' }}
+        run: |
+          sha="$(git -C dal merge-base "origin/${TABAN}" HEAD)"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          git -C dal worktree add --detach ../taban "${sha}"
+          echo "taban ${TABAN} ortak ata ${sha}, dal $(git -C dal rev-parse HEAD)"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            dal/package-lock.json
+            taban/package-lock.json
+      - name: Kur ve derle (taban)
+        working-directory: taban
+        run: npm ci && npx vite build
+      - name: Kur ve derle (dal)
+        working-directory: dal
+        run: npm ci && npx vite build
+      - name: Playwright sürümü
+        id: pw
+        working-directory: dal
+        run: echo "surum=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.surum }}
+      - working-directory: dal
+        run: npx playwright install chromium
+      - name: Ölç
+        working-directory: dal
+        env:
+          KOSU: ${{ inputs.kosu || '9' }}
+          BUTCE: ${{ inputs.butce || '0' }}
+          TABAN_SHA: ${{ steps.taban.outputs.sha }}
+        run: |
+          # Veri tabanın kopyası: yeni şemalı bir dosyayı eski derleme açamaz, eskisini yenisi göç ettirir.
+          veri=../taban/src/fixtures/tam-dolu-kurs-dizili.json
+          [ -f "$veri" ] || veri=src/fixtures/tam-dolu-kurs-dizili.json
+          {
+            echo "## Açılış ölçümü"
+            echo
+            echo "taban \`${TABAN_SHA:0:7}\` → dal \`$(git rev-parse --short HEAD)\`, $(nproc) çekirdek, $(node -p 'require("os").cpus()[0].model')"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Inside `dal`, so `@playwright/test` resolves from its node_modules.
+          cp ../olcer/scripts/acilis-olc.mjs scripts/acilis-olc.olcer.mjs
+          node scripts/acilis-olc.olcer.mjs \
+            --taban ../taban/dist/index.html --dal dist/index.html \
+            --veri "$veri" --kosu "$KOSU" --butce-ms "$BUTCE" \
+            --ozet "$GITHUB_STEP_SUMMARY" --json ../acilis.json
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: acilis
+          path: acilis.json
+          if-no-files-found: ignore

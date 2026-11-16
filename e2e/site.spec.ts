@@ -20,7 +20,9 @@ import { cacheAdi } from '../scripts/surum.mjs';
 test.describe('36. Site sürümü', () => {
   test('site http üzerinden açılıyor ve uygulama çiziliyor', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     // Same single file as the double-clicked one: no second request for code.
     await expect(page.locator('script[src]')).toHaveCount(0);
   });
@@ -110,7 +112,9 @@ test.describe('36. Site sürümü', () => {
 
     await context.setOffline(true);
     await reopen(page);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
     await context.setOffline(false);
   });
@@ -120,7 +124,10 @@ test.describe('36. Site sürümü', () => {
     // anyway. This is the principle-6 half of the same question.
     await page.goto('/');
     await page.evaluate(() => navigator.serviceWorker.ready);
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Ç1');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -128,7 +135,10 @@ test.describe('36. Site sürümü', () => {
 
     await context.setOffline(true);
     await reopen(page);
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await expect(page.locator('table.list tbody input').first()).toHaveValue('Ç1');
     await context.setOffline(false);

@@ -13,7 +13,7 @@ import { expect, test } from './kapan';
 import { solve } from '../src/pure/solver/solver';
 import { HEAVY_WORLDS, gridQuality, hoursOf, illegalBlocks, qualityLine } from '../src/pure/worlds';
 import { activePlacements } from '../src/pure/grid';
-import { loadWorld, savedState, settledText } from './helpers';
+import { loadWorld, savedState, settledText, openProblems } from './helpers';
 
 /** The budget the app itself uses (solver.ts DEFAULTS). */
 const APP_BUDGET_MS = 15_000;
@@ -47,15 +47,17 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
       expect(bar.length).toBeGreaterThan(20);
       if (!world.want.solved) {
         await expect(page.locator('.reason-bar')).toContainText('yerleşemedi');
-        await expect(page.locator('.reason-bar')).toContainText('Ayrıntı: Kontrol sekmesi.');
+        await expect(
+          page.locator('.reason-bar').getByRole('button', { name: 'Ayrıntı', exact: true }),
+        ).toBeVisible();
       }
       if (world.want.reasonLike !== undefined) {
         await expect(page.locator('.reason-bar')).toContainText(world.want.reasonLike);
       }
 
-      // The page never froze: a tab click still answers.
-      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-      await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+      // The page never froze: the status chip still opens its list.
+      await openProblems(page);
+      await expect(page.getByRole('dialog').getByRole('button', { name: /^Sorunlar/ })).toBeVisible();
     });
   }
 
@@ -64,7 +66,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
     await loadWorld(page, world.state);
     await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     // If the search held the main thread this would time out instead of answering.
-    await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
+    await expect(page.locator('.topbar .health')).toBeEnabled();
     // `exact: true`, and the name is the WORD: the button carried a literal "■"
     // in its label until the strip was standardised on symbol-plus-word, and a
     // test naming the glyph was naming a drawing (pitfall 49).
