@@ -19,7 +19,8 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-15 akşam. Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
+Son güncelleme: 2026-11-15 akşam. 2026-11-16: `sade/asama-1` dalında Sadeleşme aşama 1 yazıldı,
+birleşmedi (aşağıda tarihli girdi, TODO SD8). Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
 olduğu gibi aşağıda, "2026-11-15 · Önceki 'Şu an'" girdisinde.
 
 **Sürüm.** 2.2.0 sahada (2026-09-26). Üstüne çok iş birikti ve yayınlanmadı (CHANGELOG
@@ -85,6 +86,73 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
+
+Alp önerinin sekiz kararını da onayladı (DECISIONS "Sadeleşme (Alp onayladı, K1–K8)"). Bu
+dal yalnız aşama 1: kararlardan bağımsız sakinleştirme ve K4'ün yeni adları. Aşama 2 (kişi
+sayfası) ve 3 (beş sekme, Plan + Seçenek, Kontrol çipe, Sığdır ve Geçici görünüm, Eski hâline
+dön) bunun üstüne gelir; `common/More.tsx` (Daha fazla), `common/Help.tsx` (`Help`,
+`HelpHead`) ve "dolu yalnız `.btn.primary`" kuralı yeni sekmelerde aynen kullanılsın diye
+ortak yazıldı.
+
+**Yapılan.** Her ekranda tek dolu düğme (Programı yap, Ekle, Yazdır); basılı seçim bir
+segment. Her şeridin sağ ucunda Daha fazla (Program: Yeniden yap, Seçenek, Renk, Yoğunluk,
+toplu sabitleme, geçici görünüm, Programı boşalt; Kontrol: üç yük tablosu; Müsaitlik:
+darlık ve saatler; Çıktı: Renkli bas; Ayarlar: Planlar ve yedek, Hakkında; Okul ve Dersler:
+oraya giden kısayollar). Üst çubukta yalnız Dosya ▾, sekmeler, çip, okulun adı (ikinci plan
+olunca seçici), Geri al, Kaydet ve ?; tema yalnız Görünüm'de, şerit katlama Görünüm'de ve
+Ctrl+K'de, Ayarlar'da şerit katlı da çizilir. Kaydırınca gizlenme varsayılanı kapalı; açıkça
+"acik" yazılmış makine korunuyor. Yardım cümleleri panel başlığının ?'inde. Tekrarlanan
+sayılar, Haftanın doluluğu, Boş kalan sınıf saati ve "çözücü" sözü kalktı; Teknik bilgiler ve
+Yenilikler katlı (nokta notlar açılınca söner). Kontrol tam dizili haftada "Program tamam"
+diyor. Yeni adlar beş dilde (K4a, K4b; sürüm notları tarihsel kaldı). Başlarken beş iş, bitince
+tek bağlantı. Ctrl+K işleri buluyor. Liste satırının simge düğmesi "Ayrıntı" yazıyor. Seçili
+sekme tek ve nötr.
+
+**Ölçüm (önce `origin/main` 78f1062 → sonra bu dal, örnek okul, 1920×1080, Playwright
+Chromium).** Betikler `denetim3/yuk/olc.mjs` ve `denetim3/envanter/crawl.cjs`'nin kopyaları
+(oturumun scratch klasörü, `asama1/`); "sonra"da Ayarlar'ın iki seyrek bölümü Daha fazla'dan
+açılıyor, Kontrol'ün yük görünümleri ölçülmedi. Görünen kontrol: ekranda görünen düğme, girdi
+ve seçiciler (ızgara ve müsaitlik hücreleri hariç). Kelime ve yardım cümlesi `olc.mjs`'in
+saydığı; Okul'dan Çıktı'ya kadar iki cümle örnek okulun "yüklendi" bildirimi, iki ölçümde de.
+
+| Ekran | Görünen kontrol | Kelime | Yardım cümlesi |
+|---|---|---|---|
+| Okul / Derslikler 8 | 63 → 60 | 168 → 163 | 6 → 5 |
+| Okul / Branşlar 21 | 80 → 81 | 173 → 166 | 7 → 6 |
+| Okul / Öğretmenler 25 | 194 → 204 | 280 → 278 | 10 → 7 |
+| Okul / Sınıflar 20 | 117 → 121 | 209 → 219 | 7 → 6 |
+| Müsaitlik | 51 → 47 | 203 → 181 | 8 → 6 |
+| Dersler / Sınıftan | 90 → 87 | 152 → 138 | 7 → 6 |
+| Dersler / Öğretmenden | 77 → 74 | 129 → 115 | 7 → 6 |
+| Dersler / Genel | 146 → 148 | 807 → 793 | 6 → 5 |
+| Program | 31 → 21 | 79 → 46 | 7 → 5 |
+| Kontrol | 22 → 15 | 84 → 77 | 7 → 7 |
+| Çıktı | 44 → 40 | 273 → 238 | 10 → 7 |
+| Ayarlar / Zil ve günler | 43 → 39 | 202 → 170 | 5 → 2 |
+| Ayarlar / Kurallar | 34 → 31 | 230 → 168 | 13 → 3 |
+| Ayarlar / Görünüm | 48 → 56 | 291 → 124 | 21 → 2 |
+| Ayarlar / Planlar ve yedek | 32 → 30 | 157 → 97 | 8 → 3 |
+| Ayarlar / Hakkında | 26 → 23 | 259 → 69 | 12 → 2 |
+
+Üst çubuk her ekranda 17 kontrolden 12'ye indi, Program şeridi 10'dan 4'e. Okul listelerinde
+görünen kontrol azalmadı, arttı: ekleme panelinin açıklama rayı kalkınca ekrana daha çok satır
+giriyor ve satır başına 12 kontrol duruyor; bu aşama 2'nin işi (K5). Görünüm'de de açıklamalar
+gidince paneller ekrana sığdı, görünen kontrol 48'den 56'ya çıktı ama toplam aynı (57).
+
+**Boyut.** `dist/index.html` 1 301 720 → 1 302 495 bayt, brotli 301 794 → 302 399 bayt (sınırlar
+1 320 000 ve 306 000). Yeni paket yok; `@radix-ui/react-popover` zaten demetteydi.
+
+**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `npm run hizli`
+(yalnız `linuxKur.test.ts`'in iki testi yükten zaman aşımı, tek başına yeşil), `npx vite
+build`, `npm run boyut`. E2E `--workers=2`, sonuç aşağıda. `scripts/agir.sh` bu makinede
+çalışmadı (`flock` yok), Playwright doğrudan koşuldu. Tıklama testi 1920×1080 ve 1366×768'de;
+1366'da üst çubuk tek satır.
+
+**Bilinen.** `kayma.spec.ts`'in "taşan bölümle taşmayan bölüm" testi Görünüm artık 1080'de
+taşmadığı için 900 piksel yüksekliğe alındı; macOS'ta kaydırma çubuğu yer kaplamadığı için
+burada doğrulanamadı, CI'da (Linux) bakılmalı.
 
 ## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
 

@@ -19,7 +19,7 @@ release is incomplete, the entry says so.
 
 ### Added
 
-- "Getting started" on the School tab is now a checklist of nine steps, from the school's name, days and bell times to printing. Each step ticks itself from the plan and has a button that takes you there; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next step, can be closed, and goes away by itself when every step is done. It no longer disappears when the first teacher is added.
+- "Getting started" on the School tab is now a checklist of five tasks: introduce the school (name, days, bell and the four lists), enter the lessons, mark the hours people cannot come, make the timetable, print. Each task ticks itself from the plan and has a button that takes you to its first missing part; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next task and, once everything is done or it is closed, to a single "show the list" link; "?" → Getting started brings it back too. It no longer disappears when the first teacher is added.
 - Lessons warns while you enter them when a class or teacher gets more lesson hours than open hours ("9A: 54 lesson hours, 48 open hours. 6 hours do not fit the week."), and the class or teacher is marked red in the list on the right.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
 - Wherever Mozaik says it needs updating to open a file, a "See the update" button opens Settings → About.
@@ -34,6 +34,11 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- A calmer screen (the first step of a simplification Alp approved on 2026-11-16). Every screen has one filled button, its main job ("Make the timetable", "Add", "Print"), and a "More ▾" menu at the right end of the tool strip that holds what is rarely used, in the same place on every screen: on Program the rebuild, the timetable variants, colour, density, pinning everything and clearing the grid. The top bar holds only the tabs, the status, the school's name, Undo, Save and "?"; "File ▾" has Save, Open, Copy for a new term, Plans and Redo, and "?" has search, keyboard shortcuts, Getting started and About. The theme is set in Settings → Appearance only, folding the tool strip moved there too, and the strip no longer hides itself while you scroll unless you turn that on. The plan picker appears once there is a second plan.
+- Explanations moved behind a "?" beside each panel's heading, so a screen shows at most a sentence or two. Repeated counts, "How full the week is", "Free class hours left" and the solver wording are gone; the storage keys and search threads in About are under a closed "Technical details", and the release notes are folded. Check says "The timetable is complete" once every lesson is placed, instead of "it can be laid out".
+- New names on screen, in all five languages: "Fill automatically (N cards)" is "Make the timetable", "Lay out from scratch" is "Make it again", "Advisor" is "Tips", the rule levels "Blocker / Warning" are "Strict / Preference", "N hours in the tray" is "N hours not placed", and a card is called a lesson.
+- Ctrl+K finds jobs as well as places: typing "print", "save", "open", "copy", "backup", "school name", "theme", "text size" or "make the timetable" does it or opens the one place it is done.
+- The selected tab is one neutral style; colour is kept for teachers, classes and states. A pressed choice is underlined instead of filled.
 - Opening a plan file into an empty plan no longer asks first, because nothing can be lost; opening it over a plan that holds something still asks.
 - After "Add" in Lessons the weekly hours go back to 4 and the split to single hours, so the last lesson's number is not reused by mistake.
 - Adding a teacher without a subject now says "Önce bir branş seçin" (choose a subject first) instead of greying out the button without a word.

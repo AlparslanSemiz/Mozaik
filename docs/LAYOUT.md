@@ -33,22 +33,29 @@ Yedi sekme, bu sırayla. Alt+1'den Alt+7'ye kadar bu sırayla açılırlar.
 Okul yalnız listeleri, Ayarlar yalnız ayarları tutar: dönem başında doldurulan
 şeyle yılda bir dokunulan şey aynı ekranda durmuyor. Dersler kendi sekmesi, çünkü
 en çok kullanılan ekran ve bir sihirbazın dördüncü adımından geçilerek varılmıyor.
-Her sekmenin bir bölüm rengi var ([DESIGN.md](DESIGN.md)). Üst bar dar kalınca (%100'de
+Seçili sekme tek ve nötr bir biçimde çizilir: kâğıt zemin, kontrol kenarı ve accent bir alt
+çizgi (2026-11-16, Sadeleşme). Yedi bölüm rengi bir şey anlatmıyordu, seçili sekmenin sözü zaten
+"neredeyim"i söylüyor; renk yalnız veri (öğretmen ve sınıf kimliği) ve durum için. Üst bar dar kalınca (%100'de
 yaklaşık 1320 piksellik bir barın altında, yani 1366'da yan yana, 1280'de alt alta;
 programın kendi ölçeğiyle birlikte) sekme etiketi simgenin
 altına iner ve bir basamak küçülür; gizlenmez (2026-11-15).
 
 ## Üst çubuk
 
-Soldan sağa: marka işareti, yedi sekme, durum çipi, boşluk, okulun adı ve plan
-seçici, geri al ve ileri al, dosyaya kaydet ve dosyadan aç, ara ve git (Ctrl+K),
-klavye kısayolları, araç şeridi aç kapa, tema.
+Soldan sağa: marka işareti, `Dosya ▾`, yedi sekme, durum çipi, boşluk, okulun adı (ve ikinci
+plan olunca plan seçici), `Geri al`, `Kaydet`, `?`. Başka bir şey yok (2026-11-16, Sadeleşme
+aşama 1); kaldırılanların yeni yeri aşağıda.
+
+- **Dosya ▾** dosyanın her işini bir menüde tutar: Kaydet, Dosyadan aç, Yeni dönem için kopyala (verinin tamamı yeni bir plana, dizilmiş program boş; eski plan olduğu gibi kalır), Planlar ve yedek (Ayarlar'a götürür) ve İleri al (Ctrl+Y). "Eski hâline dön" aşama 3'te buraya girer (K8).
+- **Kaydet** sade bir düğme, dolu değil: her ekranın dolu tek düğmesi o ekranın ana işi.
+- **?** ara ve yap (Ctrl+K), klavye kısayolları, Başlarken'i yeniden açma ve Hakkında.
+- **Tema** yalnız Ayarlar → Görünüm'de; Ctrl+K'nin "tema"sı oraya götürür. **Şerit katlama** Ayarlar → Görünüm'de ve Ctrl+K'de; Ayarlar'da şerit katlı olsa da çizilir, çünkü bölümler oradan seçiliyor ve açmanın yolu da orada.
 
 - **Marka işareti** bir düğme değil ve `aria-hidden`, çünkü programın adı zaten belge başlığı. `<img src>` değil satır içi SVG, çünkü dosya dışarıdan bir şey istemiyor, ve boyu `--ui-scale`'i izliyor.
 - **Durum çipi** her sekmede sorunu adıyla söyler ve Kontrol'e götürür.
-- **Plan seçici** tek plan varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve ancak iki plan olunca beliren bir kutu planların var olduğunu öğretemezdi. Plan yaratan, adlandıran ve silen her şey Ayarlar → Planlar ve yedek'te, çünkü üst çubuk bir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak kalıyor. `Sıfırla` da bu yüzden Ayarlar'da.
-- **Dosyaya kaydet** ve **dosyadan aç** üst çubukta, çünkü veri kaybına karşı önlem görünür olmalı. İkisi tek bir plan yazar ve okur, bir paketi reddedip yolunu gösterir (tuzak 30).
-- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı; sekme etiketleri simgenin altına iner ve "Dosyaya kaydet" ile "Dosyadan aç" iki satıra kırılır. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Bu da yetmezse çubuk ikinci bir satıra geçer; sayfa yana kaymaz. Sekmeler feda edilmez (tuzak 48).
+- **Plan seçici** yalnız ikinci bir plan olunca görünür (2026-11-16): tek planda "Plan 1" kimsenin sormadığı bir soruyu cevaplıyordu, ve planların yeri bir tık ötede, Dosya ▾ → Planlar ve yedek. Plan yaratan, adlandıran ve silen her şey Ayarlar → Planlar ve yedek'te, çünkü üst çubuk bir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak kalıyor. `Sıfırla` da bu yüzden Ayarlar'da.
+- **Kaydet** ve **Dosya ▾ → Dosyadan aç** tek bir plan yazar ve okur, bir paketi reddedip yolunu gösterir (tuzak 30). Kaydet görünür kalır, çünkü veri kaybına karşı önlem görünür olmalı.
+- Çubuk daralırken önce boşluk, sonra çipin cümlesi feda edilir, sonra belge adı; sekme etiketleri simgenin altına iner. Çipin cümlesinin yerine iki kelime kalır ("3 sorun", "45 saat havuzda"): yalnız noktası kalan renkli bir hap aç kapa düğmesi gibi okunuyordu (2026-11-15), ve ekran meşgulken yok olan bir durum güvenilmez bir durum. Bu da yetmezse çubuk ikinci bir satıra geçer; sayfa yana kaymaz. Sekmeler feda edilmez (tuzak 48).
 
 ## Araç şeridi
 
@@ -56,12 +63,19 @@ klavye kısayolları, araç şeridi aç kapa, tema.
 gibi). Sekmeler bir süre soldaki bir rayda durdu, ve ray Program dışındaki
 sekmelerde harcanacak yeri olmayan bir genişliği götürüyordu. Şerit kendi satırı
 olduğu için bir satıra mal oluyor, ve bu yüzden katlanabiliyor: katlanınca tamamen
-gider ve yerini ızgaraya bırakır. Katlama düğmesi üst çubukta, çünkü katlanmış bir
-şeridin kendi düğmesine yeri yok. Şerit okurken kendiliğinden de çekilir, bu
-Ayarlar → Görünüm'den kapatılır.
+gider ve yerini ızgaraya bırakır. Katlama Ayarlar → Görünüm'de ve Ctrl+K'de (2026-11-16);
+Ayarlar'da şerit katlı da olsa çizilir. Şeridin okurken kendiliğinden çekilmesi Ayarlar →
+Görünüm'den açılır ve 2026-11-16'dan beri seçilmedikçe kapalı: okurken düğmeler
+kayboluyordu. Açıkça seçmiş bir makine seçimini korur.
 
 Şeride "şu an neye bakıyorum" ve "tek tıkla ne yaparım" konur. Liste, sayaç ve
-açıklama panelde durur.
+açıklama panelde durur. Her ekranda **tek bir ana düğme** dolu çizilir (Program'da `Programı
+yap`, Okul listelerinde ve Dersler'de `Ekle`, Çıktı'da `Yazdır`); basılı seçim düğmeleri dolu
+değil, bir segmenttir. Az kullanılan her şey her şeridin sağ ucundaki **Daha fazla ▾**
+menüsünde (`common/More.tsx`), her ekranda aynı yerde ve aynı biçimde: gerçek bir düğme ve
+menü, oklarla gezilir, Esc kapatır, odak düğmeye döner. Bir panelin açıklaması başlığının
+yanındaki **?**'in arkasında (`common/Help.tsx`, `HelpHead`); ekranda her an en çok iki yardım
+cümlesi kalır.
 
 ### Şerit standardı
 
@@ -75,19 +89,19 @@ test koruyamaz.
 5. Şeritteki her kontrol aynı yükseklikte (`--ribbon-h`). Yükseklik şeride değil kontrole verilir, çünkü sabit yükseklikli bir şerit kendine verileni ortalar ve uzun bir düğmeyi saklar.
 6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri bir basamak küçülür ve iç boşlukları daralır, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Son adım 2026-11-15'e kadar kelimeyi yazı boyunu sıfırlayarak siliyordu (ad erişilebilirlik ağacında kalıyordu, tuzak 56); %150'de 1024 piksel ya da %200'de şerit yalnız simgeydi ve az gören biri için ezberlenecek bir simge kelimeden zordu. En dar kutuda (%200, 960 piksel) bir iki uzun kelime üç noktayla kısalabilir. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
 
-Seçili bir seçeneği renk söyler, yazı kalınlığı değil: eşit sütunlu bir grupta
+Seçili bir seçeneği zemin ve alt çizgi söyler, yazı kalınlığı değil: eşit sütunlu bir grupta
 kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydırır
 (tuzak 94).
 
 ### Sekmelerin şeritleri
 
-- **Okul.** `Liste`: Derslikler, Branşlar, Öğretmenler, Sınıflar, her birinin sayısıyla.
-- **Müsaitlik.** `Kim`: Öğretmen, Sınıf, Derslik. `Açık olan`: seçili varlık. Sağda `Göster`: Haftanın darlığı, Saatler.
-- **Dersler.** `Yöntem`: Öğretmenden, Sınıftan, Genel. `Açık olan`, Genel'de yok. Sağda `Toplam`: ders ve saat.
-- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Otomatik diz (N kart)` ve `Baştan diz`, koşarken yerlerine `Durdur`), `Seçenek` (seçenekler menüsü: seçim, bu seçeneğin kopyası, boş seçenek, yeniden adlandır, seçeneği sil). Sağda `Renk` (öğretmene, sınıfa, dersliğe ya da branşa göre), `Yoğunluk` (Ferah, Rahat, Sığdır), `Izgara` (İşlemler menüsü: tüm programı sabitle ya da sabitlemeleri kaldır, geçici görünüm listesi ve tümünü geri yükle, programı boşalt). Görünüm en solda, çünkü orası onun eski yeri. Alternatifler ve ızgara işlemleri menüde, çünkü düz gruplar olarak %150'de şerit kutusuna sığmıyorlardı. Yoğunluğun bir kopyası şeritte, çünkü ızgaranın ne kadarının görüldüğü ızgaraya bakarken verilen bir karar.
-- **Kontrol.** `Göster`: Sorunlar (N), Danışman (N), Öğretmenler, Sınıflar, Derslikler. Sağda `Durum`: engel ve uyarı sayıları. Engel, haftayı olduğu hâliyle imkânsız yapan her şeyi sayar: Engel seviyesinde çiğnenen kural, kapalı saatte kalmış ders ve koyacak yeri kalmamış ders, yani çipin kırmızı olduğu her şey. Kapalı saatte ders varken Kontrol'ün hükmü de "Sorun görünmüyor" demez, kaç dersin kapalı saatte kaldığını söyler. Şerit raporun hangi bölümünün görüneceğini seçer.
-- **Çıktı.** `İçerik`: Öğretmenler, Sınıflar, İkisi de. `Renk`: Renkli bas.
-- **Ayarlar.** `Bölüm`: beş bölüm. Sağdaki grup bölüme göre değişir: Görünüm'de tema, Zil ve günler'de hafta, Kurallar'da seviyeler, Planlar ve yedek'te açık plan, Hakkında'da sürüm.
+- **Okul.** `Liste`: Derslikler, Branşlar, Öğretmenler, Sınıflar, her birinin sayısıyla; bu ekranda sayılar yalnız burada. Daha fazla: Okul adını ve zili gir, Kurallar, Başlarken listesini göster.
+- **Müsaitlik.** `Kim`: Öğretmen, Sınıf, Derslik. `Açık olan`: seçili varlık. Daha fazla: Haftanın darlığı, Saatler (işaretli menü kalemleri).
+- **Dersler.** `Yöntem`: Öğretmenden, Sınıftan, Genel. `Açık olan`, Genel'de yok. Toplam listenin başlığında. Daha fazla: Kapalı saat işaretle, Kurallar.
+- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Programı yap`, ekranın tek ana düğmesi; koşarken yerinde `Durdur`), ve ikinci bir seçenek varsa adı. Daha fazla: Yeniden yap; Seçenek ▸ (seçim, bu seçeneğin kopyası, boş seçenek, yeniden adlandır, seçeneği sil); Renk ▸ (öğretmene, sınıfa, dersliğe ya da branşa göre); Yoğunluk ▸ (Ferah, Rahat, Sığdır, aşama 3'te kalkar); tüm programı sabitle ya da sabitlemeleri kaldır; bir şey gizlenmişse geçici görünüm listesi ve tümünü geri yükle; programı boşalt. Görünüm en solda, çünkü orası onun eski yeri. `Yeniden yap` gündelik düğmenin yanında durmuyor: yerleşmiş bir haftayı tek tıkla boşaltıp yeniden yapmak yanlışlıkla basılacak bir düğme değil.
+- **Kontrol.** `Göster`: Sorunlar (N), İpuçları (N). Daha fazla: Öğretmen, Sınıf ve Derslik yükleri (Okul'un Özet'iyle aynı tablolar). Engel ve uyarı sayılarını şerit artık tekrar etmiyor, çip ve Sorunlar söylüyor. Kapalı saatte ders varken Kontrol'ün hükmü de "Sorun görünmüyor" demez, kaç dersin kapalı saatte kaldığını söyler; hafta tamamen dizilmişse "Program tamam" der. Şerit raporun hangi bölümünün görüneceğini seçer.
+- **Çıktı.** `İçerik`: Öğretmenler, Sınıflar, İkisi de. Daha fazla: Renkli bas.
+- **Ayarlar.** `Bölüm`: Zil ve günler, Kurallar, Görünüm; Planlar ve yedek ile Hakkında Daha fazla'da (ikisine de üst çubuktan da gidilir: Dosya ▾ ve ?), yeni bir sürüm notu varsa Daha fazla düğmesi nokta taşır. Sağda bir okuma: Kurallar'da kesin, tercih ve kapalı sayıları, Planlar ve yedek'te açık plan, Hakkında'da sürüm.
 
 ## İçerik düzeni
 
@@ -116,7 +130,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 ## Okul
 
 - **Dört liste, bu sırayla:** Derslikler, Branşlar, Öğretmenler, Sınıflar. Sıra bağımlılık zinciri: sınıf bir dersliği gösterir, öğretmen listeden bir branş seçer. Her liste her an açık, kilitli bir sihirbaz değil, ve önlerinde sıra numarası yok. Sayaç kalıyor, çünkü 0 gösteren liste eksiğin nerede olduğunu söylüyor.
-- **Her liste ekranı iki kardeş panel:** bir ekleme paneli (`.panel.add-panel`: işi adlandıran başlık, tek cümlelik açıklama, form ve Excel'den yapıştır) ve sayılı başlıklı liste paneli (`.panel.step-panel`: arama şeridi ve tablo). Sayılı başlık saydığı listeyle birlikte duruyor, yani ekranda hâlâ tek bir `--fs-xl` başlık var. Yapıştır düğmesi panelin başlığında, kutusu formun altında. Branşlar'da yapıştır yok. `e2e/kurulum.spec.ts` 44 sırayı ve iki ayrı kutu olduğunu ölçer.
+- **Her liste ekranı iki kardeş panel:** bir ekleme paneli (`.panel.add-panel`: işi adlandıran başlık ve yanında açıklamasını tutan `?`, form ve Excel'den yapıştır) ve sayılı başlıklı liste paneli (`.panel.step-panel`: arama şeridi ve tablo). Sayılı başlık saydığı listeyle birlikte duruyor, yani ekranda hâlâ tek bir `--fs-xl` başlık var. Yapıştır düğmesi panelin başlığında, kutusu formun altında. Branşlar'da yapıştır yok. `e2e/kurulum.spec.ts` 44 sırayı ve iki ayrı kutu olduğunu ölçer.
 - **Sağda Özet**, her liste için ayrı bir başlıkla.
 - **Yeni bir proje boş branş listesiyle doğar.** Gömülü branşlar bir teklif olarak Branşlar adımının sağındaki panelde durur ve tek tıkla listeye girer.
 - **Branşlar da elle sıralanır**, ve Öğretmenler'deki branş seçimi bu sırada gelir. `settings.subjects` bir seviye derinde olduğu için `reorderList`'te kendi dalı var. Branş tablosunda iki gövde var: okulun kendi listesi (tutamaklı) ve yalnız bir öğretmende duran, listede olmayan branşlar (tutamaksız), çünkü satır sürükleme hedefi gövde içindeki indisle buluyor.
@@ -124,7 +138,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 - **Branş yazılmaz, seçilir**, ve "Yeni branş…" ile oracıkta eklenir. Serbest metin "Matemtik"i sessizce ikinci bir branş yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Kullanılan bir branş silinemez, mesaj kimin kullandığını sayar.
 - **Öğretmenin e-postası Öğretmenler tablosunda bir sütun**, Cinsiyet'ten sonra, kural kutularından önce. Yazıldığı gibi durur; tek bir adrese benzemiyorsa kenarı kırmızı ve üstüne gelince ne yazılacağı söylenir. Sütun dar kalır, ama kutuya tıklanınca kutu satırın üstünde adresin boyunda açılır, gövde yazı boyunda; sütun ve komşuları yerinden oynamaz. Ekleme formunda da bir E-posta kutusu var (isteğe bağlı, ilk harften geniş), Excel'den yapıştırmada altıncı sütun; adres biçimindeki bir hücre hangi sütunda olursa olsun e-posta sayılır.
 - **Renk bir sayı olarak değil renk olarak seçilir.** Satır başındaki düğme rengin kendisini gösterir, tıklayınca 36 rengin tamamı 6×6 bir `<dialog>`'da açılır ve seçili renk çerçevelidir.
-- **Başlarken** (2026-11-15), Okul'un en üstünde dokuz adımlık bir liste: Okul adı ve saatler, Derslikler, Branşlar, Öğretmenler, Sınıflar, Dersler, Müsaitlik, Otomatik diz, Yazdır. Her adım plandan işaretlenir (okul adı yazılı mı, liste dolu mu, kapalı saat ya da yerleşmiş kart var mı; Yazdır bu bilgisayarda bir kez basılınca) ve her birinin oraya götüren bir düğmesi var; düğmenin sözü yapılacak işi söyler, sekmenin adını değil (tuzak 49). İlk adım varsayılan haftayı yazar ("Salı–Pazar, günde 12 ders"), yanlışsa görülsün diye. Liste dokuz kartlık bir ızgara; dersi olan planda kendiliğinden tek satıra iner (`Sıradaki: …` ve o adımın düğmesi), `Listeyi daralt` ve `Listeyi kapat` bu bilgisayarda hatırlanır (`ders-programi-ilk-adimlar`), ve her adım bitince liste kendiliğinden gider. Hiç öğretmen ve sınıf yokken altında hazır bir okul yükleme teklifi durur (`Örnek okulu yükle`, `Bir daha gösterme`), taslak varsa `Taslaktan başla`; liste kapatılsa da teklif kalır. Görüldü işareti ilk çizimde değil bir eylemde yazılır, okunmamış bir teklif bir yenilemeyi atlatsın diye. Örnek okulun kalıcı yeri Ayarlar → Hakkında: orada düğme hep durur, proje doluyken sorusu ne kaybedileceğini sayar ve kırmızıdır.
+- **Başlarken** (2026-11-15, beş işe indi 2026-11-16), Okul'un en üstünde beş işlik bir liste: Okulu tanıt (ad, günler, zil ve dört liste), Dersleri gir, Gelemediği saatleri işaretle, Programı yap, Yazdır. Her iş plandan işaretlenir (okul adı yazılı ve dört liste dolu mu, kapalı saat ya da yerleşmiş ders var mı; Yazdır bu bilgisayarda bir kez basılınca) ve her birinin oraya götüren bir düğmesi var; Okulu tanıt'ınki ilk eksik parçaya gider (ad, derslik, branş, öğretmen, sınıf). Düğmenin sözü yapılacak işi söyler, sekmenin adını değil (tuzak 49). İlk iş varsayılan haftayı yazar ("Salı–Pazar, günde 12 ders"), yanlışsa görülsün diye. Düğmeleri sade: ekranın dolu tek düğmesi listenin `Ekle`'si. Dersi olan planda liste kendiliğinden tek satıra iner (`Sıradaki: …` ve o işin düğmesi), `Listeyi daralt` ve `Listeyi kapat` bu bilgisayarda hatırlanır (`ders-programi-ilk-adimlar`). Bütün işler bitince ya da kapatılınca liste tek bir bağlantıya iner (`Başlarken listesini göster`); `?` → Başlarken ve Okul'un Daha fazla'sı da onu açar. Dersi olan bir plan Program'da açılır. Hiç öğretmen ve sınıf yokken altında hazır bir okul yükleme teklifi durur (`Örnek okulu yükle`, `Bir daha gösterme`), taslak varsa `Taslaktan başla`; liste kapatılsa da teklif kalır. Görüldü işareti ilk çizimde değil bir eylemde yazılır, okunmamış bir teklif bir yenilemeyi atlatsın diye. Örnek okulun kalıcı yeri Ayarlar → Hakkında: orada düğme hep durur, proje doluyken sorusu ne kaybedileceğini sayar ve kırmızıdır.
 
 ## Müsaitlik
 
@@ -198,12 +212,12 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 
 ### Otomatik dizme
 
-Şeritte iki düğme var: `Otomatik diz (N kart)` bekleyen dersleri dizer, `Baştan diz`
+Şeritte `Programı yap` bekleyen dersleri dizer, Daha fazla'daki `Yeniden yap`
 (sormadan, bildirimi `Geri al` taşır) ızgarayı boşaltıp yeniden dizer. Bir ayarı yok: "sabaha yay" gibi tercihler
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de
 duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yazılır:
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
-geri al adımı. Sonucun satırı ("Program dizildi…", "Öneri uygulandı…") yalnız program
+geri al adımı. Boştaki satır tek cümle söyler ("Yerleşmiş dersi sürükleyerek taşıyın."), satırların ne olduğu ve haftanın sığmadığı yanındaki `?`'te. Sonucun satırı ("Program yapıldı…", "Öneri uygulandı…") yalnız program
 o koşunun bıraktığı hâldeyken durur: Ctrl+Z ya da başka bir değişiklikten sonra satır
 ızgaranın ne olduğunu söyleyen boş hâline döner. Okul listelerindeki "… sıraya
 taşındı." cümlesi de aynı kuralla susar. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
@@ -281,7 +295,7 @@ parçalı.
 Bir öğretmen ya da sınıf satırını veya bir günü, bu oturum ve bu plan için
 soluklaştırır ya da gizler. Gizli satırlar ızgaradan ve havuzdan çıkar, maskelenmiş
 bloklar sürüklenmez ve kaldırılmaz, kapsam dışındaki bir güne bırakılamaz, ve
-otomatik dizme onları dışarıda bırakır. Sağ tık menüsünden ve şeridin İşlemler
+otomatik dizme onları dışarıda bırakır. Sağ tık menüsünden ve şeridin Daha fazla
 menüsünden yönetilir.
 
 ## Kontrol
@@ -319,13 +333,13 @@ her biri kartı havuzda işaretler; sebep bir kişinin ya da yerin açık saati 
 
 ## Ayarlar
 
-Beş bölüm: `Zil ve günler · Kurallar · Görünüm · Planlar ve yedek · Hakkında`.
+Beş bölüm: `Zil ve günler · Kurallar · Görünüm` şeritte, `Planlar ve yedek · Hakkında` şeridin Daha fazla'sında.
 
 - **Zil ve günler:** okul adı, hangi günler ders olduğu, zil saatleri, ve sağda zil önizlemesi. Dersleri dizili bir günü kaldırmak ya da günlük ders sayısını düşürmek önce bir soru sorar: o gün ya da saatlerde kaç saatin yerleşmiş, kaçının sabitli olduğunu ve derslerin havuza döneceğini söyler. Vazgeçilince kutu eski değerine döner. Günlük ders sayısını yalnız `Günlük ders sayısı` kutusu belirler, `Ders adları` yalnız ad verir: adı yazılmayan saat numarasını alır, ders sayısından fazla ad kullanılmaz ve kutunun altında bunu söyleyen bir satır çıkar. Başlangıç saati iki açılır liste (saat ve beşer dakika), `<input type="time">` değil: o girdi AM ya da PM'i tarayıcının yereline göre seçer ve boşaltılınca günü sessizce 00:00'a alır.
 - **Kurallar:** okul geneli sınırlar ve seviyeleri, sağda canlı ihlal listesi.
-- **Görünüm** okulu değil makineyi tarif eder: tema (Açık, Koyu), yazı büyüklüğü (%80 ile %150 arası, beşer adımlık düğmeler), yoğunluk (ızgara ve arayüzün geri kalanı için, tek panelde iki `role="group"` olarak ayrı ayrı Ferah, Rahat, Sığdır), araç şeridinin kaydırınca gizlenmesi, hareket (Tam, Az, Kapalı) ve dil. Sağda örnek bir tablo. Yazı büyüklüğü bir kaydırıcı değil düğmeler, çünkü yasal değerler sayılı ve bir kaydırıcı olmayan bir süreklilik uydururdu. Bu ayarların hiçbiri kâğıdı etkilemez. Temanın düğmesi üst çubukta da var: orası kısayol, burası envanter.
+- **Görünüm** okulu değil makineyi tarif eder: tema (Açık, Koyu), yazı büyüklüğü (%80 ile %150 arası, beşer adımlık düğmeler), yoğunluk (ızgara ve arayüzün geri kalanı için, tek panelde iki `role="group"` olarak ayrı ayrı Ferah, Rahat, Sığdır), araç şeridi (görünsün ya da gizlensin, ve kaydırınca gizlenmesi), hareket (Tam, Az, Kapalı) ve dil. Her panelin açıklaması başlığının `?`'inde. Sağda örnek bir tablo. Yazı büyüklüğü bir kaydırıcı değil düğmeler, çünkü yasal değerler sayılı ve bir kaydırıcı olmayan bir süreklilik uydururdu. Bu ayarların hiçbiri kâğıdı etkilemez. Tema yalnız burada (2026-11-16).
 - **Planlar ve yedek**, "işim nerede duruyor ve dışarı nasıl çıkar": plan kitaplığı (yarat, adlandır, sil, taslak), "Nereye kaydedilsin" (seçilen klasöre bütün planlar ve günlük yedek), "Bütün planlar tek dosyada" (paket), oturum yedekleri. Klasör paneli paketin üstünde, çünkü bir alışkanlık isteyen çareden önce hiçbir şey istemeyen çare gelir.
-- **Hakkında**, "bu hangi kopya": sürüm ve güncelleme, Yenilikler paneli, "Veriler nerede" tablosu, ve açık planın yerine geçen ya da onu boşaltan iki işlem (örnek veri ve sıfırla). "Veriler nerede" gerçek anahtar adlarını ve boyutlarını gösterir, ve verinin bu tarayıcıya ve bu bilgisayara ait olduğunu, "tarama verilerini temizle"nin onu sildiğini ve taşınan tek şeyin dosya olduğunu tek bir cümleyle söyler. "Tarayıcıda saklanıyor" demek bunu söylemiyordu.
+- **Hakkında**, "bu hangi kopya": sürüm ve güncelleme, katlı bir Yenilikler paneli, katlı "Teknik bilgiler" (öneri aramasının iş parçacıkları, adres ve "Veriler nerede" tablosu; 2026-11-16'dan beri, çünkü geliştiricinin okuması babanın ekranındaki en uzun paneldi), ve açık planın yerine geçen ya da onu boşaltan iki işlem (örnek veri ve sıfırla). "Veriler nerede" gerçek anahtar adlarını ve boyutlarını gösterir, ve verinin bu tarayıcıya ve bu bilgisayara ait olduğunu, "tarama verilerini temizle"nin onu sildiğini ve taşınan tek şeyin dosya olduğunu tek bir cümleyle söyler. "Tarayıcıda saklanıyor" demek bunu söylemiyordu.
 
 `Data.tsx` son iki bölümü birlikte çizer, çünkü paketi yazan işleyiciler kitaplığı
 okuyanlarla aynı.
@@ -336,5 +350,6 @@ okuyanlarla aynı.
 - **Geri alınabilen silme sormaz** (TODO SD1): öğretmen, sınıf, derslik, ders, kullanılmayan branş, seçenek, `Programı boşalt` ve `Baştan diz` hemen olur, ve bildirim ne gittiğini sayar ve `Geri al` taşır: "A dersliği silindi, 4 sınıfın dersliği boşaldı (410, 411, 510, 511). Bu sınıflar artık aynı saate konabilir." Bildirim 10 s durur, fare üstündeyken ya da odak içindeyken süresi işlemez; `Geri al` yalnız en yeni bildirimde, arada başka bir değişiklik olduysa bunu söyler. `Sil`'den sonra odak sonraki satırın `Sil`'ine geçer (son satırda öncekine, liste boşaldıysa ekleme kutusuna), ve Ctrl+Z ekran okuyucuya neyi geri aldığını söyler. `Her şeyi sil` ve dolu planın yerine örnek okul bir kez sorar, sonra aynı bildirimi verir. Dosyadan aç'ın sorusu dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
 - **Olan biteni** kısa bir bildirim satırı söyler (`useToast()`), ve bir hamlede ne kaybedildiyse adıyla yazar.
 - **Boş ekranlar yönlendirir:** "Henüz ders yok" değil, nereden başlanacağı, ve oraya götüren bir düğme (2026-11-15; önceden sekme adları kalın yazılıp tıklanmıyordu, [DENETIM.md](DENETIM.md), P19). Program, Kontrol, Çıktı ve Dersler eksik ilk adımın düğmesini (`Öğretmen ekle`, `Sınıf ekle`, `Ders gir`) ve okul adı boşken `Okul adını ve zili gir`i gösterir, Müsaitlik seçili türün `… ekle`sini (`common/NextStep.tsx`, `common/GoTo.tsx`). "Mozaik'i güncelleyin" diyen her yer (Dosyadan aç, Tümünü dosyadan aç, açılıştaki şerit) Ayarlar → Hakkında'ya götüren `Güncellemeye bak` düğmesini taşır. Boş bir plana dosya açmak soru sormaz: kaybedilecek bir şey yok (`isEmptyPlan`).
-- **Ctrl+K komut paleti** her yere gider, her şeyi bulur, sık yapılan işleri yapar. `?` tuşu klavye kısayolları ekranını açar.
+- **Ctrl+K komut paleti** her yere gider, her şeyi bulur, ve işleri de bulur (2026-11-16): "yazdır", "kaydet", "aç", "kopya", "yedek", "okul adı", "tema", "yazı boyu", "programı yap" yazınca o işi yapar ya da yapıldığı tek yeri açar. `?` tuşu klavye kısayolları ekranını açar; üst çubuktaki `?` menüsü de.
+- **Yardım "?"** (`common/Help.tsx`): panel başlığının yanındaki yuvarlak düğme, açıklamayı bir açılır kutuda gösterir; Esc ve dışarı tıklama kapatır, odak düğmeye döner. Kapalıyken açıklama ne ekranda ne erişilebilirlik ağacında.
 - **Varlık paneli** bir öğretmenin, sınıfın ya da dersliğin kendi haftasını gösterir ve onu düzenler. Satır başından, kartın menüsünden ve paletten açılır, ve sağdan kayar, solmaz, çünkü altından iki bin hücre geçiyor.
