@@ -54,8 +54,11 @@ import {
   useUndoIf,
 } from '../common';
 import { PrintOne, SendTeacher } from '../print';
+import { DayDialog } from '../dated';
+import { addAway, coverCount } from '../../pure/dated';
+import { dayStamp } from '../../leaf/app';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Printer, Trash2, X } from 'lucide-react';
+import { CalendarX, Printer, Trash2, X } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { GENDERS, NewClass, NewTeacher } from './NewPerson';
 import { KIND_ICON } from './steps';
@@ -96,6 +99,8 @@ export function Inspector({
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const [printing, setPrinting] = useState(false);
+  /** "Gelmiyor…": the date page, this person away on it. */
+  const [awayOn, setAwayOn] = useState<string | null>(null);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const emailBox = useRef<HTMLInputElement>(null);
   // Where the keyboard goes after Sil: the next person's name in the list,
@@ -206,6 +211,7 @@ export function Inspector({
     setShown(target);
     setWeekOpen(null);
     setPrinting(false);
+    setAwayOn(null);
   }
   const week = useMemo(
     () => (target !== null && target.id !== '' ? entityWeek(state, target.kind, target.id) : null),
@@ -693,6 +699,7 @@ export function Inspector({
     );
   }
 
+  const covers = coverCount(state, target?.id ?? '', dayStamp(new Date()));
   const fresh = target !== null && target.id === '';
   const missing = target !== null && !fresh && view === null;
   const printable = target !== null && !fresh && !missing && target.kind !== 'room';
@@ -757,6 +764,17 @@ export function Inspector({
                       <Printer size={16} strokeWidth={2} aria-hidden="true" />
                       {t('Yazdır')}
                     </button>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const today = dayStamp(new Date());
+                        change((d) => addAway(d, target.id, today));
+                        setAwayOn(today);
+                      }}
+                    >
+                      <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
+                      {t('Gelmiyor…')}
+                    </button>
                     {teacherOf !== undefined && (
                       <SendTeacher
                         key={teacherOf.id}
@@ -765,6 +783,11 @@ export function Inspector({
                         onMissing={() => emailBox.current?.focus()}
                       />
                     )}
+                    {teacherOf !== undefined && covers[0] > 0 && (
+                      <span className="sheet-said hint">
+                        {t('İkame: bu hafta {m}, toplam {n} saat', { m: covers[1], n: covers[0] })}
+                      </span>
+                    )}
                   </div>
                 )}
                 <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
@@ -772,6 +795,14 @@ export function Inspector({
                 </Dialog.Close>
               </div>
               {body(target)}
+              <DayDialog
+                state={state}
+                change={change}
+                date={awayOn}
+                setDate={setAwayOn}
+                person={target.id}
+                onClose={() => setAwayOn(null)}
+              />
               {printing && printable && (
                 <PrintOne
                   state={state}

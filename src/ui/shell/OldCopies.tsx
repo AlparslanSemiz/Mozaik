@@ -9,10 +9,9 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { gunYazisi } from '../../leaf/app';
-import { WEEK, dayLabel } from '../../leaf/lang';
 import type { State } from '../../leaf/model';
 import { dailyCopies, isoDay } from '../../platform/storage';
+import { dayName } from '../../pure/dated';
 import { activePlacements } from '../../pure/grid';
 import { T, useReturnFocus, useT } from '../common';
 
@@ -23,13 +22,6 @@ interface Props {
   state: State;
   /** `day` as the reader sees it: "Salı 12 Kasım". */
   restore: (copy: State, day: string) => void;
-}
-
-/** "Salı 12 Kasım", the weekday read off the date itself. */
-function dayName(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  const weekday = new Date(Date.UTC(y!, m! - 1, d)).getUTCDay();
-  return gunYazisi(iso, dayLabel(WEEK[(weekday + 6) % 7]!));
 }
 
 export default function OldCopies({ open, onClose, planId, state, restore }: Props) {

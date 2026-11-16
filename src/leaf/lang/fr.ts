@@ -1919,6 +1919,21 @@ const FR: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "Le plan est revenu à son état du {gun}.",
   "günlük kopya": "copie quotidienne",
   "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
+  // ------------------------------------------- the dated layer (DayDialog.tsx)
+  "Boş geçsin": "Classe libre",
+  "Bu gün değişen ders yok.": "Aucun cours ne change ce jour.",
+  "bu hafta {n}": "{n} cette semaine",
+  "Bu hafta: {gunler}, {n} değişiklik": "Cette semaine : {gunler}, {n} {n:changement|changements}",
+  "Bu haftanın değişikliklerini sil": "Supprimer les changements de la semaine",
+  "Bugün kim yok?": "Qui est absent aujourd'hui ?",
+  "Gelmeyen ekle…": "Ajouter un absent…",
+  "Gelmeyen": "Absent",
+  "Gelmiyor…": "Absent…",
+  "İkame listesi": "Liste des remplacements",
+  "İkame: bu hafta {m}, toplam {n} saat": "Remplacements : {m} cette semaine, {n} {n:heure|heures} au total",
+  "Seçilmedi": "Non choisi",
+  "Son gün": "Dernier jour",
+  "Yerine": "Remplacé par",
 };
 
 registerSozluk("fr", FR);

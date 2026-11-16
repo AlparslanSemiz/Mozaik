@@ -7583,6 +7583,19 @@ table.person-list tbody tr {
   border-top: 1px solid var(--hairline);
 }
 
+/* The Program strip's date chip once this week has changes (DateChip.tsx):
+   a heavier line and word, never a colour alone. */
+.btn.dated-on {
+  border: 2px solid var(--accent);
+  font-weight: 600;
+}
+
+/* The date page's boxes are hit as easily as its buttons (44 px). */
+.dated input,
+.dated select {
+  min-height: 2.75rem;
+}
+
 /* Yazdır from the page: one sheet, drawn under <body> only while the print
    window is up (PrintOne.tsx). On screen it is never seen; on paper it is the
    only thing there. */
