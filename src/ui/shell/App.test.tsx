@@ -228,7 +228,7 @@ describe('uygulama açılıyor', () => {
     );
   });
 
-  it('Yazdır ve gönder sekmesi her sınıf için bir sayfa üretir', () => {
+  it('Yazdır ve gönder sekmesi öğretmenlerle açılır, her öğretmen için bir sayfa üretir', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
     click(button('Yazdır ve gönder'));
@@ -238,7 +238,7 @@ describe('uygulama açılıyor', () => {
     act(() => {
       window.dispatchEvent(new Event('beforeprint'));
     });
-    expect(container.querySelectorAll('.print-page')).toHaveLength(20);
+    expect(container.querySelectorAll('.print-page')).toHaveLength(25);
   });
 
   it('bozuk localStorage içeriğinde çökmez, boş projeyle açılır', () => {
@@ -282,23 +282,16 @@ describe('uygulama açılıyor', () => {
       click(button(section));
       expect(container.textContent, section).toContain(text);
     }
-    // The two rare sections are behind the strip's Daha fazla since
-    // Sadeleşme phase 1 (2026-11-16): a Radix menu, opened from the keyboard.
+    // Planlar ve yedek and Hakkında are the second group of the strip's own
+    // buttons (denetim/kisi); no Daha fazla is left on this strip.
     for (const [section, text] of [
       ['Planlar ve yedek', 'Bütün planlar tek dosyada'],
       ['Hakkında', 'Her şeyi sil'],
     ] as const) {
-      const more = container.querySelector<HTMLButtonElement>('.ribbon .more-menu')!;
-      act(() => {
-        more.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      });
-      const item = [...document.body.querySelectorAll('[role^="menuitem"]')].find((e) =>
-        (e.textContent ?? '').includes(section),
-      );
-      expect(item, section).toBeDefined();
-      click(item!);
+      click(button(section));
       expect(container.textContent, section).toContain(text);
     }
+    expect(container.querySelector('.ribbon .more-menu')).toBeNull();
   });
 
   it('Sıfırla üst çubukta değil, Okul bilgileri altında', () => {

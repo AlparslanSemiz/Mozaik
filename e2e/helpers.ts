@@ -177,20 +177,19 @@ export async function addSubjects(page: Page, ...names: string[]) {
 
 /**
  * The lessons, entered from a class (Sınıflar → Dersler), from a teacher
- * (Öğretmenler → Dersler), or all of them (Daha fazla → "Bütün dersler tek
- * listede"). Dersler was a tab of its own until K1 (2026-11-16).
+ * (Öğretmenler → Dersler), or all of them (the "Hepsi" row of that list).
+ * Dersler was a tab of its own until K1 (2026-11-16).
  */
 export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' = 'all') {
   await goTab(page, mode === 'teacher' ? 'Öğretmenler' : 'Sınıflar');
   await revealRibbon(page);
-  if (mode === 'all') {
-    await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitem', { name: 'Bütün dersler tek listede' }).click();
-    await expect(page.locator('.panel.step-panel h2').first()).toContainText('Dersler ·');
-    return;
-  }
   await page.locator('.ribbon').getByRole('button', { name: 'Dersler', exact: true }).click();
   await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText('Dersler');
+  if (mode === 'all') {
+    // The first row of the right-hand list (it was the strip's Daha fazla).
+    await page.locator('.entity-list .entity', { hasText: 'Hepsi' }).click();
+    await expect(page.locator('.panel.step-panel h2').first()).toContainText('Dersler ·');
+  }
 }
 
 /**
@@ -230,11 +229,10 @@ export async function revealRibbon(page: Page) {
 export async function openSettings(page: Page, section: string) {
   await goTab(page, 'Okul bilgileri');
   await revealRibbon(page);
-  // The two rarely opened sections are behind the strip's Daha fazla since
-  // 2026-11-16 (Sadeleşme); the strip then READS which one is open.
+  // The two rarely opened sections are in the strip's second group (they were
+  // behind Daha fazla until denetim/kisi); the strip then READS which one is open.
   if (section === 'Planlar ve yedek' || section === 'Hakkında') {
-    await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitem', { name: section }).click();
+    await page.locator('.ribbon .btn', { hasText: section }).first().click();
     await expect(page.locator('.ribbon .ribbon-label').last()).toHaveText(
       section === 'Hakkında' ? /sürüm/i : /açık plan/i,
     );
@@ -242,14 +240,11 @@ export async function openSettings(page: Page, section: string) {
   }
   // Sections are plain `.btn`s in the strip; they never had step numbers.
   await page.locator('.ribbon .btn', { hasText: section }).first().click();
-  // THE FIRST GROUP, not the whole strip. Since 2026-08-30 the right-hand end
-  // of Ayarlar → Görünüm carries the theme, and a pressed button there made
-  // `.ribbon .btn[aria-pressed="true"]` two elements — a strict-mode violation
-  // in a helper twenty files call. The section buttons are the FIRST
-  // `.ribbon-group`, which is what this was always asking about.
-  await expect(
-    page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
-  ).toContainText(section);
+  // The section buttons are the strip's two groups (Görünüm is in the second);
+  // the theme left the strip (2026-11-16), so one pressed button is the section.
+  await expect(page.locator('.ribbon .ribbon-group .btn[aria-pressed="true"]')).toContainText(
+    section,
+  );
 }
 
 export async function startDrag(page: Page, index = 0) {
@@ -1174,6 +1169,9 @@ export async function openPerson(page: Page, which: number | string) {
   await opener.click();
   const sheet = page.getByRole('dialog');
   await expect(sheet).toBeVisible();
+  // The fold is opened so a test reaches 2. branş, Cinsiyet and Renk as before;
+  // kisi.spec.ts tests the fold itself.
+  await openMoreInfo(page);
   return sheet;
 }
 
@@ -1186,7 +1184,7 @@ export async function deletePerson(page: Page, which: number | string) {
 
 /** Adds a teacher through "+ Yeni öğretmen", and closes the page Ekle opens. */
 export async function addTeacher(page: Page, name: string, subject: string, short = '') {
-  await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+  await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
   const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
   await sheet.getByPlaceholder('Ad Soyad').fill(name);
   if (short !== '') await sheet.getByRole('textbox', { name: 'Kısa ad' }).fill(short);
@@ -1199,7 +1197,7 @@ export async function addTeacher(page: Page, name: string, subject: string, shor
 
 /** Adds a class through "+ Yeni sınıf", and closes the page Ekle opens. */
 export async function addClass(page: Page, name: string, room = '') {
-  await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+  await page.getByRole('button', { name: '+ Yeni sınıf' }).last().click();
   const sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
   await sheet.getByPlaceholder('Sınıf adı, örn. 510').fill(name);
   if (room !== '') await sheet.getByRole('combobox', { name: 'Derslik' }).selectOption(room);
@@ -1207,4 +1205,24 @@ export async function addClass(page: Page, name: string, room = '') {
   await expect(page.getByRole('dialog', { name: `${name.trim()} sınıfı` })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toBeHidden();
+}
+
+/** Opens the person page's folded "Diğer bilgiler" (2. branş, Cinsiyet, Renk). */
+export async function openMoreInfo(page: Page) {
+  const fold = page
+    .getByRole('dialog')
+    .locator('details.sheet-more', { hasText: 'Diğer bilgiler' });
+  if ((await fold.count()) > 0 && !(await fold.evaluate((d) => (d as HTMLDetailsElement).open))) {
+    await fold.locator('summary').click();
+  }
+}
+
+/**
+ * The Yazdır ve gönder tab with the CLASS pages chosen (it opens on teachers
+ * since denetim/kisi; most print tests count class sheets).
+ */
+export async function openPrintClasses(page: Page) {
+  await goTab(page, 'Yazdır ve gönder');
+  await revealRibbon(page);
+  await page.locator('.ribbon').getByRole('button', { name: 'Sınıflar', exact: true }).click();
 }

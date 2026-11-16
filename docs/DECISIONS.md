@@ -36,6 +36,27 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Denetim turu: kişi sayfası, listeler, yazdır, okul bilgileri (`denetim/kisi`)
+
+Babanın gözüyle denetim, Alp'in onayıyla. Baba programı bugün Excel'de yapıp PDF'e çevirip
+öğretmenlere gönderiyor; hedef PDF'in doğrudan Mozaik'ten çıkması. Kararlar: öğretmenin sayfasında tek
+tıkla `PDF kaydet` (adres ya da numara aranmaz); `Yazdır ve gönder` öğretmenlerle açılır, son seçim
+saklanmaz (bir tercih daha kaydetmek bir soru daha demek); sağ ray işin sırasıyla Yazdır, Sayfa
+düzeni (`Renkli bas` içinde), Sayfada ne olsun, Gönder, Çıktı özeti. `Bugün yok…` tıklamada yazmaz,
+pencere açar ve yalnız `Bugün gelmiyor olarak işaretle` yazar (eski hâlde pencerede Vazgeç yoktu, bir
+tıklama kayıt ve geri alma adımı bırakıyordu). Özet yalnız sorunu gösterir; tam tablolar sorun
+listesinin Daha fazla'sında. K5'e not: `+ Yeni öğretmen` ve `+ Yeni sınıf` listenin sonundaki satır
+olarak kalır, başlıkta bir kopyası da durur (yirmi beş adın sonu bir ekran uzakta). K1'e not: Dersler'in
+Daha fazla'sı kalktı, bütün dersler sağ listenin `Hepsi` satırı; `Kurallar` başka sekmeye atladığı için
+kalktı. Okul bilgileri şeridinde Planlar ve yedek ile Hakkında ayrı bir grup, Daha fazla yok. Kişi
+sayfasında 2. branş, cinsiyet ve renk `Diğer bilgiler` altında katlı, ders satırındaki aktarma kutusu
+satırın `…` menüsünde (17 rem'lik bir kutu her satırda sayfanın yarısıydı). Bildirimler 10 s, `Geri
+al`lı 20 s. **Denenmedi, bırakıldı:** Okul bilgileri'nin Daha fazla'sına `Başlarken listesini göster`
+ve `Örnek okulu yükle` koymak; ikisi bugün Başlarken ve Hakkında'da duruyor, taşımak onların onay
+sorusunu da taşımak demek.
+
+---
+
 ### 2026-11-16 · Denetim turu: tek adlar (`denetim/metin`)
 
 Babanın gözüyle yapılan arayüz denetimi, aynı şeye ekranda iki ad verilen yerleri
@@ -282,7 +303,7 @@ gelemiyor"); öğretmen satırı on iki kontroldü.
 - **Satırdan kalkanlar:** Cinsiyet, E-posta, 2. branş, üç sınır kutusu, sınıfın günlük sınırı,
   renk düğmesi, ad, kısa ad, branş ve derslik kutuları, `Ayrıntı` ve `Sil`. Silme sayfanın en
   altında, eskisi gibi sorusuz, bildirimde `Geri al` ve öncesinin kopyası (`keepBefore`).
-- **Ekleme listenin sonunda bir satır:** `+ Yeni öğretmen`, `+ Yeni sınıf` boş bir kişi sayfası
+- **Ekleme listenin sonunda bir satır (ve başlıkta bir kopya, 2026-11-16 `denetim/kisi`):** `+ Yeni öğretmen`, `+ Yeni sınıf` boş bir kişi sayfası
   açar, `Ekle` onu yeni kişinin sayfası yapar (sıradaki iş gelemediği saatler). Toplu ekleme
   liste başlığındaki `Excel'den yapıştır`. Tek tek yirmi beş öğretmen girmek eskisinden bir
   tıklama uzun; kabul edildi, çünkü dönemde bir kez yapılıyor ve yapıştırma duruyor.

@@ -165,6 +165,7 @@ test.describe('90. Erişilebilirlik taraması', () => {
       await page.keyboard.press('Escape');
       await page
         .getByRole('button', { name: adim === 'Öğretmenler' ? '+ Yeni öğretmen' : '+ Yeni sınıf' })
+        .last()
         .click();
       karsilastir(`Yeni kişi · ${adim}`, await tara(page));
     });

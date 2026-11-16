@@ -12,7 +12,15 @@
 // opposite of what the old form did.
 
 import { expect, test } from './kapan';
-import { openLessons, openSetup, openWithSample, mainList, open, openPerson } from './helpers';
+import {
+  openLessons,
+  openSetup,
+  openWithSample,
+  mainList,
+  open,
+  openPerson,
+  openMoreInfo,
+} from './helpers';
 
 test.describe('69. Dersler', () => {
   // Five tasks since K1 (2026-11-16); the lessons are in Öğretmenler and
@@ -174,6 +182,7 @@ test.describe('69. Dersler', () => {
     // On the teacher's page since 2026-11-16 (K5): the row is text.
     const row = mainList(page).locator(`tbody tr[data-row-name="${who}"]`);
     await row.locator('.person-open').click();
+    await openMoreInfo(page);
     const second = page.getByRole('dialog').getByRole('combobox', { name: '2. branş' });
     const other = await second.locator('option').nth(1).getAttribute('value');
     await second.selectOption(other!);
@@ -272,11 +281,13 @@ test.describe('69. Dersler', () => {
     await expect(page.locator('.entity-list .entity[aria-current="true"]')).toHaveCount(1);
   });
 
-  test('Genel modda seçilecek bir şey yok — ama sağ sütun DURUYOR', async ({ page }) => {
+  test('Genel modda "Hepsi" satırı seçili ve sağ sütun DURUYOR', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'all');
-    // Nothing to pick between: Genel is the whole list.
-    await expect(page.locator('.entity-list')).toHaveCount(0);
+    // The list's first row is how Genel is reached, and it is the current one.
+    await expect(page.locator('.entity-list .entity').first()).toHaveText(/^Hepsi/);
+    await expect(page.locator('.entity-list .entity[aria-current="true"]')).toHaveCount(1);
+    await expect(page.locator('.entity-list .entity[aria-current="true"]')).toHaveText(/^Hepsi/);
 
     // The rail stays, and it stays the same width. It used to vanish here, so
     // switching modes moved the list's right edge by several hundred pixels —

@@ -599,6 +599,8 @@ export default function App() {
                           mode={lessonModeOf(tab, ui.people)}
                           focus={ui.lessonFocus}
                           setFocus={ui.setLessonFocus}
+                          side={tab === 'teachers' ? 'teacher' : 'class'}
+                          setAll={(all) => ui.setPeople(tab, all ? 'all' : 'lessons')}
                         />
                       ))}
                     <Activity mode={tab === 'program' ? 'visible' : 'hidden'} name="Program grid">
@@ -623,6 +625,7 @@ export default function App() {
                         setExcluded={setPrintExcluded}
                         scope={ui.scope}
                         colored={ui.colored}
+                        setColored={ui.setColored}
                         options={printOptions}
                         setOptions={(next) => {
                           setPrintOptions(next);

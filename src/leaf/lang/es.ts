@@ -661,7 +661,6 @@ const ES: Sozluk = {
   '"{ad}" branşı kullanılıyor': 'La asignatura "{ad}" está en uso',
   "{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.":
     "{n} {n:profesor tiene|profesores tienen} esta asignatura ({kimler}). Cambie primero su asignatura y bórrela después.",
-  "Branşlar ({n})": "Asignaturas ({n})",
   "Yeni branş (örn. Robotik)": "Asignatura nueva (p. ej. Robótica)",
   "Yeni branş": "Asignatura nueva",
   "Bu branş listede zaten var.": "Esta asignatura ya está en la lista.",
@@ -696,7 +695,6 @@ const ES: Sozluk = {
     "Profesores sin ninguna clase: {kimler}.",
   "**{n} {ne} başkasıyla aynı renkte.** Renk burada bir kimlik: ızgarada, havuzda ve kâğıtta okunuyor.":
     "**{n} {ne} comparten color con otro.** Aquí el color es una identidad: se lee en la cuadrícula, en la bandeja y en el papel.",
-  "**{ad}**: {n} öğretmen": "**{ad}**: {n} {n:profesor|profesores}",
   "Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı.":
     "El total de horas asignadas a un grupo debe caber en las horas en que está **abierto**.",
   "**{n} sınıfın hiç dersi yok** ({hangileri}).":
@@ -1251,8 +1249,6 @@ const ES: Sozluk = {
   Değiştir: "Renombrar",
   "Verdiği dersler": "Clases que imparte",
   "Aldığı dersler": "Clases que recibe",
-  "{ne} dersini başka öğretmene aktar":
-    "Pasar la clase de {ne} a otro profesor",
   "Başka öğretmene aktar…": "Pasar a otro profesor…",
   "{ne} dersi {kim} öğretmenine geçecek": "La clase de {ne} pasará a {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
@@ -1817,6 +1813,13 @@ const ES: Sozluk = {
   "Kaydırınca gizlensin": "Ocultar al desplazar",
   "Kural aşımları": "Reglas incumplidas",
   "Yeni sürüm notu var": "Hay una nota de versión nueva",
+  // ------------------------------------------- denetim/kisi: kişi sayfası, Özet, Hepsi
+  "Bugün gelmiyor olarak işaretle": "Marcar como ausente hoy",
+  "Bütün öğretmenler saatlerine sığıyor.": "Todos los profesores caben en sus horas.",
+  "Bütün sınıflar saatlerine sığıyor.": "Todas las clases caben en sus horas.",
+  "Hepsi": "Todos",
+  "Diğer bilgiler": "Otros datos",
+  "{ne} dersi için işlemler": "Acciones para la clase {ne}",
 };
 
 registerSozluk("es", ES);

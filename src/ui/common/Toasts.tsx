@@ -75,9 +75,9 @@ export function useAnnounce(): (text: string) => void {
 }
 
 /** Long enough to read a sentence twice; the reader has trouble seeing. */
-const LIFETIME = 6000;
+const LIFETIME = 10000;
 /** A notice with a button stays longer: reading it AND reaching for it (SD1). */
-export const ACTION_LIFETIME = 10000;
+export const ACTION_LIFETIME = 20000;
 /** After a pause, at least this long, so a notice does not vanish as the pointer leaves it. */
 const AFTER_PAUSE = 2000;
 

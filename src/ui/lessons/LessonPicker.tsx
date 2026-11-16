@@ -2,6 +2,7 @@
 // class the screen is filling in, each with its lessons and hours.
 
 import { type ClassGroup, type Id, type State, type Teacher, paletteColor } from '../../leaf/model';
+import { List } from 'lucide-react';
 import { useMemo } from 'react';
 import { weeklyLoad } from '../../pure/entities';
 import { buildCapacity } from '../../pure/feasibility';
@@ -14,9 +15,12 @@ interface Props {
   picking: Array<Teacher | ClassGroup>;
   focused: Teacher | ClassGroup | undefined;
   setFocus: (next: Id) => void;
+  /** Every lesson in one list is what is open: the "Hepsi" row is the current one. */
+  all: boolean;
+  onAll: () => void;
 }
 
-export function LessonPicker({ state, mode, picking, focused, setFocus }: Props) {
+export function LessonPicker({ state, mode, picking, focused, setFocus, all, onAll }: Props) {
   const t = useT();
   // A row whose hours do not fit its week is red here, beside the form that
   // filled it: the same numbers as Okul → Özet and Kontrol (`buildCapacity`).
@@ -38,6 +42,24 @@ export function LessonPicker({ state, mode, picking, focused, setFocus }: Props)
           : t('Seçtiğiniz sınıf için ders girin. Soldaki liste de o sınıfa daralır.')}
       </p>
       <div className="entity-list" role="group" aria-label={t('Ders listesi')}>
+        {/* The one way to the general list (it used to be in the strip's Daha
+            fazla): every lesson of the school, one row per lesson. */}
+        <button
+          type="button"
+          className="entity"
+          aria-current={all}
+          title={t('Bütün dersler tek listede')}
+          onClick={onAll}
+        >
+          <span className="entity-icon" aria-hidden="true">
+            <List size={16} strokeWidth={2} />
+          </span>
+          <span className="entity-name">{t('Hepsi')}</span>
+          <span className="entity-count">
+            {state.lessons.length} ders · {state.lessons.reduce((n, l) => n + l.weeklyHours, 0)}{' '}
+            saat
+          </span>
+        </button>
         {picking.map((x) => {
           const count = state.lessons.filter((l) =>
             mode === 'teacher' ? l.teacherId === x.id : l.classId === x.id,

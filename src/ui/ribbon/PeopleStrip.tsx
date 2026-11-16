@@ -5,8 +5,6 @@
 // report's views; where each of those went is LAYOUT, "Sekmeler".
 
 import type React from 'react';
-import { List, Scale } from 'lucide-react';
-import { MoreItem, MoreMenu } from '../common';
 import { paletteColor } from '../../leaf/model';
 import { lessonIcon, STEPS } from '../program';
 import { Group, Sep, type StripContext } from './parts';
@@ -73,22 +71,6 @@ export function peopleStrip({ ui, state, t }: StripContext): React.ReactElement 
           </Group>
         </>
       )}
-
-      {/* The general lesson list, and the place a lesson's limits are set. */}
-      <MoreMenu>
-        <MoreItem icon={<List size={15} />} onSelect={() => ui.setPeople(tab, 'all')}>
-          {t('Bütün dersler tek listede')}
-        </MoreItem>
-        <MoreItem
-          icon={<Scale size={15} />}
-          onSelect={() => {
-            ui.setSection('rules');
-            ui.setTab('school');
-          }}
-        >
-          {t('Kurallar')}
-        </MoreItem>
-      </MoreMenu>
     </div>
   );
 }

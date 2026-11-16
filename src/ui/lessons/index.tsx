@@ -36,9 +36,13 @@ interface Props {
   mode: LessonMode;
   focus: Id;
   setFocus: (next: Id) => void;
+  /** The tab the lessons are entered from: which people the right-hand list holds. */
+  side: 'teacher' | 'class';
+  /** The list's first row: every lesson at once (`true`), or back to one person (`false`). */
+  setAll: (all: boolean) => void;
 }
 
-export default function Lessons({ state, change, mode, focus, setFocus }: Props) {
+export default function Lessons({ state, change, mode, focus, setFocus, side, setAll }: Props) {
   const t = useT();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
@@ -235,17 +239,19 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           time, and the number that says whether this one is done — lessons
           entered, hours loaded — belongs on the row itself. */}
       <aside>
-        {mode === 'all' ? (
-          <Summary state={state} change={change} step="lessons" />
-        ) : (
-          <LessonPicker
-            state={state}
-            mode={mode}
-            picking={picking}
-            focused={focused}
-            setFocus={setFocus}
-          />
-        )}
+        <LessonPicker
+          state={state}
+          mode={side}
+          picking={side === 'teacher' ? state.teachers : state.classes}
+          focused={mode === 'all' ? undefined : focused}
+          setFocus={(id) => {
+            setFocus(id);
+            setAll(false);
+          }}
+          all={mode === 'all'}
+          onAll={() => setAll(true)}
+        />
+        {mode === 'all' && <Summary state={state} change={change} step="lessons" />}
       </aside>
     </div>
   );

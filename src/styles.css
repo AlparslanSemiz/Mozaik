@@ -4560,12 +4560,6 @@ table.sheet-lessons td:last-child {
   white-space: nowrap;
 }
 
-/* A fixed width: its options are drawn only when it is reached
-   (`TransferPick`), and a box sized by them would jump under the pointer. */
-table.sheet-lessons select.transfer-pick {
-  width: 17rem;
-}
-
 /* The split editor: the current shape is one compact button. Its Radix popover
    shows every 3/2/1 combination in a scrollable list, including impossible
    choices as locked rows with the daily-limit reason beside them. */
@@ -7912,4 +7906,18 @@ table.sheet-lessons td.num input.num {
 table.person-list th,
 table.person-list td:not(.person-status) {
   white-space: nowrap;
+}
+
+/* The buttons at the right of a list's heading: "+ Yeni …" and the paste. */
+.panel-head-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* A menu longer than the window scrolls inside itself (a row's "Başka
+   öğretmene aktar…" lists every teacher). */
+.menu {
+  max-height: var(--radix-dropdown-menu-content-available-height, 80vh);
+  overflow-y: auto;
 }

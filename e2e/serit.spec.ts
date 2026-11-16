@@ -638,7 +638,7 @@ test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
     ['Hakkında', /Sürüm/i],
   ];
 
-  test('okuması olan bölümde sağda okuması var, her bölümde sonda Daha fazla', async ({ page }) => {
+  test('okuması olan bölümde sağda okuması var, şeritte Daha fazla yok', async ({ page }) => {
     await openWithSample(page);
     for (const [s, read] of READS) {
       await openSettings(page, s);
@@ -646,10 +646,9 @@ test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
     }
     for (const s of ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında']) {
       await openSettings(page, s);
-      const last = await page.evaluate(
-        () => document.querySelector('.ribbon')!.lastElementChild!.className,
-      );
-      expect(last, s).toContain('more-menu');
+      // The seven sections are two groups (denetim/kisi); nothing is left
+      // for a Daha fazla to hold.
+      await expect(page.locator('.ribbon .more-menu'), s).toHaveCount(0);
     }
   });
 

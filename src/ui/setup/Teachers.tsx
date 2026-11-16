@@ -75,9 +75,16 @@ export default function Teachers({ state, change }: PanelProps) {
       {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
       <div className="panel-head">
         <h2>{t('Öğretmenler')}</h2>
-        <button className="btn" onClick={() => setPasteOpen(true)}>
-          {t("Excel'den yapıştır")}
-        </button>
+        <span className="panel-head-tools">
+          {/* A copy of the row at the end of the list: with twenty-five names
+              the end is a screen away (the end one stays). */}
+          <button className="btn" onClick={() => inspect('teacher', '')}>
+            {t('+ Yeni öğretmen')}
+          </button>
+          <button className="btn" onClick={() => setPasteOpen(true)}>
+            {t("Excel'den yapıştır")}
+          </button>
+        </span>
       </div>
 
       <Paste

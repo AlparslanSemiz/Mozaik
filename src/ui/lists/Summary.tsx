@@ -18,7 +18,6 @@ import {
   addSubject,
   builtInShort,
   respreadColors,
-  genderLabel,
   roomClasses,
   subjectKey,
   subjectOptions,
@@ -33,10 +32,7 @@ import type { StepId } from '../../platform/prefs';
  * exactly the one the fallback branch answers ("does each class's week fit").
  */
 export type SummaryView = StepId | 'lessons';
-import type { Gender, State } from '../../leaf/model';
-
-/** The three values, in the order the teacher list offers them. */
-const GENDERS: Gender[] = ['', 'k', 'e'];
+import type { State } from '../../leaf/model';
 import { T, useT } from '../common';
 
 /**
@@ -239,19 +235,6 @@ export default function Summary({
   }
 
   if (step === 'teachers') {
-    // In the school's own order (Ayarlar > Branşlar), then whatever a teacher
-    // carries that the list does not — `subjectOptions` already answers exactly
-    // that. It used to be `usedSubjects`, i.e. the order the teachers happened
-    // to be typed in, which is an order nobody chose and nobody can change.
-    const subjects = subjectOptions(state).filter(
-      (name) => subjectTeachers(state, name).length > 0,
-    );
-    // Counted, not estimated — and the blank is counted too, because the
-    // number worth seeing is how many rows are still to be filled in.
-    const byGender = GENDERS.map((g) => ({
-      label: genderLabel(g),
-      count: state.teachers.filter((x) => x.gender === g).length,
-    })).filter((x) => x.count > 0);
     return (
       <div className="panel">
         <h2>{t('Özet')}</h2>
@@ -259,39 +242,13 @@ export default function Summary({
         <p className="hint">
           <T k="Öğretmenin açık saati, ona yüklenen ders saatinden az olamaz." />
         </p>
-        {/* Above the table, not below it: under twenty-five rows this line is
-            a screen away from the heading it belongs to. */}
-        {byGender.length > 1 && (
-          <p className="hint">
-            {byGender.map((x, i) => (
-              <span key={x.label}>
-                {i > 0 && ' · '}
-                <b>{x.label}</b> {x.count}
-              </span>
-            ))}
-          </p>
-        )}
         <CapacityRows
           rows={capacity.teachers}
           label={t('Öğretmen yükü')}
           empty={t('Henüz öğretmen yok.')}
           problemsFirst
+          onlyProblems={t('Bütün öğretmenler saatlerine sığıyor.')}
         />
-        {subjects.length > 0 && (
-          <>
-            <h3>{t('Branşlar ({n})', { n: subjects.length })}</h3>
-            <ul className="plain-list">
-              {subjects.map((name) => (
-                <li key={name}>
-                  <T
-                    k="**{ad}**: {n} öğretmen"
-                    vars={{ ad: subjectLabel(name), n: subjectTeachers(state, name).length }}
-                  />
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
         <Colors state={state} change={change} kind="teacher" />
       </div>
     );
@@ -323,6 +280,7 @@ export default function Summary({
           label={t('Sınıf yükü')}
           empty={t('Henüz sınıf yok.')}
           problemsFirst
+          onlyProblems={t('Bütün sınıflar saatlerine sığıyor.')}
         />
         {/* The one number that decides whether any of this can be laid out at
             all. It outlived the "Kurulum durumu" panel it used to sit in. */}

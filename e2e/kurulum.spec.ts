@@ -20,6 +20,8 @@ import {
   chooseScale,
   savedText,
   savedState,
+  openMoreInfo,
+  openPrintClasses,
 } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
@@ -78,7 +80,7 @@ test.describe('5. Kurulum ve yedek', () => {
       // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
       ['Ayşe Solmaz', 'Fizik'],
     ] as const) {
-      await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+      await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
       const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
       // The placeholder shows what will be derived, live
       await sheet.getByPlaceholder('Ad Soyad').fill(who);
@@ -195,10 +197,7 @@ test.describe('12. Branş kısaltmaları', () => {
     await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
 
     // ...and the printed page uses the same short form
-    await page
-      .locator('.tabstrip')
-      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
-      .click();
+    await openPrintClasses(page);
     await expect(page.locator('.print-area')).toContainText('Zzz');
   });
 
@@ -242,7 +241,7 @@ test.describe('16. Branş seçimi', () => {
     await open(page);
     await addSubjects(page, 'Matematik');
     await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
     const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
 
     const branch = sheet.getByLabel('Branş', { exact: true });
@@ -273,7 +272,7 @@ test.describe('16. Branş seçimi', () => {
   test('“+ Yeni branş” hem öğretmene atanıyor hem listeye giriyor', async ({ page }) => {
     await open(page);
     await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
     const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
 
     await sheet.getByPlaceholder('Ad Soyad').fill('Ayşe Yıldız');
@@ -326,7 +325,7 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
     // By VALUE: an option reads "Mat · Matematik" now, and what this test asks
     // is which subjects the dropdown still OFFERS.
     const options = await page
@@ -552,14 +551,16 @@ test.describe('31. Kurulum — sağ sütun', () => {
     await expect(side.locator('table.stat tbody tr')).toHaveCount(8);
   });
 
-  test('öğretmen adımında yük ve branş dağılımı yazıyor', async ({ page }) => {
+  test('öğretmen adımında yük yalnız sorun varsa satır, yoksa tek cümle', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
 
     const side = page.locator('.cols aside');
     await expect(side).toContainText('Öğretmen yükü');
-    await expect(side).toContainText('Branşlar');
-    await expect(side.locator('table.stat tbody tr')).toHaveCount(25);
+    // Only the teachers whose hours do not fit are listed; the sample school's all do.
+    await expect(side).toContainText('Bütün öğretmenler saatlerine sığıyor.');
+    await expect(side.locator('table.stat')).toHaveCount(0);
+    await expect(side).not.toContainText('Branşlar');
   });
 
   test('dersliksiz sınıf sağ sütunda uyarı çıkarıyor', async ({ page }) => {
@@ -603,7 +604,12 @@ test.describe('31. Kurulum — sağ sütun', () => {
       const kids = [...el.children];
       return {
         warn: kids.findIndex((c) => c.classList.contains('warn-box')),
-        table: kids.findIndex((c) => c.querySelector('table.stat') !== null),
+        // The table, or the one sentence that stands in for it when every row fits.
+        table: kids.findIndex(
+          (c) =>
+            c.querySelector('table.stat') !== null ||
+            (c.textContent ?? '').includes('saatlerine sığıyor'),
+        ),
       };
     });
     expect(order.warn, 'uyarı kutusu yok').toBeGreaterThan(-1);
@@ -827,6 +833,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
   // On the teacher's page since 2026-11-16 (K5).
   const genderOf = async (page: Page, n: number) => {
     const sheet = await openPerson(page, n);
+    await openMoreInfo(page);
     return sheet.getByRole('combobox', { name: 'Cinsiyet' });
   };
 
@@ -915,15 +922,6 @@ test.describe('63. Öğretmende cinsiyet', () => {
       .toBe(true);
   });
 
-  test('Kurulum özeti dağılımı SAYIYOR', async ({ page }) => {
-    await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const summary = page.locator('.panel', { hasText: 'Öğretmen yükü' });
-    await expect(summary).toContainText('Kadın');
-    await expect(summary).toContainText('Erkek');
-    await expect(summary).toContainText('Belirtilmemiş');
-  });
-
   test('yapıştırma kutusu dördüncü sütunu okuyor, üç sütunluyu da kabul ediyor', async ({
     page,
   }) => {
@@ -966,6 +964,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
 
       // The teacher's page and the new teacher's page (2026-11-16, K5).
       await openPerson(page, 0);
+      await openMoreInfo(page);
       const boxes = [page.getByRole('dialog').getByRole('combobox', { name: 'Cinsiyet' })];
       for (const box of boxes) {
         const fit = await box.evaluate((el) => {

@@ -136,11 +136,10 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
 
     const section = async (name: string) => {
       await page.locator('.ribbon .btn', { hasText: name }).first().click();
-      // The FIRST group: Görünüm's strip carries a pressed theme button at its
-      // right-hand end too, and the whole-strip selector became two elements.
-      await expect(
-        page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
-      ).toContainText(name);
+      // Görünüm is in the strip's second group since denetim/kisi.
+      await expect(page.locator('.ribbon .ribbon-group .btn[aria-pressed="true"]')).toContainText(
+        name,
+      );
       await page.waitForTimeout(200);
       return geometry(page);
     };

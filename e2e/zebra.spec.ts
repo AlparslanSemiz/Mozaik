@@ -185,8 +185,10 @@ const ORNEK: Liste[] = [
     satir: '.cols > div table.list > tbody > tr',
   },
   {
+    // The rooms' load table: the teachers' and classes' tables list only the
+    // rows that do not fit (denetim/kisi), and the sample school has none.
     ad: 'Özet',
-    git: (p) => openSetup(p, 'Öğretmenler'),
+    git: (p) => openSettings(p, 'Derslikler'),
     satir: '.cols aside table.stat > tbody > tr',
   },
   {
@@ -625,26 +627,6 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
     expect(edge.style, 'ikinci gövdenin üst çizgisi').toBe('solid');
     expect(edge.width).toBeGreaterThanOrEqual(2);
     expect(edge.color).toBe(t['--line-dark']);
-  });
-
-  test('varlık panelinin aktarma seçicisi zebra satırında kutusunu koruyor', async ({ page }) => {
-    // The sheet's lesson rows took the stripe, and the transfer picker kept the
-    // input recess (--paper-sunk) and a hairline edge: on a zebra row, a hair
-    // from that recess, the box vanished. In a list a field is paper with a
-    // control edge, like its neighbours in table.list (found by mozaik-70's review).
-    // The edge is --border-strong since 2026-11-15: --line was 1.4:1 on a row.
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
-    const pick = page.locator('table.sheet-lessons > tbody > tr:nth-child(2) select.transfer-pick');
-    await expect(pick).toBeVisible();
-    const t = await tokens(page, ['--paper', '--border-strong']);
-    const box = await pick.evaluate((el) => {
-      const s = getComputedStyle(el);
-      return { bg: s.backgroundColor, edge: s.borderTopColor };
-    });
-    expect(box.bg, 'aktarma seçicisi kâğıt zeminli').toBe(t['--paper']);
-    expect(box.edge, 'aktarma seçicisinin kenarı').toBe(t['--border-strong']);
   });
 
   test('Branşlar: liste boşken yabancı branşların üstünde grup çizgisi yok', async ({ page }) => {

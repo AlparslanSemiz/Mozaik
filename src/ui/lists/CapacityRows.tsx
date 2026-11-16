@@ -37,6 +37,7 @@ export default function CapacityRows({
   empty,
   problemsFirst = false,
   colorOf,
+  onlyProblems,
 }: {
   rows: ReportRow[];
   /**
@@ -54,9 +55,19 @@ export default function CapacityRows({
   problemsFirst?: boolean;
   /** Palette index for a row, or null where the kind has none (rooms). */
   colorOf?: ((id: Id) => number | null) | undefined;
+  /**
+   * Özet shows only the rows that are not `Uygun`; when every row is, this one
+   * sentence stands in for the table (the full table stays on the problem list).
+   */
+  onlyProblems?: string | undefined;
 }) {
   const t = useT();
   if (rows.length === 0) return <p className="hint">{empty}</p>;
+  if (onlyProblems !== undefined) {
+    const bad = rows.filter((r) => r.level !== 'ok');
+    if (bad.length === 0) return <p className="hint">{onlyProblems}</p>;
+    rows = bad;
+  }
   const shown = problemsFirst
     ? [...rows].sort((a, b) => RANK[a.level] - RANK[b.level] || a.name.localeCompare(b.name, 'tr'))
     : rows;

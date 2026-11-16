@@ -18,7 +18,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
-import { chooseScale, open, openSetup, openWithSample, openLessons } from './helpers';
+import { chooseScale, open, openSettings, openSetup, openWithSample, openLessons } from './helpers';
 
 const TABS = ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri'] as const;
 
@@ -350,7 +350,9 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
   }
 
   const SCROLLERS = [
-    { where: 'Öğretmenler', box: '.stat-scroll' },
+    // The rooms' load table: the teachers' and classes' tables list only the
+    // rows that do not fit (denetim/kisi), and the sample school has none.
+    { where: 'Derslikler', box: '.stat-scroll' },
     // The lesson form's picker; Müsaitlik's entity list went with K1.
     { where: 'Sınıflar → Dersler', box: '.entity-list' },
   ] as const;
@@ -361,7 +363,7 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
 
     for (const { where, box } of SCROLLERS) {
       if (where === 'Sınıflar → Dersler') await openLessons(page, 'class');
-      else await openSetup(page, 'Öğretmenler');
+      else await openSettings(page, 'Derslikler');
       await settled(page);
 
       const panel = page.locator('.cols > aside > .panel');
@@ -414,9 +416,10 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
   // vanishing, the panel takes over the scrolling, and the heading stays put so
   // the word saying which summary this is is not the first thing to leave.
   test('ekran çok kısalınca kutu SON ÇARE olarak kayıyor', async ({ page }) => {
-    await page.setViewportSize({ width: 1600, height: 540 });
+    // Shorter than it was (540): the rooms' table is shorter than the teachers' was.
+    await page.setViewportSize({ width: 1600, height: 400 });
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSettings(page, 'Derslikler');
     await settled(page);
 
     const panel = page.locator('.cols > aside > .panel');

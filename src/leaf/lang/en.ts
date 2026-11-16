@@ -654,7 +654,6 @@ const EN: Sozluk = {
   '"{ad}" branşı kullanılıyor': 'The "{ad}" subject is in use',
   "{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.":
     "{n} {n:teacher holds|teachers hold} this subject ({kimler}). Change their subject first, then delete this one.",
-  "Branşlar ({n})": "Subjects ({n})",
   "Yeni branş (örn. Robotik)": "New subject (e.g. Robotics)",
   "Yeni branş": "New subject",
   "Bu branş listede zaten var.": "This subject is already in the list.",
@@ -688,7 +687,6 @@ const EN: Sozluk = {
     "Teachers with no lessons at all: {kimler}.",
   "**{n} {ne} başkasıyla aynı renkte.** Renk burada bir kimlik: ızgarada, havuzda ve kâğıtta okunuyor.":
     "**{n} {ne} share a colour with somebody else.** Colour is an identity here: it is read in the grid, in the tray and on paper.",
-  "**{ad}**: {n} öğretmen": "**{ad}**: {n} {n:teacher|teachers}",
   "Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı.":
     "The total hours loaded onto a class must fit into the hours that class is **open**.",
   "**{n} sınıfın hiç dersi yok** ({hangileri}).":
@@ -1237,8 +1235,6 @@ const EN: Sozluk = {
   Değiştir: "Rename",
   "Verdiği dersler": "Lessons taught",
   "Aldığı dersler": "Lessons taken",
-  "{ne} dersini başka öğretmene aktar":
-    "Hand the {ne} lesson to another teacher",
   "Başka öğretmene aktar…": "Hand to another teacher…",
   "{ne} dersi {kim} öğretmenine geçecek": "The {ne} lesson will go to {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
@@ -1803,6 +1799,13 @@ const EN: Sozluk = {
   "Kaydırınca gizlensin": "Hide on scroll",
   "Kural aşımları": "Rule breaches",
   "Yeni sürüm notu var": "There is a new release note",
+  // ------------------------------------------- denetim/kisi: kişi sayfası, Özet, Hepsi
+  "Bugün gelmiyor olarak işaretle": "Mark as away today",
+  "Bütün öğretmenler saatlerine sığıyor.": "All teachers fit their hours.",
+  "Bütün sınıflar saatlerine sığıyor.": "All classes fit their hours.",
+  "Hepsi": "All",
+  "Diğer bilgiler": "More details",
+  "{ne} dersi için işlemler": "Actions for the {ne} lesson",
 };
 
 registerSozluk("en", EN);
