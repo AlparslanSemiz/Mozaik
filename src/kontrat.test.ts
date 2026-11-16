@@ -544,7 +544,10 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     expect(linux).toContain('fail-fast: false');
     expect(linux).toContain('npm ci --ignore-scripts');
     expect(linux).not.toMatch(/cache|MOZAIK_IMZA_ANAHTARI/);
-    const sign = surumYml.slice(surumYml.indexOf('\n  sign:\n'), surumYml.indexOf('\n  publish:\n'));
+    const sign = surumYml.slice(
+      surumYml.indexOf('\n  sign:\n'),
+      surumYml.indexOf('\n  publish:\n'),
+    );
     expect(sign).toContain('needs: [exe, mac, linux]');
     expect(sign).not.toMatch(/needs\.linux\.result/);
     expect(sign).toMatch(/if \[ -s teslim\/Mozaik-linux-x86_64\.AppImage \]; then\s+minisign -S/);
