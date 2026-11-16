@@ -60,6 +60,16 @@ test.describe('İkame', () => {
 
     const day = page.getByRole('dialog', { name: 'Salı 17 Kasım' });
     await expect(day).toBeVisible();
+    // Opening writes nothing: closing now leaves the plan as it was.
+    await page.keyboard.press('Escape');
+    await expect(day).toHaveCount(0);
+    expect((JSON.parse(await savedText(page)) as State).dated).toEqual(
+      (JSON.parse(before) as State).dated,
+    );
+    await page.getByRole('button', { name: 'Bugün yok…' }).click();
+    await expect(day).toBeVisible();
+    // Only the window's button writes the absence.
+    await day.getByRole('button', { name: 'Bugün gelmiyor olarak işaretle' }).click();
     // Another date moves the one-day absence with it, and back.
     await day.getByLabel('Tarih').fill('2026-11-18');
     await expect(page.getByRole('dialog', { name: 'Çarşamba 18 Kasım' })).toBeVisible();

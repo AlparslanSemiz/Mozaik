@@ -7,7 +7,7 @@
 // layer: the base week, the grid and the solver never see it.
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Printer, X } from 'lucide-react';
+import { CalendarX, Printer, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { subjectLabel } from '../../leaf/lang';
@@ -54,6 +54,7 @@ export function DayDialog({
   date,
   setDate,
   person,
+  ask,
   onClose,
   onShow,
 }: {
@@ -64,6 +65,12 @@ export function DayDialog({
   setDate: (iso: string) => void;
   /** Opened by this person's "Bugün yok…": a new date moves their one-day absence. */
   person?: Id | undefined;
+  /**
+   * Opened by "Bugün yok…" but nothing written yet: the one button writes the
+   * absence, closing the window writes nothing. While it is set the date is
+   * today's and the date box is not drawn.
+   */
+  ask?: (() => void) | undefined;
   onClose: () => void;
   /** Draws the date's week on the Program grid (the strip's chip only). */
   onShow?: () => void;
@@ -133,7 +140,15 @@ export function DayDialog({
             </Dialog.Close>
           </div>
 
-          <div className="form-row">
+          {ask !== undefined && (
+            <div className="form-row">
+              <button className="btn primary" onClick={ask}>
+                <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
+                {t('Bugün gelmiyor olarak işaretle')}
+              </button>
+            </div>
+          )}
+          <div className="form-row" hidden={ask !== undefined}>
             <label>
               {t('Tarih')}{' '}
               <input

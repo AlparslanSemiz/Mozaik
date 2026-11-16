@@ -227,14 +227,14 @@ test.describe('Kişi sayfası', () => {
       null,
     );
     await openSetup(page, 'Sınıflar');
-    await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+    await page.getByRole('button', { name: '+ Yeni sınıf' }).last().click();
     let sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
     await page.keyboard.type('512');
     await sheet.getByRole('combobox', { name: 'Derslik', exact: true }).selectOption('dB');
     await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(page.getByRole('dialog', { name: '512' })).toBeVisible();
     await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+    await page.getByRole('button', { name: '+ Yeni sınıf' }).last().click();
     sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
     await expect(sheet.getByRole('combobox', { name: 'Derslik', exact: true })).toHaveValue('dB');
   });
@@ -243,7 +243,7 @@ test.describe('Kişi sayfası', () => {
     page,
   }) => {
     await openTeachers(page);
-    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).last().click();
     const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
     await expect(sheet.getByPlaceholder('Ad Soyad')).toBeFocused();
     await page.keyboard.type('Zeynep Ak');
@@ -341,5 +341,14 @@ test.describe('Kişi sayfası', () => {
     const pdf = page.waitForEvent('download');
     await cls.getByRole('button', { name: 'PDF kaydet', exact: true }).click();
     expect((await pdf).suggestedFilename()).toMatch(/^Mozaik – 510 – .*\.pdf$/);
+  });
+
+  test('öğretmen sayfasında tek tıkla PDF kaydet: adres ve numara yokken de', async ({ page }) => {
+    await openTeachers(page);
+    await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
+    const sheet = page.getByRole('dialog');
+    const pdf = page.waitForEvent('download');
+    await sheet.getByRole('button', { name: 'PDF kaydet', exact: true }).click();
+    expect((await pdf).suggestedFilename()).toMatch(/^Mozaik – Mehmet Çelik – .*\.pdf$/);
   });
 });

@@ -51,6 +51,9 @@ import {
   AvailGrid,
   ColorPick,
   LimitBox,
+  MoreItem,
+  MoreMenu,
+  MoreSub,
   T,
   useDialogs,
   useKeepBefore,
@@ -64,7 +67,7 @@ import { DayDialog } from '../dated';
 import { addAway, coverCount, isAway } from '../../pure/dated';
 import { dayStamp } from '../../leaf/app';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CalendarX, Printer, Trash2, X } from 'lucide-react';
+import { CalendarX, MoreHorizontal, Printer, Trash2, X } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { GENDERS, NewClass, NewTeacher } from './NewPerson';
 import { KIND_ICON } from './steps';
@@ -108,6 +111,8 @@ export function Inspector({
   /** "Bugün yok…": the date page, this person away on it. */
   const [awayOn, setAwayOn] = useState<string | null>(null);
   const [made, setMade] = useState(false);
+  /** "Bugün yok…" is open and the absence is not written yet: the window's button writes it. */
+  const [asking, setAsking] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const emailBox = useRef<HTMLInputElement>(null);
   const phoneBox = useRef<HTMLInputElement>(null);
@@ -342,30 +347,6 @@ export function Inspector({
                 </select>
               </dd>
 
-              {/* Blank first, and that is how it is emptied again: a second
-                  branch that can be added but not removed is a one-way door.
-                  Clearing it also clears the flag on that teacher's lessons
-                  (`sanitize()`). */}
-              <dt>{t('2. branş')}</dt>
-              <dd>
-                <select
-                  aria-label={t('2. branş')}
-                  value={teacherOf.subject2}
-                  onChange={(e) =>
-                    change((d) => updateTeacher(d, teacherOf.id, { subject2: e.target.value }))
-                  }
-                >
-                  <option value="">{t('Yok')}</option>
-                  {subjects
-                    .filter((x) => subjectKey(x) !== subjectKey(teacherOf.subject))
-                    .map((x) => (
-                      <option key={x} value={x}>
-                        {subjectOption(state.settings, x)}
-                      </option>
-                    ))}
-                </select>
-              </dd>
-
               {/* Kept as typed (trimmed, control characters dropped:
                   cleanEmail); a box that does not hold one address says so
                   here, where it is fixed, and Gönder does not offer to send. */}
@@ -418,25 +399,6 @@ export function Inspector({
                   }}
                 />
               </dd>
-
-              <dt>{t('Cinsiyet')}</dt>
-              <dd>
-                <select
-                  aria-label={t('Cinsiyet')}
-                  value={teacherOf.gender}
-                  onChange={(e) =>
-                    change((d) =>
-                      updateTeacher(d, teacherOf.id, { gender: e.target.value as Gender }),
-                    )
-                  }
-                >
-                  {GENDERS.map((g) => (
-                    <option key={g} value={g}>
-                      {genderCell(g)}
-                    </option>
-                  ))}
-                </select>
-              </dd>
             </>
           )}
 
@@ -465,26 +427,82 @@ export function Inspector({
               </dd>
             </>
           )}
-
-          {(teacherOf ?? classOf) !== undefined && (
-            <>
-              <dt>{t('Renk')}</dt>
-              <dd>
-                <ColorPick
-                  value={(teacherOf ?? classOf)!.color}
-                  owner={who}
-                  onChange={(color) =>
-                    change((d) =>
-                      teacherOf !== undefined
-                        ? updateTeacher(d, teacherOf.id, { color })
-                        : updateClass(d, classOf!.id, { color }),
-                    )
-                  }
-                />
-              </dd>
-            </>
-          )}
         </dl>
+
+        {/* Seldom changed, so folded: the page is read at 1366 wide, and the
+            hours it cannot come (the reason the page is opened) have to be on
+            the first screen. E-posta and Telefon stay open: Gönder asks for them. */}
+        {(teacherOf ?? classOf) !== undefined && (
+          <details className="sheet-more">
+            <summary>{t('Diğer bilgiler')}</summary>
+            <dl className="sheet-edit">
+              {teacherOf !== undefined && (
+                <>
+                  {/* Blank first, and that is how it is emptied again: a second
+                  branch that can be added but not removed is a one-way door.
+                  Clearing it also clears the flag on that teacher's lessons
+                  (`sanitize()`). */}
+                  <dt>{t('2. branş')}</dt>
+                  <dd>
+                    <select
+                      aria-label={t('2. branş')}
+                      value={teacherOf.subject2}
+                      onChange={(e) =>
+                        change((d) => updateTeacher(d, teacherOf.id, { subject2: e.target.value }))
+                      }
+                    >
+                      <option value="">{t('Yok')}</option>
+                      {subjects
+                        .filter((x) => subjectKey(x) !== subjectKey(teacherOf.subject))
+                        .map((x) => (
+                          <option key={x} value={x}>
+                            {subjectOption(state.settings, x)}
+                          </option>
+                        ))}
+                    </select>
+                  </dd>
+
+                  <dt>{t('Cinsiyet')}</dt>
+                  <dd>
+                    <select
+                      aria-label={t('Cinsiyet')}
+                      value={teacherOf.gender}
+                      onChange={(e) =>
+                        change((d) =>
+                          updateTeacher(d, teacherOf.id, { gender: e.target.value as Gender }),
+                        )
+                      }
+                    >
+                      {GENDERS.map((g) => (
+                        <option key={g} value={g}>
+                          {genderCell(g)}
+                        </option>
+                      ))}
+                    </select>
+                  </dd>
+                </>
+              )}
+              {(teacherOf ?? classOf) !== undefined && (
+                <>
+                  <dt>{t('Renk')}</dt>
+                  <dd>
+                    <ColorPick
+                      value={(teacherOf ?? classOf)!.color}
+                      owner={who}
+                      onChange={(color) =>
+                        change((d) =>
+                          teacherOf !== undefined
+                            ? updateTeacher(d, teacherOf.id, { color })
+                            : updateClass(d, classOf!.id, { color }),
+                        )
+                      }
+                    />
+                  </dd>
+                </>
+              )}
+            </dl>
+          </details>
+        )}
 
         {roomOf !== undefined && (
           <ul className="sheet-links">
@@ -552,10 +570,10 @@ export function Inspector({
                           {t('saat')}
                         </td>
                         <td>
-                          <TransferPick
+                          <RowMenu
                             state={state}
                             from={x.teacherId}
-                            label={t('{ne} dersini başka öğretmene aktar', { ne: other })}
+                            label={t('{ne} dersi için işlemler', { ne: other })}
                             pick={(id) => void hand(x.id, other, id)}
                           />
                         </td>
@@ -805,9 +823,11 @@ export function Inspector({
                       className="btn"
                       onClick={() => {
                         const today = dayStamp(new Date());
-                        // Only an absence made here moves with the page's date.
-                        setMade(!isAway(state, target.id, today));
-                        change((d) => addAway(d, target.id, today));
+                        // Nothing is written here: the window asks, and
+                        // only its button writes (closing it writes nothing).
+                        const free = !isAway(state, target.id, today);
+                        setMade(false);
+                        setAsking(free);
                         setAwayOn(today);
                       }}
                     >
@@ -830,8 +850,14 @@ export function Inspector({
                         {t('İkame: bu hafta {m}, toplam {n} saat', { m: covers[1], n: covers[0] })}
                       </span>
                     )}
-                    {target.kind === 'class' && (
-                      <SavePdf key={target.id} state={state} id={target.id} colored={colored} />
+                    {target.kind !== 'room' && (
+                      <SavePdf
+                        key={target.id}
+                        state={state}
+                        kind={target.kind}
+                        id={target.id}
+                        colored={colored}
+                      />
                     )}
                   </div>
                 )}
@@ -846,7 +872,19 @@ export function Inspector({
                 date={awayOn}
                 setDate={setAwayOn}
                 person={made ? target.id : undefined}
-                onClose={() => setAwayOn(null)}
+                ask={
+                  asking
+                    ? () => {
+                        setMade(true);
+                        setAsking(false);
+                        change((d) => addAway(d, target.id, awayOn ?? dayStamp(new Date())));
+                      }
+                    : undefined
+                }
+                onClose={() => {
+                  setAwayOn(null);
+                  setAsking(false);
+                }}
               />
               {printing && printable && (
                 <PrintOne
@@ -939,12 +977,12 @@ function AddLesson({
 }
 
 /**
- * "Başka öğretmene aktar…" on one lesson. Its options are drawn the first time
- * the pointer or the keyboard reaches it: eleven lessons times eighteen
- * teachers was a fifth of the page's opening time at 4x, for lists nobody had
- * looked at yet. Its width is fixed so that drawing them moves nothing.
+ * The "…" at the end of a lesson row: the actions seldom wanted on one lesson.
+ * Today that is "Başka öğretmene aktar…" (it was a box on every row, which made
+ * the page twice as long as the hours it is opened for). The teachers are
+ * only drawn once the menu is open (Radix mounts its content on open).
  */
-function TransferPick({
+function RowMenu({
   state,
   from,
   label,
@@ -956,27 +994,22 @@ function TransferPick({
   pick: (teacherId: Id) => void;
 }) {
   const t = useT();
-  const [armed, setArmed] = useState(false);
   return (
-    <select
-      className="transfer-pick"
-      value=""
-      aria-label={label}
-      onPointerEnter={() => setArmed(true)}
-      onFocus={() => setArmed(true)}
-      onChange={(e) => {
-        if (e.target.value !== '') pick(e.target.value);
-      }}
+    <MoreMenu
+      label=""
+      ariaLabel={label}
+      className="row-more"
+      icon={<MoreHorizontal size={18} aria-hidden="true" focusable="false" />}
     >
-      <option value="">{t('Başka öğretmene aktar…')}</option>
-      {armed &&
-        state.teachers
+      <MoreSub label={t('Başka öğretmene aktar…')}>
+        {state.teachers
           .filter((p) => p.id !== from)
           .map((p) => (
-            <option key={p.id} value={p.id}>
+            <MoreItem key={p.id} onSelect={() => pick(p.id)}>
               {p.short} · {p.name}
-            </option>
+            </MoreItem>
           ))}
-    </select>
+      </MoreSub>
+    </MoreMenu>
   );
 }

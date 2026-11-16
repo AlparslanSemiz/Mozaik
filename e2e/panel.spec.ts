@@ -134,6 +134,24 @@ test.describe('48. Varlık paneli', () => {
 // with every count still adding up.
 test.describe('83. Panelden ders aktarma', () => {
   const sheet = (page: import('@playwright/test').Page) => page.locator('.sheet');
+  type Page = import('@playwright/test').Page;
+  // The row's "…" menu → "Başka öğretmene aktar…" → the teachers; returns the
+  // items so a test can read them before choosing one.
+  const openTransfer = async (page: Page) => {
+    await sheet(page)
+      .locator('.sheet-lessons tbody tr')
+      .first()
+      .getByRole('button', { name: /dersi için işlemler/ })
+      .click();
+    await page.getByRole('menuitem', { name: 'Başka öğretmene aktar…' }).click();
+    return page.locator('.menu').getByRole('menuitem').filter({ hasText: ' · ' });
+  };
+  // Chosen with the keyboard: Radix closes the menu as the pointer lands, and
+  // Playwright reads that as a click that went nowhere.
+  const choose = async (page: Page, item: import('@playwright/test').Locator) => {
+    await item.focus();
+    await page.keyboard.press('Enter');
+  };
 
   test('öğretmenin dersi BAŞKA hocaya geçiyor', async ({ page }) => {
     await openWithSample(page);
@@ -147,11 +165,9 @@ test.describe('83. Panelden ders aktarma', () => {
     const which = (await rows.first().locator('td').first().innerText()).trim();
     const before = await rows.count();
 
-    const pick = rows.first().getByRole('combobox', { name: /başka öğretmene aktar/ });
-    // Its teachers are drawn when it is reached (`TransferPick`).
-    await pick.focus();
-    const to = (await pick.locator('option').nth(1).innerText()).trim();
-    await pick.selectOption({ index: 1 });
+    const items = await openTransfer(page);
+    const to = (await items.first().innerText()).trim();
+    await choose(page, items.first());
 
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
       'öğretmenine geçecek',
@@ -179,8 +195,12 @@ test.describe('83. Panelden ders aktarma', () => {
       sheet(page)
         .locator('.sheet-lessons tbody tr')
         .first()
-        .getByRole('combobox', { name: /başka öğretmene aktar/ }),
+        .getByRole('button', { name: /dersi için işlemler/ }),
     ).toBeVisible();
+    // Not a box on every row any more: the transfer is inside that menu.
+    await expect(sheet(page).getByRole('combobox', { name: /başka öğretmene aktar/ })).toHaveCount(
+      0,
+    );
   });
 
   // The count in the toast is written inside the reducer callback. React runs
@@ -204,12 +224,8 @@ test.describe('83. Panelden ders aktarma', () => {
     await openSetup(page, 'Öğretmenler');
     await mainList(page).locator('.person-open', { hasText: 'MÇ' }).click();
 
-    const pick = sheet(page)
-      .locator('.sheet-lessons tbody tr')
-      .first()
-      .getByRole('combobox', { name: /başka öğretmene aktar/ });
-    await pick.focus();
-    await pick.selectOption('oAV');
+    const items = await openTransfer(page);
+    await choose(page, items.filter({ hasText: /^AV ·/ }));
     // Precondition: both blocks are on the grid, and AV's week is shut.
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
       '2 ders yeni',
@@ -228,12 +244,8 @@ test.describe('83. Panelden ders aktarma', () => {
 
     await openSetup(page, 'Öğretmenler');
     await mainList(page).locator('tbody tr').first().locator('.person-open').click();
-    const pick = sheet(page)
-      .locator('.sheet-lessons tbody tr')
-      .first()
-      .getByRole('combobox', { name: /başka öğretmene aktar/ });
-    await pick.focus();
-    await pick.selectOption({ index: 1 });
+    const items = await openTransfer(page);
+    await choose(page, items.first());
     await page.getByRole('button', { name: 'Aktar' }).click();
     await expect(page.locator('.toast').last()).toContainText('geçti');
 

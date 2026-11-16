@@ -194,11 +194,24 @@ function WhatsappButton({
   );
 }
 
-/** The person page's PDF kaydet, for a class: the same file a teacher is sent. */
-export function SavePdf({ state, id, colored }: { state: State; id: string; colored: boolean }) {
+/**
+ * The person page's PDF kaydet: the same file a teacher is sent, one click,
+ * with or without an address or a number.
+ */
+export function SavePdf({
+  state,
+  kind,
+  id,
+  colored,
+}: {
+  state: State;
+  kind: 'teacher' | 'class';
+  id: string;
+  colored: boolean;
+}) {
   const t = useT();
   const [saved, setSaved] = useState<Saved>(null);
-  const save = saver(state, 'class', colored, t, setSaved, () => undefined)(id);
+  const save = saver(state, kind, colored, t, setSaved, () => undefined)(id);
   return (
     <>
       <button className="btn" onClick={() => save()}>
