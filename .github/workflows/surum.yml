@@ -279,7 +279,7 @@ jobs:
   # Developer ID ile imzalar (ve `APPLE_ID` üçlüsü de varsa notarize eder);
   # tanımlı değilse ad-hoc imza (`signingIdentity: "-"`, tauri.macos.conf.json),
   # ki Apple Silicon imzasız bir programı hiç çalıştırmaz. Bugün sır yok
-  # (DECISIONS 2026-11-15): ilk açılışta "Yine de Aç" gerekir (README.md, "Mac").
+  # (DECISIONS 2026-11-15): ilk açılışta "Yine de Aç" gerekir (docs/INSTALL.md, "Mac").
   #
   # MAC HİÇBİR ŞEYİ ENGELLEMEZ (Alp, 2026-11-16: Windows ve web önce). Bu iş
   # kırmızıysa ya da hiç koşmadıysa `publish` yine Windows'u ve surum.json'ı
