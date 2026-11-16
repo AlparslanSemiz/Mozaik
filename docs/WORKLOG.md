@@ -129,6 +129,9 @@ da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzg
   `sample.test`'in dropMap testi açgözlü doldurmayı ikinci kez koşuyordu ve 50 ms'lik mutlak
   eşiği vardı: doldurma bir kez, eşik dolu/boş medyan oranı < 4 (bugün ~1,3). Hücre başına
   `blockAt` çağıran mutasyon oranı 6,7'ye çıkardı ve kırmızı, eski eşik onda 13 ms ile yeşil kalırdı.
+- **Çözücünün saati:** tam `npm test`'te `solver.test`'in "Roboders'teki saatlerle" testi
+  varsayılan 15 s'lik bütçeyle yükte iki blok eksik kaldı (iş 18,5 s sürdü). Bütçe 600 s
+  (durma kuralı hamle sayıyor), test sınırı 120 s.
 
 Belgeler: TRAPS 170 ve 171 (159–165 alınmış, açık dallar da numara beklediği için 170'ten başlandı), TESTPLAN
 "Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.

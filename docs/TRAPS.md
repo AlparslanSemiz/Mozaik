@@ -1596,9 +1596,14 @@ kez kendi içinde koşuyordu, yani süresinin çoğu ölçtüğü şey değildi.
 bir kez yapılıyor, eşik de görelileşti: dolu haftanın medyanı boş haftanınkinin dört
 katını geçmiyor, ikisi yan yana ölçülerek. Hücre başına haftayı yürüyen bir mutasyon
 oranı 1,3'ten 6,7'ye çıkardı ve testi kırmızıya çevirdi, eski 50 ms'lik eşik aynı
-mutasyonda (13 ms) yeşil kalırdı. Kural: **belirli ama ağır bir test sınırını
+mutasyonda (13 ms) yeşil kalırdı. Aynı gece tam süitte `solver.test.ts`'in "Roboders'teki
+saatlerle haftanın tamamını diziyor"u iki blok eksik kaldı: sınır değil, sonuç düştü,
+çünkü test çözücünün varsayılan 15 s'lik saatiyle koşuyordu ve yükte iş 18,5 s sürdü. İddia
+"bu hafta dizilebilir"; çözücünün hamle sayan durma kuralı umutsuz onarımı zaten bitiriyor,
+o yüzden bütçe 600 s, yanındaki "olduğu gibi kurulamıyor" testindeki gibi. Kural: **belirli ama ağır bir test sınırını
 gerekçesiyle kendisi söyler; bir süre eşiği birim testinde yalnız aynı anda ölçülen
-bir karşılaştırmaya karşı durur (TESTPLAN TP15).**
+bir karşılaştırmaya karşı durur (TESTPLAN TP15); sonucu saate bağlı bir işin "yapabilir"
+iddiası saati kapatarak sınanır.**
 
 ---
 
