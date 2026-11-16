@@ -2664,13 +2664,38 @@ td.block-in > .card {
 }
 
 table.grid tbody td.unavailable {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--closed),
-    var(--closed) 3px,
-    var(--hatch) 3px,
-    var(--hatch) 6px
-  );
+  /* The cross is two strokes painted here, not a "×" in the cell: on the
+     father's week that was 669 text nodes, each shaped and laid out on the
+     open (pitfall 222). Drawn to the glyph's measure: Plex SemiBold's ×
+     inks a 0.44em square with a ~0.12em stroke, in the cell's own colour
+     (`currentColor`, --muted below). Each stroke's edges are half a pixel
+     soft, as a glyph's are; a hard stop on a diagonal is a staircase. */
+  --x-in: calc(50% - .06em - .5px);
+  --x-out: calc(50% + .06em + .5px);
+  background:
+    linear-gradient(
+        45deg,
+        transparent var(--x-in),
+        currentColor calc(var(--x-in) + 1px),
+        currentColor calc(var(--x-out) - 1px),
+        transparent var(--x-out)
+      )
+      center / .44em .44em no-repeat,
+    linear-gradient(
+        -45deg,
+        transparent var(--x-in),
+        currentColor calc(var(--x-in) + 1px),
+        currentColor calc(var(--x-out) - 1px),
+        transparent var(--x-out)
+      )
+      center / .44em .44em no-repeat,
+    repeating-linear-gradient(
+      45deg,
+      var(--closed),
+      var(--closed) 3px,
+      var(--hatch) 3px,
+      var(--hatch) 6px
+    );
   /* GREY here, and one step smaller than Müsaitlik's. It used to match that
      screen's mark exactly — red, 25px, bold — and on a timetable with the
      school's closed hours drawn in, the loudest thing in the grid was the
@@ -2684,6 +2709,18 @@ table.grid tbody td.unavailable {
   font-size: var(--fs-lg);
   font-weight: 600;
   line-height: 1;
+}
+
+/* Where backgrounds are not drawn the cross is a glyph again: paper prints no
+   backgrounds by default, and a forced-colours theme replaces them. */
+@media print, (forced-colors: active) {
+  table.grid tbody td.unavailable {
+    background-image: none;
+  }
+
+  table.grid tbody td.unavailable::after {
+    content: "×";
+  }
 }
 
 /* A placed lesson card */
@@ -2763,11 +2800,20 @@ table.grid tbody td.unavailable {
     background var(--dur-fast) var(--ease);
 }
 
-.card-pin > svg {
+.card-pin::before {
+  /* Lucide's pin at stroke 3, as a mask over the button's ink: one box per
+     card instead of an <svg> and two <path>s (pitfall 222). */
+  --pin-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 17v5'/%3E%3Cpath d='M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z'/%3E%3C/svg%3E");
+  content: "";
   width: 74%;
   height: 74%;
-  stroke-width: 3;
+  background: currentColor;
+  -webkit-mask: var(--pin-icon) center / contain no-repeat;
+  mask: var(--pin-icon) center / contain no-repeat;
+  /* A forced-colours theme would paint this box Canvas and lose the pin. */
+  forced-color-adjust: none;
 }
+
 
 /* On, or being aimed at. Hovering the CELL is enough: the pointer is already
    over the card by the time the hand decides. */

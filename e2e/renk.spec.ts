@@ -604,7 +604,10 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     await openWithSample(page);
 
     const mark = page.locator('table.grid td.unavailable').first();
-    await expect(mark).toContainText('×');
+    // The cross is painted by the stylesheet since 2026-11-16 (pitfall 222);
+    // what is read is the cell's name, and the paint is sized from its font.
+    await expect(mark).toHaveAttribute('aria-label', /müsait değil|kapalı/);
+    expect(await mark.evaluate((el) => el.textContent)).toBe('');
     const style = await mark.evaluate((el) => {
       const own = getComputedStyle(el);
       // What "as big as the text beside it" measures to right now. Asked of a
@@ -642,6 +645,8 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     const t = await tokens(page, ['--closed']);
     expect(contrast(style.color, t['--closed']!)).toBeGreaterThanOrEqual(4.5);
     expect(style.backgroundImage).toContain('repeating-linear-gradient');
+    // Two strokes on top of the hatch, in the cell's own ink.
+    expect(style.backgroundImage.match(/(?<!repeating-)linear-gradient/g)?.length).toBe(2);
 
     // Availability keeps its big red cross: there the screen only says open
     // or closed. Program does NOT share it any more (2026-11-15): on this grid

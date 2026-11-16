@@ -36,6 +36,19 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Izgaranın kapalı saati ve iğnesi çizimle, metin ve SVG değil (`hiz/acilis-2`)
+
+- **Ne değişti.** Kapalı saatin "×"'i hücrenin arka planında iki çizgi; kartın iğnesi düğmenin
+  `::before`'unda bir maske. Anlam aynı yerde: hücrenin `aria-label`'ı ("kapalı" / "müsait değil"),
+  düğmenin `aria-label`'ı ve `aria-pressed`'i. Baskıda ve zorunlu renklerde çarpı yine glif
+  (arka plan orada çizilmez). Çarpı glife ölçülerek çizildi, piksel piksel aynı değil (tuzak 222).
+- **Bırakılan.** Kartların satır içi `background` stilini sınıfa çevirmek: satır içi kısaltma
+  `background-image`'ı da sıfırlıyor, yani bir sınıfa taşımak `.card.conflict`'in köşe kamasını
+  ve `.mark-opened`'ın taramasını bugün olmadıkları biçimde görünür yapabilir; bu bir görünüş
+  kararı, hız işinin içinde verilmedi (WORKLOG).
+
+---
+
 ### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
 
 - **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama

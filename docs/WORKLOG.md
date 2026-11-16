@@ -103,6 +103,24 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
 
+## 2026-11-16 · Izgaranın DOM'u inceldi (`hiz/acilis-2`)
+
+`hiz/acilis`'ten sonra en uzun görev ızgaranın ilk yerleşimiydi. Babanın haftasında ızgaranın
+içi (sayım, süre değil): 2937 öğe, 1196 metin düğümü; bunların 669'u kapalı saatlerin "×"'i,
+597 öğe de 199 kartın her birindeki iğnenin `<svg>`'si ve iki `<path>`'i (fareyle gelinmeden
+saydam). Çarpı artık `td.unavailable`'ın arka planında iki çizgi, iğne düğmenin `::before`'unda
+bir maske (tuzak 222, DECISIONS). Sonra: metin düğümü 527, SVG 0. Görünüş: çarpı ve iğne
+1920'de, açık ve koyu temada, 2× yakın çekimle eskisiyle yan yana bakıldı; iğne aynı, çarpı
+glifin ölçüsünde (0,44em, ~0,12em çizgi). E2E: `renk.spec.ts`'in çarpı testi metin yerine
+`aria-label`'a ve iki çizgiye bakıyor.
+
+**Not edilen.** Kartın rengi satır içi `background` kısaltmasıyla yazılıyor; kısaltma
+`background-image`'ı da sıfırladığı için `.card.conflict`'in kaması ve `.mark-opened`'ın
+taraması büyük olasılıkla hiç görünmüyor (doğrulanmadı). Sınıfa taşımak onları görünür yapar,
+bu bir görünüş kararı.
+
+**CI:** yazılacak (aynı koşunun taban ve dal sütunu).
+
 ## 2026-11-16 · Açılışın ana iş parçacığı (`hiz/acilis`)
 
 `origin/main` + `olcum/acilis` (PR #77, `acilis.yml`). Ölçüm Chromium'da CDP izi ve

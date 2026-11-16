@@ -5,7 +5,6 @@ import { dayLabel } from '../../leaf/lang';
 import { type Settings, paletteColor } from '../../leaf/model';
 import type { GridRow } from '../../pure/program';
 import { useT } from '../common';
-import { Pin } from 'lucide-react';
 import { memo } from 'react';
 import type React from 'react';
 import { useInspect } from './Inspector';
@@ -156,6 +155,9 @@ export const Row = memo(function Row({
           colSpan={spans ? span : undefined}
           // The cross is drawn, the word is read: "×" came out as "çarpı".
           // One attribute on the closed cells only, not two spans in each.
+          // Drawn by the stylesheet, not a "×" in the cell: 669 text nodes
+          // on the father's week, each one shaped and laid out on the open
+          // (styles.css, `td.unavailable`).
           aria-label={cell === null && closed ? closedWord : undefined}
           className={className}
           title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
@@ -262,8 +264,6 @@ export const Row = memo(function Row({
                 </span>
               )}
             </button>
-          ) : closed ? (
-            '×'
           ) : null}
           {/* THE PIN IS A CONTROL NOW, and a SIBLING of the card.
               ("Program kısmında kartların üzerinde sabitleye basınca dersi
@@ -309,7 +309,9 @@ export const Row = memo(function Row({
                 cell.pinned ? t('Sabitlenmiş. Kaldırmak için tıklayın') : t('Dersi buraya sabitle')
               }
             >
-              <Pin aria-hidden="true" />
+              {/* The icon is the button's own `::before` (styles.css): an
+                  <svg> with two <path>s was three more boxes on each of 199
+                  cards, laid out on the open and never seen until hovered. */}
             </button>
           )}
         </td>,
