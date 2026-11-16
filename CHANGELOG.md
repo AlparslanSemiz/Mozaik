@@ -19,6 +19,11 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- Automatic layout now makes the week better after it has placed every card: it moves and swaps whole cards, never breaking a rule and never touching a pinned or kept card, to give fewer free hours between a teacher's lessons, fewer days a teacher has to come in and fewer gaps in a class's day, and to keep "Warn" rules unbroken where it can. On the sample school a teacher waits 61 free hours a week instead of 271; on the father's course 118 instead of 151.
+- "Başka bir dizilim" (Another layout) next to "Baştan diz" lays out a different week under the same rules on every press; "Geri al" brings the week before back.
+- When "Otomatik diz" cannot fit a card into the week as it stands (after a lesson's split or teacher was changed, say), it lays the unpinned week out again close to the old one and says how many hours moved: on the sample school 17 of 433 cells change, where "Baştan diz" changes 418.
+- When the layout gets stuck because someone has more lessons than open hours, the bar says so first, with the numbers: "AY: 18 hours of lessons, 15 available; 3 more must be opened"; the same for a class and for a room two classes share, and for two lessons that may not share a day but need more days than the week has.
+
 - "Getting started" on the School tab is now a checklist of nine steps, from the school's name, days and bell times to printing. Each step ticks itself from the plan and has a button that takes you there; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next step, can be closed, and goes away by itself when every step is done. It no longer disappears when the first teacher is added.
 - Lessons warns while you enter them when a class or teacher gets more lesson hours than open hours ("9A: 54 lesson hours, 48 open hours. 6 hours do not fit the week."), and the class or teacher is marked red in the list on the right.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
