@@ -147,7 +147,7 @@ yok), yerine tavan. Formüller artık kullanılmayınca bırakılıyor: Node tep
 
 **Boyut eşiği 306 000 → 307 000 B brotli.** Zincirin ucunda (gönder, inceleme, `hiz/acilis-2`
 ile) bu dal brotli 305 629 → 306 582 B (+953), ham 1 180 419 → 1 182 829 B; ham eşik (1 200 000)
-değişmedi, onun altında açılış ölçümü şart değil. Eşik kalan pay 418 B'a çekildi: sonraki iş
+değişmedi, onun altında açılış ölçümü şart değil. Eşik yarım kilobayt kadar pay bırakacak yere çekildi (`npm run boyut`: 611 B): sonraki iş
 yer açmadan büyüyemesin.
 
 ## 2026-11-16 · Izgaranın DOM'u inceldi (`hiz/acilis-2`)
