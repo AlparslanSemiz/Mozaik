@@ -94,6 +94,8 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
  * as a function, once per render of whichever strip is open.
  */
 let anotherSeed = 0;
+/** The week the last "Başka bir dizilim" put on the grid. */
+let anotherMade: State | null = null;
 
 export function programStrip({
   ui,
@@ -220,7 +222,7 @@ export function programStrip({
 
       <Sep />
 
-      {/* Two buttons and no settings. What "spread over the week" or "prefer
+      {/* Three buttons and no settings. What "spread over the week" or "prefer
           mornings" should mean is not knowable before a term has been laid
           out with this (the former rule against guessed features). */}
       <Group label="Diz">
@@ -294,11 +296,17 @@ export function programStrip({
               disabled={placed === 0 && pending === 0}
               onClick={() => {
                 anotherSeed++;
-                keepBefore(state, t('Program baştan dizildi.'));
+                // The week before the FIRST press is the one worth keeping: a
+                // second press would push the hand-made week out of the one
+                // slot with a week this button made (review, 2026-11-16).
+                if (state !== anotherMade) keepBefore(state, t('Program baştan dizildi.'));
                 solver.start(
                   state,
                   { keepPlaced: false, exclusions, seed: anotherSeed },
-                  relaidNotice,
+                  (next) => {
+                    anotherMade = next;
+                    relaidNotice(next);
+                  },
                 );
               }}
             >

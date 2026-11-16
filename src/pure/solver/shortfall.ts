@@ -150,11 +150,19 @@ export function bindingPair(
     }
     return out;
   };
+  const placements = activePlacements(d);
   const need = (x: Lesson): number => {
     const limit = lessonLimit(d, x);
     const capped = ruleLevel(d, 'maxSameLessonPerDay') === 'block' && limit > 0;
-    if (x.weeklyHours <= 0) return 0;
-    return capped ? Math.ceil(x.weeklyHours / limit) : 1;
+    // Hours already on an excluded day stay there and need no day of their own.
+    let hours = x.weeklyHours;
+    for (let day = 0; day < dayCount; day++) {
+      for (let h = 0; h < hourCount && excluded(day); h++) {
+        if (placements[placementKey(x.classId, day, h)] === x.id) hours--;
+      }
+    }
+    if (hours <= 0) return 0;
+    return capped ? Math.ceil(hours / limit) : 1;
   };
 
   const mine = days(lesson);

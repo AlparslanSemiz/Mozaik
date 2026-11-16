@@ -83,7 +83,9 @@ const DEFAULTS: SolverOptions = {
 /**
  * The improvement pass's own wall-clock cap, on top of the search's budget.
  * Its real limit is a step count (improve.ts), so a seed gives the same week
- * on any machine; this only keeps a very slow machine from waiting long.
+ * on any machine; this only keeps a very slow machine from waiting long. A
+ * quarter of the run's own budget when that is longer, so a caller that gives
+ * the search minutes (the tests, on a loaded machine) gives the pass room too.
  */
 const IMPROVE_CAP_MS = 4_000;
 
@@ -1473,12 +1475,13 @@ function createSearch(
       if (finished !== null) return finished;
       const t0 = performance.now();
       if (improver !== null) {
-        const left = Math.max(1, Math.min(sliceMs, IMPROVE_CAP_MS - improveMs));
+        const cap = Math.max(IMPROVE_CAP_MS, opts.budgetMs / 4);
+        const left = Math.max(1, Math.min(sliceMs, cap - improveMs));
         const over = improver.step(left);
         const spent = performance.now() - t0;
         elapsedMs += spent;
         improveMs += spent;
-        if (!over && improveMs < IMPROVE_CAP_MS) return null;
+        if (!over && improveMs < cap) return null;
         endImprove();
         finished = report(improvePhase);
         return finished;

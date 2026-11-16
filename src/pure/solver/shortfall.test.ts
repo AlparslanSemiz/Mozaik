@@ -100,7 +100,7 @@ describe('tıkanınca açık söyleniyor', () => {
       expect(s.reason).toBe('MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı');
     }
     expect(r.stuck[0]!.reason).toContain('MÇ: 18 saat ders');
-  });
+  }, 30_000);
 
   it('günlük sınır bağlıyorsa açık değil dersin tavanı söyleniyor', () => {
     const d = makeWorld({
@@ -128,7 +128,7 @@ describe('tıkanınca açık söyleniyor', () => {
     const r = solve(d, { keepPlaced: false });
     expect(r.stuck.length).toBeGreaterThan(0);
     for (const s of r.stuck) expect(s.reason).toContain('A dersliği: 24 saat ders');
-  });
+  }, 30_000);
 
   it('kapsam dışı gün açık saat sayılmıyor', () => {
     const d = k3();

@@ -665,8 +665,10 @@ describe('iyileştirme — gerçek haftalar', () => {
   ] as const) {
     it(`${name}: kural çiğnemeden öğretmen boşluğunu azaltıyor`, () => {
       const d = make();
-      const before = solve(d, { keepPlaced: false, improve: false });
-      const after = solve(d, { keepPlaced: false });
+      // Minutes of budget: the claim is about the week, not the clock, and a
+      // loaded machine ran the default 15 s out (2026-11-16).
+      const before = solve(d, { keepPlaced: false, improve: false, budgetMs: 600_000 });
+      const after = solve(d, { keepPlaced: false, budgetMs: 600_000 });
       const qb = quality(before.state);
       const qa = quality(after.state);
       console.log(`[ölçüm] ${name}: önce ${JSON.stringify(qb)}, sonra ${JSON.stringify(qa)}`);
@@ -680,11 +682,12 @@ describe('iyileştirme — gerçek haftalar', () => {
 
   it('Başka bir dizilim: her tohum başka, aynı tohum aynı hafta', () => {
     const d = emptied(sampleState());
-    const weeks = [0, 1, 2].map((seed) => solve(d, { keepPlaced: false, seed }).state);
+    const run = (seed: number) => solve(d, { keepPlaced: false, seed, budgetMs: 600_000 }).state;
+    const weeks = [0, 1, 2].map(run);
     for (const w of weeks) expect(hardBreaches(w)).toEqual([]);
     expect(cellsChanged(weeks[0]!, weeks[1]!)).toBeGreaterThan(100);
     expect(cellsChanged(weeks[1]!, weeks[2]!)).toBeGreaterThan(100);
-    const again = solve(d, { keepPlaced: false, seed: 1 }).state;
+    const again = run(1);
     expect(cellsChanged(again, weeks[1]!)).toBe(0);
   }, 60_000);
 
