@@ -11,7 +11,7 @@ import { activePlacements } from '../grid';
 import { blocksOf, makeWorld, SMALL_WORLDS } from '../worlds';
 import type { RuleLevel, State } from '../../leaf/model';
 import { createSolver, solve } from './solver';
-import { compareQuality, hardBreaches, pinsMoved, quality } from './oracle';
+import { compareQuality, hardBreaches, pinsMoved, quality, runs } from './oracle';
 
 function rng(seed: number): () => number {
   let x = seed >>> 0 || 1;
@@ -112,6 +112,12 @@ function expectSound(input: State, before: State, after: State): void {
     expect(count(after), lesson.id).toBe(count(before));
     expect(pendingBlocks(after, lesson), lesson.id).toEqual(pendingBlocks(before, lesson));
   }
+  //    And no new pair of the lesson's cards side by side: there the grid
+  //    could read the same cells into differently drawn cards (pitfall 75).
+  expect(blocksOf(after).length).toBe(blocksOf(before).length);
+  expect(blocksOf(after).length - runs(after)).toBeLessThanOrEqual(
+    blocksOf(before).length - runs(before),
+  );
   // 4. The week is never worse: hard breaches first, then the rest in order.
   const hardBefore = hardBreaches(before).length;
   const hardAfter = hardBreaches(after).length;
@@ -136,7 +142,9 @@ describe('iyileştirme — rastgele küçük haftalar', () => {
           }
         }
       }
-    });
+      // Four solves of a small week: well under a second, but a loaded machine
+      // running the whole suite at once took 5,4 s (2026-11-16).
+    }, 30_000);
   }
 });
 

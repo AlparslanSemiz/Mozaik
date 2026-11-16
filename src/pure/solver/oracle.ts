@@ -219,6 +219,29 @@ export function compareQuality(a: number[], b: number[]): number {
   return 0;
 }
 
+/**
+ * Runs of one lesson's hours, side by side, over the week. With the cards the
+ * grid reads (`blocksOf`) it says how many cards touch another card of their
+ * own lesson: cards − runs. Touching cards are where the reading can shift.
+ */
+export function runs(d: State): number {
+  const P = activePlacements(d);
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+  let n = 0;
+  for (const c of d.classes) {
+    for (let day = 0; day < dayCount; day++) {
+      let prev: Id | undefined;
+      for (let h = 0; h < hourCount; h++) {
+        const here = P[`${c.id}|${day}|${h}`];
+        if (here !== undefined && here !== prev) n++;
+        prev = here;
+      }
+    }
+  }
+  return n;
+}
+
 /** Cells that differ between two weeks. */
 export function cellsChanged(a: State, b: State): number {
   const A = activePlacements(a);

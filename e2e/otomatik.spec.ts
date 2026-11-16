@@ -94,8 +94,11 @@ test.describe('22. Otomatik dizme', () => {
   test('"Başka bir dizilim" aynı kartlarla başka bir hafta diziyor', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
-    const cards = page.locator('table.grid .card');
-    const count = await cards.count();
+    const bar = page.locator('.reason-bar');
+    // "N kart yerleşti": the count of cards, not of drawn pieces (a double
+    // over the long break is drawn in two).
+    const placed = /\d+ kart yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
+    expect(placed).toBeDefined();
     const week = () =>
       page
         .locator('table.grid td[data-row]')
@@ -105,7 +108,7 @@ test.describe('22. Otomatik dizme', () => {
     await page.getByRole('button', { name: 'Başka bir dizilim' }).click();
     const notice = page.locator('.toast', { hasText: 'baştan dizildi' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
-    await expect(cards).toHaveCount(count);
+    await expect(bar).toContainText(`Program dizildi. ${placed!}`);
     expect(await week()).not.toBe(before);
     // One undo step brings the week before back.
     await notice.getByRole('button', { name: 'Geri al' }).click();

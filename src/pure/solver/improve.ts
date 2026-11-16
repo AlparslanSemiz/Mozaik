@@ -8,16 +8,20 @@
 // MEASURED (audit 2026-11-16): the sample school laid out with 271 teacher
 // gaps; a naive walk of 6 000 legal moves within a class took it to 159.
 //
-// WHAT. A local search over whole blocks: move one to free hours, swap two of
-// the same length in one class, or swap two of the same length of one teacher.
+// WHAT. A local search over whole blocks: move one into a window of the same
+// length in its class (empty: a move; holding blocks that lie wholly inside
+// it: a swap, a double for two singles or a single and a free hour), or swap
+// two of the same length of one teacher in two classes.
 // A step is taken only when the week gets better on the objective below, or
 // stays exactly as good (a sideways step, so the walk can cross a plateau).
 // It can therefore never hand back a worse week than it was given.
 //
 // THE HARD RULES ARE NOT RE-IMPLEMENTED. Every step is put down through
 // `occupy`, and every block it puts down is first asked of `blocker()`, the
-// same question the drag and the search ask, against the grid as it stands
-// with the other moved block already in place. The typed arrays below only
+// same question the drag and the search ask: all moved blocks are lifted, then
+// put down one by one, each judged against everything already down. Every
+// rule there is either a clash or a count that only grows as blocks are
+// added, so the last block down judges every pair and every final count. The typed arrays below only
 // rank candidates; a candidate they misjudge is refused by `blocker()`.
 // Rules `blocker()` cannot judge while placing (en az N saat, the gap limits)
 // are the objective's first tier, and the objective never goes up.
@@ -32,6 +36,9 @@
 //   6. how late the week runs (the sum of the hour indices taught)
 //   7. cells that differ from the hint week, when there is one; then it is
 //      compared third, right after the rules (`HINTED`)
+//
+// Tier 0 counts breaches: a step may trade one for another of the same kind
+// on another teacher when a later tier gains; the count never goes up.
 //
 // Only the blocks the run itself put down move: a pinned cell, a kept one and
 // anything on an excluded row or day stays where it is (`fixed`).
@@ -133,7 +140,8 @@ const PLAIN = [0, 1, 2, 3, 4, 5, 6, 7];
 /**
  * With a hint the week laid out again after an edit is to look like the week
  * before it: staying close comes straight after the rules, and the gaps only
- * then. The week before was already through this pass, so little is lost.
+ * then. The hint is the week on the grid, which "Otomatik diz" put there and
+ * this pass improved, unless the reader has moved cards since.
  */
 const HINTED = [0, 1, 7, 2, 3, 4, 5, 6];
 
@@ -359,12 +367,11 @@ export function createImprover(input: ImproveInput): Improver {
   let pool = withUnits();
   const totalUnits = pool.reduce((s, li) => s + unitsOf.get(li)!.length, 0);
 
-  /** The size-signature of a lesson's reading, to see that a step kept it. */
-  const signature = (li: number): string =>
+  /** A lesson's cards as the grid reads them: day, hour and length of each. */
+  const reading = (li: number): string[] =>
     placedBlocks(work, lessons[li]!)
-      .map((b) => b.size)
-      .sort((a, b) => a - b)
-      .join(',');
+      .map((b) => `${b.day}|${b.hour}|${b.size}`)
+      .sort();
 
   /**
    * lesson -> cell -> 1 where none of its hours can ever be: closed for the
@@ -456,6 +463,17 @@ export function createImprover(input: ImproveInput): Improver {
       if (!fits) break;
       write(u, day, hour, u.li);
     }
+    // No card put down beside an hour of its own lesson: the grid keeps no
+    // block boundaries, and two cards side by side read back as one run, whose
+    // reading can move the boundaries of the lesson's other cards too (pitfall
+    // 75; the drawn cards changed under E2E, the sizes summed the same).
+    for (let k = 0; k < written && fits; k++) {
+      const u = units[k]!;
+      const { day, hour } = to[k]!;
+      const row = lessonClass[u.li]! * cellCount + day * hourCount;
+      if (hour > 0 && classCell[row + hour - 1] === u.li) fits = false;
+      if (hour + u.size < hourCount && classCell[row + hour + u.size] === u.li) fits = false;
+    }
     if (fits) local(scratch, +1);
     // Back as it was, whatever happened: the new places emptied, then the old
     // ones written again (a swap's new place is the other block's old one).
@@ -471,7 +489,17 @@ export function createImprover(input: ImproveInput): Improver {
 
   /** Puts the step down through blocker() and occupy(). False = refused, nothing changed. */
   function commit(s: Step): boolean {
-    const before = s.units.map((u) => signature(u.li));
+    // What the grid must read afterwards: every card where it was, except the
+    // moved ones, which are where they went. Anything else is a boundary that
+    // moved under a card nobody touched (pitfall 75), and the step is refused.
+    const expected = new Map<number, string[]>();
+    for (const u of s.units) if (!expected.has(u.li)) expected.set(u.li, reading(u.li));
+    s.units.forEach((u, i) => {
+      const list = expected.get(u.li)!;
+      const at = list.indexOf(`${u.day}|${u.hour}|${u.size}`);
+      if (at >= 0) list.splice(at, 1);
+      list.push(`${s.to[i]!.day}|${s.to[i]!.hour}|${u.size}`);
+    });
     for (const u of s.units) {
       vacate(placements, ix, lessons[u.li]!, roomOf(u.li), u.day, u.hour, u.size);
     }
@@ -486,7 +514,11 @@ export function createImprover(input: ImproveInput): Improver {
       }
       occupy(placements, ix, lessons[u.li]!, roomOf(u.li), day, hour, u.size);
     }
-    if (ok) ok = s.units.every((u, i) => signature(u.li) === before[i]);
+    if (ok) {
+      for (const [li, list] of expected) {
+        if (reading(li).join() !== [...list].sort().join()) ok = false;
+      }
+    }
     if (!ok) {
       const done = Math.min(k, s.units.length);
       for (let j = done - 1; j >= 0; j--) {
