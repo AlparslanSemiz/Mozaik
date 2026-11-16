@@ -1,6 +1,6 @@
 # Plan · Elle düzeltme ve soru çözüm saatleri
 
-Tarih: 2026-11-16. Durum: **plan, kod yok.** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
+Tarih: 2026-11-16. Durum: **plan, kod yok; açık sorular cevaplandı (Alp, 2026-11-16).** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
 Bu dosya işin niçinini ve önerilen yolu tutar; uygulamaya geçerken maddeler [TODO.md](TODO.md)'ye
 numaralı olarak taşınır, verilen kararlar [DECISIONS.md](DECISIONS.md)'ye yazılır.
 
@@ -12,8 +12,9 @@ numaralı olarak taşınır, verilen kararlar [DECISIONS.md](DECISIONS.md)'ye ya
 4. Öğrenciler (sınıf programı) soru çözümü **görmez**; öğretmenler kendi programlarında
    soru çözümlü hâlini görür.
 
-Bugün 2. adım çalışıyor ama kırılgan, 3. ve 4. adım Mozaik'te hiç yok (baba bunları ya Mozaik
-dışında ya da kâğıt üstünde yapıyor olmalı; Alp'e sorulacak, aşağıda S1).
+Bugün 2. adım çalışıyor ama kırılgan. 3. ve 4. adım Mozaik'te hiç yok: baba soru çözümlü
+öğretmen programını **Excel'de yapıp PDF'e çevirip** öğretmenlere gösteriyor (S1). Hedef bu Excel
+adımını ortadan kaldırmak: soru çözümlü öğretmen PDF'i doğrudan Mozaik'ten çıksın.
 
 Hedef: **bu iki adım baba için Mozaik'teki en kolay iş olsun.** PRINCIPLES "daha az yazı, daha
 az soru" burada da geçerli: yeni ekran yok, yeni sekme yok, var olan ızgaranın üstünde iş görülür.
@@ -39,8 +40,7 @@ taşıma reddedildiğinde (öğretmen o saatte başka sınıfta) ne yapacağın�
 - **A1 · Elle konan ders kendiliğinden sabitlenir.** Sürükleyip bırakılan ya da takasla yer
   değiştiren her blok bırakıldığı yerde sabitli olur. Kartta sabitleme işareti görünür, tek
   tıkla kalkar. Ayrı bir "elle" bayrağı yerine var olan `pinned` kullanılır: şema değişmez, tek
-  kilit kavramı kalır. (Karar S2: kendiliğinden mi, yoksa bıraktıktan sonra küçük bir
-  "Sabitle?" bildirimi mi. Öneri: kendiliğinden, bildirimde "Geri al" ile.)
+  kilit kavramı kalır. **Karar (S2): kendiliğinden**, bildirimde "Geri al" ile.
 - **A2 · "Kalanı diz" her zaman elle yapılanı korur.** `Yeniden yap` / `Baştan diz` ayrımı
   babaya tek bir söz olarak görünür: "Benim yaptıklarıma dokunmadan kalanı diz". Bunun dışında
   her şeyi silen yol yalnız Dosya ▾ altında, geri alınabilir (SD1 çizgisinde).
@@ -74,13 +74,13 @@ Ders değil, ayrı bir katman. Sebep: `Lesson`'un haftalık saati, blokları, g�
 ```
 ProgramVariant {
   …
-  study: Record<`${teacherId}|${day}|${hour}`, { classId: string | null }>
+  study: Record<`${teacherId}|${day}|${hour}`, 1>
 }
 ```
 
 - Program alternatifine (variant) ait, yerleşim ve sabitleme gibi: ayrı bir seçenek denenince
   soru çözümleri de onunla gider.
-- `classId` isteğe bağlı: soru çözümü belli bir sınıfa mı, yoksa açık mı (S3).
+- Sınıf alanı yok: **soru çözümü herkese açık bir öğretmen saati (S3)**, belli bir sınıfa ait değil.
 - Gün ya da saat silinince taşan anahtarlar `placements` gibi silinir (tuzak 5), önce sayılıp
   sorulur.
 - Göç: v19 → v20 boş sözlük. DATA.md şema tablosuna satır.
@@ -90,8 +90,9 @@ ProgramVariant {
 - **B1 · Soru çözümü öğretmeni meşgul eder.** O saate öğretmenin dersi sürüklenemez; ret
   cümlesi "Ali Bey o saatte soru çözümünde" der. Çözücü (`Kalanı diz`) soru çözüm saatini
   öğretmenin kapalı saati gibi okur, böylece sonradan yeniden dizmek soru çözümünü ezmez.
-- **B2 · Sınıfı meşgul etmez** (S3'e bağlı). Öğrenci programında o saat boş görünür.
-- **B3 · Günlük/haftalık ders sınırına sayılmaz** (S4: baba sayılmasını isterse ayrı bir sınır).
+- **B2 · Hiçbir sınıfı meşgul etmez** (S3). Öğrenci programında o saat boş görünür.
+- **B3 · Ders sayısına girmez, ücret hesabını etkilemez** (S4). Günlük/haftalık ders sınırları,
+  boşluk (pencere) sayımı ve ders yükü raporları onu görmez.
 - **B4 · Var olan bir derse soru çözümü konamaz**, öğretmen o saatte zaten derste.
 
 ### Ekleme kolay olmalı
@@ -111,7 +112,7 @@ ProgramVariant {
   ayrı biçimde ("Soru çözüm", gerekirse sınıf adı).
 - **B9 · Sınıf kâğıdı, okul geneli sınıf çizelgesi ve öğrenciye giden her şey içermez.**
   Bunu bir testle sabitle: sınıf çıktısının HTML'inde "Soru çözüm" geçmez.
-- **B10 · Okul geneli öğretmen çizelgesi** içerir (müdür/baba görür). Eyotek'e giden biçim S5.
+- **B10 · Okul geneli öğretmen çizelgesi ve Eyotek'e giden öğretmen programı** içerir (S5).
 
 ### İkame ile ilişkisi (sonra)
 
@@ -120,24 +121,22 @@ istemez (boş geçebilir). İlk sürümde yalnız görünür, atama yok.
 
 ---
 
-## Açık sorular (Alp'e / babaya)
+## Cevaplanan sorular (Alp, babadan, 2026-11-16)
 
-- **S1** Baba soru çözüm saatlerini bugün nerede tutuyor (Excel, kâğıt, Roboders)? Örnek bir
-  öğretmen kâğıdı fotoğrafı `docs/Örnek Fotolar/`'a gelirse biçim ondan alınır.
-- **S2** Elle taşınan ders kendiliğinden sabitlensin mi? (Öneri: evet.)
-- **S3** Soru çözümü belli bir sınıfa mı ait, yoksa öğretmenin açık saati mi? Sınıfa aitse o
-  sınıfın öğrencileri de mi görmesin? (İstek "öğrenciler görmez" diyor; öneri: sınıf alanı
-  isteğe bağlı, öğrenciye hiçbir durumda çıkmaz.)
-- **S4** Soru çözümü öğretmenin günlük/haftalık ders sayısına girer mi, ücret hesabı var mı?
-- **S5** Eyotek'e giden öğretmen programında soru çözümü olmalı mı?
+- **S1** Bugün nerede? → Excel'de yapıp PDF'e çevirip öğretmenlere gösteriyor.
+- **S2** Elle taşınan ders kendiliğinden sabitlensin mi? → Evet.
+- **S3** Sınıfa mı ait? → Hayır, herkese açık.
+- **S4** Ders sayısına / ücrete girer mi? → Hayır, ikisine de girmez.
+- **S5** Eyotek'e giden programda olsun mu? → Evet.
 
 ## Sıra
 
-1. S1–S3 cevabı (Alp babaya sorar).
+1. ~~Açık sorular~~ cevaplandı.
 2. **A1 + A2** (küçük, şema yok, güveni hemen artırır).
 3. **B veri + B1 + B4 + B5 + B7 + B9** (çekirdek: ekle, kaldır, öğrenciye çıkmaz).
 4. **B8 + B10** (çıktılar), sonra **B6**.
 5. **A3**, sonra **A4**; **A5** babayı izleme oturumuyla birlikte.
 
 Her adım kendi dalında, PR ve squash merge ile; e2e testi babanın akışını (diz → elle düzelt →
-kalanı diz → düzeltme yerinde) ve öğrenciye sızmamayı (B9) kapsar.
+kalanı diz → düzeltme yerinde) ve öğrenciye sızmamayı (B9) kapsar. B8'in kabul ölçütü: babanın bugünkü Excel→PDF'inin yerini tutması; bir örneği
+`docs/Örnek Fotolar/`'a gelirse biçim ona göre ayarlanır.
