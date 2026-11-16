@@ -202,7 +202,7 @@ test.describe('Kişi sayfası', () => {
       teachers: w.teachers.map((t) => (t.id === 'tAY' ? { ...t, subject2: 'Kimya' } : t)),
       lessons: [...w.lessons, { ...w.lessons[0]!, id: 'l3', second: true, weeklyHours: 1 }],
     };
-    await loadWorld(page, two, 'Okul');
+    await loadWorld(page, two, null);
     await openSetup(page, 'Öğretmenler');
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
     const boxes = page.getByRole('spinbutton', { name: /^510 · .* · Haftalık saat$/ });
@@ -222,7 +222,7 @@ test.describe('Kişi sayfası', () => {
           { id: 'dB', name: 'B' },
         ],
       },
-      'Okul',
+      null,
     );
     await openSetup(page, 'Sınıflar');
     await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
