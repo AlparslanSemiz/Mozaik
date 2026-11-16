@@ -1867,7 +1867,7 @@ const EN: Sozluk = {
   "Yerine": "Covered by",
   "Değişen": "Changed",
   "Temel haftaya dön": "Back to the usual week",
-  "{n}. saate taşı": "Move to hour {n}",
+  "{n}. saate": "To hour {n}",
   "Bir dersi değiştir…": "Change a lesson…",
   "Programda göster": "Show on the timetable",
   "Ayrı plan yap":

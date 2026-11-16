@@ -86,7 +86,7 @@ export function DayDialog({
     return state.rooms.find((r) => r.id === roomId)?.name ?? '';
   };
   const hourOf = (h: number) => state.settings.hours[h] ?? '';
-  const moveTo = (h: number) => t('{n}. saate taşı', { n: hourOf(h) });
+  const moveTo = (h: number) => t('{n}. saate', { n: hourOf(h) });
   const paper = [
     [t('Saat'), t('Sınıf'), t('Öğretmen'), t('Yerine'), t('Derslik')],
     ...rows.map((r) => [

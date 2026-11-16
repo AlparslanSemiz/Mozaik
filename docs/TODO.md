@@ -2197,7 +2197,7 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       saat saat ikame ya da boş geçsin), kişi sayfasında `Gelmiyor…`, Program şeridinde tarih
       çipi, tarih sayfası ve İkame listesinin Yazdır'ı, öğretmen sayfasında ikame sayısı,
       `Bu haftanın değişikliklerini sil`; tek bir dersi yalnız o tarih boş geçirmek ya da aynı günün
-      başka saatine taşımak (`Bir dersi değiştir…`, `N. saate taşı`), ve ızgarada o haftanın
+      başka saatine taşımak (`Bir dersi değiştir…`, `N. saate`), ve ızgarada o haftanın
       işaretli görünüşü (`Programda göster`, `Temel haftaya dön`). Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
       v18) ve E2E (`e2e/ikame.spec.ts`, axe dahil) yeşil. **Kalan:** (1) tatil günü (bir tarihin
       bütün dersleri) yok; taşıma yalnız aynı günün başka saatine, ızgarada sürüklemeyle değil;

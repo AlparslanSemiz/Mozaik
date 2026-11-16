@@ -1887,7 +1887,7 @@ const FR: Sozluk = {
   "Yerine": "Remplacé par",
   "Değişen": "Modifié",
   "Temel haftaya dön": "Revenir à la semaine habituelle",
-  "{n}. saate taşı": "Déplacer à l'heure {n}",
+  "{n}. saate": "À l'heure {n}",
   "Bir dersi değiştir…": "Modifier un cours…",
   "Programda göster": "Afficher dans l'emploi du temps",
   "Ayrı plan yap":

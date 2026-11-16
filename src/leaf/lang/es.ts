@@ -1882,7 +1882,7 @@ const ES: Sozluk = {
   "Yerine": "Sustituye",
   "Değişen": "Cambiada",
   "Temel haftaya dön": "Volver a la semana habitual",
-  "{n}. saate taşı": "Pasar a la hora {n}",
+  "{n}. saate": "A la hora {n}",
   "Bir dersi değiştir…": "Cambiar una clase…",
   "Programda göster": "Mostrar en el horario",
   "Ayrı plan yap":

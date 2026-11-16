@@ -626,7 +626,7 @@ function Program({
         />
       )}
 
-      {dated !== null && <WeekBar />}
+      {dated !== null && week !== null && <WeekBar state={state} week={week} />}
       {previewed !== null && preview !== null && diff !== null && (
         <PreviewBar
           previewed={previewed}
@@ -681,7 +681,7 @@ function Program({
           filter={poolFilter}
           setFilter={setPoolFilter}
           subjects={poolSubjects}
-          onStart={cardStart}
+          onStart={shown === null ? cardStart : still}
           onPick={shown === null ? cardPick : still}
           onMenu={setPoolMenuLessonId}
           menuOpen={active && poolMenuOpen}

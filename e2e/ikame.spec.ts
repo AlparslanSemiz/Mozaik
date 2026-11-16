@@ -152,7 +152,7 @@ test.describe('İkame', () => {
     await day.getByRole('combobox', { name: 'Bir dersi değiştir…' }).selectOption({ index: 1 });
     const pick = day.getByRole('combobox', { name: 'Yerine: 1 · 510' });
     await expect(pick).toHaveValue('-');
-    await pick.selectOption({ label: '3. saate taşı' });
+    await pick.selectOption({ label: '3. saate' });
     await expect
       .poll(async () => (JSON.parse(await savedText(page)) as State).dated.covers)
       .toEqual([{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: null, to: 2 }]);
@@ -161,7 +161,7 @@ test.describe('İkame', () => {
     );
 
     await day.getByRole('button', { name: 'Programda göster' }).click();
-    const bar = page.getByRole('region', { name: 'Önizleme' });
+    const bar = page.getByRole('region', { name: '17–18 Kasım' });
     await expect(
       page.getByRole('button', { name: 'Bu hafta: 17–18 Kasım, 1 değişiklik' }),
     ).toBeVisible();

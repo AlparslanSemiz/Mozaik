@@ -78,9 +78,10 @@ dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aş
 Gerçek Windows exe'de koşulmadı.
 
 **İkame ve hafta istisnası (2026-11-16, `ozellik/ikame`, `sade/asama-3a`'nın üstünde,
-birleşmedi; 3B'den sonra birleşir):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
-şeridinde tarih çipi, tarih sayfası ve İkame listesi (TODO SD9, DECISIONS). Brotli 302 044 →
-304 684 B (+2 640; bütçe 2 kB'tı, eşiğe 1 316 B kaldı), ham 1 174 531 → 1 185 596 B.
+birleşmedi; `sade/asama-3b` içinde):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
+şeridinde tarih çipi, tarih sayfası, İkame listesi, tek dersi yalnız o tarih boş geçirmek ya da
+aynı günün başka saatine taşımak, ızgarada o haftanın işaretli görünüşü (TODO SD9, DECISIONS).
+Brotli 3B'nin 299 085'i → 302 602 B (+3 517; bütçe 3,5 kB), ham 1 172 023 B.
 
 **Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
 kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
@@ -131,6 +132,16 @@ Tıklama testi 1920 ve 1366'da örnek okulla (görüntüler `scratch/ikame/`). B
 çekildi, geçti). İnceleme alt ajanının bulguları ayrı commit'te: yokluk gidince ikamesi de gider,
 dolan hoca seçicide kalır, Gelmiyor… yalnız kendi yokluğunu taşır, İkame listesi Başlarken'in
 Yazdır adımını işaretlemez.
+
+**Hafta istisnası ve haftanın görünüşü (aynı gün, 3B birleştirildikten sonra).** `Cover.to` (aynı
+v18), `Bir dersi değiştir…`, `N. saate`, `weekView` ve `WeekBar` (önerinin önizleme yolu, salt
+okunur; havuz temel haftanın). İkinci inceleme: havuzdaki kart haftanın görünüşünde
+sürüklenebiliyordu (kapandı), kendi dersine ikame önerisi, dolan hedef saat, boş geçen saate
+taşınan dersin yanlış deseni, `.find` taramaları (plan başına tek `Map`), çubukta haftanın adı,
+`useSyncExternalStore`'un aboneliği; düzeldi. Esc ile kapanmıyor (bilerek, bütçe). Koordinatörün
+yeni kuralıyla (makine yükü) yalnız `ikame`, `kisi`, `program`, `temel` spec'leri `--workers=1`;
+bütün E2E CI'da.
+
 ## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
 
 `sade/asama-2`'nin (PR #74) üstünde, birleşmedi. Aşama 3A (K6–K8) paralel bir dalda; ikisi

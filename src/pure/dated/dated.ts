@@ -10,8 +10,23 @@
 
 import { aralikYazisi, dayStamp, gunYazisi } from '../../leaf/app';
 import { WEEK, dayLabel } from '../../leaf/lang';
-import { type Dated, type Id, type State, closedKey, lessonSubject } from '../../leaf/model';
+import {
+  type Dated,
+  type Id,
+  type Lesson,
+  type State,
+  closedKey,
+  lessonSubject,
+} from '../../leaf/model';
 import { activePlacements } from '../grid';
+
+const lessonsBy = new WeakMap<State, Map<Id, Lesson>>();
+/** The plan's lessons by id, built once per plan: the week walks every cell seven times. */
+function lessonOf(d: State, id: Id | undefined): Lesson | undefined {
+  let map = lessonsBy.get(d);
+  if (map === undefined) lessonsBy.set(d, (map = new Map(d.lessons.map((l) => [l.id, l]))));
+  return map.get(id ?? '');
+}
 
 const put = (d: State, patch: Partial<Dated>): State => ({ ...d, dated: { ...d.dated, ...patch } });
 
@@ -64,7 +79,7 @@ function dropCovers(d: State, id: Id, from: string, to: string): State {
   const covers = d.dated.covers.filter((c) => {
     if (c.date < from || c.date > to) return true;
     const lessonId = placed[`${c.classId}|${dayOf(d, c.date)}|${c.hour}`];
-    const teacherId = d.lessons.find((l) => l.id === lessonId)?.teacherId;
+    const teacherId = lessonOf(d, lessonId)?.teacherId;
     return c.classId !== id && teacherId !== id;
   });
   return put(d, { covers });
@@ -190,7 +205,7 @@ export function taughtOn(d: State, iso: string) {
   const taught: Array<{ hour: number; classId: Id; lessonId: Id; teacherId: Id }> = [];
   for (const [key, lessonId] of Object.entries(activePlacements(d))) {
     const [classId, k, h] = key.split('|');
-    const lesson = d.lessons.find((l) => l.id === lessonId);
+    const lesson = lessonOf(d, lessonId);
     if (Number(k) !== day || lesson === undefined || isAway(d, classId!, iso)) continue;
     taught.push({ hour: Number(h), classId: classId!, lessonId, teacherId: lesson.teacherId });
   }
@@ -238,12 +253,9 @@ export function coverRows(d: State, iso: string): CoverRow[] {
       const taken = busy(x.hour, x);
       const free = (id: Id, hour: number) =>
         !isAway(d, id, iso) && d.unavailable[closedKey(id, day, hour)] === undefined;
-      const subject = lessonSubject(
-        d,
-        d.lessons.find((l) => l.id === x.lessonId)!,
-      );
+      const subject = lessonSubject(d, lessonOf(d, x.lessonId)!);
       const options = d.teachers
-        .filter((t) => !taken.has(t.id) && free(t.id, x.hour))
+        .filter((t) => t.id !== x.teacherId && !taken.has(t.id) && free(t.id, x.hour))
         .map((t) => {
           const same = subject !== '' && (t.subject === subject || t.subject2 === subject);
           return {
@@ -267,6 +279,8 @@ export function coverRows(d: State, iso: string): CoverRow[] {
           ? [h]
           : [];
       });
+      // A move chosen before the day filled up under it stays visible too.
+      if (own?.to !== undefined && !hours.includes(own.to)) hours.push(own.to);
       return { ...x, cover: own?.teacherId, options, to: own?.to, hours };
     });
 }
@@ -284,15 +298,16 @@ export function weekView(d: State, iso: string) {
   const lessons = [...d.lessons];
   const opened = new Set<string>();
   const moved = new Set<string>();
+  /** A teacher's hour a moved lesson fills: not "nobody", even if another class's hour there is. */
+  const filled: string[] = [];
   for (let i = 0; i < 7; i++) {
     const date = addDays(weekOf(iso)[0], i);
     const day = dayOf(d, date);
     if (day < 0) continue;
     for (const [key, lessonId] of Object.entries(base)) {
       const [classId, k, h] = key.split('|');
-      const teacherId = d.lessons.find((l) => l.id === lessonId)?.teacherId ?? '';
       if (Number(k) === day && isAway(d, classId!, date))
-        opened.add(closedKey(teacherId, day, Number(h)));
+        opened.add(closedKey(lessonOf(d, lessonId)?.teacherId ?? '', day, Number(h)));
     }
     for (const r of coverRows(d, date)) {
       const key = `${r.classId}|${day}|${r.hour}`;
@@ -301,14 +316,15 @@ export function weekView(d: State, iso: string) {
         if (placements[key] === r.lessonId) delete placements[key];
         placements[to] = r.lessonId;
         moved.add(to);
+        filled.push(closedKey(r.teacherId, day, r.to));
       } else if (r.cover != null) {
-        const lesson = d.lessons.find((l) => l.id === r.lessonId)!;
-        lessons.push({ ...lesson, id: key, teacherId: r.cover, second: false });
+        lessons.push({ ...lessonOf(d, r.lessonId)!, id: key, teacherId: r.cover, second: false });
         placements[key] = key;
         moved.add(key);
       } else opened.add(closedKey(r.teacherId, day, r.hour));
     }
   }
+  for (const key of filled) opened.delete(key);
   return {
     state: {
       ...d,

@@ -75,7 +75,7 @@ Alanların anlamı:
 - `dated`, taban haftanın üstünde tarihli katman (v18, ikame ve hafta istisnası, DECISIONS 2026-11-16 "İkame"):
   - `absent`: bir öğretmen ya da sınıf, `from`'dan `to`'ya (yerel takvim günü, iki uç dahil) gelmiyor. Gelmeyen sınıf gezi ya da sınav haftası: o günlerde dersleri ikame istemez, öğretmenleri boş sayılır.
   - `covers`: o tarihte bir sınıfın bir saatine kimin girdiği; `teacherId: null` "boş geçsin", `to` ile birlikte ders yalnız o tarih aynı günün `to`. saatine taşındı (hafta istisnası). Gelmeyeni olmayan bir derse de yazılabilir. Yer anahtarı değil tarih: hangi gün sütunu olduğu kayıtlı gün ADINDAN okunur (`WEEK`, Türkçe saklanır), yeniden adlandırılmış bir günün tarihi yoktur.
-  - Taban hafta, ızgara, Kontrol ve çözücü bu katmanı okumaz; geçen bir tarihin kaydı silinmez, yalnız artık bir şey değiştirmez, ve ikameler öğretmenin adalet sayısı (`coverCount`) olarak kalır.
+  - Taban hafta, Kontrol ve çözücü bu katmanı okumaz, ızgara yalnız salt okunur "haftanın görünüşü"nde (`weekView`, bellekte bir kopya); geçen bir tarihin kaydı silinmez, yalnız artık bir şey değiştirmez, ve ikameler öğretmenin adalet sayısı (`coverCount`) olarak kalır.
   - Bir yokluk silinince, kısalınca ya da başka güne taşınınca kaybettiği günlerin o kişiye ait kayıtları da düşer, yoksa ikame sayısında kalırdı.
   - Silinen öğretmenin ya da sınıfın yokluğu, sınıfı, saati, `to` saati ya da yerine gireni silinen kayıt `sanitize()` ile düşer; okunamayan tek bir kayıt (tarih değil, `from > to`, saat sayı değil) okurken tek başına düşer.
 - `Lesson.second` dersin öğretmenin ikinci branşından mı verildiği. Öğretmenin ikinci branşı silinince `sanitize()` onu `false` yapar, yoksa ders kimsenin vermediği bir branşı iddia ederdi.

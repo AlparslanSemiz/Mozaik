@@ -12,12 +12,12 @@ export function showWeek(iso: string | null) {
   heard.forEach((f) => f());
 }
 
+const listen = (f: () => void) => {
+  heard.add(f);
+  return () => heard.delete(f);
+};
+const read = () => week;
+
 export function useShownWeek(): string | null {
-  return useSyncExternalStore(
-    (f) => {
-      heard.add(f);
-      return () => heard.delete(f);
-    },
-    () => week,
-  );
+  return useSyncExternalStore(listen, read);
 }

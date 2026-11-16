@@ -1,15 +1,18 @@
-// The bar over the grid while a dated week is drawn on it (v18): what the two
-// marks mean, and the way back to the base week, which is the one the grid
-// edits. Which week it is, the strip's date chip says right above it. The
-// suggestion preview's bar and marks, reused.
+// The bar over the grid while a dated week is drawn on it (v18): which week,
+// what the two marks mean, and the way back to the base week, which is the one
+// the grid edits. The suggestion preview's bar and marks, reused.
 
+import type { State } from '../../leaf/model';
+import { weekLabel } from '../../pure/dated';
 import { useT } from '../common';
 import { showWeek } from './shownWeek';
 
-export function WeekBar() {
+export function WeekBar({ state, week }: { state: State; week: string }) {
   const t = useT();
+  const label = weekLabel(state, week);
   return (
-    <div className="preview-bar" role="region" aria-label={t('Önizleme')}>
+    <div className="preview-bar" role="region" aria-label={label}>
+      <b>{label}</b>
       <span className="preview-legend">
         <span className="mark-key mark-opened" aria-hidden="true" />
         {t('Boş geçsin')}
