@@ -135,6 +135,13 @@ Zincir `main`'e bağlanınca (2026-10-24 gece) bu dalda birleşik ham boy 1 194 
 `rk2-bozuk-iliski`'te (zincirin ucu) birleşik ham boy 1 198 108 bayt; ham eşik CLAUDE.md'nin ölçüm
 çizgisine, 1 200 000'e çekildi: onu aşan ilk dal, eşiği yükseltmeden önce `file://` açılışını 4×
 yavaşlatılmış işlemcide ölçer.
+`boyut/kucult` (2026-11-16) dört sözlüğü derlemede paketledi (`scripts/sozluk-paket.mjs`): her
+sözlük bütün Türkçe cümleyle anahtarlandığı için aynı 1 221 cümle dosyada dört kez duruyordu.
+Ham boy 1 319 045'ten 1 154 736 bayta (−164 kB), brotli hâli 305,14'ten 295,48 kB'a indi. Ham
+eşik 1 320 000'den 1 200 000'e indi (45 kB pay, CLAUDE.md'nin ölçüm çizgisi); brotli eşiği
+306 000'de kaldı, payı 10,5 kB. Bugün bağlayıcı olan brotli: yeni bir cümle artık ham boya bir
+kez anahtar ve dört çeviri olarak giriyor, ama brotli hâline girdiği kadar girmeye devam ediyor
+(WORKLOG 2026-11-16, DECISIONS aynı gün).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
@@ -183,6 +190,7 @@ scripts/sunucu.mjs           sunucu.ps1'in Node ikizi, geliştirme ve ölçüm i
 scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-source/)
 scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
+scripts/sozluk-paket.mjs     derlemenin eklentisi: dört sözlüğün Türkçe anahtarları bir kez, diller ilk istenince açılır
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/dal-temizle.mjs      biten dal ve worktree'leri arşivleyip siler (kuru koşu varsayılan)

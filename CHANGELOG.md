@@ -34,6 +34,7 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- The program file is about 160 kB smaller (1.32 MB to 1.15 MB): the English, German, Spanish and French texts no longer each carry their own copy of the Turkish sentences, and a language is only unpacked when it is chosen.
 - Opening a plan file into an empty plan no longer asks first, because nothing can be lost; opening it over a plan that holds something still asks.
 - After "Add" in Lessons the weekly hours go back to 4 and the split to single hours, so the last lesson's number is not reused by mistake.
 - Adding a teacher without a subject now says "Önce bir branş seçin" (choose a subject first) instead of greying out the button without a word.
