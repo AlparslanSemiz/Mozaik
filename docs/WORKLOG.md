@@ -52,6 +52,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
   Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
   2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
+- Dalda, birleşmedi: `tarayici/safari-ipad` (2026-11-16): WebKit'te Program'ın kaydırması sekme
+  dönüşünde korunuyor (tuzak 174), iPad'de Müsaitlik parmakla boyanıyor (175) ve karta basılı
+  tutmak menüyü açıyor (176); `npm run test:firefox`; Firefox/WebKit'te dürüst süit (aşağıdaki girdi).
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -188,6 +191,33 @@ raptiye testi yükten zaman aşımı, tek başına yeşil. `scripts/agir.sh` bu 
 **Bilinen.** `kayma.spec.ts`'in "taşan bölümle taşmayan bölüm" testi Görünüm artık 1080'de
 taşmadığı için 900 piksel yüksekliğe alındı; macOS'ta kaydırma çubuğu yer kaplamadığı için
 burada doğrulanamadı, CI'da (Linux) bakılmalı.
+
+---
+
+## 2026-11-16 · Safari ve iPad (`tarayici/safari-ipad`)
+
+Tarayıcı denetiminin (Firefox ve WebKit koşusu, `scratchpad/denetim4/tarayici/hatalar.txt`)
+bulguları. Bu makine macOS, `agir.sh` çalışmıyor; Playwright kilitsiz ve `--workers=2`.
+
+- **WebKit kaydırması** (tuzak 174): `display: none` olan `<Activity>` dalında WebKit
+  `.grid-wrap`'in kaydırmasını sıfırlıyordu (repro: 600/200 → 0/0, Chromium 600/200).
+  `useProgramScrollKeep` (`ui/shell/useMainScroll.ts`) not edip geri yazıyor; repro sonra 600/200.
+  `program.spec.ts`'in "kaydırmayı korurken" testi iki eksende, WebKit'te yeşil.
+- **iPad boyama** (tuzak 175): `pointermove` + `elementFromPoint`, boyanan hücrelerde
+  `touch-action: none`. Çare geri alınınca `dokunmatik.spec.ts` WebKit'te 4 yerine 1 hücre.
+- **iPad menü** (tuzak 176): `platform/dom/longPress.ts`, 500 ms, 8 px; önce `pointercancel`, sonra
+  `contextmenu`. Çare geri alınınca iki menü testi kırmızı; `pointercancel` çıkarılınca boş hücre
+  testi kırmızı. Gerçek bir iPad'de denenmedi. Dokunmatik Windows'ta Chromium kendi `contextmenu`'sünü
+  de gönderir, menü iki kez istenir (aynı hedef, zararsız sanılıyor, ölçülmedi).
+- **Yalnız test:** `KLASOR_YALNIZ_CHROMIUM` (temel 75'in iki testi, exe 76'nın tarayıcı testi),
+  `SAYDAM_GORUNTU_FIREFOX_YOK` (temel 79), Çıktı rayının kaydırıcısı hesaplanmış `overflow-y` ile.
+  Kurulum 65'in sayı kutusu: Firefox'un boş `input[type=number]`'ı 65 px istiyor, kutu 7ch = 63;
+  3× ekran görüntüsünde "16", "88", "10" spinnerın yanında tam okunuyor, CSS değişmedi, Firefox'ta
+  o kutu karşılaştırmadan çıktı. `playwright.firefox.config.ts` ve `npm run test:firefox`, CI'da değil.
+- **Koşulanlar:** Chromium program, musaitlik, temel, yazdir, kurulum, exe, dokunmatik 255/255;
+  WebKit program, musaitlik, dokunmatik 95/95; Firefox temel, yazdir, exe, dokunmatik 80 geçti
+  10 atlandı, kurulum 65 14/14. `tsc`, eslint, prettier, `vite build`, `boyut` (ham 1,17 MB,
+  brotli 299,88 kB, 6,12 kB pay). Tam süit Firefox ve WebKit'te koşulmadı.
 
 ---
 

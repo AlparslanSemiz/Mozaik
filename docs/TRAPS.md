@@ -713,6 +713,37 @@ bir ölçü `cq*` birimine ya da kapsayıcıya bağlanmaz; gereken sayı JS'le b
 ölçülüp yazılır. Bir kasma şikâyeti kullanıcının verisinde ve kullanıcının
 yoğunluğunda, iki motorda ölçülür.**
 
+### 174 · WebKit `display: none` olan bir kutunun kaydırmasını sıfırlar
+Program `<Activity mode="hidden">` ile gizlenir, yani `display: none`. Chromium ve
+Firefox gizli kutunun `scrollLeft`/`scrollTop`'unu tutar, WebKit (Safari, iPad)
+sıfırlar: sekmeden çıkıp dönünce ızgara başa dönüyordu. `program.spec.ts`'in
+"kaydırmayı korurken" testi yalnız WebKit'te kırmızıydı (tarayıcı denetimi,
+2026-11-16, `scrollLeft` 600 → 0). Kaydırmayı gizlenirken okumak geç: gizli kutu
+0 der. Çare `useProgramScrollKeep` (`ui/shell/useMainScroll.ts`): `.grid-wrap` ve
+`.pool-list`'in her kaydırması kutu yerleşikken (`getClientRects()` boş değilken)
+not edilir, Program görününce bir layout effect boyamadan önce geri yazar.
+Ölçen test aynı test, artık iki eksende.
+
+### 175 · Dokunmada `pointerenter` öteki hücrelere gelmez
+Müsaitlik'te boyama hücrelerin `pointerenter`'ına dayanıyordu. Dokunma bir
+işaretçiyi indiği öğeye örtük olarak yakalar, bütün hareketler ve kalkış ona
+gider, öteki hücreler hiçbir şey duymaz: iPad'de parmak yalnız ilk hücreyi
+boyardı, ve `touch-action` olmadan sayfa kayardı. Çare hücreye değil konuma
+sormak: tablo `pointermove`'da (fare dışında) `elementFromPoint` ile parmağın
+altındaki `td[data-cell]`'i bulur, boyanan hücreler `touch-action: none`.
+`dokunmatik.spec.ts` olayları yakalamanın yaptığı gibi hep ilk hücreye gönderir;
+çare geri alınınca 4 yerine 1 hücre kapanıyor (WebKit).
+
+### 176 · Radix'in uzun basışı menüyü `onContextMenu` olmadan açar
+Kartın menüsü tek bir `ContextMenu.Trigger`'ın `onContextMenu`'sünden hedefini
+öğrenir (`openMenu`). Radix'in tetikleyicisi dokunmada kendi 700 ms'lik basışıyla
+da açar, ama `contextmenu` göndermeden: menü son sorulan kart için açılırdı,
+boş hücrede de. Sürüklenebilir kartta ise kartın `pointerdown`'ı
+`preventDefault` çağırdığı için hiç başlamaz. Çare `platform/dom/longPress.ts`:
+500 ms'de parmağın indiği yere önce bir `pointercancel` (sürüklemeyi ve
+Radix'in sayacını bitirir), sonra sağ tıkın `contextmenu`'sü. `pointercancel`
+çıkarılınca `dokunmatik.spec.ts`'in "BOŞ hücrede basılı tutmak" testi kırmızı.
+
 ## Düzen ölçümü ve hangi kutuya bakıldığı
 
 **Kural.** Bir düzen iddiası gerçek tarayıcıda, onu dolduran gerçek veriyle, ve
@@ -1641,7 +1672,7 @@ iddiası saati kapatarak sınanır.**
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
@@ -1654,7 +1685,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 172, yeni bir tuzak 173'ten devam eder. 167 ile 169 arası
+büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

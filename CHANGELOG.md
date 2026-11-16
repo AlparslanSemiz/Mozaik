@@ -31,6 +31,7 @@ release is incomplete, the entry says so.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
 - Wherever Mozaik says it needs updating to open a file, a "See the update" button opens Settings → About.
 - On a small screen, the Program bar says when the week does not fit and that "Fit" shows every day.
+- On a touch screen (iPad), holding a finger on a lesson card for half a second opens the same menu as a right click, so a lesson can be sent back to the tray without a mouse. A finger drawn across Availability now closes every hour it passes over, instead of only the first one, and no longer scrolls the page.
 
 - Each teacher's week can be sent by e-mail from Çıktı: "Open in e-mail" opens a new message in your own mail program with the teacher's address and the week as plain text, and you press Send; Mozaik sends nothing itself. The address is a new column in Okul → Öğretmenler (plan file version 17; older backups open with no addresses); the box opens to the whole address while you type in it, and an address can also be typed in the add form or pasted from Excel as a sixth column. If no mail program is chosen, one line says so.
 
@@ -82,6 +83,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- In Safari, leaving the Program tab and coming back kept the timetable but jumped it back to the top-left corner; it now stays where you left it.
 - In the .exe, downloading an update no longer gives up after five minutes in all, which a slow line could never beat for the 31 MB installer: it stops only when no data arrives for a minute, and Settings → About shows how far it is.
 - "Yeni hâlini asıl dosya yap" now applies to that one save. A later deletion of most of the plan in the same session is again kept out of the folder's main file.
 - Rescue and before-deletion files in the folder no longer pile up: the newest ten of each kind are kept.
