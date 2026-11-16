@@ -10,8 +10,10 @@
 //! THE LIBRARY IS OPTIONAL. The installer puts `ortools.dll` and the DLLs it
 //! needs next to the program (tauri.conf.json, `bundle.resources`), and the Mac
 //! .app carries `libortools.9.dylib` and the dylibs it loads in
-//! `Contents/Frameworks` (scripts/ortools-mac.sh); the standalone exe, the
-//! Linux development build and a broken install have none.
+//! `Contents/Frameworks` (scripts/ortools-mac.sh), and the Linux AppImage
+//! carries `libortools.so.9` and its closure in `usr/lib/Mozaik`, Tauri's
+//! resource folder beside `usr/bin` (scripts/ortools-linux.sh); the standalone
+//! exe, the Linux development build and a broken install have none.
 //! `cpsat_var` says which, and the page falls back to its own search.
 //!
 //! The five functions are the ones `ortools/sat/c_api/cp_solver_c.h` declares
@@ -44,8 +46,8 @@ struct Cpsat {
     stop: EnvFn,
 }
 
-/// The library's file name on each platform. Windows and the Mac are
-/// delivered; Linux is how the Rust side is tested on a development machine.
+/// The library's file name on each platform. All three are delivered (Linux as
+/// an AppImage from 2026-11-16).
 const AD: &str = if cfg!(windows) {
     "ortools.dll"
 } else if cfg!(target_os = "macos") {
@@ -80,7 +82,25 @@ pub(crate) fn kutuphane_yolu(exe: &Path, kurulum_sart: bool) -> Result<PathBuf, 
     if kurulum_sart && !crate::update::kurulu_mu(exe) {
         return Err("CP-SAT yalnız kurulumla gelir; bu kopya kurulu değil.".into());
     }
+    if cfg!(target_os = "linux") {
+        return linux_yeri(klasor)
+            .ok_or_else(|| "CP-SAT yalnız AppImage ile gelir; bu kopya paketli değil.".into());
+    }
     Ok(kutuphane_yeri(klasor))
+}
+
+/// On Linux the library is loaded only from the package's own resource
+/// folder, `usr/lib/Mozaik` beside the `usr/bin` the program runs from: in an
+/// AppImage that is its read-only mount, nothing anyone can drop a file into.
+/// A program anywhere else (the development build in `target/release`, a copy
+/// in Downloads) loads none, for the reason the standalone Windows exe loads
+/// none. Apart from `cfg!` so every machine's `cargo test` judges it.
+pub(crate) fn linux_yeri(program_klasoru: &Path) -> Option<PathBuf> {
+    program_klasoru.ends_with("usr/bin").then(|| {
+        program_klasoru
+            .join("../lib/Mozaik")
+            .join("libortools.so.9")
+    })
 }
 
 /// Opens the library. On Windows with `LoadLibraryExW` and only two places to
@@ -325,6 +345,32 @@ mod tests {
     }
 
     #[test]
+    fn on_linux_only_the_appimages_own_resource_folder_is_looked_in() {
+        assert_eq!(
+            linux_yeri(Path::new("/tmp/.mount_MozaikAb12/usr/bin")),
+            Some(PathBuf::from(
+                "/tmp/.mount_MozaikAb12/usr/bin/../lib/Mozaik/libortools.so.9"
+            ))
+        );
+        for degil in [
+            "/home/a/Mozaik/src-tauri/target/release",
+            "/home/a/İndirilenler",
+            "/tmp/.mount_MozaikAb12/usr",
+            "/tmp/x/usr/bin-baska",
+        ] {
+            assert_eq!(linux_yeri(Path::new(degil)), None, "{degil}");
+        }
+        if cfg!(target_os = "linux") {
+            let exe = Path::new("/home/a/İndirilenler/Mozaik");
+            assert!(kutuphane_yolu(exe, false).is_err());
+            assert_eq!(
+                kutuphane_yolu(Path::new("/tmp/.mount_M/usr/bin/Mozaik"), false).unwrap(),
+                linux_yeri(Path::new("/tmp/.mount_M/usr/bin")).unwrap()
+            );
+        }
+    }
+
+    #[test]
     fn the_body_splits_into_params_and_model() {
         let mut body = 3u32.to_le_bytes().to_vec();
         body.extend_from_slice(&[1, 2, 3, 9, 9]);
@@ -353,8 +399,10 @@ mod tests {
         std::fs::write(&exe, b"MZ").unwrap();
         std::fs::write(tmp.0.join(AD), b"MZ").unwrap();
         assert!(kutuphane_yolu(&exe, true).is_err());
-        // Off Windows (the development machines) the folder rule alone.
-        assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
+        // On the Mac the folder rule alone; Linux has its own (`linux_yeri`).
+        if !cfg!(target_os = "linux") {
+            assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
+        }
     }
 
     #[test]
@@ -363,7 +411,9 @@ mod tests {
         let exe = tmp.0.join("Mozaik.exe");
         std::fs::write(&exe, b"MZ").unwrap();
         std::fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
-        assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
+        if !cfg!(target_os = "linux") {
+            assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
+        }
     }
 
     /// A release build must not read the variable: the line before the read is
