@@ -66,6 +66,53 @@ gelemiyor"); öğretmen satırı on iki kontroldü.
   **Gönder** Çıktı'daki e-posta yolunun aynısı; WhatsApp ve PDF aşama 4.
 - **Müsaitlik sekmesi kaldı** (aşama 3 sekmeleri yeniden kuracak), başlığında `Sayfasını aç`.
 
+### 2026-11-16 · Linux sürümü: tek AppImage, kendini güncelliyor, hiçbir şeyi engellemiyor (`platform/linux`)
+
+**Karar (Alp'in hedefi, 2026-11-16: "her yerde, güzelce"; Windows ve web önce).** Linux'a bir
+Release dosyası: `Mozaik-linux-x86_64.AppImage`, ilk kurulum da güncelleme de o. `.deb` ve
+`.rpm` yok. Linux işi `surum.yml`'de Mac'in kuralıyla: `sign` ve `publish` onu bekler ama
+sonucunu şart koşmaz, gelmezse dosyası ve `linux_appimage*` alanları o sürümde yok ve bir uyarı
+söyler. Ayrıntı [BUILD.md](BUILD.md)'de ("Linux", "Güncelleme").
+
+**Eski kaydın yeniden tartılması.** 2026-10-10'un "Linux Release'e girmiyor, `surum.yml`'e
+Linux işi eklenmiyor" kuralının gerekçesi ikiydi: o iş akışına eklenen her iş babanın exe'sini
+bekletir ya da düşürür, ve WebKitGTK kasıyor. Birincisi 2026-11-16'da Mac için çözüldü
+(`always()`, aşağıda "Windows ve web önce"); Linux aynı kapıdan geçiyor ve `kontrat.test.ts` onu
+ölçüyor, yani bugün geçerli değil. İkincisi hâlâ doğru ve kalıyor: WebKitGTK Chromium kadar akıcı
+değil ve `test:webkit`'in kırmızıları ayrılmadı (2026-10-09). Ama Mac 2026-11-15'ten beri WebKit
+(WKWebView) ile teslim ediliyor, yani "WebKit hiçbir teslim yolunun motoru olmayacak" zaten
+değişmişti; ve babanın yolu Windows olduğu için Linux'taki bir yavaşlık onu etkilemez. Linux'ta
+Chrome'un app modu çalışan tek seçenek değil artık: Chrome isteyen, `~/GitHub/Mozaikler/Mozaik`
+klonu isteyen ve güncellemesi elle olan bir yol, kendi CP-SAT'ı olan ve kendini güncelleyen bir
+programdan bir kullanıcı için daha kötü. App modu geliştirme makinesinde kalıyor.
+
+**Neden AppImage, neden yalnız o.**
+- **WebKitGTK uyumu.** AppImage WebKitGTK'yı ve GTK'yı kendi taşıyor; Ubuntu 22.04'ün 2.4x'i ile
+  Fedora'nın daha yenisi arasındaki fark önemsizleşiyor. `.deb` sistemin `libwebkit2gtk-4.1-0`'ına
+  bağlanır (Ubuntu 22.04+, Debian 12+) ve Fedora'da hiç açılmaz; `.rpm` 2026-10-10'da bırakılmıştı.
+  Ekran kartı sürücüleri (libGL, EGL) AppImage'da da sistemden gelir; DMA-BUF kapalı (tuzak 130).
+- **Taban glibc.** Program derlendiği sistemin glibc'sini ister: yayın Ubuntu 22.04'te (2.35)
+  derleniyor, yani Ubuntu 22.04 ve 24.04, Debian 12, Fedora 36+ açar; Debian 11 açmaz. OR-Tools'un
+  Ubuntu arşivleri de derlendikleri sürüme bağlı; AlmaLinux 8.10 arşivinin kapanışı en çok glibc
+  2.26 ve GLIBCXX 3.4.22 istiyor (ölçüldü, 99 kütüphane, 65 MB), o seçildi.
+- **Kendini güncelleme.** AppImage tek dosya, Windows'un tek başına exe'si gibi: yanına indirilir,
+  tek `rename` ile yer değiştirir (Linux'ta atomik; çalışan kopya eski dosyayı açık tutar),
+  `.eski` sabit bağla korunur. Aynı iki kilit (özet ve minisign, yorum
+  `mozaik <sürüm> Mozaik-linux-x86_64.AppImage`), aynı üç düğme, arayüzde yeni metin yok. `.deb`
+  kendini güncelleyemezdi (`/usr/bin` root'un): ya paket yöneticisi (bir depo, imza anahtarı,
+  sunucu) ya da "yeni .deb'i indirin" cümlesi, ve o cümle için Ayarlar'ın metni değişirdi.
+- **CP-SAT.** Kütüphane yalnız AppImage'ın salt okunur bağlamasındaki `usr/lib/Mozaik`'ten
+  yüklenir (`cpsat.rs`, `linux_yolu`: bağlar çözülmüş,
+  bağlamanın içinde, başkalarının yazamadığı; tuzak 178), `MOZAIK_ORTOOLS` yalnız debug'da.
+
+**Önerilip bırakılan: `.deb` yanında.** Bir hedef daha bedava görünür ama güncellemesiz bir
+kopya ve onun için ayrı bir Ayarlar metni demek; bir AppImage bir dağıtımda açılmazsa ilk çare
+olarak kalıyor (sistemin WebKitGTK'sı ve sürücüleriyle).
+
+**Ölçülmeyen.** Gerçek bir masaüstünde AppImage'ın açılışı, FUSE'suz bir Ubuntu 24.04'te ne
+olduğu, eski sürümden yenisine uçtan uca güncelleme ve WebKitGTK'da CP-SAT'lı bir arama: bu dal
+Mac'te yazıldı, Linux'ta yalnız CI koşacak (`linux.yml`).
+
 ### 2026-11-16 · Sadeleşme (Alp onayladı, K1–K8)
 
 **Karar (Alp, 2026-11-16).** Babanın şikâyeti "çok seçenek var, karışık, neyin nerede olduğunu
@@ -575,9 +622,8 @@ temiz `main`'inden derleyip `~/.local/share/mozaik/app/`'e kopyaladığı `dist/
 (`~/.local/share/mozaik/profil`) ve `--app=file://…` ile açar; Chrome yoksa bunu bildirimle
 söyler ve çıkar. `npm run exe:rpm` kaldırıldı. Linux ikilisi (`exe:linux`, `exe:e2e`)
 Windows exe'sinin Rust yarısını bu makinede sınayan test aracı olarak kalıyor
-([BUILD.md](BUILD.md), "Linux uygulaması"). Linux hiçbir biçimde Release'e girmiyor ve
-`surum.yml`'e Linux işi eklenmiyor: o iş akışı babanın exe'sini üreten tek yol, ona eklenen
-her iş o exe'yi bekleten ya da düşüren bir adım daha olurdu (kullanıcının kararı).
+([BUILD.md](BUILD.md), "Linux uygulaması"). Yayınlanan Linux paketi ayrı bir karar
+(2026-11-16, "Linux sürümü").
 
 **Gerekçe.** Tauri'nin Linux penceresi WebKitGTK, ve kasıyor; ana süitin WebKit koşusunda
 19 kırmızı var (TODO B7.21). Babanın motoru Chromium (WebView2). Ölçülenler (TODO B7.28):

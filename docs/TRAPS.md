@@ -404,6 +404,33 @@ vermedi" olurdu. Karşı önlem: indirmede toplam sınır yok, bağlantıya 20 s
 Koruyan: `update.rs`'in yerel yavaş sunucuya karşı iki testi (sürekli gönderen hat bitiyor,
 aynı hatta toplam sınırlı istemci bitiremiyor; susan hat sessizlik sınırında bırakılıyor).
 
+### 177 · AppImage'da çalışan program, kişinin açtığı dosya değildir
+Bulundu 2026-11-16, Linux sürümü yazılırken (`update_linux.rs`). Windows'ta ve Mac'te
+kendini güncellemek `current_exe()`'den başlar; AppImage'da o yol
+`/tmp/.mount_…/usr/bin/Mozaik`, AppImage'ın salt okunur bağlamasının içi. Oraya `.yeni`
+yazılamaz, yazılsaydı da bir sonraki açılışta bağlama yeniden kurulur ve iş kaybolurdu.
+Kişinin çift tıkladığı dosya AppImage çalışma zamanının koyduğu `APPIMAGE`'da. O değişken de
+tek başına inanılmaz: başka bir AppImage'dan (onun açtığı bir uçbirimden) başlatılan bir
+program onunkini miras alır ve o dosyanın üstüne yazardı. Karşı önlem: `appimage_yolu`
+yalnız program `APPDIR`'in, yani aynı çalışma zamanının kurduğu bağlamanın içindeyse ve
+dosya o bağlamanın dışındaysa yolu verir; `.eski`'yi de `sweep_old` program yolunun değil o
+dosyanın yanından siler. Koruyan: `update_linux.rs`'in
+`the_appimage_is_believed_only_for_the_program_inside_its_mount` testi. Gerçek bir masaüstünde
+uçtan uca güncelleme henüz koşulmadı.
+
+### 178 · Tauri Linux'ta kaynakları programın yanına değil `../lib/<productName>`'e koyar
+Bulundu 2026-11-16, Linux sürümü yazılırken, `tauri-utils`'in `resource_dir`'i okunarak.
+Windows'ta CP-SAT programın klasöründe, Mac'te `Contents/Frameworks`'te; "program
+klasörünün yanında" kuralı Linux'a taşınsaydı kütüphane AppImage'da hiç bulunmaz ve sayfa
+sessizce yavaş aramaya düşerdi: program çalışır görünür ve kimse fark etmez.
+`bundle.resources` AppImage'da `usr/bin`'in yanındaki `usr/lib/Mozaik`'e gider. Karşı önlem:
+`cpsat.rs`'in `linux_yolu`'u o klasörü yalnız `APPDIR`'in içinden çalışan bir programa verir,
+bağlar çözülünce bağlamanın içinde kalıyorsa ve başkaları yazamıyorsa; başka her yer
+(geliştirme ikilisi, yanına bir kütüphane klasörü dikilmiş İndirilenler'deki bir kopya) kütüphanesiz kalır. Koruyan:
+`linux_yolu`'nun birim testleri ve `scripts/linux-paket.sh`, AppImage'ı açıp CP-SAT'ın küçük
+modelini paketin içindeki kütüphaneyle çözdüren adım (bundler'ın `RUNPATH`'e dokunup
+dokunmadığını da okur).
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1670,7 +1697,7 @@ iddiası saati kapatarak sınanır.**
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172, 177, 178 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1685,7 +1712,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
+büyük kullanılan numara 178, yeni bir tuzak 179'dan devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

@@ -19,6 +19,10 @@
 # `Mozaik-mac-<mimari>.app.tar.gz` (update_mac.rs). Apple imzası yok, yalnız
 # ad-hoc; güncellemeyi bizim minisign imzamız korur, Windows'takiyle aynı.
 #
+# 2026-11-16'dan beri bir de Linux (DECISIONS, "Linux sürümü"): tek dosya,
+# `Mozaik-linux-x86_64.AppImage`, hem ilk kurulum hem kendini güncelleme için
+# (update_linux.rs). Aynı minisign imzası; Mac gibi hiçbir şeyi engellemez.
+#
 # ARTI BİR DÖRDÜNCÜ, ve o bir program değil bir CÜMLE: `surum.json`. Exe'nin
 # "yeni sürüm var mı" diye sorduğu tek yer burasıdır
 # (`src-tauri/src/update.rs`). `publish` işinde üretilir, çünkü içindeki
@@ -393,16 +397,105 @@ jobs:
           path: teslim/*
           if-no-files-found: error
 
+  # --------------------------------------------------------------- 3b · linux
+  # Mozaik-linux-x86_64.AppImage (BUILD.md, "Linux"): bütün dağıtımlar için tek
+  # dosya, WebKitGTK içinde. Ubuntu 22.04'te derlenir, çünkü program derlendiği
+  # sistemin glibc'sini ister ve 22.04'ünki (2.35) Ubuntu 22.04/24.04, Debian 12
+  # ve Fedora'da var; OR-Tools'un AlmaLinux 8 arşivi daha azını (2.26) ister.
+  #
+  # LINUX HİÇBİR ŞEYİ ENGELLEMEZ (Alp, 2026-11-16: Windows ve web önce), Mac'in
+  # kuralıyla aynı: bu iş kırmızıysa `sign` ve `publish` yine koşar, o sürümde
+  # AppImage olmaz ve Linux kopyaları güncelleme görmez.
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        mimari: [x86_64]
+    runs-on: ubuntu-22.04 # bilerek 22.04 (yukarıda): AppImage'ın glibc tabanı
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
+        with:
+          toolchain: stable
+
+      # Tauri'nin Linux'ta istedikleri (WebKitGTK 4.1 ve GTK), AppImage
+      # paketleyicisinin `file`'ı, paketin içine bakan `readelf` (binutils), ve
+      # açılış denemesi için sanal ekran, oturum veri yolu ve bir masaüstünün
+      # grafik kütüphaneleri (Mesa: AppImage libEGL/libGL'i sistemden alır).
+      - name: System libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
+            libayatana-appindicator3-dev libssl-dev patchelf file binutils desktop-file-utils \
+            xvfb dbus libfuse2 libgtk-3-0 libegl1 libgl1 libgles2 libgbm1 >/dev/null
+
+      # Betiksiz ve önbelleksiz, Windows ve Mac işleri gibi.
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+
+      # OR-Tools'un resmi Linux arşivi, SHA-256'sı betikte sabit; AppImage'a
+      # `libortools.so.9`'un yüklediği kütüphanelerin kapanışı girer.
+      - name: OR-Tools CP-SAT for the AppImage
+        run: scripts/ortools-linux.sh
+
+      - name: cargo test, with the CP-SAT tiny model
+        run: |
+          MOZAIK_ORTOOLS="$PWD/src-tauri/ortools/libortools.so.9" \
+            cargo test --manifest-path src-tauri/Cargo.toml
+
+      # tauri.linux.conf.json kendiliğinden birleşir: hedef yalnız `appimage`.
+      - name: Build the AppImage
+        # linuxdeploy kendisi bir AppImage: runner'da FUSE'a güvenmeden açılsın.
+        # Strip yok: program zaten `strip = true` ile derleniyor, ve linuxdeploy'un
+        # eski `strip`'i yeni ELF bölümlerinde (OR-Tools, sistem kütüphaneleri) düşüyor.
+        #
+        # linuxdeploy, AppDir'deki her ELF'in bağımlılığını sistemin arama yolunda
+        # arar ve CP-SAT'ın kütüphanelerinin `RUNPATH $ORIGIN`'ini izlemez: onları
+        # kendi klasörlerinde bulsun diye o klasör (tuzak 178). Yalnız AppDir'in
+        # klasörü, kaynak `src-tauri/ortools` değil: bu yol derleme sırasında
+        # henüz yok, yani cargo ve rustc OR-Tools'un libz'ini görmez.
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          NO_STRIP: 'true'
+          LD_LIBRARY_PATH: ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/Mozaik.AppDir/usr/lib/Mozaik
+        run: npx --yes @tauri-apps/cli@2.12.4 build --verbose --config src-tauri/tauri.ortools.json
+
+      # Paket ne taşıyor (scripts/linux-paket.sh): AppImage imi, program, CP-SAT
+      # ve lisansı, CP-SAT'ın paketin içinden küçük modeli çözmesi, glibc tabanı.
+      # Sonra yirmi saniye açık kalıyor mu (scripts/linux-acilis.sh).
+      - name: Is the AppImage whole, and does it start
+        run: |
+          set -euo pipefail
+          app=$(find src-tauri/target/release/bundle/appimage -maxdepth 1 -name '*.AppImage' | head -1)
+          test -n "$app" || { echo "AppImage üretilmedi" >&2; ls -R src-tauri/target/release/bundle | head -50; exit 1; }
+          scripts/linux-paket.sh "$app"
+          mkdir -p teslim
+          cp "$app" "teslim/Mozaik-linux-${{ matrix.mimari }}.AppImage"
+          ACILIS_CIKTI=acilis scripts/linux-acilis.sh "teslim/Mozaik-linux-${{ matrix.mimari }}.AppImage"
+          ls -l teslim
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: linux-${{ matrix.mimari }}
+          path: teslim/*
+          if-no-files-found: error
+
   # ---------------------------------------------------------------- 4 · sign
   # İMZALAYAN TEK İŞ, ve anahtarı gören tek iş (DECISIONS 2026-11-16). Sır depo
   # düzeyinde değil `release` ortamında; o ortamı yalnız `v*` etiketleri
   # kullanabilir (ayarları BUILD.md'nin "Yayın güvenliği" bölümünde). Bu iş kod
-  # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe ve Mac artefaktlarını
+  # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe, Mac ve Linux artefaktlarını
   # indirir, imzalar, `.minisig`'leri yükler. Yayınlayan iş anahtarı hiç görmez.
   # Mac'i beklemez gibi değil, bekler ama ona takılmaz (`always()`, `publish`'teki
   # kuralın aynısı): gelmeyen bir mimari imzalanmaz.
   sign:
-    needs: [exe, mac]
+    needs: [exe, mac, linux]
     environment: release
     permissions:
       contents: read
@@ -420,6 +513,12 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: mac-*
+          merge-multiple: true
+          path: teslim
+      # Linux da öyle.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: linux-*
           merge-multiple: true
           path: teslim
 
@@ -463,6 +562,11 @@ jobs:
                 -t "mozaik $surum Mozaik-mac-$m.app.tar.gz"
             fi
           done
+          # Linux'un AppImage'ı, aynı biçimde yorum (update_linux.rs), yalnız geldiyse.
+          if [ -s teslim/Mozaik-linux-x86_64.AppImage ]; then
+            minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-linux-x86_64.AppImage -x imza-linux.minisig \
+              -t "mozaik $surum Mozaik-linux-x86_64.AppImage"
+          fi
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -472,11 +576,11 @@ jobs:
 
   # ------------------------------------------------------------- 5 · publish
   publish:
-    needs: [package, exe, mac, sign]
+    needs: [package, exe, mac, linux, sign]
     permissions:
       contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
-    # `always()`: mac işi düşse de bu iş koşar; yalnız Windows ve paket şart.
+    # `always()`: mac ya da linux işi düşse de bu iş koşar; yalnız Windows ve paket şart.
     if: >-
       always() &&
       needs.package.result == 'success' &&
@@ -515,6 +619,15 @@ jobs:
           done
           echo "MAC_VAR=${var# }" >> "$GITHUB_ENV"
           echo "Mac: ${var:- yok}"
+          # Linux: aynı kural, tek dosya.
+          if [ -s teslim/Mozaik-linux-x86_64.AppImage ] && [ -s imza-linux.minisig ]; then
+            echo "LINUX_VAR=1" >> "$GITHUB_ENV"
+            echo "Linux: var"
+          else
+            rm -f teslim/Mozaik-linux-x86_64.AppImage imza-linux.minisig
+            echo "::warning title=Linux paketi bu sürümde yok::AppImage derlenmedi; Windows ve surum.json yine yayınlanıyor, Linux kopyaları güncelleme görmez."
+            echo "**Linux paketi bu sürümde yok.** Windows ve web yayınlandı." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -583,6 +696,14 @@ jobs:
             export "MAC_${m}_BOYUT=$(stat -c%s "$f")"
             export "MAC_${m}_OZET=$(sha256sum "$f" | cut -d' ' -f1)"
           done
+          # Linux'un AppImage'ı da aynı önekte; gelmediyse alanları yazılmaz
+          # (undefined) ve AppImage kopyası güncelleme önermez (`linux_karari`).
+          if [ -n "${LINUX_VAR:-}" ]; then
+            f="teslim/Mozaik-linux-x86_64.AppImage"
+            export "LINUX_ADRES=$mac_kok/Mozaik-linux-x86_64.AppImage"
+            export "LINUX_BOYUT=$(stat -c%s "$f")"
+            export "LINUX_OZET=$(sha256sum "$f" | cut -d' ' -f1)"
+          fi
           node -e "
             const fs = require('fs');
             const oku = (f) => (fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : undefined);
@@ -606,6 +727,10 @@ jobs:
               mac_x86_64_boyut: sayi(process.env.MAC_x86_64_BOYUT),
               mac_x86_64_sha256: process.env.MAC_x86_64_OZET,
               mac_x86_64_imza: oku('imza-mac-x86_64.minisig'),
+              linux_appimage: process.env.LINUX_ADRES,
+              linux_appimage_boyut: sayi(process.env.LINUX_BOYUT),
+              linux_appimage_sha256: process.env.LINUX_OZET,
+              linux_appimage_imza: oku('imza-linux.minisig'),
             }, null, 2) + '\n');
           " "$surum" "$adres" "$boyut" "$ozet" "$kurulum" "$kurulum_boyut" "$kurulum_ozet"
           cat teslim/surum.json
@@ -622,6 +747,7 @@ jobs:
           cd teslim
           mac=()
           for m in $MAC_VAR; do mac+=("Mozaik-mac-$m.app.tar.gz" "Mozaik-mac-$m.dmg"); done
+          if [ -n "${LINUX_VAR:-}" ]; then mac+=("Mozaik-linux-x86_64.AppImage"); fi
           sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe \
             "${mac[@]}" surum.json > SHA256SUMS.txt
           cat SHA256SUMS.txt
@@ -651,10 +777,11 @@ jobs:
           # çalıştırmak olurdu.
           # Notu ayrı dosyadan: bir YAML blok skalerinin içine heredoc koymak
           # girintiyi bozuyor. Dosyayı bir önceki adım kuruyor.
-          # Mac dosyaları yalnız geldiyse (`MAC_VAR`, ilk adım).
+          # Mac ve Linux dosyaları yalnız geldiyse (`MAC_VAR`, `LINUX_VAR`, ilk adım).
           mac=()
           for f in teslim/Mozaik-mac-arm64.app.tar.gz teslim/Mozaik-mac-arm64.dmg \
-                   teslim/Mozaik-mac-x86_64.app.tar.gz teslim/Mozaik-mac-x86_64.dmg; do
+                   teslim/Mozaik-mac-x86_64.app.tar.gz teslim/Mozaik-mac-x86_64.dmg \
+                   teslim/Mozaik-linux-x86_64.AppImage; do
             if [ -s "$f" ]; then mac+=("$f"); fi
           done
           gh release create "$ETIKET" \

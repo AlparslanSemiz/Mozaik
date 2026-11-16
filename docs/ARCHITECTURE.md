@@ -493,7 +493,8 @@ dosyayı aç"a dönüşemez ve bir `"` programın komut satırına giremez. Hiç
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).
 
-Aynı kaynak bu makinede bir Linux ikilisine de derleniyor, yalnız geliştirme ve
-test için. Tek fark güncellemede: `update.rs`'in `self_update_here()`'ı indirmeyi
-ve takası Windows dışında reddeder, çünkü manifestin gösterdiği tek dosya Windows
-exe'si (tuzak 126).
+Aynı kaynak Mac'te `Mozaik.app`'e (`update_mac.rs`) ve Linux'ta bir AppImage'a
+(`update_linux.rs`) derleniyor; ikisi de manifestten yalnız kendi dosyasını indirip kendini
+güncelliyor. Bu makinede derlenen Linux ikilisi (AppImage değil) yalnız geliştirme ve test
+için: `update.rs`'in `self_update_here()`'ı onun indirmesini ve takasını reddeder, çünkü
+manifestte onun dosyası yok ve Windows exe'sini kendi üstüne yazardı (tuzak 126).

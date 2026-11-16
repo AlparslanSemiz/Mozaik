@@ -1085,6 +1085,18 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
         engellemiyor, eksik mimari uyarıyla atlanıyor (DECISIONS 2026-11-16);
       - Apple Developer üyeliği alınırsa: `APPLE_*` sırları, iş akışı hazır.
 
+- [~] **B7.43 Linux sürümü (2026-11-16, `platform/linux`, DECISIONS "Linux sürümü").** Yazıldı,
+  doğrulanmadı: tek `Mozaik-linux-x86_64.AppImage`, kendini güncelliyor (`update_linux.rs`),
+  CP-SAT AlmaLinux 8 arşivinden, `surum.yml`'in `linux` işi hiçbir şeyi engellemiyor, `linux.yml`
+  PR'da. Bu Mac'te yalnız `cargo test` ve kontrat testleri koştu. Kalanlar:
+      - `linux.yml`'in ilk koşusu: AppImage üretiliyor mu, linuxdeploy CP-SAT'ın `RUNPATH`'ine ve
+        modlarına dokunuyor mu, dört sistemde açılıyor mu (kapların kırmızısı ne eksik diyor);
+      - gerçek bir masaüstünde (Fedora, Ubuntu 24.04) çift tıklama, FUSE'suz Ubuntu 24.04'te ne
+        olduğu, WebKitGTK'da CP-SAT'lı öneri araması ve süresi;
+      - eski sürümden yenisine uçtan uca güncelleme (yerel sunucuyla, Mac'te yapıldığı gibi),
+        sonra gerçek bir Release'le;
+      - arayüz metinleri Windows diyor (B7.42'deki gibi: "Uygulama (.exe)", "Belgelerim'deki").
+
 ---
 
 ## §8. Karar bekleyenler
