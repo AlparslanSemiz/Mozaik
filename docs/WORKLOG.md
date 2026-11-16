@@ -53,6 +53,10 @@ istisnası).
 **Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
 gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
 yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
+Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
+`npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
+worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
+birleşen worktree'leri bekletmemek yeter.
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 
