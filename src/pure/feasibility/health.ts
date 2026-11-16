@@ -56,7 +56,7 @@ export interface Health {
    */
   advice: number;
   /** The loudest thing to say, for the chip's colour. */
-  level: Level;
+  level: Level | 'empty';
   /** The chip's own sentence. Never "there is a problem" — always which. */
   message: string;
   /**
@@ -93,14 +93,19 @@ export function health(d: State): Health {
 
   const stranded = report.stranded;
 
-  const level: Level =
-    blocked > 0 || stranded > 0 || report.unplaceable.length > 0
-      ? 'impossible'
-      : // Hours still in the pool are not "fine" either: a green chip beside
-        // "12 saat yerleşmedi" read as done (usability walkthrough, 2026-11-16).
-        warnings > 0 || pending > 0
-        ? 'tight'
-        : 'ok';
+  // An empty project is not "ok" either: it has not started, and a green chip
+  // there said the opposite of its own words. `empty` has no colour of its own,
+  // so the chip stays the neutral one.
+  const level: Level | 'empty' =
+    d.lessons.length === 0
+      ? 'empty'
+      : blocked > 0 || stranded > 0 || report.unplaceable.length > 0
+        ? 'impossible'
+        : // Hours still in the pool are not "fine" either: a green chip beside
+          // "12 saat yerleşmedi" read as done (usability walkthrough, 2026-11-16).
+          warnings > 0 || pending > 0
+          ? 'tight'
+          : 'ok';
 
   // The sentence names the loudest thing and counts it. "Sorun var" would
   // send somebody to Kontrol to find out what; this tells them before they go.

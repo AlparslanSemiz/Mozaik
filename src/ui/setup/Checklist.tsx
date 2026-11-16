@@ -94,9 +94,10 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       id: 'school',
       name: t('Okulu tanıt'),
       done: missing.length === 0,
+      // What the task covers while it is open; once it is done, what stands.
       detail:
-        name === ''
-          ? t('Okul adı boş. Hafta: {hafta}.', { hafta: week })
+        missing.length > 0
+          ? t('Okulun adı, zili, öğretmenleri ve sınıfları.')
           : `${name} · ${week} · ${lists}`,
       to: school.to,
       action: school.action,
@@ -115,12 +116,9 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       id: 'availability',
       name: t('Kapalı saatleri işaretle'),
       done: closed > 0 || placed > 0,
-      detail:
-        closed > 0
-          ? t('{n} kapalı saat', { n: closed })
-          : t('Herkes her saat gelebiliyorsa geçin.'),
+      detail: closed > 0 ? t('{n} kapalı saat', { n: closed }) : t('Kapalı saat yoksa geçin.'),
       to: { tab: 'teachers', people: 'list' },
-      action: t('Kapalı saat işaretle'),
+      action: t('Kapalı saatleri işaretle'),
     },
     {
       id: 'solve',

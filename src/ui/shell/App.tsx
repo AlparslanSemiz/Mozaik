@@ -7,6 +7,7 @@ import {
   GoToProvider,
   KeepBeforeProvider,
   UndoIfProvider,
+  useToastFollow,
   useAnnounce,
   useDialogs,
   useToast,
@@ -22,6 +23,7 @@ import {
   markChanged,
   reminderDue,
   storageKind,
+  loadPlan,
   storageWorks,
   useFileRecord,
   useFolder,
@@ -55,6 +57,7 @@ import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
+import { emptyState } from '../../pure/entities';
 import { activeProgram, blankProgram, DEFAULT_PROGRAM_ID, switchProgram } from '../../pure/grid';
 import { openChecklist } from '../../platform/prefs';
 import { useMoveIn, useMoveOut } from './useMove';
@@ -91,6 +94,8 @@ export default function App() {
     keepBefore: keepInStore,
     openFolderCopy,
   } = useStore(announce);
+  // A notice's "Geri al" goes when another state than its own is open.
+  useToastFollow(state);
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -305,6 +310,35 @@ export default function App() {
     );
   }, [plans, state, notify, t]);
 
+  // "Kendi okulumla başla", over the sample school: a NEW empty plan opens and
+  // the sample stays where it was, as a plan of its own. Nothing is deleted.
+  // "Geri al" goes back to the sample plan and drops the empty plan again,
+  // unless something has been typed in it meanwhile (then it stays, as a
+  // plan). The plans come from a ref: this notice outlives the render it was
+  // made in, and a switch made from a stale library would write it back.
+  const plansNow = useRef(plans);
+  plansNow.current = plans;
+  const startOwnSchool = useCallback(() => {
+    const was = plans.planId;
+    const id = plans.createPlan(t('Kendi okulum'), emptyState());
+    notify(t('Boş bir plan açıldı. Örnek okul, plan seçicide duruyor.'), 'info', {
+      label: t('Geri al'),
+      run: () => {
+        plansNow.current.switchPlan(was);
+        window.setTimeout(() => {
+          const left = loadPlan(id);
+          if (
+            left !== null &&
+            left.teachers.length + left.classes.length + left.lessons.length + left.rooms.length ===
+              0
+          ) {
+            plansNow.current.deletePlan(id);
+          }
+        }, 0);
+      },
+    });
+  }, [plans, notify, t]);
+
   // Dosya ▾ → "Bu planın kopyası" (K2; Program's Daha fazla until 2026-11-16): a second arrangement
   // is a second plan, holding this one's data and week; the plan picker in
   // the top bar appears with it.
@@ -367,7 +401,7 @@ export default function App() {
     keepInFolder(state);
     const next = replaceState(lastDelete.state, said);
     if (next === null) notify(said, 'info');
-    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
   };
 
   // Dosya ▾ → Eski hâline dön (K8). The plan as it is now becomes today's
@@ -380,7 +414,7 @@ export default function App() {
     keepInFolder(state);
     const next = replaceState(copy, said);
     if (next === null) notify(said, 'info');
-    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
   };
 
   // The folder's fuller copy after an empty start (useFolder's `bulundu`).
@@ -640,7 +674,7 @@ export default function App() {
                       (ui.section === 'school' ||
                         ui.section === 'rooms' ||
                         ui.section === 'subjects') && (
-                        <Start state={state} change={change} plans={plans} />
+                        <Start state={state} change={change} plans={plans} onOwn={startOwnSchool} />
                       )}
                     {tab === 'school' && (ui.section === 'rooms' || ui.section === 'subjects') && (
                       <Setup state={state} change={change} step={ui.section} />

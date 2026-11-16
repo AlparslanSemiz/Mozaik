@@ -112,6 +112,11 @@ export function readPlanText(id: Id): string | null {
   return safely(() => localStorage.getItem(planKey(id))) ?? null;
 }
 
+/** No plan of any entry has stored text: this is the first time the program opens here. */
+export function nothingStored(): boolean {
+  return readLibrary().plans.every((p) => readPlanText(p.id) === null);
+}
+
 let emptyAtStart: Id | null = null;
 let refused = false;
 

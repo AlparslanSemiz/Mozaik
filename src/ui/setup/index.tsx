@@ -18,7 +18,7 @@ import Classes from './Classes';
 import Subjects from './Subjects';
 import { Checklist } from './Checklist';
 import { Summary } from '../lists';
-import { drafts as draftsOf } from '../../pure/io';
+import { drafts as draftsOf, isSampleSchool } from '../../pure/io';
 
 const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
   rooms: (p) => <Rooms {...p} />,
@@ -45,7 +45,12 @@ export default function Setup({ state, change, step }: PanelProps & { step: Step
  * answered — and since 2026-11-15 also "what is left": the list ticks itself
  * from the plan (Checklist.tsx).
  */
-export function Start({ state, change, plans }: PanelProps & { plans: PlanControls }) {
+export function Start({
+  state,
+  change,
+  plans,
+  onOwn,
+}: PanelProps & { plans: PlanControls; onOwn: () => void }) {
   const t = useT();
   const notify = useToast();
   const loadSample = useLoadSample();
@@ -72,6 +77,17 @@ export function Start({ state, change, plans }: PanelProps & { plans: PlanContro
 
   return (
     <Checklist state={state}>
+      {/* The sample school is open: the way to one's own is one line, and
+          the sample stays as a plan (App.tsx, startOwnSchool). */}
+      {isSampleSchool(state) && (
+        <p className="hint intro-line">
+          <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
+          {t('Bu örnek okul.')}
+          <button className="btn" onClick={onOwn}>
+            {t('Kendi okulumla başla')}
+          </button>
+        </p>
+      )}
       {empty && (
         <>
           {/* Once, on a first run, and then never here again — its home is

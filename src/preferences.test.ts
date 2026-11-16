@@ -324,16 +324,28 @@ describe('görülen sürüm notu', () => {
   const latest = changelog.SURUM_NOTLARI[0]!.version;
   const KEY = 'ders-programi-yenilik-gorulen';
 
-  it('kayıt yoksa en yeni not görülmemiş sayılır', () => {
-    fakeStorage();
+  // A stored plan is enough to say "somebody has used this before".
+  const USED = { 'ders-programi': '{}' };
+
+  it('hiç veri yokken ilk açılışta en yeni not görülmüş sayılır ve işaret yazılır', () => {
+    const values = fakeStorage();
+    expect(changelog.hasUnseenChangelog()).toBe(false);
+    expect(values.get(KEY)).toBe(latest);
+  });
+
+  it('veri varken kayıt yoksa en yeni not görülmemiş sayılır', () => {
+    fakeStorage(USED);
     expect(changelog.hasUnseenChangelog()).toBe(true);
   });
 
   it('eski bir sürümün işareti de boş kayıt da en yeni notu görülmemiş bırakır', () => {
     for (const text of ['2.0.0', '']) {
-      fakeStorage({ [KEY]: text });
+      fakeStorage({ ...USED, [KEY]: text });
       expect(changelog.hasUnseenChangelog(), JSON.stringify(text)).toBe(true);
     }
+    // An older marker means an earlier release WAS seen: that is no first run.
+    fakeStorage({ [KEY]: '2.0.0' });
+    expect(changelog.hasUnseenChangelog()).toBe(true);
   });
 
   it('işaret kendi anahtarına sürümü yazar ve not görülmüş sayılır', () => {

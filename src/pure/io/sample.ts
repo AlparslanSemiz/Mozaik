@@ -119,6 +119,13 @@ const CLASS_ROOM: Array<[string, string]> = [
   ['432', 'F'],
 ];
 
+/** The sample school's name: how an open plan is told to be it. */
+export const SAMPLE_SCHOOL_NAME = 'Örnek Kurs';
+
+export function isSampleSchool(d: State): boolean {
+  return d.settings.schoolName === SAMPLE_SCHOOL_NAME;
+}
+
 export function sampleState(): State {
   const rnd = rng(20260824);
   const days = defaultDays();
@@ -225,7 +232,7 @@ export function sampleState(): State {
   return {
     schemaVersion: SCHEMA_VERSION,
     settings: {
-      schoolName: 'Örnek Kurs',
+      schoolName: SAMPLE_SCHOOL_NAME,
       days,
       hours,
       bell: { ...DEFAULT_BELL },

@@ -5,8 +5,8 @@
 // pending write that dies because someone glanced at Program is exactly the
 // kind of silent loss the no-data-loss principle is about.
 //
-// What it writes is a BUNDLE — every plan, the same bytes "Tümünü dosyaya
-// kaydet" produces. Not the open plan: a folder that holds one of three plans
+// What it writes is a BUNDLE — every plan, the same bytes "Bütün planları
+// dosyaya kaydet" produces. Not the open plan: a folder that holds one of three plans
 // is a backup that is wrong in the way nobody checks.
 
 import { t } from '../../leaf/i18n';

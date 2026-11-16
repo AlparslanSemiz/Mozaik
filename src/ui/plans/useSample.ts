@@ -63,7 +63,7 @@ export function useLoadSample(): LoadSample {
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
       markIntroSeen();
-      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
       return true;
     },
     [confirm, notify, t, undoIf, keepBefore],

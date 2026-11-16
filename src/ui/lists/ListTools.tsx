@@ -232,6 +232,12 @@ export default function ListTools<T>({
 
         return (
           <div className="chips" key={facet.id} role="group" aria-label={facet.label}>
+            {/* The group's name, drawn: a row of bare numbers beside "Derslik"
+                chips said nothing about what they sort by. The group already
+                has it as its name, so a reader hears it once. */}
+            <span className="chips-label" aria-hidden="true">
+              {facet.label}:
+            </span>
             {counts.map((f) => (
               <button
                 key={f.value}
