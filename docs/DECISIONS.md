@@ -73,9 +73,12 @@ aralığında gelmediğini, `covers` o tarihte bir sınıfın bir saatine kimin 
 geçince kayıt bir şey değiştirmez (kendiliğinden biter) ama silinmez, çünkü ikameler öğretmenin
 adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
 
-- **Hafta istisnası = gelmeyen sınıf.** Gezi ya da sınav haftası bir sınıfın o günlerde
-  gelmemesi: dersleri ikame istemez, öğretmenleri o saatlerde boş sayılır ve ikame önerisine
-  girer. Ayrı bir "dersi taşı" ya da "tatil günü" kavramı yok (aşağıda).
+- **Hafta istisnası.** Gezi ya da sınav haftası bir sınıfın o günlerde gelmemesi: dersleri ikame
+  istemez, öğretmenleri boş sayılır. Tek bir ders de yalnız o tarih boş geçer ya da aynı günün
+  boş bir saatine taşınır (`Cover.to`, koordinatörün kararı, aynı v18); taşıma başka güne değil,
+  çünkü o tarihin sayfası tek günün sayfası ve hedef saati sınıfı ve öğretmeni boş olan saatler.
+  Izgara o haftayı önerinin önizlemesiyle aynı yoldan, salt okunur ve işaretli çizer;
+  düzenlenen hep temel hafta (`Temel haftaya dön`).
 - **Öneri sırası:** o saatte ders vermeyen, başka bir saate ikame girmemiş, kendi saatlerinde
   müsait ve o gün gelmeyen olmayan öğretmenler; önce aynı branş (birinci ya da ikinci), sonra bu
   hafta en az ikameye girmiş, sonra o gün zaten okulda olan. Seçim babanındır; Mozaik kimseyi
@@ -87,9 +90,9 @@ adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
   dokunmadan: çip Program şeridine tek satırla giriyor, 3B onu yeni şeride taşır.
 - **Şema v18, ve eski kopya.** Alan sürüm artırılmadan eklenseydi eski kopya dosyayı açar ve ilk
   kayıtta alanı silerdi; artırıldığı için eski kopya "daha yeni bir sürüm" der ve dokunmaz.
-- **Bırakılan, bütçe yüzünden (brotli):** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı
-  ve çıkarıldı; bir dersi yalnız o hafta başka saate taşımak hiç yazılmadı, çünkü ızgaranın
-  sürüklemesini tarihli katmana bağlamak 3B'nin dosyalarına girer. İkisi TODO'da.
+- **Bırakılan:** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı ve bütçe yüzünden
+  çıkarıldı (koordinatör: şimdilik yok); dersi ızgarada sürükleyerek taşımak yok, taşıma tarih
+  sayfasının seçicisinden.
 - **Gönderme:** İkame listesi bugün yalnız basılıyor (Yazdır'dan PDF de). WhatsApp ve e-posta
   "gönder" işiyle (aşama 4).
 ### 2026-11-16 · Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan (Sadeleşme aşama 3B, K1–K3)
@@ -140,6 +143,26 @@ Program şeridinin `Seçenek` grubu; DECISIONS 2026-08-27 "Dersler kendi sekmesi
 sekme ve bir bölüm yeniden adlandırıldı" ve "Branşlar Okul'a, Ayarlar beş bölüm" (üçü silindi,
 bu dosyanın kuralı; Branşlar'ın gerekçesi, öğretmen listeden branş seçer, bölüm sırasında
 yaşıyor).
+
+### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
+
+- **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama
+  saydamdır (`data-fitting`, `opacity: 0`), `gridFit` iki tabanını ilk boyamadan sonraki karede
+  yazar ve saydamlığı kaldırır (~2 kare). Kabuk
+  ve havuz önce, ızgara ~2 kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
+  Son hâl (taban, sütunlar, tablo genişliği, çekmece boyu) iki derlemede aynı, 1920 ve 1366'da
+  ölçüldü. Her Grid bağlanışında böyle (açılıştan başka bir yeniden bağlanış da tabloyu ~2 kare
+  boş gösterir; önceden bir kare tabansız çiziyordu). Gerekçe: aynı iki yazı ilk karede ~270 ms, ilk boyamadan sonra ~35 ms (4× CPU, tuzak 221).
+- **Ayrıca.** İki taban arka arkaya okunup sonra yazılıyor (araya yazı girince tablo bir kez daha
+  yerleşiyordu); Plex açılışta isteniyor (tuzak 220); ilk React çizimi `startTransition` içinde.
+- **Denendi, bırakıldı.** (1) `@property … inherits: false` ile `--cell-min`/`--head-min`: stil
+  geçişi kısalmadı, çünkü onlardan türeyen `--cell-w` miras kalıyor. (2) Çekmecenin `fit`'ini
+  rAF'a almak: ilk yerleşim ilk kareye kayıyor ve ikinci yerleşimle aynı göreve düşüyor, en uzun
+  görev büyüyor. (3) Tabanları depoda saklayıp ilk yerleşimden önce yazmak: ikinci yerleşimi
+  tümden kaldırırdı, ama yeni bir depolama anahtarı (Veriler nerede satırı, dört dilde etiket)
+  ister ve CI'ın taze profilli ölçümü onu hiç göremez; açık soru olarak WORKLOG'da.
+
+---
 
 ### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
 

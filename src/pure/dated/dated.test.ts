@@ -14,7 +14,9 @@ import {
   moveAway,
   setAwayEnd,
   setCover,
+  taughtOn,
   weekChanges,
+  weekView,
   weekLabel,
   weekOf,
 } from './dated';
@@ -237,5 +239,85 @@ describe('ikame önerisi', () => {
     expect(out.dated.absent).toEqual([]);
     expect(out.dated.covers.map((c) => c.teacherId)).toEqual(['CD']);
     expect(sanitize(out)).toBe(out);
+  });
+});
+
+describe('hafta istisnası: yalnız o hafta taşınan ya da boş geçen ders', () => {
+  it('gelmeyen olmadan da bir ders boş geçer ya da aynı günün boş saatine taşınır', () => {
+    const d = school();
+    expect(taughtOn(d, SALI).map((x) => [x.classId, x.hour])).toEqual([
+      ['c510', 0],
+      ['c510', 1],
+      ['c511', 0],
+    ]);
+    const off = setCover(d, SALI, 'c511', 0, null);
+    const row = coverRows(off, SALI)[0]!;
+    expect([row.classId, row.hour, row.cover, row.to]).toEqual(['c511', 0, null, undefined]);
+    // 511 is free at 2 and 3; BK too, and not closed.
+    expect(row.hours).toEqual([1, 2]);
+    // 510 is taken at 1 and 2 by AY: it can only go to the third hour.
+    expect(coverRows(setCover(d, SALI, 'c510', 0, null), SALI)[0]!.hours).toEqual([2]);
+    expect(weekChanges(off, SALI)).toBe(1);
+  });
+
+  it('taşınan ders yeni saatinde sınıfını ve öğretmenini meşgul eder', () => {
+    let d = setCover(school(), SALI, 'c511', 0, null, 1);
+    expect(coverRows(d, SALI)[0]!.to).toBe(1);
+    d = addAway(d, 'AY', SALI);
+    // AY's second hour in 510: BK has moved there, so he is not free.
+    const second = coverRows(d, SALI).find((r) => r.classId === 'c510' && r.hour === 1)!;
+    expect(second.options.map((o) => o.id)).not.toContain('BK');
+  });
+
+  it('haftanın görünüşü tabana dokunmadan değişenleri işaretliyor', () => {
+    let d = addAway(school(), 'AY', SALI);
+    d = setCover(d, SALI, 'c510', 0, 'CD');
+    d = setCover(d, SALI, 'c511', 0, null, 2);
+    d = addAway(d, 'c511', '2026-11-18');
+    const base = school().programs[0]!.placements;
+    const { state, diff } = weekView(d, SALI);
+    expect(d.programs[0]!.placements).toEqual(base);
+    const shown = state.programs[0]!.placements;
+    // Covered: the lesson under its substitute.
+    const cover = state.lessons.find((l) => l.id === shown['c510|0|0'])!;
+    expect(cover.teacherId).toBe('CD');
+    // Moved: gone from the first hour, there at the third.
+    expect(shown['c511|0|0']).toBeUndefined();
+    expect(shown['c511|0|2']).toBe('l2');
+    expect([...diff.moved].sort()).toEqual(['c510|0|0', 'c511|0|2']);
+    // Nobody: AY's second hour; and 511 away on Wednesday.
+    expect([...diff.opened].sort()).toEqual(['AY|0|1', 'EF|1|2']);
+  });
+
+  it('kendi dersine ikame olarak önerilmiyor; dolan hedef saat seçicide kalıyor', () => {
+    let d = setCover(school(), SALI, 'c511', 0, null);
+    expect(coverRows(d, SALI)[0]!.options.map((o) => o.id)).not.toContain('BK');
+    d = setCover(d, SALI, 'c511', 0, null, 2);
+    // Something else takes 511's third hour that day: the choice stays visible.
+    d = { ...d, unavailable: { 'BK|0|2': 1 } };
+    expect(coverRows(d, SALI)[0]!.hours).toContain(2);
+  });
+
+  it('boş geçen saate taşınan ders o saatte "kimse yok" diye işaretlenmiyor', () => {
+    // BK: 511 at 1; give him 510's third hour too, cancel it, move 511 there.
+    let d = school();
+    d = {
+      ...d,
+      lessons: [...d.lessons, { ...d.lessons[1]!, id: 'l4', classId: 'c510' }],
+      programs: [
+        { ...d.programs[0]!, placements: { ...d.programs[0]!.placements, 'c510|0|2': 'l4' } },
+      ],
+    };
+    d = setCover(d, SALI, 'c510', 2, null);
+    d = setCover(d, SALI, 'c511', 0, null, 2);
+    const { diff } = weekView(d, SALI);
+    expect(diff.opened.has('BK|0|2')).toBe(false);
+    expect(diff.moved.has('c511|0|2')).toBe(true);
+  });
+
+  it('başka saate taşıma sanitize ile saat silinince düşüyor', () => {
+    const d = setCover(school(), SALI, 'c511', 0, null, 2);
+    const out = sanitize({ ...d, settings: { ...d.settings, hours: ['1', '2'] } });
+    expect(out.dated.covers).toEqual([]);
   });
 });

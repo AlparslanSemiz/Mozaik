@@ -187,7 +187,11 @@ function v18() {
         { id: 'tMC', from: '2026-11-17', to: '2026-11-17' },
         { id: 'c511', from: '2026-11-17', to: '2026-11-19' },
       ],
-      covers: [{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' }],
+      covers: [
+        { date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' },
+        // That week only, 510's Wednesday third hour moves to the sixth.
+        { date: '2026-11-18', classId: 'c510', hour: 2, teacherId: null, to: 5 },
+      ],
     },
   };
 }

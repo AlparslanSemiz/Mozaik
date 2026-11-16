@@ -52,7 +52,7 @@ test.describe('İkame', () => {
   test('Gelmiyor… o günü açıyor, seçilen ikame kayda giriyor, taban hafta değişmiyor', async ({
     page,
   }) => {
-    await loadWorld(page, world(), 'Okul');
+    await loadWorld(page, world(), 'Öğretmenler');
     await openSetup(page, 'Öğretmenler');
     const before = await settledText(page);
     await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
@@ -140,5 +140,35 @@ test.describe('İkame', () => {
     expect((await savedState(page, before)).dated).toEqual({ absent: [], covers: [] });
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'Bugün kim yok?' })).toBeFocused();
+  });
+
+  test('bir ders yalnız bu hafta başka saate taşınıyor, ızgara o haftayı işaretli gösteriyor', async ({
+    page,
+  }) => {
+    await loadWorld(page, world());
+    const before = await settledText(page);
+    await page.getByRole('button', { name: 'Bugün kim yok?' }).click();
+    const day = page.getByRole('dialog', { name: 'Salı 17 Kasım' });
+    await day.getByRole('combobox', { name: 'Bir dersi değiştir…' }).selectOption({ index: 1 });
+    const pick = day.getByRole('combobox', { name: 'Yerine: 1 · 510' });
+    await expect(pick).toHaveValue('-');
+    await pick.selectOption({ label: '3. saate' });
+    await expect
+      .poll(async () => (JSON.parse(await savedText(page)) as State).dated.covers)
+      .toEqual([{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: null, to: 2 }]);
+    expect((await savedState(page, before)).programs[0]!.placements).toEqual(
+      world().programs[0]!.placements,
+    );
+
+    await day.getByRole('button', { name: 'Programda göster' }).click();
+    const bar = page.getByRole('region', { name: '17–18 Kasım' });
+    await expect(
+      page.getByRole('button', { name: 'Bu hafta: 17–18 Kasım, 1 değişiklik' }),
+    ).toBeVisible();
+    await expect(bar).toContainText('Değişen');
+    await expect(page.locator('.program-body.previewing .card.mark-moved')).toHaveCount(1);
+    await bar.getByRole('button', { name: 'Temel haftaya dön' }).click();
+    await expect(bar).toBeHidden();
+    await expect(page.locator('.card.mark-moved')).toHaveCount(0);
   });
 });

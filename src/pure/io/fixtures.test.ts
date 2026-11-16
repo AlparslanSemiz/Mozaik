@@ -487,7 +487,10 @@ describe('şema örnekleri — tarihli değişiklikler (v18)', () => {
               { id: 'tMC', from: '2026-11-17', to: '2026-11-17' },
               { id: 'c511', from: '2026-11-17', to: '2026-11-19' },
             ],
-            covers: [{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' }],
+            covers: [
+              { date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' },
+              { date: '2026-11-18', classId: 'c510', hour: 2, teacherId: null, to: 5 },
+            ],
           }
         : { absent: [], covers: [] },
     );
@@ -515,6 +518,7 @@ describe('şema örnekleri — tarihli değişiklikler (v18)', () => {
     expect(state!.dated.absent.map((a) => a.id)).toEqual(['tMC', 'c511']);
     expect(state!.dated.covers.map((c) => [c.hour, c.teacherId])).toEqual([
       [0, 'tAV'],
+      [2, null],
       [1, null],
     ]);
   });

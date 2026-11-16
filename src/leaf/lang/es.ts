@@ -1880,6 +1880,11 @@ const ES: Sozluk = {
   "Seçilmedi": "Sin elegir",
   "Son gün": "Último día",
   "Yerine": "Sustituye",
+  "Değişen": "Cambiada",
+  "Temel haftaya dön": "Volver a la semana habitual",
+  "{n}. saate": "A la hora {n}",
+  "Bir dersi değiştir…": "Cambiar una clase…",
+  "Programda göster": "Mostrar en el horario",
   "Ayrı plan yap":
     "Convertir en plan propio",
   "WhatsApp açılamadı.": "No se pudo abrir WhatsApp.",

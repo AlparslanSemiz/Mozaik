@@ -220,6 +220,13 @@
         "classId": "c510",
         "hour": 0,
         "teacherId": "tAV"
+      },
+      {
+        "date": "2026-11-18",
+        "classId": "c510",
+        "hour": 2,
+        "teacherId": null,
+        "to": 5
       }
     ]
   }

@@ -771,6 +771,31 @@ boş hücrede de. Sürüklenebilir kartta ise kartın `pointerdown`'ı
 Radix'in sayacını bitirir), sonra sağ tıkın `contextmenu`'sü. `pointercancel`
 çıkarılınca `dokunmatik.spec.ts`'in "BOŞ hücrede basılı tutmak" testi kırmızı.
 
+### 220 · Gömülü yazı yüzü ilk kullanıldığında çözülür, sayfa iki kez yerleşir
+Plex `data:` URI olarak CSS'in içinde ve tarayıcı onu ancak bir metin o yüzü
+istediğinde çözüyor: o an ızgaranın ilk yerleşimiydi. 4× CPU'da çözüm ~700 ms
+sonra bitiyordu (ızgara 905 ms'de DOM'da, yüz 1574 ms'de `loaded`), yani bütün
+sayfa yedek yazının ölçüleriyle yerleşti, `gridFit` tabanı onunla ölçtü, Plex
+gelince ikisi baştan. `font-display: block` bunu gizler, çünkü o arada yazı çizilmez.
+Çare açılışta `document.fonts.load('1em "IBM Plex Sans"')` (`ui/main.tsx`): çözüm
+React haftayı okurken bitiyor (352 ms). Ölçü `scripts/acilis-olc.mjs`: ızgaradan
+sonra uzun görev kalmıyor (`uzun` = `uzunIzgara`).
+
+### 221 · İlk karede yazılan custom property ilk boyamadan sonrakinden beş kat pahalı
+`gridFit`'in iki tabanı (`--cell-min`, `--head-min`) ilk boyamadan önceki karede
+yazılınca, 4× CPU'da babanın haftasında bir stil geçişi (3348 öğe) ve tablo
+yerleşimi ~270 ms; aynı iki yazı ilk boyamadan sonraki karede 35 ms (iki yönde
+ölçüldü, 2026-11-16; nedeni tarayıcının içinde, burada çözülmedi). Ayrıca
+`document.fonts`'a sormak sayfanın stilini ve yerleşimini günceller: tutturma
+anında sorulunca açılışın ilk yerleşimi oydu. Çare: ilk taban ilk boyamadan sonra
+yazılır, o kareye kadar tablo `data-fitting` ile saydam (yerini tutar, tabansız
+hiç görünmez; `visibility: hidden` değil, çünkü gizli hücre odak almaz ve
+`innerText`'i boş: Kontrol'ün Göster'i Program'ı bağlayıp aynı anda bir karta odaklanıyor,
+E2E'de iki test kırmızıydı); gizli bir sekmede saydamlık hemen kalkar; `fonts.ready` de o zaman sorulur; `attachGridFit` yerleşim
+etkisinde tutturulur ki gizleme ilk yerleşimden önce gelsin, sonra gelince bir
+stil geçişi daha. Ölçü `scripts/acilis-olc.mjs` (`enUzun`, `izgara` artık görünür
+ızgarayı sayar).
+
 ## Düzen ölçümü ve hangi kutuya bakıldığı
 
 **Kural.** Bir düzen iddiası gerçek tarayıcıda, onu dolduran gerçek veriyle, ve
@@ -1720,7 +1745,7 @@ iddiası saati kapatarak sınanır.**
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172, 177, 178 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176, 220, 221 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142, 179 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
@@ -1733,7 +1758,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 179 (177 ve 178 açık dallarda), yeni bir tuzak 180'den devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
+büyük kullanılan numara 179 (177 ve 178 açık dallarda), yeni bir tuzak 180'den devam eder; 220 ve 221 `hiz/acilis`'in (açık dallar çakışmasın diye 220'den). 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

@@ -1879,6 +1879,11 @@ const DE: Sozluk = {
   "Seçilmedi": "Nicht gewählt",
   "Son gün": "Letzter Tag",
   "Yerine": "Vertreten durch",
+  "Değişen": "Geändert",
+  "Temel haftaya dön": "Zurück zur normalen Woche",
+  "{n}. saate": "In Stunde {n}",
+  "Bir dersi değiştir…": "Eine Stunde ändern…",
+  "Programda göster": "Im Stundenplan zeigen",
   "Ayrı plan yap":
     "Als eigenen Plan anlegen",
   "WhatsApp açılamadı.": "WhatsApp konnte nicht geöffnet werden.",

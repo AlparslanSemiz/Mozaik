@@ -11,7 +11,7 @@
 //   load     `loadEventEnd` (WORKLOG'un açılış sayısı)
 //   fcp      first-contentful-paint
 //   hazir       kabuğun `Okul` düğmesi DOM'a girip bir rAF geçti
-//   izgara      `table.grid` DOM'a girip bir rAF geçti (veriyle Program'da açılır)
+//   izgara      `table.grid` DOM'da ve gizli değil (`data-fitting` yok), bir rAF geçti
 //   uzunIzgara  ızgaraya kadarki uzun görevlerin (ana iş parçacığında ≥50 ms) toplamı
 //   uzun        aynısı, iş durulana kadar (1 s uzun görev gelmeyene, en çok 15 s)
 //   tbt         `uzun`un 50 ms üstü kısımları (Total Blocking Time)
@@ -71,21 +71,31 @@ function hazirlik(v) {
   // açılıyor, `table.grid` tıklamasız gelir.
   const gozcu = new MutationObserver(() => {
     if (window.__hazir === undefined && !gozcu.okul) {
+      // The shell is up once the Program tab's button is there: it exists in
+      // every version, where "Okul" went with the five tabs (Sadeleşme K1).
       const okul = [...document.querySelectorAll('button')].some(
-        (b) => b.textContent?.trim() === 'Okul',
+        (b) => b.textContent?.trim() === 'Program',
       );
       if (okul) {
         gozcu.okul = true;
         requestAnimationFrame(() => (window.__hazir = performance.now()));
       }
     }
-    if (!gozcu.izgara && document.querySelector('table.grid')) {
+    // Görünür ızgara: `data-fitting` altındaki tablo yerinde ama çizilmiyor
+    // (gridFit.ts ilk tabanı ilk boyamadan sonra yazana kadar).
+    const tablo = document.querySelector('table.grid');
+    if (!gozcu.izgara && tablo !== null && tablo.closest('[data-fitting]') === null) {
       gozcu.izgara = true;
       requestAnimationFrame(() => (window.__izgara = performance.now()));
     }
     if (gozcu.okul && gozcu.izgara) gozcu.disconnect();
   });
-  gozcu.observe(document, { childList: true, subtree: true });
+  gozcu.observe(document, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['data-fitting'],
+  });
 }
 
 async function birKosu(browser, url) {
@@ -199,7 +209,7 @@ const tablo = [
   '|---|---:|---:|---:|---:|---:|---:|',
   ...satirlar,
   '',
-  "load = `loadEventEnd`; hazir = `Okul` düğmesi DOM'da + bir rAF; izgara = `table.grid` DOM'da + bir rAF;",
+  "load = `loadEventEnd`; hazir = `Okul` düğmesi DOM'da + bir rAF; izgara = `table.grid` DOM'da ve gizli değil + bir rAF;",
   'uzunIzgara = ızgaraya kadarki uzun görevlerin toplamı; uzun / tbt / enUzun = iş durulana kadar (1 s sessizlik).',
   'Veri: `' + a.veri + '`; her koşu taze bağlam, 1920×1080, tr-TR; ısınma koşusu sayılmadı.',
   '',

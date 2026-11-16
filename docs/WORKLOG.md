@@ -78,9 +78,10 @@ dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aş
 Gerçek Windows exe'de koşulmadı.
 
 **İkame ve hafta istisnası (2026-11-16, `ozellik/ikame`, `sade/asama-3a`'nın üstünde,
-birleşmedi; 3B'den sonra birleşir):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
-şeridinde tarih çipi, tarih sayfası ve İkame listesi (TODO SD9, DECISIONS). Brotli 302 044 →
-304 684 B (+2 640; bütçe 2 kB'tı, eşiğe 1 316 B kaldı), ham 1 174 531 → 1 185 596 B.
+birleşmedi; `sade/asama-3b` içinde):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
+şeridinde tarih çipi, tarih sayfası, İkame listesi, tek dersi yalnız o tarih boş geçirmek ya da
+aynı günün başka saatine taşımak, ızgarada o haftanın işaretli görünüşü (TODO SD9, DECISIONS).
+Brotli 3B'nin 299 085'i → 302 602 B (+3 517; bütçe 3,5 kB), ham 1 172 023 B.
 
 **Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
 kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
@@ -157,6 +158,16 @@ Tıklama testi 1920 ve 1366'da örnek okulla (görüntüler `scratch/ikame/`). B
 çekildi, geçti). İnceleme alt ajanının bulguları ayrı commit'te: yokluk gidince ikamesi de gider,
 dolan hoca seçicide kalır, Gelmiyor… yalnız kendi yokluğunu taşır, İkame listesi Başlarken'in
 Yazdır adımını işaretlemez.
+
+**Hafta istisnası ve haftanın görünüşü (aynı gün, 3B birleştirildikten sonra).** `Cover.to` (aynı
+v18), `Bir dersi değiştir…`, `N. saate`, `weekView` ve `WeekBar` (önerinin önizleme yolu, salt
+okunur; havuz temel haftanın). İkinci inceleme: havuzdaki kart haftanın görünüşünde
+sürüklenebiliyordu (kapandı), kendi dersine ikame önerisi, dolan hedef saat, boş geçen saate
+taşınan dersin yanlış deseni, `.find` taramaları (plan başına tek `Map`), çubukta haftanın adı,
+`useSyncExternalStore`'un aboneliği; düzeldi. Esc ile kapanmıyor (bilerek, bütçe). Koordinatörün
+yeni kuralıyla (makine yükü) yalnız `ikame`, `kisi`, `program`, `temel` spec'leri `--workers=1`;
+bütün E2E CI'da.
+
 ## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
 
 `sade/asama-2`'nin (PR #74) üstünde, birleşmedi. Aşama 3A (K6–K8) paralel bir dalda; ikisi
@@ -247,6 +258,39 @@ Fransızcada çakışma yoktu. Almancada sayılan dersin bir kısmı hâlâ "Stu
 stres testi ve Windows betikleri (`kurulum-gecisi.mjs`, `gercek-exe`, `guncelleme-exe`) Okul
 bilgileri → Daha fazla → Hakkında yolunu kullanıyor; stres testi yerelde 7/7, Windows'unkiler
 koşulmadı.
+
+## 2026-11-16 · Açılışın ana iş parçacığı (`hiz/acilis`)
+
+`origin/main` + `olcum/acilis` (PR #77, `acilis.yml`). Ölçüm Chromium'da CDP izi ve
+`scripts/acilis-olc.mjs` ile, 4× CPU, `file://`, babanın haftası (`tam-dolu-kurs-dizili.json`).
+Mac yüklüydü (yük 15–28), sayılar yalnız göreli; temiz sayı CI'ın.
+
+**Büyük görevler neydi** (tabandaki iz, 4×): (a) React'in ilk çizimi + commit + çekmecenin
+yerleşim etkisinin (`LessonPool` `fit`) zorladığı ilk yerleşim, tek görev ~435–460 ms (script
+~140, stil+yerleşim ~280); (b) ilk kare ~780 ms: `gridFit` `--cell-min`'i yazıp `--head-min`'i
+ölçerken tabloyu baştan yerleştirdi (stil 3348 öğe ~100–130 + yerleşim ~230), `--head-min` yazısı
+karenin kendi geçişinde bir daha (~320), `--wrap-w` bir stil geçişi daha (~37); (c) Plex `data:`
+yüzü ancak ilk yerleşimde istendiği için ~700 ms sonra geliyor, sayfa ve tabanlar bir kez daha
+(tuzak 220). Script derleme ve durumun ayrıştırılması küçük (EvaluateScript ~30, `parseState` ~17,
+sağlık raporu ~38, zaten paylaşılan tek kopya). Gizli sekmeler çizilmiyor.
+
+**Ne değişti:** iki taban önce okunup sonra yazılıyor; ilk taban ilk boyamadan sonra, tablo o
+kareye kadar `data-fitting` ile saydam (önce `visibility: hidden` denendi: Göster'in odağı ve
+satır başının `innerText`'i boş kaldı, E2E'de 2 kırmızı), `gridFit` yerleşim etkisinde tutturuluyor (tuzak 221);
+`document.fonts.load` açılışta; ilk çizim `startTransition` içinde. `acilis-olc.mjs`'in `izgara`'sı
+artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son geometri iki derlemede aynı
+(`--cell-min` 32px, `--head-min` 73px, tablo 2410×695, bütün `col` genişlikleri, 1920 ve 1366).
+
+**Yerel, 9 dönüşümlü koşu, medyan (taban → dal, ms, son derleme):** enUzun 684 → 276 (−60 %),
+tbt 1469 → 384 (−74 %), uzun 1719 → 684 (−60 %), fcp 1556 → 908 (−42 %), izgara (görünür)
+1180 → 987 (−16 %), load 265 → 280 (gürültü içinde). Dal izinde görevler: 52–59 + 33 (çizim
+dilimleri), 250–290 (commit + ilk yerleşim, en uzunu), 75–86 (ilk kare), 118–129 (tabanlar,
+saydamlık kalkar). CI sayısı: yazılacak (taban medyanları
+#77'nin koşusundan: load 383–405, fcp ~1000, izgara ~890–940, tbt ~770–820, enUzun ~460–490).
+
+**Kalan.** En uzun görev artık sayfanın ilk tam yerleşimi (~290 ms yerelde): 3348 öğenin ilk
+stili ve tablo. 200 ms'nin altı ya ızgaranın DOM'unu inceltmek (2937 öğe) ya da tabanları depoda
+saklayıp ilk yerleşimden önce yazmak ister (DECISIONS'ta (3); karar bekliyor).
 
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 

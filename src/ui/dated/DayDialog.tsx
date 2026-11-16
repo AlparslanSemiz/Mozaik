@@ -20,6 +20,7 @@ import {
   moveAway,
   setAwayEnd,
   setCover,
+  taughtOn,
   weekChanges,
 } from '../../pure/dated';
 import { useReturnFocus, useT } from '../common';
@@ -54,6 +55,7 @@ export function DayDialog({
   setDate,
   person,
   onClose,
+  onShow,
 }: {
   state: State;
   change: Change;
@@ -63,6 +65,8 @@ export function DayDialog({
   /** Opened by this person's "Gelmiyor…": a new date moves their one-day absence. */
   person?: Id | undefined;
   onClose: () => void;
+  /** Draws the date's week on the Program grid (the strip's chip only). */
+  onShow?: () => void;
 }) {
   const t = useT();
   const returnFocus = useReturnFocus(date !== null);
@@ -72,6 +76,7 @@ export function DayDialog({
   const nameOf = (id: Id | null | undefined) =>
     state.teachers.find((x) => x.id === id)?.name ?? state.classes.find((x) => x.id === id)?.name;
   const rows = date === null ? [] : coverRows(state, iso);
+  const taught = date === null ? [] : taughtOn(state, iso);
   const away = state.dated.absent.flatMap((a, i) =>
     a.from <= iso && iso <= a.to ? [{ ...a, i }] : [],
   );
@@ -80,13 +85,19 @@ export function DayDialog({
     const roomId = state.classes.find((c) => c.id === classId)?.roomId;
     return state.rooms.find((r) => r.id === roomId)?.name ?? '';
   };
+  const hourOf = (h: number) => state.settings.hours[h] ?? '';
+  const moveTo = (h: number) => t('{n}. saate', { n: hourOf(h) });
   const paper = [
-    [t('Saat'), t('Sınıf'), t('Gelmeyen'), t('Yerine'), t('Derslik')],
+    [t('Saat'), t('Sınıf'), t('Öğretmen'), t('Yerine'), t('Derslik')],
     ...rows.map((r) => [
       state.settings.hours[r.hour] ?? '',
       nameOf(r.classId) ?? '',
       nameOf(r.teacherId) ?? '',
-      r.cover === null ? t('Boş geçsin') : (nameOf(r.cover) ?? ''),
+      r.to !== undefined
+        ? moveTo(r.to)
+        : r.cover === null
+          ? t('Boş geçsin')
+          : (nameOf(r.cover) ?? ''),
       room(r.classId),
     ]),
   ];
@@ -106,6 +117,8 @@ export function DayDialog({
               <span className="sheet-kind">{t('İkame listesi')}</span>
             </div>
             <div className="sheet-actions">
+              {/* TODO(gönder, aşama 4): the send work's button goes here, beside
+                  Yazdır, sending `paper` (the same rows) by WhatsApp or e-mail. */}
               <button
                 className="btn primary"
                 disabled={rows.length === 0}
@@ -203,17 +216,25 @@ export function DayDialog({
                     <td>
                       <select
                         aria-label={`${t('Yerine')}: ${state.settings.hours[r.hour]} · ${nameOf(r.classId)}`}
-                        value={r.cover === undefined ? '' : (r.cover ?? '-')}
+                        value={
+                          r.to !== undefined
+                            ? `>${r.to}`
+                            : r.cover === undefined
+                              ? ''
+                              : (r.cover ?? '-')
+                        }
                         onChange={(e) => {
                           const v = e.target.value;
                           change((d) =>
-                            setCover(
-                              d,
-                              iso,
-                              r.classId,
-                              r.hour,
-                              v === '' ? undefined : v === '-' ? null : v,
-                            ),
+                            v[0] === '>'
+                              ? setCover(d, iso, r.classId, r.hour, null, Number(v.slice(1)))
+                              : setCover(
+                                  d,
+                                  iso,
+                                  r.classId,
+                                  r.hour,
+                                  v === '' ? undefined : v === '-' ? null : v,
+                                ),
                           );
                         }}
                       >
@@ -230,6 +251,11 @@ export function DayDialog({
                               .join(' · ')}
                           </option>
                         ))}
+                        {r.hours.map((h) => (
+                          <option key={h} value={`>${h}`}>
+                            {moveTo(h)}
+                          </option>
+                        ))}
                       </select>
                     </td>
                   </tr>
@@ -238,8 +264,33 @@ export function DayDialog({
             </table>
           )}
 
+          {/* Any other lesson of the date: it becomes a row, first as "boş
+              geçsin", then a substitute or another hour can be chosen. */}
+          <select
+            aria-label={t('Bir dersi değiştir…')}
+            value=""
+            onChange={(e) => {
+              const x = taught[Number(e.target.value)];
+              if (x !== undefined) change((d) => setCover(d, iso, x.classId, x.hour, null));
+            }}
+          >
+            <option value="">{t('Bir dersi değiştir…')}</option>
+            {taught.map((x, i) =>
+              rows.some((r) => r.classId === x.classId && r.hour === x.hour) ? null : (
+                <option key={i} value={i}>
+                  {hourOf(x.hour)} · {nameOf(x.classId)} · {nameOf(x.teacherId)}
+                </option>
+              ),
+            )}
+          </select>
+
           {date !== null && weekChanges(state, iso) > 0 && (
-            <div className="sheet-foot">
+            <div className="sheet-foot form-row">
+              {onShow !== undefined && (
+                <button className="btn" onClick={onShow}>
+                  {t('Programda göster')}
+                </button>
+              )}
               <button className="btn" onClick={() => change((d) => clearWeek(d, iso))}>
                 {t('Bu haftanın değişikliklerini sil')}
               </button>

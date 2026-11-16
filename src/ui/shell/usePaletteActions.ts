@@ -116,6 +116,15 @@ export function usePaletteActions({
         run: openOldCopies,
       },
       {
+        // Hakkında is behind a Daha fazla; "güncelleme" is what an older
+        // reader types for it.
+        id: 'update',
+        label: t('Güncellemeye bak'),
+        hint: `${school} → ${t('Hakkında')}`,
+        extra: 'güncelleme güncelle yeni sürüm indir hakkında versiyon',
+        run: () => goTo({ tab: 'school', section: 'about' }),
+      },
+      {
         id: 'backup',
         label: t('Planlar ve yedek'),
         hint: school,
