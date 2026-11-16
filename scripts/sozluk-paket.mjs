@@ -109,7 +109,9 @@ export function sozlukPaketi() {
     packed ??= packSozlukler(Object.fromEntries(PAKET_DILLER.map((d) => [d, readSozluk(d)])));
     return packed;
   };
-  const LANG_FILE = /[\\/]src[\\/]leaf[\\/]lang[\\/](en|de|es|fr)\.ts$/;
+  const LANG_FILE = new RegExp(
+    `[\\\\/]src[\\\\/]leaf[\\\\/]lang[\\\\/](${PAKET_DILLER.join('|')})\\.ts$`,
+  );
   return {
     name: 'mozaik-sozluk-paketi',
     apply: 'build',
