@@ -5832,17 +5832,21 @@ table.availability .av-head {
 
 .mail-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
 
+/* The name is never squeezed under the address: two buttons on a row
+   (e-mail and WhatsApp) wrap to their own line instead. */
 .mail-row .mail-who {
-  min-width: 4ch;
+  flex: none;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .mail-row .mail-to {
+  flex: 1 1 8ch;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5853,6 +5857,16 @@ table.availability .av-head {
 .mail-row .btn {
   margin-left: auto;
   flex: none;
+}
+
+.mail-row .btn + .btn {
+  margin-left: 0;
+}
+
+/* The saved file's line reads from the left in the panel; on the person page
+   it sits under the buttons, on the right (`.sheet-said`). */
+.mail-panel .sheet-said {
+  text-align: left;
 }
 
 /* In a browser the button is a link (a plain mailto:), and it reads as the

@@ -393,11 +393,11 @@ export function Inspector({
                 <input
                   ref={phoneBox}
                   key={`p-${teacherOf.id}-${teacherOf.phone}`}
-                  type="tel"
+                  type="text"
+                  inputMode="tel"
                   autoComplete="off"
                   className="dlg-input"
                   aria-label={t('Telefon')}
-                  placeholder="0532 123 45 67"
                   defaultValue={teacherOf.phone}
                   aria-invalid={teacherOf.phone !== '' && whatsappNumber(teacherOf.phone) === null}
                   onBlur={(e) => {
