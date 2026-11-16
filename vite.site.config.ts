@@ -113,7 +113,11 @@ function siteShell(): Plugin {
           attrs: { name: 'theme-color', content: '#2e4ba8' },
           injectTo: 'head' as const,
         },
-        { tag: 'script', children: REGISTER + yeniAdresYoklamasi + ziyaretSayaci, injectTo: 'body' as const },
+        {
+          tag: 'script',
+          children: REGISTER + yeniAdresYoklamasi + ziyaretSayaci,
+          injectTo: 'body' as const,
+        },
       ],
     },
   };
