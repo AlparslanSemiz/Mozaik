@@ -140,12 +140,15 @@ test.describe('52. Komut paleti', () => {
 });
 
 test.describe('53. Durum çipi', () => {
-  test('sorun yokken yeşil, kapalı saatte ders kalınca kırmızı ve SAYIYOR', async ({ page }) => {
+  test('bekleyen ders varken sarı, sorun yokken yeşil, kapalı saatte ders kalınca kırmızı ve SAYIYOR', async ({
+    page,
+  }) => {
     await openWithSample(page);
     const chip = page.locator('.health');
     await expect(chip).toBeVisible();
-    // Nothing laid out yet: not a problem, but it says what is waiting.
-    await expect(chip).toHaveClass(/ok/);
+    // Nothing laid out yet: yellow, and it says what is waiting (green only
+    // once nothing waits: the usability walkthrough, 2026-11-16).
+    await expect(chip).toHaveClass(/tight/);
     await expect(chip).toContainText('saat yerleşmedi');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
