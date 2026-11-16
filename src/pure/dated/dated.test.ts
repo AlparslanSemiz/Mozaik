@@ -187,6 +187,25 @@ describe('ikame önerisi', () => {
     expect(setCover(d, SALI, 'c510', 0, undefined).dated.covers).toEqual([]);
   });
 
+  it('yokluk silinince, kısalınca ya da taşınınca o günlerin ikamesi de gidiyor', () => {
+    let d = addAway(school(), 'AY', SALI);
+    d = setAwayEnd(d, 0, '2026-11-18');
+    d = setCover(d, SALI, 'c510', 0, 'CD');
+    d = setCover(d, SALI, 'c511', 0, 'EF'); // BK's hour: not AY's, stays
+    expect(setAwayEnd(d, 0, null).dated.covers.map((c) => c.teacherId)).toEqual(['EF']);
+    expect(setAwayEnd(d, 0, SALI).dated.covers).toHaveLength(2);
+    const one = setCover(addAway(school(), 'AY', SALI), SALI, 'c510', 0, 'CD');
+    expect(moveAway(one, 'AY', SALI, '2026-11-18').dated.covers).toEqual([]);
+  });
+
+  it('seçilen hoca sonradan dolsa da seçicide kalıyor', () => {
+    let d = setCover(addAway(school(), 'AY', SALI), SALI, 'c510', 0, 'CD');
+    d = { ...d, unavailable: { ...d.unavailable, 'CD|0|0': 1 } };
+    const first = coverRows(d, SALI)[0]!;
+    expect(first.cover).toBe('CD');
+    expect(first.options.map((o) => o.id)).toEqual(['EF', 'CD']);
+  });
+
   it('gezideki sınıfın saatleri ikame istemiyor ve öğretmeni boş sayılıyor', () => {
     let d = addAway(school(), 'BK', SALI);
     expect(coverRows(d, SALI)).toHaveLength(1);

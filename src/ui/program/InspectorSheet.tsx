@@ -55,7 +55,7 @@ import {
 } from '../common';
 import { PrintOne, SendTeacher } from '../print';
 import { DayDialog } from '../dated';
-import { addAway, coverCount } from '../../pure/dated';
+import { addAway, coverCount, isAway } from '../../pure/dated';
 import { dayStamp } from '../../leaf/app';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CalendarX, Printer, Trash2, X } from 'lucide-react';
@@ -101,6 +101,7 @@ export function Inspector({
   const [printing, setPrinting] = useState(false);
   /** "Gelmiyor…": the date page, this person away on it. */
   const [awayOn, setAwayOn] = useState<string | null>(null);
+  const [made, setMade] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const emailBox = useRef<HTMLInputElement>(null);
   // Where the keyboard goes after Sil: the next person's name in the list,
@@ -768,6 +769,8 @@ export function Inspector({
                       className="btn"
                       onClick={() => {
                         const today = dayStamp(new Date());
+                        // Only an absence made here moves with the page's date.
+                        setMade(!isAway(state, target.id, today));
                         change((d) => addAway(d, target.id, today));
                         setAwayOn(today);
                       }}
@@ -800,7 +803,7 @@ export function Inspector({
                 change={change}
                 date={awayOn}
                 setDate={setAwayOn}
-                person={target.id}
+                person={made ? target.id : undefined}
                 onClose={() => setAwayOn(null)}
               />
               {printing && printable && (

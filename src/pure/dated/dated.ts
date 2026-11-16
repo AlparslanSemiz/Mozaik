@@ -13,7 +13,6 @@ import { WEEK, dayLabel } from '../../leaf/lang';
 import { type Dated, type Id, type State, closedKey, lessonSubject } from '../../leaf/model';
 import { activePlacements } from '../grid';
 
-const datedOf = (d: State): Dated => d.dated;
 const put = (d: State, patch: Partial<Dated>): State => ({ ...d, dated: { ...d.dated, ...patch } });
 
 const parts = (iso: string) => iso.split('-').map(Number) as [number, number, number];
@@ -47,29 +46,50 @@ export function dayOf(d: State, iso: string): number {
 }
 
 export const isAway = (d: State, id: Id, iso: string): boolean =>
-  datedOf(d).absent.some((a) => a.id === id && a.from <= iso && iso <= a.to);
+  d.dated.absent.some((a) => a.id === id && a.from <= iso && iso <= a.to);
 
 /** `id` away on `iso` alone, unless it already is. */
 export function addAway(d: State, id: Id, iso: string): State {
   if (isAway(d, id, iso)) return d;
-  return put(d, { absent: [...datedOf(d).absent, { id, from: iso, to: iso }] });
+  return put(d, { absent: [...d.dated.absent, { id, from: iso, to: iso }] });
+}
+
+/**
+ * The covers of `id`'s hours from `from` to `to` dropped: the absence they
+ * answered is gone from those dates, and a left-over cover would still count
+ * as the substitute's (review, 2026-11-16).
+ */
+function dropCovers(d: State, id: Id, from: string, to: string): State {
+  const placed = activePlacements(d);
+  const covers = d.dated.covers.filter((c) => {
+    if (c.date < from || c.date > to) return true;
+    const lessonId = placed[`${c.classId}|${dayOf(d, c.date)}|${c.hour}`];
+    const teacherId = d.lessons.find((l) => l.id === lessonId)?.teacherId;
+    return c.classId !== id && teacherId !== id;
+  });
+  return put(d, { covers });
 }
 
 /** `id`'s one-day absence on `from` moved to `to`: "Gelmiyor…" and then the date. */
 export function moveAway(d: State, id: Id, from: string, to: string): State {
-  const absent = datedOf(d).absent.filter(
-    (a) => !(a.id === id && a.from === from && a.to === from),
-  );
-  return addAway(put(d, { absent }), id, to);
+  const absent = d.dated.absent.filter((a) => !(a.id === id && a.from === from && a.to === from));
+  return addAway(dropCovers(put(d, { absent }), id, from, from), id, to);
 }
 
-/** Absence `i` ends on `to`, or (`null`) is taken back. */
+/** Absence `i` ends on `to`, or (`null`) is taken back; the dates it loses lose their covers. */
 export function setAwayEnd(d: State, i: number, to: string | null): State {
-  const absent = datedOf(d).absent.flatMap((a, j) => {
-    if (j !== i) return [a];
-    return to === null ? [] : [{ ...a, to: to < a.from ? a.from : to }];
-  });
-  return put(d, { absent });
+  const a = d.dated.absent[i];
+  if (a === undefined) return d;
+  const end = to === null ? null : to < a.from ? a.from : to;
+  const absent = d.dated.absent.flatMap((x, j) =>
+    j !== i ? [x] : end === null ? [] : [{ ...x, to: end }],
+  );
+  const next = put(d, { absent });
+  return end === null
+    ? dropCovers(next, a.id, a.from, a.to)
+    : end < a.to
+      ? dropCovers(next, a.id, addDays(end, 1), a.to)
+      : next;
 }
 
 /** Who takes `classId` at `hour` on `iso`: a teacher, `null` (nobody), or `undefined` (not chosen). */
@@ -80,7 +100,7 @@ export function setCover(
   hour: number,
   teacherId: Id | null | undefined,
 ): State {
-  const covers = datedOf(d).covers.filter(
+  const covers = d.dated.covers.filter(
     (c) => !(c.date === iso && c.classId === classId && c.hour === hour),
   );
   if (teacherId !== undefined) covers.push({ date: iso, classId, hour, teacherId });
@@ -107,7 +127,7 @@ export function weekLabel(d: State, iso: string): string {
  */
 export function clearWeek(d: State, iso: string): State {
   const [from, to] = weekOf(iso);
-  const { absent, covers } = datedOf(d);
+  const { absent, covers } = d.dated;
   return put(d, {
     absent: absent.flatMap((a) =>
       a.to < from || a.from > to
@@ -124,7 +144,7 @@ export function clearWeek(d: State, iso: string): State {
 /** A teacher's covers: all of them, and those in the date's week. */
 export function coverCount(d: State, teacherId: Id, iso: string): [number, number] {
   const [from, to] = weekOf(iso);
-  const mine = datedOf(d).covers.filter((c) => c.teacherId === teacherId);
+  const mine = d.dated.covers.filter((c) => c.teacherId === teacherId);
   return [mine.length, mine.filter((c) => c.date >= from && c.date <= to).length];
 }
 
@@ -159,7 +179,7 @@ export function coverRows(d: State, iso: string): CoverRow[] {
   const day = dayOf(d, iso);
   if (day < 0) return [];
   const lessons = new Map(d.lessons.map((l) => [l.id, l]));
-  const covers = datedOf(d).covers.filter((c) => c.date === iso);
+  const covers = d.dated.covers.filter((c) => c.date === iso);
 
   // Who teaches what at each hour that day, the classes away left out.
   const taught: Array<{ hour: number; classId: Id; lessonId: Id; teacherId: Id }> = [];
@@ -205,6 +225,10 @@ export function coverRows(d: State, iso: string): CoverRow[] {
         })
         .sort((a, b) => (a.rank >> 1) - (b.rank >> 1) || a.week - b.week || a.rank - b.rank)
         .map(({ id, subject, week }) => ({ id, subject, week }));
+      // A choice made before the week changed under it stays visible.
+      const kept = d.teachers.find((t) => t.id === own?.teacherId);
+      if (kept !== undefined && !options.some((o) => o.id === kept.id))
+        options.push({ id: kept.id, subject: kept.subject, week: 0 });
       return { ...x, cover: own?.teacherId, options };
     });
 }

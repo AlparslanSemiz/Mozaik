@@ -25,12 +25,13 @@ import Sheet from './Sheet';
  * Prints the `.print-one-box` drawn beside it, then calls `done` once the
  * print window has closed. The person page's sheet and the İkame listesi.
  */
-export function usePrintNow(done: () => void) {
+export function usePrintNow(done: () => void, program = true) {
   useEffect(() => {
     const root = document.documentElement;
     root.classList.add('print-one');
-    // The one Başlarken step the plan cannot show (Checklist.tsx).
-    markPrinted();
+    // The one Başlarken step the plan cannot show (Checklist.tsx): a program,
+    // not an İkame listesi.
+    if (program) markPrinted();
     window.addEventListener('afterprint', done, { once: true });
     const frame = requestAnimationFrame(() => window.print());
     return () => {
@@ -38,7 +39,7 @@ export function usePrintNow(done: () => void) {
       window.removeEventListener('afterprint', done);
       root.classList.remove('print-one');
     };
-  }, [done]);
+  }, [done, program]);
 }
 
 export function PrintOne({

@@ -1,5 +1,5 @@
 // One date over the base week (schema v18): who is not coming, who takes
-// their hours ("ikame"), and whether the day has no lessons at all. Its one
+// their hours ("ikame"). A class away is a trip or an exam. Its one
 // primary button prints the İkame listesi. Opened from the Program strip's
 // date chip and from a person page's "Gelmiyor…".
 //
@@ -29,7 +29,7 @@ type Change = (apply: (d: State) => State, label?: string) => void;
 
 /** The İkame listesi on paper: one table, nothing else on the page. */
 function Paper({ title, rows, done }: { title: string; rows: string[][]; done: () => void }) {
-  usePrintNow(done);
+  usePrintNow(done, false);
   return createPortal(
     <div className="print-one-box" aria-hidden="true">
       <h1>{title}</h1>
@@ -61,7 +61,7 @@ export function DayDialog({
   date: string | null;
   setDate: (iso: string) => void;
   /** Opened by this person's "Gelmiyor…": a new date moves their one-day absence. */
-  person?: Id;
+  person?: Id | undefined;
   onClose: () => void;
 }) {
   const t = useT();
@@ -129,7 +129,8 @@ export function DayDialog({
                 required
                 onChange={(e) => {
                   const next = e.target.value;
-                  if (next === '') return;
+                  // Chrome fires once per typed digit of the year: wait for a real one.
+                  if (next < '2000') return;
                   if (person !== undefined) change((d) => moveAway(d, person, iso, next));
                   setDate(next);
                 }}
@@ -173,11 +174,13 @@ export function DayDialog({
             }}
           >
             <option value="">{t('Gelmeyen ekle…')}</option>
-            {[...state.teachers, ...state.classes].map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
+            {[...state.teachers, ...state.classes]
+              .filter((p) => !away.some((a) => a.id === p.id))
+              .map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
           </select>
 
           {rows.length === 0 ? (
@@ -235,7 +238,7 @@ export function DayDialog({
             </table>
           )}
 
-          {weekChanges(state, iso) > 0 && (
+          {date !== null && weekChanges(state, iso) > 0 && (
             <div className="sheet-foot">
               <button className="btn" onClick={() => change((d) => clearWeek(d, iso))}>
                 {t('Bu haftanın değişikliklerini sil')}
