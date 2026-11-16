@@ -42,7 +42,9 @@ simgeler dosyanın içine gömülüdür. Ağ isteyen bir özellik (göndermek, g
 denetlemek) ağ yokken kendi işini yapamaz ve bunu söyler, ama programı durdurmaz.
 Bugün program çalışırken ağa hiç çıkmıyor, ve bu `vite-plugin-singlefile`,
 `e2e/temel.spec.ts`, `e2e/site.spec.ts` ve `e2e/kapan.ts` ile mekanik olarak
-ölçülüyor. Ağ isteyen bir özellik girerse bu ölçüm ona göre daraltılır, kaldırılmaz.
+ölçülüyor. Tek istisna web adresindeki çerezsiz ziyaret sayımı (aşağıda "Ağ ve
+servisler"); o yalnız canlı kökende yüklenir, testler localhost'ta koştuğu için ölçüm
+onu görmez. Ağ isteyen bir özellik girerse bu ölçüm ona göre daraltılır, kaldırılmaz.
 
 ## Türkçe kaynak dil
 
@@ -146,4 +148,6 @@ değil ([DECISIONS.md](DECISIONS.md), 2026-10-08) ve bir özellik onları bozuyo
 reddedilmez. Ağa çıkan ya da bir servise bağlanan bir özellik (öğretmenlere e-posta,
 [TODO.md](TODO.md) B3.8) tasarımın ve KVKK'nın sorularıyla karar
 verilir: veri nereye gidiyor, kim saklıyor, bakımı kimde. İlke olan, açılışın ağa bağlı
-olmaması ("Çift tıkla çalışır", "Açılış ağa bağlı değil").
+olmaması ("Çift tıkla çalışır", "Açılış ağa bağlı değil"). Tek istisna, yalnız web
+adresinde: çerezsiz ziyaret sayımı (Cloudflare Web Analytics; programdan veri göndermez,
+yüklenmezse hiçbir şey değişmez; [DECISIONS.md](DECISIONS.md), 2026-11-16).
