@@ -161,7 +161,7 @@ jobs:
 
       # A desktop's graphics and text stack, which the AppImage takes from the
       # system on purpose (linuxdeploy's excludelist: libEGL, libGL, libgbm,
-      # fribidi, harfbuzz, fontconfig, X11; BUILD.md, "Linux"). Every desktop
+      # fribidi, harfbuzz, fontconfig, X11, libgpg-error; BUILD.md, "Linux"). Every desktop
       # with GTK has them; a headless runner or a bare container does not, so
       # GTK 3 and Mesa are installed here, for the smoke run only.
       - name: A virtual screen, a session bus and a desktop's libraries
@@ -177,7 +177,7 @@ jobs:
               libegl1 libgl1 libgles2 libgbm1 >/dev/null
           else
             dnf install -y -q xorg-x11-server-Xvfb dbus-daemon fontconfig dejavu-sans-fonts \
-              gtk3 mesa-libGL mesa-libEGL mesa-libgbm procps-ng >/dev/null
+              gtk3 mesa-libGL mesa-libEGL mesa-libgbm libgpg-error libgcrypt procps-ng >/dev/null
           fi
 
       - name: Does it start and stay up
