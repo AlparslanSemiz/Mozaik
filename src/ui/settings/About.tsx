@@ -269,7 +269,8 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
               }}
             />
           )}
-          {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
+          {d.ad === 'indiriliyor' &&
+            t('Yeni sürüm iniyor…') + (d.yuzde === undefined ? '' : ` %${d.yuzde}`)}
           {d.ad === 'hazir' && d.kurulum && (
             <T k="**Kurulum indi.** **Şimdi kur** deyince Mozaik kapanır, kurulum bir ilerleme çubuğuyla çalışır ve Mozaik kendiliğinden yeniden açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz. Masaüstündeki ya da görev çubuğundaki eski Mozaik simgesi de kurulan programı açar." />
           )}
