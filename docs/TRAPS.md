@@ -781,10 +781,10 @@ gelince ikisi baştan. `font-display: block` bunu gizler, çünkü o arada yazı
 React haftayı okurken bitiyor (352 ms). Ölçü `scripts/acilis-olc.mjs`: ızgaradan
 sonra uzun görev kalmıyor (`uzun` = `uzunIzgara`).
 
-### 221 · İlk karede yazılan custom property bir kare sonrakinden beş kat pahalı
+### 221 · İlk karede yazılan custom property ilk boyamadan sonrakinden beş kat pahalı
 `gridFit`'in iki tabanı (`--cell-min`, `--head-min`) ilk boyamadan önceki karede
 yazılınca, 4× CPU'da babanın haftasında bir stil geçişi (3348 öğe) ve tablo
-yerleşimi ~270 ms; aynı iki yazı ilk boyamadan bir kare sonra 35 ms (iki yönde
+yerleşimi ~270 ms; aynı iki yazı ilk boyamadan sonraki karede 35 ms (iki yönde
 ölçüldü, 2026-11-16; nedeni tarayıcının içinde, burada çözülmedi). Ayrıca
 `document.fonts`'a sormak sayfanın stilini ve yerleşimini günceller: tutturma
 anında sorulunca açılışın ilk yerleşimi oydu. Çare: ilk taban ilk boyamadan sonra

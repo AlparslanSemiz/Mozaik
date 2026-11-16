@@ -2240,8 +2240,8 @@ table.grid {
   table-layout: fixed;
 }
 
-/* Until gridFit.ts has measured the first floor, one frame after the first
-   paint: the table is laid out and keeps its room, it is only not drawn
+/* Until gridFit.ts has measured the first floor, in the frame after the
+   first paint (about two frames): the table is laid out and keeps its room, it is only not drawn
    without the widths it is about to get. */
 .grid-wrap[data-fitting] table.grid {
   visibility: hidden;

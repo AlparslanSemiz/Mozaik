@@ -36,13 +36,14 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
-### 2026-11-16 · Açılışta ızgara ilk boyamadan bir kare sonra görünür (`hiz/acilis`)
+### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
 
 - **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama
-  çizilmez (`data-fitting`), `gridFit` iki tabanını bir kare sonra yazar ve tabloyu açar. Kabuk
-  ve havuz önce, ızgara bir kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
+  çizilmez (`data-fitting`), `gridFit` iki tabanını ilk boyamadan sonraki karede yazar ve tabloyu açar (gizlilik ~2 kare). Kabuk
+  ve havuz önce, ızgara ~2 kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
   Son hâl (taban, sütunlar, tablo genişliği, çekmece boyu) iki derlemede aynı, 1920 ve 1366'da
-  ölçüldü. Gerekçe: aynı iki yazı ilk karede ~270 ms, bir kare sonra ~35 ms (4× CPU, tuzak 221).
+  ölçüldü. Her Grid bağlanışında böyle (açılıştan başka bir yeniden bağlanış da tabloyu ~2 kare
+  boş gösterir; önceden bir kare tabansız çiziyordu). Gerekçe: aynı iki yazı ilk karede ~270 ms, ilk boyamadan sonra ~35 ms (4× CPU, tuzak 221).
 - **Ayrıca.** İki taban arka arkaya okunup sonra yazılıyor (araya yazı girince tablo bir kez daha
   yerleşiyordu); Plex açılışta isteniyor (tuzak 220); ilk React çizimi `startTransition` içinde.
 - **Denendi, bırakıldı.** (1) `@property … inherits: false` ile `--cell-min`/`--head-min`: stil

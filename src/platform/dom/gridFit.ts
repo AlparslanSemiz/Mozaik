@@ -70,7 +70,7 @@ export function attachGridFit(wrap: HTMLElement): () => void {
   // THE FIRST FLOOR IS WRITTEN AFTER THE FIRST PAINT, with the table hidden
   // until then (`data-fitting`, styles.css). Written in the first frame, the
   // same two properties cost a style pass over the whole grid and a table
-  // layout of ~270 ms at 4x CPU on the father's week; one frame later, 35 ms
+  // layout of ~270 ms at 4x CPU on the father's week; in the frame after the first paint, 35 ms
   // (2026-11-16, measured both ways, pitfall 221). The table keeps its place
   // while hidden, so nothing around it moves, and it is never drawn without
   // its floor.
