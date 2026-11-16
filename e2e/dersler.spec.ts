@@ -12,23 +12,40 @@
 // opposite of what the old form did.
 
 import { expect, test } from './kapan';
-import { openLessons, openSetup, openWithSample, mainList, open } from './helpers';
+import { openLessons, openSetup, openWithSample, mainList, open, openPerson } from './helpers';
 
-test.describe('69. Dersler sekmesi', () => {
-  test('yedinci sekme, Müsaitlik ile Program arasında', async ({ page }) => {
+test.describe('69. Dersler', () => {
+  // Five tasks since K1 (2026-11-16); the lessons are in Öğretmenler and
+  // Sınıflar, each strip's second button, and not a tab of their own.
+  test('beş sekme, Dersler ikisinin şeridinde', async ({ page }) => {
     await open(page);
     const names = await page
       .locator('.tabstrip .tab')
       .evaluateAll((tabs) => tabs.map((t) => t.getAttribute('aria-label')));
     expect(names).toEqual([
-      'Okul',
-      'Müsaitlik',
-      'Dersler',
       'Program',
-      'Kontrol',
-      'Çıktı',
-      'Ayarlar',
+      'Öğretmenler',
+      'Sınıflar',
+      'Yazdır ve gönder',
+      'Okul bilgileri',
     ]);
+    for (const tab of ['Öğretmenler', 'Sınıflar']) {
+      await page.locator('.tabstrip').getByRole('button', { name: tab, exact: true }).click();
+      await expect(
+        page.locator('.ribbon').getByRole('button', { name: 'Dersler', exact: true }),
+      ).toBeVisible();
+    }
+  });
+
+  // The person page's "Ders gir" opens the lesson form on that person.
+  test('kişi sayfasının Ders gir düğmesi formu o kişide açıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    const sheet = await openPerson(page, '411');
+    await sheet.getByRole('button', { name: 'Ders gir', exact: true }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText('Dersler');
+    await expect(page.locator('.ribbon .ribbon-value')).toContainText('411');
   });
 
   // The shortening the reader asked for by name: "tek bir sınıf için ders
@@ -234,14 +251,14 @@ test.describe('69. Dersler sekmesi', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(before + 1);
   });
 
-  test('mod değişince açık olan varlık sıfırlanıyor', async ({ page }) => {
+  test('öbür sekmeye geçince açık olan varlık o listeden', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'class');
     await page.locator('.entity-list .entity', { hasText: '411' }).click();
     await expect(page.locator('.ribbon-value').first()).toContainText('411');
 
     // '411' is a class id; carried into the teacher list it would name nobody.
-    await page.getByRole('button', { name: 'Öğretmenden', exact: true }).click();
+    await openLessons(page, 'teacher');
     const named = await page.locator('.ribbon-value').first().innerText();
     expect(named).not.toContain('411');
     await expect(page.locator('.entity-list .entity[aria-current="true"]')).toHaveCount(1);
@@ -261,7 +278,7 @@ test.describe('69. Dersler sekmesi', () => {
     await expect(rail).toContainText('Ders yükü');
     const wide = (await rail.boundingBox())!.width;
 
-    await page.getByRole('button', { name: 'Sınıftan', exact: true }).click();
+    await page.locator('.ribbon').getByRole('button', { name: 'Dersler', exact: true }).click();
     await expect(page.locator('.entity-list')).toHaveCount(1);
     expect((await rail.boundingBox())!.width).toBeCloseTo(wide, 0);
   });

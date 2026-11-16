@@ -624,7 +624,7 @@ test.describe('29. Hata yolları', () => {
     // The answer is a button: "Güncellemeye bak" opens Ayarlar → Hakkında.
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Okul bilgileri',
     );
     // Hakkında is behind the strip's Daha fazla since 2026-11-16; the strip
     // reads the version there.

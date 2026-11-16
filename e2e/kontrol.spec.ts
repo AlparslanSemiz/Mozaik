@@ -1,4 +1,4 @@
-// The Kontrol tab, which had almost no coverage: the thing aSc does not do and
+// The problem list (the Kontrol tab until K3, 2026-11-16), which had almost no coverage: the thing aSc does not do and
 // that hurts most at the school is saying WHY a timetable cannot be built, and
 // until now only "does the page render" was checked.
 //
@@ -17,6 +17,7 @@ import {
   openWithSampleTheme,
   chooseScale,
   settledMotion,
+  openProblems,
 } from './helpers';
 
 /**
@@ -27,7 +28,8 @@ import {
  * under src/ where the e2e folder is not checked at all.
  */
 async function load(page: Page, world: WorldSpec) {
-  await loadWorld(page, makeWorld(world), 'Kontrol');
+  await loadWorld(page, makeWorld(world));
+  await openProblems(page);
 }
 
 /**
@@ -41,22 +43,24 @@ async function load(page: Page, world: WorldSpec) {
 async function showCapacity(page: Page, which: string) {
   const item =
     { Öğretmenler: 'Öğretmen yükleri', Sınıflar: 'Sınıf yükleri' }[which] ?? 'Derslik yükleri';
-  await page.locator('.ribbon .more-menu').click();
+  await page.getByRole('dialog').locator('.more-menu').click();
   await page.getByRole('menuitemradio', { name: item }).click();
 }
 
 test.describe('26. Kontrol — kapasite', () => {
   test('veri yokken ne yapılacağını söylüyor', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     // The hidden Program tab has an empty state too — see `onScreen`.
     await expect(onScreen(page, '.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
-    await expect(onScreen(page, '.empty-screen')).toContainText('Okul');
+    await expect(
+      onScreen(page, '.empty-screen').getByRole('button', { name: 'Öğretmen ekle' }),
+    ).toBeVisible();
   });
 
   test('her şey sığıyorsa net biçimde "Sorun görünmüyor" diyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await expect(page.locator('table.stat .badge.impossible')).toHaveCount(0);
   });
@@ -75,8 +79,8 @@ test.describe('26. Kontrol — kapasite', () => {
         lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
         placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
       }),
-      'Kontrol',
     );
+    await openProblems(page);
     // The week is fully laid out, so since 2026-11-16 the box says so rather
     // than "it can be laid out" — and still never "Dikkat".
     await expect(page.locator('.ok-box')).toContainText('Program tamam');
@@ -240,7 +244,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       '1 dersin 1 saati kapalı saatte kaldı',
     );
     // The strip's "N engel" reading left on 2026-11-16; Sorunlar counts it.
-    await expect(page.locator('.ribbon')).toContainText('Sorunlar (1)');
+    await expect(page.getByRole('dialog')).toContainText('Sorunlar (1)');
   });
 });
 
@@ -255,7 +259,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
 
     await page
-      .locator('.ribbon')
+      .getByRole('dialog')
       .getByRole('button', { name: /^İpuçları/ })
       .click();
     const panel = page.locator('.panel', { hasText: 'İpuçları' });
@@ -276,11 +280,12 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       unavailable: { 'oMC|0|0': 1, 'oMC|0|1': 1, 'oMC|0|2': 1, 'oMC|0|3': 1 },
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
     });
-    await loadWorld(page, world, 'Kontrol');
+    await loadWorld(page, world);
+    await openProblems(page);
 
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await page
-      .locator('.ribbon')
+      .getByRole('dialog')
       .getByRole('button', { name: /^İpuçları/ })
       .click();
     const panel = page.locator('.panel', { hasText: 'İpuçları' });
@@ -294,11 +299,12 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blockSize: 3 }],
     });
-    await loadWorld(page, world, 'Kontrol');
+    await loadWorld(page, world);
+    await openProblems(page);
 
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await page
-      .locator('.ribbon')
+      .getByRole('dialog')
       .getByRole('button', { name: /^İpuçları/ })
       .click();
     const panel = page.locator('.panel', { hasText: 'İpuçları' });
@@ -311,7 +317,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
     });
     await expect(
-      page.locator('.ribbon').getByRole('button', { name: /^İpuçları \(\d+\)$/ }),
+      page.getByRole('dialog').getByRole('button', { name: /^İpuçları \(\d+\)$/ }),
     ).toBeVisible();
   });
 });
@@ -339,12 +345,19 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
     'Derslik yükleri',
   ] as const;
 
+  // The list is a sheet over Program since K3 (2026-11-16): it scrolls in
+  // itself, so what must not happen is the page under it scrolling, or the
+  // sheet scrolling sideways.
   async function box(page: Page) {
     return page.evaluate(() => {
       const main = document.querySelector('.main') as HTMLElement;
+      const sheet = document.querySelector('.sheet.problem-list') as HTMLElement;
       return {
         vertical: main.scrollHeight - main.clientHeight,
-        horizontal: document.body.scrollWidth - document.body.clientWidth,
+        horizontal: Math.max(
+          document.body.scrollWidth - document.body.clientWidth,
+          sheet.scrollWidth - sheet.clientWidth,
+        ),
       };
     });
   }
@@ -355,18 +368,18 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
     ceiling: number,
   ): Promise<Array<{ view: string; vertical: number; horizontal: number }>> {
     const rows: Array<{ view: string; vertical: number; horizontal: number }> = [];
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     for (const view of VIEWS) {
       // 'Sorunlar' carries a live count in its name ("Sorunlar (3)"), the
       // other three do not — a prefix match covers both without risking a
       // collision with another button (pitfall 49): this locator is already
       // scoped to the Kontrol strip alone.
       if (view.endsWith('yükleri')) {
-        await page.locator('.ribbon .more-menu').click();
+        await page.getByRole('dialog').locator('.more-menu').click();
         await page.getByRole('menuitemradio', { name: view }).click();
       } else {
         await page
-          .locator('.ribbon')
+          .getByRole('dialog')
           .getByRole('button', { name: new RegExp('^' + view) })
           .click();
       }
@@ -483,21 +496,39 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     await expect(marked.locator('button.card')).toBeFocused();
   });
 
-  test("Müsaitlik'te aç kapatanın satırını açar", async ({ page }) => {
+  // The closed hours are on the person's page since K1 (2026-11-16).
+  test('Sayfasını aç kapatanın kişi sayfasını açar', async ({ page }) => {
     await load(page, {
       ...TWO,
       lessons: [{ id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 1 }],
       placements: { 's511|0|1': 'x2' },
       unavailable: { 'oAV|0|1': 1 },
     });
-    await page.locator('#kontrol-kapali').getByRole('button', { name: "Müsaitlik'te aç" }).click();
-    await expect(page.getByRole('button', { name: 'Müsaitlik', exact: true })).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-    await expect(page.locator('.main h2', { hasText: 'müsait olmayan saatler' })).toContainText(
-      'AV',
-    );
+    await page.locator('#kontrol-kapali').getByRole('button', { name: 'Sayfasını aç' }).click();
+    await expect(page.getByRole('dialog', { name: 'Programın durumu' })).toBeHidden();
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.locator('.sheet-mark')).toHaveText('AV');
+    await expect(sheet.getByRole('heading', { name: 'Gelemediği saatler' })).toBeVisible();
+  });
+
+  // K3: a lesson in the pool says why it is there, and the way out.
+  test('havuzdaki dersin Neden yerleşmedi?si listeyi o derste açar', async ({ page }) => {
+    const away: Record<string, 1> = {};
+    for (let s = 0; s < 4; s++) away[`oAV|0|${s}`] = 1;
+    await load(page, {
+      ...TWO,
+      lessons: [{ id: 'y2', classId: 's511', teacherId: 'oAV', weeklyHours: 1 }],
+      unavailable: away,
+    });
+    await page.keyboard.press('Escape');
+    await page.locator('.pool-card[data-lesson="y2"]').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Neden yerleşmedi?' }).click();
+    const list = page.getByRole('dialog', { name: 'Programın durumu' });
+    await expect(list.locator('.lesson-chip[data-lesson="y2"]')).toBeFocused();
+    await expect(list.locator('#kontrol-yerlesemeyen')).toContainText('AV 0 saat müsait');
+    await expect(
+      list.locator('#kontrol-yerlesemeyen').getByRole('button', { name: 'Sayfasını aç' }),
+    ).toBeVisible();
   });
 
   test('aynı sebepli yerleşemeyen dersler tek satır, ders adı havuzdaki kartı gösterir', async ({

@@ -16,6 +16,8 @@ import {
   mainList,
   loadWorld,
   placedHours,
+  chooseEntity,
+  openProblems,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -99,11 +101,13 @@ async function makeColourGap(page: Page) {
   await expect(page.locator('.cols aside')).toContainText('Renkler');
 }
 
-test.describe('15. Ayarlar sekmesi', () => {
-  test('kendi sekmesi var ve beş bölümü açılıyor', async ({ page }) => {
+test.describe('15. Okul bilgileri sekmesi', () => {
+  test('kendi sekmesi var ve ayar bölümleri açılıyor', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.tabstrip .tab')).toHaveCount(7);
-    await expect(page.getByRole('button', { name: 'Ayarlar' })).toBeVisible();
+    await expect(page.locator('.tabstrip .tab')).toHaveCount(5);
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
 
     for (const [section, heading] of [
       ['Zil ve günler', 'Zil ve günler'],
@@ -117,24 +121,25 @@ test.describe('15. Ayarlar sekmesi', () => {
     }
   });
 
-  // Four LISTS, and nothing else. What Okul holds is the things the school is
-  // made of; what Ayarlar holds is the settings touched once a year. Branşlar
-  // is on the first side of that line and spent a year on the second: the
-  // dropdown that reads it is one step away, so adding a subject used to mean
-  // leaving a half-typed teacher behind.
-  test('Okul DÖRT liste, ve ayarların hiçbiri orada değil', async ({ page }) => {
+  // K1 (2026-11-16): Okul bilgileri holds the school's two lists that are not
+  // people, counted, beside its settings; the people are tabs of their own.
+  test('Okul bilgileri iki listeyi sayısıyla tutuyor, kişiler kendi sekmesinde', async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
 
     const steps = await page.locator('.ribbon .step').allInnerTexts();
-    expect(steps).toHaveLength(4);
-    expect(steps.join(' ')).toContain('Derslikler');
-    expect(steps.join(' ')).toContain('Branşlar');
-    // A step is a LIST. These three are settings, and they stayed in Ayarlar.
-    expect(steps.join(' ')).not.toContain('Zil');
-    expect(steps.join(' ')).not.toContain('Kurallar');
-    expect(steps.join(' ')).not.toContain('Görünüm');
-    // ...and Dersler is a tab, not step five.
+    expect(steps).toHaveLength(2);
+    expect(steps.join(' ')).toMatch(/Derslikler\s*8/);
+    expect(steps.join(' ')).toMatch(/Branşlar\s*\d+/);
+    for (const section of ['Zil ve günler', 'Kurallar', 'Görünüm']) {
+      await expect(page.locator('.ribbon .btn', { hasText: section })).toHaveCount(1);
+    }
+    expect(steps.join(' ')).not.toContain('Öğretmenler');
     expect(steps.join(' ')).not.toContain('Dersler');
   });
 
@@ -269,12 +274,12 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
   test('sınıfın kapalı saatine ders bırakılamıyor ve sebebi yazıyor', async ({ page }) => {
     await openFixture(page);
 
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute('data-id', 's510');
+    // The class's closed hours are on its page (K1, 2026-11-16).
+    const sheet = await chooseEntity(page, 's510');
     // row = 1st day, column = 1st hour (the axis was turned in v0.7)
-    await page.locator('table.availability tbody tr').first().locator('td').first().click();
+    await sheet.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
@@ -291,10 +296,13 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
   test('derslik kapatılınca o dersliği kullanan sınıf da ders yapamıyor', async ({ page }) => {
     await openFixture(page);
 
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.getByRole('button', { name: 'Derslik', exact: true }).click();
-    await page.locator('table.availability tbody tr').first().locator('td').first().click();
+    // A room's closed hours are on its page, from the Derslikler list.
+    await openSetup(page, 'Derslikler');
+    await page.getByRole('button', { name: 'Ayrıntı · A', exact: true }).click();
+    const sheet = page.getByRole('dialog');
+    await sheet.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
@@ -345,10 +353,10 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.mouse.up();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
 
-    // What was allowed through is listed in Kontrol.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
+    // What was allowed through is listed in the problem list.
+    const list = await openProblems(page);
+    await expect(list.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
+    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
       'MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.',
     );
   });
@@ -368,7 +376,10 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     await name.fill('Semiz Kurs');
     await name.blur();
 
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page h2').first()).toContainText('Semiz Kurs');
     // ...and into the top bar, which is where you see which file you are in.
     await expect(page.locator('.app-title')).toHaveText('Semiz Kurs');
@@ -627,7 +638,7 @@ test.describe('33. Ayarlar — kurallar', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
       placements: { 's510|0|0': 'x1', 's510|0|2': 'x1' },
     });
-    await loadWorld(page, world, 'Ayarlar');
+    await loadWorld(page, world, 'Okul bilgileri');
     await openSettings(page, 'Kurallar');
     const rule = page.locator('table.list tr', { hasText: 'Öğretmenin dersleri arasında' });
     await rule.locator('input[type=number]').fill('0');
@@ -636,13 +647,10 @@ test.describe('33. Ayarlar — kurallar', () => {
 
     // A gap rule can never block a drop (v14, same reason as minPerDay) — the
     // grid the world arrived with is untouched, no drag needed.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await page
-      .locator('.ribbon')
-      .getByRole('button', { name: /^Sorunlar/ })
-      .click();
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('MÇ');
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('boşlukta');
+    const list = await openProblems(page);
+    await list.getByRole('button', { name: /^Sorunlar/ }).click();
+    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('MÇ');
+    await expect(list.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('boşlukta');
   });
 
   test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {

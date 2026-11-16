@@ -139,7 +139,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     // where localStorage, i.e. every plan, lives (`useHttpsScheme: false`).
     expect(sayfa.adres).toMatch(WINDOWS ? /^http:\/\/tauri\.localhost\// : /^tauri:\/\/localhost/);
     expect(sayfa.kopru).toBe(true);
-    for (const ad of ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar']) {
+    for (const ad of ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri']) {
       expect(sayfa.sekmeler).toContain(ad);
     }
   });

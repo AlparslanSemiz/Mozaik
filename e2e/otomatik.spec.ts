@@ -9,7 +9,6 @@ import { type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { expect, test } from './kapan';
 import {
-  chooseEntity,
   loadWorld,
   openMore,
   openSettings,
@@ -17,6 +16,9 @@ import {
   placedHours,
   savedState,
   settledText,
+  openProblems,
+  openPerson,
+  openSetup,
 } from './helpers';
 import type { State } from '../src/leaf/model/types';
 import { SMALL_WORLDS } from '../src/pure/worlds';
@@ -130,11 +132,10 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
 
     // Close one teacher's whole week: their lessons have nowhere to go.
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const first = page.locator('.entity').first();
-    const id = (await first.getAttribute('data-id'))!;
-    await chooseEntity(page, id);
-    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    await openSetup(page, 'Öğretmenler');
+    const sheet = await openPerson(page, 0);
+    await sheet.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await autoFill(page);
@@ -143,7 +144,11 @@ test.describe('22. Otomatik dizme', () => {
     await expect(bar).toContainText('yerleşemedi');
     // The shortfall itself (2026-11-16), not one closed hour of it.
     await expect(bar).toContainText(/\d+ saat ders, 0 müsait saat; \d+ saat açılmalı/);
-    await expect(bar).toContainText('Ayrıntı: Kontrol sekmesi.');
+    // ...and the way to the list that says the rest (K3, 2026-11-16).
+    await bar.getByRole('button', { name: 'Ayrıntı', exact: true }).click();
+    await expect(
+      page.getByRole('dialog', { name: 'Programın durumu' }).locator('#kontrol-yerlesemeyen'),
+    ).toBeVisible();
   });
 
   test('Engelle seviyesindeki kuralı çiğnemiyor', async ({ page }) => {
@@ -169,7 +174,7 @@ test.describe('22. Otomatik dizme', () => {
     expect(placed).toBeGreaterThan(400);
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     await expect(page.locator('.badge', { hasText: /^Kesin$/ })).toHaveCount(0);
   });
 
@@ -190,7 +195,10 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
     await autoFill(page);
 
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     expect(await page.locator('.print-page .p-top').count()).toBeGreaterThan(0);
   });
@@ -199,10 +207,10 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     // If the main thread were blocked this would time out rather than answer.
-    await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
+    await expect(page.locator('.topbar .health')).toBeEnabled();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+    await openProblems(page);
+    await expect(page.getByRole('dialog').getByRole('button', { name: /^Sorunlar/ })).toBeVisible();
   });
 
   // DK4: the bar kept saying what the last run or the last suggestion did

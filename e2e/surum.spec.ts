@@ -154,7 +154,9 @@ test.describe('79. Yenilikler', () => {
     // ...and the mark is written, not merely the in-memory state: it survives
     // the reload the way the sample-data hint does (theme.ts's INTRO_KEY).
     await reopen(page);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     await expect(dot).toBeHidden();
   });
 });

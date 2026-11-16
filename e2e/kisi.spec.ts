@@ -46,7 +46,7 @@ function world(): State {
 }
 
 async function openTeachers(page: import('@playwright/test').Page) {
-  await loadWorld(page, world(), 'Okul');
+  await loadWorld(page, world(), 'Öğretmenler');
   await openSetup(page, 'Öğretmenler');
 }
 
@@ -213,7 +213,7 @@ test.describe('Kişi sayfası', () => {
   test('sınıfın sayfası: kapalı saatler, aldığı dersler tam adla, Yazdır; Gönder yok', async ({
     page,
   }) => {
-    await loadWorld(page, world(), 'Okul');
+    await loadWorld(page, world(), 'Öğretmenler');
     await openSetup(page, 'Sınıflar');
     await page.getByRole('button', { name: '510', exact: true }).click();
     const sheet = page.getByRole('dialog', { name: '510 sınıfı' });

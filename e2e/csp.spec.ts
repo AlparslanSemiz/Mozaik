@@ -77,7 +77,9 @@ async function politikaAltinda(page: Page): Promise<string[]> {
     }),
   );
   await page.goto(KOK);
-  await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+  await expect(
+    page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+  ).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   return ihlaller;
 }
@@ -107,7 +109,10 @@ test.describe('exe’nin CSP’si', () => {
     await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     await page.emulateMedia({ media: 'print' });
     expect((await page.pdf()).byteLength).toBeGreaterThan(10_000);

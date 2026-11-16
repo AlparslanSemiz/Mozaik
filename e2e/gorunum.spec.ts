@@ -24,9 +24,9 @@ import {
   openSetup,
   openWithSample,
   reopen,
-  revealRibbon,
   savedText,
   settledText,
+  openPerson,
 } from './helpers';
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
@@ -380,7 +380,10 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   }) => {
     test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
@@ -419,7 +422,10 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(at100.pages).toBe(3);
 
     await chooseScale(page, 125);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-page')).toHaveCount(3);
     const at125 = await paperSizes();
 
@@ -933,125 +939,19 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
   });
 });
 
-/** Müsaitlik's Daha fazla holds it since 2026-11-16 (Sadeleşme), as a ticked item. */
-async function hoursOn(page: import('@playwright/test').Page): Promise<boolean> {
-  await page.locator('.ribbon .more-menu').click();
-  const on = await page
-    .getByRole('menuitemcheckbox', { name: 'Saatler' })
-    .getAttribute('aria-checked');
-  await page.keyboard.press('Escape');
-  return on === 'true';
-}
-async function toggleHours(page: import('@playwright/test').Page): Promise<void> {
-  await page.locator('.ribbon .more-menu').click();
-  await page.getByRole('menuitemcheckbox', { name: 'Saatler' }).click();
-  await page.keyboard.press('Escape');
-}
-
-test.describe('50. Müsaitlikte saat gösterimi', () => {
-  // "Ayarlarda müsaitlikteki programda derslerin altında saatleri olsun olmasın
-  // diye ayar olsun ve default olarak kapalı olsun." — the reader's own words,
-  // including the default. The default is the half worth testing: an option
-  // that ships turned on is not the option that was asked for.
-  test('varsayılan KAPALI, açılınca gerçek saat yazıyor', async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-
-    const grid = page.locator('table.availability:not(.heat)');
-    await expect(grid).toBeVisible();
-    const clock = grid.locator('thead .hour-clock').first();
-    await expect(clock).toBeHidden();
-    const before = (await grid.boundingBox())!;
-
-    // The switch is in Müsaitlik's OWN strip now, not three screens away in
-    // Ayarlar → Görünüm: what it changes is on this table, and it used to be
-    // reached by leaving the table to find it.
-    await revealRibbon(page);
-    await toggleHours(page);
-    await expect(clock).toBeVisible();
-    await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
-
-    // ...and it costs the table NOTHING, which is the opposite of what I first
-    // claimed and the reason this assertion exists rather than a width one.
-    // `table-layout: fixed` at `width: 100%` makes the columns equal whatever
-    // is in them, and the 2.125rem heading already holds two lines of --fs-xs.
-    // Measured: 1341.7 x 354.2 in both states, to the pixel. So this is a
-    // choice about NOISE, not about room, and the setting says so.
-    const after = (await grid.boundingBox())!;
-    expect(after.width).toBeCloseTo(before.width, 0);
-    expect(after.height).toBeCloseTo(before.height, 0);
-  });
-
-  // "Saat açma kapama çalışmıyor müsaitlikte."
-  //
-  // And it did work — at the DEFAULT density, which is the only one the test
-  // above ever ran at. `:root[data-density='sigdir'] .hour-clock` was written
-  // for the grid (2461 -> 1728px, pitfall 37) and left unscoped, so at Sığdır
-  // it also took this heading: the button flipped `aria-pressed`, wrote
-  // `data-avail-clock='acik'`, and `display: none` outranked the `visibility`
-  // this screen switches. Nothing on screen moved and nothing said why.
-  //
-  // Measured before the fix, all three densities, clock ON:
-  //   rahat   block / visible    table 1514.8 x 332
-  //   sigdir  NONE  / visible    table 1514.8 x 329.9
-  //   ferah   block / visible    table 1514.8 x 332
-  //
-  // The height is the second half: `visibility: hidden` keeps the second line
-  // box so the two states match BY CONSTRUCTION (pitfall 102), and the
-  // `display: none` arriving from the grid's rule took 2.1px of that back.
-  // Both are asserted, and at the density the fault lived at.
-  test('Sığdır yoğunluğunda da açılıyor, ve tablo boyu değişmiyor', async ({ page }) => {
+test.describe('50. Gelemediği saatlerde saat gösterimi', () => {
+  // The Müsaitlik tab and its "Saatler" switch went with K1 (2026-11-16): the
+  // grid lives on the person's page, which always shows the bell, because
+  // "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock times. The stored
+  // switch (`ders-programi-musaitlik-saat`) no longer changes anything.
+  test('kişi sayfasının ızgarası saati hep gösteriyor, Sığdır’da da', async ({ page }) => {
     await openWithSample(page);
     await chooseDensity(page, 'Sığdır');
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-
-    const grid = page.locator('table.availability:not(.heat)');
-    await expect(grid).toBeVisible();
-    const clock = grid.locator('thead .hour-clock').first();
-    await expect(clock).toBeHidden();
-    const before = (await grid.boundingBox())!;
-
-    await revealRibbon(page);
-    await toggleHours(page);
+    await openSetup(page, 'Öğretmenler');
+    const sheet = await openPerson(page, 0);
+    const clock = sheet.locator('table.availability thead .hour-clock').first();
     await expect(clock).toBeVisible();
     await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
-
-    const after = (await grid.boundingBox())!;
-    expect(after.height).toBeCloseTo(before.height, 0);
-
-    // ...and the grid's own clock is STILL gone at this density: the scope was
-    // narrowed, not the rule dropped. Measuring it here is what stops the fix
-    // from being "delete the Sığdır rule", which would give the week back the
-    // 733px it was written to reclaim.
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid')).toBeVisible();
-    expect(
-      await page.evaluate(() => {
-        const el = document.querySelector('table.grid thead .hour-clock');
-        return el === null ? 'YOK' : getComputedStyle(el).display;
-      }),
-    ).toBe('none');
-  });
-
-  test('tercih yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await revealRibbon(page);
-    // One button with two states rather than two labels: `aria-pressed` is
-    // what a toggle says, and a label that renames itself cannot be found by
-    // the name it had a moment ago.
-    expect(await hoursOn(page)).toBe(false);
-    await toggleHours(page);
-    expect(await hoursOn(page)).toBe(true);
-
-    await reopen(page);
-    await expect(page.locator('html')).toHaveAttribute('data-avail-clock', 'acik');
-
-    const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
-    expect(saved!.includes('musaitlik-saat')).toBe(false);
-    expect(await page.evaluate(() => localStorage.getItem('ders-programi-musaitlik-saat'))).toBe(
-      'acik',
-    );
   });
 
   test('Ayarlar → Hakkında bu anahtarı da sayıyor', async ({ page }) => {
@@ -1168,8 +1068,9 @@ test.describe('81. Yoğunluk listelerde de', () => {
     expect(sigdir.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(rahat.height);
     expect(rahat.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(ferah.height);
     // ...and the point of it: more of the list at once. Comfortably more, not
-    // one row more — 10 to 19 when this was written.
-    expect(sigdir.visible).toBeGreaterThanOrEqual(rahat.visible + 5);
+    // one row more — 10 to 19 when this was written. Or the whole list: since
+    // K1 (2026-11-16) no Başlarken stands above it, and 25 is every teacher.
+    expect(sigdir.visible).toBeGreaterThanOrEqual(Math.min(25, rahat.visible + 5));
 
     // The floor that must survive all of it. What comes out of a row is AIR.
     for (const [name, m] of [

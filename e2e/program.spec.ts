@@ -21,6 +21,7 @@ import {
   startDrag,
   tokens,
   visibleCells,
+  openLessons,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -736,7 +737,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // ...and the Dersler tab agrees, which is the half that says it was written
     // to the program and not to the sheet.
     await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: 'Dersler', exact: true }).click();
+    await openLessons(page, 'all');
     await expect(page.locator('table.list')).toBeVisible();
   });
 
@@ -2485,7 +2486,10 @@ test.describe('92. Program sekmesi gizlenince sökülmüyor', () => {
     });
     expect(remembered, 'ızgara bulunamadı').toBe(true);
 
-    await page.getByRole('button', { name: 'Ayarlar' }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     // Hidden, not gone: the retained tree is still in the document (pitfall 104).
     await expect(onScreen(page, 'table.grid')).toHaveCount(0);
     await page.getByRole('button', { name: 'Program', exact: true }).click();

@@ -10,6 +10,8 @@ import {
   answerDialog,
   open,
   onScreen,
+  openLessons,
+  openProblems,
   openSetup,
   openSettings,
   openWithSample,
@@ -17,9 +19,12 @@ import {
 } from './helpers';
 
 test.describe('35. Boş ekranlar yönlendiriyor', () => {
-  test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
+  test('veri yokken Okul bilgileri sekmesiyle açılıyor', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Okul');
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Okul bilgileri',
+    );
     await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('Okulu tanıt');
   });
 
@@ -62,6 +67,9 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await open(page);
       await expect(page.locator('.intro-line')).toBeVisible();
 
+      // The offer stands over Okul bilgileri's Derslikler too (K1).
+      await openSetup(page, 'Derslikler');
+      await expect(page.locator('.intro-line')).toBeVisible();
       await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
       await page.getByRole('button', { name: 'Ekle', exact: true }).first().click();
       await expect(page.locator('.intro-line')).toHaveCount(0);
@@ -109,7 +117,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await list.getByRole('button', { name: 'Okul adını ve zili gir' }).click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Okul bilgileri',
     );
     await expect(
       page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
@@ -118,12 +126,15 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
     // The school task is not done until its lists are: its button goes on to
     // the first empty one.
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await expect(list.locator('li[data-step="school"]')).not.toHaveClass(/done/);
     await expect(list).toContainText('0 / 5 adım');
 
     await list.getByRole('button', { name: 'Derslik ekle' }).click();
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Derslikler');
+    await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText('Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(list.getByRole('button', { name: 'Branş ekle' })).toBeVisible();
@@ -172,22 +183,29 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await open(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await onScreen(page, '.empty-screen').getByRole('button', { name: 'Öğretmen ekle' }).click();
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Okul');
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Öğretmenler');
-
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await onScreen(page, '.empty-screen').getByRole('button', { name: 'Sınıf ekle' }).click();
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
-
-    // And the school's name and bell, which no empty screen used to mention.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await onScreen(page, '.empty-screen')
-      .getByRole('button', { name: 'Okul adını ve zili gir' })
-      .click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Öğretmenler',
+    );
+    await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText('Liste');
+
+    // The lesson form's picker says what is missing on the other side.
+    await openLessons(page, 'class');
+    await page.locator('.cols aside').getByRole('button', { name: 'Sınıf ekle' }).click();
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Sınıflar',
+    );
+    await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText('Liste');
+
+    // And the school's name and bell, which no empty screen used to mention:
+    // the problem list (the Kontrol tab until K3) says it too.
+    const problems = await openProblems(page);
+    await problems.getByRole('button', { name: 'Okul adını ve zili gir' }).click();
+    await expect(problems).toBeHidden();
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Okul bilgileri',
     );
   });
 
@@ -196,11 +214,8 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     const screen = page.locator('.empty-screen');
     await expect(screen).toContainText('Henüz dizilecek ders yok');
-    await expect(screen).toContainText('Okul');
-    await expect(screen).toContainText('Müsaitlik');
-    // Lessons are entered in Dersler, not Okul. All three empty screens named
-    // only Okul until 2026-09-25.
-    await expect(screen).toContainText('Dersler sekmesinde');
+    // The tabs it names are the five of K1 (2026-11-16).
+    await expect(screen).toContainText('Öğretmenler ve Sınıflar sekmelerinde');
     // Not clipped: the empty screen must never live inside the grid's
     // overflow:hidden shell.
     await expect(page.locator('main.main.no-overflow')).toHaveCount(0);
@@ -208,42 +223,34 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
   test('Yazdır: basılacak bir şey olmadığını söylüyor', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     // `onScreen`, not a bare locator: the Program tab is mounted-but-hidden and
     // carries an empty state of its own ("Henüz dizilecek ders yok").
     await expect(onScreen(page, '.empty-screen')).toBeVisible();
-    await expect(onScreen(page, '.empty-screen')).toContainText('Önce Dersler sekmesinden');
+    await expect(onScreen(page, '.empty-screen')).toContainText('Önce dersleri girip');
   });
 
-  test('Kontrol: dersin hangi sekmede girildiğini söylüyor', async ({ page }) => {
+  test('sorun listesi: boş planda ilk eksik adıma götürüyor', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(onScreen(page, '.empty-screen')).toContainText('dersleri Dersler');
+    const problems = await openProblems(page);
+    await expect(problems.locator('.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
+    await expect(problems.getByRole('button', { name: 'Öğretmen ekle' })).toBeVisible();
   });
 
-  test('Müsaitlik: üç türün üçü de ne eksik olduğunu söylüyor', async ({ page }) => {
+  test('liste sayaçları boşken soluk', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await expect(onScreen(page, '.empty-screen')).toContainText('öğretmen ekleyin');
-
-    await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await expect(onScreen(page, '.empty-screen')).toContainText('sınıf ekleyin');
-
-    await page.getByRole('button', { name: 'Derslik', exact: true }).click();
-    await expect(onScreen(page, '.empty-screen')).toContainText('derslik ekleyin');
-  });
-
-  test('Okul adım sayaçları boşken soluk', async ({ page }) => {
-    await open(page);
-    // Four steps, and on a brand-new project every one of them is empty —
+    // Okul bilgileri's two lists, and on a brand-new project both are empty —
     // Branşlar included, since a new project no longer arrives with the 21
     // built-in subjects already on its list.
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(4);
+    await expect(page.locator('.ribbon .step[data-empty="true"]')).toHaveCount(2);
 
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(3);
+    await expect(page.locator('.ribbon .step[data-empty="true"]')).toHaveCount(1);
   });
 
   test('boş projede bile Ayarlar açılıyor ve dolu', async ({ page }) => {
@@ -255,7 +262,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 });
 
 test.describe('36. Klavye', () => {
-  test('Tab ile yedi sekmeye de ulaşılıyor', async ({ page }) => {
+  test('Tab ile beş sekmeye de ulaşılıyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
     // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
@@ -267,20 +274,18 @@ test.describe('36. Klavye', () => {
 
     // Then the sections, in the order they are drawn.
     const names: string[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
       names.push(
         await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? ''),
       );
       await page.keyboard.press('Tab');
     }
     expect(names).toEqual([
-      'Okul',
-      'Müsaitlik',
-      'Dersler',
       'Program',
-      'Kontrol',
-      'Çıktı',
-      'Ayarlar',
+      'Öğretmenler',
+      'Sınıflar',
+      'Yazdır ve gönder',
+      'Okul bilgileri',
     ]);
   });
 
@@ -290,13 +295,12 @@ test.describe('36. Klavye', () => {
     // The first stop is "İçeriğe geç" (KS27), the way past the top bar.
     await expect(page.locator(':focus')).toHaveText('İçeriğe geç');
     await page.keyboard.press('Tab');
-    // Dosya ▾ first (2026-11-16), then four stops in: Okul, Müsaitlik,
-    // Dersler, Program.
-    for (let i = 0; i < 4; i++) await page.keyboard.press('Tab');
+    // Dosya ▾ first (2026-11-16), then two stops in: Program, Öğretmenler.
+    for (let i = 0; i < 2; i++) await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Program',
+      'Öğretmenler',
     );
   });
 
@@ -316,10 +320,10 @@ test.describe('36. Klavye', () => {
   test('adım şeridinde Enter çalışıyor', async ({ page }) => {
     await open(page);
     await openSetup(page, 'Derslikler');
-    await page.locator('.step', { hasText: 'Sınıflar' }).focus();
+    await page.locator('.step', { hasText: 'Branşlar' }).focus();
     await page.keyboard.press('Enter');
     // The steps are `.btn`s in the tool strip now, so "you are here" is the
     // button state, not a navigation link's `aria-current`.
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Branşlar');
   });
 });

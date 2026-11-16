@@ -8,7 +8,7 @@
 // on a full grid, one per card and one per pin.
 
 import { expect, test } from './kapan';
-import { dragAndDrop, openWithSample } from './helpers';
+import { dragAndDrop, openWithSample, openPerson, openSetup } from './helpers';
 
 const grid = 'table.grid';
 
@@ -169,14 +169,16 @@ test.describe('95. Klavyeyle ızgara', () => {
 test.describe('96. Klavyeyle müsaitlik', () => {
   test('oklar, Space ve başlık düğmeleri', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
-    const sheet = page.locator('table.availability:not(.heat)');
+    // The grid is on the person's page since K1 (2026-11-16).
+    await openSetup(page, 'Öğretmenler');
+    const page2 = await openPerson(page, 0);
+    await page2.getByRole('button', { name: 'Bütün haftayı aç' }).click();
+    const sheet = page2.locator('table.availability');
     const closed = sheet.locator('td.closed');
     await expect(closed).toHaveCount(0);
 
-    // One Tab stop for the sheet: the box hands focus to the first hour.
-    await page.locator('.scroll-x:has(table.availability:not(.heat))').focus();
+    // One Tab stop for the grid: the box hands focus to the first hour.
+    await page2.locator('.scroll-x:has(table.availability)').focus();
     const first = sheet.locator('tbody td button').first();
     await expect(first).toBeFocused();
     await expect(first).toHaveAttribute('aria-pressed', 'false');

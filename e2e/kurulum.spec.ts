@@ -201,7 +201,10 @@ test.describe('12. Branş kısaltmaları', () => {
     await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
 
     // ...and the printed page uses the same short form
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await expect(page.locator('.print-area')).toContainText('Zzz');
   });
 
@@ -626,17 +629,12 @@ test.describe('31. Kurulum — sağ sütun', () => {
     // "İmkânsız". The last one on purpose — closing the first would put the
     // problem at the top whether anything sorted or not, and a test that passes
     // with the sort removed is measuring nothing (pitfall 23).
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.locator('.entity').last().click();
-    const label = (
-      await page.locator('.entity[aria-current="true"] .entity-name').innerText()
-    ).trim();
-    // "CA · Cem Aslan (Mat)" on the availability row; the summary carries the
-    // plain name. Split rather than strip — no regex to get subtly wrong.
-    const who = label.split(' · ')[1]!.split(' (')[0]!;
-    await page.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
-
+    // On the person's page since K1 (2026-11-16): the list's last name.
     await openSetup(page, 'Öğretmenler');
+    const who = (await page.locator('table.list .person-open').last().innerText()).trim();
+    const sheet = await openPerson(page, who);
+    await sheet.getByRole('button', { name: 'Bütün haftayı kapat', exact: true }).click();
+    await page.keyboard.press('Escape');
     const first = page.locator('.cols > aside table.stat tbody tr').first();
     await expect(first, 'sorunlu satır listenin sonunda kalmış').toContainText(who);
     await expect(first.locator('.badge')).toHaveText('İmkânsız');
@@ -1002,8 +1000,11 @@ test.describe('63. Öğretmende cinsiyet', () => {
 
   test('cinsiyet KÂĞIDA çıkmıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
+    await page.locator('.ribbon').getByRole('button', { name: 'Öğretmenler', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     const paper = await page.locator('.print-area').innerText();
     expect(paper).not.toMatch(/Kadın|Erkek|Belirtilmemiş/);

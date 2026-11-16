@@ -18,15 +18,15 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
-import { chooseScale, open, openSetup, openWithSample } from './helpers';
+import { chooseScale, open, openSetup, openWithSample, openLessons } from './helpers';
 
-const TABS = ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
+const TABS = ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri'] as const;
 
 test.describe('23. Sekmeler', () => {
   test('seçili sekme belli, tıklayınca değişiyor', async ({ page }) => {
     await openWithSample(page);
     for (const name of TABS) {
-      await page.getByRole('button', { name, exact: true }).click();
+      await page.locator('.tabstrip').getByRole('button', { name, exact: true }).click();
       await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', name);
       await expect(page.locator('.tab[aria-current="true"]')).toHaveCount(1);
     }
@@ -52,27 +52,30 @@ test.describe('23. Sekmeler', () => {
 
     // The accessible name survives, so a screen reader — and a test — can still
     // find a destination by what it is called.
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await page.getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Kontrol',
+      'Yazdır ve gönder',
     );
   });
 
-  test('yedi simge birbirine benzemiyor', async ({ page }) => {
+  test('beş simge birbirine benzemiyor', async ({ page }) => {
     await open(page);
     const paths = await page
       .locator('.tabstrip .tab svg')
       .evaluateAll((nodes) => nodes.map((n) => n.innerHTML.replace(/\s+/g, '')));
-    expect(paths).toHaveLength(7);
-    expect(new Set(paths).size).toBe(7);
+    expect(paths).toHaveLength(5);
+    expect(new Set(paths).size).toBe(5);
   });
 });
 
 test.describe('25. Kabuk kâğıda basılmıyor', () => {
   test('üst çubuk ve şerit basılmıyor, iki sütun tek sütuna iniyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await page.emulateMedia({ media: 'print' });
 
     await expect(page.locator('header.topbar')).toBeHidden();
@@ -270,7 +273,10 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
 
   test('Yazdır: yan sütun ekranda kalıyor, kâğıtlar akıp gidiyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await page.locator('.print-page').first().waitFor();
 
     const m = await boxes(page);
@@ -328,8 +334,9 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
   }
 
   const SCROLLERS = [
-    { where: 'Okul → Öğretmenler', box: '.stat-scroll' },
-    { where: 'Müsaitlik', box: '.entity-list' },
+    { where: 'Öğretmenler', box: '.stat-scroll' },
+    // The lesson form's picker; Müsaitlik's entity list went with K1.
+    { where: 'Sınıflar → Dersler', box: '.entity-list' },
   ] as const;
 
   test('uzun özet LİSTESİNİN içinde kayıyor, kutunun değil', async ({ page }) => {
@@ -337,7 +344,7 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
     await openWithSample(page);
 
     for (const { where, box } of SCROLLERS) {
-      if (where === 'Müsaitlik') await page.getByRole('button', { name: 'Müsaitlik' }).click();
+      if (where === 'Sınıflar → Dersler') await openLessons(page, 'class');
       else await openSetup(page, 'Öğretmenler');
       await settled(page);
 
