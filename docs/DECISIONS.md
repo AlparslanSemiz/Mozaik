@@ -40,6 +40,17 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 Alp tüm sitelerimizde ziyaret ölçümü istedi ("mozaike de kur"). Neden: uygulamayı bizden başka açan var mı, bilinmiyordu (GitHub'da dış iz yok, Pages ziyaret saymıyor). Ne: `vite.site.config.ts` içindeki satır içi betik, yalnız `adres.json`'daki yeni kökende Cloudflare'in çerezsiz beacon'ını ekler. Gönderilen: sayfa adresi, gelinen sayfa, tarayıcı, ülke ve yüklenme süreleri (Web Vitals); programdan hiçbir şey. Neden böyle: `dist/index.html` (çift tıklanan) hiç almaz, site yine tek dosya kalır (`site.yml`'in `<script src=` denetimi), ağ yoksa ya da engellenirse beacon yüklenmez ve hiçbir şey değişmez, açılış ona bağlı değil. Servis çalışanı yalnız kendi kökenini işlediği için beacon önbelleğe girmez. Denenmeyen: `<script src>` ile eklemek (tek dosya denetimini gevşetirdi), çift tıklanan dosyaya koymak (orada ağ isteği hiç yok, `site.spec.ts`).
 
+### 2026-11-16 · Eyotek kalktı
+
+**Ne.** Eyotek'e gönderme ve Eyotek turu yapılmayacak: baba artık Eyotek kullanmıyor (Alp).
+Öğretmene program yalnız Mozaik'ten gider: öğretmen PDF'i ve Öğretmene gönder (PDF,
+WhatsApp, e-posta). Soru çözüm saatleri planında (S5) da Eyotek yok. Bu, 2026-10-09'un
+"Turtek'e sorulmayacak; B3.8'de Eyotek e-postadan önce" kararının yerine geçer.
+`scripts/roboders/`'in `--hedef eyotek` ayarı kullanılmıyor; Roboders korumasının içinde
+olduğu için şimdi sökülmedi, koruma bir dahaki sefere elden geçerken çıkarılır.
+
+**Gerekçe.** Kullanıcının bilgisi.
+
 ### 2026-11-16 · Izgaranın kapalı saati ve iğnesi çizimle, metin ve SVG değil (`hiz/acilis-2`)
 
 - **Ne değişti.** Kapalı saatin "×"'i hücrenin arka planında iki çizgi; kartın iğnesi düğmenin
@@ -993,17 +1004,6 @@ gönderme, zebra) o denemeden geldi. [ROADMAP.md](ROADMAP.md) v0'ı bitti sayıy
 §8c'deki çıkma şartı maddesi kapandı.
 
 **Gerekçe.** Kullanıcının bilgisi.
-
-### 2026-10-09 · Turtek'e sorulmayacak; B3.8'de Eyotek e-postadan önce
-
-**Ne.** Eyotek'e dışarıdan ders programı yüklemenin yolu Turtek'e sorulmayacak:
-"kendimiz çözeriz" (kullanıcının kararı). Yol Eyotek'in kendi arayüzünde aranır
-(Eyotek turu, salt okunur), bulunamazsa babanın hesabıyla otomasyon karar bekleyen
-bir seçenek olarak kalır ([TODO.md](TODO.md) B3.8). Öğretmenler programa genelde
-Eyotek'ten baktığı için B3.8'de Eyotek'e gönderme e-postadan önce gelir.
-
-**Gerekçe.** Kullanıcının kararı; öncelik babanın cevabından (öğretmenler Eyotek'e
-bakıyor).
 
 ### 2026-10-08 · Refactor turu: davranış değişmez, sıra ve park edilenler
 
