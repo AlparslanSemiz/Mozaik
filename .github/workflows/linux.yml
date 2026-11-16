@@ -65,7 +65,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
-            libayatana-appindicator3-dev libssl-dev patchelf file binutils >/dev/null
+            libayatana-appindicator3-dev libssl-dev patchelf file binutils \
+            desktop-file-utils libfuse2 >/dev/null
 
       - run: npm ci --ignore-scripts
       - run: npm run build
@@ -79,7 +80,14 @@ jobs:
           MOZAIK_ORTOOLS="$PWD/src-tauri/ortools/libortools.so.9" \
             cargo test --manifest-path src-tauri/Cargo.toml
 
-      - run: npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
+      - name: Build the AppImage
+        # linuxdeploy kendisi bir AppImage: runner'da FUSE'a güvenmeden açılsın.
+        # Strip yok: program zaten `strip = true` ile derleniyor, ve linuxdeploy'un
+        # eski `strip`'i yeni ELF bölümlerinde (OR-Tools, sistem kütüphaneleri) düşüyor.
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+          NO_STRIP: 'true'
+        run: npx --yes @tauri-apps/cli@2.12.4 build --verbose --config src-tauri/tauri.ortools.json
 
       - name: Is the AppImage whole
         run: |

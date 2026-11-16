@@ -48,6 +48,7 @@ struct Cpsat {
 
 /// The library's file name on each platform. All three are delivered (Linux as
 /// an AppImage from 2026-11-16).
+#[cfg_attr(target_os = "linux", allow(dead_code))] // Linux: `linux_yolu`
 const AD: &str = if cfg!(windows) {
     "ortools.dll"
 } else if cfg!(target_os = "macos") {
@@ -201,6 +202,7 @@ unsafe fn ac(yol: &Path) -> Result<libloading::Library, libloading::Error> {
 /// The library's path, given the folder the program runs from. The Mac's
 /// dylibs find one another through their own `LC_RPATH @loader_path`, so the
 /// first one only has to be opened by its full path.
+#[cfg_attr(target_os = "linux", allow(dead_code))] // Linux: `linux_yolu`
 fn kutuphane_yeri(program_klasoru: &std::path::Path) -> PathBuf {
     if cfg!(target_os = "macos") {
         program_klasoru.join("../Frameworks").join(AD)
