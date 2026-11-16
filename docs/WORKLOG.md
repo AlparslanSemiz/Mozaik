@@ -25,6 +25,9 @@ kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). Aşama 3A (K6 tek ızgar
 sabitleme ve geçici görünüm yok, K8 Eski hâline dön) `main`'de (b44b59a). `sade/asama-3b` aşama
 2'nin ve `main`'in üstünde beş görev sekmesini (K1), ikinci dizilişin bir plan olmasını (K2) ve
 Kontrol'ün çipin sorun listesine geçmesini (K3) taşıyor, birleşmedi (aşağıda tarihli girdi).
+`sade/inceleme` onun üstünde babanın gözüyle yapılan kullanılabilirlik turunun on bulgusunu
+düzeltiyor (ana düğme, Excel sütunları, adlar, yazı büyüklüğü, dar üst bar…), İkame ve
+Öğretmene gönder'den sonra birleşecek, birleşmedi.
 
 **Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
 önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
@@ -102,6 +105,30 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 `npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
+
+## 2026-11-16 · Babanın gözüyle kullanılabilirlik turu (`sade/inceleme`)
+
+`sade/asama-3b`'nin (PR #80) üstünde, birleşmedi; İkame ve Öğretmene gönder önce birleşecek
+(tarih çipine, yazdırma/gönderme koduna ve şemaya dokunulmadı). Karar DECISIONS "Babanın
+gözüyle kullanılabilirlik turu".
+
+**Yapılan.** (1) `ProgramStrip`: bekleyen yok + sorun var → ana düğme `Yeniden yap`; havuzun
+başı `{n} sorun` (`LessonPool`'a `problems`). (2) `teacherColumns` + `parseTeachers(text, known,
+cols)` (`pure/io/import.ts`), `Paste`'in `columns` önizleme tablosu. (3) `surname()`, satır başı
+soyadı + kısa ad, kartta `full` (≤ 3 harf/saat), seçicilerde "Ad Soyad · Branş". (4)
+`keepBefore(…, quiet)` yeniden dizmelerde; nötr şerit. (5) `SCALE_STEPS`, `nearestStep`, `?` →
+Yazı büyüklüğü, Ctrl+K `Yazıyı büyüt`. (6) `@container bar (max-width: 75em)`: sekmeler ikinci
+satır. (7) `health.level` bekleyen saatte `tight`. (8) `Branşa göre süz`, `Haftaya dağılış` (anahtar
+her yerde değişti) ve örnek. (9) gün tablosunda zil aralığı, `Ders süresi (dakika)`, Başlarken
+derslik sormuyor. (10) kişi sayfasında dersler kapalı saatlerin üstünde, `AddLesson` satırı.
+Küçükler: `.sheet-mark` uzun kısa adda büyür ve küçülür, `Her şeyi sil` kendi panelinde, menü ve
+sekme 14 px, Dosyadan aç sorusunun cümlesi, Dosya ▾ ipuçları, Hakkında'da sitede düğme yok, tek
+tarih.
+
+**Ölçülen.** Üst bar, örnek okul (`scratch/bar.mjs`): 1366 %100/%115 ve 1920 %100–%150 tek
+satır; 1366 %130/%150 önce `?` ikinci satıra düşüyordu (bar 91/105 px), şimdi sekmeler kendi
+satırında (76/87 px), sayfa yana kaymıyor. Boyut: `npm run boyut` önce 1 157 480 B / brotli
+299 040 B, sonra 1 155 093 B / 298 982 B (−58 B brotli).
 
 ## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
 

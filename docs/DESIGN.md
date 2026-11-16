@@ -57,11 +57,10 @@ uyarılar `role="alertdialog"`. Renk tek başına bir durum taşımaz. Klavyeyle
 gidilen her yerde odak görünür.
 
 Hedef kullanıcı zor görüyor, ve bu süsün değil boyutun tarafındaki bir kısıt:
-ekranda 12 px taban. Taban varsayılan ölçekte (%100) geçerli. `SCALE_MIN` 0,80,
-yani ölçek merdiveninin altında `--fs-xs` 12 px değil 9,6 px çizer, ama
-`SCALE_DEFAULT` 1: kimsenin ekranı küçülerek açılmıyor, ve %80'e uzanan okuyucu
-tabana kendisi cevap veriyor, bunu da çoğu zaman Windows'un kendi ölçeklemesi
-zaten büyükken yapıyor. Tipografi merdiveni her kök değişiminde yeniden
+ekranda 12 px taban. Taban varsayılan ölçekte (%100) geçerli. Ekran dört adlı basamak
+sunar (%100–%150, 2026-11-16); daha önce kaydedilmiş bir %80 olduğu gibi çizilir ve
+orada `--fs-xs` 9,6 px'tir: okuyucu tabana kendisi cevap vermiş, çoğu zaman Windows'un
+kendi ölçeklemesi zaten büyükken. Tipografi merdiveni her kök değişiminde yeniden
 sabitlendiği için %100'de 12 px hâlâ 12 px.
 
 Program ızgarasının kartları 12 px ve hiçbir ölçekte 11 px'ten küçük değil
@@ -72,9 +71,9 @@ yoğunluğundaydı ve Ferah ile Rahat'ta kart 14/13 px'ti; yoğunluk kalkınca (
 K6) ızgaranın tek düzeni bu, kartı büyütmenin yolu Yazı büyüklüğü.
 
 Dar kutuda (Windows %150'de 1920 piksel ekran 1280 CSS pikseli, %200'de 960) sözcükler
-gitmez, küçülür ya da yer değiştirir: sekmenin etiketi simgenin altına iner (12 px),
-şeritteki düğmenin sözcüğü bir basamak küçülür, üst bar sığmazsa ikinci bir satıra
-geçer. Sayfa yana kaymaz. Eskiden etiketler ve şerit sözcükleri hiç çizilmiyordu.
+gitmez, küçülür ya da yer değiştirir: sekmenin etiketi simgenin altına iner,
+şeritteki düğmenin sözcüğü bir basamak küçülür, daha dar barda sekmeler bilerek kendi
+satırlarına geçer (2026-11-16). Sayfa yana kaymaz. Eskiden etiketler ve şerit sözcükleri hiç çizilmiyordu.
 
 ### Hareket
 
