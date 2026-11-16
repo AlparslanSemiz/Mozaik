@@ -319,6 +319,8 @@ Adımlar, bu sırayla (Alp):
 
 1. Cloudflare DNS (`alparslansemiz.com`): `CNAME`, ad `mozaik`, hedef
    `alparslansemiz.github.io`, proxy **kapalı** ("DNS only"). (2026-11-16'da kuruldu.)
+   Adım 3–8 de 2026-11-16'da yapıldı: depo, deploy anahtarı (ortam sırrı), ilk yayın, Pages ve
+   HTTPS, `yeniAdresAcik: true`. Adım 2 (alan adı doğrulaması) önerilen, isteğe bağlı.
 2. Önerilen: GitHub → hesap Settings → Pages → Add a domain ile `alparslansemiz.com`'u
    doğrula (`_github-pages-challenge-alparslansemiz` TXT kaydı Cloudflare'e).
 3. Yeni, herkese açık depo `AlparslanSemiz/mozaik-site` (boş; README gerekmez).

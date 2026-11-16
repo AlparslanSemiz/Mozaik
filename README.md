@@ -30,7 +30,7 @@ Everything below is a finished file. Nothing to build.
 | **[Mozaik-linux-x86_64.AppImage](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-linux-x86_64.AppImage)** | Linux (Ubuntu 22.04 and later, Debian 12, Fedora). One file, updates itself. Read [Linux](#linux-one-file-the-appimage) first. |
 
 Or use it without downloading anything:
-**<https://alparslansemiz.github.io/Mozaik/>** works offline after
+**<https://mozaik.alparslansemiz.com/>** works offline after
 the first visit.
 
 These links always point at the newest release; no version number and no login

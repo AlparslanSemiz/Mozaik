@@ -438,7 +438,7 @@ console.log(`  ${etiket} itildi ve uzakta görüldü. Site yayında, sürüm ko�
 // were not. The Releases one redirects; the Pages one does NOT — Pages
 // publishes a repository by its NAME, so the old address is a plain 404 and
 // this script was printing it at the end of every release (B7.11, pitfall 106).
-console.log('      site   → https://alparslansemiz.github.io/Mozaik/');
+console.log('      site   → https://mozaik.alparslansemiz.com/');
 console.log('      sürüm  → https://github.com/AlparslanSemiz/Mozaik/releases/latest');
 console.log('');
 console.log('  Bitince üç indirme bağlantısının 200 verdiğini görün:\n');
