@@ -134,6 +134,10 @@ describe('kimlik — verinin ADRESİ', () => {
     // reverted". It was not: the name is Mozaik everywhere a person sees one.
     expect(tauriConf.productName).toBe('Mozaik');
     expect(tauriConf.app.windows.map((w) => w.title)).toContain('Mozaik');
+    // And the installed program's file: without it the installer put
+    // `ders-programi.exe` (Cargo's name) in Programs\Mozaik, which Task Manager
+    // showed, and update.rs and the CI gate looked for Mozaik.exe (TRAPS 166).
+    expect(tauriConf.mainBinaryName).toBe('Mozaik');
   });
 
   it('pencere BÜYÜTÜLMÜŞ açılıyor, ve en az yüksekliği %150 ekrana sığıyor', () => {
