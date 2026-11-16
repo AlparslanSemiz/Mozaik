@@ -12,7 +12,8 @@
 // name a person reads on it. The upgrade gate (scripts/guncelleme-eski.mjs)
 // uses this to make the old version's data with the old version's own hands.
 //
-// A button is pressed through its Invoke pattern, a tab through SelectionItem;
+// A button or a menu item (menuitemradio may arrive as RadioButton) is pressed
+// through its Invoke pattern, a tab through SelectionItem;
 // anything that offers neither gets a real mouse click on its centre, with the
 // window brought to the front first. Windows only.
 
@@ -54,9 +55,27 @@ while ((Get-Date) -lt $son) {
       } catch { continue }
       if ([string]::IsNullOrWhiteSpace($ad)) { continue }
       $gorulen += "$tur '$ad'"
-      if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem') { continue }
+      if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem|RadioButton|CheckBox') { continue }
       if (-not (Uyar $ad) -or -not $acik) { continue }
       $o = $null
+      # A radio or check item SELECTS; its Invoke may be a click the page's
+      # menu never sees, and a radio menu item pressed that way changed
+      # nothing (kurulum-windows, 2026-11-16). Selected first, then invoked,
+      # then focused and Enter: a menu item answers the key the same way.
+      if ($tur -match 'RadioButton|CheckBox') {
+        if ($e.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$o)) {
+          $o.Select(); "basildi Select $tur '$ad'"; exit 0
+        }
+        if ($e.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$o)) {
+          $o.Toggle(); "basildi Toggle $tur '$ad'"; exit 0
+        }
+        try {
+          $e.SetFocus()
+          Add-Type -AssemblyName System.Windows.Forms
+          [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
+          "basildi Enter $tur '$ad'"; exit 0
+        } catch { }
+      }
       if ($e.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$o)) {
         $o.Invoke(); "basildi Invoke $tur '$ad'"; exit 0
       }
@@ -101,5 +120,48 @@ export function uiaBas(adlar, { pencere = 'Mozaik', tam = false, sureMs = 30_000
   } catch (e) {
     const cikti = `${e.stdout ?? ''}${e.stderr ?? ''}`.trim();
     throw new Error(`UI Automation basamadı (${adlar.join(' | ')}):\n${cikti || e.message}`);
+  }
+}
+
+const TUS = `
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName UIAutomationClient
+Add-Type -AssemblyName UIAutomationTypes
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type @'
+using System; using System.Runtime.InteropServices;
+public static class Pencere {
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+}
+'@
+$A = [System.Windows.Automation.AutomationElement]
+$T = [System.Windows.Automation.TreeScope]
+$kosul = New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $env:UIA_PENCERE)
+$p = $A::RootElement.FindFirst($T::Children, $kosul)
+if ($null -eq $p) { "pencere yok: $env:UIA_PENCERE"; exit 3 }
+[void][Pencere]::SetForegroundWindow([IntPtr]$p.Current.NativeWindowHandle)
+Start-Sleep -Milliseconds 300
+foreach ($t in @($env:UIA_TUSLAR -split "\`n" | Where-Object { $_ -ne '' })) {
+  [System.Windows.Forms.SendKeys]::SendWait($t)
+  Start-Sleep -Milliseconds 400
+}
+"basildi tuslar"
+`;
+
+/**
+ * Types into the program's window the way a person does: brought to the
+ * front, then each entry of `tuslar` through SendKeys (`^k` is Ctrl+K,
+ * `{ENTER}` Enter), with a pause between them for the page to answer.
+ */
+export function uiaTus(tuslar, { pencere = 'Mozaik' } = {}) {
+  try {
+    return execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', TUS], {
+      encoding: 'utf8',
+      env: { ...process.env, UIA_TUSLAR: tuslar.join('\n'), UIA_PENCERE: pencere },
+      timeout: 60_000,
+    }).trim();
+  } catch (e) {
+    const cikti = `${e.stdout ?? ''}${e.stderr ?? ''}`.trim();
+    throw new Error(`UI Automation yazamadı (${tuslar.join(' ')}):\n${cikti || e.message}`);
   }
 }

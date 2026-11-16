@@ -116,6 +116,26 @@ sekme ve bir bölüm yeniden adlandırıldı" ve "Branşlar Okul'a, Ayarlar beş
 bu dosyanın kuralı; Branşlar'ın gerekçesi, öğretmen listeden branş seçer, bölüm sırasında
 yaşıyor).
 
+### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
+
+- **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama
+  saydamdır (`data-fitting`, `opacity: 0`), `gridFit` iki tabanını ilk boyamadan sonraki karede
+  yazar ve saydamlığı kaldırır (~2 kare). Kabuk
+  ve havuz önce, ızgara ~2 kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
+  Son hâl (taban, sütunlar, tablo genişliği, çekmece boyu) iki derlemede aynı, 1920 ve 1366'da
+  ölçüldü. Her Grid bağlanışında böyle (açılıştan başka bir yeniden bağlanış da tabloyu ~2 kare
+  boş gösterir; önceden bir kare tabansız çiziyordu). Gerekçe: aynı iki yazı ilk karede ~270 ms, ilk boyamadan sonra ~35 ms (4× CPU, tuzak 221).
+- **Ayrıca.** İki taban arka arkaya okunup sonra yazılıyor (araya yazı girince tablo bir kez daha
+  yerleşiyordu); Plex açılışta isteniyor (tuzak 220); ilk React çizimi `startTransition` içinde.
+- **Denendi, bırakıldı.** (1) `@property … inherits: false` ile `--cell-min`/`--head-min`: stil
+  geçişi kısalmadı, çünkü onlardan türeyen `--cell-w` miras kalıyor. (2) Çekmecenin `fit`'ini
+  rAF'a almak: ilk yerleşim ilk kareye kayıyor ve ikinci yerleşimle aynı göreve düşüyor, en uzun
+  görev büyüyor. (3) Tabanları depoda saklayıp ilk yerleşimden önce yazmak: ikinci yerleşimi
+  tümden kaldırırdı, ama yeni bir depolama anahtarı (Veriler nerede satırı, dört dilde etiket)
+  ister ve CI'ın taze profilli ölçümü onu hiç göremez; açık soru olarak WORKLOG'da.
+
+---
+
 ### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
 
 - **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",
