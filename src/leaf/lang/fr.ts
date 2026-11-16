@@ -517,6 +517,13 @@ const FR: Sozluk = {
   Adres: "Adresse",
   "Güncellemeleri denetle": "Rechercher des mises à jour",
   "Yeni sürümü indir": "Télécharger la nouvelle version",
+  "Kurulumu indir": "Télécharger l'installateur",
+  "Şimdi kur": "Installer maintenant",
+  "Kuruluma bak": "Voir l'installateur",
+  "**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) için gerekli, onunla çok daha hızlı. İndirmek {mb} MB yer kaplar.": "**Installez Mozaik sur cet ordinateur.** La recherche de suggestions (CP-SAT) en a besoin et va beaucoup plus vite avec. Le téléchargement occupe {mb} Mo.",
+  "**Kurulum indi.** **Şimdi kur** deyince Mozaik kapanır, kurulum bir ilerleme çubuğuyla çalışır ve Mozaik kendiliğinden yeniden açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz. Masaüstündeki ya da görev çubuğundaki eski Mozaik simgesi de kurulan programı açar.": "**L'installateur est arrivé.** Avec **Installer maintenant**, Mozaik se ferme, l'installation se déroule avec une barre de progression et Mozaik se rouvre tout seul. Vos plans sont enregistrés, rien n'est perdu. L'ancienne icône de Mozaik sur le bureau ou dans la barre des tâches ouvre aussi le programme installé.",
+  "**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır.": "**Installez Mozaik sur cet ordinateur.** La recherche de suggestions (CP-SAT) n'arrive qu'avec l'installation, et elle est beaucoup plus rapide. Vos plans restent où ils sont.",
+  "**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Ayarlar → Hakkında'dan tekrar deneyebilirsiniz.": "**L'installation n'a pas abouti** (code {kod}). Mozaik s'est ouvert tel qu'il était, vos plans sont en place. Redémarrez l'ordinateur et réessayez depuis Réglages → À propos.",
   "Şimdi yeniden başlat": "Redémarrer maintenant",
   "Bakılıyor…": "Vérification…",
   "En son sürümü kullanıyorsunuz.": "Vous utilisez la dernière version.",
@@ -1883,6 +1890,29 @@ const FR: Sozluk = {
   "{toplam} öğretmenin ilk {kac} tanesi.": "Les {kac} premiers des {toplam} {toplam:enseignant|enseignants}.",
   "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden \"Dosyadan aç\" ile açabilirsiniz.": "Ce fichier ne contient pas tous les plans. Ouvrez un seul plan avec « Ouvrir un fichier » dans le menu Fichier de la barre du haut.",
   "Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "Le plan à l’écran sera remplacé par celui du fichier et l’historique d’annulation effacé. Si vous pouvez changer d’avis, cliquez d’abord sur « Enregistrer ».",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "Le plan « {plan} » est illisible, donc aucun plan n’est écrit dans le dossier.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**Le plan s’est ouvert vide sur cet ordinateur, mais le dossier {klasor} contient un fichier de plan plus complet :** {dosya}, {ogretmen} {ogretmen:enseignant|enseignants} et {ders} {ders:cours|cours}. Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
+  "Belgelerim'deki son kaydı aç": "Ouvrir la dernière sauvegarde dans Documents",
+  "Boş başla": "Commencer vide",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**Le plan a beaucoup diminué :** il reste {ogretmen} {ogretmen:enseignant|enseignants} et {ders} {ders:cours|cours}, et le dernier fichier de plan du dossier en a {eskiOgretmen} {eskiOgretmen:enseignant|enseignants} et {eskiDers} {eskiDers:cours|cours}. Ce fichier a été gardé ; le nouvel état a été écrit à part sous **{dosya}**.",
+  "Yeni hâlini asıl dosya yap": "Faire du nouvel état le fichier principal",
+  "{ne} Son silmeyi geri almak için:": "{ne} Pour annuler la dernière suppression :",
+  "Geri getir": "Récupérer",
+  "Son silme geri alındı.": "La dernière suppression a été annulée.",
+  "son silmeden önceki hâl": "état avant la dernière suppression",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan à l’identifiant manquant ou répété : {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Ce plan plus petit remplace le dernier fichier de plan du dossier. L’ancien état reste dans les sauvegardes quotidiennes.",
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
+  "son plan dosyasının tarihi":
+    "date du dernier fichier de plan",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Ce plan n’a pas de fichier de plan.** Ce que vous avez fait n’est que dans ce navigateur.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Le dernier fichier de plan date du {tarih}.** Ce que vous avez fait depuis n’est que dans ce navigateur.",
+  "Son plan dosyası: {tarih}.":
+    "Dernier fichier de plan : {tarih}.",
 };
 
 registerSozluk("fr", FR);

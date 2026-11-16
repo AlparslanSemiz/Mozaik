@@ -15,6 +15,7 @@ import {
   openSettings,
   openSetup,
   openWithSample,
+  poolHours,
   reopen,
   settledMotion,
   startDrag,
@@ -744,10 +745,9 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await dragAndDrop(page);
 
     const gridCards = page.locator('table.grid .card');
-    const poolCards = page.locator('.pool-card');
-    const poolHoursBefore = await poolCards.evaluateAll((cards) =>
-      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
-    );
+    // `dragAndDrop` returns once the tray has let go of the dropped card, so
+    // this is the tray after the drop and not the one before it.
+    const poolHoursBefore = await poolHours(page);
     await gridCards.first().click({ button: 'right' });
     await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
 
@@ -756,7 +756,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await expect(trigger).toBeVisible();
     await trigger.click();
     const options = page.locator('.split-popover:visible').getByRole('option');
-    expect(await options.count()).toBeGreaterThan(1);
+    await expect.poll(() => options.count()).toBeGreaterThan(1);
     const other = page
       .locator(
         '.split-popover:visible .split-option[aria-selected="false"]:not([aria-disabled="true"])',
@@ -767,10 +767,10 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // A new boundary makes the old placed block ambiguous, so that lesson is
     // lifted safely and its new cards are offered back in the tray.
     await expect(gridCards).toHaveCount(0);
-    const poolHoursAfter = await poolCards.evaluateAll((cards) =>
-      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
-    );
-    expect(poolHoursAfter).toBeGreaterThan(poolHoursBefore);
+    // The grid empties a render before the tray takes the hours back
+    // (`useDeferredValue`): read once, the tray still showed the old total and
+    // failed on CI as "> 146, received 146" (pitfall 170).
+    await expect.poll(() => poolHours(page)).toBeGreaterThan(poolHoursBefore);
   });
 
   test('ders düzenleme penceresi dersi başka öğretmene aktarabiliyor', async ({ page }) => {

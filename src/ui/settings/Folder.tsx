@@ -112,7 +112,9 @@ export function Folder({ folder }: { folder: FolderRun }) {
               work has exactly one copy and a cleared browser takes it. */}
           <p
             className={
-              s.kind === 'hata' || (s.kind === 'secilmedi' && storageKind() === 'site')
+              s.kind === 'hata' ||
+              s.kind === 'bulundu' ||
+              (s.kind === 'secilmedi' && storageKind() === 'site')
                 ? 'hint bad'
                 : 'hint'
             }
@@ -127,6 +129,11 @@ export function Folder({ folder }: { folder: FolderRun }) {
               />
             )}
             {s.kind === 'bekliyor' && <T k="**{klasor}** · yazılıyor…" vars={{ klasor: s.name }} />}
+            {s.kind === 'bulundu' && (
+              <>
+                <b>{s.name}</b>: {t('Siz seçene kadar klasöre hiçbir şey yazılmıyor.')}
+              </>
+            )}
             {s.kind === 'yazildi' && (
               <>
                 <b>{s.name}</b> klasörüne yazıldı, saat{' '}
@@ -145,8 +152,9 @@ export function Folder({ folder }: { folder: FolderRun }) {
             )}
             {s.kind === 'hata' && (
               <>
-                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar işiniz yalnız
-                tarayıcıda duruyor.
+                <b>{s.name}</b>: {s.text}{' '}
+                {s.plan === undefined &&
+                  'Klasörü yeniden seçin. O zamana kadar işiniz yalnız tarayıcıda duruyor.'}
               </>
             )}
           </p>

@@ -24,6 +24,7 @@ export const CHECKLIST_KEY = 'ders-programi-ilk-adimlar';
 export const PRINT_OPTIONS_KEY = 'ders-programi-baski';
 export const CHANGELOG_SEEN_KEY = 'ders-programi-yenilik-gorulen';
 export const RELAX_LOG_KEY = 'ders-programi-oneri-olcum';
+export const FILE_SAVED_KEY = 'ders-programi-son-dosya';
 
 /**
  * The rail it belonged to is gone and nothing writes it any more, but an older
@@ -51,4 +52,5 @@ export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: PRINT_OPTIONS_KEY, label: 'kâğıt seçenekleri' },
   { key: CHANGELOG_SEEN_KEY, label: 'görülen sürüm notu' },
   { key: RELAX_LOG_KEY, label: 'öneri aramasının ölçümleri' },
+  { key: FILE_SAVED_KEY, label: 'son plan dosyasının tarihi' },
 ];

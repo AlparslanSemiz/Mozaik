@@ -34,6 +34,7 @@ import {
   T,
   useT,
   useToast,
+  useKeepBefore,
   useUndoIf,
 } from '../common';
 import { EMPTY_QUERY } from '../../pure/listview';
@@ -155,6 +156,7 @@ export default function Subjects({ state, change }: PanelProps) {
   const { confirm, alert } = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const [fresh, setFresh] = useState('');
 
   const options = subjectOptions(state);
@@ -245,6 +247,7 @@ export default function Subjects({ state, change }: PanelProps) {
     const said = t('"{ad}" branşı listeden çıkarıldı.', { ad: subjectLabel(subject) });
     const next = deleteSubject(state, subject);
     moveFocusFromDeleted(button);
+    keepBefore(state, said);
     change((d) => (d === state ? next : deleteSubject(d, subject)), said);
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   }

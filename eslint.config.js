@@ -147,6 +147,7 @@ export default defineConfig([
   {
     files: [
       'src/leaf/preference/preference.ts',
+      'src/platform/storage/beforeDelete.ts',
       'src/platform/storage/folder.ts',
       'src/platform/storage/libraryStore.ts',
       'src/platform/storage/planStore.ts',

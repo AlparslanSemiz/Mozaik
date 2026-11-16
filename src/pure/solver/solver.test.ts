@@ -477,7 +477,12 @@ describe('solve — tam dolu bir kurs', () => {
       x.short === 'Ö1' ? { ...x, limits: { ...x.limits, maxPerDay: 9 } } : x,
     );
 
-    const result = solve({ ...d, unavailable, teachers }, { keepPlaced: false });
+    // The claim is that this week CAN be laid out, not how fast: with the
+    // default 15 s clock the solver stopped two blocks short on 2026-11-16
+    // while other sessions loaded the same cores, and the test said "not
+    // solvable" about a machine. Its own stall rule ends a hopeless repair,
+    // so the budget is only a cap here, as in the test below (pitfall 171).
+    const result = solve({ ...d, unavailable, teachers }, { keepPlaced: false, budgetMs: 600_000 });
 
     expect(result.stuck).toEqual([]);
     expect(result.phase).toBe('solved');
@@ -486,7 +491,7 @@ describe('solve — tam dolu bir kurs', () => {
     expect(
       findViolations(result.state, buildIndex(result.state)).filter((v) => v.level === 'block'),
     ).toEqual([]);
-  }, 30_000);
+  }, 120_000);
 
   it('olduğu gibi kurulamıyor: bütçeyi bitirmeden duruyor ve eksiği sayıyor', () => {
     // The repair gives up after so many fruitless MOVES (REPAIR_STALL_PER_BLOCK),

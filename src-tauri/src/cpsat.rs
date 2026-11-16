@@ -19,7 +19,7 @@
 //! program that will not start.
 
 use std::ffi::{c_int, c_void};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 type Interruptible = unsafe extern "C" fn(
@@ -56,14 +56,53 @@ const AD: &str = if cfg!(windows) {
 
 /// Where the library is looked for: next to the program, where the installer
 /// puts it; on the Mac in the bundle's `Contents/Frameworks`, beside
-/// `Contents/MacOS` where the program is; or where `MOZAIK_ORTOOLS` says
-/// (tests and development only).
-fn yol() -> Option<PathBuf> {
+/// `Contents/MacOS` where the program is. `MOZAIK_ORTOOLS` names another file
+/// in a debug build only (tests and development); a released program never
+/// reads it, so an environment variable cannot make it load somebody else's
+/// library (güvenlik denetimi 2026-11-16).
+fn yol() -> Result<PathBuf, String> {
+    #[cfg(debug_assertions)]
     if let Some(p) = std::env::var_os("MOZAIK_ORTOOLS") {
-        return Some(PathBuf::from(p));
+        return Ok(PathBuf::from(p));
     }
-    let klasor = std::env::current_exe().ok()?.parent()?.to_path_buf();
-    Some(kutuphane_yeri(&klasor))
+    let exe = std::env::current_exe().map_err(|_| "Program klasörü bulunamadı.")?;
+    kutuphane_yolu(&exe, cfg!(windows))
+}
+
+/// The rule, apart from the process so it can be tested on any machine. On
+/// Windows the library is loaded only from an INSTALLED copy's folder
+/// (`uninstall.exe` beside it, update.rs `kurulu_mu`): a standalone
+/// `Mozaik.exe` sits in Downloads or on the Desktop, where any file named
+/// `ortools.dll` could have been dropped next to it (DLL planting), and only
+/// the installer ships the real one.
+pub(crate) fn kutuphane_yolu(exe: &Path, kurulum_sart: bool) -> Result<PathBuf, String> {
+    let klasor = exe.parent().ok_or("Program klasörü bulunamadı.")?;
+    if kurulum_sart && !crate::update::kurulu_mu(exe) {
+        return Err("CP-SAT yalnız kurulumla gelir; bu kopya kurulu değil.".into());
+    }
+    Ok(kutuphane_yeri(klasor))
+}
+
+/// Opens the library. On Windows with `LoadLibraryExW` and only two places to
+/// look for what it imports: its own folder (the OR-Tools DLLs and the C++
+/// runtime the installer put there) and System32. Never the current directory
+/// or PATH. The flag needs an absolute path, which `current_exe` gives.
+unsafe fn ac(yol: &Path) -> Result<libloading::Library, libloading::Error> {
+    #[cfg(windows)]
+    {
+        use libloading::os::windows::{
+            Library, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR, LOAD_LIBRARY_SEARCH_SYSTEM32,
+        };
+        Library::load_with_flags(
+            yol,
+            LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32,
+        )
+        .map(Into::into)
+    }
+    #[cfg(not(windows))]
+    {
+        libloading::Library::new(yol)
+    }
 }
 
 /// The library's path, given the folder the program runs from. The Mac's
@@ -78,15 +117,14 @@ fn kutuphane_yeri(program_klasoru: &std::path::Path) -> PathBuf {
 }
 
 fn yukle() -> Result<Cpsat, String> {
-    let yol = yol().ok_or("Program klasörü bulunamadı.")?;
+    let yol = yol()?;
     if !yol.is_file() {
         return Err(format!("CP-SAT kütüphanesi yok: {}", yol.display()));
     }
     // SAFETY: loading a library runs its initialisers. This one is the
     // OR-Tools release the installer ships, pinned by SHA-256 in surum.yml.
     unsafe {
-        let lib = libloading::Library::new(&yol)
-            .map_err(|e| format!("CP-SAT kütüphanesi açılamadı: {e}"))?;
+        let lib = ac(&yol).map_err(|e| format!("CP-SAT kütüphanesi açılamadı: {e}"))?;
         let al = |ad: &[u8]| {
             lib.get::<*const c_void>(ad)
                 .map(|s| *s)
@@ -117,9 +155,53 @@ fn cpsat() -> Result<&'static Cpsat, String> {
 /// to the library that made it.
 static CALISAN: Mutex<Option<usize>> = Mutex::new(None);
 
+/// The program's priority, lowered while CP-SAT works (Windows only).
+///
+/// The search occupies every core it is given (`relaxPool.ts` gives it all of
+/// them), and on a weak two-core machine the window would then wait behind it.
+/// The library makes its own threads, so lowering the calling thread would not
+/// reach them; the PROCESS's class does, and it is this process only: the
+/// page itself is drawn by WebView2's own processes, which keep theirs. Put
+/// back when the question ends, whatever way it ends.
+struct DusukOncelik;
+
+#[cfg(windows)]
+mod oncelik {
+    use std::ffi::c_void;
+    pub const NORMAL: u32 = 0x0000_0020;
+    pub const BELOW_NORMAL: u32 = 0x0000_4000;
+    #[link(name = "kernel32")]
+    extern "system" {
+        pub fn GetCurrentProcess() -> *mut c_void;
+        pub fn SetPriorityClass(process: *mut c_void, class: u32) -> i32;
+    }
+}
+
+impl DusukOncelik {
+    fn al() -> Self {
+        // SAFETY: the pseudo-handle of this process; nothing else is touched.
+        #[cfg(windows)]
+        unsafe {
+            oncelik::SetPriorityClass(oncelik::GetCurrentProcess(), oncelik::BELOW_NORMAL);
+        }
+        DusukOncelik
+    }
+}
+
+impl Drop for DusukOncelik {
+    fn drop(&mut self) {
+        // SAFETY: as above.
+        #[cfg(windows)]
+        unsafe {
+            oncelik::SetPriorityClass(oncelik::GetCurrentProcess(), oncelik::NORMAL);
+        }
+    }
+}
+
 /// One question, solved to the end (or to its time limit, or to "Durdur").
 pub fn coz(model: &[u8], params: &[u8]) -> Result<Vec<u8>, String> {
     let c = cpsat()?;
+    let _oncelik = DusukOncelik::al();
     let model_len = c_int::try_from(model.len()).map_err(|_| "CP-SAT modeli çok büyük.")?;
     let params_len = c_int::try_from(params.len()).map_err(|_| "CP-SAT ayarları çok büyük.")?;
     let mut res: *mut c_void = std::ptr::null_mut();
@@ -249,6 +331,50 @@ mod tests {
         assert_eq!(ayir(&body).unwrap(), (&[1u8, 2, 3][..], &[9u8, 9][..]));
         assert!(ayir(&[1, 0]).is_err());
         assert!(ayir(&[5, 0, 0, 0, 1]).is_err());
+    }
+
+    struct Gecici(PathBuf);
+    impl Drop for Gecici {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    fn gecici(ad: &str) -> Gecici {
+        let d = std::env::temp_dir().join(format!("mozaik-cpsat-{ad}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(&d).unwrap();
+        Gecici(d)
+    }
+
+    #[test]
+    fn a_standalone_windows_copy_does_not_load_a_library_beside_it() {
+        let tmp = gecici("tek");
+        let exe = tmp.0.join("Mozaik.exe");
+        std::fs::write(&exe, b"MZ").unwrap();
+        std::fs::write(tmp.0.join(AD), b"MZ").unwrap();
+        assert!(kutuphane_yolu(&exe, true).is_err());
+        // Off Windows (the development machines) the folder rule alone.
+        assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
+    }
+
+    #[test]
+    fn an_installed_copy_loads_the_library_from_its_own_folder_only() {
+        let tmp = gecici("kurulu");
+        let exe = tmp.0.join("Mozaik.exe");
+        std::fs::write(&exe, b"MZ").unwrap();
+        std::fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
+        assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
+    }
+
+    /// A release build must not read the variable: the line before the read is
+    /// the `debug_assertions` gate.
+    #[test]
+    fn the_environment_variable_is_read_in_debug_builds_only() {
+        let kaynak = include_str!("cpsat.rs");
+        let arama = ["std::env::var_os(", "\"MOZAIK_ORTOOLS\")"].concat();
+        let i = kaynak.find(&arama).unwrap();
+        let onceki = kaynak[..i].lines().rev().nth(1).unwrap_or("");
+        assert_eq!(onceki.trim(), "#[cfg(debug_assertions)]");
     }
 
     /// Runs only where `MOZAIK_ORTOOLS` points at a library: one boolean,

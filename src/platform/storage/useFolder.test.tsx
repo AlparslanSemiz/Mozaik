@@ -19,6 +19,12 @@ import { SCHEMA_VERSION } from '../../leaf/model';
 import type { FolderRun } from './useFolder';
 import type { useStore as UseStore } from './useStore';
 
+// Every launch below throws the module graph away (`vi.resetModules`) and
+// imports React, the store and the folder hook afresh, and G2 does that eleven
+// times. The clock is fake, so nothing waits on time; it is module loading,
+// 1-3 s on a quiet machine and over Vitest's 5 s under load (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
@@ -239,8 +245,8 @@ describe('exe klasörü · açılış yazısı yalnız okunmuş bir plandan', ()
     expect(box.folder!.status.kind).toBe('yazildi');
   });
 
-  it('boş açılan depo ilk gerçek değişiklikte yazılıyor', async () => {
-    const disk = fakeDisk({ 'ders-programi-tumu.json': FULL_BUNDLE });
+  it('boş açılan depo, boş klasörde, ilk gerçek değişiklikte yazılıyor', async () => {
+    const disk = fakeDisk({});
     const { box, act, wait } = await launch(disk);
     expect(writes(disk)).toEqual([]);
     act(() => box.store!.change(() => FULL_STATE));
@@ -249,15 +255,14 @@ describe('exe klasörü · açılış yazısı yalnız okunmuş bir plandan', ()
     expect(disk.calls).toContain(`write_file:${day(0)}`);
   });
 
-  it('okunan ama BOŞ plan dolu ana dosyanın üstüne yazmıyor; olmayan günlüğü yazıyor, budamıyor', async () => {
+  it('okunan ama BOŞ plan, dolu klasörde: hiçbir şey yazılmıyor, klasördeki kayıt öneriliyor', async () => {
     localStorage.setItem(BASE_KEY, JSON.stringify(EMPTY_STATE));
     const seed: Record<string, string> = { 'ders-programi-tumu.json': FULL_BUNDLE };
     for (let b = 1; b <= 12; b++) seed[day(b)] = FULL_BUNDLE;
     const disk = fakeDisk(seed);
-    await launch(disk);
-    expect(disk.files.get('ders-programi-tumu.json')).toBe(FULL_BUNDLE);
-    expect(teachersIn(disk.files.get(day(0)))).toBe(0);
-    expect(disk.calls.filter((c) => c.startsWith('remove_file'))).toEqual([]);
+    const { box } = await launch(disk);
+    expect(writes(disk)).toEqual([]);
+    expect(box.folder!.status.kind).toBe('bulundu');
   });
 
   it('klasör okunamıyorsa boş plan sessizce atlanmıyor, satır kırmızı', async () => {
@@ -323,5 +328,136 @@ describe('exe klasörü · budama yalnız dolu günlükleri sayıyor', () => {
     const removed = disk.calls.filter((c) => c.startsWith('remove_file')).map((c) => c.slice(12));
     expect(removed.sort()).toEqual([day(12), day(11)].sort());
     expect(disk.files.get(day(1))).toBe('eski');
+  });
+});
+
+// The audit of 2026-11-16 (scratch probe `veri.probe.test.ts`): a wiped WebView2
+// profile opened empty, one teacher went over the live file and today's
+// backup, and on each new day the tiny backup counted as "full", so after ten
+// days none of the ten real backups was left. And B7.37's last hole: a plan
+// that is not even JSON stopped every folder write without a word.
+const ONE_TEACHER = { ...EMPTY_STATE, teachers: [FULL_STATE.teachers[0]] };
+
+describe('exe klasörü · silinmiş profil (denetim 2026-11-16)', () => {
+  function realFolder(): Record<string, string> {
+    const seed: Record<string, string> = { 'ders-programi-tumu.json': FULL_BUNDLE };
+    for (let b = 1; b <= 10; b++) seed[day(b)] = FULL_BUNDLE;
+    return seed;
+  }
+
+  it('boş açılış dolu klasörü öneriyor ve seçilene kadar hiçbir şey yazmıyor', async () => {
+    const disk = fakeDisk(realFolder());
+    const { box, act, wait } = await launch(disk);
+    const status = box.folder!.status;
+    expect(status.kind).toBe('bulundu');
+    if (status.kind !== 'bulundu') return;
+    expect(status.copy.name).toBe('ders-programi-tumu.json');
+    expect(status.copy.work.teachers).toBe(FULL_STATE.teachers.length);
+    // One teacher typed in before anybody chose: the folder is not touched.
+    act(() => box.store!.change(() => ONE_TEACHER));
+    await wait(3000);
+    await act(() => box.folder!.flush());
+    expect(writes(disk)).toEqual([]);
+  });
+
+  it('"Belgelerim\'deki son kaydı aç": okul geri geliyor, sonra klasöre yazılıyor', async () => {
+    const disk = fakeDisk(realFolder());
+    const { box, act, wait } = await launch(disk);
+    const { parseBundle } = await import('../../pure/io');
+    const status = box.folder!.status;
+    if (status.kind !== 'bulundu') throw new Error(status.kind);
+    act(() => {
+      const opened = box.store!.openFolderCopy(parseBundle(status.copy.text)!);
+      expect(opened.ok).toBe(1);
+      box.folder!.release();
+    });
+    await wait(3000);
+    expect(box.store!.state.teachers.length).toBe(FULL_STATE.teachers.length);
+    expect(teachersIn(disk.files.get('ders-programi-tumu.json'))).toBe(FULL_STATE.teachers.length);
+    expect(teachersIn(disk.files.get(day(0)))).toBe(FULL_STATE.teachers.length);
+  });
+
+  it('"Boş başla" ve bir öğretmen: ana dosya ve günlük korunuyor, yeni hâl kurtarma dosyasına', async () => {
+    const disk = fakeDisk(realFolder());
+    const { box, act, wait } = await launch(disk);
+    act(() => box.folder!.release());
+    act(() => box.store!.change(() => ONE_TEACHER));
+    await wait(3000);
+    expect(disk.files.get('ders-programi-tumu.json')).toBe(FULL_BUNDLE);
+    expect(disk.files.has(day(0))).toBe(false);
+    expect(teachersIn(disk.files.get('ders-programi-kurtarma-2026-10-24.json'))).toBe(1);
+    expect(box.folder!.shrunk?.before.teachers).toBe(FULL_STATE.teachers.length);
+    // The user says the small plan is the one: it goes over the live file.
+    await act(() => box.folder!.acceptShrink());
+    expect(teachersIn(disk.files.get('ders-programi-tumu.json'))).toBe(1);
+    expect(box.folder!.shrunk).toBeNull();
+  });
+
+  it('on bir gün tek öğretmenli plan: on dolu günlüğün onu da kalıyor (sondanın tekrarı)', async () => {
+    const disk = fakeDisk(realFolder());
+    localStorage.setItem(BASE_KEY, JSON.stringify(ONE_TEACHER));
+    const big = () => [...disk.files.values()].filter((v) => v === FULL_BUNDLE).length;
+    for (let k = 0; k <= 10; k++) {
+      vi.setSystemTime(new Date(TODAY.getTime() + k * 86_400_000));
+      await launch(disk);
+      unmount();
+    }
+    expect(big()).toBe(11); // the live file and all ten dailies
+    expect(disk.files.get('ders-programi-tumu.json')).toBe(FULL_BUNDLE);
+  });
+
+  it('küçük hâli kabul edilse de en dolu günlük budanmıyor', async () => {
+    const disk = fakeDisk(realFolder());
+    localStorage.setItem(BASE_KEY, JSON.stringify(ONE_TEACHER));
+    for (let k = 0; k <= 10; k++) {
+      vi.setSystemTime(new Date(TODAY.getTime() + k * 86_400_000));
+      const { box, act } = await launch(disk);
+      await act(() => box.folder!.acceptShrink());
+      unmount();
+    }
+    const fullDailies = [...disk.files.entries()].filter(
+      ([n, v]) => /\d{4}-\d{2}-\d{2}\.json$/.test(n) && v === FULL_BUNDLE,
+    );
+    expect(fullDailies.length).toBe(1);
+  });
+});
+
+describe('exe klasörü · JSON olmayan plan ekranda söyleniyor (B7.37)', () => {
+  it('klasör yazılmıyor ve satır kırmızı, planın adıyla', async () => {
+    localStorage.setItem(BASE_KEY, FULL);
+    localStorage.setItem(planKey('zz'), FULL.slice(0, 5000));
+    localStorage.setItem(
+      LIBRARY_KEY,
+      JSON.stringify({
+        activeId: '1',
+        plans: [
+          { id: '1', name: '1. plan', draft: false },
+          { id: 'zz', name: 'Bozuk', draft: false },
+        ],
+      }),
+    );
+    const disk = fakeDisk({});
+    const { box, act, wait } = await launch(disk);
+    act(() => box.store!.change((d) => ({ ...d, teachers: d.teachers.slice(1) })));
+    await wait(3000);
+    expect(writes(disk)).toEqual([]);
+    const status = box.folder!.status;
+    expect(status.kind).toBe('hata');
+    if (status.kind === 'hata') expect(status.text).toContain('Bozuk');
+  });
+});
+
+describe('exe klasörü · silmeden önceki hâl (SD1)', () => {
+  it('keepBefore günün silmeden-once dosyasını yazıyor, boş planı yazmıyor', async () => {
+    localStorage.setItem(BASE_KEY, FULL);
+    const disk = fakeDisk({});
+    const { box, act } = await launch(disk);
+    await act(async () => {
+      box.folder!.keepBefore(FULL_STATE);
+      box.folder!.keepBefore(EMPTY_STATE);
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    const name = 'ders-programi-silmeden-once-2026-10-24.json';
+    expect(JSON.parse(disk.files.get(name)!).teachers.length).toBe(FULL_STATE.teachers.length);
   });
 });

@@ -510,6 +510,13 @@ const EN: Sozluk = {
   Adres: "Address",
   "Güncellemeleri denetle": "Check for updates",
   "Yeni sürümü indir": "Download the new version",
+  "Kurulumu indir": "Download the installer",
+  "Şimdi kur": "Install now",
+  "Kuruluma bak": "See the installer",
+  "**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) için gerekli, onunla çok daha hızlı. İndirmek {mb} MB yer kaplar.": "**Install Mozaik on this computer.** The suggestion search (CP-SAT) needs it and is much faster with it. The download takes {mb} MB.",
+  "**Kurulum indi.** **Şimdi kur** deyince Mozaik kapanır, kurulum bir ilerleme çubuğuyla çalışır ve Mozaik kendiliğinden yeniden açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz. Masaüstündeki ya da görev çubuğundaki eski Mozaik simgesi de kurulan programı açar.": "**The installer is here.** With **Install now** Mozaik closes, the installer runs with a progress bar and Mozaik opens again by itself. Your plans are saved, nothing is lost. The old Mozaik icon on the desktop or the taskbar opens the installed program too.",
+  "**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır.": "**Install Mozaik on this computer.** The suggestion search (CP-SAT) only comes with the installer, and it is much faster. Your plans stay where they are.",
+  "**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Ayarlar → Hakkında'dan tekrar deneyebilirsiniz.": "**The installation did not finish** (code {kod}). Mozaik opened as it was, your plans are in place. Restart the computer and try again from Settings → About.",
   "Şimdi yeniden başlat": "Restart now",
   "Bakılıyor…": "Checking…",
   "En son sürümü kullanıyorsunuz.": "You are on the latest version.",
@@ -1859,6 +1866,29 @@ const EN: Sozluk = {
   "{toplam} öğretmenin ilk {kac} tanesi.": "The first {kac} of {toplam} {toplam:teacher|teachers}.",
   "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden \"Dosyadan aç\" ile açabilirsiniz.": "This is not a file with every plan in it. Open a single plan with “Open from file” in the File menu of the top bar.",
   "Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "The plan on screen will be replaced by the one in the file and the undo history cleared. If you may change your mind, press “Save” first.",
+  "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "The plan \"{plan}\" cannot be read, so no plan is being written to the folder.",
+  "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**The plan opened empty on this computer, but the {klasor} folder holds a fuller plan file:** {dosya}, {ogretmen} {ogretmen:teacher|teachers} and {ders} {ders:lesson|lessons}. Nothing is written to the folder until you choose.",
+  "Belgelerim'deki son kaydı aç": "Open the last save in Documents",
+  "Boş başla": "Start empty",
+  "**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı.": "**The plan shrank a lot:** {ogretmen} {ogretmen:teacher|teachers} and {ders} {ders:lesson|lessons} are left, and the last plan file in the folder has {eskiOgretmen} {eskiOgretmen:teacher|teachers} and {eskiDers} {eskiDers:lesson|lessons}. That file was kept; the new state was written separately as **{dosya}**.",
+  "Yeni hâlini asıl dosya yap": "Make the new state the main file",
+  "{ne} Son silmeyi geri almak için:": "{ne} To undo the last deletion:",
+  "Geri getir": "Bring back",
+  "Son silme geri alındı.": "The last deletion was undone.",
+  "son silmeden önceki hâl": "the plan before the last deletion",
+  "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
+  "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Nothing is written to the folder until you choose.",
+  "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
+  "son plan dosyasının tarihi":
+    "date of the last plan file",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**This plan has no plan file.** What you have done is only in this browser.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**The last plan file is from {tarih}.** What you have done since then is only in this browser.",
+  "Son plan dosyası: {tarih}.":
+    "Last plan file: {tarih}.",
 };
 
 registerSozluk("en", EN);

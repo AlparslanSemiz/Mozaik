@@ -35,6 +35,11 @@ import { buildReport } from '../../pure/feasibility';
 import { sampleState } from '../../pure/io/sample';
 import { SCHEMA_VERSION, type State } from '../../leaf/model/types';
 
+// The page skeleton mounts the whole app in jsdom and draws the print sheet:
+// 3-4 s under load on 2026-11-16, near Vitest's 5 s. Synchronous rendering,
+// no timer or wait in it (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 // jsdom has no ResizeObserver and `scrollFade.ts` uses one. Stubbed exactly as
 // App.test.tsx stubs it, and for the same reason: the absence is a jsdom
 // limitation, and a guard in shipped code would be a test artefact.
@@ -241,6 +246,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-yedek-0 · otomatik yedek · bir önceki açılış",
         "ders-programi-yedek-1 · otomatik yedek · 2 açılış önce",
         "ders-programi-yedek-2 · otomatik yedek · 3 açılış önce",
+        "ders-programi-silmeden-once · son silmeden önceki hâl",
         "ders-programi-tema · tema tercihi",
         "ders-programi-dil · dil tercihi",
         "ders-programi-kenar · kenar çubuğu tercihi",
@@ -259,6 +265,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-baski · kâğıt seçenekleri",
         "ders-programi-yenilik-gorulen · görülen sürüm notu",
         "ders-programi-oneri-olcum · öneri aramasının ölçümleri",
+        "ders-programi-son-dosya · son plan dosyasının tarihi",
       ]
     `);
   });

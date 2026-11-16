@@ -240,7 +240,9 @@ test.describe('40. Plan kitaplığı', () => {
     const bar = (await page.locator('header.topbar').boundingBox())!;
     const box = (await page.getByLabel('Plan', { exact: true }).boundingBox())!;
     expect(box.x + box.width).toBeLessThanOrEqual(bar.x + bar.width + 1);
-    await expect(page.getByRole('button', { name: 'Kaydet', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
+    ).toBeVisible();
   });
 });
 
@@ -515,7 +517,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
   test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
     await openWithSample(page);
     const single = await grab(page, () =>
-      page.getByRole('button', { name: 'Kaydet', exact: true }).click(),
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }).click(),
     );
 
     await openPlans(page);

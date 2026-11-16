@@ -19,6 +19,9 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- The site is moving to its own address, mozaik.alparslansemiz.com. A copy opened at the old address says so once the new one answers, and "Move plans" copies every plan there; the new address asks before it puts them in place, and nothing is deleted at the old one. If the new address cannot take them, all plans are saved to a plan file instead.
+- The "Save" button's tooltip says when the last plan file was saved. In a browser that does not write to a chosen folder, one strip appears when changes have gone a week without a plan file; "Later" hides it for the session.
+
 - "Getting started" on the School tab is now a checklist of five tasks: introduce the school (name, days, bell and the four lists), enter the lessons, mark the hours people cannot come, make the timetable, print. Each task ticks itself from the plan and has a button that takes you to its first missing part; the first one shows the week a new plan starts with (Tuesday to Sunday, 12 hours a day) so you can see whether it is right. The list folds to one line with the next task and, once everything is done or it is closed, to a single "show the list" link; "?" → Getting started brings it back too. It no longer disappears when the first teacher is added.
 - Lessons warns while you enter them when a class or teacher gets more lesson hours than open hours ("9A: 54 lesson hours, 48 open hours. 6 hours do not fit the week."), and the class or teacher is marked red in the list on the right.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
@@ -39,6 +42,10 @@ release is incomplete, the entry says so.
 - New names on screen, in all five languages: "Fill automatically (N cards)" is "Make the timetable", "Lay out from scratch" is "Make it again", "Advisor" is "Tips", the rule levels "Blocker / Warning" are "Strict / Preference", "N hours in the tray" is "N hours not placed", and a card is called a lesson.
 - Ctrl+K finds jobs as well as places: typing "print", "save", "open", "copy", "backup", "school name", "theme", "text size" or "make the timetable" does it or opens the one place it is done.
 - The selected tab is one neutral style; colour is kept for teachers, classes and states. A pressed choice is underlined instead of filled.
+- The program file is about 160 kB smaller (1.32 MB to 1.15 MB): the English, German, Spanish and French texts no longer each carry their own copy of the Turkish sentences, and a language is only unpacked when it is chosen.
+- Windows app: a copy that is not installed (the single Mozaik.exe) is now offered the installer of its own version in Settings → About ("Install Mozaik on this computer": the suggestion search's CP-SAT comes only with it), and once in a strip right after it has been updated. The installer runs with a progress bar instead of silently, and if it does not finish Mozaik opens again with a message that gives the code. The old Mozaik.exe is no longer deleted: it opens the installed program, so desktop icons and taskbar pins keep working.
+- Windows app: the suggestion search runs at a lower priority while CP-SAT works, so the window stays usable on a two-core computer.
+
 - Opening a plan file into an empty plan no longer asks first, because nothing can be lost; opening it over a plan that holds something still asks.
 - After "Add" in Lessons the weekly hours go back to 4 and the split to single hours, so the last lesson's number is not reused by mistake.
 - Adding a teacher without a subject now says "Önce bir branş seçin" (choose a subject first) instead of greying out the button without a word.
@@ -70,6 +77,16 @@ release is incomplete, the entry says so.
 - Mozaik answers faster on a slow computer. Dropping a card or undoing now shows the move on the grid at once and updates the tray, the counts and the status chip a moment later, instead of freezing for a quarter of a second. Opening Print shows the first pages at once and adds the rest while you look (printing still gets every page). Durdur stops a run at once; the end of an automatic run shows the week before the search for suggestions starts. Typing in the teacher and lesson search boxes no longer waits for the list.
 
 ### Fixed
+
+- If the app opens empty while the folder (Belgelerim\Ders Programı in the .exe) holds a fuller plan file, a strip says so, with "Belgelerim'deki son kaydı aç" (open it) and "Boş başla" (start empty); nothing is written to the folder until one is pressed. Before this, a wiped app profile opened empty, the first teacher typed in went over the whole school in the folder's main file and today's backup, and on each following day one more real daily backup was pruned.
+- A change that would leave the plan with under half the rooms, teachers, classes and lessons of the folder's last file no longer goes over it: it is written to that day's rescue file (`ders-programi-kurtarma-YYYY-MM-DD.json`) and a strip says so, with buttons to open the folder's copy or, after a question, keep the smaller plan. The daily backup with the most work in it is never pruned.
+- Deletions that ask no question (class, room, subject, option, teacher, lesson, "Empty the timetable", "Lay out again"), "Delete everything", the sample school over a plan and "Open from file" now keep the plan as it was before them. After a reload, if the plan has not changed since, a strip offers it once: "Son silmeyi geri almak için: Geri getir". Before this their undo lived only in memory and a reload lost it. In a folder the copy is also written as that day's `ders-programi-silmeden-once-YYYY-MM-DD.json`.
+- When a plan's saved text is not even JSON, the folder line now turns red and names the plan instead of the folder silently not being written.
+- "Open all from file" names the plans it skips because they have no id or repeat an earlier one's, instead of dropping them without a word.
+- The plan list is no longer rewritten at every start, and fields a newer copy of Mozaik put in it are kept.
+- On the site, Mozaik asks the browser to keep its storage (`persist`) after the first real change, so it is not cleared when space runs low or, in Safari, after a week without a visit.
+- A site update could store the previous version under the new version's name for up to ten minutes; the service worker now asks past the browser's cache.
+- Saving a plan file could fail in some Safari versions, because the file's address was released in the same moment as the click.
 
 - Check counted a lesson on closed hours once per hour, so one two-hour lesson read "2 lessons" in the heading and in the top bar.
 - Closing a dialog (search, keyboard shortcuts, a question, a teacher's or class's panel, a lesson's window) with Esc or a button puts the keyboard back where it was, on the button or card that opened it, instead of at the top of the page. If that is gone, the keyboard lands in the screen's content.
@@ -112,6 +129,10 @@ release is incomplete, the entry says so.
 - Dragging a card along its row no longer stutters in the Fit density. On a full week, 23% of frames were dropped even on a fast machine, and nearly all of them on a slow one. Now none are, and the column widths are exactly what they were. The Linux build also stuttered in both densities, and it is smooth now too.
 - In the Fit density, card text no longer ends in "…" where it can be shown: a class name is written with its first word ("411A" for "411A SAY", on the card and on the class row), and a line that still does not fit is drawn smaller, down to 9px, instead of being cut. Rows keep their height, the full name is still what the card says to a screen reader, and the Comfortable and Spacious densities are unchanged. On a 1920 screen a full week with long class names went from 204 of 211 cards cut to 2; at Windows 125% the sample school went from 315 of 374 to none.
 - In the Fit density, a card in the first lesson of a day is now as wide as the cards beside it. The thick line between days was drawn inside that lesson's column and took 3px of its card, so on Windows a full week with long class names still showed five cards as "41…" at 1920. They now read "415D", "450C" and so on; the other columns are a quarter of a pixel narrower.
+
+### Security
+
+- Windows app: the window now runs under a strict Content Security Policy (no remote scripts, styles, fonts or connections). Updates are only ever downloaded up to the size the release states, and the installer is run from a new folder of its own in the temporary folder. The fast suggestion search's library is loaded only by an installed copy, from its own folder.
 
 ## [2.2.0] - 2026-09-26
 

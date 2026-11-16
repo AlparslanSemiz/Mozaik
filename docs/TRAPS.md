@@ -122,6 +122,31 @@ yere yazar ve budama yalnız iş taşıyan günlükleri sayar. Bir savunma katma
 "yok"u ayırmıyorsa, kendi yedeğini silen katman o olur. `src/platform/storage/okunamayan.test.tsx`,
 `src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts`.
 
+### 159 · "Boş değil" "dolu" demek değil: tek öğretmen bir okulun yedeğini siler
+Tuzak 153'ün çaresi klasörü yalnız boş pakete karşı korudu. Exe'nin WebView2 deposu silinince
+Mozaik boş açılıyor, ilk öğretmen (ya da örnek okul) yazılınca paket "iş taşıyor" sayılıyor ve
+canlı dosyanın ve günün yedeğinin üstüne gidiyordu; sonraki her gün o küçük günlük de "dolu"
+sayıldığı için budama her gün bir gerçek yedek daha sildi: on gerçek günlük ve on bir gün tek
+öğretmenle sıfır büyük kopya kaldı (denetim 2026-11-16, sonda). Açılışta uyarı da yoktu. Sebep:
+"boş mu" sorusu sıfırla sıfır olmayanı ayırıyor, ölçeği değil. Çare üç katmanlı: boş ya da
+okunamayan açılış klasöre yazmadan önce oradaki kaydı okur ve daha doluysa şeritle önerir,
+seçilene kadar hiçbir şey yazmaz; dört liste satırının yarısının altına düşüren yazım canlı
+dosyaya değil günün kurtarma dosyasına gider ve ekranda söylenir; budama en dolu günlüğü hiç
+silmez. Bir koruma "var mı"yı soruyorsa, "ne kadar"ı soran bir koruma daha gerekir.
+`src/platform/storage/useFolder.test.tsx`, `src/platform/storage/folder.test.ts`,
+`e2e/okunamayan.spec.ts`.
+
+### 160 · Bellekteki geri al yenilemeden sağ çıkmaz
+SD1 soruları kaldırıp her silmeye "Geri al" verdi. Geri al reducer'ın belleğinde yaşıyor; sayfa
+yenilenince ya da exe penceresi kapanıp açılınca silmeden önceki hâl hiçbir yerde değildi:
+otomatik kayıt silinmiş hâli 400 ms'de yazmıştı, oturum zinciri ise oturumun BAŞINDAKİ hâli
+tutuyor (denetim 2026-11-16: sınıf silindi, sayfa yenilendi, sınıf hiçbir anahtarda yok). "Geri
+alınabilir" diye sorusu kaldırılan bir eylem, geri almanın yaşadığı yer kadar geri alınabilir.
+Çare: her sorusuz silmeden, `Her şeyi sil`den, dolu planın yerine örnek okuldan, `Baştan diz`den ve
+`Dosyadan aç`tan önce açık plan tek bir depo yuvasına (`ders-programi-silmeden-once`) ve klasörde
+günün dosyasına yazılır, sonraki açılış bir kez "Geri getir" der. `src/platform/storage/beforeDelete.test.ts`,
+`e2e/okunamayan.spec.ts`.
+
 ---
 
 ## Dağıtım kimlikleri, tek kaynak ve sürüm
@@ -308,6 +333,54 @@ ve kütüphane 99 dosya, 53 MB. `cpsat_var` eş zamanlı bir komuttu, yani Tauri
 parçacığında koşturuyordu: ilk öneri aramasında pencere bu süre boyunca donardı. Karşı önlem:
 `cpsat_var` async ve yüklemeyi bekleme havuzunda yapıyor (`cpsat.rs`). Bir sonraki adım ölçmek:
 babanın türünden bir Mac'te ilk aramanın süresi (TODO B7.42).
+
+### 161 · Sürüm numarasına bakan bir köprü, eski kopyanın bilmediği alanı aynı sürümde hiç sunmaz
+Okunarak bulundu 2026-11-16 (Windows denetimi). Sahadaki 2.2.0 manifestten yalnız `exe` ve
+`boyut`'u okur; kurulum alanlarını taşıyan sürümde tek başına exe'yi takas eder. O exe kendi
+numarasıyla sorar, manifest aynı numarayı söyler, `karar` yalnız `is_newer`'a baktığı için
+"güncel" der: kurulum ve CP-SAT babaya hiçbir zaman ulaşmaz, DECISIONS'taki "bir sonraki
+Denetle kurulumu önerir" cümlesi doğru değildi. Karşı önlem: `update.rs`'in `windows_karari`'sı
+kurulmamış bir kopyaya aynı sürümün imzalı kurulumunu `gecis` olarak sunuyor, ve sayfa bunu
+güncellemeden sonraki ilk açılışta bir kez kendiliğinden söylüyor (`guncelleme_durumu`;
+2.2.0 yenisini bayraksız başlattığı için işaret yanında bıraktığı `.eski`). Koruyan:
+`a_standalone_copy_at_the_same_version_is_offered_the_installer` ve komşuları, 2.2.0'ın
+`karar`'ının kopyası (`the_published_220_reads_this_manifest...`), ve `guncelleme-windows.yml`'in
+gerçek 2.2.0 evresi (tuzak 164). Genel kural: bir köprüyü eski kopyanın kodunu okuyarak
+sınamak, yeni kopyanın kodunu değil.
+
+### 162 · Eski dosyayı silmek, ona bağlı her kısayolu ve sabitlemeyi kırar
+Okunarak bulundu 2026-11-16. Kurulan program açılışta tek başına eski kopyayı siliyordu
+(tek başına kopyanın bıraktığı not dosyasıyla). Babanın görev çubuğunda sabitlediği ya da masaüstüne koyduğu simge o
+dosyaya bağlı: silinince simge "öğe bulunamadı" der, kurulumun açtığı yeni kısayolu ise
+aramayı bilmez. Karşı önlem: eski dosya kalıyor; kurulan program yolunu
+`%LOCALAPPDATA%\com.dersprogrami.arac\kurulu-yol.txt`'ye yazıyor, tek başına kopya açılışta
+onu bulur ve kurulan program en az kendisi kadar yeniyse onu başlatıp çıkıyor
+(`kurulu_hedef`: yalnız kaldırıcısı yanında duran başka bir `.exe`). Koruyan:
+`a_standalone_copy_forwards_only_to_an_installed_program`, `the_note_forwards_only_to_an_installed_program_at_least_as_new`, ve
+`kurulum-windows.yml`'de eski dosyanın kurulan programı açtığı adım.
+
+### 163 · Sessiz kurulum (`/S`) durunca hiçbir şey söylemez, program yalnız kaybolur
+Okunarak bulundu 2026-11-16 (Tauri'nin NSIS şablonu). `/S` altında çalışan kopya
+kapatılamazsa kurulum sessizce `Abort` eder; WebView2 kurulumu, disk ya da virüs tarayıcısı
+da aynı yere düşer, ve `/R` programı yalnız başarıda yeniden açar. `kurulumu_baslat` kurulumu
+başlatıp hemen çıkıyordu: başarısızlıkta ekranda pencere de cümle de kalmazdı. Karşı önlem:
+kurulum `/P` (ilerleme çubuğu, hata kutusu) ile, ve geçici klasördeki bir bekleyici kopya
+(`Mozaik-kurulum-bekleyici.exe`, kurulumun kapattığı `Mozaik.exe` adını taşımıyor) onu
+bekleyip başarısızlıkta eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açıyor; sayfa kodu
+yazan bir uyarı gösteriyor. Koruyan: `the_installer_runs_passive_never_silent`,
+`the_waiter_reads_its_arguments...`; başarısız yolu bugün hiçbir CI koşmuyor.
+
+### 165 · Tauri `script-src`'e özet ekleyince `style-src`'e de nonce ekler, ve `'unsafe-inline'` düşer
+Ölçüldü 2026-11-16, CSP eklenirken (`e2e/csp.spec.ts`). `tauri.conf.json`'da bir `csp`
+verilince Tauri sayfayı gömerken her satır içi `<script>`'in `sha256-`'sını `script-src`'e,
+her `<style>`'a bir nonce koyup onu da `style-src`'e ekler. CSP2'den beri bir hash ya da
+nonce bulunan kaynak listesinde `'unsafe-inline'` yok sayılır: Radix'in pencere açarken
+çalışma anında yazdığı `<style>` reddedildi ("Applying inline style violates ...
+'unsafe-inline' is ignored if either a hash or nonce value is present"), oysa yapılandırmada
+`'unsafe-inline'` yazıyordu. Karşı önlem: `dangerousDisableAssetCspModification:
+["style-src"]`, `script-src` Tauri'nin özetlerine bırakılır. Koruyan test `e2e/csp.spec.ts`:
+sayfayı Tauri'nin hesabıyla kurulan başlık altında açar ve her ihlal bir konsol hatasıdır;
+bayrak kaldırılınca kırmızı.
 
 ## Çözücü ve kısıt motoru
 
@@ -1343,6 +1416,40 @@ yalnız bir programın YOKLUĞUNU sınayan test sahtelerle tek başına koşar. 
 gösterildi (TESTFINDINGS 2026-10-10). Kural: **bir kabuk testinin PATH'i, betiğin
 yapmaması gereken şeyi yapabileceği kadar geniştir.**
 
+### 164 · Bugünkü kodu eski diye numaralamak, eski kodu sınamak değildir
+Okunarak bulundu 2026-11-16. `guncelleme-windows.yml`'in "eski" kopyası bu commit'in kodu,
+0.0.1 diye derlenmiş: güncelleme yolu yeşildi ama sahadaki 2.2.0'ın `karar`'ı, `verify`'ı ve
+takası hiç koşmamıştı, kurulum yolu (bekleyici, Restart Manager, kaldırma) da hiç, ve hiçbir iş
+`ortools.dll`'i Windows'ta yüklemiyordu (`MOZAIK_ORTOOLS` yokken küçük model testi erken
+dönüyor). Tuzak 161 tam bu boşlukta kaldı. Karşı önlem: aynı iş akışı yayınlanmış v2.2.0'ı
+(özeti sabit) kendi düğmeleriyle koşuyor; adresi derlenmiş olduğu için github.com runner'da
+hosts ve makinenin güvendiği bir sertifikayla yerel sunucuya çevriliyor
+(`scripts/guncelleme-220.mjs`). `kurulum-windows.yml` kurulumu kurup kaldırıyor ve CP-SAT'ı
+kurulan DLL'lerle koşuyor; `npm run yayinla` ikisini de bekliyor.
+
+### 170 · Izgara bir render önce çizilir, havuz sonra: tek seferlik okuma eskiyi okur
+`program.spec.ts`'in "dağılım seçicisi bütün seçenekleri açıyor" testi CI'da iki ayrı
+dalda "> 146, received 146" ile düştü, ikisi de arayüze dokunmuyordu, ve yeniden
+koşunca geçti (2026-11-15, 43769965101 ve 43773651075). Havuz planı `useDeferredValue`
+ile bir render geriden izliyor (`Program.tsx`): bir bırakmada ya
+da dağılım değişince ızgara önce boyanıyor, havuz React'in kesebildiği sonraki render'da.
+Test ızgaranın boşaldığını bekledi, sonra havuzun saatini bir kez okudu; yüklü bir
+makinede havuz henüz eski toplamı gösteriyordu. Aynı pencere `dragAndDrop()`'un hemen
+ardında da açıktı, "önce" değeri bırakılan kartı hâlâ içerebiliyordu. Çare `e2e/helpers.ts`'te:
+`poolHours()` havuzun saatini yığın boyuyla birlikte sayıyor (aynı kartlar tek bir
+`.pool-card` olarak çiziliyor, `data-count` kaç tane olduğunu söylüyor), `dragAndDrop()`
+havuz kartı bırakana kadar dönmüyor, ve test sonrasını `expect.poll` ile bekliyor.
+İşlemci 8 kat yavaşlatılınca eski hâli düşüyor, yenisi geçiyor (WORKLOG 2026-11-16).
+Aynı testin ikinci düşüşü yüklü makinede 30 s'lik test sınırıydı: `dragAndDrop()`
+satırın görünen her hücresine fareyi götürüp 40 ms bekliyordu, CI'da test 11-13 s
+sürüyordu. Sürükleme satırın cevabını başta bir kez boyuyor (`can-ok`), yardımcı artık
+yalnız o hücreleri deniyor ve sabit beklemenin yerine vurgunun boyanmasını bekliyor.
+Öğretmenler listesinin sıralaması da aynı ertelemeyle geliyor (`Teachers.tsx`):
+`liste.spec.ts`'in sıralama testi seçimden hemen sonra okuyup eski sırayı buldu (CI'da
+bir kez, yerelde tam süitte bir kez); iddiaları artık `toPass` ile yeniden deneniyor.
+Kural: **bir ekranın ertelenmiş parçası, başka bir parçanın değiştiğini gördükten sonra
+da tek seferde okunmaz, kendi değeri beklenir.**
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1477,14 +1584,40 @@ dışarıdan `timeout` sarılmaz. Betik komutun bütün ağacını ortamındaki 
 buluyor, süre dolunca, bir sinyal gelince ve komut geride bir şey bırakıp çıkınca önce
 ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` ölçüyor.
 
+### 171 · Birim testinin süre sınırı, yüklü bir makinede makineyi ölçer
+Başka oturumların aynı çekirdekleri doldurduğu bir gecede (2026-11-16, 8 çekirdekte yük
+ortalaması 78 ile 266 arası) `npm run hizli`'de yedi test Vitest'in sınırını aştı ya da ona dayandı:
+`linuxKur.test.ts` (bash, git ve `npm run build` başlatıyor), `useFolder.test.tsx`
+(her açılışta modülleri baştan yüklüyor), `App.test.tsx`, `sentences.test.tsx` ve
+`programScreen.test.tsx` (bütün uygulamayı jsdom'da çiziyor), `relax.test.ts`
+(saati olmayan SAT araması: "aynı girdi" 5 s'yi, derslik darboğazı 30 s'lik sınırında
+24 s) ve `sample.test.ts`'in dropMap testi. İlk altısında beklenen bir saat ya da yarış
+yok, iş eşzamanlı ve belirli; tek eksik süre sınırının gerekçesiydi. Dosyanın başında
+`vi.setConfig({ testTimeout })` ile, neyin ağır olduğu ve ölçülen süreyle yükseltildi.
+dropMap testi başkaydı: 50 ms'lik mutlak bir eşiği vardı ve açgözlü doldurmayı ikinci
+kez kendi içinde koşuyordu, yani süresinin çoğu ölçtüğü şey değildi. Doldurma dosyada
+bir kez yapılıyor, eşik de görelileşti: dolu haftanın medyanı boş haftanınkinin dört
+katını geçmiyor, ikisi yan yana ölçülerek. Hücre başına haftayı yürüyen bir mutasyon
+oranı 1,3'ten 6,7'ye çıkardı ve testi kırmızıya çevirdi, eski 50 ms'lik eşik aynı
+mutasyonda (13 ms) yeşil kalırdı. Aynı gece tam süitte `solver.test.ts`'in "Roboders'teki
+saatlerle haftanın tamamını diziyor"u iki blok eksik kaldı: sınır değil, sonuç düştü,
+çünkü test çözücünün varsayılan 15 s'lik saatiyle koşuyordu ve yükte iş 18,5 s sürdü. İddia
+"bu hafta dizilebilir"; çözücünün hamle sayan durma kuralı umutsuz onarımı zaten bitiriyor,
+o yüzden bütçe 600 s, yanındaki "olduğu gibi kurulamıyor" testindeki gibi. E2E'de aynı
+sınıf: `erisim.spec.ts`'in dolu veriyle axe taramaları tek başına 8-25 s, tam süitte dördü
+30 s'yi aştı; taramalar `test.slow()` ile. Kural: **belirli ama ağır bir test sınırını
+gerekçesiyle kendisi söyler; bir süre eşiği birim testinde yalnız aynı anda ölçülen
+bir karşılaştırmaya karşı durur (TESTPLAN TP15); sonucu saate bağlı bir işin "yapabilir"
+iddiası saati kapatarak sınanır.**
+
 ---
 
 ## Dizin
 
 | Grup | Tuzaklar |
 |---|---|
-| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158 |
+| Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1492,13 +1625,15 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143, 156 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151, 164, 170 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150, 171 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 158, yeni bir tuzak 159'dan devam eder. Test stratejisi
+büyük kullanılan numara 171, yeni bir tuzak 172'den devam eder. 166 ile 169 arası
+boş: 2026-11-16'da 159-165 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
+diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

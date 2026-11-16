@@ -5,7 +5,14 @@ import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import { addRoom, deletionNotice, deleteRoom, updateRoom } from '../../pure/entities';
 import { useInspect } from '../program';
-import { moveFocusFromDeleted, type PanelProps, useT, useToast, useUndoIf } from '../common';
+import {
+  moveFocusFromDeleted,
+  type PanelProps,
+  useT,
+  useKeepBefore,
+  useToast,
+  useUndoIf,
+} from '../common';
 import { parseRooms } from '../../pure/io';
 import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
 import { roomListConfig } from '../../pure/lists';
@@ -14,6 +21,7 @@ export default function Rooms({ state, change }: PanelProps) {
   const t = useT();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
 
@@ -165,6 +173,7 @@ export default function Rooms({ state, change }: PanelProps) {
                             const said = deletionNotice(state, 'room', r.id);
                             const next = deleteRoom(state, r.id);
                             moveFocusFromDeleted(e.currentTarget);
+                            keepBefore(state, said);
                             change((d) => (d === state ? next : deleteRoom(d, r.id)), said);
                             notify(said, 'info', {
                               label: t('Geri al'),

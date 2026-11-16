@@ -12,6 +12,12 @@ import AppRoot from './Root';
 import { blockPlan } from '../../leaf/model/blocks';
 import { sampleState } from '../../pure/io/sample';
 
+// Each test mounts the whole app over the sample school in jsdom, and the
+// first walks all six tabs: 1-3 s on a quiet machine, 6 s on 2026-11-16 under
+// load, over Vitest's 5 s. It is synchronous rendering with no timer or wait
+// in it, so the only thing a 5 s limit measured was the machine (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }

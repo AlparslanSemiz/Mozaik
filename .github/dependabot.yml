@@ -41,8 +41,8 @@ updates:
     labels: ['bağımlılık']
 
   # İş akışlarının kendi eylemleri de bağımlılık: `actions/checkout@v4` bir gün
-  # eskir ve bunu kimse fark etmez. Üçüncü taraf eylemler tam commit SHA'sıyla
-  # sabit (yanında sürüm yorumu). Dependabot etiketli olanın (rust-cache) SHA'sını ve yorumunu
+  # eskir ve bunu kimse fark etmez. Bütün eylemler (actions/* dahil) tam commit SHA'sıyla
+  # sabit (yanında sürüm yorumu). Dependabot etiketli olanların SHA'sını ve yorumunu
   # birlikte günceller; rust-toolchain'in `stable` dalı etiket değil, o elle tazelenir.
   - package-ecosystem: github-actions
     directory: /

@@ -55,7 +55,8 @@ kusur düzelince kırmızıya döner, ve o commit'te sıradan bir gerileme testi
 | Kanarya | `.github/workflows/kanarya.yml` | Salı 02:00 UTC ve elle: denetim ve ana E2E'nin bir parçası runner'ın bir sonraki imajında (bugün `ubuntu-26.04`). Hiçbir şeyi kilitlemez; iki hafta yeşil kalınca `ci.yml`'in sabit sürümü ona çekilir |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 | Gerçek exe, Windows | `.github/workflows/exe-windows.yml` | Pazartesi 01:30 UTC, exe'ye dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: aynı süit `Mozaik.exe`'ye karşı, WebView2'de. Yavaş süit, push'u ve birleştirmeyi beklemez; `npm run yayinla` etiketten önce onun da yeşilini bekler |
-| Güncelleme, Windows | `.github/workflows/guncelleme-windows.yml` | exe'ye, şemaya ya da depolama koduna dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: son Release'in exe'si veri üretir, bu commit'in exe'si onun yerine geçer ve veriyi eksiksiz, şimdiki şemada açar. `npm run yayinla` her sürümde etiketten önce onun da yeşilini bekler |
+| Güncelleme, Windows | `.github/workflows/guncelleme-windows.yml` | exe'ye, şemaya ya da depolama koduna dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: son Release'in exe'si veri üretir, bu commit'in exe'si onun yerine geçer ve veriyi eksiksiz, şimdiki şemada açar; sonra yayınlanmış v2.2.0 kendi güncelleyicisiyle bu commit'e geçer ve yeni exe kurulumu önerir. `npm run yayinla` her sürümde etiketten önce onun da yeşilini bekler |
+| Kurulum, Windows | `.github/workflows/kurulum-windows.yml` | kuruluma ya da güncellemeye dokunan bir `main` push'unda ve elle: tek başına exe kendi düğmeleriyle kuruluma geçer (bekleyici, `/P /R`), eski dosya kurulan programı açar, CP-SAT kurulan DLL'lerle cevap verir, kaldırma veriyi bırakır. `npm run yayinla` bekler |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
@@ -154,6 +155,15 @@ exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adr
 fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
 çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
 karşılaştırır: ikili ve uzun cümleler, sonradan eklenen cümleler ve varsayımlar.
+
+**Süre sınırı.** Vitest'in 5 s'si bir askıda kalmayı yakalamak için, makinenin hızını
+ölçmek için değil. Belirli ama ağır bir dosya (bütün uygulamayı jsdom'da çizen, alt süreç
+başlatan, modülleri baştan yükleyen, saati olmayan bir arama yapan) sınırını başında
+`vi.setConfig({ testTimeout })` ile, neyin ağır olduğunu ve ölçülen süreyi yazarak
+yükseltir. Bekleyen ya da yarışan bir testin sınırı yükseltilmez, beklediği koşul
+beklenir. Bir birim testinde mutlak bir süre eşiği yok (TP15): performans iddiası aynı
+anda, sırayla ölçülen bir karşılaştırmaya karşı durur, `sample.test.ts`'in dropMap'i
+dolu haftayı boş haftaya karşı ölçtüğü gibi (tuzak 171).
 
 ### Değişmez (özellik bazlı)
 
@@ -582,7 +592,7 @@ haftalık arka planda koşar (CLAUDE.md).
 - **Paralellik.** `fullyParallel: true`, dört işçi. `file://` altında her Playwright context'inin kendi localStorage'ı var, paralel testler birbirinin verisini görmüyor. Bu ölçülerek doğrulandı.
 - **Dil.** `kapan.ts` ilk yüklemede dili Türkçeye sabitler.
 - **Gizli sekmeler.** Program sekmesi React'in `<Activity>`'si içinde, gizliyken DOM'da kalıyor. Bir ekranın ne dediğini soran test `e2e/helpers.ts`'teki `onScreen()` ile hangi ekran olduğunu söyler (tuzak 104).
-- **Beklemeler.** Depoya yazılanı okumadan önce sayfanın ne yazdığı beklenir (`settledText()`, tuzak 24 ve 51). Bir düzeni ya da boyanmış bir değeri okumadan önce hareketin bitmesi beklenir (`settledMotion()`, tuzak 59 ve 99).
+- **Beklemeler.** Depoya yazılanı okumadan önce sayfanın ne yazdığı beklenir (`settledText()`, tuzak 24 ve 51). Bir düzeni ya da boyanmış bir değeri okumadan önce hareketin bitmesi beklenir (`settledMotion()`, tuzak 59 ve 99). Havuz planı bir render geriden izler: ızgaradaki bir değişiklikten sonra havuzun saati `poolHours()` ile ve `expect.poll` ile okunur, `dragAndDrop()` havuz kartı bırakana kadar dönmez (tuzak 170).
 - **Kaydırma çubukları.** Playwright Chromium'u `--hide-scrollbars` ile açar, bir çubuğun yer kapladığını ölçen test kendi tarayıcısını açar (tuzak 94).
 
 ## Test edilemeyenler

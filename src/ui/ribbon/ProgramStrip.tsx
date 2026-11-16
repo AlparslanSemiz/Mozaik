@@ -99,6 +99,7 @@ export function programStrip({
   dialogs: { prompt, alert },
   notify,
   undoIf,
+  keepBefore,
   strip,
 }: StripContext): React.ReactElement {
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
@@ -164,6 +165,7 @@ export function programStrip({
             n: hours,
           });
     const next = sanitize(removeProgram(state, currentProgram.id));
+    keepBefore(state, said);
     manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
@@ -176,6 +178,7 @@ export function programStrip({
     // step of the history (useSolver's `finish`), so its notice can offer
     // "Geri al" for the whole of it. Nothing on the grid moves until the run
     // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
+    keepBefore(state, t('Program yeniden yapıldı.'));
     solver.start(state, { keepPlaced: false, exclusions }, (next) => {
       const said =
         pinnedHours === 0
@@ -191,6 +194,7 @@ export function programStrip({
     // happens and the notice offers that click. The pinned cells stay, and so
     // do their pins: nothing takes a pinned block down but unpinning it.
     const next = keepPinnedOnly(state);
+    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
     change((d) => (d === state ? next : keepPinnedOnly(d)));
     notify(
       pinnedHours === 0
@@ -228,7 +232,7 @@ export function programStrip({
       <Sep />
 
       {/* THE screen's one primary (Sadeleşme, phase 1, 2026-11-16): it was
-          "Otomatik diz (N kart)" beside an equally loud "Baştan diz". The
+          the old "Otomatik diz (N kart)" beside an equally loud "Baştan diz". The
           count lives in the pool and in the status chip; "Yeniden yap" is
           behind Daha fazla, because emptying a laid-out week in one click is
           not the click that should be next to the everyday one. */}

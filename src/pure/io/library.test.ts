@@ -355,6 +355,7 @@ describe('veriler nerede — depo raporu', () => {
       backupKey(2),
     ]);
     expect(rows.slice(6).map((r) => [r.key, r.what])).toEqual([
+      ['ders-programi-silmeden-once', 'son silmeden önceki hâl'],
       ['ders-programi-tema', 'tema tercihi'],
       ['ders-programi-dil', 'dil tercihi'],
       ['ders-programi-kenar', 'kenar çubuğu tercihi'],
@@ -373,6 +374,7 @@ describe('veriler nerede — depo raporu', () => {
       ['ders-programi-baski', 'kâğıt seçenekleri'],
       ['ders-programi-yenilik-gorulen', 'görülen sürüm notu'],
       ['ders-programi-oneri-olcum', 'öneri aramasının ölçümleri'],
+      ['ders-programi-son-dosya', 'son plan dosyasının tarihi'],
     ]);
   });
 

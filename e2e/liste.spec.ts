@@ -143,11 +143,16 @@ test.describe('49. Liste araçları', () => {
     const entered = await Promise.all((await names()).map((i) => i.inputValue()));
     expect(entered[0]).toBe('Mehmet Çelik'); // sample order, not alphabetical
 
+    // The rows follow the sort a render late (`useDeferredValue` in
+    // Teachers.tsx): read once right after the pick, they were sometimes still
+    // the old order (pitfall 170). So the same assertions are retried.
     await page.locator('select.sort-pick').selectOption({ label: 'Ada göre' });
-    const alpha = await Promise.all((await names()).map((i) => i.inputValue()));
-    expect(alpha).not.toEqual(entered);
-    // Turkish collation, done by the browser: Ç sorts after C, not after Z.
-    expect([...alpha].sort((a, b) => a.localeCompare(b, 'tr'))).toEqual(alpha);
+    await expect(async () => {
+      const alpha = await Promise.all((await names()).map((i) => i.inputValue()));
+      expect(alpha).not.toEqual(entered);
+      // Turkish collation, done by the browser: Ç sorts after C, not after Z.
+      expect([...alpha].sort((a, b) => a.localeCompare(b, 'tr'))).toEqual(alpha);
+    }).toPass({ timeout: 10_000 });
 
     const sort = page.locator('select.sort-pick');
     expect(await sort.locator('option').allInnerTexts()).not.toContainEqual(
@@ -156,9 +161,11 @@ test.describe('49. Liste araçları', () => {
     await sort.selectOption({ label: 'Ders yüküne göre' });
     // Counted from the END for the same reason: "Ders saati" is always the
     // cell before the buttons, whatever gets inserted ahead of it.
-    const loads = await rows(page).locator('td:nth-last-child(2)').allInnerTexts();
-    const numbers = loads.map((t) => Number(t.trim()));
-    expect([...numbers].sort((a, b) => b - a)).toEqual(numbers);
+    await expect(async () => {
+      const loads = await rows(page).locator('td:nth-last-child(2)').allInnerTexts();
+      const numbers = loads.map((t) => Number(t.trim()));
+      expect([...numbers].sort((a, b) => b - a)).toEqual(numbers);
+    }).toPass({ timeout: 10_000 });
   });
 
   test('dersler listesi de aranıyor — 99 satırın olduğu tek yer', async ({ page }) => {

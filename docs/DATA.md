@@ -180,6 +180,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-plan-<id>` | öteki planların State'i |
 | `ders-programi-planlar` | plan listesi: `{ activeId, plans: [{ id, name, draft }] }` |
 | `ders-programi-yedek-0`, `-1`, `-2` | oturum yedekleri, açılıştaki plana ait |
+| `ders-programi-silmeden-once` | son sorusuz silmeden önceki açık plan: `{ planId, at, label, state, seen? }` (TODO SD1) |
 | `ders-programi-tema` | tema |
 | `ders-programi-dil` | arayüz dili |
 | `ders-programi-kenar` | kenar çubuğu tercihi, ray kalktığı için tarihsel |
@@ -198,6 +199,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-baski` | kâğıt seçenekleri, tek bir JSON kaydı |
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 | `ders-programi-oneri-olcum` | bu makinedeki son 20 öneri aramasının ölçümü (`relaxLog.ts`) |
+| `ders-programi-son-dosya` | son plan dosyasının zamanı ve ondan sonraki ilk değişikliğin zamanı, tek bir JSON kaydı (`fileSaved.ts`) |
 
 Bu listenin tamamı Ayarlar → Hakkında'daki "Veriler nerede" tablosunda görünür, ve
 satırları `storageReport.ts` üretir, tercihlerinkini
@@ -210,6 +212,19 @@ her `ders-programi*` anahtarını o tabloda arar. Yeni bir tercih anahtarı
 Yalnız bir oturumu ilgilendiren bir tercih `sessionStorage`'a gider ve bu satır
 borcunu doğurmaz. Güncelleme şeridinin `Sonra`'sı böyle: o oturumda bir daha
 sorulmaz.
+
+Son plan dosyasının kaydı (`ders-programi-son-dosya`) üst çubuğun ve Ayarlar'ın iki
+dosyasında da yazılır. Tarihi Dosyaya kaydet'in ipucunda görünür; seçilmiş bir klasöre
+yazılmayan bir tarayıcıda (Firefox, Safari, ya da klasör seçmemiş Chromium) dosyadan sonraki
+ilk değişiklik bir haftayı geçince tek bir şerit çıkar, `Sonra` onu o oturum için kapatır.
+Sitede iş taşıyan ilk değişiklikte bir kez `navigator.storage.persist()` istenir
+(`persist.ts`).
+
+Depo kökene bağlı: aynı tarayıcıda `alparslansemiz.github.io` ile
+`mozaik.alparslansemiz.com` iki ayrı depo. Eski adresten yeni adrese geçiş planları bir
+paket olarak kopyalar ve yeni adres Tümünü dosyadan aç'ın sorusuyla sorar
+(`move.ts`, [BUILD.md](BUILD.md) "Alan adına geçiş"); eski adresteki anahtarlar yerinde
+kalır.
 
 Seçilen klasörün tutamağı localStorage'da değil `IndexedDB['ders-programi-klasor']`'da,
 çünkü bir `FileSystemDirectoryHandle` string değil ve onu saklayabilen yol structured
@@ -271,7 +286,9 @@ okunamıyorsa soru sorulmaz ve hiçbir şey değişmez. Paket olmayan bir dosya 
 aç"a verilince üst çubuğa yalnız tek bir plansa yollanır (üst çubuğun kendi gerekçesiyle
 reddedeceği eksik ya da yeni bir plan da); yarım kalmış ya da JSON olmayan dosya için
 "okunamadı" denir (TODO B7.35).
-`state`'i nesne olmayan bir girdi de okunamayan plan sayılır (`skipped`). Depo dolduğu için
+`state`'i nesne olmayan bir girdi de okunamayan plan sayılır (`skipped`). Kimliği olmayan ya da
+kendinden önceki bir girdinin kimliğini taşıyan girdi de açılmaz (ilki kalır), ama sessizce
+değil: eksik sayısına girer ve onay ile not adını söyler (`dropped`, 2026-11-16). Depo dolduğu için
 yazılamayan plan da açılmamış sayılır: buradaki aynı kimlikli plan kalır, yoksa dizine verisiz
 satır girmez; hiçbir plan yazılamazsa hiçbir şey silinmez ve not depolamayı söyler.
 `bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil.
@@ -292,11 +309,47 @@ taşımayan bir paket yalnız kaybedecek bir şey olmayan yere yazılır: olmaya
 bir dosyaya (`holdsWork()`). Açılıştaki ilk yazım, exe'de de tarayıcıda da, yalnız açık plan
 depodan okunduysa yapılır; yoksa ilk değişikliği bekler. Okunamayan bir plan pakete deposundaki
 hâliyle girer (daha yeni bir sürümünki JSON olduğu için olduğu gibi), JSON bile değilse klasöre
-hiç yazılmaz. 2026-10-24'e kadar exe boş bir depoyla açılınca boş paketi canlı dosyanın ve
-günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si, tuzak
-153). Klasöre yazamamak sessiz kalmaz:
+hiç yazılmaz ve klasör satırı kırmızı olur, planın adıyla (TODO B7.37). 2026-10-24'e kadar exe
+boş bir depoyla açılınca boş paketi canlı dosyanın ve günün yedeğinin üstüne yazıyor, budama da
+boş günlüğü ona sayıyordu (denetimin A2'si, tuzak 153). Klasöre yazamamak sessiz kalmaz:
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
+
+Bu pencerenin depodan OKUDUĞU planlarda hiç satır yoksa (depo boş, açık plan okunamadı ya da
+planlar boş; dondurulmuş planlar sayılmaz, çünkü kopyayı açmak buradaki her planın yerine geçer)
+klasöre yazılmadan önce klasöre bakılır (`newestInFolder`): canlı dosya, fazla küçülmüş değilse,
+yoksa en dolu günlük; bakılırken de hiçbir şey yazılmaz. Orada iş varsa (`workOf`: dört listenin
+satırları, öğretmen, ders ve yerleşmiş saatler) klasöre hiçbir şey yazılmaz, Ayarlar'ın klasör
+satırı kırmızıdır ve bir şerit dosyanın adını, öğretmen ve ders sayısını söyler,
+iki düğmeyle: "Belgelerim'deki son kaydı aç" dosyayı "Tümünü dosyadan aç" gibi açar (okunamayan
+dondurulmuş bir plan anahtarında kalır), "Boş başla" yazmayı serbest bırakır. İş taşıyan bir yazım
+canlı dosyanın ya da günün yedeğinin dört liste satırının yarısının altına düşürüyorsa (`shrinks`;
+yerleşim sayılmaz, "Programı boşalt" bilerek siler) ikisine de yazılmaz: paket günün kurtarma
+dosyasına (`ders-programi-kurtarma-YYYY-AA-GG.json`) gider, budama koşmaz, ve bir şerit iki sayıyı
+söyler, iki düğmeyle: "Belgelerim'deki son kaydı aç" klasördeki kopyayı açar (küçük hâl kurtarma
+dosyasında ve silmeden-önce yuvasında kalır), "Yeni hâlini asıl dosya yap" bir soru sorup o klasör
+için küçülmeyi kabul eder ve hemen yazar; başka klasör seçmek ya da unutmak kabulü sıfırlar. Budama en
+dolu günlüğü (`largest`, eşitlerde en yenisi) hiç silmez. 2026-11-16'ya kadar silinmiş bir profilde
+tek öğretmen canlı dosyanın ve günün yedeğinin üstüne yazılıyor, tek öğretmenli günlükler de dolu
+sayıldığı için on günde on gerçek yedeğin hepsi budanıyordu (denetim 2026-11-16, tuzak 159).
+
+Sorusuz her silmeden önce (sınıf, derslik, branş, seçenek, öğretmen, ders, `Programı boşalt`,
+`Baştan diz`), `Her şeyi sil`, dolu planın yerine örnek okul ve `Dosyadan aç` öncesinde açık plan
+`ders-programi-silmeden-once`'ya yazılır (tek yuva, boş ve dondurulmuş plan yazılmaz), seçilen
+klasörde de günün `ders-programi-silmeden-once-YYYY-AA-GG.json` dosyasına (tek plan dosyası, gün
+içinde her silmede yeniden yazılır; exe yalnız günlüğü sildiği için tarihli ad başına bir dosya
+birikirdi). Silmeden sonraki ilk otomatik kayıt yuvaya planın o hâlinin parmak izini yazar
+(`noteAfter`). Sonraki açılış, yuva açılan plana aitse, görülmemişse, açılan plandan farklıysa ve
+plan silmeden sonra değişmemişse (parmak izi tutuyorsa) bir kez bir şerit gösterir; değiştiyse
+geri getirmek sonraki işi de silerdi, yuva sessizce kalır. Şerit: "… Son silmeyi geri almak için: Geri getir". Geri getirmek geri
+alınabilen bir adım; yerine geçtiği hâl de yuvaya yazılır ama bir daha önerilmez. Depo doluysa
+yuva yer açar: kendi yazımı reddedilen yuva silinir (eskisi "son silme" diye önerilmesin), planın
+reddedilen otomatik kaydı yuvayı silip bir kez daha dener (`writePlanText`).
+
+Plan listesi (`ders-programi-planlar`) yalnız metni değişecekse yazılır, ve bu kopyanın
+bilmediği alanlar, listenin kendisinde de her planın satırında da (kimliğiyle eşlenerek) korunur;
+2026-11-16'ya kadar her açılış listeyi `normalizeLibrary`'nin cevabıyla yeniden yazıp daha yeni
+bir kopyanın alanlarını siliyordu.
 
 Bu tarayıcının kendi deposu kaydı reddederken (kota, VK2) her klasör yazımı oturuma özel
 bir kurtarma kopyası da bırakır: `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`, aynı

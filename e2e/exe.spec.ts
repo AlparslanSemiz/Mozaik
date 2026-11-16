@@ -70,6 +70,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
                 sha256: null,
                 kurulum: false,
                 imza: null,
+                gecis: false,
               };
             }
             return {
@@ -81,6 +82,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
               sha256: '0'.repeat(64),
               kurulum: false,
               imza: 'untrusted comment: deneme',
+              gecis: false,
             };
           }
           if (cmd === 'download_update') return 3_742_584;

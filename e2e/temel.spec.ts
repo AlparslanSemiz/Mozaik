@@ -52,7 +52,9 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     // The old names said what the file format was, not what the button does
     // Kaydet on the bar, Dosyadan aç in Dosya ▾ (Sadeleşme, 2026-11-16).
-    await expect(page.getByRole('button', { name: 'Kaydet', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
+    ).toBeVisible();
     await openFileMenu(page);
     await expect(page.getByRole('menuitem', { name: 'Dosyadan aç', exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
@@ -62,10 +64,9 @@ test.describe('5. Yedek ve şema göçü', () => {
     // the top bar; C9 moved it to Ayarlar → Hakkında, beside the report that says
     // where the data actually IS, and left a short version on the save
     // button's own tooltip — which is where somebody about to click it looks.
-    await expect(page.getByRole('button', { name: 'Kaydet', exact: true })).toHaveAttribute(
-      'title',
-      /kendiliğinden saklıyor/,
-    );
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
+    ).toHaveAttribute('title', /kendiliğinden saklıyor/);
 
     // In HAKKINDA, which is where "Veriler nerede" is — the comment above
     // already said so, and the assertion had been reading Planlar ve yedek,
@@ -85,9 +86,42 @@ test.describe('5. Yedek ve şema göçü', () => {
   test('yedek indirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Kaydet', exact: true }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^ders-programi-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
+  });
+
+  test('indirmenin blob adresi tıklamadan sonra da okunuyor, ve tarihi düğmede', async ({
+    page,
+  }) => {
+    // Web audit, 2026-11-16: the object URL was revoked in the same tick as
+    // the click, and some WebKit builds read the blob AFTER the click, so the
+    // download came out empty or not at all. The URL now lives on for half a
+    // minute; this reads it back right after the click, which a same-tick
+    // revoke would fail.
+    await page.addInitScript(() => {
+      const real = URL.createObjectURL.bind(URL);
+      (window as unknown as { __bloblar: string[] }).__bloblar = [];
+      URL.createObjectURL = (b: Blob | MediaSource) => {
+        const url = real(b);
+        (window as unknown as { __bloblar: string[] }).__bloblar.push(url);
+        return url;
+      };
+    });
+    await openWithSample(page);
+    const kaydet = page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true });
+    await expect(kaydet).not.toHaveAttribute('title', /Son plan dosyası/);
+    const download = page.waitForEvent('download');
+    await kaydet.click();
+    await download;
+    const text = await page.evaluate(async () => {
+      const urls = (window as unknown as { __bloblar: string[] }).__bloblar;
+      const res = await fetch(urls[urls.length - 1]!);
+      return res.text();
+    });
+    expect(JSON.parse(text)).toHaveProperty('schemaVersion');
+    // The day of that file, in the button's own tooltip (fileSaved.ts).
+    await expect(kaydet).toHaveAttribute('title', /Son plan dosyası: \d{1,2} \S+ \d{4}\./);
   });
 
   test('rename öncesi indirilmiş (v1) yedek hâlâ açılıyor', async ({ page }) => {
