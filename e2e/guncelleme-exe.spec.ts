@@ -150,7 +150,9 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       // 3. The old copy, through its own three buttons.
       oturum = await Oturum.ac({ port, ikili: kurulu, bekleMs: 120_000 });
       await oturum.bekle('h1', 90_000);
-      await oturum.tikla('metin:Ayarlar');
+      await oturum.tikla('metin:Okul bilgileri');
+      // Hakkında is behind Okul bilgileri's Daha fazla (Sadeleşme K1).
+      await oturum.tikla('metin:Daha fazla');
       await oturum.tikla('metin:Hakkında');
       await expect
         .poll(() => oturum!.js<string>(SURUM_HUCRESI), { timeout: 15_000 })
@@ -183,7 +185,9 @@ test.describe('Güncelleme: yayınlanmış son exe → update.rs → bu commit�
       ]);
       expect(sha256(kurulu), 'kurulu dosya yayımlanan dosya').toBe(sha256(resolve(ORTAM.yeni!)));
       await expect.poll(() => existsSync(`${kurulu}.eski`), { timeout: 15_000 }).toBe(false);
-      await oturum.tikla('metin:Ayarlar');
+      await oturum.tikla('metin:Okul bilgileri');
+      // Hakkında is behind Okul bilgileri's Daha fazla (Sadeleşme K1).
+      await oturum.tikla('metin:Daha fazla');
       await oturum.tikla('metin:Hakkında');
       const surum = await oturum.js<string>(SURUM_HUCRESI);
       expect(

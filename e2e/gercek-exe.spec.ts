@@ -387,7 +387,9 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     const [var_, yok] = WINDOWS
       ? ['kendini güncelleyebilir', 'kendini güncellemez']
       : ['kendini güncellemez', 'kendini güncelleyebilir'];
-    await exe.oturum.tikla('metin:Ayarlar');
+    await exe.oturum.tikla('metin:Okul bilgileri');
+    // Hakkında is behind Okul bilgileri's Daha fazla (Sadeleşme K1).
+    await exe.oturum.tikla('metin:Daha fazla');
     await exe.oturum.tikla('metin:Hakkında');
     await expect
       .poll(() => exe.oturum.js<string>(`return document.querySelector('main').innerText;`), {
@@ -483,7 +485,9 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await expect.poll(ust, { timeout: 10_000 }).toContain('havuzda');
 
     // The search left its line in Hakkında (relaxLog.ts): with workers.
-    await exe.oturum.tikla('metin:Ayarlar');
+    await exe.oturum.tikla('metin:Okul bilgileri');
+    // Hakkında is behind Okul bilgileri's Daha fazla (Sadeleşme K1).
+    await exe.oturum.tikla('metin:Daha fazla');
     await exe.oturum.tikla('metin:Hakkında');
     await expect
       .poll(() => exe.oturum.js<string>(`return document.querySelector('main').innerText;`), {

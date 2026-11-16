@@ -55,9 +55,9 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
         await expect(page.locator('.reason-bar')).toContainText(world.want.reasonLike);
       }
 
-      // The page never froze: a tab click still answers.
+      // The page never froze: the status chip still opens its list.
       await openProblems(page);
-      await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+      await expect(page.getByRole('dialog').getByRole('button', { name: /^Sorunlar/ })).toBeVisible();
     });
   }
 
