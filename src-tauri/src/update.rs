@@ -1142,8 +1142,6 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
     Ok(cevap)
 }
 
-/// Downloads next to the running program and stops there. Nothing is replaced
-/// until `apply_update`, which is a second button.
 /// The event the page draws the download's progress from: `[inen, toplam]`.
 pub const INDIRME_OLAYI: &str = "guncelleme-indirme";
 
@@ -1160,6 +1158,8 @@ fn yuzde_haberi(boyut: u64, mut haber: impl FnMut(u64)) -> impl FnMut(u64) {
     }
 }
 
+/// Downloads next to the running program and stops there. Nothing is replaced
+/// until `apply_update`, which is a second button.
 #[tauri::command]
 pub async fn download_update(
     app: tauri::AppHandle,

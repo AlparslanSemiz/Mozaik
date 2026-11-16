@@ -229,10 +229,11 @@ describe('sparePrunable', () => {
   it('her türün en yeni onu kalıyor, gerisi en eskiden', () => {
     const names = [12, 3, 5, 1, 7, 9, 2, 11, 4, 8, 6, 10].map(once);
     expect(sparePrunable(names)).toEqual([once(1), once(2)]);
-    // Rescue copies, one-a-day and per-session, count as one kind.
-    const k = [...[1, 2, 3, 4, 5, 6].map(kurtarma), ...[1, 2, 3, 4, 5, 6].map(oturum)];
-    expect(sparePrunable(k)).toEqual([oturum(1), kurtarma(1)]);
-    expect(sparePrunable([...names, ...k]).length).toBe(4);
+    // Session copies and the day's shrink file are counted apart: eleven
+    // sessions push out one session copy, never a shrink file.
+    const k = [...[1, 2, 3].map(kurtarma), ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(oturum)];
+    expect(sparePrunable(k)).toEqual([oturum(1)]);
+    expect(sparePrunable([...names, ...k]).length).toBe(3);
   });
 
   it('en yenisi hiç silinmiyor, sınırın altında hiçbir şey', () => {

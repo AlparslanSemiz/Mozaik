@@ -69,11 +69,14 @@ const DAILY = /^ders-programi-(\d{4})-(\d{2})-(\d{2})\.json$/;
 /** How many rescue and before-deletion files are kept, of each kind. */
 export const KEEP_SPARE = 10;
 
-/** The two other dated kinds this program writes (`rescueName` and
+/** The three other dated kinds this program writes (`rescueName`,
     `shrinkName`, `beforeDeleteName`). The same shapes as `yedek_mi` in
     src-tauri/src/lib.rs, which deletes nothing else. */
 const SPARES = [
-  /^ders-programi-kurtarma-\d{4}-\d{2}-\d{2}(-\d{6})?\.json$/,
+  /^ders-programi-kurtarma-\d{4}-\d{2}-\d{2}-\d{6}\.json$/,
+  // Counted apart from the session copies: a run of sessions with a full
+  // storage must not push out the day a shrink was kept out of the live file.
+  /^ders-programi-kurtarma-\d{4}-\d{2}-\d{2}\.json$/,
   /^ders-programi-silmeden-once-\d{4}-\d{2}-\d{2}\.json$/,
 ];
 

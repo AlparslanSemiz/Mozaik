@@ -355,7 +355,7 @@ Bu tarayıcının kendi deposu kaydı reddederken (kota, VK2) her klasör yazım
 bir kurtarma kopyası da bırakır: `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`, aynı
 paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski durumla yeniden
 yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve günlük budamasına
-girmez. Kurtarma dosyalarının (oturumluk ve günlük birlikte) ve silmeden-önce dosyalarının her
+girmez. Oturumluk kurtarma kopyalarının, günlük kurtarma dosyalarının ve silmeden-önce dosyalarının her
 türünden en yeni on kalır, en yenisi hiç silinmez (`sparePrunable`; 2026-11-16'ya kadar hiçbiri
 silinmiyor, Belgelerim'de birikiyordu). Exe'nin `remove_file`'ı yalnız bu üç tarihli kalıbı siler
 (`yedek_mi`). Başka bir pencere açık planı ya da plan listesini
