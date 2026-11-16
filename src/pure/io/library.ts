@@ -72,6 +72,22 @@ export function backupKey(i: number): string {
  */
 export const BEFORE_DELETE_KEY = `${BASE_KEY}-silmeden-once`;
 
+/**
+ * "Eski hâline dön" (Sadeleşme K8): a plan as it was at the end of a day it was
+ * worked on, one key per plan and day, `ders-programi-gunluk-2026-11-12-<id>`.
+ * The day first, so the plan id may hold anything. The last `DAILY_COUNT`
+ * days of each plan are kept (`platform/storage/dailyCopies.ts`).
+ */
+export const DAILY_PREFIX = `${BASE_KEY}-gunluk-`;
+export const DAILY_COUNT = 7;
+
+export function dailyKey(day: string, id: Id): string {
+  return `${DAILY_PREFIX}${day}-${id}`;
+}
+
+/** Which day each plan was last saved on, `{ [planId]: 'YYYY-AA-GG' }`. */
+export const DAILY_MARK_KEY = `${BASE_KEY}-gunluk`;
+
 export function defaultLibrary(): Library {
   return {
     activeId: FIRST_PLAN_ID,

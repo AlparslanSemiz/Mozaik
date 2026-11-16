@@ -11,8 +11,8 @@
 import type React from 'react';
 import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
-import type { Density, ProgramColorMode, ToolState } from '../../platform/prefs';
-import type { ProgramMask, StripCounts } from '../../pure/program';
+import type { ProgramColorMode, ToolState } from '../../platform/prefs';
+import type { StripCounts } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
 import { type useDialogs, type useToast, useT } from '../common';
 import type { State as PlanState } from '../../leaf/model';
@@ -30,10 +30,6 @@ export interface RibbonProps {
   /** "Bu programın kopyası": a new plan holding this one (K2). */
   copyPlan: () => void;
   solver: SolverRun;
-  programMask: ProgramMask;
-  setProgramMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
-  density: Density;
-  setDensity: (next: Density) => void;
   programColor: ProgramColorMode;
   setProgramColor: (next: ProgramColorMode) => void;
   changelogUnseen: boolean;

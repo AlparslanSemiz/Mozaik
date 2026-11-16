@@ -31,11 +31,8 @@ import {
   pendingBlocks,
   placementKey,
   setBlockPinned,
-  pinScopeCells,
-  togglePinScope,
   type BlockRef,
   type Index,
-  type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
 import { Help, NextStep, useGoTo, useToast, T, useT } from '../common';
@@ -43,7 +40,6 @@ import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
 import {
-  blockMaskedDays,
   buildPool,
   buildRows,
   classOfCell,
@@ -51,10 +47,8 @@ import {
   describeMenu,
   dropNotice,
   keepSameRows,
-  poolMenuFacts,
   markPreview,
   roomLetter,
-  visibleDays,
   waitingSubjects,
   type ColorOf,
   type GridRow,
@@ -63,8 +57,7 @@ import { focusCellSoon, useDrag, type DragData, type KeyMove } from '../../platf
 import { lessonName } from '../../pure/feasibility';
 import { dayLabel } from '../../leaf/lang';
 import { samePlan, type SolverRun } from '../../platform/search';
-import { setDayMask, setRowMask, type ProgramMask } from '../../pure/program';
-import { activePinned, activePlacements } from '../../pure/grid';
+import { activePlacements } from '../../pure/grid';
 import {
   programColorIndex,
   type PoolSort,
@@ -79,7 +72,6 @@ import PreviewBar from './PreviewBar';
 import GridMenu from './GridMenu';
 import PoolMenu from './PoolMenu';
 import { usePreview } from './usePreview';
-import { useWeekCut } from './useWeekCut';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -90,8 +82,6 @@ interface Props {
   solver: SolverRun;
   /** Which axis the rows are. Owned by App: the tool strip above shows it. */
   view: View;
-  mask: ProgramMask;
-  setMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
   /** How the tray is arranged. A POSITION, owned by App (see toolState.ts). */
   poolSort: PoolSort;
   setPoolSort: (next: PoolSort) => void;
@@ -159,8 +149,6 @@ function Program({
   change,
   solver,
   view,
-  mask,
-  setMask,
   poolSort,
   setPoolSort,
   poolFilter,
@@ -225,12 +213,12 @@ function Program({
   const rows = useMemo(() => {
     const built =
       shown !== null && shownIx !== null && diff !== null
-        ? markPreview(buildRows(shown, shownIx, view, mask, colorOf, t), shown, diff, view)
-        : buildRows(state, ix, view, mask, colorOf, t);
+        ? markPreview(buildRows(shown, shownIx, view, colorOf, t), shown, diff, view)
+        : buildRows(state, ix, view, colorOf, t);
     const kept = keepSameRows(lastRows.current, built);
     lastRows.current = kept;
     return kept;
-  }, [shown, shownIx, diff, state, ix, view, mask, colorOf, t]);
+  }, [shown, shownIx, diff, state, ix, view, colorOf, t]);
   // The plan's answers are the search's: an answer, or an undo that takes one
   // back, runs it again (useSolver checks whether anything changed).
   const { reconsider } = solver;
@@ -253,16 +241,13 @@ function Program({
     // waiting, which for a way that builds the week is nothing.
     () =>
       shown === null || shownIx === null
-        ? buildPool(trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t)
-        : buildPool(shown, shownIx, view, mask, poolSort, poolFilter, colorOf, t),
-    [shown, shownIx, trayState, trayIx, view, mask, poolSort, poolFilter, colorOf, t],
+        ? buildPool(trayState, trayIx, view, poolSort, poolFilter, colorOf, t)
+        : buildPool(shown, shownIx, view, poolSort, poolFilter, colorOf, t),
+    [shown, shownIx, trayState, trayIx, view, poolSort, poolFilter, colorOf, t],
   );
   // The branches with something still waiting (see `waitingSubjects`).
-  const poolSubjects = useMemo(() => waitingSubjects(trayState, mask), [trayState, mask]);
-  const dayIndices = useMemo(
-    () => visibleDays(state.settings.days, mask.days),
-    [state.settings.days, mask.days],
-  );
+  const poolSubjects = useMemo(() => waitingSubjects(trayState), [trayState]);
+  const dayIndices = useMemo(() => state.settings.days.map((_, i) => i), [state.settings.days]);
 
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
@@ -276,9 +261,8 @@ function Program({
     counter: barCounter,
   } = describeBar(solver, view, t, current);
   // An idle bar says ONE sentence since Sadeleşme phase 1 (2026-11-16); what
-  // the rows are and that the week runs off the side (useWeekCut.ts) are
-  // behind its "?". A run, a result and a drag still speak in full here.
-  const weekCut = useWeekCut(active && state.lessons.length > 0);
+  // the rows are is behind its "?". A run, a result and a drag still speak in
+  // full here.
   const idle = barLevel === '';
   const barText = idle ? t('Yerleşmiş dersi sürükleyerek taşıyın.') : idleText;
 
@@ -348,8 +332,8 @@ function Program({
     },
     [],
   );
-  const menuFacts = describeMenu(state, ix, view, mask, menuTarget);
-  const { at: menuAt, rowId: menuRowId, day: menuDay } = menuFacts;
+  const menuFacts = describeMenu(state, ix, view, menuTarget);
+  const { at: menuAt } = menuFacts;
 
   /**
    * Lock or unlock ONE block, wherever the ask came from.
@@ -378,50 +362,8 @@ function Program({
     pinCell(menuAt.rowId, menuAt.day, menuAt.hour);
   }, [menuAt, pinCell]);
 
-  const toggleScope = useCallback(
-    (scope: PinScope) => {
-      const cells = pinScopeCells(state, scope);
-      if (cells.length === 0) return;
-      const pinned = activePinned(state);
-      const willPin = !cells.every((key) => pinned[key] !== undefined);
-      change((d) => togglePinScope(d, scope));
-      notify(
-        willPin
-          ? t('{n} saat sabitlendi.', { n: cells.length })
-          : t('{n} saatin sabitlemesi kaldırıldı.', { n: cells.length }),
-      );
-    },
-    [state, change, notify, t],
-  );
-
-  const setMenuRowMode = useCallback(
-    (mode?: 'ghost' | 'hidden') => {
-      if (menuRowId === null || solver.running) return;
-      setMask((current) => setRowMask(current, view, menuRowId, mode));
-    },
-    [menuRowId, solver.running, setMask, view],
-  );
-
-  const setMenuDayMode = useCallback(
-    (mode?: 'ghost' | 'hidden') => {
-      if (menuDay === null || solver.running) return;
-      const name = state.settings.days[menuDay]?.name;
-      if (name !== undefined) setMask((current) => setDayMask(current, name, mode));
-    },
-    [menuDay, solver.running, setMask, state.settings.days],
-  );
-  const {
-    lesson: poolMenuLesson,
-    rowId: poolMenuRowId,
-    rowMode: poolMenuRowMode,
-  } = poolMenuFacts(ix, view, mask, poolMenuLessonId);
-  const setPoolMenuRowMode = useCallback(
-    (mode?: 'ghost' | 'hidden') => {
-      if (poolMenuRowId === null || solver.running) return;
-      setMask((current) => setRowMask(current, view, poolMenuRowId, mode));
-    },
-    [poolMenuRowId, solver.running, setMask, view],
-  );
+  const poolMenuLesson =
+    poolMenuLessonId === null ? undefined : ix.lessonById.get(poolMenuLessonId);
 
   /**
    * One drag, two sources: a card from the pool (`source === null`) or a block
@@ -462,7 +404,6 @@ function Program({
       // the constraint engine answering 72 questions, and one of the answers
       // ("occupied by this class's own lesson") now costs an eviction to say.
       const map = dropMap(state, ix, lessonId, size, sourceRef);
-      blockMaskedDays(map, state, mask.days, t);
 
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
@@ -520,7 +461,7 @@ function Program({
         color: programColorIndex(state, lesson, colorMode),
       });
     },
-    [state, ix, view, start, startKeys, notify, solver.running, mask.days, colorMode, t],
+    [state, ix, view, start, startKeys, notify, solver.running, colorMode, t],
   );
 
   const cardStart = useCallback(
@@ -629,13 +570,6 @@ function Program({
         {idle && (
           <Help topic="Program">
             <p>{idleText}</p>
-            {weekCut && (
-              <p>
-                {t(
-                  'Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.',
-                )}
-              </p>
-            )}
           </Help>
         )}
         {barCounter !== undefined && (
@@ -696,7 +630,6 @@ function Program({
           settings={state.settings}
           rows={rows}
           dayIndices={dayIndices}
-          dayModes={mask.days}
           firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
           onCellRemove={shown === null ? steadyRemove : still}
           onCellMoveStart={shown === null ? steadyMoveStart : still}
@@ -708,8 +641,6 @@ function Program({
           menu={
             <GridMenu
               facts={menuFacts}
-              menuTarget={menuTarget}
-              view={view}
               running={solver.running}
               container={menuPortalRef.current}
               cellRemove={cellRemove}
@@ -717,9 +648,6 @@ function Program({
               editLesson={editLesson}
               inspect={inspect}
               togglePin={togglePin}
-              toggleScope={toggleScope}
-              setMenuRowMode={setMenuRowMode}
-              setMenuDayMode={setMenuDayMode}
             />
           }
         />
@@ -741,14 +669,10 @@ function Program({
           menu={
             <PoolMenu
               poolMenuLesson={poolMenuLesson}
-              poolMenuRowId={poolMenuRowId}
-              poolMenuRowMode={poolMenuRowMode}
-              running={solver.running}
               container={menuPortalRef.current}
               editLesson={editLesson}
               inspect={inspect}
               why={(id) => goTo({ tab: 'program', problems: id })}
-              setPoolMenuRowMode={setPoolMenuRowMode}
             />
           }
         />

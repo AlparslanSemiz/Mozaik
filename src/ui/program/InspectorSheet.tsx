@@ -563,7 +563,19 @@ export function Inspector({
                             max={40}
                             className="num"
                             key={`h-${x.id}-${x.weeklyHours}`}
-                            aria-label={t('{ne} · Haftalık saat', { ne: other })}
+                            // Two lessons of one teacher in one class are told
+                            // apart by their subject (2026-11-16).
+                            aria-label={t('{ne} · Haftalık saat', {
+                              ne: lessons.some(
+                                (y) =>
+                                  y !== x &&
+                                  (target.kind === 'teacher'
+                                    ? y.classId === x.classId
+                                    : y.teacherId === x.teacherId),
+                              )
+                                ? `${other} · ${subjectLabel(lessonSubject(state, x))}`
+                                : other,
+                            })}
                             defaultValue={x.weeklyHours}
                             onBlur={(e) => {
                               const weeklyHours = Math.max(1, Number(e.target.value) || 1);

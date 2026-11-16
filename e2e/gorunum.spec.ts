@@ -1,5 +1,5 @@
-// 44. Ayarlar → Görünüm: how big the interface is drawn, and how much of the
-// week the grid shows at once.
+// 44. Ayarlar → Görünüm: how big the interface is drawn, and the grid that
+// fits its box by itself (the densities went on 2026-11-16, Sadeleşme K6).
 //
 // One setting, six steps, and one claim that has to be MEASURED rather than
 // asserted, because getting it wrong is invisible until my father is standing
@@ -13,13 +13,10 @@ import type { State } from '../src/leaf/model/types';
 import { expect, test } from './kapan';
 import {
   PDF_YALNIZ_CHROMIUM,
-  chooseDensity,
   chooseScale,
-  chooseUiDensity,
   loadWorld,
   open,
   openGridMenu,
-  openMoreSub,
   openSettings,
   openSetup,
   openWithSample,
@@ -42,7 +39,7 @@ async function gridMetrics(page: import('@playwright/test').Page) {
     };
     const wrap = document.querySelector('.grid-wrap')!;
     const cell = document.querySelector('table.grid tbody td:not(.break-col)')!;
-    const clock = document.querySelector('.hour-clock');
+    const clock = document.querySelector('table.grid .hour-clock');
     const cards = [...document.querySelectorAll('table.grid .card')];
 
     // What the hour heading asks for when nothing constrains it.
@@ -133,6 +130,10 @@ async function gridMetrics(page: import('@playwright/test').Page) {
           [...th.querySelectorAll('.secondary, .inspect')].some(overflows),
       ).length,
       heads: document.querySelectorAll('table.grid tbody th').length,
+      // The hour numbers: "10", "11", "12" read "1." once (2026-11-16).
+      hoursClipped: [...document.querySelectorAll('table.grid thead th[data-col]')].filter(
+        overflows,
+      ).length,
       cornerClipped: (() => {
         const c = document.querySelector('table.grid .corner');
         return c !== null && c.scrollWidth - c.clientWidth > 0.5;
@@ -141,15 +142,6 @@ async function gridMetrics(page: import('@playwright/test').Page) {
       // its fit in the one currency it was never allowed to spend.
       rowH: document.querySelector('table.grid tbody tr')!.getBoundingClientRect().height,
     };
-  });
-}
-
-/** Rahat's 0.923rem is 11.999px and Sığdır's floor 12px: same box, to a hair. */
-function expectSameLineBox(fit: number[], roomy: number[]) {
-  expect(fit.length).toBe(2);
-  fit.forEach((box, i) => {
-    expect(box, 'kart satırının satır kutusu değişti').toBeGreaterThan(0);
-    expect(box, 'kart satırının satır kutusu değişti').toBeCloseTo(roomy[i]!, 1);
   });
 }
 
@@ -323,20 +315,19 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   });
 
   test('ızgara ölçekle birlikte büyüyor', async ({ page }) => {
-    // The grid is on the same axis as the shell: A5 (a separate --grid-zoom)
-    // was removed, and a scale setting that leaves the one screen my father
-    // spends the day in untouched would miss the point of the setting.
+    // The grid is on the same axis as the shell: a scale setting that leaves
+    // the one screen my father spends the day in untouched would miss the
+    // point of the setting. Since 2026-11-16 (K6) the grid's WIDTH is the
+    // box's, so what the scale moves is the height of a row and the type in
+    // it; the week stays in the box.
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     const measure = () =>
       page.locator('table.grid').evaluate((e) => ({
-        width: e.getBoundingClientRect().width,
-        columns: e.querySelectorAll('thead tr:nth-child(2) th').length,
+        row: e.querySelector('tbody tr')!.getBoundingClientRect().height,
+        head: parseFloat(getComputedStyle(e.querySelector('tbody .row-head')!).fontSize),
+        over: e.parentElement!.scrollWidth - e.parentElement!.clientWidth,
       }));
-    // Start from a KNOWN rung rather than from whatever the default happens to
-    // be: the ratio below is the whole assertion, and reading it off an
-    // unstated starting point is how this test came to claim 1.25 while
-    // actually walking 1.10 -> 1.25.
     await chooseScale(page, 100);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
@@ -347,31 +338,11 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     await expect(page.locator('table.grid')).toBeVisible();
     const after = await measure();
 
-    // The tolerance is DERIVED, not chosen, and it had to be re-derived on
-    // 2026-08-27 when the root came down to 14px.
-    //
-    // --cell-w is 2.125rem, which at 100% now asks for 29.75px — and the column
-    // is drawn at 35.0, because the heading's min-content is 35.0 and a column
-    // cannot be narrower than its content (pitfall 37). So the request has
-    // stopped deciding anything: the whole grid is now the width of its own
-    // TEXT, and text does not scale linearly. Measured at 100 / 125 / 150:
-    //
-    //   cell   35.0    44.0    54.0       (1.257x, 1.543x — not 1.25 and 1.5)
-    //   table  2437.5  3114.4  3863.3     (1.2777x, 1.5849x)
-    //
-    // That is pitfall 39 for a whole table: a real face quantises its advances,
-    // so a column sized by a glyph grows in steps. One pixel per column is the
-    // honest allowance for a step that has to land on a whole pixel 78 times;
-    // half a pixel was the allowance for a table that was still being sized by
-    // the rem request.
-    const slack = before.columns * 1 + 1;
-    expect(after.columns).toBe(before.columns);
-    expect(
-      after.width,
-      `%100'de ${before.width}px, %125'te ${after.width}px — ` +
-        `beklenen ${(before.width * 1.25).toFixed(0)}px ±${slack}`,
-    ).toBeGreaterThanOrEqual(before.width * 1.25 - slack);
-    expect(after.width).toBeLessThanOrEqual(before.width * 1.25 + slack);
+    expect(after.head).toBeCloseTo(before.head * 1.25, 0);
+    expect(after.row, `%100'de ${before.row}px, %125'te ${after.row}px`).toBeGreaterThan(
+      before.row * 1.15,
+    );
+    expect(before.over).toBe(0);
   });
 
   test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({
@@ -466,146 +437,50 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   });
 });
 
-test.describe('46. Görünüm — Ferah', () => {
-  // The third step, and the one that goes the other way: 'sigdir' trades
-  // information for the whole week, 'ferah' trades days on screen for a cell
-  // you can read without leaning in. The reader has trouble seeing, so the
-  // grid needed a direction that was not "smaller".
-  test('Ferah hücreyi büyütüyor ve kartın alt satırını geri veriyor', async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-
-    const roomy = await gridMetrics(page);
-
-    await chooseDensity(page, 'Ferah');
-    const airy = await gridMetrics(page);
-
-    // Bigger, and bigger in BOTH directions — a wider cell with the same
-    // height would just be a stretched slab.
-    expect(airy.cell).toBeGreaterThan(roomy.cell);
-    expect(airy.clock).toBe('block');
-    // The trade is stated out loud: more scrolling, not less.
-    expect(airy.overflow).toBeGreaterThan(roomy.overflow);
-    // And it is paid for in DAYS, never in legibility.
-    expect(airy.cards).toBe(roomy.cards);
-    expect(airy.clipped, `${airy.clipped} kartın yazısı kırpıldı`).toBe(0);
-
-    // A real way back, like Sığdır.
-    await chooseDensity(page, 'Rahat');
-    expect((await gridMetrics(page)).cell).toBeCloseTo(roomy.cell, 0);
-  });
-
-  test('üç basamak da şeritten seçilebiliyor ve tercih yenilemede duruyor', async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-
-    // Taken while looking at the grid: Daha fazla → Yoğunluk since
-    // 2026-11-16 (Sadeleşme; phase 3 removes the three, K6).
-    await openMoreSub(page, /^Yoğunluk/);
-    await page.getByRole('menuitemradio', { name: 'Ferah', exact: true }).click();
-    await openMoreSub(page, /^Yoğunluk/);
-    await expect(page.getByRole('menuitemradio', { name: 'Ferah', exact: true })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
-    await page.keyboard.press('Escape');
-
-    await reopen(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-density', 'ferah');
-
-    // A machine setting, never timetable data.
-    const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
-    expect(saved).not.toBeNull();
-    expect(saved!.includes('ferah')).toBe(false);
-    expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe('ferah');
-  });
-});
-
-test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
-  // The claim this mode is built on is a measurement, not a preference:
-  // --cell-w was set to 28, 23 and 18px in turn and the cell came out 33.69px
-  // every time, because "10:40" under the lesson number — not the card — was
-  // setting the column's min-content (pitfall 37). So the test asserts the
-  // measurement: hiding the clock is what makes the week fit.
-  test('Sığdır haftanın tamamını kutuya sokuyor, kart yazısını kırpmadan', async ({ page }) => {
+test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, K6)', () => {
+  // Since 2026-11-16 the grid has ONE layout, what was "Sığdır": the whole
+  // week in the box, no switch. What made it fit is a measurement (pitfall 37):
+  // the bell time under the hour number set the column's min-content, so the
+  // grid draws no clock at all now; the heading's title still says it.
+  test('haftanın tamamı kutuda, kart yazısı kırpılmadan', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 
     // The grid has to be FULL. An empty sample would let both the fit and the
-    // "nothing is clipped" assertion pass on a grid with nothing in it, which
-    // is exactly the free green pitfall 33 warned about — the cards are what
-    // set the column's floor once the clock is gone.
+    // "nothing is clipped" assertion pass on a grid with nothing in it
+    // (pitfall 33): the cards are what set the column's floor.
     await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('table.grid .card').first()).toBeVisible();
 
-    const roomy = await gridMetrics(page);
-    expect(roomy.cards).toBeGreaterThan(400);
-    expect(roomy.clock).toBe('block');
-    // --cell-w is 2.125rem and the root is ROOT_PX * the scale, so the cell is a
-    // CONSEQUENCE of the scale, not a number of its own. Written out as 34 it
-    // was really asserting "the default scale is 1.0".
-    //
-    // It is a FLOOR, not an equality, and pitfall 37 is why: `width` on a table
-    // cell is a request, and the column cannot be drawn narrower than its
-    // min-content — which here is "09:00" in the heading. At 1.0 the request
-    // (34.0) happened to sit above the floor and the two matched exactly; at
-    // 1.1 the request is 37.4 and the floor rounds it to 38. Asserting equality
-    // was asserting the coincidence.
-    //
-    // The ceiling used to be `wanted + 2`, and 2 was a number nobody had
-    // measured. It was down to 0.4 px of headroom, which is how a test starts
-    // failing for a reason that has nothing to do with what it is testing.
-    // MEASURED 2026-08-27: the column comes out 39.0 px, the request is
-    // 37.4 px, and the heading's own min-content is 41.0 px. So the honest
-    // ceiling is the floor itself: the column may be pushed up to what the
-    // heading needs and no further. When the embedded face changes, the
-    // heading moves and this moves with it (pitfall 42).
-    // MEASURED AGAIN 2026-08-27, 14px root: the request is 29.75px and the
-    // column comes out 35.0px, which is exactly what the heading needs — so
-    // the cell is now entirely the heading's min-content and the request has
-    // stopped mattering. That is pitfall 37 all the way, and it is why the
-    // ceiling below is `max(wanted, headWants)` and not a number.
-    const wanted = 2.125 * ROOT_PX * SCALE_DEFAULT;
-    expect(roomy.cell).toBeGreaterThanOrEqual(wanted - 0.5);
-    expect(roomy.headWants, 'saat başlığı ölçülemedi').toBeGreaterThan(0);
-    expect(
-      roomy.cell,
-      `hücre ${roomy.cell}px, istenen ${wanted.toFixed(1)}px, başlığın istediği ` +
-        `${roomy.headWants.toFixed(1)}px — sütun bu ikisinin arasında kalmalı`,
-    ).toBeLessThanOrEqual(Math.max(wanted, roomy.headWants) + 0.5);
-    // The default is the grid my father already knows: it scrolls sideways.
-    expect(roomy.overflow).toBeGreaterThan(500);
-
-    await chooseDensity(page, 'Sığdır');
     const fit = await gridMetrics(page);
-
-    expect(fit.clock).toBe('none');
-    expect(fit.cell).toBeLessThan(roomy.cell);
-    // The point of the whole mode, in one number.
-    expect(fit.overflow, `Sığdır'da ${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-    // ...and it must not have been bought by clipping the cells.
-    expect(fit.cards).toBe(roomy.cards);
+    expect(fit.cards).toBeGreaterThan(400);
+    expect(fit.clock, 'ızgarada saat çizilmemeli').toBe('yok');
+    expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
     expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBe(0);
-
-    // Rahat is a real way back, not a one-way door.
-    await chooseDensity(page, 'Rahat');
-    const back = await gridMetrics(page);
-    expect(back.clock).toBe('block');
-    expect(back.cell).toBeCloseTo(roomy.cell, 0);
-    expect(back.table).toBeCloseTo(roomy.table, 0);
+    await expect(page.locator('table.grid thead th[data-col]').first()).toHaveAttribute(
+      'title',
+      /^\d{2}:\d{2}–\d{2}:\d{2}$/,
+    );
   });
 
+  // The app's own scale (Ayarlar → Yazı büyüklüğü), and the boxes a 1366 and
+  // a 1920 screen give at Windows %100, %125 and %150 (CSS px = screen /
+  // zoom). Every lesson is read whole at 11px or more; where 72 such columns
+  // do not go in, the grid scrolls sideways (2026-11-16) and its last hour,
+  // and the row heads, are reachable.
   for (const target of [
-    { width: 1280, height: 720, scale: 100 },
-    { width: 1366, height: 768, scale: 125 },
-    { width: 1920, height: 1080, scale: 150 },
+    { width: 1920, height: 1080, scale: 100, fits: true },
+    { width: 1536, height: 864, scale: 100, fits: false },
+    { width: 1280, height: 720, scale: 100, fits: false },
+    { width: 1366, height: 768, scale: 100, fits: false },
+    { width: 1093, height: 614, scale: 100, fits: false },
+    { width: 911, height: 512, scale: 100, fits: false },
+    { width: 1366, height: 768, scale: 125, fits: false },
+    { width: 1920, height: 1080, scale: 150, fits: false },
   ]) {
-    test(`Sığdır ${target.width}×${target.height} ve %${target.scale} ölçekte yatay kaydırmayı SIFIRLIYOR`, async ({
+    test(`${target.width}×${target.height} ve %${target.scale}: hiçbir ders kırpılmıyor`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: target.width, height: target.height });
@@ -617,58 +492,41 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
         timeout: 30_000,
       });
 
-      await chooseDensity(page, 'Sığdır');
       const fit = await gridMetrics(page);
-      expect(fit.overflow, `${target.width}px/%${target.scale}: ${fit.overflow}px taşma`).toBe(0);
-
-      const card = page.locator('table.grid .card').first();
-      await expect(card).toBeVisible();
-      const access = await card.evaluate((el) => {
-        const parent = el.getBoundingClientRect();
-        return {
-          name: el.getAttribute('aria-label') ?? '',
-          topSize: parseFloat(getComputedStyle(el.querySelector('.card-top')!).fontSize),
-          contained: [...el.children].every((child) => {
-            const box = child.getBoundingClientRect();
-            return box.left >= parent.left - 0.5 && box.right <= parent.right + 0.5;
-          }),
-        };
+      expect(fit.cards).toBeGreaterThan(300);
+      expect(fit.clipped, `${fit.clipped}/${fit.cards} ders kırpıldı`).toBe(0);
+      expect(fit.hoursClipped, `${fit.hoursClipped} saat numarası kırpıldı`).toBe(0);
+      expect(fit.smallestText, 'ders yazısı 11 px altına indi').toBeGreaterThanOrEqual(11);
+      if (target.fits) {
+        expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+        return;
+      }
+      expect(fit.overflow, 'sığmayan hafta kaymıyor').toBeGreaterThan(0);
+      // Scrolled all the way: the last day's last hour is in the box, and the
+      // row heads stayed where they were.
+      const head = page.locator('tbody .row-head').first();
+      const before = (await head.boundingBox())!;
+      const seen = await page.locator('.grid-wrap').evaluate((wrap) => {
+        wrap.scrollLeft = wrap.scrollWidth;
+        const last = [...wrap.querySelectorAll('thead th[data-col]')].at(-1)!;
+        const box = wrap.getBoundingClientRect();
+        const r = last.getBoundingClientRect();
+        return r.left >= box.left - 0.5 && r.right <= box.right + 0.5;
       });
-      expect(access.name.length).toBeGreaterThan(3);
-      // 10, not 12, since 2026-09-26: in Sığdır a line that does not fit is
-      // drawn smaller rather than cut, down to 9px (the user's choice), and in
-      // a 1280 box the first card's "310" is exactly such a line. Every card is
-      // held to the floor, not only the first.
-      expect(access.topSize).toBeGreaterThanOrEqual(9);
-      expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
-      expect(access.contained).toBe(true);
+      expect(seen, 'son saat görünmüyor').toBe(true);
+      await page.waitForTimeout(120);
+      expect(Math.abs((await head.boundingBox())!.x - before.x)).toBeLessThan(2);
     });
   }
 
   /**
-   * The box the EXE actually runs in, which is not the box this suite runs in.
-   *
-   * `playwright.config.ts` opens 1920x1080 because that is my father's screen,
-   * and every layout number in this repo was measured there. The exe was not:
-   * `tauri.conf.json` asked for a 1600x1000 window and never maximised, so the
-   * page got 1600 CSS px — 320 less than anything anyone had ever looked at.
-   * Measured in that box, on a full grid, in Sığdır: the cell fell to 20.83px
-   * and 315 of 374 cards read "4…" instead of "411". The week fitted and the
-   * lessons did not, which is the complaint word for word.
-   *
-   * Two boxes, because they fail differently and both are real. 1920x1032 is
-   * the fixed window maximised on his screen and everything must be clean
-   * there. 1600x968 is what an un-maximised window still gives, and the only
-   * thing claimed there is the mode's own contract — the week fits — because
-   * 72 legible columns simply do not go into 1600px and no CSS makes them.
-   *
-   * BOTH views: the teacher row's second line is a subject short ("Mat"), the
-   * class row's is "G dersliği". A sweep of the row-head width against the
-   * teacher view alone said 4.25rem was fine; the class view had 20 of 20
-   * heads clipped there. One view is not this grid.
+   * The box the EXE actually runs in (1920x1032, the fixed window maximised),
+   * in BOTH views: the teacher row's second line is a subject short ("Mat"),
+   * the class row's is "G dersliği", and a row-head width that suits one
+   * clipped all twenty heads of the other.
    */
   for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
-    test(`Sığdır exe'nin kutusunda da kırpmıyor · ${view}`, async ({ page }) => {
+    test(`exe'nin kutusunda da kırpmıyor · ${view}`, async ({ page }) => {
       await page.setViewportSize({ width: 1920, height: 1032 });
       await openWithSample(page);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -679,73 +537,49 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       });
       await expect(page.locator('table.grid .card').first()).toBeVisible();
 
-      // Rahat first, so the row height below is compared against something
-      // measured rather than a number written here (pitfall 42).
-      const roomy = await gridMetrics(page);
-      expect(roomy.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
-
-      await chooseDensity(page, 'Sığdır');
       const fit = await gridMetrics(page);
-
+      expect(fit.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
       expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-      expect(fit.clipped, `${fit.clipped}/${roomy.cards} kartın yazısı kırpıldı`).toBe(0);
+      expect(fit.clipped, `${fit.clipped}/${fit.cards} kartın yazısı kırpıldı`).toBe(0);
       expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(0);
       expect(fit.cornerClipped, 'köşedeki eksen adı kırpıldı').toBe(false);
-      // Width was the subject; height was not allowed to be the payment. The
-      // first draft of this fix narrowed the head without `nowrap` and the row
-      // went 38.5px -> 50.6px, which no card metric could have seen.
-      expect(
-        fit.rowH,
-        `satır ${fit.rowH.toFixed(1)}px, Rahat'ta ${roomy.rowH.toFixed(1)}px`,
-      ).toBeLessThanOrEqual(roomy.rowH + 0.5);
-      // ...nor shorter, which a ceiling cannot see: the first draft of the
-      // shrinking fix (2026-09-26) made every Sığdır row 38.5px -> 35px by
-      // giving the card lines a tighter line box. Sığdır changes the SIZE of a
-      // card line, never its line box, and the vertical layout is the user's
-      // to keep (DECISIONS 2026-09-01).
-      expectSameLineBox(fit.lineBox, roomy.lineBox);
     });
   }
 
-  test('Sığdır maximize edilmemiş 1600px kutuda da haftayı sığdırıyor', async ({ page }) => {
+  test('maximize edilmemiş 1600px kutuda ders kırpılmıyor, satır başı da', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 968 });
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
-    await chooseDensity(page, 'Sığdır');
     const fit = await gridMetrics(page);
-    // The contract, and only the contract. Legibility is NOT claimed here:
-    // 72 columns at the 12px reading floor need about 1795 CSS px, so in a
-    // 1600px box something has to give and this mode gives the text. What is
-    // fixed is the window, not the CSS — see tauri.conf.json.
-    expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+    // 72 columns at the 12px reading size need more than 1600 CSS px, so the
+    // grid scrolls here rather than cut a lesson (2026-11-16).
+    expect(fit.clipped, `${fit.clipped} ders kırpıldı`).toBe(0);
     expect(fit.headsClipped, `${fit.headsClipped} satır başı kırpıldı`).toBe(0);
   });
 
-  test('yoğunluk tercihi yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
+  // An older copy saved a density. It is never read again: the page draws the
+  // one layout, nothing on <html> says otherwise, and "Veriler nerede" still
+  // names the key it once wrote (preferenceKeys.ts).
+  test('eski yoğunluk kaydı okunmuyor ve hiçbir şeyi bozmuyor', async ({ page }) => {
     await openWithSample(page);
-    // Pitfall 24: the store debounces by 400 ms and the page's own load write
-    // lands inside that window.
-    const before = await settledText(page);
-
-    await chooseDensity(page, 'Sığdır');
-    await page.waitForTimeout(700);
-    expect(await savedText(page)).toBe(before);
-    expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe(
-      'sigdir',
-    );
-
+    await page.evaluate(() => {
+      localStorage.setItem('ders-programi-yogunluk', 'rahat');
+      localStorage.setItem('ders-programi-arayuz-yogunluk', 'ferah');
+    });
     await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid')).toBeVisible();
-    expect((await gridMetrics(page)).clock).toBe('none');
-  });
-
-  test('Ayarlar → Hakkında yoğunluk anahtarını da sayıyor', async ({ page }) => {
-    await openWithSample(page);
-    await chooseDensity(page, 'Sığdır');
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+    expect(
+      await page.evaluate(() => [
+        document.documentElement.getAttribute('data-density'),
+        document.documentElement.getAttribute('data-ui-density'),
+      ]),
+    ).toEqual([null, null]);
+    expect((await gridMetrics(page)).overflow).toBe(0);
     await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-yogunluk' })).toHaveCount(1);
@@ -753,7 +587,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
 });
 
 /**
- * Sığdır on the father's own SHAPE of data, and in the box Windows at %125
+ * The fitted grid on the father's own SHAPE of data, and in the box Windows at %125
  * gives (2026-09-26).
  *
  * Everything above measures the sample school, whose class names are three
@@ -763,10 +597,10 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
  * At 1536 CSS px — a 1920 screen at Windows %125 — the sample school's "310"
  * needs 21px where the card has 19.2, and 315 of 374 cards were clipped.
  *
- * The fix the user chose has two halves, both only in Sığdır: a card shows
- * the class name's first word ("411A"), and a line that still does not fit is
- * drawn smaller, down to a 9px floor, instead of being cut. Neither changes a
- * row's height: that is asked of the line box and of the table directly.
+ * The fix the user chose on 2026-09-26 had two halves: a card shows the class
+ * name's first word ("411A"), and a line that still did not fit was drawn
+ * smaller, down to 9px. The second half went on 2026-11-16: nothing under
+ * 11px, and a week that does not fit at that size scrolls sideways.
  *
  * The numbers below are what is left AFTER the fix, measured, not a hope.
  * A one-hour card was 24.5px at 1920 and 21.5 in the first hour of a day,
@@ -782,51 +616,18 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
  * there; %80 is still the way out. They are ceilings; the day this gets
  * better, lower them.
  */
-test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusunda', () => {
+test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda', () => {
   const dizili = () =>
     JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs-dizili.json', 'utf8')) as State;
-
-  /**
-   * Shrinking a line must not change the height of anything. Asked directly:
-   * the table's body with the shrink and without it. Not "no taller than
-   * Rahat": the first draft made every row 38.5px -> 35px, and that ceiling
-   * let it through (on this data Rahat's rows are 57px, the names wrap there).
-   */
-  async function expectShrinkKeepsHeight(page: import('@playwright/test').Page) {
-    const h = await page.evaluate(() => {
-      const body = () => document.querySelector('table.grid tbody')!.getBoundingClientRect().height;
-      const lines = [...document.querySelectorAll<HTMLElement>('table.grid [style*="--fit"]')];
-      const kept = lines.map((line) => line.style.getPropertyValue('--fit'));
-      const shrunk = body();
-      for (const line of lines) line.style.removeProperty('--fit');
-      const whole = body();
-      lines.forEach((line, i) => line.style.setProperty('--fit', kept[i]!));
-      return { shrunk, whole, lines: lines.length };
-    });
-    expect(h.lines, 'küçülen satır yok, iddia bedava geçerdi').toBeGreaterThan(0);
-    expect(
-      Math.abs(h.shrunk - h.whole),
-      `küçülmüş ${h.shrunk}px, küçülmemiş ${h.whole}px`,
-    ).toBeLessThanOrEqual(0.5);
-  }
 
   const boxes = [
     { name: '1920', viewport: { width: 1920, height: 1080 }, dpr: 1 },
     { name: 'Windows %125', viewport: { width: 1536, height: 816 }, dpr: 1.25 },
   ] as const;
 
-  // Ceilings, per box and view, for the anonymised fixture ("411A SAY").
-  const DIZILI: Record<string, { cards: number; heads: number }> = {
-    '1920 · Öğretmen görünümü': { cards: 0, heads: 0 }, // before: 192 of 199, then 2 (B7.22)
-    '1920 · Sınıf görünümü': { cards: 0, heads: 0 }, // 26, and 20 of 20 heads
-    'Windows %125 · Öğretmen görünümü': { cards: 75, heads: 0 }, // 199
-    'Windows %125 · Sınıf görünümü': { cards: 24, heads: 0 }, // 63, then 27 (B7.22)
-  };
-  // ...and for the sample school, where only the %125 box ever clipped.
-  const ORNEK: Record<string, number> = {
-    'Öğretmen görünümü': 0, // before: 315 of 374
-    'Sınıf görünümü': 0, // 152, then 2 (B7.22)
-  };
+  // Zero everywhere since 2026-11-16: a lesson that does not fit makes the
+  // grid scroll. Before, the %125 box left 75 and 24 of the father's cards
+  // reading "41…" even at 9px.
 
   for (const box of boxes) {
     test.describe(box.name, () => {
@@ -837,23 +638,12 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
           await loadWorld(page, dizili());
           await page.getByRole('button', { name: view }).click();
           await expect(page.locator('table.grid .card').first()).toBeVisible();
-          const roomy = await gridMetrics(page);
-          expect(roomy.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
-
-          await chooseDensity(page, 'Sığdır');
           const fit = await gridMetrics(page);
-          const ceiling = DIZILI[`${box.name} · ${view}`]!;
-
-          expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-          expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBeLessThanOrEqual(
-            ceiling.cards,
-          );
-          expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(
-            ceiling.heads,
-          );
-          expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
-          expectSameLineBox(fit.lineBox, roomy.lineBox);
-          await expectShrinkKeepsHeight(page);
+          expect(fit.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
+          expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBe(0);
+          expect(fit.hoursClipped).toBe(0);
+          expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(0);
+          expect(fit.smallestText, 'yazı 11 px altına indi').toBeGreaterThanOrEqual(11);
         });
       }
 
@@ -867,75 +657,25 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
             await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
               timeout: 30_000,
             });
-            const roomy = await gridMetrics(page);
-            await chooseDensity(page, 'Sığdır');
             const fit = await gridMetrics(page);
 
-            expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-            expect(fit.clipped, `${fit.clipped}/374 kartın yazısı kırpıldı`).toBeLessThanOrEqual(
-              ORNEK[view]!,
-            );
-            expect(fit.smallestText).toBeGreaterThanOrEqual(9);
-            expect(fit.rowH).toBeLessThanOrEqual(roomy.rowH + 0.5);
-            expectSameLineBox(fit.lineBox, roomy.lineBox);
-            await expectShrinkKeepsHeight(page);
+            expect(fit.clipped, `${fit.clipped}/374 kartın yazısı kırpıldı`).toBe(0);
+            expect(fit.smallestText).toBeGreaterThanOrEqual(11);
           });
         }
       }
     });
   }
 
-  /**
-   * Dragging a card along the target row juddered in Sığdır and not in Rahat
-   * (2026-09-26). The drag writes the reason bar, and that is a full-document
-   * layout (pitfall 117) in both densities: the same 47 of them in one sweep.
-   * In Rahat each was 1.8ms; in Sığdır 53ms, and 22% of frames dropped at x1,
-   * because the column width came from `100cqw` and a size resolved against
-   * the container is redone for every cell whenever the container is laid
-   * out. Measured by freezing that one value to the same px: 2554ms of layout
-   * down to 185, no frame dropped.
-   *
-   * Asked as a RATIO in one page, so the machine's speed (and its power
-   * profile) cancels out: the drag's own write, timed in Sığdır against Rahat.
-   * It was about 30 times; the fix brings it near 2.
-   */
-  test('Sığdır sürüklemenin yerleşimini Rahat kadar ucuz tutuyor', async ({ page }) => {
-    await loadWorld(page, dizili());
-    await expect(page.locator('table.grid .card').first()).toBeVisible();
-    const layoutMs = () =>
-      page.evaluate(async () => {
-        const bar = document.querySelector('.reason-bar span') as HTMLElement;
-        const times: number[] = [];
-        for (let i = 0; i < 25; i++) {
-          bar.textContent = `ölçüm ${i}`;
-          const start = performance.now();
-          void document.body.offsetWidth;
-          times.push(performance.now() - start);
-          await new Promise((r) => requestAnimationFrame(r));
-        }
-        return times.sort((a, b) => a - b)[12]!;
-      });
-    const roomy = await layoutMs();
-    await chooseDensity(page, 'Sığdır');
-    await page.waitForTimeout(300);
-    const fit = await layoutMs();
-    expect(
-      fit / Math.max(roomy, 0.05),
-      `Sığdır'da ${fit.toFixed(2)} ms, Rahat'ta ${roomy.toFixed(2)} ms`,
-    ).toBeLessThan(8);
-  });
-
   // The full name is not lost: it is what the card SAYS to a screen reader,
-  // and every other density still draws it. Since erisim/anlam the name opens
-  // with the day and hour ("Çarşamba 10–11. saat, Ö1, 411A SAY, A").
-  test('kart sınıfın tam adını söylüyor, Rahat onu çiziyor', async ({ page }) => {
+  // and the markup still holds it. Since erisim/anlam the name opens with the
+  // day and hour ("Çarşamba 10–11. saat, Ö1, 411A SAY, A").
+  test('kart sınıfın tam adını söylüyor, ilk kelimesini çiziyor', async ({ page }) => {
     await loadWorld(page, dizili());
     const card = page.locator('table.grid .card', { hasText: '411A' }).first();
     await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
     await expect(card.locator('.card-top')).toHaveText('411A SAY');
-    await chooseDensity(page, 'Sığdır');
     await expect(card.locator('.card-top')).toHaveJSProperty('innerText', '411A');
-    await expect(card).toHaveAttribute('aria-label', /, 411A SAY, /);
   });
 });
 
@@ -943,10 +683,11 @@ test.describe('50. Gelemediği saatlerde saat gösterimi', () => {
   // The Müsaitlik tab and its "Saatler" switch went with K1 (2026-11-16): the
   // grid lives on the person's page, which always shows the bell, because
   // "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock times. The stored
-  // switch (`ders-programi-musaitlik-saat`) no longer changes anything.
-  test('kişi sayfasının ızgarası saati hep gösteriyor, Sığdır’da da', async ({ page }) => {
+  // switch (`ders-programi-musaitlik-saat`) no longer changes anything, and
+  // the grid's own clockless layout (K6) does not reach this heading.
+  test('kişi sayfasının ızgarası saati hep gösteriyor, ızgara göstermiyor', async ({ page }) => {
     await openWithSample(page);
-    await chooseDensity(page, 'Sığdır');
+    await expect(page.locator('table.grid thead .hour-clock')).toHaveCount(0);
     await openSetup(page, 'Öğretmenler');
     const sheet = await openPerson(page, 0);
     const clock = sheet.locator('table.availability thead .hour-clock').first();
@@ -998,121 +739,5 @@ test.describe('51. Program: programı boşalt', () => {
       'data-disabled',
       '',
     );
-  });
-});
-
-// 81. The INTERFACE's density — its own axis since 2026-08-27.
-//
-// "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
-//  yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
-//
-// ...and then: "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı
-// rahatından farklı olsun." One attribute drove both; there are two now, and
-// the second half of this test is the one that says so — moving the interface
-// must leave `data-density` where it was, or the split is cosmetic.
-//
-// Measured on the sample school at the default scale, Kurulum → Öğretmenler,
-// 2026-08-27 (14px root):
-//
-//   Ferah    row 57.5px  11 rows above the fold
-//   Rahat    row 49.5px  13
-//   Sığdır   row 31px    23
-//
-// Twenty-five teachers still do not ALL fit, and that is written down rather
-// than tuned away: what is left setting the row's height is the text box in it,
-// and the only thing that would take it lower is a smaller letter. 12px on
-// screen is a floor this program does not cross for a reader who has trouble
-// seeing. So the claim here is the one that is true — each step shows strictly
-// more than the one before it, and none of them shrinks the type.
-test.describe('81. Yoğunluk listelerde de', () => {
-  test('üç basamak listede gerçekten farklı, ve hiçbiri yazıyı küçültmüyor', async ({ page }) => {
-    await openWithSample(page);
-
-    const measure = async () => {
-      await openSetup(page, 'Öğretmenler');
-      return page.evaluate(() => {
-        const main = document.querySelector('.main') as HTMLElement;
-        const rows = [...document.querySelectorAll('.cols > div table.list tbody tr')];
-        const box = main.getBoundingClientRect();
-        const sizes = rows
-          .slice(0, 3)
-          .flatMap((r) => [...r.querySelectorAll('td, td *')])
-          .map((el) => parseFloat(getComputedStyle(el as HTMLElement).fontSize))
-          .filter((n) => Number.isFinite(n) && n > 0);
-        return {
-          height: Math.round(rows[0]!.getBoundingClientRect().height),
-          visible: rows.filter((r) => {
-            const b = r.getBoundingClientRect();
-            return b.top >= box.top && b.bottom <= box.bottom;
-          }).length,
-          smallest: Math.min(...sizes),
-        };
-      });
-    };
-
-    // The GRID's step is parked where it starts and never touched, so anything
-    // that moves below is the interface axis and nothing else.
-    const gridBefore = await page.evaluate(() =>
-      document.documentElement.getAttribute('data-density'),
-    );
-
-    await chooseUiDensity(page, 'Ferah');
-    const ferah = await measure();
-    await chooseUiDensity(page, 'Rahat');
-    const rahat = await measure();
-    await chooseUiDensity(page, 'Sığdır');
-    const sigdir = await measure();
-
-    // Each step is tighter than the one before it — in the LIST, which is the
-    // part of this setting that did not exist until now.
-    expect(sigdir.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(rahat.height);
-    expect(rahat.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(ferah.height);
-    // ...and the point of it: more of the list at once. Comfortably more, not
-    // one row more — 10 to 19 when this was written. Or the whole list: since
-    // K1 (2026-11-16) no Başlarken stands above it, and 25 is every teacher.
-    expect(sigdir.visible).toBeGreaterThanOrEqual(Math.min(25, rahat.visible + 5));
-
-    // The floor that must survive all of it. What comes out of a row is AIR.
-    for (const [name, m] of [
-      ['ferah', ferah],
-      ['rahat', rahat],
-      ['sigdir', sigdir],
-    ] as const) {
-      expect(m.smallest, `${name}: ${m.smallest}px`).toBeGreaterThanOrEqual(12);
-    }
-
-    // TWO AXES, and this is the assertion that makes them two: three moves of
-    // the interface step and the grid's step has not been touched once.
-    expect(await page.evaluate(() => document.documentElement.getAttribute('data-density'))).toBe(
-      gridBefore,
-    );
-    expect(
-      await page.evaluate(() => document.documentElement.getAttribute('data-ui-density')),
-    ).toBe('sigdir');
-    expect(await page.evaluate(() => localStorage.getItem('ders-programi-arayuz-yogunluk'))).toBe(
-      'sigdir',
-    );
-  });
-
-  test('ızgara ekseni arayüz eksenini kıpırdatmıyor — ters yönde de', async ({ page }) => {
-    await openWithSample(page);
-    await chooseUiDensity(page, 'Sığdır');
-
-    // Move the GRID all the way and read the INTERFACE back.
-    await chooseDensity(page, 'Ferah');
-    const html = await page.evaluate(() => ({
-      izgara: document.documentElement.getAttribute('data-density'),
-      arayuz: document.documentElement.getAttribute('data-ui-density'),
-    }));
-    expect(html).toEqual({ izgara: 'ferah', arayuz: 'sigdir' });
-
-    // ...and it survives the reload, because two axes means two keys.
-    await reopen(page);
-    expect(
-      await page.evaluate(() => ({
-        izgara: document.documentElement.getAttribute('data-density'),
-        arayuz: document.documentElement.getAttribute('data-ui-density'),
-      })),
-    ).toEqual({ izgara: 'ferah', arayuz: 'sigdir' });
   });
 });

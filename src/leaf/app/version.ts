@@ -79,6 +79,17 @@ export function tarihYazisi(iso: string): string {
   return t('{gun} {ay} {yil}', { gun: Number(m[3]), ay: t(ay), yil: m[1]! });
 }
 
+/**
+ * "Salı 12 Kasım" from "2026-11-12" and the day's name, already in the
+ * interface language (Eski hâline dön, K8). '' when the date is not one.
+ */
+export function gunYazisi(iso: string, hafta: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  const ay = m === null ? undefined : AYLAR[Number(m[2]) - 1];
+  if (m === null || ay === undefined) return '';
+  return t('{hafta} {gun} {ay}', { hafta, gun: Number(m[3]), ay: t(ay) });
+}
+
 /** "v1.1.0 · 27 Ağustos 2026", or just "v1.1.0" when there is no date. */
 export function surumEtiketi(s: Surum = SURUM): string {
   const tarih = tarihYazisi(s.date);

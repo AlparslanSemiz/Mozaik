@@ -32,12 +32,7 @@ import { activePlacements } from '../grid';
  * says which, and names the hole. null only when the lesson or its class is
  * gone.
  */
-export function holeReason(
-  d: State,
-  ix: Index,
-  lessonId: Id,
-  isExcludedDay: (day: number) => boolean = () => false,
-): string | null {
+export function holeReason(d: State, ix: Index, lessonId: Id): string | null {
   const lesson = ix.lessonById.get(lessonId);
   const group = lesson === undefined ? undefined : ix.classById.get(lesson.classId);
   if (lesson === undefined || group === undefined) return null;
@@ -54,7 +49,6 @@ export function holeReason(
   const counts = new Map<BlockCode, { count: number; message: string }>();
   let holes = 0;
   for (let g = 0; g < dayCount; g++) {
-    if (isExcludedDay(g)) continue;
     for (let s = 0; s < hourCount; s++) {
       if (hole(g, s)) holes++;
       for (const size of sizes) {

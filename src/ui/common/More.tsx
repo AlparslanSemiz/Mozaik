@@ -101,10 +101,6 @@ export function MoreSep() {
   return <DropdownMenu.Separator className="menu-sep" />;
 }
 
-export function MoreLabel({ children }: { children: React.ReactNode }) {
-  return <DropdownMenu.Label className="menu-label">{children}</DropdownMenu.Label>;
-}
-
 /** An on/off item: a tick when on, `menuitemcheckbox` to the reader. */
 export function MoreCheck({
   checked,

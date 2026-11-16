@@ -13,7 +13,7 @@ import {
   startLongPress,
 } from '../../platform/dom';
 import { dayPeriods } from '../../pure/entities';
-import type { GridRow, MaskMode, MenuTarget } from '../../pure/program';
+import type { GridRow, MenuTarget } from '../../pure/program';
 import { useT } from '../common';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import type React from 'react';
@@ -27,7 +27,6 @@ interface Props {
   settings: Settings;
   rows: GridRow[];
   dayIndices: number[];
-  dayModes: Record<string, MaskMode>;
   firstColumnTitle: string;
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
@@ -54,7 +53,6 @@ function GridInner({
   settings,
   rows,
   dayIndices,
-  dayModes,
   firstColumnTitle,
   onCellRemove,
   onCellMoveStart,
@@ -98,7 +96,7 @@ function GridInner({
     };
   }, []);
 
-  // Counts, not widths: the "Sığdır" density derives --cell-w from the box it
+  // Counts, not widths: the stylesheet derives --cell-w from the box it
   // is in, and the week is not always 6x12 — a seven-day week is 84 columns
   // and a hard-coded 72 in the stylesheet would be wrong the day somebody adds
   // Pazartesi. The design rule bans a MEASUREMENT written in the JSX; these are
@@ -119,7 +117,8 @@ function GridInner({
    * `data-row`, `data-day` and `data-hour` are on the <td> because drag.ts
    * needs them — so the menu reads the click the same way the drag does.
    *
-   * A right click on anything that is NOT a card opens nothing: preventDefault
+   * A right click on anything that is NOT a card opens nothing, headings
+   * included since 2026-11-16 (K7): preventDefault
    * here runs before Radix's own handler (it composes ours first and checks
    * `defaultPrevented`), so an empty cell keeps behaving as it always did.
    */
@@ -132,30 +131,10 @@ function GridInner({
     const card = td?.querySelector('.card') ?? null;
     if (card != null && td != null) {
       onMenu({
-        kind: 'card',
         rowId: td.dataset.row ?? '',
         day: Number(td.dataset.day),
         hour: Number(td.dataset.hour),
       });
-      return;
-    }
-    const row = element.closest<HTMLElement>('[data-menu-row]');
-    if (row !== null) {
-      onMenu({ kind: 'row', rowId: row.dataset.menuRow ?? '' });
-      return;
-    }
-    const hour = element.closest<HTMLElement>('[data-menu-hour]');
-    if (hour !== null) {
-      onMenu({
-        kind: 'column',
-        day: Number(hour.dataset.menuDay),
-        hour: Number(hour.dataset.menuHour),
-      });
-      return;
-    }
-    const day = element.closest<HTMLElement>('[data-menu-day]');
-    if (day !== null) {
-      onMenu({ kind: 'day', day: Number(day.dataset.menuDay) });
       return;
     }
     e.preventDefault();
@@ -172,7 +151,7 @@ function GridInner({
               {t('Haftalık dersler')} · {firstColumnTitle}
             </caption>
             {/* Explicit columns make `table-layout: fixed` an actual contract.
-                In Sığdır the table owns exactly the container width; card text
+                The table owns exactly the container width; card text
                 may ellipsize, but it cannot impose a min-content floor. */}
             <colgroup>
               <col className="grid-row-col" />
@@ -200,7 +179,7 @@ function GridInner({
                       key={g}
                       data-menu-day={g}
                       colSpan={hourCount + ((breakAt[g] ?? -1) >= 0 ? 1 : 0)}
-                      className={`${visibleDay % 2 === 1 ? 'day-head band' : 'day-head'}${dayModes[day.name] === 'ghost' ? ' masked-scope' : ''}`}
+                      className={visibleDay % 2 === 1 ? 'day-head band' : 'day-head'}
                     >
                       {dayLabel(day.name)}
                     </th>
@@ -230,11 +209,7 @@ function GridInner({
                       data-menu-day={g}
                       data-menu-hour={s}
                       className={
-                        [
-                          s === 0 ? 'day-first' : '',
-                          visibleDay % 2 === 1 ? 'band' : '',
-                          dayModes[settings.days[g]?.name ?? ''] === 'ghost' ? 'masked-scope' : '',
-                        ]
+                        [s === 0 ? 'day-first' : '', visibleDay % 2 === 1 ? 'band' : '']
                           .filter(Boolean)
                           .join(' ') || undefined
                       }
@@ -245,7 +220,6 @@ function GridInner({
                       }
                     >
                       {hour}
-                      <span className="hour-clock">{clocks[g]?.periods[s]?.start ?? ''}</span>
                     </th>,
                   ]),
                 )}
@@ -259,7 +233,6 @@ function GridInner({
                   dayIndices={dayIndices}
                   hourCount={hourCount}
                   breakAt={breakAt}
-                  dayModes={dayModes}
                   settings={settings}
                   onCellRemove={onCellRemove}
                   onCellMoveStart={onCellMoveStart}
@@ -287,7 +260,6 @@ function sameGridProps(a: Props, b: Props): boolean {
     a.settings === b.settings &&
     a.rows === b.rows &&
     a.dayIndices === b.dayIndices &&
-    a.dayModes === b.dayModes &&
     a.firstColumnTitle === b.firstColumnTitle &&
     a.onCellRemove === b.onCellRemove &&
     a.onCellMoveStart === b.onCellMoveStart &&

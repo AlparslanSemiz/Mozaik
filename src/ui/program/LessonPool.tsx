@@ -203,7 +203,7 @@ function LessonPool({
    * its own table and drew nothing in that strip, while the tray showed 19 of
    * its 205 cards and the other 182 sat under the fold. Everything is read
    * rather than assumed, because the room is a property of THIS school at THIS
-   * scale and density: three teachers leave a lot, forty leave none, and
+   * scale: three teachers leave a lot, forty leave none, and
    * `dockHeightForRoom` then returns the stored height untouched.
    */
   function fit() {
@@ -517,21 +517,18 @@ function LessonPool({
                         }
                       >
                         <div
-                          className={`pool-card${c.masked ? ' masked-scope' : ''}`}
+                          className="pool-card"
                           data-size={c.size}
                           data-lesson={c.lessonId}
                           style={{ background: paletteColor(c.color) }}
-                          onPointerDown={
-                            c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
-                          }
+                          onPointerDown={(e) => onStart(e, c.lessonId, c.size)}
                           // A control now: Enter picks it up, the arrows walk
                           // the tray (one Tab stop, see the effect above).
                           // Named by its own text, the long sentence is the
                           // description: a speech user says what is on the
                           // card (axe label-content-name-mismatch).
                           role="button"
-                          tabIndex={c.masked ? undefined : -1}
-                          aria-disabled={c.masked || undefined}
+                          tabIndex={-1}
                           title={describe}
                         >
                           <span className="card-top">{c.top}</span>

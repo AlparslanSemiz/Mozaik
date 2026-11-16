@@ -169,5 +169,5 @@ Roboders kullanıyor (2026-10-08). Bir son tarih yok, acele de yok (kullanıcı,
 
 Soru listesinde olmayan ama aynı turdan kalan bir soru daha vardı, ekran:
 2026-08-25'te ölçülerek cevaplandı, hedef makine 27 inçlik bir monitör ve
-1920×1080 CSS pikseli. Bugünkü karşılığı Görünüm'deki Sığdır seçeneği ve
+1920×1080 CSS pikseli. Bugünkü karşılığı kutuya kendiliğinden sığan ızgara (2026-11-16'ya kadar Sığdır seçeneği) ve
 [PRINCIPLES.md](PRINCIPLES.md)'in hedef makine bölümü.

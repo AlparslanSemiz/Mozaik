@@ -602,7 +602,9 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     expect(separator.width).toBeLessThanOrEqual(8);
     expect(separator.width).toBeLessThan(cell.width / 3);
     // Still a real column with its own edges, not a hairline that goes unseen.
-    expect(separator.width).toBeGreaterThanOrEqual(4);
+    // 2, not 4, since 2026-11-16 (K6): the fitted grid is the only layout and
+    // its separator is .1875rem (2.4px at %100), the width it hands to lessons.
+    expect(separator.width).toBeGreaterThanOrEqual(2);
   });
 
   test('kapalı saatin çarpısı büyüdü ve hâlâ okunuyor', async ({ page }) => {

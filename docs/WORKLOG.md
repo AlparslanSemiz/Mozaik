@@ -21,9 +21,10 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 Son güncelleme: 2026-11-16 sabah (gece çalışması). Bu blok yeni bir oturumun başlangıç noktası;
 ayrıntı aşağıdaki tarihli girdilerde, kararlar DECISIONS'ta. `sade/asama-2` Sadeleşme aşama 2'yi,
-kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). `sade/asama-3b` onun üstünde beş görev sekmesini
-(K1), ikinci dizilişin bir plan olmasını (K2) ve Kontrol'ün çipin sorun listesine geçmesini (K3)
-taşıyor, birleşmedi; aşama 3A (K6–K8) paralel dalda, ikisi birleştirilecek (aşağıda tarihli girdi).
+kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). Aşama 3A (K6 tek ızgara düzeni, K7 toplu
+sabitleme ve geçici görünüm yok, K8 Eski hâline dön) `main`'de (b44b59a). `sade/asama-3b` aşama
+2'nin ve `main`'in üstünde beş görev sekmesini (K1), ikinci dizilişin bir plan olmasını (K2) ve
+Kontrol'ün çipin sorun listesine geçmesini (K3) taşıyor, birleşmedi (aşağıda tarihli girdi).
 
 **Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
 önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
@@ -41,8 +42,7 @@ bulguları (#68: yavaş hatta indirme, bekleyici, küçülme koruması, budama);
 sadeleşme aşama 1 (#67: tek ana düğme, Daha fazla, Dosya menüsü, Başlarken 5 iş, K4 adları).
 
 **Sürüyor (dallarda):** sadeleşme aşama 2, kişi sayfası (`sade/asama-2`, K5); aşama 3B (`sade/asama-3b`,
-K1–K3, aşama 2'nin üstünde); aşama 3A (K6 Sığdır, K7 Geçici görünüm, K8 Eski hâline dön); Linux
-paketi (`platform/linux`). Sonra: 3A ile 3B'nin birleşmesi, aşama 4 (öğretmene PDF gönder, ikame, hafta
+K1–K3, aşama 2'nin ve 3A'lı `main`'in üstünde); Linux paketi (`platform/linux`). Sonra: aşama 4 (öğretmene PDF gönder, ikame, hafta
 istisnası).
 
 **Alp'te bekleyenler:**
@@ -53,7 +53,50 @@ istisnası).
 3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
 4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
 
-**Dikkat.** Brotli boyut payı 3B'den sonra 3,5 kB (eşik 306 000 B; aşama 2'de 213 B'ye inmişti). Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
+**Dikkat.** 3A ve 3B birlikte 1 156 468 B, brotli 299 085 B, eşiğe 6,9 kB (aşama 2'nin 305 787'si 3A'da 302 162'ye,
+3B'de 302 530'a indi; iki dal ayrı ayrı). Tuzaklarda en büyük numara 179.
+
+**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
+kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
+budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
+ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
+
+**Daha iyi program (2026-11-16, `cozucu/iyilestirme`, birleşmedi):** bitmiş haftaya iyileştirme
+geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığı söyleyen tıkanma cümlesi
+(TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
+brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
+
+**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
+seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
+dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
+aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
+**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
+birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
+Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
+dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
+Gerçek Windows exe'de koşulmadı.
+
+**Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
+kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
+`linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
+(DECISIONS "Linux sürümü", tuzak 177, 178). Mac'te yazıldı: hiç Linux'ta derlenmedi, hiç açılmadı.
+
+---
+
+weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
+diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
+bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
+
+**Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
+kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
+için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
+birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+---
+
+**Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
+gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
 yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
 Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
 `npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
@@ -123,9 +166,9 @@ yer sayısı: 15 ekrandan 13'ü ve bir liste, Müsaitlik ile Kontrol'ün iki ekr
 günler'de 1920'de üç kontrol arttı: Başlarken satırı artık orada.
 
 **Boyut** (`npm run boyut`, aynı makine): önce 1 192 401 B, brotli 305 787 B (eşiğe 213 B); sonra
-1 174 340 B (−18 061), brotli 302 530 B (−3 257; eşiğe 3 470 B). Eşik değişmedi.
+1 174 340 B (−18 061), brotli 302 530 B (−3 257; eşiğe 3 470 B). Aşama 3A'lı `main` ile birleşince 1 156 468 B, brotli 299 085 B (eşiğe 6 915 B). Eşik değişmedi.
 
-**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `npm run hizli` (73 dosya yeşil), `vite build`, `npm run boyut`. Bütün E2E süiti `--workers=2` önce: 787 testin 712'si yeşil, kalan 75'in çoğu `openLessons('all')` yardımcısının yanlış başlığa bakmasıydı; o 21 dosya yeniden: 558'in 555'i, kalan ikisi düzeltilip tek başına yeşil. Son bütün koşu: E2E_SON. `kayma.spec.ts` 128 (eski 129) bilinen macOS kaydırma çubuğu durumu: çift artık Hakkında ile Görünüm, ölçülecek çubuk macOS'ta yer kaplamıyor. Tıklama testi 1920×1080 ve 1366×768'de örnek okulla (`bul.mjs`, görüntüler oturumun scratch klasöründe `bul1920/`, `bul1366/`).
+**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `npm run hizli` (73 dosya yeşil), `vite build`, `npm run boyut`. Bütün E2E süiti `--workers=2` önce: 787 testin 712'si yeşil, kalan 75'in çoğu `openLessons('all')` yardımcısının yanlış başlığa bakmasıydı; o 21 dosya yeniden: 558'in 555'i, kalan ikisi düzeltilip tek başına yeşil. Son bütün koşu: E2E_SON. `kayma.spec.ts` 128 (eski 129) bilinen macOS kaydırma çubuğu durumu: çift Okul bilgileri'nde Görünüm (sığar, K6'dan beri) ile Kurallar (taşar); Zil ve günler Başlarken'i taşıdığı için artık kısa olan değil. macOS'ta ölçülecek çubuk yer kaplamıyor, Linux CI'da geçmeli. Tıklama testi 1920×1080 ve 1366×768'de örnek okulla (`bul.mjs`, görüntüler oturumun scratch klasöründe `bul1920/`, `bul1366/`).
 
 **İnceleme.** Taze bağlamlı bir alt ajan farkı okudu. Düzeltilenler: eski sekme adını anan dört
 cümle (Kurallar'ın iki "Okul → …"su, Görünüm'ün "Okul → Öğretmenler"i, yanlış dosya uyarısı),
@@ -138,6 +181,74 @@ programları yeniden adlandırılamıyor (yalnız geçilir ve silinir, hiçbiri 
 sorun listesinin segment grubunun adı ile satırların `Göster` düğmesi aynı kelime (grup adı,
 düğme adı değil). Tıklama testinde bulunan: 1366'da çipin "433 saat yerleşmedi"si kesiliyordu
 (sekmeler yedi kısa addan beş uzun ada geçince daha geniş), çip artık kendi genişliğinde.
+
+## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
+
+`origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,
+Kontrol çipe) başka bir dalda; bu dal sekme yapısına, üst çubuğun gezinmesine, Kontrol'e ve
+seçenek değiştiriciye dokunmadı.
+
+- **K6.** Yoğunluk kalktı, eski Sığdır ızgaranın tek düzeni; arayüz yoğunluğu da gitti.
+  `density.ts`, `useWeekCut.ts`, iki seçici, Daha fazla → Yoğunluk, "hafta sığmıyor" ipucu,
+  ızgaradaki saat yazısı (başlığın `title`'ında kaldı), 36 çeviri anahtarı × 4 dil. Eski
+  anahtarlar okunmuyor, Veriler nerede'de tarihsel satır (`preferenceKeys.ts`).
+- **K7.** Toplu sabitle, Geçici görünüm, şeritteki geçici liste, `programMask.ts`,
+  `useProgramMask.ts`, `PinScope` (yalnız `allPinCells`/`togglePinAll` kaldı) ve çözücünün
+  `exclusions` seçeneği (solver, relax, cpModel, shortfall, improve, hole). Ağır çözücü
+  testleri (solver, relaxFullCourse, relaxLaidOut, invariants) 118/118 yeşil.
+- **K8.** `platform/storage/dailyCopies.ts`, `ui/shell/OldCopies.tsx`, Dosya ▾ ve Ctrl+K.
+  Kural DATA.md'de "Günlük kopyalar". Birim (`dailyCopies.test.ts`, 8) ve E2E
+  (`eski-hal.spec.ts`, 3).
+
+**Boyut** (`npm run boyut`, bayt): önce 1 192 401 ham / 305 787 brotli; K6+K7 sonrası
+1 167 137 / 300 437; K8 ile 1 174 176 / 302 154; (b) ve artıklarla, main birleşince 1 174 531 / 302 162 (eşik 1 200 000 / 306 000).
+
+**Izgara ölçümü** (örnek okul, Programı yap, 376 kart; CSS px = ekran / Windows ölçeği):
+
+| Kutu | Hücre | Taşma | Kırpılan kart | En küçük yazı |
+|---|---|---|---|---|
+| 1920 %100 | 28,3 | 0 | 0 | 12 |
+| 1920 %125 (1536) | 23,0 | 0 | 0 | 9,96 |
+| 1920 %150 (1280) | 19,4 | 0 | 317 | 9 |
+| 1366 %100 | 20,6 | 0 | 0 | 9 |
+| 1366 %125 (1093) | 16,8 | 0 | 319 | 9 |
+| 1366 %150 (911) | 14,3 | 0 | 319 | 9 |
+
+Hafta her kutuda sığıyordu ama 1920 %150 ve 1366 %125/%150'de tek saatlik kartlar "4…"
+okunuyordu, 10–12. saat numaraları da kırpılıyordu. **Alp (b)'yi seçti, aynı gün yazıldı:**
+sütun en geniş dersin okunduğu genişlikten dar olmuyor (`--cell-min`, yazıdan ölçülüyor:
+örnek okulda 23 px, en geniş satır "453" 21,61 px), kart yazısı en az 11 px (9 px küçültme
+kalktı), sığmayan hafta 14 px'lik hep çizilen bir çubukla yana kayıyor. Sonra:
+
+| Kutu | Hücre | Yana kayma | Kesik ders | En küçük yazı |
+|---|---|---|---|---|
+| 1920 %100 | 28,1 | 0 | 0 | 12 |
+| 1920 %125 | 26 | 232 | 0 | 12 |
+| 1920 %150 | 26 | 488 | 0 | 12 |
+| 1366 %100 | 26 | 402 | 0 | 12 |
+| 1366 %125 | 26 | 675 | 0 | 12 |
+| 1366 %150 | 26 | 857 | 0 | 12 |
+
+(Hücre ilk sütunda gün çizgisiyle birlikte. Playwright başsız Chromium kaydırma çubuğunu
+`--hide-scrollbars` ile gizliyor; çubuk o bayrak kaldırılarak görüldü.)
+
+**Koşular.** `tsc` (uygulama ve e2e), `eslint src`, `knip`, `depcruise` temiz; `npm run hizli`
+1 690 geçti (bir kez yük altında `emptyStart.test.ts` 5 s'de zaman aşımı, tek başına yeşil);
+tam Chromium E2E `--workers=2`: 786 geçti, 3 kırmızı: bilinen `kayma.spec.ts:129` (macOS),
+`renk.spec.ts:589` (ayraç 2,4 px, sığan ızgaranın ölçüsü; eşik 4 → 2) ve `temel.spec.ts:181`
+(saat başlıkta değil `title`'da); ikisi düzeltildi, yeniden koşuldu, yeşil.
+
+**İnceleme** (taze bağlamlı alt ajan): bugünün kopyasının günün sonunu engellemesi, bugünün
+kopyasında VK1/okunamayan/boş plan kapısının eksikliği, dolu depoda silmeden-önce yuvasının
+kopyalardan önce gitmesi, kapalı pencerede planın her çizimde metne çevrilmesi, gün kaydının
+yazılamaması, DST'de "dün", bayat yorumlar ve belge cümleleri: düzeldi, ayrı commit'te. Sonradan (Alp onayladı): silinen planın kopyaları sonraki açılışta budanıyor; yeni sınıf
+bir öncekinin dersliğiyle açılıyor (aşama 2'nin gerilemesi, `NewPerson.tsx`); aynı sınıfta
+iki dersi olan öğretmenin iki saat kutusu branşla ayrı adlar alıyor (`InspectorSheet.tsx`).
+Birim ve E2E (`dailyCopies.test.ts`, `kisi.spec.ts`).
+
+**Tıklama testi** (`dist/index.html`, Chromium): altı kutuda Program, 1920 ve 1366'da Dosya ▾
+→ Eski hâline dön (kopya yok / dünkü kopya) → Dünkü hâline dön → bildirim ve Geri al.
+Görüntüler oturumun scratch klasöründe (`shots/`).
 
 ## 2026-11-16 · Sadeleşme aşama 2: kişi sayfası (`sade/asama-2`, TODO SD8, K5)
 
@@ -213,6 +324,38 @@ iki dersi olan öğretmende "510 · Haftalık saat" adı iki kez geçiyor (seyre
 satırıyla birlikte); `role="status"` satırlarının içerikle birlikte doğması (programın başka
 yerlerindeki desenle aynı); yeni sınıfta derslik bir sonrakine taşınmıyor (artık tek tek ekleme
 sayfa sayfa, toplu ekleme yapıştırma).
+
+## 2026-11-16 · Linux sürümü: AppImage (`platform/linux`)
+
+Alp'in hedefi "her yerde, güzelce", Windows ve web önce. Karar DECISIONS "Linux sürümü":
+yalnız AppImage, kendini güncelliyor, `.deb` yok. 2026-10-10'un "Linux Release'e girmiyor"
+kuralı yeniden tartıldı: gerekçesinin yarısı (Windows'u bekletmek) Mac'in `always()` kapısıyla
+çözülmüştü, öteki yarısı (WebKitGTK) babanın yolunu etkilemiyor.
+
+**Yapılan.** `src-tauri/src/update_linux.rs` (APPIMAGE yalnız program APPDIR'in içindeyse,
+`AI\x02` imi, `.yeni` + sabit bağlı `.eski` + tek rename, yazılamayan klasörde indirmeden önce
+cümle), `update.rs`'e `Hedef::Linux` ve dört isteğe bağlı `linux_appimage*` alanı, `cpsat.rs`'e
+`linux_yolu` (yalnız AppImage'ın kendi bağlamasındaki `usr/lib/Mozaik`, bağlar çözülmüş,
+başkalarının yazamadığı; güvenlik incelemesinin isteğiyle sıkılaştırıldı), `tauri.linux.conf.json`,
+`scripts/ortools-linux.sh`, `linux-paket.sh`, `linux-acilis.sh`, `surum.yml`'e `linux` işi,
+`sign`'a ve `publish`'e AppImage, `.github/workflows/linux.yml`, `kontrat.test.ts`'e iki test.
+
+**Ölçülen (bu Mac'te).** OR-Tools 9.15'in resmi Linux arşivleri `gh api` ile listelendi;
+AlmaLinux 8.10 arşivi indirildi (SHA-256 `c43b473b…a1e9`, GitHub'ın kendi özetiyle aynı) ve
+`llvm-objdump -p` ile okundu: `libortools.so.9`'un kapanışı 99 dosya, 65 MB, en çok GLIBC_2.26,
+GLIBCXX_3.4.22, CXXABI_1.3.11; sistemden yalnız libc, libm, libdl, libpthread, librt,
+libstdc++, libgcc_s ve ld-linux; hepsinde `RUNPATH $ORIGIN` (libz, libbz2, libutf8_validity
+hariç, onlar yalnız sistem kütüphanesi istiyor). Tauri'nin Linux kaynak klasörü
+`tauri-utils` 2.10'un `resource_dir`'inden okundu: `<exe>/../lib/<productName>`.
+
+**Koşulan.** `cargo test` (macOS, 108/108), rustfmt, `actionlint` (yeni bulgu yok; kanarya'nın
+`ubuntu-26.04` etiketi ve `surum.yml`'in eski SC2012 bilgileri önceden vardı), shellcheck (yalnız
+bilgi), `vitest` `kontrat.test.ts` ve `surum.test.ts`, ve aşağıdaki `hizli`.
+**Koşulmayan.** Linux hedefine `cargo check` (bu Mac'te GTK/WebKitGTK'nın pkg-config'i yok, Docker
+yok); Linux'a özgü kod `cfg!` ile her platformda derleniyor, yalnız `#[cfg(target_os = "linux")]`
+blokları (lib.rs'in önceden var olanları) burada derlenmedi. AppImage hiç üretilmedi, hiç açılmadı;
+güncelleme uçtan uca denenmedi; FUSE'suz Ubuntu 24.04'te ne olduğu bilinmiyor. İlk `linux.yml`
+koşusu bunların ilk ölçümü olacak.
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 

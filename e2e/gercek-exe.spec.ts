@@ -571,14 +571,14 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   });
 
   // Dragging a card along its row juddered here: 16% of frames dropped in
-  // either density, and none without a drag (2026-09-26). Of seven things
+  // either density of the time, and none without a drag (2026-09-26). Of seven things
   // switched off one at a time only the reason bar's text mattered — a drag
   // writes it up to ten times a second (REASON_GAP), and in WebKitGTK every
   // write dropped a frame, the page being redrawn from the top (pitfall 117).
   // `contain: size layout` on the bar keeps the write inside it. Asked here
   // without a drag, which WebDriver cannot give in this engine (pitfall 127):
   // the bar written every sixth frame for three seconds, as a drag does.
-  test("gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor", async ({ exe }) => {
+  test('gerekçe çubuğuna yazmak sığan ızgarada kare düşürmüyor', async ({ exe }) => {
     // WebKitGTK's pitfall, and a frame count on a runner without a GPU would
     // measure the runner.
     test.skip(WINDOWS, "WebKitGTK'nin kusuru (tuzak 117); GPU'suz runner'da kare ölçümü anlamsız");
@@ -592,12 +592,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
     );
     await dosyaAcildi(exe);
-    await exe.oturum.tikla('metin:Ayarlar');
-    await exe.oturum.tikla('metin:Görünüm');
-    await exe.oturum.js(
-      `const g = [...document.querySelectorAll('[role=group]')].find((x) => x.getAttribute('aria-label') === 'Izgara yoğunluğu');
-      [...g.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Sığdır').click();`,
-    );
+    // The fitted grid, which was Sığdır, is the only layout since 2026-11-16.
     await exe.oturum.tikla('metin:Program');
     const olcum = await exe.oturum.js<{ yazma: number; dusen: number; kare: number }>(
       `await new Promise((r) => setTimeout(r, 1000));

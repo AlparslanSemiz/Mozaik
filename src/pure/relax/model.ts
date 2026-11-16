@@ -14,7 +14,6 @@ import {
   placementKey,
 } from '../../leaf/model';
 import { type Index, buildIndex, pendingBlocks } from '../constraints';
-import { lessonExcluded } from '../program';
 import { fixedCells } from '../solver';
 import { HAND_CAP, type RelaxFamily, type RelaxOptions } from './options';
 import { sameLimit, teacherLimit, withGrid } from './reading';
@@ -102,13 +101,13 @@ export interface Frame {
 }
 
 export function frameOf(base: State, opts: RelaxOptions): Frame {
-  const fixed = fixedCells(base, opts.keepPlaced, opts.exclusions);
+  const fixed = fixedCells(base, opts.keepPlaced);
   const fixedState = withGrid(base, fixed);
   return {
     fixed,
     fixedState,
     fixedIx: buildIndex(fixedState),
-    lessons: base.lessons.filter((x) => !lessonExcluded(x, opts.exclusions)),
+    lessons: base.lessons,
   };
 }
 
@@ -195,7 +194,6 @@ export function buildModel(
   const { fixed, fixedState, fixedIx } = frame;
   const days = base.settings.days.length;
   const hours = base.settings.hours.length;
-  const excludedDays = new Set(opts.exclusions.dayNames);
   const classes = new Map(base.classes.map((x) => [x.id, x]));
   // reassign opens teacher hours too, as a way in: its search starts from a
   // week with hours opened and trades them for lessons handed over, and only a
@@ -314,7 +312,6 @@ export function buildModel(
           when.push(not(d));
         }
         for (let day = 0; day < days; day++) {
-          if (excludedDays.has(base.settings.days[day]!.name)) continue;
           for (let hour = 0; hour + size <= hours; hour++) {
             let ok = true;
             const closedHere: string[] = [];
@@ -409,7 +406,6 @@ export function buildModel(
     for (const group of base.classes) {
       const open: string[] = [];
       for (let day = 0; day < days; day++) {
-        if (excludedDays.has(base.settings.days[day]!.name)) continue;
         for (let h = 0; h < hours; h++) {
           if (fixed[placementKey(group.id, day, h)] !== undefined) continue;
           if (base.unavailable[closedKey(group.id, day, h)] !== undefined) continue;

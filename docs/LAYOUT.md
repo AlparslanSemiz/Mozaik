@@ -60,7 +60,8 @@ Soldan sağa: marka işareti, `Dosya ▾`, beş sekme, durum çipi, boşluk, oku
 plan olunca plan seçici), `Geri al`, `Kaydet`, `?`. Başka bir şey yok (2026-11-16, Sadeleşme
 aşama 1); kaldırılanların yeni yeri aşağıda.
 
-- **Dosya ▾** dosyanın her işini bir menüde tutar: Kaydet, Dosyadan aç, Yeni dönem için kopyala (verinin tamamı yeni bir plana, dizilmiş program boş; eski plan olduğu gibi kalır), Planlar ve yedek (Okul bilgileri'ne götürür) ve İleri al (Ctrl+Y). "Eski hâline dön" aşama 3'te buraya girer (K8).
+- **Dosya ▾** dosyanın her işini bir menüde tutar: Kaydet, Dosyadan aç, Yeni dönem için kopyala (verinin tamamı yeni bir plana, dizilmiş program boş; eski plan olduğu gibi kalır), Eski hâline dön, Planlar ve yedek (Okul bilgileri'ne götürür) ve İleri al (Ctrl+Y).
+- **Eski hâline dön** (2026-11-16, Sadeleşme K8) açık planın son yedi gününü bir pencerede listeler, en yenisi üstte: her satırda günün adı ve tarihi ("Salı 12 Kasım"), öğretmen, ders ve yerleşmiş saat sayısı, ve bir düğme; dünün düğmesi "Dünkü hâline dön", ötekiler "Bu hâline dön". Şimdiki hâlle aynı olan gün listelenmez. Kopya yoksa tek cümle: ilki yarın gelir. Dönmek bildirimiyle `Geri al` taşıyan bir adım; kopyaların nasıl tutulduğu [DATA.md](DATA.md)'de. Ctrl+K "dün" ile de bulur.
 - **Kaydet** sade bir düğme, dolu değil: her ekranın dolu tek düğmesi o ekranın ana işi.
 - **?** ara ve yap (Ctrl+K), klavye kısayolları, Başlarken'i yeniden açma ve Hakkında.
 - **Tema** yalnız Okul bilgileri → Görünüm'de; Ctrl+K'nin "tema"sı oraya götürür. **Şerit katlama** Okul bilgileri → Görünüm'de ve Ctrl+K'de; Okul bilgileri'nde şerit katlı olsa da çizilir, çünkü bölümler oradan seçiliyor ve açmanın yolu da orada.
@@ -110,7 +111,7 @@ kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydı
 ### Sekmelerin şeritleri
 
 - **Öğretmenler** ve **Sınıflar** (bir şerit, iki sekme). `Göster`: `Liste` (sayısıyla; bu ekranda sayı yalnız burada) ve `Dersler`. `Dersler`'de `Açık olan`: sağdaki listeden seçilen kişi. Daha fazla: Bütün dersler tek listede (eski Genel), Kurallar. Düğmenin adı `Liste`, sekmenin adı değil (tuzak 49).
-- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Programı yap`, ekranın tek ana düğmesi; koşarken yerinde `Durdur`), Daha fazla: Yeniden yap; Başka bir dizilim; Bu programın kopyası (yeni bir plan, K2; eski bir dosyada birden çok program varsa açık olanı silmek de); Renk ▸ (öğretmene, sınıfa, dersliğe ya da branşa göre); Yoğunluk ▸ (Ferah, Rahat, Sığdır, aşama 3'te kalkar); tüm programı sabitle ya da sabitlemeleri kaldır; bir şey gizlenmişse geçici görünüm listesi ve tümünü geri yükle; programı boşalt. Görünüm en solda, çünkü orası onun eski yeri. `Yeniden yap` gündelik düğmenin yanında durmuyor: yerleşmiş bir haftayı tek tıkla boşaltıp yeniden yapmak yanlışlıkla basılacak bir düğme değil.
+- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Programı yap`, ekranın tek ana düğmesi; koşarken yerinde `Durdur`), Daha fazla: Yeniden yap; Başka bir dizilim; Bu programın kopyası (yeni bir plan, K2; eski bir dosyada birden çok program varsa açık olanı silmek de); Renk ▸ (öğretmene, sınıfa, dersliğe ya da branşa göre); tüm programı sabitle ya da sabitlemeleri kaldır; programı boşalt. Yoğunluk ve geçici görünüm 2026-11-16'da kalktı (Sadeleşme K6, K7). Görünüm en solda, çünkü orası onun eski yeri. `Yeniden yap` gündelik düğmenin yanında durmuyor: yerleşmiş bir haftayı tek tıkla boşaltıp yeniden yapmak yanlışlıkla basılacak bir düğme değil.
 - **Yazdır ve gönder.** `İçerik`: Öğretmenler, Sınıflar, İkisi de. Daha fazla: Renkli bas.
 - **Okul bilgileri.** `Bölüm`: Zil ve günler, Derslikler, Branşlar (ikisi sayısıyla), Kurallar, Görünüm; Planlar ve yedek ile Hakkında Daha fazla'da (ikisine de üst çubuktan da gidilir: Dosya ▾ ve ?), yeni bir sürüm notu varsa Daha fazla düğmesi nokta taşır. Sağda bir okuma: Kurallar'da kesin, tercih ve kapalı sayıları, Planlar ve yedek'te açık plan, Hakkında'da sürüm.
 
@@ -177,9 +178,9 @@ Müsaitlik bir sekme değil (2026-11-16, K1): ızgara kişinin sayfasında (öğ
 - **Hücreyi boyayan renk** öntanımlı olarak öğretmen rengi, şeritteki `Renk` menüsünden sınıf, derslik ya da branş rengi seçilebilir. Sınıf rengi ayrıca satır başındaki noktada ve basılan sayfanın başlığında bir işaret.
 - **İmleç haçı.** Bir hücrenin üstüne gelince satırı, sütunu, saat başlığı ve satır adı birlikte aydınlanır. Uzun bir haftada yerini kaybetmemenin yolu ve babanın gözüne doğrudan bir cevap. Kapalı saat taramasını örtmez, ve sürükleme başlayınca söner, çünkü orada ızgaranın kendi renkleri konuşur. Birleşmiş iki ve üç saatlik blokların kapsadığı her sütun yanar (tuzak 85). Saf DOM, `gridChrome.ts`.
 - **Gün bandı.** Tek indeksli günler çok hafif bir zemin alır, günleri gruplamak için.
-- **Saat başlığı** ders numarasını ve altında başlangıç saatini taşır.
+- **Saat başlığı** ders numarasını taşır; başlangıç ve bitiş saati başlığın `title`'ında ve her basılan sayfada. Izgara saati 2026-11-16'dan beri çizmiyor (aşağıda).
 - **Öğle arası** dar bir ayraç sütunu, çünkü ızgarada ara konumu gün başına sabit. Ayraç `data-day` ve `data-hour` taşımaz (tuzak 13).
-- **Yoğunluk:** Ferah, Rahat, Sığdır. Sığdır haftanın tamamını kutuya sığdırır, ve bunu kart yazısını kırpmadan yapması ölçülür (tuzak 37, 107 ve 140). Sığdır'da sınıf adı ilk kelimesiyle yazılır ("411A SAY" → "411A", kartta ve satır başında; tam ad etikette ve öteki iki yoğunlukta), ve yine sığmayan bir kart satırı ya da satır başının ikinci satırı kesilmek yerine küçülür, varsayılan ölçekte en çok 9 px'e (`platform/dom/gridFit.ts`). Küçülen yazı satırın yüksekliğini değiştirmez. Windows %125'te (1536 CSS px) babanın tek saatlik kartları 9 px'te de sığmıyor, orada çıkış hâlâ ölçeği %80'e almak.
+- **Izgara kutuya sığar, ders hiç kesilmez** (2026-11-16, Sadeleşme K6 ve Alp'in (b) kararı): tek düzen, seçenek yok; Ferah, Rahat ve Sığdır kalktı. Sütun kutunun payı kadar geniş, ama en geniş dersin okunduğu genişlikten (`--cell-min`, `platform/dom/gridFit.ts` yazıdan ölçer: kartın satırları ve saat numaraları) dar değil. Hafta o genişlikte sığmıyorsa ızgara yana kayar: kalın, hep çizilen bir kaydırma çubuğu, satır başları ve saat satırı yapışkan. Kart yazısı varsayılan ölçekte 12 px ve hiçbir yerde 11 px'ten küçük değil; küçültülerek sığdırılmaz. Örnek okulda 1920 %100'de hafta sığıyor, 1920 %125/%150 ve 1366 %100/%125/%150'de kayıyor, hepsinde 376 dersin 0'ı kesik (`gorunum.spec.ts` 45, 45b). Yazının büyüklüğü Okul bilgileri → Görünüm → Yazı büyüklüğü'nde. Sınıf adı ilk kelimesiyle yazılır ("411A SAY" → "411A", kartta ve satır başında; tam ad etikette).
 
 ### Havuz
 
@@ -208,12 +209,9 @@ nadir olan.
 Taşı · Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
 ────
 Dersi buraya sabitle  (ya da Sabitlemeyi kaldır)
-Toplu sabitle   ▸  Satırı · Sütunu · Günü
-────
-Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü soluklaştır · Günü gizle
 ```
 
-- Satır başında satırı sabitleme ve satırın iki geçici görünüm kalemi, gün başlığında günün karşılıkları, saat başlığında yalnız sütunu sabitleme çıkar. Boş bir hücrede menü açılmaz. Havuzdaki bir kartta aynı menü açılır ve ızgaraya ait kalemler kapalıdır.
+- Satır, gün ve saat başlığında ve boş bir hücrede menü açılmaz. `Toplu sabitle` (satırı, sütunu, günü) ve `Geçici görünüm` 2026-11-16'da kalktı (Sadeleşme K7); tek ders kartın raptiyesiyle, bütün hafta Daha fazla'daki `Tüm programı sabitle` ile sabitlenir. Havuzdaki bir kartta aynı menü açılır ve ızgaraya ait kalemler kapalıdır.
 - `Öğretmeni düzenle` ve `Sınıfı düzenle` ızgaranın çizilmediği eksene ulaşmanın yolu, satır başı zaten bakılan ekseni açıyor.
 - Menü tabloyu saran tek bir `ContextMenu.Root`. İki bin hücreye birer tetikleyici konmaz, tıklamanın yeri `data-row`, `data-day` ve `data-hour`'dan okunur. Karta gelmeyen bir sağ tıkta `preventDefault()` çağrılır ve Radix'in kendi işleyicisi hiç koşmaz.
 - Dokunmatik ekranda (iPad, 2026-11-16) menü karta yarım saniye basılı tutunca açılır: iOS uzun basışta `contextmenu` göndermez. Yeni bir düğme yok; `platform/dom/longPress.ts` parmağın indiği yere aynı `contextmenu`'yü gönderir, önce bir `pointercancel` ile başlayan sürüklemeyi ve Radix'in kendi 700 ms'lik basışını bitirerek (tuzak 176). 8 pikselden fazla kayan parmak sürüklemedir, menü açılmaz. Fare ve klavye değişmedi.
@@ -232,10 +230,10 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de
 duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yazılır:
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
-geri al adımı. Boştaki satır tek cümle söyler ("Yerleşmiş dersi sürükleyerek taşıyın."), satırların ne olduğu ve haftanın sığmadığı yanındaki `?`'te. Sonucun satırı ("Program yapıldı…", "Öneri uygulandı…") yalnız program
+geri al adımı. Boştaki satır tek cümle söyler ("Yerleşmiş dersi sürükleyerek taşıyın."), satırların ne olduğu yanındaki `?`'te. Sonucun satırı ("Program yapıldı…", "Öneri uygulandı…") yalnız program
 o koşunun bıraktığı hâldeyken durur: Ctrl+Z ya da başka bir değişiklikten sonra satır
 ızgaranın ne olduğunu söyleyen boş hâline döner. Okul listelerindeki "… sıraya
-taşındı." cümlesi de aynı kuralla susar. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
+taşındı." cümlesi de aynı kuralla susar.
 
 Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
 altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9,
@@ -305,14 +303,6 @@ bir cümleyle söyler, ve düğme "Uygula, baştan diz" olur. Babanın dosyası
 tam bu durumda: 330 saat dizili, ve boş kalanlar 2 saatlik bloklara uymayacak kadar
 parçalı.
 
-### Geçici görünüm
-
-Bir öğretmen ya da sınıf satırını veya bir günü, bu oturum ve bu plan için
-soluklaştırır ya da gizler. Gizli satırlar ızgaradan ve havuzdan çıkar, maskelenmiş
-bloklar sürüklenmez ve kaldırılmaz, kapsam dışındaki bir güne bırakılamaz, ve
-otomatik dizme onları dışarıda bırakır. Sağ tık menüsünden ve şeridin Daha fazla
-menüsünden yönetilir.
-
 ## Sorun listesi
 
 Durum çipi açar (2026-11-16, K3; Kontrol bir sekmeydi): sağdan bir sayfa, `ProblemList.tsx`,
@@ -358,7 +348,7 @@ Yedi bölüm (2026-11-16, K1; Ayarlar ve Okul'un iki listesi): `Zil ve günler �
 
 - **Zil ve günler:** okul adı, hangi günler ders olduğu, zil saatleri, ve sağda zil önizlemesi. Dersleri dizili bir günü kaldırmak ya da günlük ders sayısını düşürmek önce bir soru sorar: o gün ya da saatlerde kaç saatin yerleşmiş, kaçının sabitli olduğunu ve derslerin havuza döneceğini söyler. Vazgeçilince kutu eski değerine döner. Günlük ders sayısını yalnız `Günlük ders sayısı` kutusu belirler, `Ders adları` yalnız ad verir: adı yazılmayan saat numarasını alır, ders sayısından fazla ad kullanılmaz ve kutunun altında bunu söyleyen bir satır çıkar. Başlangıç saati iki açılır liste (saat ve beşer dakika), `<input type="time">` değil: o girdi AM ya da PM'i tarayıcının yereline göre seçer ve boşaltılınca günü sessizce 00:00'a alır.
 - **Kurallar:** okul geneli sınırlar ve seviyeleri, sağda canlı ihlal listesi.
-- **Görünüm** okulu değil makineyi tarif eder: tema (Açık, Koyu), yazı büyüklüğü (%80 ile %150 arası, beşer adımlık düğmeler), yoğunluk (ızgara ve arayüzün geri kalanı için, tek panelde iki `role="group"` olarak ayrı ayrı Ferah, Rahat, Sığdır), araç şeridi (görünsün ya da gizlensin, ve kaydırınca gizlenmesi), hareket (Tam, Az, Kapalı) ve dil. Her panelin açıklaması başlığının `?`'inde. Sağda örnek bir tablo. Yazı büyüklüğü bir kaydırıcı değil düğmeler, çünkü yasal değerler sayılı ve bir kaydırıcı olmayan bir süreklilik uydururdu. Bu ayarların hiçbiri kâğıdı etkilemez. Tema yalnız burada (2026-11-16).
+- **Görünüm** okulu değil makineyi tarif eder: tema (Açık, Koyu), yazı büyüklüğü (%80 ile %150 arası, beşer adımlık düğmeler), araç şeridi (görünsün ya da gizlensin, ve kaydırınca gizlenmesi), hareket (Tam, Az, Kapalı) ve dil. Her panelin açıklaması başlığının `?`'inde. Sağda örnek bir tablo. Yazı büyüklüğü bir kaydırıcı değil düğmeler, çünkü yasal değerler sayılı ve bir kaydırıcı olmayan bir süreklilik uydururdu. Bu ayarların hiçbiri kâğıdı etkilemez. Tema yalnız burada (2026-11-16).
 - **Planlar ve yedek**, "işim nerede duruyor ve dışarı nasıl çıkar": plan kitaplığı (yarat, adlandır, sil, taslak), "Nereye kaydedilsin" (seçilen klasöre bütün planlar ve günlük yedek), "Bütün planlar tek dosyada" (paket), oturum yedekleri. Klasör paneli paketin üstünde, çünkü bir alışkanlık isteyen çareden önce hiçbir şey istemeyen çare gelir.
 - **Hakkında**, "bu hangi kopya": sürüm ve güncelleme, katlı bir Yenilikler paneli, katlı "Teknik bilgiler" (öneri aramasının iş parçacıkları, adres ve "Veriler nerede" tablosu; 2026-11-16'dan beri, çünkü geliştiricinin okuması babanın ekranındaki en uzun paneldi), ve açık planın yerine geçen ya da onu boşaltan iki işlem (örnek veri ve sıfırla). "Veriler nerede" gerçek anahtar adlarını ve boyutlarını gösterir, ve verinin bu tarayıcıya ve bu bilgisayara ait olduğunu, "tarama verilerini temizle"nin onu sildiğini ve taşınan tek şeyin dosya olduğunu tek bir cümleyle söyler. "Tarayıcıda saklanıyor" demek bunu söylemiyordu.
 

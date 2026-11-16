@@ -57,9 +57,10 @@ test.describe('6. Gün ve ders saatleri', () => {
   }) => {
     await openWithSample(page);
     // 09:00 start, 40 min lessons, 10 min breaks -> the 2nd lesson is at 09:50.
-    const header = page.locator('table.grid thead tr').nth(1);
-    await expect(header).toContainText('09:00');
-    await expect(header).toContainText('09:50');
+    // In the hour heading's title since 2026-11-16 (K6: the grid draws no clock).
+    const hours = page.locator('table.grid thead th[data-col]');
+    await expect(hours.nth(0)).toHaveAttribute('title', '09:00–09:40');
+    await expect(hours.nth(1)).toHaveAttribute('title', '09:50–10:30');
 
     await openSettings(page, 'Zil ve günler');
     const preview = page.locator('table.bell-preview');
@@ -76,7 +77,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await expect(preview).toContainText('09:00–09:45');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid thead tr').nth(1)).toContainText('09:55');
+    await expect(hours.nth(1)).toHaveAttribute('title', /^09:55–/);
   });
 });
 
@@ -145,8 +146,10 @@ test.describe('15. Okul bilgileri sekmesi', () => {
 
   test("Ayarlar'dan değişen zil saati ızgaraya geçiyor", async ({ page }) => {
     await openWithSample(page);
-    const firstHour = page.locator('table.grid thead .hour-clock').first();
-    await expect(firstHour).toHaveText('09:00');
+    // The grid draws no clock since 2026-11-16 (K6, it fits the box); the
+    // hour heading's title still says it.
+    const firstHour = page.locator('table.grid thead th[data-col]').first();
+    await expect(firstHour).toHaveAttribute('title', /^09:00–/);
 
     await openSettings(page, 'Zil ve günler');
     const lessonMinutes = page.getByLabel('Saat (dk)');
@@ -155,7 +158,10 @@ test.describe('15. Okul bilgileri sekmesi', () => {
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // The second lesson moves: 09:00 + 45 + 10
-    await expect(page.locator('table.grid thead .hour-clock').nth(1)).toHaveText('09:55');
+    await expect(page.locator('table.grid thead th[data-col]').nth(1)).toHaveAttribute(
+      'title',
+      /^09:55–/,
+    );
   });
 
   test("Ayarlar'dan değişen kural sürüklemeyi hemen etkiliyor", async ({ page }) => {
@@ -252,7 +258,10 @@ test.describe('17. Başlangıç saati', () => {
     await expect(page.locator('table.bell-preview')).toContainText('14:35–15:15');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid thead .hour-clock').first()).toHaveText('14:35');
+    await expect(page.locator('table.grid thead th[data-col]').first()).toHaveAttribute(
+      'title',
+      /^14:35–/,
+    );
   });
 
   test("boş bırakılıp 00:00'a düşme tuzağı kalmadı", async ({ page }) => {

@@ -28,16 +28,8 @@ import {
   ruleLevel,
 } from '../constraints';
 import { t } from '../../leaf/i18n';
-import {
-  closedKey,
-  parseKey,
-  placementKey,
-  type Id,
-  type Lesson,
-  type State,
-} from '../../leaf/model';
+import { closedKey, placementKey, type Id, type Lesson, type State } from '../../leaf/model';
 import { commonestBlock, holeReason, lessonName } from '../feasibility';
-import { lessonExcluded, type SolverExclusions } from '../program';
 import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
 import { createImprover, rng, type Improver } from './improve';
 import { bindingPair, shortfalls } from './shortfall';
@@ -47,8 +39,6 @@ export interface SolverOptions {
   keepPlaced: boolean;
   /** How long the search may WORK, in milliseconds. Slices are summed. */
   budgetMs: number;
-  /** Session-only rows/days that this run must leave untouched. */
-  exclusions: SolverExclusions;
   /**
    * Which of the many legal weeks to look for. 0 is the week this data has
    * always given; "Başka bir dizilim" asks for another number on every press.
@@ -73,7 +63,6 @@ export interface SolverOptions {
 const DEFAULTS: SolverOptions = {
   keepPlaced: true,
   budgetMs: 15_000,
-  exclusions: { teacherIds: [], classIds: [], dayNames: [] },
   seed: 0,
   hint: undefined,
   improve: true,
@@ -148,7 +137,6 @@ export interface SolverProgress {
   totalBlocks: number;
   nodes: number;
   elapsedMs: number;
-  excludedBlocks: number;
 }
 
 export interface SolverResult extends SolverProgress {
@@ -261,39 +249,22 @@ function warningsPossible(d: State): boolean {
 }
 
 /** Just the cells the reader pinned, with the lessons that are in them. */
-function preservedPlacements(base: State, exclusions: SolverExclusions): Record<string, Id> {
+function preservedPlacements(base: State): Record<string, Id> {
   const out: Record<string, Id> = {};
   const placements = activePlacements(base);
   for (const key in activePinned(base)) {
     const lessonId = placements[key];
     if (lessonId !== undefined) out[key] = lessonId;
   }
-  const excludedDays = new Set(exclusions.dayNames);
-  const lessons = new Map(base.lessons.map((lesson) => [lesson.id, lesson]));
-  for (const [key, lessonId] of Object.entries(placements)) {
-    const lesson = lessons.get(lessonId);
-    const parts = parseKey(key);
-    const dayName = parts === null ? undefined : base.settings.days[parts.day]?.name;
-    if (
-      lesson !== undefined &&
-      (lessonExcluded(lesson, exclusions) || (dayName !== undefined && excludedDays.has(dayName)))
-    ) {
-      out[key] = lessonId;
-    }
-  }
   return out;
 }
 
 /**
  * The cells a run may not move: with `keepPlaced` everything already on the
- * grid, otherwise only the pinned cells and the excluded rows and days.
+ * grid, otherwise only the pinned cells.
  */
-export function fixedCells(
-  base: State,
-  keepPlaced: boolean,
-  exclusions: SolverExclusions,
-): Record<string, Id> {
-  return keepPlaced ? { ...activePlacements(base) } : preservedPlacements(base, exclusions);
+export function fixedCells(base: State, keepPlaced: boolean): Record<string, Id> {
+  return keepPlaced ? { ...activePlacements(base) } : preservedPlacements(base);
 }
 
 function createSearch(
@@ -302,12 +273,6 @@ function createSearch(
   /** The repair's patience; the second run of `relay` is given less (`RELAY_STALL_PER_BLOCK`). */
   repairStallPerBlock = REPAIR_STALL_PER_BLOCK,
 ): Solver {
-  const excludedDays = new Set(opts.exclusions.dayNames);
-  const isExcludedDay = (day: number) => {
-    const name = base.settings.days[day]?.name;
-    return name !== undefined && excludedDays.has(name);
-  };
-
   const dayCount = base.settings.days.length;
   const hourCount = base.settings.hours.length;
   const cellCount = dayCount * hourCount;
@@ -320,11 +285,11 @@ function createSearch(
   // so `placedHours`, `placedBlocks` and `pendingBlocks` below all count the
   // pinned blocks as already down, and `retract()` only ever vacates a cell
   // this search itself filled.
-  const placements: Record<string, Id> = fixedCells(base, opts.keepPlaced, opts.exclusions);
+  const placements: Record<string, Id> = fixedCells(base, opts.keepPlaced);
   const work: State = replaceActiveGrid(base, { placements });
   let ix: Index = buildIndex(work);
-  // What this run was handed and must not move: kept blocks, pinned cells and
-  // everything on an excluded row or day. The repair below may push out only
+  // What this run was handed and must not move: kept blocks and pinned cells.
+  // The repair below may push out only
   // what the search itself put down.
   const fixedAtStart = new Set(Object.keys(placements));
 
@@ -350,7 +315,6 @@ function createSearch(
   // ---- the items -----------------------------------------------------------
   const items: Item[] = [];
   for (const lesson of base.lessons) {
-    if (lessonExcluded(lesson, opts.exclusions)) continue;
     const already = ix.placedHours.get(lesson.id) ?? 0;
     const down = blocksOnGrid(work, lesson);
     // The blocks still owed, read off the grid rather than divided out of the
@@ -381,10 +345,6 @@ function createSearch(
   if (seeded) shuffle(items);
 
   const totalBlocks = items.reduce((sum, x) => sum + x.need, 0);
-  const excludedBlocks = base.lessons.reduce((sum, lesson) => {
-    if (lessonExcluded(lesson, opts.exclusions)) return sum + pendingBlocks(base, lesson).length;
-    return sum + blocksOnGrid(base, lesson).filter((block) => isExcludedDay(block.day)).length;
-  }, 0);
 
   // Neighbours: an assignment can only ever narrow a lesson that shares a
   // teacher, a class or a room with it. ~25 of 99 lessons, not all of them.
@@ -412,7 +372,6 @@ function createSearch(
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
-      if (isExcludedDay(day)) continue;
       if (blocker(work, ix, item.lesson.id, day, hour, item.block) === null) {
         item.domain[cell] = 1;
         item.size++;
@@ -601,7 +560,6 @@ function createSearch(
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
-      if (isExcludedDay(day)) continue;
       if (base.unavailable[closedKey(group.id, day, hour)] !== undefined) continue;
       if (
         group.roomId != null &&
@@ -940,7 +898,7 @@ function createSearch(
 
   /**
    * item -> cell -> 1 when a block of this item can never start there, whatever
-   * moves: past the end of the day, on an excluded day, or over an hour the
+   * moves: past the end of the day, or over an hour the
    * class, the teacher or the room has closed. None of that changes during a
    * run, so it is read once instead of on every move.
    */
@@ -950,7 +908,7 @@ function createSearch(
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
-      if (hour + block > hourCount || isExcludedDay(day)) {
+      if (hour + block > hourCount) {
         out[cell] = 1;
         continue;
       }
@@ -1330,9 +1288,7 @@ function createSearch(
       const id = bestPlacements[key]!;
       counts.set(id, (counts.get(id) ?? 0) + 1);
     }
-    return base.lessons.some(
-      (l) => !lessonExcluded(l, opts.exclusions) && (counts.get(l.id) ?? 0) < l.weeklyHours,
-    );
+    return base.lessons.some((l) => (counts.get(l.id) ?? 0) < l.weeklyHours);
   }
 
   function report(phase: SolverPhase): SolverResult {
@@ -1351,10 +1307,9 @@ function createSearch(
     // sentence of every lesson they hold up: somebody's lessons outnumber
     // their open hours, or a pair of lessons that may not share a day needs
     // more days than the week has.
-    const short = stuckAny() ? shortfalls(base, opts.exclusions) : new Map<Id, string>();
+    const short = stuckAny() ? shortfalls(base) : new Map<Id, string>();
     const binding = new Set<Id>();
     for (const lesson of base.lessons) {
-      if (lessonExcluded(lesson, opts.exclusions)) continue;
       const missing = lesson.weeklyHours - (finalIx.placedHours.get(lesson.id) ?? 0);
       if (missing <= 0) continue;
       // Which sentence tells the reader what to DO about it?
@@ -1376,8 +1331,7 @@ function createSearch(
         short.get(lesson.teacherId) ??
         short.get(lesson.classId) ??
         (roomId === null ? undefined : short.get(roomId));
-      const pair =
-        cause === undefined ? bindingPair(base, finalIx, lesson.id, opts.exclusions) : null;
+      const pair = cause === undefined ? bindingPair(base, finalIx, lesson.id) : null;
       if (cause !== undefined || pair !== null) binding.add(lesson.id);
 
       stuck.push({
@@ -1394,7 +1348,7 @@ function createSearch(
                     'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
                     { istenen: lesson.weeklyHours, olabilen: fits },
                   )
-                : (holeReason(state, finalIx, lesson.id, isExcludedDay) ??
+                : (holeReason(state, finalIx, lesson.id) ??
                   commonestBlock(state, finalIx, lesson.id).reason),
       });
     }
@@ -1420,7 +1374,6 @@ function createSearch(
       totalBlocks,
       nodes,
       elapsedMs,
-      excludedBlocks,
       stuck,
     };
   }
@@ -1457,7 +1410,6 @@ function createSearch(
       ix,
       fixed: fixedAtStart,
       lessonIds: [...itemsByLesson.keys()],
-      isExcludedDay,
       seed: opts.seed,
       hint: opts.hint,
     });
@@ -1568,7 +1520,7 @@ function createSearch(
     },
 
     progress(): SolverProgress {
-      return { placedBlocks, totalBlocks, nodes, elapsedMs, excludedBlocks };
+      return { placedBlocks, totalBlocks, nodes, elapsedMs };
     },
 
     cancel(): SolverResult {
@@ -1596,11 +1548,11 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   const relayable = () => {
     if (!opts.relay || !opts.keepPlaced) return false;
-    const kept = Object.keys(fixedCells(base, false, opts.exclusions)).length;
+    const kept = Object.keys(fixedCells(base, false)).length;
     if (kept >= Object.keys(activePlacements(base)).length) return false;
     // A week whose loads do not fit its open hours cannot be laid out by any
     // order of the cards; the second run would only spend the time.
-    return shortfalls(base, opts.exclusions).size === 0;
+    return shortfalls(base).size === 0;
   };
 
   const settle = (second: SolverResult): SolverResult => {

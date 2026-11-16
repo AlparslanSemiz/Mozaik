@@ -64,12 +64,12 @@ tabana kendisi cevap veriyor, bunu da çoğu zaman Windows'un kendi ölçeklemes
 zaten büyükken yapıyor. Tipografi merdiveni her kök değişiminde yeniden
 sabitlendiği için %100'de 12 px hâlâ 12 px.
 
-Tek istisna Sığdır ve kullanıcının kararı (2026-09-26): bu yoğunluğun işi haftanın
-tamamını kutuya sığdırmak, ve orada sığmayan bir kart satırı kesilmek yerine en çok
-9 px'e küçülür. Yalnız sığmayan satır küçülür, satır yüksekliği değişmez
-([LAYOUT.md](LAYOUT.md), [DECISIONS.md](DECISIONS.md)). Öteki iki yoğunlukta kartın
-üst satırı 14 px, alt satırı 13 px (2026-11-15); Sığdır'ın tabanı 12 px kaldı, çünkü
-14 px'lik bir ad sığdırma sözünü bozar.
+Program ızgarasının kartları 12 px ve hiçbir ölçekte 11 px'ten küçük değil
+(2026-11-16, Alp): yazı küçültülerek sığdırılmaz, hafta o boyda sığmıyorsa ızgara yana
+kayar ([LAYOUT.md](LAYOUT.md)). 2026-09-26'dan o güne sığmayan satır 9 px'e kadar
+küçülüyordu. Kartın tabanı 12 px, çünkü 14 px'lik bir ad 1920'de haftayı sığdırmaz. Bu 2026-11-16'ya kadar yalnız Sığdır
+yoğunluğundaydı ve Ferah ile Rahat'ta kart 14/13 px'ti; yoğunluk kalkınca (Sadeleşme
+K6) ızgaranın tek düzeni bu, kartı büyütmenin yolu Yazı büyüklüğü.
 
 Dar kutuda (Windows %150'de 1920 piksel ekran 1280 CSS pikseli, %200'de 960) sözcükler
 gitmez, küçülür ya da yer değiştirir: sekmenin etiketi simgenin altına iner (12 px),
@@ -123,8 +123,8 @@ tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil ok
 
 Ekranda 12 px'te kalan yerler (2026-11-15, varsayılan ölçek): şerit başlıkları, ızgara
 başlığındaki gün adı ve ders numarası, satır başının ikinci satırı, rozetler, havuzun
-seçicileri ve sayacı, sekme etiketi dar kutuda, şerit sözcüğü en dar adımda, ve Sığdır'ın
-kart satırları (sığmazsa 9 px'e kadar). `.hint` 13 px ve bu kararı TODO SD5 bekliyor.
+seçicileri ve sayacı, sekme etiketi dar kutuda, şerit sözcüğü en dar adımda, ve ızgaranın
+kart satırları (en az 11 px). `.hint` 13 px ve bu kararı TODO SD5 bekliyor.
 
 ---
 
@@ -221,7 +221,7 @@ hareket      --dur-fast 110ms · --dur 180ms · --dur-slow 280ms   (süre)
 odak         --focus-ring (iki halka: kâğıt boşluğu ve accent)
 sütun        --w-col-xs 8ch … --w-col-2xl 32ch
 geometri     --cell-w/-h · --rowhead-w · --dock-w · --break-w   (rem)
-             --day-rule-w 3px   (gün çizgisi; Sığdır o sütuna geri verir)
+             --day-rule-w 3px   (gün çizgisi; ızgara o sütuna geri verir)
 ölçek        --ui-scale, varsayılan 1, 0,80 ile 1,50 arası, 0,05 adım
 ```
 
@@ -303,7 +303,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 
 ## Makine tercihleri
 
-Tema, ölçek, iki yoğunluk, havuz, şerit, müsaitlik saati, hareket, dil ve program
+Tema, ölçek, havuz, şerit, müsaitlik saati, hareket, dil ve program
 kart rengi bu makinenin tercihleri. State'e ve yedeğe yazılmıyorlar, ve hepsi
 Okul bilgileri → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların tam
 listesi [DATA.md](DATA.md)'de.

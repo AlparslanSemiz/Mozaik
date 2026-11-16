@@ -127,7 +127,8 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
 
   test('taşan bölümle taşmayan bölüm AYNI genişlikte', async ({ page }) => {
     // A shorter window: since 2026-11-16 Görünüm's sentences are behind "?",
-    // and at 1080 it no longer scrolls.
+    // and at 1080 it no longer scrolls. Since the density choices went (K6,
+    // 2026-11-16) Görünüm fits at 900 too; Kurallar is the section that scrolls.
     await page.setViewportSize({ width: 1920, height: 900 });
     await openWithSample(page);
 
@@ -144,13 +145,10 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
       return geometry(page);
     };
 
-    // Hakkında folds its long panels, so it fits; Zil ve günler and Kurallar
-    // carry Başlarken or long tables since K1 and overflow at 900.
-    await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitemradio', { name: 'Hakkında' }).click();
-    await page.waitForTimeout(200);
-    const fits = await geometry(page);
-    const overflows = await section('Görünüm');
+    // Görünüm fits since K6 (no density panel); Kurallar's tables overflow.
+    // Zil ve günler carries Başlarken since K1, so it is not the short one.
+    const fits = await section('Görünüm');
+    const overflows = await section('Kurallar');
 
     // TWO GUARDS BEFORE THE ASSERTION, and neither is optional.
     //
@@ -160,8 +158,8 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     // take room: with `--hide-scrollbars` — the default every other spec in
     // this suite runs under — it takes none, and a bar of zero pixels can never
     // take any away.
-    expect(fits.overflowing, '"Hakkında" taşıyor — çift seçilmeli').toBe(false);
-    expect(overflows.overflowing, '"Görünüm" taşmıyor — çift seçilmeli').toBe(true);
+    expect(fits.overflowing, '"Görünüm" taşıyor — çift seçilmeli').toBe(false);
+    expect(overflows.overflowing, '"Kurallar" taşmıyor — çift seçilmeli').toBe(true);
     expect(
       overflows.gutter,
       'kaydırma çubuğu yer kaplamıyor — bu test hiçbir şey ölçmüyor',

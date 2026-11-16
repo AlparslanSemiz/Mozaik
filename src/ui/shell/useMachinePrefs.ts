@@ -10,16 +10,13 @@ import {
   applyRibbon,
   applyTheme,
   readAvailClock,
-  readDensity,
   readMotion,
   readProgramColor,
   readRibbon,
   readRibbonAuto,
   readScale,
   readTheme,
-  readUiDensity,
   writeProgramColor,
-  type Density,
   type Motion,
   type ProgramColorMode,
   type Theme,
@@ -34,16 +31,11 @@ export function useMachinePrefs() {
   // Already applied to the document by main.tsx before the first paint; this
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
-  const [density, setDensity] = useState<Density>(readDensity);
   const [programColor, setProgramColorRaw] = useState<ProgramColorMode>(readProgramColor);
   const setProgramColor = useCallback((next: ProgramColorMode) => {
     writeProgramColor(next);
     setProgramColorRaw(next);
   }, []);
-  // Its twin, and a separate one since 2026-08-27: the grid's step and the
-  // interface's step are two decisions (see density.ts). Only Ayarlar → Görünüm
-  // sets this one — the Program strip still speaks for the grid alone.
-  const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
   // Applied to the document by main.tsx before the first paint; this copy
   // exists so the button that flips it can show which way the switch is.
   const [availClock, setAvailClockRaw] = useState<boolean>(readAvailClock);
@@ -96,12 +88,8 @@ export function useMachinePrefs() {
     setTheme,
     scale,
     setScale,
-    density,
-    setDensity,
     programColor,
     setProgramColor,
-    uiDensity,
-    setUiDensity,
     availClock,
     setAvailClock,
     motion,

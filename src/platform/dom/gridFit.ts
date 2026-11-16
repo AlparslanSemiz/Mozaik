@@ -1,179 +1,109 @@
-// Sığdır: the week sized to the box, and a card line that does not fit drawn
-// smaller, not cut.
+// The week sized to the box, and never a lesson cut (Sadeleşme K6, 2026-11-16).
 //
-// Sığdır derives the column from the box (styles.css), so a card is as wide as
-// the week allows and no wider. The father's class names are "411A SAY" and
-// his subject shorts "Mat1": at 1920 a one-hour card is 24.5px and holds three
-// characters at 12px, and at Windows %125 (1536 CSS px) it is 19.2px and not
-// even "310" (21px) goes in. Measured on 2026-09-26: 204 of 211 cards on his
-// (anonymised) week and 315 of 374 on the sample school at %125 read "4…".
+// The stylesheet derives the column from the box (`--wrap-w`, written here)
+// and holds it at no less than `--cell-min`: what the widest lesson needs to be
+// read whole at its size, 12px at the default scale and never under 11px. When
+// 72 such columns do not go into the box (Windows %125 or %150, a 1366 screen),
+// the table is wider than the box and the grid scrolls sideways with its heads
+// sticky, rather than drawing "4…". Until 2026-11-16 a line that did not fit
+// was drawn smaller, down to 9px (the user's choice of 2026-09-26), and in
+// those boxes 317 of 376 cards still read "4…".
 //
-// The user chose (2026-09-26): only in Sığdır, only the line that does not
-// fit, and never below 9px at the default scale. This writes a ratio, not a
-// size — `--fit` — and styles.css multiplies the line's own size by it while
-// holding the line HEIGHT at the unshrunk size, so a row never changes height
-// because its cards got smaller.
+// The floor is MEASURED from the text, not written down: the father's class
+// names are "411A" (first word only, styles.css), the sample school's "310",
+// and an hour heading reads "12". Each card line's text is read against the
+// room its cell gives it (the cell's width minus the line's box, i.e. the
+// card's padding and border), a block's over the columns it spans. Text in a
+// `nowrap` line does not depend on the column's width, so writing the floor
+// cannot change what it measured.
 //
 // Pure DOM and attached once, like gridChrome.ts and for the same reason
-// (pitfall 1): nothing here goes through React. It runs when what it measures
-// can change — the table's text (a React commit), the box (a resize, the tab
-// coming back into view), the density or the scale (attributes on <html>),
-// and the embedded font arriving — and never during a drag, which changes
-// classes only and is not observed.
+// (pitfall 1): nothing here goes through React. It runs when the text can
+// change (a React commit), the size it is drawn at (the scale on <html>, the
+// embedded font arriving), and never during a drag, which changes classes only
+// and is not observed.
 
-/** The lines that may shrink: both card lines and the row head's second line. */
-const LINES = 'tbody .card-top, tbody .card-bottom, tbody .row-head .secondary';
+/** The card lines, and the hour numbers in the heading. */
+const LINES = 'tbody .card-top, tbody .card-bottom, thead th[data-col]';
 
-/**
- * 9px at the default scale; a reader at %80 has already chosen smaller type.
- * The user's choice (2026-09-26), measured against 10 and 9.5: the father's
- * "411A" is 25px at 10px in a 24.5px card, and at 10px 71 of his 211 cards
- * still read "41…" at 1920; at 9.5px 44, at 9px 2.
- */
-const FLOOR_PX = 9;
+/** A row head's two lines: the name and what it teaches or where it sits. */
+const HEADS = 'tbody .row-head .inspect, tbody .row-head .secondary';
 
-/**
- * What each line was last fitted for: its width and its text. A line whose two
- * are unchanged is not touched, and that is the whole cost model. Every write
- * here restyles the table, and a restyle of this table is a 40–50ms layout at
- * x1 (measured on the father's full week): clearing and refitting every line
- * on each React commit cost 130ms a time, three layouts. Now an ordinary drop
- * re-reads the lines and writes only the few whose card changed.
- */
-type Fitted = WeakMap<HTMLElement, string>;
+/** Air around an hour number: a heading has no card padding to give it. */
+const HEAD_AIR = 4;
 
-function ratioOf(line: HTMLElement): number {
-  const value = line.style.getPropertyValue('--fit');
-  return value === '' ? 1 : Number(value);
-}
-
-function write(line: HTMLElement, ratio: number) {
-  if (ratio >= 1) line.style.removeProperty('--fit');
-  else line.style.setProperty('--fit', String(ratio));
-}
-
-/** Does the text run past its box? What the ellipsis itself answers. */
-function overflows(line: HTMLElement, range: Range): boolean {
-  range.selectNodeContents(line);
-  return range.getBoundingClientRect().width > line.getBoundingClientRect().width;
-}
-
-function fit(table: HTMLElement, fitted: Fitted) {
-  // A hidden tab has no widths, and measuring it would shrink every line to
-  // the floor. The ResizeObserver brings it back here when it is shown.
-  if (table.getClientRects().length === 0) return;
-
-  const root = document.documentElement;
-  if (root.dataset.density !== 'sigdir') {
-    for (const line of table.querySelectorAll<HTMLElement>('[style*="--fit"]')) {
-      line.style.removeProperty('--fit');
-    }
-    return;
-  }
-
-  const scale = Number.parseFloat(getComputedStyle(root).getPropertyValue('--ui-scale')) || 1;
-  const floor = FLOOR_PX * Math.min(1, scale);
+function floorOf(table: HTMLElement, lines: string): number {
   const range = document.createRange();
-  // A line, the ratio to draw it at, and the smallest ratio it may take.
-  let pending: Array<[HTMLElement, number, number]> = [];
-  // Every read first, every write after: one layout for the whole table, and
-  // it is the one the browser was about to do anyway.
-  for (const line of table.querySelectorAll<HTMLElement>(LINES)) {
-    // The box's whole pixels, and from the box itself: glyph advances land
-    // on whole pixels here, so text of 25px does not go in 24.53. Not
-    // `clientWidth`, which ROUNDS (24.53 -> 25): aimed at that, 79 of the
-    // father's 211 cards were shrunk to the floor and still drew "41…" while
-    // every `scrollWidth` check said they fitted (TRAPS 140).
-    const have = Math.floor(line.getBoundingClientRect().width);
-    const key = `${have}|${line.textContent}`;
-    if (have === 0 || fitted.get(line) === key) continue;
-    fitted.set(line, key);
-    const was = ratioOf(line);
+  let most = 0;
+  for (const line of table.querySelectorAll<HTMLElement>(lines)) {
+    const cell = line.closest<HTMLTableCellElement>('td, th');
+    if (cell === null) continue;
     range.selectNodeContents(line);
-    // Its width unshrunk, estimated from the size it is drawn at. Text does
-    // not scale exactly with its size, and the check below corrects that.
-    const whole = range.getBoundingClientRect().width / was;
-    const least = Math.min(1, (floor * was) / Number.parseFloat(getComputedStyle(line).fontSize));
-    // Rounded DOWN to the hundredth, so the first guess errs small.
-    const want = whole <= have ? 1 : Math.max(least, Math.floor((have / whole) * 100) / 100);
-    if (want !== was) pending.push([line, want, least]);
+    const text = range.getBoundingClientRect().width;
+    if (text === 0) continue;
+    // The heading cell IS the line; a card line sits inside the card's padding.
+    // A day's first column is given the day rule's width on top of --cell-w
+    // (styles.css), so the rule is not the lesson's to pay for.
+    const rule = cell.classList.contains('day-first')
+      ? Number.parseFloat(getComputedStyle(cell).borderLeftWidth) || 0
+      : 0;
+    // A row head's line may be narrower than its cell (an inline button), so
+    // what is around it is the head's own padding and border, read as such;
+    // asking the boxes would hand back the slack and grow the head each run.
+    const style = getComputedStyle(cell);
+    const around = cell.classList.contains('row-head')
+      ? ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce(
+          (sum, k) => sum + (Number.parseFloat(style[k as 'paddingLeft']) || 0),
+          0,
+        )
+      : cell === line
+        ? HEAD_AIR
+        : cell.getBoundingClientRect().width - line.getBoundingClientRect().width - rule;
+    most = Math.max(most, (text + around) / Math.max(1, cell.colSpan));
   }
-
-  // Glyph advances land on whole pixels, so "derslik yok" is 59px at 12px, 58
-  // at 11.28 and 52 at 10.8. The guess is written, the lines it touched are
-  // measured again, and one still over steps down until it fits or reaches
-  // the floor: 0.04 of the size a step, and few steps.
-  for (let pass = 0; pass < 5 && pending.length > 0; pass++) {
-    for (const [line, ratio] of pending) write(line, ratio);
-    pending = pending
-      .filter(([line, ratio, least]) => ratio > least && overflows(line, range))
-      .map(([line, ratio, least]) => [line, Math.max(least, ratio - 0.04), least]);
-  }
+  return Math.ceil(most);
 }
 
-/** Attaches the fitting to a `.grid-wrap`. Returns the detach function. */
+/** Attaches the floor and the box's width to a `.grid-wrap`. Returns the detach function. */
 export function attachGridFit(wrap: HTMLElement): () => void {
-  let fitted: Fitted = new WeakMap();
   let frame = 0;
-  // Has the box a width of its own yet: written by an earlier attach (the tab
-  // came back), or the observer below has answered once.
-  let observed = false;
-  const measured = () => observed || wrap.style.getPropertyValue('--wrap-w') !== '';
   const run = () => {
     const table = wrap.querySelector<HTMLElement>('table.grid');
-    if (table !== null) fit(table, fitted);
+    // A hidden tab has no widths; the ResizeObserver brings it back here.
+    if (table === null || table.getClientRects().length === 0) return;
+    const floor = floorOf(table, LINES);
+    if (floor > 0) table.style.setProperty('--cell-min', `${floor}px`);
+    // The row head the same way: "Mat1 · Mat2" and "derslik yok" whole.
+    const head = floorOf(table, HEADS);
+    if (head > 0) table.style.setProperty('--head-min', `${head}px`);
   };
-  // `fresh`: the size every ratio multiplies has changed (density, scale, the
-  // font), so no line's last fit says anything any more.
-  const schedule = (fresh = false) => {
-    if (fresh) fitted = new WeakMap();
+  const schedule = () => {
     if (frame !== 0) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      // Not before the box has a width of its own: on the very first attach
-      // the first fit is the observer's, below. When the tab comes back the
-      // width from before is still on the box and this one runs, as it did.
-      if (measured()) run();
+      run();
     });
   };
 
-  // The box's own width, as a number the stylesheet can use (styles.css,
-  // Sığdır's --cell-w). It used to be `100cqw`, and a size resolved against
-  // the container is redone for every cell whenever the container is laid
-  // out: in Sığdır every layout of the page re-laid the whole table. A drag
-  // writes the reason bar and so lays out the page on each change of target
-  // cell, and on the father's week each of those was 53ms, not Rahat's 1.8;
-  // 22% of frames dropped at x1. The same value as a px number: 2554ms of
-  // layout in a sweep down to 185, and none dropped (2026-09-26).
-  //
-  // Until that first write the column is still `100cqw`, and so is the cost:
-  // a fit then, writing `--fit` and reading it back, re-laid the whole table
-  // against the container (60ms at x1 on the father's week, the first time
-  // Program opens in Sığdır). So the first fit waits for the width and runs
-  // here, in the same frame, before it is painted: the layout it forces is
-  // the one the new width needed anyway, and its read-back is a few ms.
+  // The box's own width, as a number the stylesheet can use (--cell-w). It
+  // used to be `100cqw`, and a size resolved against the container is redone
+  // for every cell whenever the container is laid out: a drag writes the
+  // reason bar and so lays out the page, 53ms a time on the father's week.
+  // The same value as a px number: 2554ms of layout in a sweep down to 185
+  // (2026-09-26, pitfall 141).
   const resize = new ResizeObserver(([entry]) => {
-    const first = !measured();
-    observed = true;
     const width = entry?.contentBoxSize[0]?.inlineSize;
     if (width !== undefined) wrap.style.setProperty('--wrap-w', `${width}px`);
-    if (first) {
-      cancelAnimationFrame(frame);
-      frame = 0;
-      run();
-    } else schedule();
+    schedule();
   });
   resize.observe(wrap);
   // Text and rows, not attributes: a drag toggles classes on every move, and
-  // the `--fit` this writes is an attribute too.
-  const content = new MutationObserver(() => schedule());
+  // the `--cell-min` this writes is an attribute too.
+  const content = new MutationObserver(schedule);
   content.observe(wrap, { childList: true, subtree: true, characterData: true });
-  const prefs = new MutationObserver(() => schedule(true));
-  prefs.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-density', 'style'],
-  });
-  void document.fonts?.ready.then(() => schedule(true));
+  const prefs = new MutationObserver(schedule);
+  prefs.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+  void document.fonts?.ready.then(schedule);
   schedule();
 
   return () => {

@@ -18,6 +18,7 @@ import {
   askToKeep,
   downloadBackup,
   isoDay,
+  keepToday,
   markChanged,
   reminderDue,
   storageKind,
@@ -47,10 +48,10 @@ import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../../platform/changelog';
 import { TABS } from './tabs';
 import Topbar from './Topbar';
+import OldCopies from './OldCopies';
 import Notices from './Notices';
 import { useMachinePrefs } from './useMachinePrefs';
 import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
-import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
@@ -112,12 +113,8 @@ export default function App() {
     setTheme,
     scale,
     setScale,
-    density,
-    setDensity,
     programColor,
     setProgramColor,
-    uiDensity,
-    setUiDensity,
     motion,
     setMotion,
     ribbon,
@@ -191,7 +188,6 @@ export default function App() {
   // lists — Print unmounts on every tab change — but unlike them it is
   // remembered between sessions: it is set once a term, not once a printout.
   const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
-  const { programMask, setProgramMask } = useProgramMask(plans.planId, state);
 
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
@@ -330,10 +326,10 @@ export default function App() {
     goTo,
     notify,
     t,
-    programMask,
     openShortcuts,
     openFile: () => fileInput.current?.click(),
     copyForNewTerm,
+    openOldCopies: () => setOldCopiesOpen(true),
     toggleRibbon,
     toggleMotion,
   });
@@ -362,6 +358,19 @@ export default function App() {
     keepInStore(state, said, true);
     keepInFolder(state);
     const next = replaceState(lastDelete.state, said);
+    if (next === null) notify(said, 'info');
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+  };
+
+  // Dosya ▾ → Eski hâline dön (K8). The plan as it is now becomes today's
+  // copy first, then the slot a reload reaches, then a step of the history.
+  const [oldCopiesOpen, setOldCopiesOpen] = useState(false);
+  const restoreCopy = (copy: State, day: string) => {
+    if (unreadable === null) keepToday(plans.planId, state);
+    const said = t('Plan eski hâline döndü: {gun}.', { gun: day });
+    keepInStore(state, said, true);
+    keepInFolder(state);
+    const next = replaceState(copy, said);
     if (next === null) notify(said, 'info');
     else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
@@ -468,7 +477,15 @@ export default function App() {
               copyForNewTerm={copyForNewTerm}
               openProblems={() => setProblems({ lesson: null })}
               switchProgram={(id) => viewProgram((d) => switchProgram(d, id))}
+              openOldCopies={() => setOldCopiesOpen(true)}
               lastFileDay={reminder.savedDay}
+            />
+            <OldCopies
+              open={oldCopiesOpen}
+              onClose={() => setOldCopiesOpen(false)}
+              planId={plans.planId}
+              state={state}
+              restore={restoreCopy}
             />
 
             {/* Row two: the tools of whichever section is open. A named region
@@ -488,10 +505,6 @@ export default function App() {
                 manageProgram={manageProgram}
                 copyPlan={copyPlan}
                 solver={solver}
-                programMask={programMask}
-                setProgramMask={setProgramMask}
-                density={density}
-                setDensity={setDensity}
                 programColor={programColor}
                 setProgramColor={setProgramColor}
                 changelogUnseen={changelogUnseen}
@@ -585,8 +598,6 @@ export default function App() {
                         change={change}
                         solver={solver}
                         view={ui.view}
-                        mask={programMask}
-                        setMask={setProgramMask}
                         poolSort={ui.poolSort}
                         setPoolSort={ui.setPoolSort}
                         poolFilter={ui.poolFilter}
@@ -629,10 +640,6 @@ export default function App() {
                         update={update}
                         scale={scale}
                         setScale={setScale}
-                        density={density}
-                        setDensity={setDensity}
-                        uiDensity={uiDensity}
-                        setUiDensity={setUiDensity}
                         ribbonAuto={ribbonAuto}
                         setRibbonAuto={setRibbonAuto}
                         ribbon={ribbon}

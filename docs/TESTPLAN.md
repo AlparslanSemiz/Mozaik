@@ -372,8 +372,8 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 - **Roboders koruması** (`roboders-koruma.spec.ts`). `scripts/roboders/koruma.mjs`'in Roboders'e gitmeden önce yerel bir sunucuya karşı kanıtı: GET dışında hiçbir istek, hiçbir WebSocket ve adresinde yazan kelime taşıyan hiçbir GET sunucuya ulaşmıyor, ve sayfadan çıkarken giden istek de ulaşmıyor (tuzak 144). Yargıç sunucunun sayacı, sayfanın kendi gördüğü değil, ve bir kontrol GET'inin ulaştığı da soruluyor. Tıklama kuralı gerçek bir DOM'da sınanıyor. Aynı koruma Eyotek ayarıyla da sınanıyor: Eyotek'in ek yazan kelimeleri, zorunlu `--alan` ve alanın ağda tutulması. Deneme sayfalarındaki her işaretin korumadan geçtiği de soruluyor, yoksa "tıklanmadı" bedava geçerdi. Her Roboders ve Eyotek turundan önce ayrıca koşulur.
 - **Kapanırken bekleyen kayıt** (`kapanis.spec.ts` 93). 400 ms'lik erteleme dolmadan kapanan sekmenin son değişikliği depoda kalıyor, yani `beforeunload` flush'ı yazıyor. Sayfanın saati durdurulur ve testin önce erteleme yazımının beklediğini doğrulaması gerekir; saat durmadan bu yarış hızlı bir makinede flush'a hiç uğramadan geçerdi.
 - **Kayma.** Şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynatması (`kayma.spec.ts`). Bu dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek bir kaydırma çubuğu yok (tuzak 94).
-- **Sığdır'ın exe kutusu** (`gorunum.spec.ts` 45). 1920×1032 ve 1600×968'de haftanın sığması, ve hiçbir kart yazısının, satır başının ve köşedeki eksen adının iki eksende de kırpılmaması, satırın Rahat'takinden uzamaması, kart satırının satır kutusunun Rahat'takiyle aynı kalması (tuzak 107).
-- **Sığdır babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kırpılan kart sayısının tavanı, satır başlarının sıfırı, 9 px taban, küçültmenin tablonun boyunu değiştirmemesi, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140). Aynı grupta sürüklemenin yazdığı çubuğun yerleşimi Sığdır'da Rahat'takine oranla ölçülür (tuzak 141).
+- **Sığan ızgara, exe'nin kutusu ve dar ekranlar** (`gorunum.spec.ts` 45). Izgaranın tek düzeni 2026-11-16'dan beri eski Sığdır (K6). 1920'de haftanın sığması; 1536, 1280, 1366 (%100, %125), 1093, 911 ve 1920 %150'de hiçbir dersin ve saat numarasının kesilmemesi, 11 px taban, ızgaranın yana kayması, son saatin kaydırınca görünmesi ve satır başının yerinde kalması; 1920×1032 ve 1600×968'de iki eksende kart, satır başı ve köşedeki eksen adı (tuzak 107); eski bir yoğunluk kaydının okunmaması.
+- **Izgara babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kesik ders, saat numarası ve satır başı sıfır, 11 px taban, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140). Sürüklemenin yazdığı çubuğun yerleşimini Rahat'a oranla ölçen test Rahat'la birlikte kalktı (tuzak 141'in kendisi `gridFit.ts`'in `--wrap-w`'sinde duruyor).
 
 ### Dil
 
@@ -472,7 +472,7 @@ sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilen
 yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
 uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, "E-postada aç"ın
 öğretmenin haftasını kabuğa verdiği (Linux'ta sahte evin `xdg-open`'ı adresi yazıyor; Windows
-runner'ında e-posta programı yok ve sayfa bunu tek satırla söylüyor), ve Sığdır'da gerekçe çubuğuna
+runner'ında e-posta programı yok ve sayfa bunu tek satırla söylüyor), ve sığan ızgarada gerekçe çubuğuna
 sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141), ve X ile hemen kapanan
 pencerenin son değişikliği Belgeler'e yazıp yeniden açılışta getirdiği (TB7; kapatma
 WebDriver'la değil, pencere yöneticisinin mesajıyla, çünkü WebDriver'ın kapatması Tauri'nin
@@ -590,7 +590,7 @@ haftalık arka planda koşar (CLAUDE.md).
 
 ## E2E ortamı
 
-- **Pencere.** Varsayılan viewport 1920×1080. Exe büyütülmüş pencerede ve Windows ölçeğinde daha dar bir kutuda koşabilir, o yüzden Sığdır'ın düzeni ayrıca 1600×968'de ölçülüyor (tuzak 107).
+- **Pencere.** Varsayılan viewport 1920×1080. Exe büyütülmüş pencerede ve Windows ölçeğinde daha dar bir kutuda koşabilir, o yüzden ızgaranın düzeni ayrıca 1600×968'de ölçülüyor (tuzak 107).
 - **Paralellik.** `fullyParallel: true`, dört işçi. `file://` altında her Playwright context'inin kendi localStorage'ı var, paralel testler birbirinin verisini görmüyor. Bu ölçülerek doğrulandı.
 - **Dil.** `kapan.ts` ilk yüklemede dili Türkçeye sabitler.
 - **Gizli sekmeler.** Program sekmesi React'in `<Activity>`'si içinde, gizliyken DOM'da kalıyor. Bir ekranın ne dediğini soran test `e2e/helpers.ts`'teki `onScreen()` ile hangi ekran olduğunu söyler (tuzak 104).

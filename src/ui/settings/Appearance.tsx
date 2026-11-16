@@ -1,5 +1,6 @@
-// Settings section: how the interface is drawn — its size, and how much of the
-// week the grid shows at once.
+// Settings section: how the interface is drawn — its theme, its size, the
+// strip, motion and language. (The grid's density went on 2026-11-16, K6: the
+// grid fits the box by itself.)
 //
 // Neither control is in `State`. The size of the type is a property of
 // the machine and the eyes in front of it — a backup taken here must not
@@ -13,8 +14,8 @@
 // would invent a continuum that does not exist and then hide which rung it
 // landed on. The buttons reuse the `aria-pressed` state the tool already has
 // four of (`.btn[aria-pressed="true"]`), so there is no new control to learn
-// and no new CSS. The same applies to the density, the availability clock and
-// the motion setting below: four questions, one control shape.
+// and no new CSS. The same applies to the theme, the strip and the motion
+// setting below: one control shape.
 //
 // PRINTING IS NOT AFFECTED, and the panel says so out loud. Paper is a fixed
 // physical size: everything on the sheet is sized from `--fs-p-*` in pt and in
@@ -25,14 +26,11 @@
 import {
   applyRibbonAuto,
   applyTheme,
-  applyDensity,
   applyMotion,
   applyScale,
-  applyUiDensity,
   SCALE_MAX,
   SCALE_MIN,
   SCALE_STEP,
-  type Density,
   type Motion,
   type Theme,
 } from '../../platform/prefs';
@@ -45,10 +43,6 @@ interface Props {
   state: State;
   scale: number;
   setScale: (next: number) => void;
-  density: Density;
-  setDensity: (next: Density) => void;
-  uiDensity: Density;
-  setUiDensity: (next: Density) => void;
   /** Whether the tool strip slides away while you read down the page. */
   ribbonAuto: boolean;
   setRibbonAuto: (next: boolean) => void;
@@ -82,10 +76,6 @@ export default function Appearance({
   state,
   scale,
   setScale,
-  density,
-  setDensity,
-  uiDensity,
-  setUiDensity,
   ribbonAuto,
   setRibbonAuto,
   theme,
@@ -107,16 +97,6 @@ export default function Appearance({
   const teachers = state.teachers.slice(0, 8);
   const hoursOf = (id: string) =>
     state.lessons.filter((l) => l.teacherId === id).reduce((n, l) => n + l.weeklyHours, 0);
-
-  function chooseDensity(next: Density) {
-    applyDensity(next);
-    setDensity(next);
-  }
-
-  function chooseUiDensity(next: Density) {
-    applyUiDensity(next);
-    setUiDensity(next);
-  }
 
   function chooseTheme(next: Theme) {
     applyTheme(next);
@@ -151,10 +131,6 @@ export default function Appearance({
       ))}
     </div>
   );
-  const densities = (['ferah', 'rahat', 'sigdir'] as const).map((id) => ({
-    id,
-    label: t(id === 'ferah' ? 'Ferah' : id === 'rahat' ? 'Rahat' : 'Sığdır'),
-  }));
 
   return (
     <div className="cols">
@@ -192,41 +168,6 @@ export default function Appearance({
             STEPS.map((value) => ({ id: String(value), label: `%${Math.round(value * 100)}` })),
             String(scale),
             (id) => choose(Number(id)),
-          )}
-        </div>
-
-        {/* ONE panel, TWO questions — and they really are two: the grid's
-            cells and the rest of the screen's spacing. Two `role="group"`s
-            with their own names, which is how the test helper finds them.
-            Phase 3 of Sadeleşme removes both (K6). */}
-        <div className="panel">
-          <HelpHead topic="Yoğunluk">
-            <p>
-              <T k="Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı." />
-            </p>
-            <ul>
-              <li>
-                <T k="**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan." />
-              </li>
-              <li>
-                <T k="**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız." />
-              </li>
-              <li>
-                <T k="**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
-              </li>
-            </ul>
-            <p>
-              <T k="Basılan sayfada saatler her üç durumda da yazar." />
-            </p>
-            <p>
-              <T k="Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz." />
-            </p>
-          </HelpHead>
-          <h3>{t('Izgara')}</h3>
-          {segmented('Izgara yoğunluğu', densities, density, (id) => chooseDensity(id as Density))}
-          <h3>{t('Arayüzün geri kalanı')}</h3>
-          {segmented('Arayüz yoğunluğu', densities, uiDensity, (id) =>
-            chooseUiDensity(id as Density),
           )}
         </div>
 

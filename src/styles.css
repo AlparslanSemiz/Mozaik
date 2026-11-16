@@ -27,7 +27,7 @@
      09:00, 12) and Plex's digits are tabular by construction — every one of
      them is 600 units wide, measured, no `tnum` feature needed. The fallback
      stack below keeps the tool working if the face ever fails to decode. */
-  font-family: 'IBM Plex Sans';
+  font-family: "IBM Plex Sans";
   font-style: normal;
   font-weight: 400 700;
   /* block, NOT swap. Measured: with `swap`, the first layout resolves `ch`
@@ -38,7 +38,7 @@
      nothing is painted with the wrong metrics because nothing is painted at
      all until it is ready. */
   font-display: block;
-  src: url('./fonts/IBMPlexSans-subset.woff2') format('woff2-variations');
+  src: url("./fonts/IBMPlexSans-subset.woff2") format("woff2-variations");
 }
 
 /* THREE PLANES, and everything on screen sits on exactly one of them.
@@ -95,16 +95,16 @@
   /* THE PLANES. Four now, not three: the desk, the tool, the tool's second
      step back, and the sheet. --chrome-lit is the top stop of the top bar's
      gradient and lives only there. */
-  --bg: #cfd8e4;
-  --chrome: #f3f6fb;
-  --chrome-2: #ecf0f6;
-  --chrome-lit: #fcfdff;
-  --paper: #ffffff;
-  --paper-sunk: #f1f5fa;
+  --bg:          #cfd8e4;
+  --chrome:      #f3f6fb;
+  --chrome-2:    #ecf0f6;
+  --chrome-lit:  #fcfdff;
+  --paper:       #ffffff;
+  --paper-sunk:  #f1f5fa;
   /* The grid's day band: odd days get this ground so the eye sees SIX DAYS
      instead of 78 columns. Far below the 14 that separates two functional
      colours, or it would read as a state (pitfall 40). */
-  --band: #f8fafd;
+  --band:        #f8fafd;
   /* Every second row of a list: the reader asked for rows one after another
      on slightly different grounds, the same in every list. The same value as
      --chrome-2, written out rather than borrowed so the two cannot drift into
@@ -112,13 +112,13 @@
      against --paper: ΔL* -5.34, ΔE 6.31, ratio 1.14, i.e. seen at once and
      still far below anything that reads as a state. The dark twin moves the
      same ΔL* the other way (+5.43). */
-  --zebra: #ecf0f6;
+  --zebra:       #ecf0f6;
 
   /* Three rules, three jobs: --hairline shell, --line control edge and table
      head, --line-dark the loudest there is (day separator, row head). */
-  --hairline: #e0e4eb;
-  --line: #c6cdd7;
-  --line-dark: #8a93a0;
+  --hairline:    #e0e4eb;
+  --line:        #c6cdd7;
+  --line-dark:   #8a93a0;
   /* The edge of a CONTROL — field, select, button — and the one line here with
      a floor that is not taste: WCAG 1.4.11 asks 3:1 for the boundary that
      says "this is a thing you can use". Fields stood on --hairline (1.16:1
@@ -130,14 +130,14 @@
   --border-strong: #6d7784;
   /* One step past --line-dark, and it has exactly one job: where one day ends
      and the next begins, across 78 columns. */
-  --day-edge: #5b6572;
+  --day-edge:    #5b6572;
 
-  --text: #131a25;
+  --text:        #131a25;
   /* One step darker than the ramp's first pick (#505763) since the zebra:
      on --zebra that one measured 6.65 and the rows a low-vision reader scans
      hold their numbers and hints in this ink. Now 8.53 on --paper, 7.46 on
      --zebra, and still well behind --text (17.47), so it stays secondary. */
-  --muted: #464d58;
+  --muted:       #464d58;
 
   /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
      ink blue on the grounds that 36 identity colours plus three functional
@@ -148,17 +148,12 @@
      Measured: 7.47 on --paper, 6.28 on its own ground, 7.47 for white on it,
      and ΔE 121-144 from every functional colour — it cannot be mistaken for
      a state, which is the only thing loudness had to buy off. */
-  --accent: #373bdb;
-  --accent-hover: #2a20bc;
-  --accent-bg: #e1ecff;
-  --on-accent: #ffffff;
+  --accent: #373bdb;  --accent-hover: #2a20bc;
+  --accent-bg: #e1ecff;  --on-accent: #ffffff;
 
-  --ok: #177431;
-  --ok-bg: #d5f0dc;
-  --warn: #8a6100;
-  --warn-bg: #fdf0cf;
-  --bad: #b0201c;
-  --bad-bg: #fbdcda;
+  --ok: #177431;  --ok-bg: #d5f0dc;
+  --warn: #8a6100;  --warn-bg: #fdf0cf;
+  --bad: #b0201c;  --bad-bg: #fbdcda;
   /* THE INK of a state written ON its own ground: a badge, the health pill,
      the reason bar. --ok on --ok-bg was 4.84:1 at 12-13px (and --warn 4.89,
      --bad 5.33), under the 7:1 the rows hold (TODO E1). The three colours above
@@ -166,11 +161,8 @@
      edges of the same states. The ink is the same colour pushed toward black
      in Oklab (25 / 20 / 15%), so it keeps its hue and the functional channel
      keeps its distances. Measured on the ground: 7.47 · 7.63 · 7.20. */
-  --ok-ink: #0e5422;
-  --warn-ink: #654600;
-  --bad-ink: #8d1814;
-  --closed: #d5d8dd;
-  --hatch: #e8eaee;
+  --ok-ink: #0e5422;  --warn-ink: #654600;  --bad-ink: #8d1814;
+  --closed: #d5d8dd;  --hatch: #e8eaee;
 
   /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg:
      those are also the RESTING colours of the reason bar and of a warned cell,
@@ -274,14 +266,12 @@
   /* Ink that does NOT turn with the theme: it lands on the 36 palette colours,
      and those are the same in both themes because they are printed on paper
      (pitfall 15 and 35). */
-  --on-color: #1b1f24;
-  --on-color-sub: #3a3f46;
-  --block-cont: rgba(0, 0, 0, 0.12);
-  --edge: rgba(0, 0, 0, 0.4);
-  --dot-border: rgba(0, 0, 0, 0.3);
-  --print-line: #444;
-  --print-head-bg: #eee;
-  --shadow: rgba(0, 0, 0, 0.35);
+  --on-color: #1b1f24;  --on-color-sub: #3a3f46;
+  --block-cont: rgba(0,0,0,.12);
+  --edge: rgba(0,0,0,.4);
+  --dot-border: rgba(0,0,0,.3);
+  --print-line: #444;  --print-head-bg: #eee;
+  --shadow: rgba(0,0,0,.35);
 
   /* TWO shadow inks, because they land on two different kinds of surface and
      only one of them belongs to the block above.
@@ -293,7 +283,7 @@
                        plane is not a shadow, it is nothing: the lip that says
                        "the week is scrolling under this" simply was not there.
      One token used in both places is how that went unnoticed for a version. */
-  --shadow-shell: rgba(16, 24, 40, 0.35);
+  --shadow-shell: rgba(16,24,40,.35);
 
   /* ELEVATION — five steps. The old two ("the sheet on the desk" and "the
      three things that genuinely float") could not describe a shell that has a
@@ -306,10 +296,10 @@
        --elev-4  the drag ghost — the only thing under the pointer
      Two soft layers each, because one hard shadow reads as a cut-out. */
   --elev-0: none;
-  --elev-1: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.05);
-  --elev-2: 0 1px 3px rgba(16, 24, 40, 0.07), 0 4px 10px rgba(16, 24, 40, 0.06);
-  --elev-3: 0 4px 12px rgba(16, 24, 40, 0.1), 0 12px 32px rgba(16, 24, 40, 0.12);
-  --elev-4: 0 6px 16px rgba(16, 24, 40, 0.16), 0 24px 56px rgba(16, 24, 40, 0.2);
+  --elev-1: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.05);
+  --elev-2: 0 1px 3px rgba(16,24,40,.07), 0 4px 10px rgba(16,24,40,.06);
+  --elev-3: 0 4px 12px rgba(16,24,40,.10), 0 12px 32px rgba(16,24,40,.12);
+  --elev-4: 0 6px 16px rgba(16,24,40,.16), 0 24px 56px rgba(16,24,40,.20);
 
   /* TYPOGRAPHY. Nine steps, up from six: with only six, a page heading and a
      panel heading had to share one size and the hierarchy came out flat.
@@ -335,21 +325,21 @@
      That last line is where the room actually comes from: spacing, cells, the
      strip, the `ch` columns and the dock all follow the root and none of them
      has a floor to respect. */
-  --fs-2xs: 0.846rem; /* 11px — print preview furniture ONLY, never screen UI */
-  --fs-xs: 0.923rem; /* 12px — the screen floor */
-  --fs-sm: 1rem; /* 13px */
-  --fs-md: 1.077rem; /* 14px */
+  --fs-2xs:  .846rem;  /* 11px — print preview furniture ONLY, never screen UI */
+  --fs-xs:   .923rem;  /* 12px — the screen floor */
+  --fs-sm:   1rem;     /* 13px */
+  --fs-md:   1.077rem; /* 14px */
   --fs-base: 1.154rem; /* 15px — body */
-  --fs-lg: 1.308rem; /* 17px */
-  --fs-xl: 1.538rem; /* 20px */
-  --fs-2xl: 1.923rem; /* 25px */
-  --fs-3xl: 2.385rem; /* 31px */
+  --fs-lg:   1.308rem; /* 17px */
+  --fs-xl:   1.538rem; /* 20px */
+  --fs-2xl:  1.923rem; /* 25px */
+  --fs-3xl:  2.385rem; /* 31px */
 
   /* Tracking. Plex wants a touch of negative at display sizes, real positive
      when small text is set in caps, and a hair of negative on headings. */
-  --ls-tight: -0.011em;
-  --ls-tighter: -0.021em;
-  --ls-caps: 0.06em;
+  --ls-tight: -.011em;
+  --ls-tighter: -.021em;
+  --ls-caps:   .06em;
 
   /* PAPER — its own ladder, in pt, because A4 is a fixed physical size and
      --ui-scale is a screen comfort setting. Raised across the board on
@@ -366,16 +356,11 @@
      where the multipliers are, which is the only place it can be. */
 
   --lh-tight: 1.2;
-  --lh-base: 1.5;
-  --lh-head: 1.25;
+  --lh-base:  1.5;
+  --lh-head:  1.25;
 
-  --space-1: 0.125rem;
-  --space-2: 0.25rem;
-  --space-3: 0.5rem;
-  --space-4: 0.75rem;
-  --space-5: 1rem;
-  --space-6: 1.5rem;
-  --space-7: 2rem;
+  --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
+  --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
   --space-8: 3rem;
 
   /* RADIUS — five steps and a pill. The old three were a plane rule; with a
@@ -388,11 +373,7 @@
        --r-xl  a sheet     dialog, slide-over
      px, not rem: a corner radius is not a size that is READ, it is how sharp
      the edge is, and it should not grow when the type does. */
-  --r-xs: 3px;
-  --r-sm: 5px;
-  --r-md: 8px;
-  --r-lg: 14px;
-  --r-xl: 20px;
+  --r-xs: 3px;  --r-sm: 5px;  --r-md: 8px;  --r-lg: 14px;  --r-xl: 20px;
   --r-full: 999px;
 
   /* MOTION. The <=150ms cap and the closed list of what may move are gone
@@ -411,9 +392,9 @@
   --dur-fast: 110ms;
   --dur: 180ms;
   --dur-slow: 280ms;
-  --ease: cubic-bezier(0.2, 0, 0, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.4, .64, 1);
 
   /* HOW FAR things move, as four tokens rather than a number written out in
      each rule. The durations were already switchable from one place; the
@@ -427,10 +408,10 @@
      rem and not px for --slide, so a reader at 150% gets a movement in
      proportion to what moved (pitfall 36: a derived measure is computed from
      what it derives from). */
-  --slide: 0.5rem;
+  --slide: .5rem;
   --sweep: 100%;
   --press: 1px;
-  --pop: 0.97;
+  --pop: .97;
 
   /* Focus. Two rings, so it survives on any plane: a --paper gap first, then
      the accent. Keyboard navigation has to be visible on the grid, on a
@@ -442,15 +423,14 @@
      --fs-xs); a BOX's width lives on the box and is in the body's ch. The
      same ~70px is 10ch in one place and 8ch in the other, and that is
      correct (pitfall 34). */
-  --w-col-xs: 8ch;
+  --w-col-xs:  8ch;
   --w-col-sm: 10ch;
   --w-col-md: 13ch;
   --w-col-lg: 16ch;
   --w-col-xl: 26ch;
   --w-col-2xl: 32ch;
 
-  --cell-w: 2.125rem;
-  --cell-h: 2.125rem;
+  --cell-w: 2.125rem;  --cell-h: 2.125rem;
   /* The sticky first column. 8.25rem was never measured; asked to shrink it
      (2026-08-26, "sol taraftaki öğretmen ya da sınıf tarafının genişliği biraz
      daha kısaltılabilir") it was, and the widest thing it ever has to hold is
@@ -474,7 +454,7 @@
      formula subtracts it. It was written by hand in both, so narrowing one
      silently made the other's arithmetic wrong by --break-cols pixels
      (pitfall 36: a derived measure is computed from what it derives from). */
-  --break-w: 0.375rem;
+  --break-w: .375rem;
 
   /* The day rule's thickness, a token for the same reason as --break-w: the
      rule is drawn INSIDE the first hour's cell, so Sığdır's --cell-w formula
@@ -547,7 +527,7 @@
   interpolate-size: allow-keywords;
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
 
   /* The same hue and the same derivation, lifted — and on 2026-08-27 lowered
@@ -620,9 +600,7 @@
   --bad: #ff9089;
   --bad-bg: #401614;
   /* Already over 7:1 on their grounds in this theme (8.78 for ok). */
-  --ok-ink: var(--ok);
-  --warn-ink: var(--warn);
-  --bad-ink: var(--bad);
+  --ok-ink: var(--ok);  --warn-ink: var(--warn);  --bad-ink: var(--bad);
   --closed: #2f363e;
   --hatch: #222831;
 
@@ -658,12 +636,12 @@
   /* Deeper and blacker: on a dark ground the light theme's values are simply
      not there. The same is true of the sticky lip, which is why it has its own
      ink — see --shadow-shell above. */
-  --shadow-shell: rgba(0, 0, 0, 0.85);
+  --shadow-shell: rgba(0,0,0,.85);
 
-  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --elev-2: 0 1px 3px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.35);
-  --elev-3: 0 4px 12px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
-  --elev-4: 0 6px 16px rgba(0, 0, 0, 0.55), 0 24px 56px rgba(0, 0, 0, 0.6);
+  --elev-1: 0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
+  --elev-2: 0 1px 3px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.35);
+  --elev-3: 0 4px 12px rgba(0,0,0,.50), 0 12px 32px rgba(0,0,0,.45);
+  --elev-4: 0 6px 16px rgba(0,0,0,.55), 0 24px 56px rgba(0,0,0,.60);
 }
 
 /* THE SETTING — Ayarlar > Gorunum > Hareket, three steps.
@@ -680,7 +658,7 @@
    written AFTER these two and at equal specificity, so it wins. A reader whose
    system asks for less motion gets none whatever this setting says; the setting
    can only go further than the machine asked. See src/theme.ts. */
-:root[data-motion='az'] {
+:root[data-motion="az"] {
   --dur-fast: 60ms;
   --dur: 90ms;
   --dur-slow: 90ms;
@@ -690,7 +668,7 @@
   --pop: 1;
 }
 
-:root[data-motion='kapali'] {
+:root[data-motion="kapali"] {
   --dur-fast: 0ms;
   --dur: 0ms;
   --dur-slow: 0ms;
@@ -705,8 +683,8 @@
    line is here because a zero-length animation still fires start/end events and
    `document.getAnimations()` still reports it, and "nothing is running" is what
    the suite measures. */
-:root[data-motion='kapali'] .toast,
-:root[data-motion='kapali'] [data-reveal] {
+:root[data-motion="kapali"] .toast,
+:root[data-motion="kapali"] [data-reveal] {
   animation: none;
 }
 
@@ -719,7 +697,7 @@
   scroll-behavior: auto;
 }
 
-:root[data-motion='tam'] .main {
+:root[data-motion="tam"] .main {
   scroll-behavior: smooth;
 }
 
@@ -728,8 +706,8 @@
    the four distance tokens. Last on purpose (see above). */
 @media (prefers-reduced-motion: reduce) {
   :root,
-  :root[data-motion='tam'],
-  :root[data-motion='az'] {
+  :root[data-motion="tam"],
+  :root[data-motion="az"] {
     --dur: 0ms;
     --dur-fast: 0ms;
     --dur-slow: 0ms;
@@ -776,13 +754,7 @@ body,
 }
 
 body {
-  font-family:
-    'IBM Plex Sans',
-    'Segoe UI',
-    system-ui,
-    -apple-system,
-    Arial,
-    sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   font-size: var(--fs-base);
   line-height: var(--lh-base);
   color: var(--text);
@@ -872,21 +844,11 @@ textarea {
 /* Which section's colour this chrome is drawing. One custom property resolved
    from the attribute App writes, so nothing downstream has to know the tab
    names and no colour is ever written in the JSX. */
-[data-section='teachers'] {
-  --sec: var(--sec-setup);
-}
-[data-section='classes'] {
-  --sec: var(--sec-lessons);
-}
-[data-section='program'] {
-  --sec: var(--sec-program);
-}
-[data-section='print'] {
-  --sec: var(--sec-print);
-}
-[data-section='school'] {
-  --sec: var(--sec-settings);
-}
+[data-section="teachers"] { --sec: var(--sec-setup); }
+[data-section="classes"] { --sec: var(--sec-lessons); }
+[data-section="program"] { --sec: var(--sec-program); }
+[data-section="print"] { --sec: var(--sec-print); }
+[data-section="school"] { --sec: var(--sec-settings); }
 
 .topbar {
   display: flex;
@@ -925,11 +887,10 @@ textarea {
    volume, and the two things that ANSWER "where am I" are the filled tab and
    the 4px line, both of which stay at full strength. 16% -> 8%, 6% -> 3%. */
 :root:not([data-theme='dark']) .topbar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
-    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%
-  );
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
 }
 
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
@@ -940,12 +901,11 @@ textarea {
    old --chrome; against the darkened one that fill was the brightest thing on
    the screen, and the bar stopped reading as the plane that never scrolls away
    and started reading as a coloured banner. 14% -> 5%, top-lit like light. */
-:root[data-theme='dark'] .topbar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
-    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%
-  );
+:root[data-theme="dark"] .topbar {
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
 }
 
 /* The section's wash moves with you. `background-color` and not `background`:
@@ -1060,6 +1020,7 @@ textarea {
   border-radius: 0.42rem; /* 112/512 of 1.75rem — the drawing's own corner */
 }
 
+
 .tabstrip {
   /* EQUAL COLUMNS, not content-width buttons (five since K1). Same request and the
      same mechanism as `.ribbon-group`: `1fr` in a grid sized by its own content
@@ -1166,7 +1127,7 @@ textarea {
    the bottom: on a 1920px bar six equal white tabs with a 2px line under one
    of them is a difference you have to look for. Mixed from --sec, so the six
    identities stay one token each. */
-.tab[aria-current='true'] {
+.tab[aria-current="true"] {
   /* SOLID, and since 2026-11-15 FLAT. Two revisions ago the lit tab was a
      white sheet with a 2px rule under it — true to the tab metaphor and, on a
      1920px bar with six of them, a difference you had to go looking for. It is
@@ -1188,14 +1149,14 @@ textarea {
   box-shadow: var(--elev-2);
 }
 
-:root[data-theme='dark'] .tab[aria-current='true'] {
+:root[data-theme='dark'] .tab[aria-current="true"] {
   /* The dark section colours are LIGHT and the label is dark ink, so the
      step goes the other way. */
   background: color-mix(in oklab, #fff 25%, var(--sec, var(--accent)));
   border-color: var(--sec, var(--accent));
 }
 
-.tab[aria-current='true'] svg {
+.tab[aria-current="true"] svg {
   color: var(--on-accent);
 }
 
@@ -1293,8 +1254,8 @@ textarea {
    the strip moved and sometimes it did not, which is exactly how it was
    reported. `.tab[aria-current]` in the bar above uses the same equal-column
    grid and has never moved, because it says where you are in colour alone. */
-.ribbon .btn[aria-pressed='true'],
-.ribbon .btn[aria-pressed='true']:hover:not(:disabled) {
+.ribbon .btn[aria-pressed="true"],
+.ribbon .btn[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--sec, var(--accent));
   border-color: var(--sec, var(--accent));
   color: var(--on-accent);
@@ -1318,11 +1279,10 @@ textarea {
      order, is the block below. */
   container: serit / inline-size;
   padding: var(--space-2) var(--space-4);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
-    color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%
-  );
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%);
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
@@ -1645,11 +1605,9 @@ textarea {
 }
 
 .btn.primary {
-  background: linear-gradient(
-    180deg,
+  background: linear-gradient(180deg,
     color-mix(in oklab, #fff 8%, var(--accent)) 0%,
-    var(--accent) 100%
-  );
+    var(--accent) 100%);
   border-color: color-mix(in oklab, #000 12%, var(--accent));
   color: var(--on-accent);
   box-shadow: var(--elev-1);
@@ -1657,11 +1615,9 @@ textarea {
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: linear-gradient(
-    180deg,
+  background: linear-gradient(180deg,
     color-mix(in oklab, #fff 6%, var(--accent-hover)) 0%,
-    var(--accent-hover) 100%
-  );
+    var(--accent-hover) 100%);
   border-color: var(--accent-hover);
   box-shadow: var(--elev-2);
 }
@@ -1669,11 +1625,9 @@ textarea {
 :root[data-theme='dark'] .btn.primary {
   /* The dark accent is a LIGHT blue, so the highlight stop has to go the other
      way or the button gets paler as it rises. */
-  background: linear-gradient(
-    180deg,
+  background: linear-gradient(180deg,
     var(--accent) 0%,
-    color-mix(in oklab, #000 10%, var(--accent)) 100%
-  );
+    color-mix(in oklab, #000 10%, var(--accent)) 100%);
 }
 
 /* A two-position button (theme, availability kind, view switch): it must show
@@ -1683,8 +1637,8 @@ textarea {
    the hover state has to be named explicitly — without it the button you just
    pressed goes pale under the pointer that pressed it. This used to be two
    separate rules 1000 lines apart that disagreed about the colour. */
-.btn[aria-pressed='true'],
-.btn[aria-pressed='true']:hover:not(:disabled) {
+.btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
@@ -1712,9 +1666,7 @@ textarea {
   gap: var(--space-2);
 }
 
-.ribbon .btn > svg {
-  flex: 0 0 auto;
-}
+.ribbon .btn > svg { flex: 0 0 auto; }
 
 .btn.icon {
   display: inline-flex;
@@ -1730,8 +1682,8 @@ textarea {
 
 /* More specific than the pressed rule further up, so the ink has to be
    repeated here too: accent on accent would be an invisible icon. */
-.btn.icon[aria-pressed='true'],
-.btn.icon[aria-pressed='true']:hover:not(:disabled) {
+.btn.icon[aria-pressed="true"],
+.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
   color: var(--on-accent);
 }
 
@@ -1761,7 +1713,7 @@ textarea {
   color: var(--accent);
 }
 
-.btn.link[aria-current='true'] {
+.btn.link[aria-current="true"] {
   color: var(--accent);
 }
 
@@ -1877,19 +1829,13 @@ table.list tbody tr {
   );
 }
 
-.scroll-fade.faded-top {
-  --fade-top: 1.75rem;
-}
-.scroll-fade.faded-bot {
-  --fade-bot: 1.75rem;
-}
+.scroll-fade.faded-top { --fade-top: 1.75rem; }
+.scroll-fade.faded-bot { --fade-bot: 1.75rem; }
 
 /* Paper has no edges to run past, and a mask on the print tree would fade the
    top of the first page and the bottom of the last one. */
 @media print {
-  .scroll-fade {
-    mask-image: none;
-  }
+  .scroll-fade { mask-image: none; }
 }
 
 .main.no-overflow {
@@ -2040,7 +1986,7 @@ table.list tbody tr {
    rather than a row per way still being looked for. */
 .suggestion-progress {
   width: 10em;
-  height: 0.6em;
+  height: .6em;
   accent-color: var(--accent);
 }
 
@@ -2246,7 +2192,29 @@ table.list tbody tr {
 
 /* -------------------------------------------------------------------- grid */
 
+/* When the week does not fit at a readable width the grid scrolls sideways
+   (2026-11-16), and that has to be SEEN: the grid's bars are wider and darker
+   than the thin furniture elsewhere, and always drawn. Chromium draws the
+   `::-webkit-scrollbar` bar, never an overlay that vanishes, only while the
+   standard `scrollbar-width` and `scrollbar-color` are `auto` (the `*` rule
+   above sets them); Firefox reads those two and keeps its own bar. */
+.grid-wrap::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.grid-wrap::-webkit-scrollbar-track {
+  background: var(--chrome);
+}
+
+.grid-wrap::-webkit-scrollbar-thumb {
+  background: var(--line-dark);
+  background-clip: content-box;
+}
+
 .grid-wrap {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
   flex: 1 1 auto;
   overflow: auto;
   background: var(--paper);
@@ -2335,25 +2303,6 @@ table.grid thead tr:nth-child(2) th {
   line-height: var(--lh-tight);
 }
 
-/* The bell time under the lesson number. A reminder, the lesson number is what
-   the eye navigates by — but a reminder still has to be READ.
-
-   It was 12px with nothing between one heading and the next, and since the
-   clock is what sets the column's min-content (pitfall 37), "09:00" filled its
-   column wall to wall: the row read "09:0009:5010:40", 1px apart. Measured
-   2026-11-15 on the sample school at 1920, 1536 (%125) and 960 (%200): the
-   smallest gap between two clocks was 1.0px at every one. Now one step up the
-   ladder and with its own air on both sides, so the gap is the padding twice
-   plus the rule whatever the scale (4.25px, against 1.0). The padding is on
-   the clock and not the `th`: the hour number above it is narrower and needs
-   none. It costs width, and that is said out loud: the clock IS the column's
-   floor, so Rahat's week went from 2516px to 2946px at 1920. Rahat
-   already scrolled sideways; Sığdır, which hides the clock, is unchanged. */
-table.grid .hour-clock {
-  padding-inline: var(--space-1);
-  font-size: var(--fs-sm);
-}
-
 /* And the hairline between two bell times steps up to --line, so the gap has
    a rule in it the eye can find. Only on the hour row: down the body the
    hourly rhythm stays on the hairline (see `table.grid th, td`). */
@@ -2369,107 +2318,31 @@ table.grid thead tr:nth-child(2) th {
   color: var(--muted);
 }
 
-/* --------------------------------------------------- "Ferah": the third step
-   The reader has trouble seeing, and the two densities the grid had were
-   "the grid" and "smaller than the grid". This one goes the other way: a
-   taller, wider cell and the card's second line at full size.
+/* ------------------------------------------- THE GRID FITS THE BOX ITSELF
+   Since 2026-11-16 (Sadeleşme K6) this is the grid's only layout: what was
+   the "Sığdır" density, the whole week in the box. "Ferah" and "Rahat", and
+   the switch between them, are gone; the size of the type is Ayarlar →
+   Görünüm → Yazı büyüklüğü.
 
-   It is NOT a second zoom axis — --ui-scale still moves the whole screen, and
-   this moves the CELL inside it. The trade it offers is honest and visible:
-   fewer days on screen at once, in exchange for a card you can read without
-   leaning in. Horizontal scrolling was already how the week is read at
-   "rahat"; here there is simply more of it. */
-:root[data-density='ferah'] {
-  /* 3.5rem since 2026-11-15: the bell time at 13px with its own air made
-     Rahat's column 42px wide, and at 2.875rem (37px) Ferah was no wider than
-     Rahat any more — the step existed and did nothing. */
-  --cell-w: 3.5rem;
-  --cell-h: 2.75rem;
-}
+   It drops exactly ONE thing, and which thing was MEASURED, not chosen: the
+   bell time under the hour number ("10:40" set the column's min-content, and
+   hiding it took the table from 2461px to 1728px, pitfall 37). The grid no
+   longer draws it at all; the heading's `title` and every printed sheet still
+   say it. Müsaitlik's heading keeps its own clock and its own button. */
 
-:root[data-density='ferah'] .card-bottom {
-  font-size: var(--fs-sm);
-  opacity: 1;
-}
-
-/* ------------------------------------------------- "Sığdır": semantic zoom
-   A5. The whole week in the box instead of 2616px of table against 1828px.
-
-   It drops exactly ONE thing, and which thing was MEASURED, not chosen:
-   `--cell-w` was set to 28, 23 and 18px in turn and the cell came out 33.69px
-   every time, because "10:40" in the heading — not the card — was setting the
-   column's min-content. Hiding the card's second line changed nothing;
-   hiding the clock took the table from 2461px to 1728px. Pitfall 37.
-
-   The lesson NUMBER stays: it is what the eye navigates by, and the times are
-   a click away in Ayarlar → Zil ve günler and printed on every sheet.
-
-   SCOPED TO `table.grid`, and the scope is the whole point rather than tidying.
-   Unscoped it also hit Müsaitlik's heading, where the reader has a BUTTON for
-   this ("Göster → Saatler") — so at Sığdır that button flipped `aria-pressed`,
-   wrote `data-avail-clock='acik'`, and nothing on the table moved. Measured
-   before it was written, all three densities, both states:
-
-     rahat  / acik   display: block, visibility: visible   table 1514.8x332
-     sigdir / acik   display: NONE,  visibility: visible   table 1514.8x329.9
-     ferah  / acik   display: block, visibility: visible   table 1514.8x332
-
-   Which also cost the availability rule below the invariant it was written
-   for: `visibility: hidden` reserves the second line box so the two states are
-   the same height BY CONSTRUCTION (pitfall 102), and `display: none` from here
-   took 2.1px of it back. The measurement above is what this rule is FOR — the
-   grid's 2461px -> 1728px (pitfall 37) — and it was never a claim about any
-   other table. The comment on the availability rule already said "the grid's
-   own"; the selector did not (pitfall 77, in CSS). */
-:root[data-density='sigdir'] table.grid .hour-clock {
-  display: none;
-}
-
-/* And the card's TOP line steps down one notch — measured, the way the clock
-   was, and only after the clock stopped being the floor.
-   With the default scale at 1.10 the clock alone was no longer enough: the
-   week came back 76px over. Each candidate was hidden in turn on a full grid,
-   under `file://`, at 1920x1080:
-
-     nothing hidden ................ table 1996 / box 1920, over 76
-     card's BOTTOM line hidden ..... 1996, over 76   (not the floor)
-     hour NUMBER hidden ............ 1996, over 76   (not the floor)
-     card's TOP line hidden ........ 1906, over  0   <- the floor
-     card text at --fs-2xs ......... 1907, over  0
-
-   So it is the class number ("411") setting the column's min-content, and one
-   step down the ladder is enough. A px floor and not the token alone: 12px is
-   a floor for a reader who has trouble seeing, so it is written in px ON
-   PURPOSE — it must not shrink with the scale the way a rem would.
-
-   `min(1, --ui-scale)` is the one thing it DOES follow, and only downwards.
-   At scale 1 this resolves to exactly 12px, so the default screen is
-   untouched; above 1 the floor must not grow, which is --fs-2xs's job. The
-   clarification of 2026-08-30 already says the floor is a promise about the
-   DEFAULT scale — "%80'e uzanan okuyucu tabana kendisi cevap veriyor" — and
-   this applies that sentence to the cards. It is the only knob that reaches
-   Windows at %125, where the box is 1536 CSS px: measured there, dropping the
-   app's own scale to %80 takes clipped cards from 315/374 to 25/374 (and the
-   row from 37px to 31px, so more rows fit as well). Left at scale 1 on a
-   %125 machine the columns do not hold that text: 72 columns of ~21.6px
-   text plus the head do not fit in 1536px, and no width rule makes them.
-
-   What does, since 2026-09-26, is the line giving way instead of being cut.
-   `--fit` is a ratio written by platform/dom/gridFit.ts on a line that does not
-   fit, never below 9px at the default scale (the user's choice, Sığdır
-   only, measured in gridFit.ts). The size is multiplied, the LINE HEIGHT is not: it stays at the
-   unshrunk size, so a row full of shrunk cards is exactly as tall as it was.
-   --lh-base and not the card's own --lh-tight, because that is what these
-   lines actually get: `.card`'s `font: inherit` comes after its line-height
-   and resets it to the cell's (measured 18px at 12px). Written with
-   --lh-tight, every row went 38.5px -> 35px. Measured at 1536 with DPR 1.25
-   on the sample school: 315/374 clipped -> 0, counted the way the ellipsis
-   itself decides (pitfall 140). */
-:root[data-density='sigdir'] .card-top,
-:root[data-density='sigdir'] .card-bottom {
-  --fit-base: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-base));
+/* The card's lines: 12px at the default scale, NEVER under 11px (an older
+   reader, 2026-11-16), and never shrunk to fit. Until then a line that did not
+   fit was drawn smaller, down to 9px, and still read "4…" in a %125 or %150
+   box (317 of 376 cards). Now the column is as wide as the widest lesson needs
+   at this size (`--cell-min`, measured by platform/dom/gridFit.ts), and when
+   the week does not fit at that width the grid scrolls sideways instead (see
+   --cell-w below). The LINE HEIGHT is the size's own --lh-base, which is what
+   these lines get anyway: `.card`'s `font: inherit` resets it to the cell's. */
+:root .card-top,
+:root .card-bottom {
+  --card-fs: max(11px, calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
+  font-size: var(--card-fs);
+  line-height: calc(var(--card-fs) * var(--lh-base));
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -2478,27 +2351,21 @@ table.grid thead tr:nth-child(2) th {
 }
 
 /* The two-hour card's top line keeps its one step up (`td.block-wide`, which
-   outranks the rule above), and shrinks from THAT size. */
-:root[data-density='sigdir'] table.grid tbody td.block-wide .card-top {
-  --fit-base: var(--fs-sm);
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-base));
+   outranks the rule above). */
+:root table.grid tbody td.block-wide .card-top {
+  --card-fs: max(11px, var(--fs-sm));
 }
 
-/* The row head's second line gives way the same way: the father's class rows
-   read "derslik yok" (59px of text in 57px) and his teachers "Mat1 · Mat2",
-   and all twenty class heads were clipped at 1920. */
-:root[data-density='sigdir'] table.grid .row-head .secondary {
-  --fit-base: var(--fs-xs);
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-tight));
+:root table.grid .row-head .secondary {
+  font-size: var(--fs-xs);
+  line-height: calc(var(--fs-xs) * var(--lh-tight));
 }
 
 /* And a class name says its first word only: "411A SAY" -> "411A", on the
    card and on the class row's head (62px of name in a 57px head). The rest is
    in the markup (Grid.tsx), read by the labels and drawn in the other two
    densities. The user's choice over a short-name field (2026-09-26). */
-:root[data-density='sigdir'] table.grid .name-rest {
+:root table.grid .name-rest {
   display: none;
 }
 
@@ -2508,7 +2375,7 @@ table.grid thead tr:nth-child(2) th {
    came back 79px short of fitting. The clock was INFORMATION and its loss is
    this mode's whole subject; this is a pixel of margin, and losing it costs the
    reader nothing. */
-:root[data-density='sigdir'] table.grid tbody td {
+:root table.grid tbody td {
   padding: 0;
 }
 
@@ -2519,10 +2386,9 @@ table.grid thead tr:nth-child(2) th {
    `style={{ width }}` is about a measurement written in the JSX, and a column
    count is data the layout needs.
 
-   There is still no readable-width FLOOR here, and that is deliberate: this
-   mode's contract is that the complete week fits horizontally, so when the box
-   is too narrow the card text ellipsises rather than the grid growing a
-   scrollbar. What changed on 2026-09-01 is what the lesson columns are given
+   Since 2026-11-16 there IS a readable-width floor (`--cell-min`, below): the
+   week fits when it can and scrolls sideways when it cannot, and a lesson is
+   never cut. The numbers that follow are from before it. What changed on 2026-09-01 is what the lesson columns are given
    to begin with. Measured on the sample school, `Otomatik diz`, 374 cards,
    counting cards whose .card-top actually overflows:
 
@@ -2561,19 +2427,26 @@ table.grid thead tr:nth-child(2) th {
    The --space-4 term reserves border-rounding slack. Even with the explicit
    colgroup Chromium can round the table border one device pixel beyond the
    container at 1366px/%125, hence the final 1px subtraction on table width. */
-:root[data-density='sigdir'] table.grid {
-  --rowhead-w: 5rem;
-  --break-w: 0.1875rem;
+:root table.grid {
+  /* At least what the widest row head's text needs (`--head-min`, gridFit.ts). */
+  --rowhead-w: max(5rem, var(--head-min, 0px));
+  --break-w: .1875rem;
+  /* The box's share, but never less than the widest lesson needs (B,
+     2026-11-16): below that the table grows past the box and `.grid-wrap`
+     scrolls sideways, with the row heads and the hour row sticky. */
   --cell-w: max(
-    0px,
-    (
-        var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
-          var(--day-cols) * var(--day-rule-w) - var(--space-4)
-      ) /
+    var(--cell-min, 0px),
+    (var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
+        var(--day-cols) * var(--day-rule-w) - var(--space-4)) /
       var(--lesson-cols)
   );
-  width: calc(100% - 1px);
-  max-width: calc(100% - 1px);
+  width: max(
+    calc(100% - 1px),
+    calc(
+      var(--rowhead-w) + var(--break-cols) * var(--break-w) + var(--day-cols) *
+        var(--day-rule-w) + var(--lesson-cols) * var(--cell-w)
+    )
+  );
 }
 
 /* The day rule is drawn inside the first hour's cell (`.day-first`), so that
@@ -2584,7 +2457,7 @@ table.grid thead tr:nth-child(2) th {
    hinting rounds "410A" at 9px down to 21px, which is why only Windows showed
    it (B7.22, pitfall 146). The other columns pay for it: 7 x 3px over 84 of
    them, 0.25px each. */
-:root[data-density='sigdir'] table.grid col.grid-hour-col.day-first-col {
+:root table.grid col.grid-hour-col.day-first-col {
   width: calc(var(--cell-w) + var(--day-rule-w));
 }
 
@@ -2592,8 +2465,8 @@ table.grid thead tr:nth-child(2) th {
    broke "MÇ / Mat" onto a third line and the row went 38.5px -> 50.6px, so a
    width fix bought itself a vertical regression — measured, and the whole
    point of this round was that the vertical stays untouched. */
-:root[data-density='sigdir'] table.grid tbody th,
-:root[data-density='sigdir'] table.grid tbody th * {
+:root table.grid tbody th,
+:root table.grid tbody th * {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2609,7 +2482,7 @@ table.grid thead tr:nth-child(2) th {
    heads were 2px over at %80 and ellipsised to "G dersliğ…" — a regression
    this round introduced and the teacher view could never have shown, because
    its second line is a three-letter subject short. */
-:root[data-density='sigdir'] table.grid .row-head {
+:root table.grid .row-head {
   padding-inline: 3px !important;
 }
 
@@ -2618,105 +2491,31 @@ table.grid thead tr:nth-child(2) th {
    not as an abbreviation. It steps down one notch instead, the same move the
    card text makes above and for the same reason: this is the one label in the
    grid that is read once and then never again. */
-:root[data-density='sigdir'] table.grid .corner {
+:root table.grid .corner {
   font-size: var(--fs-2xs);
   letter-spacing: 0;
 }
 
-:root[data-density='sigdir'] table.grid col.grid-row-col {
+:root table.grid col.grid-row-col {
   width: var(--rowhead-w);
 }
 
-:root[data-density='sigdir'] table.grid col.grid-break-col {
+:root table.grid col.grid-break-col {
   width: var(--break-w);
 }
 
-:root[data-density='sigdir'] table.grid col.grid-hour-col {
+:root table.grid col.grid-hour-col {
   width: var(--cell-w);
 }
 
-:root[data-density='sigdir'] table.grid thead tr:nth-child(2) th:not(.break-col) {
+:root table.grid thead tr:nth-child(2) th:not(.break-col) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ------------------------------- The INTERFACE's density, its own axis
-   "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
-   yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
 
-   The switch existed and moved one table. What the reader wants from it is the
-   thing it was never wired to: twenty-five teachers, twenty classes and
-   ninety-nine lessons on screen without scrolling down.
-
-   `data-ui-density` and NOT `data-density` since 2026-08-27, asked for by name:
-   "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
-   farklı olsun." One attribute drove both, and they are not one decision — the
-   grid's step trades days on screen against cell size and hides the bell times
-   at the tight end; this one trades rows in a list against how far apart the
-   controls sit. Wanting the whole week in the box says nothing about wanting a
-   cramped Ayarlar.
-
-   Only the BLOCK padding is touched, never the inline. `th.grip-col` and
-   `td.row-no` set their own left and right to reclaim table width (see
-   pitfall 34), and those rules carry the same specificity as these — a
-   `padding` shorthand here would silently win by coming later in the file and
-   hand the handle column its padding back.
-
-   The 12px floor on screen text is NOT crossed: nothing here changes a font
-   size. What comes out is air, and air is the right thing to spend. */
-:root[data-ui-density='ferah'] table.list th,
-:root[data-ui-density='ferah'] table.list td,
-:root[data-ui-density='ferah'] table.stat th,
-:root[data-ui-density='ferah'] table.stat td {
-  padding-block: 9px;
-}
-
-:root[data-ui-density='sigdir'] table.list th,
-:root[data-ui-density='sigdir'] table.list td,
-:root[data-ui-density='sigdir'] table.stat th,
-:root[data-ui-density='sigdir'] table.stat td {
-  padding-block: 1px;
-}
-
-/* The row's real floor is the CONTROL in it, not the cell around it: a text box
-   at .25rem top and bottom is taller than a 1px cell. Measured on the teacher
-   list, and it is why trimming the cell alone bought almost nothing. */
-:root[data-ui-density='sigdir'] .main input,
-:root[data-ui-density='sigdir'] .main select,
-:root[data-ui-density='sigdir'] .main textarea,
-:root[data-ui-density='sigdir'] .main .btn {
-  padding-block: var(--space-1);
-  /* The leading, not the SIZE. A control's height is its line box plus its
-     padding, and once the padding is at 2px the line box is what is left —
-     --lh-base to --lh-tight is the last thing that can come out of a row
-     without making a letter smaller, and 12px on screen is a floor this
-     program does not cross. */
-  line-height: var(--lh-tight);
-}
-
-:root[data-ui-density='ferah'] .main input,
-:root[data-ui-density='ferah'] .main select,
-:root[data-ui-density='ferah'] .main textarea {
-  padding-block: var(--space-3);
-}
-
-/* The sheet the list sits on, and the strip above it. A panel at --space-6 top
-   and bottom is 48px of margin around a table whose whole complaint is that it
-   does not fit. */
-:root[data-ui-density='sigdir'] .main .panel {
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-:root[data-ui-density='sigdir'] .main .list-tools {
-  gap: var(--space-2);
-}
-
-:root[data-ui-density='ferah'] .main .panel {
-  padding: var(--space-7);
-}
 /* A thick separator between days — so the eye can navigate 84 columns.
    Asked to be clearer (2026-08-26, "günlerin arasındaki boşluk veya fark biraz
    daha belli olmalı") and it got its OWN token rather than a bigger number on
@@ -2932,7 +2731,7 @@ table.grid tbody td.unavailable {
      fixed button fills a tight cell corner to corner and leaves nowhere to
      take hold of the card (pitfall 36 — a size that comes from another size is
      calculated from it, not copied). */
-  --pin-size: clamp(0.75rem, calc(var(--cell-h) * 0.48), 1.125rem);
+  --pin-size: clamp(.75rem, calc(var(--cell-h) * .48), 1.125rem);
   width: var(--pin-size);
   height: var(--pin-size);
   display: grid;
@@ -3044,16 +2843,6 @@ table.grid tbody td:hover > .card-pin,
   color: var(--muted);
 }
 
-/* A heading INSIDE a menu: what the items under it are about. Quieter than an
-   item and not clickable, so the eye skips it on the way down. */
-.menu-label {
-  padding: var(--space-2) var(--space-3) var(--space-1);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--muted);
-  user-select: none;
-}
-
 .menu-sep {
   height: 1px;
   margin: var(--space-1) 0;
@@ -3087,9 +2876,8 @@ table.grid tbody td:hover > .card-pin,
    The LINE BOX does not grow with the letters: it is the one the lines had
    at 12px (12px x --lh-base = 18px at %100), written out because `.card`'s
    `font: inherit` would otherwise hand them 1.5 x their new size and every
-   row would come out 4.5px taller. At %100 and below it is exactly Sığdır's
-   line box, so switching density moves no row (gorunum.spec.ts, "satır
-   kutusu"); above %100 Sığdır's floor stops growing and its box is smaller. */
+   row would come out 4.5px taller. These sizes are for the tray and the drag
+   ghost: on the grid the fitted 12px base below takes over (K6, 2026-11-16). */
 .card-top,
 .card-bottom {
   line-height: calc(var(--fs-xs) * var(--lh-base));
@@ -3128,15 +2916,9 @@ td.block-cont {
        pitfall 40, the same rule, a second time.
      - these rules come BEFORE td.drop-*, which carries !important and so wins
        whatever the specificity: the cursor's cell always outranks the row. */
-table.grid tbody td.can-ok:not(.unavailable) {
-  background-color: var(--can-ok-bg);
-}
-table.grid tbody td.can-warn:not(.unavailable) {
-  background-color: var(--can-warn-bg);
-}
-table.grid tbody td.can-no:not(.unavailable) {
-  background-color: var(--can-no-bg);
-}
+table.grid tbody td.can-ok:not(.unavailable) { background-color: var(--can-ok-bg); }
+table.grid tbody td.can-warn:not(.unavailable) { background-color: var(--can-warn-bg); }
+table.grid tbody td.can-no:not(.unavailable) { background-color: var(--can-no-bg); }
 
 /* THE SAME ANSWER, ON THE CARD THAT IS HIDING IT.
    "o kartların arkasından ya da başka bir şekilde o kartın oraya gelip
@@ -3271,9 +3053,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   /* --elev-2 is "raised chrome", and a heading with the week scrolling under
      it is exactly that. Clipped to one side so it reads as a lip, not a
      floating slab. */
-  box-shadow:
-    0 6px 12px -8px var(--shadow-shell),
-    0 1px 0 var(--line);
+  box-shadow: 0 6px 12px -8px var(--shadow-shell), 0 1px 0 var(--line);
 }
 
 .grid-wrap.scrolled-x .row-head,
@@ -3354,7 +3134,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    handle", so it is visible AT REST rather than on hover: a hairline between
    two panes reads as a border, and borders do not move. */
 .pool-split::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 2.25rem;
   height: 5px;
@@ -3544,7 +3324,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    a deck used to carry, moved to where it costs nothing (2026-08-28 took the
    badge off the card by request; the count itself was never the complaint). */
 .pool-group-count {
-  padding: 0 0.35em;
+  padding: 0 .35em;
   border-radius: var(--r-sm);
   background: var(--bg);
   color: var(--muted);
@@ -3570,7 +3350,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    identical stack. Two pseudo-elements draw the visible deck depth, cutting
    hundreds of buried nodes out of the Program tab's opening paint. */
 .pool-stack {
-  --stack-step: 0.3rem;
+  --stack-step: .3rem;
   position: relative;
   flex: 0 0 auto;
   padding-bottom: calc(var(--layers, 0) * var(--stack-step));
@@ -3578,7 +3358,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 .pool-stack::before,
 .pool-stack::after {
-  content: '';
+  content: "";
   display: none;
   position: absolute;
   left: 0;
@@ -3593,13 +3373,13 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
     inset 0 0 0 1px color-mix(in oklab, var(--on-color) 22%, transparent);
 }
 
-.pool-stack:not([data-count='1'])::before {
+.pool-stack:not([data-count="1"])::before {
   display: block;
   transform: translateY(var(--stack-step));
   z-index: 1;
 }
 
-.pool-stack:not([data-count='1']):not([data-count='2'])::after {
+.pool-stack:not([data-count="1"]):not([data-count="2"])::after {
   display: block;
   transform: translateY(calc(var(--stack-step) * 2));
   z-index: 2;
@@ -3702,7 +3482,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 /* Nothing entered yet: dashed, so an empty step reads as an outline waiting to
    be filled rather than as a disabled control. */
-.step[data-empty='true']:not([aria-pressed='true']) {
+.step[data-empty="true"]:not([aria-pressed="true"]) {
   color: var(--muted);
   border-style: dashed;
   text-align: left;
@@ -3764,30 +3544,12 @@ table.stat th.num {
 }
 
 /* The column-width ladder, applied. Nothing here sets a width in the JSX. */
-table.list th.w-col-xs,
-table.stat th.w-col-xs {
-  width: var(--w-col-xs);
-}
-table.list th.w-col-sm,
-table.stat th.w-col-sm {
-  width: var(--w-col-sm);
-}
-table.list th.w-col-md,
-table.stat th.w-col-md {
-  width: var(--w-col-md);
-}
-table.list th.w-col-lg,
-table.stat th.w-col-lg {
-  width: var(--w-col-lg);
-}
-table.list th.w-col-xl,
-table.stat th.w-col-xl {
-  width: var(--w-col-xl);
-}
-table.list th.w-col-2xl,
-table.stat th.w-col-2xl {
-  width: var(--w-col-2xl);
-}
+table.list th.w-col-xs,  table.stat th.w-col-xs  { width: var(--w-col-xs); }
+table.list th.w-col-sm,  table.stat th.w-col-sm  { width: var(--w-col-sm); }
+table.list th.w-col-md,  table.stat th.w-col-md  { width: var(--w-col-md); }
+table.list th.w-col-lg,  table.stat th.w-col-lg  { width: var(--w-col-lg); }
+table.list th.w-col-xl,  table.stat th.w-col-xl  { width: var(--w-col-xl); }
+table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 
 .grow {
   width: 100%;
@@ -4034,8 +3796,8 @@ main:focus {
    The hairline went too far the other way: 1.16:1 against the recess, so for
    a reader who has trouble seeing a field was a slightly greyer patch with no
    edge. --border-strong is the 3:1 floor and no louder (see the token). */
-input[type='text'],
-input[type='number'],
+input[type="text"],
+input[type="number"],
 select,
 textarea {
   padding: var(--space-2) var(--space-3);
@@ -4050,15 +3812,15 @@ textarea {
 }
 
 /* Hovering a recess should say it is writable before you click it. */
-input[type='text']:hover:not(:disabled),
-input[type='number']:hover:not(:disabled),
+input[type="text"]:hover:not(:disabled),
+input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
   border-color: var(--muted);
 }
 
-input[type='text']:hover:not(:disabled),
-input[type='number']:hover:not(:disabled),
+input[type="text"]:hover:not(:disabled),
+input[type="number"]:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
   border-color: var(--muted);
@@ -4145,7 +3907,7 @@ table.grid tbody td:focus-visible {
 
 textarea {
   width: 100%;
-  font-family: Consolas, 'Courier New', monospace;
+  font-family: Consolas, "Courier New", monospace;
   font-size: var(--fs-sm);
   resize: vertical;
 }
@@ -4636,21 +4398,6 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
   margin-bottom: 0;
 }
 
-/* Session-only program masks keep their meaning without relying on colour.
-   Opacity says "still here, temporarily inactive"; disabled controls remove
-   the interaction path, and the context menu on the header remains the way
-   back. */
-.grid .masked-scope,
-.pool-card.masked-scope {
-  opacity: 0.42;
-}
-
-.grid .card:disabled,
-.pool-card.masked-scope {
-  cursor: not-allowed;
-  filter: grayscale(0.45);
-}
-
 /* The name of the timetable you are in, riding the button that opens the
    library. It is the only caption in the strip whose text the reader wrote, so
    it is the only one that can be arbitrarily long: it gets a ceiling and an
@@ -4718,9 +4465,7 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
   animation: reveal-pulse calc(var(--dur-slow) * 2) var(--ease) 3;
 }
 @keyframes reveal-pulse {
-  50% {
-    outline-color: transparent;
-  }
+  50% { outline-color: transparent; }
 }
 
 /* A number never wraps. `.num` is 8ch wide and "433 / 433" is nine characters,
@@ -4909,13 +4654,13 @@ table.sheet-lessons select.transfer-pick {
    do I press". A pressed toggle is now a SEGMENT: a light ground, an accent
    edge and a 3px underline, never a fill. The weight still does not change in
    the strip (pitfall 94). */
-.btn[aria-pressed='true'],
-.btn[aria-pressed='true']:hover:not(:disabled),
-.ribbon .btn[aria-pressed='true'],
-.ribbon .btn[aria-pressed='true']:hover:not(:disabled),
+.btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover:not(:disabled),
+.ribbon .btn[aria-pressed="true"],
+.ribbon .btn[aria-pressed="true"]:hover:not(:disabled),
 .segmented > .btn[aria-pressed='true'],
-.btn.icon[aria-pressed='true'],
-.btn.icon[aria-pressed='true']:hover:not(:disabled) {
+.btn.icon[aria-pressed="true"],
+.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--accent-bg);
   border-color: var(--accent);
   color: var(--text);
@@ -4951,17 +4696,15 @@ table.sheet-lessons select.transfer-pick {
   box-shadow: none;
 }
 
-.tab[aria-current='true'],
-:root[data-theme='dark'] .tab[aria-current='true'] {
+.tab[aria-current="true"],
+:root[data-theme='dark'] .tab[aria-current="true"] {
   background: var(--paper);
   border-color: var(--border-strong);
   color: var(--text);
-  box-shadow:
-    inset 0 -3px 0 var(--accent),
-    var(--elev-1);
+  box-shadow: inset 0 -3px 0 var(--accent), var(--elev-1);
 }
 
-.tab[aria-current='true'] svg {
+.tab[aria-current="true"] svg {
   color: var(--text);
 }
 
@@ -5262,7 +5005,7 @@ table.sheet-lessons select.transfer-pick {
 }
 
 .entity.over .entity-count,
-.entity.over[aria-current='true'] .entity-count {
+.entity.over[aria-current="true"] .entity-count {
   color: var(--bad);
   font-weight: 700;
 }
@@ -5607,7 +5350,7 @@ table.sheet-lessons select.transfer-pick {
   outline-offset: -2px;
 }
 
-.entity[aria-current='true'] {
+.entity[aria-current="true"] {
   background: var(--accent-bg);
   border-color: var(--accent);
   /* --text, not the accent: the accent on its own ground is 6.28 / 6.70, and
@@ -5625,14 +5368,9 @@ table.sheet-lessons select.transfer-pick {
   color: var(--muted);
 }
 
-.entity-icon svg {
-  width: 1rem;
-  height: 1rem;
-}
+.entity-icon svg { width: 1rem; height: 1rem; }
 
-.entity[aria-current='true'] .entity-icon {
-  color: inherit;
-}
+.entity[aria-current="true"] .entity-icon { color: inherit; }
 
 .entity-name {
   flex: 1 1 auto;
@@ -5648,7 +5386,7 @@ table.sheet-lessons select.transfer-pick {
   color: var(--muted);
 }
 
-.entity[aria-current='true'] .entity-count {
+.entity[aria-current="true"] .entity-count {
   color: inherit;
 }
 
@@ -5829,12 +5567,12 @@ table.availability .av-head {
   --p-zoom: 1;
   --p-type: calc(var(--p-fit) * var(--p-zoom));
 
-  --fs-p-xl: calc(17pt * var(--p-type)); /* page title */
-  --fs-p-lg: calc(12pt * var(--p-type)); /* .p-top, .p-daycol */
-  --fs-p-md: calc(10.5pt * var(--p-type)); /* the credit line */
-  --fs-p-base: calc(10pt * var(--p-type)); /* table body and heading */
-  --fs-p-sm: calc(9pt * var(--p-type)); /* .p-bottom */
-  --fs-p-xs: calc(8pt * var(--p-type)); /* .p-clock */
+  --fs-p-xl:   calc(17pt   * var(--p-type)); /* page title */
+  --fs-p-lg:   calc(12pt   * var(--p-type)); /* .p-top, .p-daycol */
+  --fs-p-md:   calc(10.5pt * var(--p-type)); /* the credit line */
+  --fs-p-base: calc(10pt   * var(--p-type)); /* table body and heading */
+  --fs-p-sm:   calc(9pt    * var(--p-type)); /* .p-bottom */
+  --fs-p-xs:   calc(8pt    * var(--p-type)); /* .p-clock */
 
   /* One day's row. Was written inside `@media print` alone, which is why the
      preview's rows were 30 px against the paper's 86.93 — the thing
@@ -5865,19 +5603,13 @@ table.availability .av-head {
   }
 
   @container print-tray (max-width: 1150px) {
-    .print-sheet {
-      zoom: 0.85;
-    }
+    .print-sheet { zoom: .85; }
   }
   @container print-tray (max-width: 980px) {
-    .print-sheet {
-      zoom: 0.75;
-    }
+    .print-sheet { zoom: .75; }
   }
   @container print-tray (max-width: 860px) {
-    .print-sheet {
-      zoom: 0.65;
-    }
+    .print-sheet { zoom: .65; }
   }
 }
 
@@ -5916,16 +5648,16 @@ table.availability .av-head {
    because an inherited colour arrives already computed from <body>. Screen
    only: on paper the `@media print` pins below speak alone. */
 @media screen {
-  :root[data-theme='dark'] .print-sheet {
-    color-scheme: light;
-    --paper: #ffffff;
-    --text: #131a25;
-    --muted: #505763;
-    --line: #c6cdd7;
-    --print-line: #444;
-    --print-head-bg: #eee;
-    color: var(--text);
-  }
+:root[data-theme="dark"] .print-sheet {
+  color-scheme: light;
+  --paper: #ffffff;
+  --text: #131a25;
+  --muted: #505763;
+  --line: #c6cdd7;
+  --print-line: #444;
+  --print-head-bg: #eee;
+  color: var(--text);
+}
 }
 
 /* ONE TIMETABLE. Not renamed to `.print-plan` even though that is what it is:
@@ -5945,19 +5677,11 @@ table.availability .av-head {
 /* TWO AND FOUR UP. The vertical is what halves in both cases, so they share a
    row height; the type does not, because at four up the WIDTH halves as well
    and twelve columns have to fit 138 mm instead of 277. */
-.print-area[data-per='2'] .print-sheet {
-  grid-template: 1fr 1fr / 1fr;
-}
-.print-area[data-per='4'] .print-sheet {
-  grid-template: 1fr 1fr / 1fr 1fr;
-}
+.print-area[data-per='2'] .print-sheet { grid-template: 1fr 1fr / 1fr; }
+.print-area[data-per='4'] .print-sheet { grid-template: 1fr 1fr / 1fr 1fr; }
 
-.print-area[data-per='2'] {
-  --p-fit: 0.72;
-}
-.print-area[data-per='4'] {
-  --p-fit: 0.5;
-}
+.print-area[data-per='2'] { --p-fit: .72; }
+.print-area[data-per='4'] { --p-fit: .5; }
 
 .print-area[data-per='2'] .print-page,
 .print-area[data-per='4'] .print-page {
@@ -5965,12 +5689,8 @@ table.availability .av-head {
 }
 
 /* The reader's own adjustment, on top of whatever the layout demanded. */
-.print-area[data-size='kucuk'] {
-  --p-zoom: 0.85;
-}
-.print-area[data-size='buyuk'] {
-  --p-zoom: 1.18;
-}
+.print-area[data-size='kucuk'] { --p-zoom: .85; }
+.print-area[data-size='buyuk'] { --p-zoom: 1.18; }
 
 /* ONE DAY'S ROW IS WHAT IS LEFT OVER, and that is the whole answer to
    "yazdırmada yazıları büyük yapınca yazdırma bozuluyor".
@@ -6149,7 +5869,7 @@ table.availability .av-head {
 
 /* The box stays on the first line of the label it belongs to. */
 .form-col > .pick-item > input[type='checkbox'] {
-  margin-top: 0.2em;
+  margin-top: .2em;
   flex: none;
 }
 
@@ -6277,7 +5997,7 @@ table.bell-preview td {
   /* Paper is always light, whatever the screen is set to. Dark ink on dark
      paper would waste a printout my father only notices after printing it. */
   :root,
-  :root[data-theme='dark'] {
+  :root[data-theme="dark"] {
     color-scheme: light;
 
     /* Pinned, and this is the answer to "does printing follow --ui-scale?":
@@ -6526,7 +6246,7 @@ table.availability.heat td.closed {
 .dlg-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 14, 22, 0.45);
+  background: rgba(10, 14, 22, .45);
   backdrop-filter: blur(3px);
   z-index: 40;
 }
@@ -6573,14 +6293,8 @@ table.availability.heat td.closed {
   color: var(--accent);
 }
 
-.dlg-icon.bad {
-  background: var(--bad-bg);
-  color: var(--bad);
-}
-.dlg-icon.warn {
-  background: var(--warn-bg);
-  color: var(--warn);
-}
+.dlg-icon.bad { background: var(--bad-bg); color: var(--bad); }
+.dlg-icon.warn { background: var(--warn-bg); color: var(--warn); }
 
 .dlg-title {
   margin: 0;
@@ -6637,18 +6351,14 @@ table.availability.heat td.closed {
 }
 
 @starting-style {
-  .dlg-overlay {
-    opacity: 0;
-  }
+  .dlg-overlay { opacity: 0; }
   .dlg {
     opacity: 0;
     transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
   }
 }
 
-.dlg-overlay[data-state='closed'] {
-  opacity: 0;
-}
+.dlg-overlay[data-state='closed'] { opacity: 0; }
 .dlg[data-state='closed'] {
   opacity: 0;
   transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
@@ -6689,12 +6399,8 @@ table.availability.heat td.closed {
   animation: toast-in var(--dur) var(--ease-out);
 }
 
-.toast.info {
-  border-left-color: var(--accent);
-}
-.toast.warn {
-  border-left-color: var(--warn);
-}
+.toast.info { border-left-color: var(--accent); }
+.toast.warn { border-left-color: var(--warn); }
 
 .toast-icon {
   display: inline-flex;
@@ -6702,12 +6408,8 @@ table.availability.heat td.closed {
   color: var(--ok);
 }
 
-.toast.info .toast-icon {
-  color: var(--accent);
-}
-.toast.warn .toast-icon {
-  color: var(--warn);
-}
+.toast.info .toast-icon { color: var(--accent); }
+.toast.warn .toast-icon { color: var(--warn); }
 
 .toast-text {
   flex: 1 1 auto;
@@ -6752,14 +6454,8 @@ table.availability.heat td.closed {
 }
 
 @keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(var(--slide));
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(var(--slide)); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* A list of choices inside explanatory text — three densities, three file
@@ -6800,6 +6496,11 @@ table.availability.heat td.closed {
    Same drawer, different width. */
 .sheet-narrow {
   width: min(30rem, calc(100vw - 3rem));
+}
+
+/* Eski hâline dön: "Pazar 15 Kasım" on one line, not three. */
+.sheet tbody th[scope='row'] {
+  white-space: nowrap;
 }
 
 .sheet-edit {
@@ -6972,7 +6673,11 @@ table.availability.heat td.closed {
 /* Closed and empty: the same hatch the availability grid uses, so the two
    screens say the same thing the same way. */
 .sheet-week td.unavailable {
-  background: repeating-linear-gradient(-45deg, var(--closed) 0 3px, var(--hatch) 3px 6px);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--closed) 0 3px,
+    var(--hatch) 3px 6px
+  );
 }
 
 /* A lesson left sitting on an hour that was closed afterwards. It is NOT
@@ -6992,14 +6697,10 @@ table.availability.heat td.closed {
 }
 
 @starting-style {
-  .sheet {
-    transform: translateX(var(--sweep));
-  }
+  .sheet { transform: translateX(var(--sweep)); }
 }
 
-.sheet[data-state='closed'] {
-  transform: translateX(var(--sweep));
-}
+.sheet[data-state='closed'] { transform: translateX(var(--sweep)); }
 
 /* A name in a list that opens the sheet. It reads as a link, not as a button:
    there are twenty-five of them down a column and twenty-five frames would be
@@ -7214,13 +6915,12 @@ input.search-box:focus-visible {
    rather than by a number somebody has to re-derive whenever the root moves
    (pitfall 36). `toBeHidden()` and `innerText` both still say it is gone.
 
-   The grid's own `.hour-clock` keeps `display: none` under Sığdır, and that is
+   The grid draws no `.hour-clock` at all since 2026-11-16 (K6), and that is
    the opposite case on purpose: there the whole measured point IS the room the
-   line gives back (2461 -> 1728px, pitfall 37). That sentence was true and the
-   SELECTOR did not say it — the Sığdır rule was unscoped, so at that density it
-   took this heading's second line box too and the reader's "Saatler" button had
-   nothing left to switch. Scoped to `table.grid` now, and `gorunum.spec.ts` 50
-   measures it at Sığdır rather than only at the default density. */
+   line gives back (2461 -> 1728px, pitfall 37). Its old rule was once unscoped
+   and took this heading's second line box too, so the reader's "Saatler"
+   button had nothing left to switch; `gorunum.spec.ts` 50 still measures this
+   heading against the grid. */
 :root:not([data-avail-clock='acik']) table.availability:not(.with-clock) thead .hour-clock {
   visibility: hidden;
 }
@@ -7277,59 +6977,33 @@ table.availability thead .hour-clock:empty::before {
 
 .health-dot {
   flex: 0 0 auto;
-  width: 0.5rem;
-  height: 0.5rem;
+  width: .5rem;
+  height: .5rem;
   border-radius: var(--r-full);
   background: var(--ok);
 }
 
-.health.ok {
-  background: var(--ok-bg);
-  border-color: var(--ok);
-  color: var(--ok-ink);
-}
-.health.tight {
-  background: var(--warn-bg);
-  border-color: var(--warn);
-  color: var(--warn-ink);
-}
-.health.impossible {
-  background: var(--bad-bg);
-  border-color: var(--bad);
-  color: var(--bad-ink);
-}
+.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-ink); }
+.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn-ink); }
+.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad-ink); }
 
-.health.tight .health-dot {
-  background: var(--warn);
-}
-.health.impossible .health-dot {
-  background: var(--bad);
-}
+.health.tight .health-dot { background: var(--warn); }
+.health.impossible .health-dot { background: var(--bad); }
 
-.health:hover {
-  box-shadow: var(--elev-1);
-}
+.health:hover { box-shadow: var(--elev-1); }
 
 /* Below this the bar has six destinations, a document name and six buttons to
    hold: the chip trades its sentence for two words ("3 sorun"). It used to keep
    only the dot, and a coloured pill with a dot in it read as an on/off switch
    (usability review, 2026-11-15). */
-.health-short {
-  display: none;
-}
+.health-short { display: none; }
 @media (max-width: 1500px) {
-  .health-text {
-    display: none;
-  }
-  .health-short {
-    display: inline;
-  }
+  .health-text { display: none; }
+  .health-short { display: inline; }
   /* Its own width, not a grown share of the bar: the five tabs of K1 are
      wider than the seven were, and a share left "433 saat yerleşme" cut at
      1366 px. The document's name gives way instead. */
-  .health {
-    flex: 0 0 auto;
-  }
+  .health { flex: 0 0 auto; }
 }
 
 /* --------------------------------------------------------- command palette
@@ -7438,7 +7112,7 @@ kbd {
 .palette-row[data-active='true'] .palette-icon,
 .palette-row[data-active='true'] .palette-hint {
   color: inherit;
-  opacity: 0.85;
+  opacity: .85;
 }
 
 .palette-dot {
@@ -7465,7 +7139,7 @@ kbd {
 
 .palette-enter {
   flex: 0 0 auto;
-  opacity: 0.7;
+  opacity: .7;
 }
 
 .palette-empty {

@@ -3,7 +3,7 @@
 
 import { dayLabel } from '../../leaf/lang';
 import { type Settings, paletteColor } from '../../leaf/model';
-import type { GridRow, MaskMode } from '../../pure/program';
+import type { GridRow } from '../../pure/program';
 import { useT } from '../common';
 import { Pin } from 'lucide-react';
 import { memo } from 'react';
@@ -16,7 +16,6 @@ interface RowProps {
   hourCount: number;
   /** Per day: the hour index the long break falls BEFORE. -1 = no long break. */
   breakAt: number[];
-  dayModes: Record<string, MaskMode>;
   settings: Settings;
   /** Delete on a focused card, or the menu's own item: back to the pool. */
   onCellRemove: (rowId: string, day: number, hour: number) => void;
@@ -33,9 +32,9 @@ interface RowProps {
 
 /**
  * A class name on a card or a row head: all of it, with everything after the
- * first word in its own span, which Sığdır hides (styles.css). The father's
+ * first word in its own span, which the grid hides (styles.css). The father's
  * classes are "411A SAY" — number, room letter, track — and a one-hour card
- * in Sığdır has room for about three characters; "411A" says which class,
+ * in the fitted grid has room for about three characters; "411A" says which class,
  * "41…" did not. The user chose this over a new short-name field
  * (2026-09-26): the data does not change, and the labels read the whole name.
  */
@@ -55,7 +54,6 @@ export const Row = memo(function Row({
   dayIndices,
   hourCount,
   breakAt,
-  dayModes,
   settings,
   onCellRemove,
   onCellMoveStart,
@@ -70,7 +68,6 @@ export const Row = memo(function Row({
   const closedWord = row.kind === 'teacher' ? t('müsait değil') : t('kapalı');
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
-    const dayMasked = dayModes[settings.days[g]?.name ?? ''] === 'ghost';
     for (let s = 0; s < hourCount; s++) {
       // The lunch break is its own narrow column. It carries NO data-day /
       // data-hour: drag.ts finds its target with closest('[data-day]') and
@@ -90,7 +87,6 @@ export const Row = memo(function Row({
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
-      const cellMasked = row.mask !== undefined || dayMasked || cell?.mask !== undefined;
       // A LATER hour of a block, i.e. the cell whose neighbour to the left said
       // it continues. A day boundary resets it: `continues` never crosses one.
       const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
@@ -136,8 +132,6 @@ export const Row = memo(function Row({
         inBlock ? 'block-in' : '',
         cell === null && closed ? 'unavailable' : '',
         band.trim(),
-        dayMasked ? 'masked-scope' : '',
-        cell?.mask !== undefined ? 'masked-scope' : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -190,9 +184,8 @@ export const Row = memo(function Row({
               style={{ background: paletteColor(cell.color) }}
               draggable={false}
               tabIndex={-1}
-              disabled={cellMasked}
               onPointerDown={(e) => {
-                if (!cell.pinned && !cellMasked) onCellMoveStart(e, row.id, g, s);
+                if (!cell.pinned) onCellMoveStart(e, row.id, g, s);
               }}
               // A keyboard click (Enter, Space) opens the card's menu, as the
               // shortcuts screen says; it used to send the lesson back to the
@@ -292,7 +285,6 @@ export const Row = memo(function Row({
               className="card-pin"
               tabIndex={-1}
               aria-pressed={cell.pinned}
-              disabled={cellMasked}
               // NO `stopPropagation` on pointerdown, and that is a measurement
               // rather than an oversight. The card starts a drag on its own
               // `onPointerDown`, so the obvious worry is that pressing the pin
@@ -326,8 +318,8 @@ export const Row = memo(function Row({
   }
 
   return (
-    <tr data-row-id={row.id} className={row.mask === 'ghost' ? 'masked-scope' : undefined}>
-      <th className="row-head" scope="row" data-menu-row={row.id}>
+    <tr data-row-id={row.id}>
+      <th className="row-head" scope="row">
         {/* The row's own colour. In the teacher view it repeats the colour of
             the cards in that row, which is what makes a pool card findable; in
             the class view it is the only place a class colour appears at all. */}

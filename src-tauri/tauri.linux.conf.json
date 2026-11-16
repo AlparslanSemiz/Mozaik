@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "mainBinaryName": "Mozaik",
+  "bundle": {
+    "targets": ["appimage"],
+    "category": "Education",
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
+  }
+}

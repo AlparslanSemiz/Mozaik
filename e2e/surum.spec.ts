@@ -63,7 +63,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
 
     const panel = buildPanel(page);
     await expect(panel).toContainText('kendini güncellemez');
-    await expect(panel).toContainText('https://alparslansemiz.github.io/Mozaik/');
+    await expect(panel).toContainText('https://mozaik.alparslansemiz.com/');
     // No "check for updates" button here: there is nothing it could ask.
     await expect(panel.getByRole('button', { name: /Güncellemeleri denetle/ })).toHaveCount(0);
   });

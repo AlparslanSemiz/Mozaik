@@ -25,6 +25,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+use crate::update_linux;
 use crate::update_mac::{self, Mimari};
 
 /// Everything this file is allowed to fetch lives under here.
@@ -120,8 +121,8 @@ fn manifest_url() -> String {
 /// `Mozaik.exe` downloads whatever the manifest points at and swaps it
 /// into its own name. The file keeps the old name; the program inside it is
 /// the new one.
-const YENI: &str = "yeni";
-const ESKI: &str = "eski";
+pub(crate) const YENI: &str = "yeni";
+pub(crate) const ESKI: &str = "eski";
 
 /// Which delivery this copy is: what it may download, and how it swaps.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -130,7 +131,10 @@ pub enum Hedef {
     Windows,
     /// `Mozaik.app`, from 2026-11-15 (update_mac.rs).
     Mac(Mimari),
-    /// The Linux development build: never shipped, never replaced.
+    /// `Mozaik-linux-x86_64.AppImage`, from 2026-11-16 (update_linux.rs): only
+    /// when this process really runs from an AppImage (`bu_appimage`).
+    Linux,
+    /// The Linux development build (`npm run exe:linux`): never shipped, never replaced.
     Diger,
 }
 
@@ -139,23 +143,27 @@ pub fn bu_hedef() -> Hedef {
         Hedef::Windows
     } else if cfg!(target_os = "macos") {
         Hedef::Mac(Mimari::bu())
+    } else if update_linux::bu_appimage().is_some() {
+        Hedef::Linux
     } else {
         Hedef::Diger
     }
 }
 
-/// Only the Windows and Mac builds may replace themselves.
+/// Only the Windows, Mac and Linux AppImage builds may replace themselves.
 ///
-/// A Linux build (made on the development machine to drive the real window,
-/// never shipped) has no download of its own in the manifest: it would be
-/// handed the Windows program, and renaming that over its own ELF file leaves
-/// nothing that starts. The check is on the platform, not on the file.
+/// A Linux binary that is not an AppImage (the development build made to drive
+/// the real window, never shipped) has no download of its own in the manifest:
+/// it would be handed the Windows program, and renaming that over its own ELF
+/// file leaves nothing that starts. The check is on how this copy runs, not on
+/// the file it would download.
 pub fn self_update_here() -> Result<(), String> {
     match bu_hedef() {
-        Hedef::Windows | Hedef::Mac(_) => Ok(()),
-        Hedef::Diger => {
-            Err("Kendini güncelleme yalnız Windows ve Mac'teki Mozaik'te var.".to_string())
-        }
+        Hedef::Windows | Hedef::Mac(_) | Hedef::Linux => Ok(()),
+        Hedef::Diger => Err(
+            "Kendini güncelleme yalnız Windows'taki, Mac'teki ve Linux AppImage'ındaki Mozaik'te var."
+                .to_string(),
+        ),
     }
 }
 
@@ -225,6 +233,18 @@ pub struct Manifest {
     pub mac_x86_64_sha256: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mac_x86_64_imza: Option<String>,
+    /// The Linux AppImage (`Mozaik-linux-x86_64.AppImage`, from 2026-11-16),
+    /// with its size, digest and signature. Optional like the Mac's: a release
+    /// whose Linux job failed writes none of them (Linux never blocks a
+    /// release), and an AppImage then offers no update (`linux_karari`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub linux_appimage: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub linux_appimage_boyut: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub linux_appimage_sha256: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub linux_appimage_imza: Option<String>,
 }
 
 /// The answer the settings panel draws.
@@ -346,10 +366,11 @@ pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
 
 /// `karar` for a given delivery, so `cargo test` on any machine judges both.
 pub fn karar_icin(m: Manifest, current: &str, hedef: Hedef) -> Result<Cevap, String> {
-    if let Hedef::Mac(mimari) = hedef {
-        return mac_karari(m, current, mimari);
+    match hedef {
+        Hedef::Mac(mimari) => mac_karari(m, current, mimari),
+        Hedef::Linux => linux_karari(m, current),
+        Hedef::Windows | Hedef::Diger => windows_karari(m, current, tek_basina()),
     }
-    windows_karari(m, current, tek_basina())
 }
 
 /// Is this the standalone Windows exe, not the installed program? Only it is
@@ -454,6 +475,50 @@ fn mac_karari(m: Manifest, current: &str, mimari: Mimari) -> Result<Cevap, Strin
             return Err(format!(
                 "Yeni sürüm ({}) yayımlandı, ama bu Mac'in kendisi kurabileceği bir paketi yok.\n\
                  Şu adresten indirip Uygulamalar klasöründekinin yerine koyabilirsiniz:\n{}",
+                m.version,
+                releases_sayfasi()
+            ));
+        }
+        if imza.is_none() && TEST_KOKU.is_none() {
+            return Err(format!(
+                "Yeni sürüm ({}) yayımlandı, ama imzası yok; bu kopya onu kendi kurmuyor.\n\
+                 Şu adresten indirebilirsiniz:\n{}",
+                m.version,
+                releases_sayfasi()
+            ));
+        }
+    }
+    Ok(Cevap {
+        yeni_var,
+        version: m.version,
+        date: m.date,
+        exe: url.unwrap_or_default(),
+        boyut: boyut.unwrap_or(0),
+        sha256,
+        kurulum: false,
+        imza,
+        gecis: false,
+    })
+}
+
+/// The Linux AppImage's answer: its own file, or a sentence. Like the Mac's:
+/// the Windows fields are never offered, and a release without the AppImage
+/// (its job failed, or it predates Linux) offers nothing to download.
+fn linux_karari(m: Manifest, current: &str) -> Result<Cevap, String> {
+    let yeni_var = is_newer(&m.version, current);
+    let (url, boyut, sha256, imza) = (
+        m.linux_appimage,
+        m.linux_appimage_boyut,
+        m.linux_appimage_sha256,
+        m.linux_appimage_imza,
+    );
+    if yeni_var {
+        let alinir = matches!((&url, boyut, &sha256), (Some(u), Some(_), Some(_))
+            if safe_url(u).is_ok() && u.rsplit('/').next() == Some(update_linux::PAKET_ADI));
+        if !alinir {
+            return Err(format!(
+                "Yeni sürüm ({}) yayımlandı, ama bu bilgisayarın kendisi kurabileceği bir paketi yok.\n\
+                 Şu adresten indirip eski AppImage dosyasının yerine koyabilirsiniz:\n{}",
                 m.version,
                 releases_sayfasi()
             ));
@@ -890,7 +955,7 @@ pub(crate) fn ozet(bytes: &[u8]) -> String {
 /// rename. `fs::write` straight to `.yeni` left half a program behind when the
 /// disk filled up, and `swap` only asks whether the file is there (security
 /// review 2026-11-15, V10). A failed write removes its temporary.
-fn diske_yaz(yol: &Path, bytes: &[u8]) -> std::io::Result<()> {
+pub(crate) fn diske_yaz(yol: &Path, bytes: &[u8]) -> std::io::Result<()> {
     use std::io::Write;
     let tmp = yan(yol, "tmp");
     let yaz = || -> std::io::Result<()> {
@@ -973,7 +1038,7 @@ pub fn yeni_gecici_klasor(kok: &Path) -> std::io::Result<PathBuf> {
 }
 
 /// `<program>.exe` -> `<program>.exe.<ek>`
-fn yan(exe: &Path, ek: &str) -> PathBuf {
+pub(crate) fn yan(exe: &Path, ek: &str) -> PathBuf {
     let mut ad = exe.as_os_str().to_os_string();
     ad.push(".");
     ad.push(ek);
@@ -1042,6 +1107,11 @@ pub fn sweep_old(exe: &Path) {
     // The Mac keeps the old bundle in the hidden folder beside the new one.
     if let (Hedef::Mac(_), Some(paket)) = (bu_hedef(), update_mac::uygulama_paketi(exe)) {
         update_mac::sweep(&paket);
+    }
+    // The AppImage's `.eski` sits beside the file a person opened, not beside
+    // the program, which runs from the AppImage's read-only mount.
+    if let Some(dosya) = update_linux::bu_appimage() {
+        let _ = fs::remove_file(yan(&dosya, ESKI));
     }
 }
 
@@ -1175,17 +1245,23 @@ pub async fn download_update(
         use tauri::Emitter;
         let _ = app.emit(INDIRME_OLAYI, (inen, boyut));
     });
-    if let Hedef::Mac(mimari) = bu_hedef() {
-        return mac_indir(
-            &exe,
-            mimari,
-            &url,
-            boyut,
-            &sha256,
-            imza.as_deref(),
-            ilerleme,
-        )
-        .await;
+    match bu_hedef() {
+        Hedef::Mac(mimari) => {
+            return mac_indir(
+                &exe,
+                mimari,
+                &url,
+                boyut,
+                &sha256,
+                imza.as_deref(),
+                ilerleme,
+            )
+            .await;
+        }
+        Hedef::Linux => {
+            return linux_indir(&url, boyut, &sha256, imza.as_deref(), ilerleme).await;
+        }
+        Hedef::Windows | Hedef::Diger => {}
     }
     let kurulum = kurulum_mu(&url);
 
@@ -1335,6 +1411,65 @@ fn mac_uygula(app: &tauri::AppHandle, exe: &Path) -> Result<(), String> {
     }
 }
 
+/// The AppImage's download (update_linux.rs says how the whole update goes).
+/// The folder is asked first, as on the Mac: a copy under `/opt` is told to
+/// move before ninety megabytes come down for nothing.
+async fn linux_indir(
+    url: &str,
+    boyut: u64,
+    sha256: &str,
+    imza: Option<&str>,
+    ilerleme: impl FnMut(u64),
+) -> Result<u64, String> {
+    let dosya_adi = url.rsplit('/').next().unwrap_or_default();
+    if dosya_adi != update_linux::PAKET_ADI {
+        return Err(format!("Bu bilgisayar için olmayan bir dosya: {dosya_adi}"));
+    }
+    let dosya = update_linux::bu_appimage()
+        .ok_or("Mozaik bir AppImage'dan çalışmıyor; kendini güncelleyemez.")?;
+    update_linux::yazilabilir_mi(&dosya)?;
+    let bytes = getir(url, boyut, ilerleme).await?;
+    update_linux::verify(&bytes, boyut, sha256)?;
+    imza_dogru(&bytes, imza, &imza_yorumu(&onerilen()?, dosya_adi))?;
+    let yeni = yan(&dosya, YENI);
+    diske_yaz(&yeni, &bytes).map_err(|e| format!("Yeni sürüm diske yazılamadı: {e}"))?;
+    update_linux::calistirilabilir(&yeni)?;
+    *INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")? = Some(sha256.to_ascii_lowercase());
+    Ok(bytes.len() as u64)
+}
+
+/// The AppImage's "Şimdi yeniden başlat": `.yeni` checked again, put in the
+/// file's place, the new version started. If it cannot be spawned, the old
+/// file goes back and this version keeps running.
+fn linux_uygula(app: &tauri::AppHandle) -> Result<(), String> {
+    let dosya = update_linux::bu_appimage()
+        .ok_or("Mozaik bir AppImage'dan çalışmıyor; kendini güncelleyemez.")?;
+    // `take`, as on the Mac: a second press must find nothing to apply.
+    let beklenen = INDIRILEN_EXE
+        .lock()
+        .map_err(|_| "İndirme kaydı okunamadı.")?
+        .take();
+    yeni_dogru(&yan(&dosya, YENI), beklenen.as_deref())?;
+    update_linux::degistir(&dosya)?;
+    match std::process::Command::new(&dosya)
+        .arg(GUNCELLENDI)
+        .stdin(std::process::Stdio::piped())
+        .spawn()
+    {
+        Ok(cocuk) => {
+            std::mem::forget(cocuk);
+            app.exit(0);
+            Ok(())
+        }
+        Err(e) => {
+            update_linux::geri_al(&dosya);
+            Err(format!("Yeni sürüm başlatılamadı: {e}"))
+        }
+    }
+}
+
 /// The digest of the standalone exe downloaded in THIS session, for the swap.
 /// On the Mac, the digest of the archive waiting beside the bundle.
 static INDIRILEN_EXE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
@@ -1356,8 +1491,10 @@ pub fn yeni_dogru(yeni: &Path, beklenen: Option<&str>) -> Result<(), String> {
 pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
     self_update_here()?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
-    if let Hedef::Mac(_) = bu_hedef() {
-        return mac_uygula(&app, &exe);
+    match bu_hedef() {
+        Hedef::Mac(_) => return mac_uygula(&app, &exe),
+        Hedef::Linux => return linux_uygula(&app),
+        Hedef::Windows | Hedef::Diger => {}
     }
     let kurulum = INDIRILEN_KURULUM
         .lock()
@@ -1823,7 +1960,80 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
             mac_x86_64_boyut: None,
             mac_x86_64_sha256: None,
             mac_x86_64_imza: None,
+            linux_appimage: None,
+            linux_appimage_boyut: None,
+            linux_appimage_sha256: None,
+            linux_appimage_imza: None,
         }
+    }
+
+    // ---------------------------------------------------------------- Linux
+
+    const LINUX: &str =
+        "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-linux-x86_64.AppImage";
+
+    fn linux_manifest(version: &str) -> Manifest {
+        let mut m = mac_manifest(version);
+        m.linux_appimage = Some(LINUX.into());
+        m.linux_appimage_boyut = Some(90_000_000);
+        m.linux_appimage_sha256 = Some("cc".repeat(32));
+        m.linux_appimage_imza = Some("imza-linux".into());
+        m
+    }
+
+    #[test]
+    fn the_appimage_is_offered_its_own_file_never_the_exe() {
+        let c = karar_icin(linux_manifest("9.0.0"), "2.2.0", Hedef::Linux).unwrap();
+        assert!(c.yeni_var && !c.kurulum && !c.gecis);
+        assert_eq!(c.exe, LINUX);
+        assert_eq!(c.boyut, 90_000_000);
+        assert_eq!(c.imza.as_deref(), Some("imza-linux"));
+        // Windows and the Mac, reading the same manifest, get their own.
+        assert_eq!(karar(linux_manifest("9.0.0"), "2.2.0").unwrap().exe, TEK);
+        let mac = karar_icin(linux_manifest("9.0.0"), "2.2.0", Hedef::Mac(Mimari::Arm64)).unwrap();
+        assert_eq!(mac.exe, MAC_ARM);
+    }
+
+    #[test]
+    fn an_appimage_with_no_file_of_its_own_is_told_where_to_go() {
+        // A release whose Linux job failed (Mac and Windows only).
+        let e = karar_icin(mac_manifest("9.0.0"), "2.2.0", Hedef::Linux).unwrap_err();
+        assert!(
+            e.contains("9.0.0") && e.contains(&releases_sayfasi()),
+            "{e}"
+        );
+        let bozuklar: [fn(&mut Manifest); 5] = [
+            |m| m.linux_appimage = Some(MAC_X86.into()),
+            |m| {
+                m.linux_appimage =
+                    Some("https://baska-yer.example/Mozaik-linux-x86_64.AppImage".into())
+            },
+            |m| m.linux_appimage_boyut = None,
+            |m| m.linux_appimage_sha256 = None,
+            |m| m.linux_appimage_imza = None,
+        ];
+        for bozuk in bozuklar {
+            let mut m = linux_manifest("9.0.0");
+            bozuk(&mut m);
+            assert!(karar_icin(m, "2.2.0", Hedef::Linux).is_err());
+        }
+        // Up to date is up to date, with or without Linux fields.
+        assert!(
+            !karar_icin(manifest("2.3.0", TEK), "2.3.0", Hedef::Linux)
+                .unwrap()
+                .yeni_var
+        );
+    }
+
+    #[test]
+    fn older_copies_read_a_manifest_with_linux_fields() {
+        let json = serde_json::to_string(&linux_manifest("9.0.0")).unwrap();
+        assert!(json.contains("linux_appimage_imza"));
+        let geri: Manifest = serde_json::from_str(&json).unwrap();
+        assert_eq!(geri.linux_appimage.as_deref(), Some(LINUX));
+        // A manifest without them (every one before 2026-11-16) writes none back.
+        let eski = serde_json::to_string(&manifest("2.2.0", TEK)).unwrap();
+        assert!(!eski.contains("linux_"));
     }
 
     // ------------------------------------------------------------------ the Mac
@@ -2366,11 +2576,14 @@ SkhGCgu4XXN4+XWwhhyVbN4Oz8MrbGuNKXxnBt1dWnw5a56bmN0YR4qwJ3zQIt+tsa+Yo8voYTh2Uydm
     }
 
     #[test]
-    fn only_the_windows_and_mac_builds_replace_themselves() {
+    fn only_the_windows_mac_and_appimage_builds_replace_themselves() {
+        // A test binary never runs from an AppImage, so on Linux it is the
+        // development build and is refused.
         assert_eq!(
             self_update_here().is_ok(),
             cfg!(windows) || cfg!(target_os = "macos")
         );
+        assert_eq!(update_linux::bu_appimage(), None);
     }
 
     // ------------------------------------------------------------- the swap

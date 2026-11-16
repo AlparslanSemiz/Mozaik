@@ -292,24 +292,6 @@ test.describe('2. Sürükle-bırak', () => {
     });
   });
 
-  test('imleç sağ kenara gelince ızgara kendiliğinden kayıyor', async ({ page }) => {
-    await openWithSample(page);
-    const wrap = page.locator('.grid-wrap');
-    const box = (await wrap.boundingBox())!;
-    expect(await wrap.evaluate((el) => el.scrollLeft)).toBe(0);
-
-    await startDrag(page);
-    // Approach the right edge and wait
-    await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2, {
-      steps: 5,
-    });
-    await page.waitForTimeout(400);
-
-    expect(await wrap.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
-    await page.keyboard.press('Escape');
-    await page.mouse.up();
-  });
-
   test('engelli hücre kırmızı olur ve üstte somut sebep yazar', async ({ page }) => {
     await openWithSample(page);
 
@@ -621,9 +603,9 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // THE WHOLE TOP LEVEL, written out rather than counted: this menu has now
     // been reshaped twice, and both times a bare count said "it changed"
     // without saying what to. Reading in order it is: the block, the three
-    // things behind it, the one-hour lock, and two doors — the locks that take
-    // many hours, and putting a row or a day aside. Nothing that a hand reaches
-    // for often is behind either door. "Taşı" leads: it is the keyboard's way
+    // things behind it and the one-hour lock. The two doors that followed (the
+    // locks that take many hours, and putting a row or a day aside) went on
+    // 2026-11-16 (Sadeleşme K7). "Taşı" leads: it is the keyboard's way
     // to move the block (2026-11-15, KS8).
     await expect(menu.getByRole('menuitem')).toHaveText([
       /^Taşı/,
@@ -632,8 +614,6 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
       'Öğretmeni düzenle',
       'Sınıfı düzenle',
       'Dersi buraya sabitle',
-      'Toplu sabitle',
-      'Geçici görünüm',
     ]);
 
     await menu.getByRole('menuitem', { name: 'Havuza kaldır' }).click();
@@ -660,10 +640,8 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
       'Öğretmeni düzenle',
       'Sınıfı düzenle',
       'Dersi buraya sabitle',
-      'Toplu sabitle',
-      'Geçici görünüm',
     ]);
-    for (const name of ['Havuza kaldır', 'Dersi buraya sabitle', 'Toplu sabitle']) {
+    for (const name of ['Havuza kaldır', 'Dersi buraya sabitle']) {
       await expect(menu.getByRole('menuitem', { name })).toHaveAttribute('data-disabled');
     }
     await expect(page.locator('.ghost')).toHaveCount(0);
@@ -807,14 +785,13 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await openWithSample(page);
     const wrap = page.locator('.grid-wrap');
     await wrap.evaluate((el) => {
-      el.scrollLeft = 600;
       el.scrollTop = 40;
       (window as unknown as { __keptGrid?: Element }).__keptGrid = el;
     });
-    // Both axes: WebKit drops a `display: none` box's offset on BOTH, and
-    // `useProgramScrollKeep` writes them back (pitfall 174).
+    // WebKit drops a `display: none` box's offset on both axes, and
+    // `useProgramScrollKeep` writes them back (pitfall 174). Only the vertical
+    // one is left to keep: the week fits the box sideways since 2026-11-16.
     const before = await wrap.evaluate((el) => [el.scrollLeft, el.scrollTop]);
-    expect(before[0]).toBeGreaterThan(0);
     expect(before[1]).toBeGreaterThan(0);
 
     await openSetup(page, 'Öğretmenler');
@@ -1021,27 +998,6 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
     await expect(cards).toHaveCount(count);
     await expect(placedCell(page)).toHaveAttribute('data-hour', hour!);
-  });
-
-  test('sağa kaydırınca öğretmen sütunu sabit kalır', async ({ page }) => {
-    await openWithSample(page);
-    const head = page.locator('tbody .row-head').first();
-    const before = (await head.boundingBox())!;
-
-    // All the way, not a fixed number of pixels: how far the grid CAN scroll
-    // depends on the screen (788px at 1920x1080, 1342px at the old 1366x768),
-    // and a constant larger than that silently becomes "scroll to the end"
-    // anyway — it just stops saying so.
-    const room = await page.locator('.grid-wrap').evaluate((el) => {
-      el.scrollLeft = el.scrollWidth;
-      return el.scrollWidth - el.clientWidth;
-    });
-    expect(room, 'ızgara yatay kaymıyor, test bir şey ölçmüyor').toBeGreaterThan(200);
-    await page.waitForTimeout(120);
-
-    const after = (await head.boundingBox())!;
-    expect(Math.abs(after.x - before.x)).toBeLessThan(2); // stayed put
-    expect(after.x).toBeGreaterThanOrEqual(0); // still on screen
   });
 
   // DK3: the corner cell sat UNDER the hour headers once the grid was
@@ -2200,61 +2156,27 @@ test.describe('86. Sabitleme', () => {
     expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(0);
   });
 
-  test('sağ tık satır, sütun ve gün başlıklarını sabitliyor', async ({ page }) => {
+  // Since 2026-11-16 (Sadeleşme K7) a heading has no menu: what it held was
+  // pinning a row, a day or a column at once and the temporary view, and both
+  // are gone. One block is pinned on its card, the week from Daha fazla.
+  test('satır, gün ve sütun başlığına sağ tık menü açmıyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     const cell = page.locator('table.grid td:has(.card)').first();
     const row = cell.locator('xpath=ancestor::tr');
-    const card = cell.locator('.card');
     const day = Number(await cell.getAttribute('data-day'));
     const hour = Number(await cell.getAttribute('data-hour'));
-
-    const toggle = async (target: import('@playwright/test').Locator, name: string) => {
-      await target.click({ button: 'right' });
-      await page.locator('.menu').getByRole('menuitem', { name }).click();
-    };
-
-    await toggle(row.locator('.row-head'), 'Satırı sabitle / kaldır');
-    await expect(card).toHaveClass(/pinned/);
-    await toggle(row.locator('.row-head'), 'Satırı sabitle / kaldır');
-    await expect(card).not.toHaveClass(/pinned/);
-
-    const dayHead = page.locator(`table.grid .day-head[data-menu-day="${day}"]`);
-    await toggle(dayHead, 'Günü sabitle / kaldır');
-    await expect(card).toHaveClass(/pinned/);
-    await toggle(dayHead, 'Günü sabitle / kaldır');
-    await expect(card).not.toHaveClass(/pinned/);
-
-    const column = page.locator(
-      `table.grid thead th[data-menu-day="${day}"][data-menu-hour="${hour}"]`,
-    );
-    await toggle(column, 'Sütunu sabitle / kaldır');
-    await expect(card).toHaveClass(/pinned/);
-  });
-
-  test('satır ve gün geçici görünümü yenilemede kalıcılaşmıyor', async ({ page }) => {
-    await openWithSample(page);
-    await dragAndDrop(page);
-    const cell = page.locator('table.grid td:has(.card)').first();
-    const row = cell.locator('xpath=ancestor::tr');
-    const day = Number(await cell.getAttribute('data-day'));
-
-    await row.locator('.row-head').click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Satırı soluklaştır' }).click();
-    await expect(row).toHaveClass(/masked-scope/);
-
-    const days = await page.locator('table.grid .day-head').count();
-    await page.locator(`table.grid .day-head[data-menu-day="${day}"]`).click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Günü gizle' }).click();
-    await expect(page.locator('table.grid .day-head')).toHaveCount(days - 1);
-
-    await page.reload();
-    await expect(page.getByRole('button', { name: 'Program', exact: true })).toHaveAttribute(
-      'aria-current',
-      'true',
-    );
-    await expect(page.locator('table.grid .day-head')).toHaveCount(days);
-    await expect(page.locator('table.grid tbody tr.masked-scope')).toHaveCount(0);
+    for (const head of [
+      row.locator('.row-head'),
+      page.locator(`table.grid .day-head[data-menu-day="${day}"]`),
+      page.locator(`table.grid thead th[data-menu-day="${day}"][data-menu-hour="${hour}"]`),
+    ]) {
+      await head.click({ button: 'right' });
+      await expect(page.locator('.menu')).toHaveCount(0);
+    }
+    // ...and the card still has its own.
+    await cell.click({ button: 'right' });
+    await expect(page.locator('.menu').getByRole('menuitem', { name: /sabitle/ })).toHaveCount(1);
   });
 
   test('ızgara menüsü bütün programı tek seferde sabitliyor', async ({ page }) => {

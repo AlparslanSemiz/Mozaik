@@ -1085,6 +1085,18 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
         engellemiyor, eksik mimari uyarıyla atlanıyor (DECISIONS 2026-11-16);
       - Apple Developer üyeliği alınırsa: `APPLE_*` sırları, iş akışı hazır.
 
+- [~] **B7.43 Linux sürümü (2026-11-16, `platform/linux`, DECISIONS "Linux sürümü").** Yazıldı,
+  doğrulanmadı: tek `Mozaik-linux-x86_64.AppImage`, kendini güncelliyor (`update_linux.rs`),
+  CP-SAT AlmaLinux 8 arşivinden, `surum.yml`'in `linux` işi hiçbir şeyi engellemiyor, `linux.yml`
+  PR'da. Bu Mac'te yalnız `cargo test` ve kontrat testleri koştu. Kalanlar:
+      - `linux.yml`'in ilk koşusu: AppImage üretiliyor mu, linuxdeploy CP-SAT'ın `RUNPATH`'ine ve
+        modlarına dokunuyor mu, dört sistemde açılıyor mu (kapların kırmızısı ne eksik diyor);
+      - gerçek bir masaüstünde (Fedora, Ubuntu 24.04) çift tıklama, FUSE'suz Ubuntu 24.04'te ne
+        olduğu, WebKitGTK'da CP-SAT'lı öneri araması ve süresi;
+      - eski sürümden yenisine uçtan uca güncelleme (yerel sunucuyla, Mac'te yapıldığı gibi),
+        sonra gerçek bir Release'le;
+      - arayüz metinleri Windows diyor (B7.42'deki gibi: "Uygulama (.exe)", "Belgelerim'deki").
+
 ---
 
 ## §8. Karar bekleyenler
@@ -2178,12 +2190,13 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
       saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
       tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
-      **Aşama 3B** yazıldı (`sade/asama-3b`, aşama 2'nin üstünde, birleşmedi; WORKLOG): beş
-      görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve Sınıflar'ın şeridine,
-      Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir plan (K2), Kontrol
-      çipin açtığı sorun listesi (K3). **Aşama 3A** (paralel dal): Sığdır/Ferah/Rahat (K6) ile
-      Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline dön (K8); 3B ile birleştirilecek.
-      Sonra babanın bir oturumu izlenir.
+      **Aşama 3A** `main`'de (b44b59a; WORKLOG): tek ızgara düzeni (K6), toplu sabitleme ve
+      geçici görünüm yok (K7), Dosya ▾ → Eski hâline dön, son 7 günün kopyası (K8); sütun en
+      geniş dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar, kart
+      yazısı en az 11 px. **Aşama 3B** yazıldı (`sade/asama-3b`, aşama 2'nin ve `main`'in üstünde,
+      birleşmedi; WORKLOG): beş görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve
+      Sınıflar'ın şeridine, Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir
+      plan (K2), Kontrol çipin açtığı sorun listesi (K3). Sonra babanın bir oturumu izlenir.
 
 ## §9. Ham notlar
 

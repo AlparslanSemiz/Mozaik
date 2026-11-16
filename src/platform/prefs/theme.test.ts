@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeAvailClock,
   normalizeRibbonAuto,
-  normalizeDensity,
   normalizeMotion,
   normalizeScale,
   normalizeDockHeight,
@@ -96,35 +95,6 @@ describe('normalizeScale', () => {
       value = normalizeScale(String(value + SCALE_STEP));
     }
     expect(value).toBe(SCALE_MAX);
-  });
-});
-
-describe('normalizeDensity', () => {
-  it('üç basamağın üçü de tanınıyor', () => {
-    expect(normalizeDensity('sigdir')).toBe('sigdir');
-    expect(normalizeDensity('ferah')).toBe('ferah');
-    expect(normalizeDensity('rahat')).toBe('rahat');
-  });
-
-  // The default has to be the grid my father already knows. A junk value that
-  // fell through to "sigdir" would hide the bell times on his screen with no
-  // visible cause and no obvious way back.
-  it('okunamayan her şey rahat ızgaradır', () => {
-    for (const junk of [
-      null,
-      undefined,
-      '',
-      'rahat',
-      'Sığdır',
-      'SIGDIR',
-      'Ferah',
-      {},
-      1,
-      [],
-      true,
-    ]) {
-      expect(normalizeDensity(junk)).toBe('rahat');
-    }
   });
 });
 

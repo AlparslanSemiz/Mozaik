@@ -247,6 +247,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-yedek-1 · otomatik yedek · 2 açılış önce",
         "ders-programi-yedek-2 · otomatik yedek · 3 açılış önce",
         "ders-programi-silmeden-once · son silmeden önceki hâl",
+        "ders-programi-gunluk · günlük kopya",
         "ders-programi-tema · tema tercihi",
         "ders-programi-dil · dil tercihi",
         "ders-programi-kenar · kenar çubuğu tercihi",

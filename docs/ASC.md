@@ -352,7 +352,7 @@ Baskı tasarımları buradan **kova 1'e taşındı**.
 | **Ön-test / hızlı fizibilite katmanı** — tam çözümden önce her varlığı (sınıf/öğretmen/derslik/branş) tek başına ya da seçili bir kümeyi üretmeyi deneyip temel veri hatasını yakalama | `health()`/`buildAdvice()` **sonradan** (dizilmiş ızgara üstünde) çalışıyor; aSc'ninki dizmeden ÖNCE, gerçekten deneyerek | R3 (u59, 5 konu) |
 | **Extended tests** — en küçük imkânsız alt kümeyi ikili aramayla bulma (sınıfları teker teker eleyerek) | Solver'a arama modu eklemek; Danışman statik kurallara bakıyor, arama yapmıyor | R3 (u59) |
 | **"Yalnız bu sınıfı/öğretmeni doğrula"** — satır başlığına sağ tık, Kontrol raporunu o varlığa süzer | `ProblemList.tsx`'te (eski Kontrol) ihlaller tüm okul için tek liste (grep: `entityId` süzgeç kalıbı yok) | R3 (u65/u60). Kontrol zaten `Sorunlar (N)` şeridiyle götürüyor, satır başından oraya bir süzgeçle atlamak orta maliyetli |
-| **Adlandırılmış/kaydedilebilir özel görünüm** (View → Define: "yalnız 5. sınıflar" gibi alt küme, açılır listeden seçilip basılabiliyor) | Bizim en yakınımız `programMask.ts`'teki geçici soluklaştır/gizle — **oturumluk**, kalıcı değil | R3 (u65). Kalıcılık `State`'e mi `toolState`'e mi girer — küçük bir mimari karar gerektiriyor |
+| **Adlandırılmış/kaydedilebilir özel görünüm** (View → Define: "yalnız 5. sınıflar" gibi alt küme, açılır listeden seçilip basılabiliyor) | Bizim en yakınımız oturumluk geçici soluklaştır/gizle idi, 2026-11-16'da kalktı (Sadeleşme K7) | R3 (u65). Kalıcılık `State`'e mi `toolState`'e mi girer — küçük bir mimari karar gerektiriyor |
 
 ---
 

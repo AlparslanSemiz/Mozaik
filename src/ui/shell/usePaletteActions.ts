@@ -14,7 +14,6 @@ import type { State } from '../../leaf/model';
 import type { Motion } from '../../platform/prefs';
 import type { SolverRun } from '../../platform/search';
 import { downloadBackup } from '../../platform/storage';
-import { solverExclusions, type ProgramMask } from '../../pure/program';
 import type { Place, useT } from '../common';
 
 export interface PaletteAction {
@@ -34,10 +33,10 @@ interface PaletteInputs {
   goTo: (place: Place) => void;
   notify: (text: string) => void;
   t: ReturnType<typeof useT>;
-  programMask: ProgramMask;
   openShortcuts: () => void;
   openFile: () => void;
   copyForNewTerm: () => void;
+  openOldCopies: () => void;
   toggleRibbon: () => void;
   toggleMotion: () => void;
 }
@@ -50,10 +49,10 @@ export function usePaletteActions({
   goTo,
   notify,
   t,
-  programMask,
   openShortcuts,
   openFile,
   copyForNewTerm,
+  openOldCopies,
   toggleRibbon,
   toggleMotion,
 }: PaletteInputs): PaletteAction[] {
@@ -68,10 +67,7 @@ export function usePaletteActions({
         extra: 'diz otomatik dağıt yerleştir',
         run: () => {
           goTo({ tab: 'program' });
-          solver.start(state, {
-            keepPlaced: true,
-            exclusions: solverExclusions(programMask),
-          });
+          solver.start(state, { keepPlaced: true });
         },
       },
       {
@@ -111,6 +107,13 @@ export function usePaletteActions({
         label: t('Programın durumu'),
         extra: 'kontrol sorun sorunlar ipuçları yerleşmedi neden yük',
         run: () => goTo({ tab: 'program', problems: true }),
+      },
+      {
+        id: 'old',
+        label: t('Eski hâline dön'),
+        hint: t('Dosya'),
+        extra: 'dün dünkü geri eski kopya yedek önceki gün',
+        run: openOldCopies,
       },
       {
         id: 'backup',
@@ -189,10 +192,10 @@ export function usePaletteActions({
     goTo,
     notify,
     t,
-    programMask,
     openShortcuts,
     openFile,
     copyForNewTerm,
+    openOldCopies,
     toggleRibbon,
     toggleMotion,
   ]);
