@@ -180,7 +180,12 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
 
       // It is the leftmost thing on the row — that is what was asked for.
       expect(facts.beforeTabs, `%${scale}: işaret sekmelerin solunda değil`).toBe(true);
-      expect(facts.left, `%${scale}: işaret sol uçta değil`).toBeLessThan(40);
+      // The bar's side padding is the page's outer edge since 2026-11-17
+      // (`--edge-x`, 1.5rem + the 10px trough: 39px at 150%), it was 10px.
+      // Measured 2026-11-17: 42px at 150% (39.25 of edge + the mark's own margin),
+      // ~31px at 100%; the bound is that plus a few px, so it pins the new
+      // edge instead of loosening the old one.
+      expect(facts.left, `%${scale}: işaret sol uçta değil`).toBeLessThan(scale === 100 ? 36 : 46);
       // rem, not px: at 150% it grows with the tabs instead of becoming a
       // speck beside them. 1.75rem, and the numbers have moved twice with the
       // root — 16px gave 28/42, 14px gave 24.5/36.75, and 13px since

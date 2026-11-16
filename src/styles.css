@@ -361,6 +361,20 @@
 
   --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
   --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
+
+  /* THE ONE OUTER EDGE. `.main`'s side padding plus the 10px a thin scrollbar
+     trough takes (`scrollbar-gutter: stable both-edges`, written on `.main`).
+     The top bar and the strip use it as their inline padding, so the bars'
+     content, the panels and the right-hand rail all stand the same distance
+     from the window's edges. The 10px is what Chromium's thin trough measures
+     (tuzak 94); a platform with an overlay scrollbar has none and is 10px
+     wider than it needs to be, which is symmetric and harmless. */
+  --edge-x: calc(var(--space-6) + 10px);
+
+  /* ONE HEIGHT for a control that stands in a table row: a button, a text
+     box, a number box and a select all come out the same, and never under
+     the 24px pointer floor (WCAG 2.5.8; 2.25rem is 29px at %100). */
+  --row-ctl-h: 2.25rem;
   --space-8: 3rem;
 
   /* RADIUS — five steps and a pill. The old three were a plane rule; with a
@@ -854,7 +868,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--edge-x);
   background: linear-gradient(180deg, var(--chrome-lit) 0%, var(--chrome) 100%);
   border-bottom: 1px solid var(--hairline);
   flex: 0 0 auto;
@@ -1232,7 +1246,10 @@ textarea {
    7.3px sideways, and pressing any of the other three slid it back. Sometimes
    the strip moved and sometimes it did not, which is exactly how it was
    reported. `.tab[aria-current]` in the bar above uses the same equal-column
-   grid and has never moved, because it says where you are in colour alone. */
+   grid, and it moved too once the tab became a bold sheet (600 at the top of
+   the tab rules, 30px of strip shifted on every click): the neutral tab block
+   further down now writes `font-weight: inherit`, so it says where you are in
+   colour, an underline and a lift, and never in a metric. */
 .ribbon .btn[aria-pressed="true"],
 .ribbon .btn[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--sec, var(--accent));
@@ -1257,7 +1274,7 @@ textarea {
      narrower window shrinks it the same way. What it gives up, and in what
      order, is the block below. */
   container: serit / inline-size;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--edge-x);
   background:
     linear-gradient(180deg,
       color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
@@ -1697,8 +1714,16 @@ textarea {
      other three do not, Dersler → Genel does not. So moving between two
      options of the SAME strip took the page from 1538.5px wide to 1528.5 and
      back — every panel, every table and every heading stepping 10px sideways,
-     on some pairs and not others. */
-  scrollbar-gutter: stable;
+     on some pairs and not others.
+
+     BOTH EDGES (2026-11-17, denetim): `stable` alone reserved the trough on
+     the right only, so the content stood 20px from the left edge and 30px
+     from the right (20 + the 10px trough) while the bars above stood 10px in
+     on both. `both-edges` reserves it on the left too: the page is now
+     --edge-x (padding + trough) from each side, and the two bars use the same
+     number, so the left and the right edge of every row below the bar line
+     up with the bar's own content. */
+  scrollbar-gutter: stable both-edges;
 
   /* A SIZE CONTAINER, so the side column can be told how tall the screen is.
      `.main` already had a definite size — it is the `1 1 auto` child of a
@@ -1813,7 +1838,7 @@ table.list tbody tr {
    does not jump down when it appears. */
 .reason-bar {
   flex: 0 0 auto;
-  height: 1.625rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -1881,7 +1906,11 @@ table.list tbody tr {
 }
 
 .bar-actions .btn {
-  padding: var(--space-1) var(--space-3);
+  /* Inside the bar's fixed 1.75rem: "Tamam" was 2px taller than the bar. */
+  min-height: 0;
+  height: 1.5rem;
+  padding: 0 var(--space-3);
+  line-height: 1;
 }
 
 /* What to change so a stuck week can be built (TODO B5.9), under the bar and
@@ -2052,7 +2081,10 @@ table.list tbody tr {
 }
 
 .program-body.previewing .card:not(.mark-opened):not(.mark-moved) {
-  opacity: 0.35;
+  /* Quiet by colour, not by transparency: at .35 the card's ink fell to a
+     fifth of its contrast and the names could not be read. The ink is
+     --on-color, which stays dark; only the palette colour goes grey. */
+  filter: saturate(.15);
 }
 
 /* The hour to ask a teacher about is the loud one: a thick line, a hatch over
@@ -2739,12 +2771,22 @@ table.grid tbody td.unavailable {
      over a pastel must not turn with the theme (pitfall 15). */
   color: var(--on-color);
   cursor: pointer;
-  /* Hidden at rest, fully opaque when aimed at. A pinned card remains visible
-     through the aria-pressed rule below so the lock state never disappears. */
-  opacity: 0;
+  /* Faint at rest (it was invisible, and a control nobody can see is a control
+     nobody finds), fully opaque when aimed at or on. */
+  opacity: .45;
   transition:
     opacity var(--dur-fast) var(--ease),
     background var(--dur-fast) var(--ease);
+}
+
+/* The target reaches into the cell's own padding, down and to the left, and
+   NOT up or right: there it would cover the middle of the card, and a click
+   or a right-click there has to land on the card (panel.spec 87). The drawn
+   pin is the same size. */
+.card-pin::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 -.25rem -.25rem;
 }
 
 .card-pin::before {
@@ -2812,7 +2854,14 @@ table.grid tbody td:hover > .card-pin,
 /* Radix moves a `data-highlighted` marker with both the pointer and the arrow
    keys, so one rule serves the mouse and the keyboard and they cannot drift. */
 .menu-item[data-highlighted] {
-  background: var(--accent-bg);
+  /* The solid accent, as the command palette's active row: --accent-bg on
+     --paper was 1.19:1, a highlight a reader with low vision could not find. */
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.menu-item[data-highlighted] .menu-why {
+  color: inherit;
 }
 
 .menu-item.danger {
@@ -2820,7 +2869,8 @@ table.grid tbody td:hover > .card-pin,
 }
 
 .menu-item.danger[data-highlighted] {
-  background: var(--bad-bg);
+  background: var(--bad);
+  color: #fff;
 }
 
 .menu-item.danger[data-disabled] {
@@ -2924,7 +2974,19 @@ td.block-cont {
        whatever the specificity: the cursor's cell always outranks the row. */
 table.grid tbody td.can-ok:not(.unavailable) { background-color: var(--can-ok-bg); }
 table.grid tbody td.can-warn:not(.unavailable) { background-color: var(--can-warn-bg); }
-table.grid tbody td.can-no:not(.unavailable) { background-color: var(--can-no-bg); }
+table.grid tbody td.can-no:not(.unavailable) {
+  background-color: var(--can-no-bg);
+  /* A refusal is also a TEXTURE, not only a tone: a pink cell next to a cream
+     one is two close tones to a reader who confuses them. The stripes are a
+     background-IMAGE over the colour above, so the colour stays (pitfalls 16
+     and 40) and nothing about the closed-hour hatch is touched. */
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--bad) 28%, transparent) 4px 6px
+  );
+  cursor: not-allowed;
+}
 
 /* THE SAME ANSWER, ON THE CARD THAT IS HIDING IT.
    "o kartların arkasından ya da başka bir şekilde o kartın oraya gelip
@@ -2978,6 +3040,12 @@ td.drop-blocked {
   outline: 3px solid var(--bad);
   outline-offset: -3px;
   background: var(--drop-bad-bg) !important;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--bad) 40%, transparent) 4px 6px
+  ) !important;
+  cursor: not-allowed;
 }
 
 /* Two fixed rectangles dim the visible rows outside the target. Per-row (and
@@ -3717,11 +3785,15 @@ main:focus {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-3);
+  /* The 10px a bare heading carries under it, moved to the wrapper: on the
+     heading it sat inside the flex row and pushed the "?" 5px below the word. */
+  margin-bottom: 10px;
 }
 
-/* The heading inside it keeps its rule and its margin collapse. */
+/* The heading inside it keeps its rule; its margin is the wrapper's. */
 .panel-head > h2 {
   margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* A panel heading is the first thing read on the sheet, so it is set like one
@@ -3760,7 +3832,7 @@ main:focus {
   background: var(--sec, var(--accent));
 }
 
-.panel h2 {
+:where(.panel) h2 {
   margin: 0 0 10px;
   font-size: var(--fs-lg);
 }
@@ -3868,7 +3940,11 @@ textarea:focus-visible,
 .entity:focus-visible,
 .toast-close:focus-visible,
 .health:focus-visible,
-.inspect:focus-visible {
+.chip:focus-visible,
+.help-btn:focus-visible,
+.swatch:focus-visible,
+summary:focus-visible,
+.search-clear:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
      a lesson card, a swatch — and that is precisely where somebody navigating
@@ -4365,7 +4441,8 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
   /* 13rem to 9.75rem on 2026-11-16: the description rail went behind the
      heading's "?" (Sadeleşme, phase 1). */
   min-height: 9.75rem;
-  padding: var(--space-5);
+  /* The padding is `.panel`'s own (--space-6): this block is a panel, and
+     it stood 1rem in where every other panel stands 1.5rem. */
 }
 
 .add-panel-head {
@@ -4553,9 +4630,14 @@ table.sheet-lessons select.transfer-pick {
 
 .split-option:hover,
 .split-option:focus-visible {
-  background: var(--accent-bg);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
   outline: none;
+}
+
+.split-option:not(.disabled):hover .split-option-why,
+.split-option:not(.disabled):focus-visible .split-option-why {
+  color: inherit;
 }
 
 .split-option.selected {
@@ -4689,6 +4771,9 @@ table.sheet-lessons select.transfer-pick {
   background: var(--paper);
   border-color: var(--border-strong);
   color: var(--text);
+  /* The lit tab above says 600, and a heavier word is a wider box: the
+     strip stepped 30px sideways at every click (pitfall 94). */
+  font-weight: inherit;
   box-shadow: inset 0 -3px 0 var(--accent), var(--elev-1);
 }
 
@@ -4709,6 +4794,12 @@ table.sheet-lessons select.transfer-pick {
 
 .ribbon > .more-menu {
   margin-left: auto;
+}
+
+/* `margin-left: auto` is 0 when the strip is full, and the last group then
+   stood against "Daha fazla" (1366, Kurallar). */
+.ribbon > .ribbon-value:has(+ .more-menu) {
+  margin-inline-end: var(--space-4);
 }
 
 /* "?" (common/Help.tsx): a round button with a glyph that is a word. 24px at
@@ -4930,6 +5021,12 @@ table.sheet-lessons select.transfer-pick {
   gap: var(--space-2);
 }
 
+/* The last button's own padding and border stood between its word and the
+   panel's inner edge, 12px beyond where every other row ends. */
+.checklist-acts .btn:last-child {
+  margin-right: calc(-1 * (var(--space-4) + 1px));
+}
+
 .checklist-steps {
   list-style: none;
   margin: var(--space-4) 0 0;
@@ -5069,7 +5166,9 @@ table.sheet-lessons select.transfer-pick {
 .cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--aside-w);
-  gap: var(--space-4);
+  /* The gutter between the two columns is the gap between two stacked
+     panels (`.panel`'s margin-bottom), not a size of its own. */
+  gap: var(--space-5);
   align-items: start;
 }
 
@@ -5101,11 +5200,16 @@ table.sheet-lessons select.transfer-pick {
    clips nothing at 100 % or 150 % (pitfall 64), and Okul → Öğretmenler's
    `.table-scroll` still overflows by exactly 0 at 100/110/125 %. */
 :root {
-  --aside-w: 23.5rem;
+  /* ONE width for every rail (2026-11-17, denetim): Çıktı alone was wider, so
+     the side block began at a different x on that screen and the list's right
+     edge jumped on the way there. The floor is the measured 23.5rem above;
+     `cqw` is `.main`, the box the rail lives in, so a narrow window gives room
+     back rather than pushing the content off the side. */
+  --aside-w: max(23.5rem, min(37rem, 32cqw));
 }
 
-/* ...EXCEPT ON ÇIKTI, and the extra room comes from a measurement of what is
-   already empty. The sheet is a fixed physical thing — 297mm, 1123px — and at
+/* WHY THE CEILING IS 37rem. It was Çıktı's alone until 2026-11-17, and the
+   extra room came from a measurement of what is already empty. The sheet is a fixed physical thing — 297mm, 1123px — and at
    1920 the preview column was 1556px wide, so 433px of it was blank paper-side
    margin (256px at 150%). The rail was 305px and holding two stacked tick
    lists, each looking through a 168px window.
@@ -5119,10 +5223,9 @@ table.sheet-lessons select.transfer-pick {
    gap inside 45px of panel padding = 474px, and 37rem is 481). 32cqw is the
    ceiling that keeps the sheet's margin honest at 150%, where two columns do
    not fit anyway and `auto-fit` stacks them: the rail lands on 613px and the
-   preview keeps 167px beside the paper instead of 28. */
-.cols.print-cols {
-  --aside-w: min(37rem, 32cqw);
-}
+   preview keeps 167px beside the paper instead of 28.
+   (`.cols.print-cols` carried this alone; it is the rule for every rail now,
+   in the `:root` block above, so the number is written once.) */
 
 /* Below this the two columns are narrower than the tables they hold. */
 @media (max-width: 68rem) {
@@ -5165,7 +5268,10 @@ table.sheet-lessons select.transfer-pick {
    "Hiçbir yerde sağ taraftaki bloklar sağa sola hareket ettirme olmasın." */
 .cols > aside {
   position: sticky;
-  top: 0;
+  /* -2px: the 2px padding below is cancelled by the -2px margin, and a sticky
+     box sticks its MARGIN edge, so 0 here parked the first panel 2px low
+     against the first panel of the column beside it. */
+  top: -2px;
   /* A flex column so a single panel can be told to fit the rail without any
      arithmetic: `min-height: 0` on the child is the whole mechanism. */
   display: flex;
@@ -6006,7 +6112,9 @@ table.print td .p-bottom {
 /* The lunch row inside the bell preview. */
 tr.break-row th,
 tr.break-row td {
-  background: var(--bg);
+  /* --closed, not --bg: --bg is the DESK, and in the dark theme it is nearly
+     black, so the lunch row was a hole in the table. */
+  background: var(--closed);
   /* --text: --muted on --bg measured 5.06, in the smallest type on screen. */
   color: var(--text);
   font-size: var(--fs-xs);
@@ -6369,7 +6477,9 @@ table.bell-preview td {
 /* ------------------------------------------------------------------ toasts
    Bottom right, above everything, and never in the way of the grid: the pool
    drawer is along the bottom and the toast sits over its right end, which is
-   the one part of it that is never a drop target. */
+   the one part of it that is never a drop target. (Top right, under the bars,
+   was tried on 2026-11-17 and measured worse: it covered the person page's
+   Gönder and WhatsApp buttons and the rail's heading.) */
 
 .toasts {
   position: fixed;
@@ -6793,6 +6903,9 @@ table.bell-preview td {
 .search:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-bg);
+  /* The tint alone was 1.2:1; the ring is the same one every control wears. */
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* The box inside carries no chrome of its own: the wrapper IS the control, so
@@ -6821,18 +6934,21 @@ input.search-box:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  /* 24px at the least (WCAG 2.5.8); it was 1.25rem, 16px. Grey on grey too:
+     --paper on --line was under 2:1. */
+  min-width: max(24px, 1.5rem);
+  min-height: max(24px, 1.5rem);
   padding: 0;
   border: none;
   border-radius: var(--r-full);
-  background: var(--line);
-  color: var(--paper);
+  background: none;
+  color: var(--muted);
   cursor: pointer;
 }
 
 .search-clear:hover {
-  background: var(--line-dark);
+  background: var(--accent-bg);
+  color: var(--text);
 }
 
 /* The sort DIRECTION button, with no sort chosen.
@@ -6865,7 +6981,10 @@ input.search-box:focus-visible {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--hairline);
+  /* A control's edge is --border-strong (DESIGN: 3:1) and a pointer target is
+     24px at the least; the chip was a hairline, 21px tall. */
+  min-height: max(24px, 1.75rem);
+  border: 1px solid var(--border-strong);
   border-radius: var(--r-full);
   background: var(--paper-sunk);
   color: var(--muted);
@@ -6878,7 +6997,7 @@ input.search-box:focus-visible {
 }
 
 .chip:hover {
-  border-color: var(--line);
+  border-color: var(--text);
   color: var(--text);
 }
 
@@ -7091,6 +7210,14 @@ kbd {
   color: var(--muted);
 }
 
+/* ONE box for the mark in front of every row, so the labels start on one
+   line whether the mark is a symbol (16-17px) or a colour square (1rem). */
+.palette-row svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 1.25rem;
+}
+
 .palette-row[data-active='true'] .palette-icon,
 .palette-row[data-active='true'] .palette-hint {
   color: inherit;
@@ -7099,8 +7226,10 @@ kbd {
 
 .palette-dot {
   display: inline-block;
+  flex: 0 0 auto;
   width: 1rem;
   height: 1rem;
+  margin-inline: .125rem;
   border-radius: var(--r-xs);
   border: 1px solid var(--dot-border);
 }
@@ -7408,6 +7537,141 @@ body.row-dragging {
   min-width: 6ch;
 }
 
+/* ------------------------------------------------------ audit, 2026-11-17
+   One measured pass over the shell for symmetry and for the reader who has
+   trouble seeing (scratch/denetim). Last before the forced-colours block on
+   purpose: these are the rules that answer an earlier rule's measurement, so
+   they sit after it and say so. */
+
+/* THE TOP BAR HAS ONE CONTROL HEIGHT. The file buttons were 38px, the tabs
+   31, the health chip 28 and the document box 26: four heights on one row,
+   each from its own padding. All are `--ribbon-h` now (the strip's own
+   number), centred by the bar's `align-items`. */
+.topbar .btn,
+.topbar .tab,
+.topbar .health {
+  min-height: var(--ribbon-h);
+  padding-block: 0;
+}
+
+/* Stacked tabs (icon over word) are taller than the bar's control height by
+   nature, and keep their own breathing room. */
+@container bar (max-width: 88em) {
+  .topbar .tab {
+    padding-block: var(--space-1);
+  }
+}
+
+/* ROW CONTROLS, ONE HEIGHT. A row's button ("Ayrıntı", "Sil"), its text box,
+   its number box and its select were 31, 33, 33 and 35px, so a row read as
+   four things side by side rather than one line. `--row-ctl-h` for all of
+   them, no vertical padding (the box centres its own text), 29px at %100. */
+table:is(.list, .stat, .sheet-lessons) td :is(.btn, input[type='text'], input[type='number'], select, .split-pick) {
+  min-height: var(--row-ctl-h);
+  padding-block: 0;
+}
+
+/* A SYMBOL FOLLOWS THE WORD'S SIZE. Lucide draws at the `size` attribute
+   (16px) whatever the type is: a 13px word beside a 16px symbol, a 15px menu
+   row beside the same 16px. `em` keeps the pair in proportion at every scale
+   (15px beside 13px, 17px beside 15px). The grid's and the tabs' symbols have
+   their own sizes and are not named here. The palette's marks are one fixed
+   box, written with `.palette-row svg`. */
+.btn svg,
+.menu svg,
+.sheet-actions svg {
+  /* 16px is the floor (renk.spec 19: a symbol the reader can tell apart); the
+     symbol only follows the word UP from there, when the type is larger. */
+  width: max(16px, 1.15em);
+  height: max(16px, 1.15em);
+}
+
+/* A mark with a word after it: space between the two, wherever the markup has
+   none (a colour square in a table cell, the problem list's two segments). */
+.color-dot[aria-hidden="true"] {
+  margin-inline-end: .375rem;
+}
+
+.sheet-views .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+}
+
+/* THE CARDS NEXT TO EACH OTHER READ AS ONE. Two lessons of the same hour
+   side by side, "450" and "431", drew as "450431": no gutter, and the same
+   family of pastel. A 1px paper line on the card's own left edge, INSIDE the
+   box, so the column's width is untouched (`gridFit` measures the text against
+   the cell, and a margin would have changed the cell). Not on the two halves
+   of one block (`.block-in`, `.block-cont`), which are meant to read as one.
+   `:where()` keeps the specificity at a bare class, so the focus ring, the
+   drag ring and the conflict wedge still win. */
+:where(table.grid tbody td:not(.block-in):not(.block-cont) + td) > .card {
+  box-shadow: inset 1px 0 0 var(--paper);
+}
+
+/* A DISABLED PRIMARY BUTTON IS READ, NOT FADED. At .45 opacity "Programı yap"
+   was 2.36:1; it is a flat grey button with a --muted word now, the same
+   shape as every other disabled control's meaning: not available, and legible. */
+.btn.primary:disabled,
+:root[data-theme='dark'] .btn.primary:disabled {
+  opacity: 1;
+  background: var(--paper-sunk);
+  color: var(--muted);
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+/* THE STRIP'S READING IS NOT AN ALARM. "3 kesin" is a count of rules set to
+   Kesin, not a problem: in the alarm colour it read as three errors. The
+   badges here are neutral, a frame and full ink; the colour stays on the
+   badges that report a state (Kontrol, the lists). */
+.ribbon .ribbon-value .badge {
+  background: var(--paper-sunk);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+/* DARK THEME: a raised surface, and edges that can be seen. The panels and the
+   desk are 1.18:1 in the dark theme where the light theme's are 1.44, and
+   something that floats (a menu, a popover, the page, a dialog) was the same
+   --paper as what it floats over. `--raised` is one step up from --paper and
+   the same as it in the light theme, where --elev-3's shadow already does the
+   job. The panel and the floating things get --line, not the hairline. */
+:root {
+  --raised: var(--paper);
+}
+
+:root[data-theme="dark"] {
+  --raised: #1d2127;
+}
+
+.menu,
+.split-popover,
+.dlg,
+.sheet,
+.palette,
+.color-dialog {
+  background: var(--raised);
+}
+
+.split-popover-arrow {
+  fill: var(--raised);
+}
+
+.sheet > .sheet-head:first-child {
+  background: var(--raised);
+}
+
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .palette,
+:root[data-theme="dark"] .dlg,
+:root[data-theme="dark"] .sheet,
+:root[data-theme="dark"] .color-dialog,
+:root[data-theme="dark"] .toast {
+  border-color: var(--line);
+}
+
 /* ------------------------------------------------------- forced colours
    Windows' contrast themes (Ayarlar > Erişilebilirlik > Karşıtlık temaları)
    replace every colour on the page with a handful of system colours. Until
@@ -7520,13 +7784,25 @@ table.person-list tbody tr {
   text-align: left;
 }
 
-.sheet-actions {
-  display: flex;
+.sheet-head {
   flex-wrap: wrap;
+}
+
+/* The page's actions are a row of their own, under the name, in an even grid:
+   beside the name they wrapped into a ragged 2+2 block that pushed the title
+   to the left (denetim, 2026-11-17). `order` keeps the close button beside the
+   name whatever the markup order is. */
+.sheet-actions {
+  order: 9;
+  flex: 1 0 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   align-items: center;
-  justify-content: flex-end;
   gap: var(--space-2);
-  max-width: 22rem;
+}
+
+.sheet-actions > .btn {
+  justify-content: center;
 }
 
 .sheet-actions a.btn {
@@ -7535,8 +7811,8 @@ table.person-list tbody tr {
 }
 
 .sheet-said {
-  flex-basis: 100%;
-  text-align: right;
+  grid-column: 1 / -1;
+  text-align: left;
   margin: 0;
 }
 
