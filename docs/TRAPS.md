@@ -393,6 +393,17 @@ nonce bulunan kaynak listesinde `'unsafe-inline'` yok sayılır: Radix'in pencer
 sayfayı Tauri'nin hesabıyla kurulan başlık altında açar ve her ihlal bir konsol hatasıdır;
 bayrak kaldırılınca kırmızı.
 
+### 172 · Toplam süre sınırı bir indirmenin boyunu hattın hızına böler
+Bulundu 2026-11-16, incelemede. `getir` güncellemeyi `reqwest`'in `.timeout(300 s)`'iyle
+indiriyordu; o sınır bağlantıdan gövdenin son baytına kadar her şeyi kapsar. 31 MB'lık kurulum
+300 s'de ancak 0,85 Mbit/s'nin üstündeki bir hatta iner, ve aynı sürümde kuruluma geçiş
+(`gecis`) her tek başına kopyaya onu indirtiyordu: yavaş bir hatta her deneme "İnternet yanıt
+vermedi" olurdu. Karşı önlem: indirmede toplam sınır yok, bağlantıya 20 s ve sessizliğe 60 s
+(`connect_timeout`, `read_timeout`; her parçada yeniden başlar), boy sınırı akışta
+(`sinirli_ekle`), Ayarlar yüzdeyi gösterir; manifestin küçük isteği toplam 20 s'de kalır.
+Koruyan: `update.rs`'in yerel yavaş sunucuya karşı iki testi (sürekli gönderen hat bitiyor,
+aynı hatta toplam sınırlı istemci bitiremiyor; susan hat sessizlik sınırında bırakılıyor).
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1659,7 +1670,7 @@ iddiası saati kapatarak sınanır.**
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166, 172 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1674,7 +1685,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 172 ve 173 açık bir dala ayrıldı. 167 ile 169 arası
+büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

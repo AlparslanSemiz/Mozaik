@@ -254,7 +254,7 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 Depoda yedi iş akışı var (2026-10-10'dan beri). `ci.yml` her dala her push'ta
 süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
 derleme ve boyut bir işte; ana E2E süiti üç parçada; öneri aramasını başlatan
-iki E2E testi kendi işinde, sırayla; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
+ve `@arama` etiketini taşıyan E2E testleri kendi işinde, üç parçada, her parça ayrı bir runner'da; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
 yeşilse ve push `main`'e ise `site.yml`'yi çağırır ve site yayınlanır. `site.yml`
 kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir commit'i
 yayınlayamaz. `windows.yml` her `main` push'unda ana E2E süitini Windows'ta koşar; siteyi
@@ -817,11 +817,14 @@ yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini ke
 yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
-taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. Kurulmamış bir kopyaya
+taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. İndirmenin toplam süre
+sınırı yok: bağlantıya 20 s, hiç bayt gelmeyen 60 s'de bırakılır, Ayarlar yüzdeyi gösterir
+(2026-11-16'ya kadar toplam 300 s'ydi, tuzak 172). Kurulmamış bir kopyaya
 kurulum aynı sürümde de önerilir (`gecis`, `windows_karari`; 2026-11-16): sahadaki 2.2.0 tek
 dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 161). Güncellemeden sonraki
 ilk açılışta şerit bunu bir kez söyler (`guncelleme_durumu`, ağsız). "Şimdi kur" kurulumu
-kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kurulum-bekleyici.exe`)
+kendisi çalıştırmaz: kurulumun kendi taze geçici klasörüne kopyalanan bir bekleyici
+(`Mozaik-kurulum-bekleyici.exe`, `bekleyici_yolu`; 2026-11-16'ya kadar sabit bir `%TEMP%` yolu)
 programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
 ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 163). Eski dosya
 silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,

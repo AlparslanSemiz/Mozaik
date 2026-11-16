@@ -104,6 +104,12 @@ seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'
 dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
 aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
 
+**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
+birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
+Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
+dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
+Gerçek Windows exe'de koşulmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -139,6 +145,37 @@ bulguları. Bu makine macOS, `agir.sh` çalışmıyor; Playwright kilitsiz ve `-
   WebKit program, musaitlik, dokunmatik 95/95; Firefox temel, yazdir, exe, dokunmatik 80 geçti
   10 atlandı, kurulum 65 14/14. `tsc`, eslint, prettier, `vite build`, `boyut` (ham 1,17 MB,
   brotli 299,88 kB, 6,12 kB pay). Tam süit Firefox ve WebKit'te koşulmadı.
+
+---
+
+## 2026-11-16 · İncelemenin dört küçük bulgusu (`duzeltme/inceleme`)
+
+`ci/kurulum-durdur`'dan (PR #65) açıldı.
+
+- **İndirme süresi (tuzak 172).** `getir` `istemci(300)` ile indiriyordu: 300 s bütün gövdeyi
+  kapsıyordu, 31 MB'lık kurulum 0,85 Mbit/s'nin altında hiç inemezdi. Şimdi `connect_timeout`
+  20 s ve `read_timeout` 60 s, boy sınırı yine akışta; manifest toplam 20 s'de. İndirme
+  `guncelleme-indirme` olayıyla yüzde başına bir kez `[inen, toplam]` yolluyor, Ayarlar "Yeni
+  sürüm iniyor… %N" yazıyor. `cargo test`'te yerel yavaş sunucu: 1,5 s süren ama 2 s susmayan hat
+  bitiyor, aynı hatta 600 ms'lik toplam sınırlı istemci bitiremiyor; 20 s susan hat 500 ms'lik
+  sessizlik sınırında "İnternet yanıt vermedi".
+- **Bekleyici.** `Mozaik-kurulum-bekleyici.exe` sabit `%TEMP%` yolundan kurulumun kendi taze
+  klasörüne (`bekleyici_yolu`); sonraki indirmenin süpürmesi klasörle birlikte siliyor, eski sabit
+  dosya da siliniyor. `BEKLEYICI_ADI`'nın yorumu `mainBinaryName`'i söylüyor.
+- **Küçülme kabulü.** `acceptShrink` bayrağı yalnız başlattığı yazım için açık (`finally`'de
+  kapanıyor); önce oturum boyu, exe'de hiç kapanmıyordu. Gerileme testi düzeltmesiz kırmızıydı.
+- **Kurtarma budaması.** `sparePrunable`: oturumluk kurtarma kopyaları, günlük kurtarma
+  dosyaları ve silmeden-önce dosyalarının her türünden en yeni on, en yenisi hiç; günlük budamayla
+  aynı anda. Rust `remove_in` artık `yedek_mi`'ye bakıyor (aynı üç kalıp, saatli üst çubuk yedeği ve
+  başka adlar yine reddediliyor). İnceleme alt ajanı iki türün tek sayılmasını buldu: on oturum
+  günün küçülme dosyasını itebilirdi, ayrıldı.
+
+Koşulan: `cargo test` 97/97, `cargo clippy` (yalnız eski iki uyarı), `tsc`, `eslint`, `prettier`
+(değişen dosyalar), `npm run hizli` 1712 geçti, `vite build`, `npm run boyut` (1,17 MB, brotli
+299,05 kB), E2E `klasor` (site, 1 işçi) 9/9, `okunamayan` + `exe` (2 işçi) 26/26. Koşulamayan:
+`cargo check --target x86_64-pc-windows-msvc` (bu Mac'te `llvm-rc` yok, `tauri-winres` duruyor);
+değişen kodun hiçbiri `cfg(windows)` altında değil. Tıklama testi yapılmadı: yüzde yalnız
+gerçek exe'nin indirmesinde görünüyor.
 
 ## 2026-11-16 · Daha iyi program: iyileştirme geçişi, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
 
