@@ -483,7 +483,7 @@ sahte bir ev dizininde.
 Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfası veriyor,
 `showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
 ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
-siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
+siteyi kullanan biri için taşıma, [INSTALL.md](INSTALL.md)'de.
 
 ### Linux
 
@@ -506,7 +506,7 @@ açılır (karar kaydında). Yalnız x86_64.
 (glibc 2.35): Ubuntu 22.04 ve 24.04, Debian 12, Fedora 36 ve sonrası açar, Debian 11 açmaz.
 `scripts/linux-paket.sh` programın istediği en yüksek glibc'yi okur ve 2.35'i geçerse durur.
 AppImage açılmak için FUSE ister; Ubuntu 22.04'ten beri `libfuse2` kurulu gelmeyebilir
-(README, "Linux").
+(INSTALL.md, "Linux: one file, the AppImage").
 
 ```sh
 scripts/ortools-linux.sh              # OR-Tools 9.15, özeti sabit; src-tauri/ortools/ ve tauri.ortools.json

@@ -23,7 +23,7 @@ Timetables does and aims to do that half better.
 
 The interface is in Turkish, English, German, Spanish and French. The project's own
 documentation under `docs/` is in Turkish on purpose, because the decisions were made
-in that language.
+in that language, except `docs/INSTALL.md`, the user-facing install guide.
 
 ## Features
 
@@ -33,12 +33,12 @@ in that language.
 - Export one plan or all plans to a `.json` file; the `.exe` and the Windows install also
   mirror plans into a folder you choose.
 - Delivered four ways from the same page: the file, a Windows install, a hosted site
-  that works offline after the first visit, and a Tauri `.exe` (also Mac and Linux builds).
+  that works offline after the first visit, and a Tauri `.exe` (Mac and Linux builds ship with the next release).
 
 ## Status
 
-Version 2.2.0, built for one user. Windows is the main target; the Mac and Linux
-builds are secondary. The `.exe` and the installer are unsigned, so Windows
+Built for one user. Windows is the main target; the Mac and Linux
+builds are secondary and not yet released. The `.exe` and the installer are unsigned, so Windows
 SmartScreen will warn; [docs/INSTALL.md](docs/INSTALL.md) says exactly what to click.
 
 ## Download
@@ -50,9 +50,8 @@ These links always point at the newest release.
 | **[Mozaik.html](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.html)** | Double-click it. Opens in your browser. This is the main delivery. |
 | **[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-Windows-kurulum.zip)** | Unzip, double-click `Kur.cmd`. Adds a desktop shortcut and a local address. |
 | **[Mozaik.exe](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
-| **[Mozaik-mac-arm64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-arm64.dmg)** | Mac with Apple silicon. Needs one extra click on first launch, see [INSTALL](docs/INSTALL.md#mac-the-first-launch-needs-one-extra-click). |
-| **[Mozaik-mac-x86_64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-x86_64.dmg)** | Intel Mac. macOS 11 or later on both. |
-| **[Mozaik-linux-x86_64.AppImage](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-linux-x86_64.AppImage)** | Linux (Ubuntu 22.04+, Debian 12+, Fedora 36+). See [INSTALL](docs/INSTALL.md#linux-one-file-the-appimage). |
+
+Mac (arm64, x86_64 `.dmg`) and Linux (`.AppImage`) builds ship with the next release; until then the notes in [docs/INSTALL.md](docs/INSTALL.md) cover them.
 
 `SHA256SUMS.txt` sits next to the files so a download can be checked
 (`Get-FileHash Mozaik.exe`). Step-by-step notes for Windows warnings, Linux, Mac, moving

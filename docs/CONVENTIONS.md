@@ -187,13 +187,14 @@ girdileri ve adımları (Actions arayüzünde görünüyorlar), `package.json` v
 `Cargo.toml`'un `description`'ları, kökteki `CHANGELOG.md`, ve Codex'in giriş
 dosyası `AGENTS.md`.
 
-`CLAUDE.md`, `docs/`, `.claude/` ve `.mcp.json` Türkçe kalır: projenin hafızası
+`CLAUDE.md`, `docs/` (`docs/INSTALL.md` hariç), `.claude/` ve `.mcp.json` Türkçe kalır: projenin hafızası
 bunlar ve kararların alındığı dilde duruyorlar. README bunun sebebini de
 yazıyor.
 
-İki istisna bilerek var. `surum-notu.md`'nin sonunda üç satır Türkçe kurulum
+Üç istisna bilerek var. `surum-notu.md`'nin sonunda üç satır Türkçe kurulum
 özeti duruyor, çünkü o metin her Release sayfasının gövdesi, yani babanın
 indirirken gördüğü sayfa. `kurulum/OKU.txt` baştan sona Türkçe.
+Üçüncüsü `docs/INSTALL.md`: kullanıcıya dönük kurulum kılavuzu olduğu için `docs/` içinde tek İngilizce belge.
 
 ## Programın adı
 

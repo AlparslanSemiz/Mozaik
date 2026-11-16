@@ -28,7 +28,7 @@ download the new one over the old one.
 Which version you are on is written in **Ayarlar → Hakkında**.
 
 Step-by-step install, update and removal:
-**[README](../../blob/main/README.md)**
+**[docs/INSTALL.md](https://github.com/AlparslanSemiz/Mozaik/blob/main/docs/INSTALL.md)**
 
 ---
 
