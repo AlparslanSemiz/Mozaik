@@ -35,6 +35,11 @@ import { buildReport } from '../../pure/feasibility';
 import { sampleState } from '../../pure/io/sample';
 import { SCHEMA_VERSION, type State } from '../../leaf/model/types';
 
+// The page skeleton mounts the whole app in jsdom and draws the print sheet:
+// 3-4 s under load on 2026-11-16, near Vitest's 5 s. Synchronous rendering,
+// no timer or wait in it (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 // jsdom has no ResizeObserver and `scrollFade.ts` uses one. Stubbed exactly as
 // App.test.tsx stubs it, and for the same reason: the absence is a jsdom
 // limitation, and a guard in shipped code would be a test artefact.

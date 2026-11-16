@@ -103,6 +103,13 @@ test.describe('90. Erişilebilirlik taraması', () => {
   // One screen per test (TODO TP22): on Windows the three scans together took
   // ~25 s of the 30 s budget, Çıktı the heaviest, and the test fell over the
   // ceiling now and then.
+  //
+  // Even one screen is heavy: axe walks every node of a full grid or a full
+  // print sheet, and that is the measurement, not a wait. 8-25 s each on a
+  // loaded machine on 2026-11-16, and Program, Çıktı, Öğretmenler and Ayarlar
+  // went over 30 s in the full suite while passing alone. `test.slow()`
+  // triples the limit for the scans only (pitfall 171).
+  test.beforeEach(() => test.slow());
   test('Program, dolu veriyle', async ({ page }) => {
     await openWithSample(page);
     karsilastir('Program', await tara(page));

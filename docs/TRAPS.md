@@ -1427,6 +1427,29 @@ hosts ve makinenin güvendiği bir sertifikayla yerel sunucuya çevriliyor
 (`scripts/guncelleme-220.mjs`). `kurulum-windows.yml` kurulumu kurup kaldırıyor ve CP-SAT'ı
 kurulan DLL'lerle koşuyor; `npm run yayinla` ikisini de bekliyor.
 
+### 170 · Izgara bir render önce çizilir, havuz sonra: tek seferlik okuma eskiyi okur
+`program.spec.ts`'in "dağılım seçicisi bütün seçenekleri açıyor" testi CI'da iki ayrı
+dalda "> 146, received 146" ile düştü, ikisi de arayüze dokunmuyordu, ve yeniden
+koşunca geçti (2026-11-15, 43769965101 ve 43773651075). Havuz planı `useDeferredValue`
+ile bir render geriden izliyor (`Program.tsx`): bir bırakmada ya
+da dağılım değişince ızgara önce boyanıyor, havuz React'in kesebildiği sonraki render'da.
+Test ızgaranın boşaldığını bekledi, sonra havuzun saatini bir kez okudu; yüklü bir
+makinede havuz henüz eski toplamı gösteriyordu. Aynı pencere `dragAndDrop()`'un hemen
+ardında da açıktı, "önce" değeri bırakılan kartı hâlâ içerebiliyordu. Çare `e2e/helpers.ts`'te:
+`poolHours()` havuzun saatini yığın boyuyla birlikte sayıyor (aynı kartlar tek bir
+`.pool-card` olarak çiziliyor, `data-count` kaç tane olduğunu söylüyor), `dragAndDrop()`
+havuz kartı bırakana kadar dönmüyor, ve test sonrasını `expect.poll` ile bekliyor.
+İşlemci 8 kat yavaşlatılınca eski hâli düşüyor, yenisi geçiyor (WORKLOG 2026-11-16).
+Aynı testin ikinci düşüşü yüklü makinede 30 s'lik test sınırıydı: `dragAndDrop()`
+satırın görünen her hücresine fareyi götürüp 40 ms bekliyordu, CI'da test 11-13 s
+sürüyordu. Sürükleme satırın cevabını başta bir kez boyuyor (`can-ok`), yardımcı artık
+yalnız o hücreleri deniyor ve sabit beklemenin yerine vurgunun boyanmasını bekliyor.
+Öğretmenler listesinin sıralaması da aynı ertelemeyle geliyor (`Teachers.tsx`):
+`liste.spec.ts`'in sıralama testi seçimden hemen sonra okuyup eski sırayı buldu (CI'da
+bir kez, yerelde tam süitte bir kez); iddiaları artık `toPass` ile yeniden deneniyor.
+Kural: **bir ekranın ertelenmiş parçası, başka bir parçanın değiştiğini gördükten sonra
+da tek seferde okunmaz, kendi değeri beklenir.**
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1561,6 +1584,32 @@ dışarıdan `timeout` sarılmaz. Betik komutun bütün ağacını ortamındaki 
 buluyor, süre dolunca, bir sinyal gelince ve komut geride bir şey bırakıp çıkınca önce
 ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` ölçüyor.
 
+### 171 · Birim testinin süre sınırı, yüklü bir makinede makineyi ölçer
+Başka oturumların aynı çekirdekleri doldurduğu bir gecede (2026-11-16, 8 çekirdekte yük
+ortalaması 78 ile 266 arası) `npm run hizli`'de yedi test Vitest'in sınırını aştı ya da ona dayandı:
+`linuxKur.test.ts` (bash, git ve `npm run build` başlatıyor), `useFolder.test.tsx`
+(her açılışta modülleri baştan yüklüyor), `App.test.tsx`, `sentences.test.tsx` ve
+`programScreen.test.tsx` (bütün uygulamayı jsdom'da çiziyor), `relax.test.ts`
+(saati olmayan SAT araması: "aynı girdi" 5 s'yi, derslik darboğazı 30 s'lik sınırında
+24 s) ve `sample.test.ts`'in dropMap testi. İlk altısında beklenen bir saat ya da yarış
+yok, iş eşzamanlı ve belirli; tek eksik süre sınırının gerekçesiydi. Dosyanın başında
+`vi.setConfig({ testTimeout })` ile, neyin ağır olduğu ve ölçülen süreyle yükseltildi.
+dropMap testi başkaydı: 50 ms'lik mutlak bir eşiği vardı ve açgözlü doldurmayı ikinci
+kez kendi içinde koşuyordu, yani süresinin çoğu ölçtüğü şey değildi. Doldurma dosyada
+bir kez yapılıyor, eşik de görelileşti: dolu haftanın medyanı boş haftanınkinin dört
+katını geçmiyor, ikisi yan yana ölçülerek. Hücre başına haftayı yürüyen bir mutasyon
+oranı 1,3'ten 6,7'ye çıkardı ve testi kırmızıya çevirdi, eski 50 ms'lik eşik aynı
+mutasyonda (13 ms) yeşil kalırdı. Aynı gece tam süitte `solver.test.ts`'in "Roboders'teki
+saatlerle haftanın tamamını diziyor"u iki blok eksik kaldı: sınır değil, sonuç düştü,
+çünkü test çözücünün varsayılan 15 s'lik saatiyle koşuyordu ve yükte iş 18,5 s sürdü. İddia
+"bu hafta dizilebilir"; çözücünün hamle sayan durma kuralı umutsuz onarımı zaten bitiriyor,
+o yüzden bütçe 600 s, yanındaki "olduğu gibi kurulamıyor" testindeki gibi. E2E'de aynı
+sınıf: `erisim.spec.ts`'in dolu veriyle axe taramaları tek başına 8-25 s, tam süitte dördü
+30 s'yi aştı; taramalar `test.slow()` ile. Kural: **belirli ama ağır bir test sınırını
+gerekçesiyle kendisi söyler; bir süre eşiği birim testinde yalnız aynı anda ölçülen
+bir karşılaştırmaya karşı durur (TESTPLAN TP15); sonucu saate bağlı bir işin "yapabilir"
+iddiası saati kapatarak sınanır.**
+
 ---
 
 ## Dizin
@@ -1576,13 +1625,15 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143, 156 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151, 164 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151, 164, 170 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150, 171 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 165, yeni bir tuzak 166'dan devam eder. Test stratejisi
+büyük kullanılan numara 171, yeni bir tuzak 172'den devam eder. 166 ile 169 arası
+boş: 2026-11-16'da 159-165 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
+diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

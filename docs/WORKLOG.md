@@ -92,6 +92,11 @@ geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığ�
 (TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
 brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
 
+**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
+seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
+dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
+aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -150,6 +155,48 @@ program (`--workers=2`, `@arama` hariç). `relaxFullCourse.test.ts` yük 250'de 
 öncesinde yeşildi (tıkanmış hafta `main` ile aynı, arama değişmedi). Taze bağlamlı inceleme: kural
 çiğneme yolu bulmadı; bulgular düzeltildi (aynı-gün çiftinde kapsam dışı gün, "Başka bir dizilim"
 ikinci basışta el emeğini yedekten itmiyor, yorumlar).
+
+## 2026-11-16 · Kararsız testler (`test/kararsiz`)
+
+CI'ın son 300 koşusu (`ci.yml`, 2026-10-09'dan beri) tarandı: aynı commit'te önce düşüp
+yeniden koşunca geçen tek test `program.spec.ts`'in "dağılım seçicisi bütün seçenekleri
+açıyor"u (43769965101 ve 43773651075, ikisi de "> 146, received 146"). Öteki kırmızıların
+çoğu dal zincirinin kendi gerilemesiydi (zincirin her dalında aynı test, sonra düzeldi), ya
+da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzgeci,
+`kurulum.spec` cinsiyet testinin `savedState`'i).
+
+- **Dağılım seçicisi:** havuz `useDeferredValue` ile bir render geriden geliyor, test havuzu
+  ızgara boşaldıktan sonra bir kez okuyordu (tuzak 170). `poolHours()` yığın boyuyla sayıyor,
+  `dragAndDrop()` havuz kartı bırakana kadar dönmüyor, sonrası `expect.poll`. Kanıt: işlemci 8
+  kat yavaşlatılınca (CDP) eski hâl 6 koşunun 3'ünde CI'ın hatasıyla düştü (2'si 30 s'yi aştı),
+  yeni hâl 6/6 geçti. Yavaşlatmasız eski hâl bu Mac'te 15/15 geçiyordu. Yükte ikinci bir
+  düşüş: 30 s'lik test sınırı, çünkü `dragAndDrop()` satırın her görünen hücresinde 40 ms
+  bekliyordu (CI'da test 11-13 s). Yardımcı artık yalnız sürüklemenin başta `can-ok` diye
+  boyadığı hücreleri deniyor ve vurgunun boyanmasını bekliyor: beş sürükleme testi aynı
+  yükte 8,9-14,8 s'den 3,5-6,8 s'ye.
+- **Birim süre sınırları (tuzak 171):** yük ortalaması 78–266 (8 çekirdek) iken `hizli`'de
+  `linuxKur`, `useFolder`, `App`, `sentences`, `programScreen` ve `relax.test`'in "aynı
+  girdi"si 5 s'yi aştı, derslik darboğazı 30 s'ye yaklaştı (24 s). Bekleme ya da yarış yok,
+  iş ağır ve belirli: dosya başında gerekçeli `vi.setConfig({ testTimeout: 30_000 })`,
+  darboğaz 120 s.
+  `sample.test`'in dropMap testi açgözlü doldurmayı ikinci kez koşuyordu ve 50 ms'lik mutlak
+  eşiği vardı: doldurma bir kez, eşik dolu/boş medyan oranı < 4 (bugün ~1,3). Hücre başına
+  `blockAt` çağıran mutasyon oranı 6,7'ye çıkardı ve kırmızı, eski eşik onda 13 ms ile yeşil kalırdı.
+- **Çözücünün saati:** tam `npm test`'te `solver.test`'in "Roboders'teki saatlerle" testi
+  varsayılan 15 s'lik bütçeyle yükte iki blok eksik kaldı (iş 18,5 s sürdü). Bütçe 600 s
+  (durma kuralı hamle sayıyor), test sınırı 120 s.
+- **Tam E2E (`--workers=2`, 34 dk, yük 42-135):** 765 geçti, 7 düştü. `liste.spec` sıralaması
+  ertelenmiş render'ı okuyordu (düzeldi, `toPass`, 5/5); `erisim.spec`'in dört axe taraması
+  30 s'yi aştı, tek başına geçti (`test.slow()`). Kalan: `kayma.spec.ts:129` bu Mac'te her
+  koşuda kırmızı (macOS'un yer kaplamayan kaydırma çubuğu, test kendisi "hiçbir şey
+  ölçmüyor" diyor; CI Linux'ta yeşil), `otomatik.spec.ts:258` @arama 420 s'yi aştı (B7.41).
+- **Tam `npm test`:** iki koşu üst üste bindi (benim hatam), `relaxFullCourse` ve
+  `relaxLaidOut` 120-240 s sınırlarını aştı; bunlara dokunulmadı, ölçülmedi.
+
+Belgeler: TRAPS 170 ve 171 (159–165 alınmış, açık dallar da numara beklediği için 170'ten başlandı), TESTPLAN
+"Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.
+
+---
 
 ---
 
