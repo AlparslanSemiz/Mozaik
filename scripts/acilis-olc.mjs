@@ -71,8 +71,10 @@ function hazirlik(v) {
   // açılıyor, `table.grid` tıklamasız gelir.
   const gozcu = new MutationObserver(() => {
     if (window.__hazir === undefined && !gozcu.okul) {
+      // The shell is up once the Program tab's button is there: it exists in
+      // every version, where "Okul" went with the five tabs (Sadeleşme K1).
       const okul = [...document.querySelectorAll('button')].some(
-        (b) => b.textContent?.trim() === 'Okul',
+        (b) => b.textContent?.trim() === 'Program',
       );
       if (okul) {
         gozcu.okul = true;
