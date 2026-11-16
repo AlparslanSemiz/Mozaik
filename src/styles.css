@@ -6508,6 +6508,11 @@ table.availability.heat td.closed {
   width: min(30rem, calc(100vw - 3rem));
 }
 
+/* Eski hâline dön: "Pazar 15 Kasım" on one line, not three. */
+.sheet tbody th[scope='row'] {
+  white-space: nowrap;
+}
+
 .sheet-edit {
   display: grid;
   grid-template-columns: auto 1fr;
