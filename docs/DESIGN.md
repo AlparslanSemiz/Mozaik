@@ -304,7 +304,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 
 ## Makine tercihleri
 
-Tema, ölçek, iki yoğunluk, havuz, şerit, müsaitlik saati, hareket, dil ve program
+Tema, ölçek, havuz, şerit, müsaitlik saati, hareket, dil ve program
 kart rengi bu makinenin tercihleri. State'e ve yedeğe yazılmıyorlar, ve hepsi
 Ayarlar → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların tam
 listesi [DATA.md](DATA.md)'de.

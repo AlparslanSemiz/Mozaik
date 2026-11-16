@@ -46,7 +46,8 @@ Soldan sağa: marka işareti, `Dosya ▾`, yedi sekme, durum çipi, boşluk, oku
 plan olunca plan seçici), `Geri al`, `Kaydet`, `?`. Başka bir şey yok (2026-11-16, Sadeleşme
 aşama 1); kaldırılanların yeni yeri aşağıda.
 
-- **Dosya ▾** dosyanın her işini bir menüde tutar: Kaydet, Dosyadan aç, Yeni dönem için kopyala (verinin tamamı yeni bir plana, dizilmiş program boş; eski plan olduğu gibi kalır), Planlar ve yedek (Ayarlar'a götürür) ve İleri al (Ctrl+Y). "Eski hâline dön" aşama 3'te buraya girer (K8).
+- **Dosya ▾** dosyanın her işini bir menüde tutar: Kaydet, Dosyadan aç, Yeni dönem için kopyala (verinin tamamı yeni bir plana, dizilmiş program boş; eski plan olduğu gibi kalır), Eski hâline dön, Planlar ve yedek (Ayarlar'a götürür) ve İleri al (Ctrl+Y).
+- **Eski hâline dön** (2026-11-16, Sadeleşme K8) açık planın son yedi gününü bir pencerede listeler, en yenisi üstte: her satırda günün adı ve tarihi ("Salı 12 Kasım"), öğretmen, ders ve yerleşmiş saat sayısı, ve bir düğme; dünün düğmesi "Dünkü hâline dön", ötekiler "Bu hâline dön". Şimdiki hâlle aynı olan gün listelenmez. Kopya yoksa tek cümle: ilki yarın gelir. Dönmek bildirimiyle `Geri al` taşıyan bir adım; kopyaların nasıl tutulduğu [DATA.md](DATA.md)'de. Ctrl+K "dün" ile de bulur.
 - **Kaydet** sade bir düğme, dolu değil: her ekranın dolu tek düğmesi o ekranın ana işi.
 - **?** ara ve yap (Ctrl+K), klavye kısayolları, Başlarken'i yeniden açma ve Hakkında.
 - **Tema** yalnız Ayarlar → Görünüm'de; Ctrl+K'nin "tema"sı oraya götürür. **Şerit katlama** Ayarlar → Görünüm'de ve Ctrl+K'de; Ayarlar'da şerit katlı olsa da çizilir, çünkü bölümler oradan seçiliyor ve açmanın yolu da orada.

@@ -233,7 +233,7 @@ kat yavaşlatılmış işlemcide dokuz açılışın dokuzunda, düzeltmeden son
 sıfırında. Klasik bir betik ayrıştırmayı bloklar, yani "ilk boyamadan önce" bir
 yarış olmaktan çıkıp bir garanti oluyor.
 
-Kapsam yalnız tema, çünkü ölçülen tek görünür fark o. Ölçek ve yoğunluk geç
+Kapsam yalnız tema, çünkü ölçülen tek görünür fark o. Ölçek geç
 uygulandığında düzen kayması 0,0002'nin altında kalıyor ve bir renk değişimi
 gibi göze çarpmıyor.
 
