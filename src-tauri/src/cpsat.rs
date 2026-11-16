@@ -10,8 +10,10 @@
 //! THE LIBRARY IS OPTIONAL. The installer puts `ortools.dll` and the DLLs it
 //! needs next to the program (tauri.conf.json, `bundle.resources`), and the Mac
 //! .app carries `libortools.9.dylib` and the dylibs it loads in
-//! `Contents/Frameworks` (scripts/ortools-mac.sh); the standalone exe, the
-//! Linux development build and a broken install have none.
+//! `Contents/Frameworks` (scripts/ortools-mac.sh), and the Linux AppImage
+//! carries `libortools.so.9` and its closure in `usr/lib/Mozaik`, Tauri's
+//! resource folder beside `usr/bin` (scripts/ortools-linux.sh); the standalone
+//! exe, the Linux development build and a broken install have none.
 //! `cpsat_var` says which, and the page falls back to its own search.
 //!
 //! The five functions are the ones `ortools/sat/c_api/cp_solver_c.h` declares
@@ -44,8 +46,9 @@ struct Cpsat {
     stop: EnvFn,
 }
 
-/// The library's file name on each platform. Windows and the Mac are
-/// delivered; Linux is how the Rust side is tested on a development machine.
+/// The library's file name on each platform. All three are delivered (Linux as
+/// an AppImage from 2026-11-16).
+#[cfg_attr(target_os = "linux", allow(dead_code))] // Linux: `linux_yolu`
 const AD: &str = if cfg!(windows) {
     "ortools.dll"
 } else if cfg!(target_os = "macos") {
@@ -76,11 +79,102 @@ fn yol() -> Result<PathBuf, String> {
 /// `ortools.dll` could have been dropped next to it (DLL planting), and only
 /// the installer ships the real one.
 pub(crate) fn kutuphane_yolu(exe: &Path, kurulum_sart: bool) -> Result<PathBuf, String> {
-    let klasor = exe.parent().ok_or("Program klasörü bulunamadı.")?;
     if kurulum_sart && !crate::update::kurulu_mu(exe) {
         return Err("CP-SAT yalnız kurulumla gelir; bu kopya kurulu değil.".into());
     }
-    Ok(kutuphane_yeri(klasor))
+    #[cfg(target_os = "linux")]
+    {
+        let appdir = std::env::var_os("APPDIR").map(PathBuf::from);
+        linux_yolu(
+            exe,
+            &LinuxKural {
+                appdir: appdir.as_deref(),
+                sistem_bin: Path::new("/usr/bin"),
+                sistem_lib: Path::new("/usr/lib/Mozaik"),
+                sistem_sahibi: 0,
+            },
+        )
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        let klasor = exe.parent().ok_or("Program klasörü bulunamadı.")?;
+        Ok(kutuphane_yeri(klasor))
+    }
+}
+
+/// Where a Linux copy may load CP-SAT from (security review 2026-11-16: a
+/// library is code, and a folder someone else can write is a way in).
+#[cfg(unix)]
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+pub(crate) struct LinuxKural<'a> {
+    /// `APPDIR`, the folder the AppImage runtime mounted (`/tmp/.mount_…`).
+    /// Believed only when the running program is inside it.
+    pub appdir: Option<&'a Path>,
+    /// A system package (a `.deb`, if one is ever made): the program in
+    /// `sistem_bin`, the library in `sistem_lib`, both owned by `sistem_sahibi`
+    /// (root). Parameters so the tests can stand them up in a temporary folder.
+    pub sistem_bin: &'a Path,
+    pub sistem_lib: &'a Path,
+    pub sistem_sahibi: u32,
+}
+
+/// The rule, apart from the process. The library is Tauri's resource folder,
+/// `usr/lib/Mozaik` beside the `usr/bin` the program runs from (TRAPS 178),
+/// resolved with every link followed, and it is loaded only when:
+///
+/// - the program runs from an AppImage (inside `APPDIR`) and the resolved
+///   library is inside that same mount: the AppImage's own read-only image,
+///   never a link out of it; or
+/// - the program is the system's `/usr/bin/Mozaik` and the library resolves
+///   inside `/usr/lib/Mozaik`, owned by root;
+///
+/// and in both cases neither the library nor its folder is writable by group
+/// or others. Anything else (the development build in `target/release`, a
+/// copy in Downloads with a `lib/` planted beside it) loads none, for the
+/// reason the standalone Windows exe loads none.
+#[cfg(unix)]
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+pub(crate) fn linux_yolu(exe: &Path, k: &LinuxKural) -> Result<PathBuf, String> {
+    use std::os::unix::fs::MetadataExt;
+    let paketsiz = || "CP-SAT yalnız AppImage ile gelir; bu kopya paketli değil.".to_string();
+    let exe = std::fs::canonicalize(exe).map_err(|_| paketsiz())?;
+    let klasor = exe.parent().ok_or_else(paketsiz)?;
+    let aday = klasor.join("../lib/Mozaik").join("libortools.so.9");
+    let appimage = k
+        .appdir
+        .and_then(|a| std::fs::canonicalize(a).ok())
+        .filter(|a| a.parent().is_some() && exe.starts_with(a));
+    let sistem = std::fs::canonicalize(k.sistem_bin).is_ok_and(|b| b == klasor);
+    let (kok, sahip) = match appimage {
+        Some(kok) => (kok, None),
+        None if sistem => (
+            std::fs::canonicalize(k.sistem_lib).map_err(|_| paketsiz())?,
+            Some(k.sistem_sahibi),
+        ),
+        None => return Err(paketsiz()),
+    };
+    let gercek = std::fs::canonicalize(&aday)
+        .map_err(|_| format!("CP-SAT kütüphanesi yok: {}", aday.display()))?;
+    if !gercek.starts_with(&kok) {
+        return Err("CP-SAT kütüphanesi paketin dışını gösteriyor; yüklenmedi.".into());
+    }
+    let klasoru = gercek.parent().ok_or_else(paketsiz)?;
+    for yer in [gercek.as_path(), klasoru] {
+        let bilgi = std::fs::metadata(yer).map_err(|_| paketsiz())?;
+        if bilgi.mode() & 0o022 != 0 {
+            return Err(format!(
+                "CP-SAT yüklenmedi: {} başkalarının yazabildiği bir yerde.",
+                yer.display()
+            ));
+        }
+        if sahip.is_some_and(|s| bilgi.uid() != s) {
+            return Err(format!(
+                "CP-SAT yüklenmedi: {} sistemin değil.",
+                yer.display()
+            ));
+        }
+    }
+    Ok(gercek)
 }
 
 /// Opens the library. On Windows with `LoadLibraryExW` and only two places to
@@ -108,6 +202,7 @@ unsafe fn ac(yol: &Path) -> Result<libloading::Library, libloading::Error> {
 /// The library's path, given the folder the program runs from. The Mac's
 /// dylibs find one another through their own `LC_RPATH @loader_path`, so the
 /// first one only has to be opened by its full path.
+#[cfg_attr(target_os = "linux", allow(dead_code))] // Linux: `linux_yolu`
 fn kutuphane_yeri(program_klasoru: &std::path::Path) -> PathBuf {
     if cfg!(target_os = "macos") {
         program_klasoru.join("../Frameworks").join(AD)
@@ -324,6 +419,136 @@ mod tests {
         }
     }
 
+    // ------------------------------------------------- the Linux load rule
+
+    /// An AppImage's tree under `kok`: `usr/bin/Mozaik` and the library in
+    /// `usr/lib/Mozaik`, with the modes a squashfs image gives them.
+    #[cfg(unix)]
+    fn paket_agaci(kok: &Path) -> PathBuf {
+        use std::os::unix::fs::PermissionsExt;
+        let bin = kok.join("usr/bin");
+        let lib = kok.join("usr/lib/Mozaik");
+        std::fs::create_dir_all(&bin).unwrap();
+        std::fs::create_dir_all(&lib).unwrap();
+        std::fs::write(bin.join("Mozaik"), b"\x7fELF").unwrap();
+        std::fs::write(lib.join("libortools.so.9"), b"\x7fELF").unwrap();
+        for (yer, mod_) in [(&lib, 0o755), (&lib.join("libortools.so.9"), 0o644)] {
+            std::fs::set_permissions(yer, std::fs::Permissions::from_mode(mod_)).unwrap();
+        }
+        bin.join("Mozaik")
+    }
+
+    #[cfg(unix)]
+    fn kural<'a>(
+        appdir: Option<&'a Path>,
+        bin: &'a Path,
+        lib: &'a Path,
+        sahip: u32,
+    ) -> LinuxKural<'a> {
+        LinuxKural {
+            appdir,
+            sistem_bin: bin,
+            sistem_lib: lib,
+            sistem_sahibi: sahip,
+        }
+    }
+
+    #[cfg(unix)]
+    fn yok() -> &'static Path {
+        Path::new("/olmayan/usr/bin")
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn on_linux_the_library_loads_from_inside_the_appimage_only() {
+        let tmp = gecici("appdir");
+        let mount = tmp.0.join(".mount_MozaikAb12");
+        let exe = paket_agaci(&mount);
+        let yol = linux_yolu(&exe, &kural(Some(&mount), yok(), yok(), 0)).unwrap();
+        assert!(
+            yol.ends_with("usr/lib/Mozaik/libortools.so.9"),
+            "{}",
+            yol.display()
+        );
+        assert!(yol.starts_with(std::fs::canonicalize(&mount).unwrap()));
+
+        // Not an AppImage at all: no APPDIR, not /usr/bin.
+        assert!(linux_yolu(&exe, &kural(None, yok(), yok(), 0)).is_err());
+        // An APPDIR this program is not inside (inherited from another AppImage).
+        let baska = tmp.0.join(".mount_Baska");
+        std::fs::create_dir_all(&baska).unwrap();
+        assert!(linux_yolu(&exe, &kural(Some(&baska), yok(), yok(), 0)).is_err());
+        // The root as APPDIR would let anything count as inside.
+        assert!(linux_yolu(&exe, &kural(Some(Path::new("/")), yok(), yok(), 0)).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_library_link_leaving_the_mount_is_refused() {
+        use std::os::unix::fs::symlink;
+        let tmp = gecici("bag");
+        let mount = tmp.0.join(".mount_MozaikAb12");
+        let exe = paket_agaci(&mount);
+        let disari = tmp.0.join("disari.so");
+        std::fs::write(&disari, b"\x7fELF").unwrap();
+        let lib = mount.join("usr/lib/Mozaik/libortools.so.9");
+        std::fs::remove_file(&lib).unwrap();
+        symlink(&disari, &lib).unwrap();
+        let e = linux_yolu(&exe, &kural(Some(&mount), yok(), yok(), 0)).unwrap_err();
+        assert!(e.contains("dışını"), "{e}");
+        // The whole lib folder a link out of the mount: refused the same way.
+        let lib_klasor = mount.join("usr/lib/Mozaik");
+        std::fs::remove_dir_all(&lib_klasor).unwrap();
+        let disari_klasor = tmp.0.join("disari-klasor");
+        std::fs::create_dir_all(&disari_klasor).unwrap();
+        std::fs::write(disari_klasor.join("libortools.so.9"), b"\x7fELF").unwrap();
+        symlink(&disari_klasor, &lib_klasor).unwrap();
+        assert!(linux_yolu(&exe, &kural(Some(&mount), yok(), yok(), 0)).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_library_or_folder_others_can_write_is_refused() {
+        use std::os::unix::fs::PermissionsExt;
+        let tmp = gecici("yazilir");
+        let mount = tmp.0.join(".mount_MozaikAb12");
+        let exe = paket_agaci(&mount);
+        let lib = mount.join("usr/lib/Mozaik");
+        for (yer, mod_) in [(lib.clone(), 0o777), (lib.join("libortools.so.9"), 0o666)] {
+            let eski = std::fs::metadata(&yer).unwrap().permissions().mode();
+            std::fs::set_permissions(&yer, std::fs::Permissions::from_mode(mod_)).unwrap();
+            let e = linux_yolu(&exe, &kural(Some(&mount), yok(), yok(), 0)).unwrap_err();
+            assert!(e.contains("başkalarının"), "{e}");
+            std::fs::set_permissions(&yer, std::fs::Permissions::from_mode(eski)).unwrap();
+        }
+        assert!(linux_yolu(&exe, &kural(Some(&mount), yok(), yok(), 0)).is_ok());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_system_package_loads_only_what_its_owner_put_there() {
+        use std::os::unix::fs::MetadataExt;
+        let tmp = gecici("sistem");
+        let exe = paket_agaci(&tmp.0);
+        let bin = tmp.0.join("usr/bin");
+        let lib = tmp.0.join("usr/lib/Mozaik");
+        // Stand-in for root: the owner of the folder the test made.
+        let ben = std::fs::metadata(&lib).unwrap().uid();
+        assert!(linux_yolu(&exe, &kural(None, &bin, &lib, ben)).is_ok());
+        // Owned by someone else than the package's owner.
+        assert!(linux_yolu(&exe, &kural(None, &bin, &lib, ben + 1)).is_err());
+        // A program elsewhere with the same shape beside it (Downloads).
+        let indirilen = gecici("indirilen");
+        let kopya = paket_agaci(&indirilen.0);
+        assert!(linux_yolu(&kopya, &kural(None, &bin, &lib, ben)).is_err());
+        // The development build.
+        let dev = gecici("dev");
+        let ikili = dev.0.join("target/release/ders-programi");
+        std::fs::create_dir_all(ikili.parent().unwrap()).unwrap();
+        std::fs::write(&ikili, b"\x7fELF").unwrap();
+        assert!(linux_yolu(&ikili, &kural(None, &bin, &lib, ben)).is_err());
+    }
+
     #[test]
     fn the_body_splits_into_params_and_model() {
         let mut body = 3u32.to_le_bytes().to_vec();
@@ -353,8 +578,10 @@ mod tests {
         std::fs::write(&exe, b"MZ").unwrap();
         std::fs::write(tmp.0.join(AD), b"MZ").unwrap();
         assert!(kutuphane_yolu(&exe, true).is_err());
-        // Off Windows (the development machines) the folder rule alone.
-        assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
+        // On the Mac the folder rule alone; Linux has its own (`linux_yolu`).
+        if !cfg!(target_os = "linux") {
+            assert_eq!(kutuphane_yolu(&exe, false).unwrap(), kutuphane_yeri(&tmp.0));
+        }
     }
 
     #[test]
@@ -363,7 +590,9 @@ mod tests {
         let exe = tmp.0.join("Mozaik.exe");
         std::fs::write(&exe, b"MZ").unwrap();
         std::fs::write(tmp.0.join("uninstall.exe"), b"MZ").unwrap();
-        assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
+        if !cfg!(target_os = "linux") {
+            assert_eq!(kutuphane_yolu(&exe, true).unwrap(), kutuphane_yeri(&tmp.0));
+        }
     }
 
     /// A release build must not read the variable: the line before the read is

@@ -53,8 +53,49 @@ istisnası).
 3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
 4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
 
-**Dikkat.** `sade/asama-3a`'da brotli 302 154 B, eşiğe 3 846 B (aşama 2'nin 305 787'si
-K6 ve K7 ile 300 437'ye indi, K8 ~1,7 kB aldı; (b) kararıyla küçültme kalktı). Tuzaklarda en büyük numara 179. Eskisi: Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
+**Dikkat.** `sade/asama-3a`'da brotli 302 162 B, eşiğe 3 838 B (main ile birleştikten sonra) (aşama 2'nin 305 787'si
+K6 ve K7 ile 300 437'ye indi, K8 ~1,7 kB aldı; (b) kararıyla küçültme kalktı). Tuzaklarda en büyük numara 179.
+
+**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
+kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
+budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
+ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
+
+**Daha iyi program (2026-11-16, `cozucu/iyilestirme`, birleşmedi):** bitmiş haftaya iyileştirme
+geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığı söyleyen tıkanma cümlesi
+(TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
+brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
+
+**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
+seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
+dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
+aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
+**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
+birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
+Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
+dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
+Gerçek Windows exe'de koşulmadı.
+
+**Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
+kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
+`linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
+(DECISIONS "Linux sürümü", tuzak 177, 178). Mac'te yazıldı: hiç Linux'ta derlenmedi, hiç açılmadı.
+
+---
+
+weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
+diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
+bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
+
+**Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
+kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
+için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
+birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+---
+
+**Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
 gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
 yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
 Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
@@ -81,7 +122,7 @@ seçenek değiştiriciye dokunmadı.
   (`eski-hal.spec.ts`, 3).
 
 **Boyut** (`npm run boyut`, bayt): önce 1 192 401 ham / 305 787 brotli; K6+K7 sonrası
-1 167 137 / 300 437; K8 ile 1 174 176 / 302 154 (eşik 1 200 000 / 306 000).
+1 167 137 / 300 437; K8 ile 1 174 176 / 302 154; (b) ve artıklarla, main birleşince 1 174 531 / 302 162 (eşik 1 200 000 / 306 000).
 
 **Izgara ölçümü** (örnek okul, Programı yap, 376 kart; CSS px = ekran / Windows ölçeği):
 
@@ -204,6 +245,38 @@ iki dersi olan öğretmende "510 · Haftalık saat" adı iki kez geçiyor (seyre
 satırıyla birlikte); `role="status"` satırlarının içerikle birlikte doğması (programın başka
 yerlerindeki desenle aynı); yeni sınıfta derslik bir sonrakine taşınmıyor (artık tek tek ekleme
 sayfa sayfa, toplu ekleme yapıştırma).
+
+## 2026-11-16 · Linux sürümü: AppImage (`platform/linux`)
+
+Alp'in hedefi "her yerde, güzelce", Windows ve web önce. Karar DECISIONS "Linux sürümü":
+yalnız AppImage, kendini güncelliyor, `.deb` yok. 2026-10-10'un "Linux Release'e girmiyor"
+kuralı yeniden tartıldı: gerekçesinin yarısı (Windows'u bekletmek) Mac'in `always()` kapısıyla
+çözülmüştü, öteki yarısı (WebKitGTK) babanın yolunu etkilemiyor.
+
+**Yapılan.** `src-tauri/src/update_linux.rs` (APPIMAGE yalnız program APPDIR'in içindeyse,
+`AI\x02` imi, `.yeni` + sabit bağlı `.eski` + tek rename, yazılamayan klasörde indirmeden önce
+cümle), `update.rs`'e `Hedef::Linux` ve dört isteğe bağlı `linux_appimage*` alanı, `cpsat.rs`'e
+`linux_yolu` (yalnız AppImage'ın kendi bağlamasındaki `usr/lib/Mozaik`, bağlar çözülmüş,
+başkalarının yazamadığı; güvenlik incelemesinin isteğiyle sıkılaştırıldı), `tauri.linux.conf.json`,
+`scripts/ortools-linux.sh`, `linux-paket.sh`, `linux-acilis.sh`, `surum.yml`'e `linux` işi,
+`sign`'a ve `publish`'e AppImage, `.github/workflows/linux.yml`, `kontrat.test.ts`'e iki test.
+
+**Ölçülen (bu Mac'te).** OR-Tools 9.15'in resmi Linux arşivleri `gh api` ile listelendi;
+AlmaLinux 8.10 arşivi indirildi (SHA-256 `c43b473b…a1e9`, GitHub'ın kendi özetiyle aynı) ve
+`llvm-objdump -p` ile okundu: `libortools.so.9`'un kapanışı 99 dosya, 65 MB, en çok GLIBC_2.26,
+GLIBCXX_3.4.22, CXXABI_1.3.11; sistemden yalnız libc, libm, libdl, libpthread, librt,
+libstdc++, libgcc_s ve ld-linux; hepsinde `RUNPATH $ORIGIN` (libz, libbz2, libutf8_validity
+hariç, onlar yalnız sistem kütüphanesi istiyor). Tauri'nin Linux kaynak klasörü
+`tauri-utils` 2.10'un `resource_dir`'inden okundu: `<exe>/../lib/<productName>`.
+
+**Koşulan.** `cargo test` (macOS, 108/108), rustfmt, `actionlint` (yeni bulgu yok; kanarya'nın
+`ubuntu-26.04` etiketi ve `surum.yml`'in eski SC2012 bilgileri önceden vardı), shellcheck (yalnız
+bilgi), `vitest` `kontrat.test.ts` ve `surum.test.ts`, ve aşağıdaki `hizli`.
+**Koşulmayan.** Linux hedefine `cargo check` (bu Mac'te GTK/WebKitGTK'nın pkg-config'i yok, Docker
+yok); Linux'a özgü kod `cfg!` ile her platformda derleniyor, yalnız `#[cfg(target_os = "linux")]`
+blokları (lib.rs'in önceden var olanları) burada derlenmedi. AppImage hiç üretilmedi, hiç açılmadı;
+güncelleme uçtan uca denenmedi; FUSE'suz Ubuntu 24.04'te ne olduğu bilinmiyor. İlk `linux.yml`
+koşusu bunların ilk ölçümü olacak.
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 

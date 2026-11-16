@@ -39,6 +39,7 @@ import { createHash } from 'node:crypto';
 import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import updateMacRs from '../src-tauri/src/update_mac.rs?raw';
+import updateLinuxRs from '../src-tauri/src/update_linux.rs?raw';
 import mailRs from '../src-tauri/src/mail.rs?raw';
 import cpsatRs from '../src-tauri/src/cpsat.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
@@ -389,6 +390,9 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     ['', '_boyut', '_sha256', '_imza'].map((ek) => `mac_${m}${ek}`),
   );
 
+  /** The Linux AppImage's four fields (2026-11-16, update_linux.rs). */
+  const LINUX = ['', '_boyut', '_sha256', '_imza'].map((ek) => `linux_appimage${ek}`);
+
   /** Read as `Option` with `serde(default)`: a manifest published before each was added still parses. */
   const OPTIONAL = [
     'sha256',
@@ -398,16 +402,18 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     'imza',
     'kurulum_imza',
     ...MAC,
+    ...LINUX,
   ];
 
-  /** What a Release carries beyond the recorded v2.2.0: the installer, and the Mac's four files. */
+  /** What a Release carries beyond the recorded v2.2.0: the installer, the Mac's four files and the AppImage. */
   const SONRADAN = [
     'Mozaik-Kurulum.exe',
     ...['arm64', 'x86_64'].flatMap((m) => [`Mozaik-mac-${m}.app.tar.gz`, `Mozaik-mac-${m}.dmg`]),
+    'Mozaik-linux-x86_64.AppImage',
   ];
 
-  it('Manifest on sekiz alan okuyor, surum.yml on sekizini yazıyor', () => {
-    expect(MANIFEST.length).toBe(18);
+  it('Manifest yirmi iki alan okuyor, surum.yml yirmi ikisini yazıyor', () => {
+    expect(MANIFEST.length).toBe(22);
     expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
   });
 
@@ -464,7 +470,7 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
 
   // The recorded release is v2.2.0; the installer and the Mac's files are
   // published from 2026-11-15 on, so a release now carries exactly those more.
-  it('Release’in dosyaları surum.yml’in yayınladıkları, artı 2026-11-15’ten beri kurulum ve Mac', () => {
+  it('Release’in dosyaları surum.yml’in yayınladıkları, artı 2026-11-15’ten beri kurulum, Mac ve Linux', () => {
     const published = publishedFiles();
     for (const f of SONRADAN) expect(published).toContain(f);
     expect(published.filter((n) => !SONRADAN.includes(n)).sort()).toEqual(
@@ -515,6 +521,41 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     const yayinlayan = surumYml.slice(surumYml.indexOf('\n  publish:\n'));
     expect(yayinlayan).not.toContain('MOZAIK_IMZA_ANAHTARI');
     expect(yayinlayan).toContain('[ -s "imza-mac-$m.minisig" ]');
+  });
+
+  // The AppImage, like each Mac archive: its own size, digest and signature,
+  // the address names it, the trusted comment is the one update.rs expects,
+  // and the name is the one update_linux.rs downloads.
+  it('surum.yml AppImage’ı kendi dosyasından ölçüp imzalıyor', () => {
+    expect(surumYml).toContain('export "LINUX_ADRES=$mac_kok/Mozaik-linux-x86_64.AppImage"');
+    expect(surumYml).toMatch(/f="teslim\/Mozaik-linux-x86_64\.AppImage"\s+export "LINUX_ADRES/);
+    expect(surumYml).toContain('export "LINUX_BOYUT=$(stat -c%s "$f")"');
+    expect(surumYml).toContain(`export "LINUX_OZET=$(sha256sum "$f" | cut -d' ' -f1)"`);
+    expect(surumYml).toContain('-t "mozaik $surum Mozaik-linux-x86_64.AppImage"');
+    expect(updateLinuxRs).toContain('pub const PAKET_ADI: &str = "Mozaik-linux-x86_64.AppImage";');
+    expect(surumYml).toContain('cp "$app" "teslim/Mozaik-linux-${{ matrix.mimari }}.AppImage"');
+    expect(surumYml).toContain("linux_appimage_imza: oku('imza-linux.minisig')");
+    expect(surumYml).toContain('linux_appimage_boyut: sayi(process.env.LINUX_BOYUT)');
+  });
+
+  // Owner's rule (2026-11-16): Linux never blocks Windows and the web either.
+  it('Linux işi düşse de Windows ve surum.json yayınlanıyor, AppImage yalnız geldiyse ve imzalandıysa', () => {
+    const linux = surumYml.slice(surumYml.indexOf('\n  linux:\n'), surumYml.indexOf('\n  sign:\n'));
+    expect(linux).toContain('fail-fast: false');
+    expect(linux).toContain('npm ci --ignore-scripts');
+    expect(linux).not.toMatch(/cache|MOZAIK_IMZA_ANAHTARI/);
+    const sign = surumYml.slice(
+      surumYml.indexOf('\n  sign:\n'),
+      surumYml.indexOf('\n  publish:\n'),
+    );
+    expect(sign).toContain('needs: [exe, mac, linux]');
+    expect(sign).not.toMatch(/needs\.linux\.result/);
+    expect(sign).toMatch(/if \[ -s teslim\/Mozaik-linux-x86_64\.AppImage \]; then\s+minisign -S/);
+    const publish = surumYml.slice(surumYml.indexOf('\n  publish:\n'));
+    expect(publish).toContain('needs: [package, exe, mac, linux, sign]');
+    expect(publish).not.toMatch(/needs\.linux\.result/);
+    expect(publish).toContain('[ -s imza-linux.minisig ]');
+    expect(publish).toContain('Linux paketi bu sürümde yok');
   });
 
   it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {

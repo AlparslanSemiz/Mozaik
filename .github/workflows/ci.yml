@@ -230,3 +230,9 @@ jobs:
       pages: write
       id-token: write
     uses: ./.github/workflows/site.yml
+    # The called workflow's `yeni-adres` job reads MOZAIK_SITE_DEPLOY_KEY from
+    # the `mozaik-site` environment. Without `inherit` a called workflow sees an
+    # empty secrets context, environment secrets included (2026-11-16: the job
+    # went green with "yok" while the secret was set). Only jobs that name a
+    # secret can read it; site.yml names just that one.
+    secrets: inherit

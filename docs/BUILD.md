@@ -155,7 +155,7 @@ atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`
 WebKitGTK ve `tauri-driver`) ve `kontrol` her makinede koşabilmeli. Yayınlanan
 Windows exe'sini derleyen ve `cargo test`'i her sürümde koşan yer
 `.github/workflows/surum.yml`. Linux ikilisi yalnız geliştirme makinesinde,
-elle derleniyor. `patrol` de
+elle derleniyor; yayınlanan Linux paketi (AppImage) ise `surum.yml`'de (aşağıda, "Linux"). `patrol` de
 `kontrol`'ün dışında, çünkü bir şey iddia etmiyor, geziyor, ve kırıldığında
 okunacak şey bir iz: kendi config'inde video ve trace açık.
 
@@ -199,6 +199,9 @@ scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, k
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop
 scripts/linux-mozaik.sh      Linux başlatıcısı: Chrome'un app modu, Mozaik'in kendi profili
+scripts/ortools-linux.sh     Linux: AppImage'ın OR-Tools 9.15 CP-SAT kapanışı, özeti sabit
+scripts/linux-paket.sh       Linux: AppImage'ın içi, CP-SAT paketin içinden küçük modeli çözüyor
+scripts/linux-acilis.sh      Linux: AppImage Xvfb altında yirmi saniye ayakta kalıyor mu
 ```
 
 ### Tek dosya
@@ -316,6 +319,8 @@ Adımlar, bu sırayla (Alp):
 
 1. Cloudflare DNS (`alparslansemiz.com`): `CNAME`, ad `mozaik`, hedef
    `alparslansemiz.github.io`, proxy **kapalı** ("DNS only"). (2026-11-16'da kuruldu.)
+   Adım 3–8 de 2026-11-16'da yapıldı: depo, deploy anahtarı (ortam sırrı), ilk yayın, Pages ve
+   HTTPS, `yeniAdresAcik: true`. Adım 2 (alan adı doğrulaması) önerilen, isteğe bağlı.
 2. Önerilen: GitHub → hesap Settings → Pages → Add a domain ile `alparslansemiz.com`'u
    doğrula (`_github-pages-challenge-alparslansemiz` TXT kaydı Cloudflare'e).
 3. Yeni, herkese açık depo `AlparslanSemiz/mozaik-site` (boş; README gerekmez).
@@ -422,9 +427,10 @@ kapatır, bu makinenin Intel sürücüsü onunla çöküyordu (tuzak 130); Windo
 derlenmez. Neden Playwright değil ve girdinin neden sayfanın içinde
 üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
 
-Linux'ta Tauri'nin bir paketi yok. Kullanıcının günlük kullandığı kopya Chrome'un app
-modu (aşağıda, "Linux uygulaması"); bir rpm'i üreten `exe:rpm` bu yüzden kaldırıldı,
-Linux ikilisi ise yukarıdaki test işi için duruyor ([DECISIONS.md](DECISIONS.md)).
+Linux'ta yayınlanan paket 2026-11-16'dan beri bir AppImage (aşağıda, "Linux"). Linux
+ikilisi ondan ayrı: yukarıdaki test işi için duruyor, kendini güncellemiyor ve CP-SAT
+yüklemiyor. Chrome'un app modu ("Linux uygulaması") geliştirme makinesindeki günlük kopya
+olarak kalıyor; bir rpm'i üreten `exe:rpm` kaldırılmıştı ([DECISIONS.md](DECISIONS.md)).
 
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere
 1600 mantıksal piksellik bir kutuda kaldığında sayfa 1920 değil 1600 CSS
@@ -441,7 +447,7 @@ Exe'nin dosya sistemi köprüsü bir adaptör, ayrıntısı [ARCHITECTURE.md](AR
 
 ### Linux uygulaması
 
-Kullanıcının Linux'ta her gün açtığı Mozaik, `dist/index.html`'in bir kopyası ve
+Bu makinede (geliştirme makinesi) her gün açılan Mozaik, `dist/index.html`'in bir kopyası ve
 Google Chrome'un app modu ([TODO.md](TODO.md) B7.28). Beşinci bir derleme değil:
 açılan dosya babanın çift tıkladığı dosyanın kendisi, ve dört yoldan hiçbiri
 değişmedi.
@@ -467,6 +473,67 @@ Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfas
 `showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
 ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
 siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
+
+### Linux
+
+Aynı `src-tauri/`, Linux'ta derlenince tek bir AppImage, `Mozaik-linux-x86_64.AppImage`
+(DECISIONS 2026-11-16, "Linux sürümü"). Bütün dağıtımlar için tek dosya: içinde WebKitGTK ve
+GTK, yani dağıtımın kendi WebKitGTK sürümü önemli değil; ekran kartı sürücüleri (libGL, EGL)
+sistemden gelir, bilerek: linuxdeploy'un dışlama listesi bir masaüstünün kendi taşıdığı
+kütüphaneleri pakete koymaz. AppImage'ın sistemden beklediği: grafik (libEGL, libGL, libgbm,
+Mesa ya da kartın sürücüsü), GTK 3'ün metin ve pencere yığını (fribidi, harfbuzz, fontconfig,
+freetype, X11/xcb) ve libgpg-error (libgcrypt'in). Hepsi GTK'lı her masaüstünde kurulu. Bir
+runner ya da çıplak bir kap onları taşımıyor (ilk `linux.yml` koşuları: `libEGL.so.1`,
+`libfribidi.so.0`, Fedora'da `libgpg-error.so.0` yok); açılış denemesi o yüzden GTK 3
+ve Mesa'yı kendisi kurar, Xvfb altında yazılımla çizer (`LIBGL_ALWAYS_SOFTWARE`,
+`WEBKIT_DISABLE_COMPOSITING_MODE`, yalnız `scripts/linux-acilis.sh`'de). Linux'a özgü ayarlar `src-tauri/tauri.linux.conf.json`'da (hedef yalnız
+`appimage`, kategori, medya çatısı yok); Tauri onu yalnız Linux'ta katar. `.deb` ve `.rpm` yok:
+ikisi de kendini güncelleyemez (program `/usr/bin`'de, root'un), `.deb` yalnız Debian ailesinde
+açılır (karar kaydında). Yalnız x86_64.
+
+**Taban.** Program derlendiği sistemin glibc'sini ister, ve yayın Ubuntu 22.04'te derlenir
+(glibc 2.35): Ubuntu 22.04 ve 24.04, Debian 12, Fedora 36 ve sonrası açar, Debian 11 açmaz.
+`scripts/linux-paket.sh` programın istediği en yüksek glibc'yi okur ve 2.35'i geçerse durur.
+AppImage açılmak için FUSE ister; Ubuntu 22.04'ten beri `libfuse2` kurulu gelmeyebilir
+(README, "Linux").
+
+```sh
+scripts/ortools-linux.sh              # OR-Tools 9.15, özeti sabit; src-tauri/ortools/ ve tauri.ortools.json
+npx vite build                        # cargo test'ten önce
+MOZAIK_ORTOOLS=$PWD/src-tauri/ortools/libortools.so.9 cargo test --manifest-path src-tauri/Cargo.toml
+npx --yes @tauri-apps/cli@2.12.4 build --config src-tauri/tauri.ortools.json
+# -> src-tauri/target/release/bundle/appimage/Mozaik_<sürüm>_amd64.AppImage
+scripts/linux-paket.sh <AppImage>     # paketin içi ve CP-SAT'ın küçük modeli
+scripts/linux-acilis.sh <AppImage>    # Xvfb'de yirmi saniye (kapta: --ayikla)
+```
+
+Gereken sistem paketleri (Ubuntu): `libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
+libayatana-appindicator3-dev libssl-dev patchelf file binutils`.
+
+**CP-SAT.** `scripts/ortools-linux.sh` resmi arşivlerden AlmaLinux 8.10'unkini indirir (Ubuntu
+arşivleri derlendikleri sürümün glibc'sini ister; bu kapanış en çok glibc 2.26 ve GLIBCXX
+3.4.22 istiyor, ölçüldü 2026-11-16), SHA-256'sını sabitle karşılaştırır ve `libortools.so.9`'un
+kapanışını (`readelf -d`, 99 kütüphane, 65 MB) `src-tauri/ortools/`'a kopyalar; sistemden
+gelmesi gerekenler yalnız glibc, libstdc++ ve libgcc_s olabilir, başkası çıkarsa durur.
+Betiğin ürettiği yapılandırma (depoya girmez) onları `bundle.resources` olarak verir ve Tauri Linux'ta kaynakları
+`usr/bin`'in yanındaki `usr/lib/Mozaik`'e koyar (tuzak 178). `cpsat.rs` kütüphaneyi yalnız
+`usr/bin`'den çalışan bir program için orada arar (`linux_yolu`): program `APPDIR`'in içindeyse
+ve bütün bağlar çözülünce kütüphane o bağlamanın içinde kalıyorsa (bir `.deb` olursa: program
+`/usr/bin`'de, kütüphane root'un `/usr/lib/Mozaik`'inde), ve ne kütüphane ne klasörü grup ya da
+başkaları tarafından yazılabiliyorsa. AppImage'da o klasör salt okunur bağlamanın içi. Kütüphanelerin `RUNPATH $ORIGIN`'i birbirini yanında bulduruyor.
+`MOZAIK_ORTOOLS` yalnız debug derlemede okunur.
+
+**Güncelleme.** Aşağıda, "Güncelleme"; `src-tauri/src/update_linux.rs`.
+
+**Yayın.** `surum.yml`'in `linux` işi (ubuntu-22.04) yukarıdaki dört adımı ve açılışı koşar,
+`Mozaik-linux-x86_64.AppImage`'ı verir; `sign` geldiyse imzalar, `publish` `linux_appimage*`
+alanlarını yazar. Linux da yayını engellemez, Mac'in kuralıyla: iş düştüyse o sürümde AppImage
+ve alanları yok, iş özetinde ve uyarıda "Linux paketi bu sürümde yok" yazar.
+`.github/workflows/linux.yml` hafif ikizi: `src-tauri/**`'a dokunan PR'da, `main` push'unda ve
+elle aynı paketi derler, sonra Ubuntu 22.04 ve 24.04 runner'larında (FUSE ile, çift tıklamanın
+yolu) ve Debian 12, Fedora 42 kaplarında (`--appimage-extract-and-run`) xvfb altında açar.
+Kapların kırmızısı işi kırmızı yapmaz, özette görünür: asgari bir kapta bir masaüstünün kurulu
+getirdiği bir kütüphane eksik olabilir. Hiçbir şeyi kilitlemez.
 
 ### Mac
 
@@ -544,6 +611,7 @@ README'nin indirme bağlantıları bunlar.
 | `Mozaik-Kurulum.exe` | Windows kurulum sihirbazı (2026-11-15'ten) |
 | `Mozaik-mac-arm64.dmg`, `Mozaik-mac-x86_64.dmg` | Mac'in ilk kurulumu, Apple Silicon ve Intel (2026-11-15'ten) |
 | `Mozaik-mac-arm64.app.tar.gz`, `Mozaik-mac-x86_64.app.tar.gz` | Mac kopyasının kendini güncellerken indirdiği paket |
+| `Mozaik-linux-x86_64.AppImage` | Linux: hem ilk kurulum hem kendini güncellemenin indirdiği dosya (2026-11-16'dan) |
 | `SHA256SUMS.txt` | öteki dosyaların özeti |
 | `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu manifest: sürüm, tarih, exe'nin adresi, boyutu ve SHA-256 özeti |
 
@@ -812,8 +880,8 @@ dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
 yarıda kalırsa eski programı yerine geri koyar. `.eski` yeni sürümün sayfası
 yüklendikten sonra silinir, açılışın ilk satırında değil: pencere açamayan bir yeni sürüm
 geri dönülecek kopyayı silmemiş olur. İndirme ve takas yalnız
-Windows'ta ve Mac'te yapılır (`self_update_here`): Linux ikilisinin manifestte kendi dosyası
-yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini kendi üstüne
+Windows'ta, Mac'te ve Linux'un AppImage'ında yapılır (`self_update_here`): Linux ikilisinin
+(AppImage değil) manifestte kendi dosyası yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini kendi üstüne
 yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
@@ -840,9 +908,21 @@ yeniden başlat" arşivi yeniden özetler, açar ve çalışan `.app` ile `renam
 tek adımda yer değiştirir (`src-tauri/src/update_mac.rs`). Program dmg'den ya da App
 Translocation'dan çalışıyorsa indirmeden önce "Mozaik'i Uygulamalar klasörüne taşıyın" der.
 
+**`exe`, Linux'ta (AppImage).** Aynı üç düğme ve aynı iki kilit (güvenilen yorum
+`mozaik <sürüm> Mozaik-linux-x86_64.AppImage`); manifestten yalnız `linux_appimage*` okunur.
+Program AppImage'ın salt okunur bağlamasından çalışır, değiştirilen dosya kişinin açtığı
+AppImage: `APPIMAGE`, yalnız program `APPDIR`'in içindeyse inanılır (tuzak 177). İndirme
+dosyanın yanına `.yeni` olarak yazılır ve çalıştırılabilir yapılır (ELF ve `AI\x02` imi, boyut,
+özet, imza önce). "Şimdi yeniden başlat" `.yeni`'yi yeniden özetler, eskisini `.eski` sabit
+bağıyla korur ve `.yeni`'yi tek `rename` ile onun yerine koyar: o yolda Mozaik'siz bir an yok.
+Yeni sürüm başlatılamazsa (`spawn` düşerse) `.eski` geri konur; başlarsa sayfası yüklenince
+`.eski`'yi siler, sayfasını çizemeyen bir yeni sürüm `.eski`'yi silmez. Klasör
+yazılamıyorsa (`/opt`) indirmeden önce "ev klasörünüzde yazabildiğiniz bir yere taşıyın" der
+(`src-tauri/src/update_linux.rs`).
+
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
-sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:
-güncellemesi `scripts/linux-kur.sh`'yi yeniden çalıştırmak.
+sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Geliştirme makinesinin Chrome app modu
+("Linux uygulaması") da bu yolda: güncellemesi `scripts/linux-kur.sh`'yi yeniden çalıştırmak.
 
 **Adresler.** `update.rs`'in `RELEASE_KOKLERI`'si iki önek tanır, depo
 `ders-programi` ve `Mozaik` adıyla. Liste yalnız uzar, çünkü dağıtılmış bir

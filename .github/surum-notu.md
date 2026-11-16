@@ -1,4 +1,4 @@
-**Nothing to download:** <https://alparslansemiz.github.io/Mozaik/> —
+**Nothing to download:** <https://mozaik.alparslansemiz.com/> —
 no installer, works offline after the first visit, and fixes arrive there by
 themselves.
 
