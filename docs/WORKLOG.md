@@ -87,6 +87,11 @@ kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtar
 budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
 ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
 
+**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
+seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
+dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
+aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
