@@ -47,9 +47,23 @@ yerel=$(find "$kok/src-tauri/ortools" -maxdepth 1 -name '*.so*' | wc -l)
 # shipped so would load nothing, quietly.
 yazilir=$(find "$kaynak" -maxdepth 1 -perm /022)
 [ -z "$yazilir" ] || { echo "AppImage'da başkalarının yazabildiği dosyalar var:" >&2; echo "$yazilir" >&2; exit 1; }
-yollar=$(readelf -d "$kaynak/libortools.so.9" | grep -E '(RUNPATH|RPATH)' || true)
-grep -q '\$ORIGIN' <<< "$yollar" \
-  || { echo "libortools.so.9'un RUNPATH'i \$ORIGIN değil" >&2; readelf -d "$kaynak/libortools.so.9" | grep -i path >&2; exit 1; }
+# Every library that arrived with `RUNPATH $ORIGIN` still has it: linuxdeploy
+# rewrites the rpath of what it deploys, and one that lost it cannot find its
+# neighbours at run time.
+for f in "$kok"/src-tauri/ortools/*.so*; do
+  ad=$(basename "$f")
+  once=$(readelf -d "$f" | grep -E '(RUNPATH|RPATH)' || true)
+  grep -q '\$ORIGIN' <<< "$once" || continue
+  simdi=$(readelf -d "$kaynak/$ad" | grep -E '(RUNPATH|RPATH)' || true)
+  grep -q '\$ORIGIN' <<< "$simdi" \
+    || { echo "$ad'in RUNPATH'i paketlenince \$ORIGIN değil: $simdi" >&2; exit 1; }
+done
+# A second copy of CP-SAT's libraries in `usr/lib` (linuxdeploy deployed what it
+# resolved) loads nothing wrong but doubles the download: said, not refused.
+cift=$(find "$ic/usr/lib" -maxdepth 1 \( -name 'libabsl_*' -o -name 'libortools*' \) | wc -l)
+if [ "$cift" != 0 ]; then
+  echo "::warning title=AppImage CP-SAT'ı iki kez taşıyor::usr/lib'de $cift OR-Tools kütüphanesi daha var"
+fi
 
 glibc=$(readelf -V "$program" | grep -o 'GLIBC_[0-9.]*' | sed 's/^GLIBC_//' | sort -V | tail -1)
 if [ "$(printf '%s\n%s\n' "$glibc" "$en_cok_glibc" | sort -V | tail -1)" != "$en_cok_glibc" ]; then

@@ -84,9 +84,16 @@ jobs:
         # linuxdeploy kendisi bir AppImage: runner'da FUSE'a güvenmeden açılsın.
         # Strip yok: program zaten `strip = true` ile derleniyor, ve linuxdeploy'un
         # eski `strip`'i yeni ELF bölümlerinde (OR-Tools, sistem kütüphaneleri) düşüyor.
+        #
+        # linuxdeploy, AppDir'deki her ELF'in bağımlılığını sistemin arama yolunda
+        # arar ve CP-SAT'ın kütüphanelerinin `RUNPATH $ORIGIN`'ini izlemez: onları
+        # kendi klasörlerinde bulsun diye o klasör (tuzak 178). Yalnız AppDir'in
+        # klasörü, kaynak `src-tauri/ortools` değil: bu yol derleme sırasında
+        # henüz yok, yani cargo ve rustc OR-Tools'un libz'ini görmez.
         env:
           APPIMAGE_EXTRACT_AND_RUN: '1'
           NO_STRIP: 'true'
+          LD_LIBRARY_PATH: ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/Mozaik.AppDir/usr/lib/Mozaik
         run: npx --yes @tauri-apps/cli@2.12.4 build --verbose --config src-tauri/tauri.ortools.json
 
       - name: Is the AppImage whole
