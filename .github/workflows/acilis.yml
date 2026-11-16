@@ -106,8 +106,9 @@ jobs:
             echo "taban \`${TABAN_SHA:0:7}\` → dal \`$(git rev-parse --short HEAD)\`, $(nproc) çekirdek, $(node -p 'require("os").cpus()[0].model')"
             echo
           } >> "$GITHUB_STEP_SUMMARY"
-          cp ../olcer/scripts/acilis-olc.mjs ../acilis-olc.mjs
-          node ../acilis-olc.mjs \
+          # Inside `dal`, so `@playwright/test` resolves from its node_modules.
+          cp ../olcer/scripts/acilis-olc.mjs scripts/acilis-olc.olcer.mjs
+          node scripts/acilis-olc.olcer.mjs \
             --taban ../taban/dist/index.html --dal dist/index.html \
             --veri "$veri" --kosu "$KOSU" --butce-ms "$BUTCE" \
             --ozet "$GITHUB_STEP_SUMMARY" --json ../acilis.json
