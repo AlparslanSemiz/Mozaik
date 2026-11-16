@@ -178,9 +178,10 @@ test.describe('49. Liste araçları', () => {
     // The teacher's SHORT form is what the grid says, so it is what gets
     // remembered and therefore what gets typed.
     await page.getByLabel('ders ara').fill('MÇ');
-    const found = await rows(page).count();
-    expect(found).toBeGreaterThan(0);
-    expect(found).toBeLessThan(99);
+    // Counted at once the filter may not have run yet (CI 2026-11-16: 99 of
+    // 99); wait for the list to shrink, then check what is left.
+    await expect.poll(() => rows(page).count()).toBeLessThan(99);
+    expect(await rows(page).count()).toBeGreaterThan(0);
     await expect(rows(page).first()).toContainText('MÇ');
   });
 

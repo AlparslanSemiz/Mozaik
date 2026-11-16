@@ -49,6 +49,15 @@ jobs:
           fetch-depth: 0
           # PR'ın birleşme commit'i değil, dalın kendisi.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      # The measuring script itself comes from the workflow's own commit, not
+      # from the branch: a branch cut before the script existed has none
+      # (PR #80, 2026-11-16: "Cannot find module dal/scripts/acilis-olc.mjs"),
+      # and both sides should be measured by the same script anyway.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: olcer
+          sparse-checkout: scripts/acilis-olc.mjs
+          sparse-checkout-cone-mode: false
       - name: Taban
         id: taban
         env:
@@ -97,7 +106,9 @@ jobs:
             echo "taban \`${TABAN_SHA:0:7}\` → dal \`$(git rev-parse --short HEAD)\`, $(nproc) çekirdek, $(node -p 'require("os").cpus()[0].model')"
             echo
           } >> "$GITHUB_STEP_SUMMARY"
-          node scripts/acilis-olc.mjs \
+          # Inside `dal`, so `@playwright/test` resolves from its node_modules.
+          cp ../olcer/scripts/acilis-olc.mjs scripts/acilis-olc.olcer.mjs
+          node scripts/acilis-olc.olcer.mjs \
             --taban ../taban/dist/index.html --dal dist/index.html \
             --veri "$veri" --kosu "$KOSU" --butce-ms "$BUTCE" \
             --ozet "$GITHUB_STEP_SUMMARY" --json ../acilis.json
