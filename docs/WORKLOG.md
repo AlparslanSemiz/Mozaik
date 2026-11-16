@@ -115,7 +115,9 @@ birleşen worktree'leri bekletmemek yeter.
 `scripts/linux-kur.sh` sabit bir yoldan değil, kendi durduğu depodan (`scripts/..`) derliyor;
 main, temiz ve worktree değil kontrolleri aynı. `src/linuxKur.test.ts` betiği sahte deponun içine
 kopyalayıp oradan koşuyor; iki yeni test: depo başka bir yerde de olsa kendi deposundan kuruyor,
-bir git deposunun içinde değilse 3 ile reddediyor. `scripts/dal-temizle.mjs`'in arşivi
+bir git deposunun içinde değilse 3 ile reddediyor. Başka bir tam klon da kurabildiği için yeni
+bir kapı: kurulu commit bu klonun main'inden yeniyse 8 ile reddediyor (geri sürüm plan şemasının
+altına düşürmesin), testiyle; bağlantıyla çağrılan betik gerçek dosyasının deposunu buluyor. `scripts/dal-temizle.mjs`'in arşivi
 `~/dev/Mozaik-arsiv/`'e taşındı (eski arşivler eski konumda duruyor). CLAUDE.md, README, BUILD
 yeni yolu söylüyor; tarihli kayıtlar olduğu gibi.
 
