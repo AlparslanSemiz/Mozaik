@@ -22,6 +22,14 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
+**2026-11-16 · Babanın iki alışkanlığı** (Alp'in aktardığı; plan yazıldı, kod yok)
+
+1. **Otomatik dizmeden sonra elle düzeltiyor.** Bu onun için en kolay ve en güvenli hâle gelmeli:
+   düzelttiği yerinde kalsın, reddedilen taşımada yol gösterilsin.
+2. **Program oturduktan sonra soru çözüm saatleri ekliyor.** Eklemek kolay olmalı; öğrenciler
+   (sınıf programı) soru çözümü görmez, yalnız öğretmenler görür.
+   → İkisinin planı ve açık soruları: [plan-elle-duzeltme-soru-cozum.md](plan-elle-duzeltme-soru-cozum.md).
+
 **2026-10-08 · Babanın yeni istekleri** (kullanıcının aktardığı; uygulamaya geçilmedi)
 
 1. **Kullanım kolaylığı: daha az yazı, daha az soru.** Çok soru ve okunacak çok yazı
