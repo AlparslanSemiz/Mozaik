@@ -1,0 +1,114 @@
+# İki çekirdekte ölçüm (2026-11-16): babanın makinesi zayıf bir Windows 10, iki
+# çekirdek, 4 GB. Otomatik diz, iyileştirme geçişi ve öneri araması (bizim arama,
+# sonra CP-SAT) orada ne kadar sürüyor, hiç ölçülmemişti.
+#
+# Aynı runner'da iki koşu: süreç ağacı iki mantıksal CPU'ya kilitli
+# (`start /affinity 3`; CP-SAT süreci maskeyi kendine de koyar) ve
+# navigator.hardwareConcurrency 2, yani relaxPool.ts'in iki çekirdekte vereceği
+# işçi sayısı; sonra kısıtsız. Ölçen src/platform/search/ikiCekirdek.olcum.test.ts,
+# CP-SAT'ı cpsat.rs'in C API'siyle ve surum.yml'in sabitlediği DLL ile
+# scripts/olcum/cpsat-soru.py soruyor. Tablo iş özetine ve bir artifact'e.
+#
+# Bellek SINIRLANMIYOR (Job Object yok), yalnız tepe working set raporlanıyor:
+# CP-SAT süreci ve Node süreci ayrı ayrı.
+#
+# Hiçbir şeyi beklemez ve kırmızısı hiçbir şeyi kilitlemez (iş düzeyinde
+# continue-on-error): çözücüye dokunan PR'da ve elle.
+name: olcum-iki-cekirdek
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/pure/relax/**'
+      - 'src/pure/solver/**'
+      - 'src/platform/search/**'
+      - 'src-tauri/src/cpsat.rs'
+      - 'scripts/olcum/**'
+      - '.github/workflows/olcum-iki-cekirdek.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: olcum-iki-cekirdek-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  olcum:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+
+      # kurulum-windows.yml'deki adımın indirme kısmı; özet surum.yml'inkiyle aynı olmalı.
+      - name: OR-Tools CP-SAT, surum.yml'deki gibi
+        shell: pwsh
+        run: |
+          $surum = "9.15.6755"
+          $ad = "or-tools_x64_VisualStudio2022_cpp_v$surum"
+          $url = "https://github.com/google/or-tools/releases/download/v9.15/$ad.zip"
+          $beklenen = "43429C741641C8B495EE77E44EA00F0F4524519495FD2EDAF929003AA2B2EA30"
+          if (-not (Select-String -Path .github/workflows/surum.yml -SimpleMatch $beklenen -Quiet)) { throw 'surum.yml başka bir OR-Tools sabitliyor' }
+          Invoke-WebRequest $url -OutFile "$env:RUNNER_TEMP/ortools.zip"
+          $hash = (Get-FileHash "$env:RUNNER_TEMP/ortools.zip" -Algorithm SHA256).Hash
+          if ($hash -ne $beklenen) { throw "OR-Tools arşivinin özeti tutmuyor: $hash" }
+          Expand-Archive "$env:RUNNER_TEMP/ortools.zip" -DestinationPath "$env:RUNNER_TEMP/ortools"
+          $dll = Join-Path $env:RUNNER_TEMP "ortools/$ad/bin/ortools.dll"
+          if (-not (Test-Path $dll)) { throw "ortools.dll yok: $dll" }
+          "MOZAIK_OLCUM_DLL=$dll" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          New-Item -ItemType Directory -Force -Path olcum | Out-Null
+
+      - name: Runner
+        shell: pwsh
+        run: |
+          $c = Get-CimInstance Win32_Processor
+          $m = Get-CimInstance Win32_ComputerSystem
+          $satir = "Runner: $($c.Name), $($c.NumberOfCores) çekirdek / $($m.NumberOfLogicalProcessors) mantıksal, $([math]::Round($m.TotalPhysicalMemory / 1GB, 1)) GB; $(python --version)"
+          Write-Host $satir
+          $satir | Out-File -FilePath olcum/runner.txt -Encoding utf8
+
+      # `start /affinity 3`: CPU 0 ve 1; çocuk süreçler (Vitest'in işçisi, Python)
+      # maskeyi miras alır.
+      - name: İki CPU
+        shell: cmd
+        env:
+          MOZAIK_OLCUM_CEKIRDEK: '2'
+          MOZAIK_OLCUM_MASK: '3'
+          MOZAIK_OLCUM_CIKTI: ${{ github.workspace }}\olcum\iki.json
+        run: |
+          start "" /b /wait /affinity 3 node node_modules\vitest\vitest.mjs run src/platform/search/ikiCekirdek.olcum.test.ts
+          exit /b %ERRORLEVEL%
+
+      - name: Kısıtsız, aynı runner
+        if: ${{ !cancelled() }}
+        shell: cmd
+        env:
+          MOZAIK_OLCUM_CIKTI: ${{ github.workspace }}\olcum\serbest.json
+        run: node node_modules\vitest\vitest.mjs run src/platform/search/ikiCekirdek.olcum.test.ts
+
+      - name: Tablo
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          {
+            node scripts/olcum/tablo.mjs olcum/iki.json olcum/serbest.json
+            echo
+            cat olcum/runner.txt
+          } > olcum/olcum.md
+          cat olcum/olcum.md >> "$GITHUB_STEP_SUMMARY"
+
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: olcum-iki-cekirdek
+          path: olcum/
+          retention-days: 30
