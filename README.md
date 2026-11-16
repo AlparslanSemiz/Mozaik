@@ -7,7 +7,7 @@
 **A single-file tool for laying out a school's weekly timetable. Works offline, no account.**
 
 [![Release](https://img.shields.io/github/v/release/AlparslanSemiz/Mozaik?style=flat&color=2b6cb0)](https://github.com/AlparslanSemiz/Mozaik/releases/latest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-2b6cb0?style=flat)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-2b6cb0?style=flat)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-React-2b6cb0?style=flat)](docs/BUILD.md)
 
 ### [Try it in the browser](https://mozaik.alparslansemiz.com/)  |  [Download](#download)
@@ -97,5 +97,16 @@ docs/        principles, architecture, data model, decisions (Turkish)
 
 ## License
 
-[MIT](LICENSE). The embedded IBM Plex Sans is under the SIL Open Font License 1.1; see
+Mozaik is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE): free
+for personal use, teachers, public and non-profit schools and other noncommercial
+organizations. Commercial use (tutoring centres, private schools, resale) needs a commercial
+licence: contact via <https://alparslansemiz.com/en/contact/>. Versions released before
+2026-11-16 (v2.2.0 and earlier) remain available under the MIT License.
+
+*Türkçesi:* Mozaik kaynağı açık ama ticari kullanıma kapalıdır (PolyForm Noncommercial 1.0.0):
+kişiler, öğretmenler, devlet ve kâr amacı gütmeyen okullar ücretsiz kullanır; dershane, özel
+okul ve yeniden satış gibi ticari kullanım için ticari lisans gerekir. v2.2.0 ve öncesi MIT
+olarak kalır.
+
+The embedded IBM Plex Sans is under the SIL Open Font License 1.1; see [NOTICE](NOTICE) and
 `scripts/font-source/OFL.txt`.

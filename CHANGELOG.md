@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Changed
+
+- Licence: from this commit on Mozaik is under the PolyForm Noncommercial License 1.0.0 (free for personal use, teachers, public and non-profit schools; commercial use needs a licence). Releases up to v2.2.0 remain under the MIT License.
+
 ### Added
 
 - Send a teacher their timetable as a PDF: on the teacher's page and in Print, "WhatsApp" saves the sheet as `Mozaik – Name – date.pdf` in Downloads and opens the chat with that teacher's number; the e-mail button saves the same file to attach. A class's page has "Save PDF". Teachers have a phone field (schema v19); the number only goes into the WhatsApp link you click.

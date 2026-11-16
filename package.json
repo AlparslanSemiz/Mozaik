@@ -4,7 +4,7 @@
   "version": "2.2.0",
   "type": "module",
   "description": "Weekly school timetable builder - one file, no server, no internet",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
