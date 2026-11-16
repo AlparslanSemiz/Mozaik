@@ -128,7 +128,8 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
 
   test('taşan bölümle taşmayan bölüm AYNI genişlikte', async ({ page }) => {
     // A shorter window: since 2026-11-16 Görünüm's sentences are behind "?",
-    // and at 1080 it no longer scrolls.
+    // and at 1080 it no longer scrolls. Since the density choices went (K6,
+    // 2026-11-16) Görünüm fits at 900 too; Kurallar is the section that scrolls.
     await page.setViewportSize({ width: 1920, height: 900 });
     await openWithSample(page);
 
@@ -146,7 +147,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     };
 
     const fits = await section('Zil ve günler');
-    const overflows = await section('Görünüm');
+    const overflows = await section('Kurallar');
 
     // TWO GUARDS BEFORE THE ASSERTION, and neither is optional.
     //
@@ -157,7 +158,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     // this suite runs under — it takes none, and a bar of zero pixels can never
     // take any away.
     expect(fits.overflowing, '"Zil ve günler" taşıyor — çift seçilmeli').toBe(false);
-    expect(overflows.overflowing, '"Görünüm" taşmıyor — çift seçilmeli').toBe(true);
+    expect(overflows.overflowing, '"Kurallar" taşmıyor — çift seçilmeli').toBe(true);
     expect(
       overflows.gutter,
       'kaydırma çubuğu yer kaplamıyor — bu test hiçbir şey ölçmüyor',
