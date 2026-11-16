@@ -78,6 +78,23 @@ export function normalizeScale(raw: unknown): number {
   return Number((SCALE_MIN + steps * SCALE_STEP).toFixed(2));
 }
 
+/**
+ * The four steps offered by name (walkthrough, 2026-11-16): fifteen "%"
+ * buttons in one panel were hard to find and harder to choose from. Any other
+ * stored value still draws as it is; the step nearest to it is the pressed one.
+ */
+export const SCALE_STEPS: Array<[number, string]> = [
+  [1, 'Normal'],
+  [1.15, 'Büyük'],
+  [1.3, 'Daha büyük'],
+  [1.5, 'Çok büyük'],
+];
+
+/** The named step nearest to `scale`. */
+export function nearestStep(scale: number): number {
+  return SCALE_STEPS.reduce((a, [v]) => (Math.abs(v - scale) < Math.abs(a - scale) ? v : a), 1);
+}
+
 export const scalePreference = preference<number>({
   key: SCALE_KEY,
   normalize: normalizeScale,

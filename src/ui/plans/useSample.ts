@@ -42,14 +42,13 @@ export function useLoadSample(): LoadSample {
           title: holds
             ? t('Bu plandaki her şeyin yerine örnek okul geçecek')
             : t('Örnek okul verisi yüklenecek'),
+          // An empty plan loses nothing: the title is the whole question.
           body: holds
             ? t(
                 '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından "Geri al" ile geri gelir.',
                 { kayip: cost },
               )
-            : t(
-                `25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Okul bilgileri → Hakkında → "Her şeyi sil" ile temizleyin.`,
-              ),
+            : undefined,
           confirmLabel: holds ? t('Yerine koy') : t('Yükle'),
           danger: holds,
         }))

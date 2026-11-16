@@ -101,8 +101,6 @@ const EN: Sozluk = {
   "Geri al": "Undo",
   "Geri al (Ctrl+Z)": "Undo (Ctrl+Z)",
   "İleri al": "Redo",
-  "Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.":
-    "Writes the open plan to a .json plan file. Mozaik already saves on this computer by itself; the file is for moving and keeping a copy.",
   "Dosyadan aç": "Open from file",
   "Klavye kısayolları": "Keyboard shortcuts",
   // -------------------------------------------------- ShortcutsHelp.tsx
@@ -143,8 +141,6 @@ const EN: Sozluk = {
   "{ad} sınıfı": "class {ad}",
   "{ad} dersliği": "room {ad}",
   "{kim} · müsait olmayan saatler": "{kim} · unavailable hours",
-  "Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki saat numarasına tıklayınca haftanın o saati değişir.":
-    "Hold and drag to mark several cells at once. Clicking a day name on the left flips the whole day; clicking a period number on top flips that hour across the week.",
   "Haftanın bu saatini değiştir": "Flip this hour of the week",
   "{gun}: bütün günü değiştir": "{gun}: flip the whole day",
 
@@ -232,7 +228,7 @@ const EN: Sozluk = {
 
   // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Most per day",
-  "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
+  "Haftaya dağılış değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Changing the split clears this lesson from the timetable, pinned lessons included",
 
   // src/ui/Ribbon.tsx — what the two destructive questions promise
@@ -361,7 +357,7 @@ const EN: Sozluk = {
   "Öğretmen seçin": "Choose a teacher",
   "{brans}: {n} öğretmen": "{brans}: {n} {n:teacher|teachers}",
   "Haftalık saat": "Weekly hours",
-  Dağılım: "Split",
+  "Haftaya dağılış": "Spread over the week",
   Ekle: "Add",
   "Dersleri yapıştır": "Paste lessons",
   "Sınıf · Öğretmen (ad veya kısa ad) · Haftalık saat · Blok (1 · 2 · 3)":
@@ -382,7 +378,7 @@ const EN: Sozluk = {
   "Kaldır: {ne}": "Remove: {ne}",
   "Günde ↑": "Per day ↑",
   "{sinif} · {kim} dersinin branşı": "Subject of the {sinif} · {kim} lesson",
-  "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar":
+  "Haftaya dağılış değiştirilirse bu dersin programdaki yerleşimleri kalkar":
     "Changing the split removes this lesson's placements from the timetable",
   Sil: "Delete",
   "Hangi öğretmen": "Which teacher",
@@ -515,7 +511,6 @@ const EN: Sozluk = {
     "Puts the ready-made sample school in place of this plan",
   "Örnek okulu yükle": "Load the sample school",
   Sıfırla: "Reset",
-  "Her şeyi siler": "Deletes everything",
   "Her şeyi sil": "Delete everything",
   "Veriler nerede": "Where the data is",
   Anahtar: "Key",
@@ -601,7 +596,6 @@ const EN: Sozluk = {
   "İlk saatin başlangıcı": "Start of the first hour",
   "Başlangıç saati": "Start hour",
   "Başlangıç dakikası": "Start minute",
-  "Saat (dk)": "Hour (min)",
   "Teneffüs (dk)": "Break (min)",
   "Öğle arası (dk)": "Lunch break (min)",
   "Saat adları (virgülle; boş kalan numarasını alır)":
@@ -1423,8 +1417,6 @@ const EN: Sozluk = {
     "Each class's fixed room; two classes sharing one cannot take the same hour.",
   "Okulun listesinde **bulunmayan** hazır branşlar; eklemek için tıklayın.":
     "Built-in subjects **not** on the school's list; click to add one.",
-  "Mozaik **kendiliğinden** saklıyor; **Kaydet** onun yanına gelir, yerine değil.":
-    "Mozaik saves **by itself**; **Save** comes beside that, not instead of it.",
   "Renk kimliktir: ızgaradaki satırı havuzdaki dersiyle eşleştiren şey budur.":
     "Colour is identity: it is what matches a grid row to its lesson in the tray.",
   "Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**.":
@@ -1441,12 +1433,6 @@ const EN: Sozluk = {
     "It sits in the store the browser keeps for this site.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** in total; the browser allows Mozaik about **5 MB**.",
-  "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
-    "A new plan opens straight away and the **undo** history is cleared.",
-  "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
-    "A line appears at the top when a new version is out; nothing changes until **Reload**.",
-  "Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de.":
-    "The above live in **localStorage**; the folder handle you chose is in **IndexedDB**.",
   "{dosya} **bütün planlarınızdır**; yanındakiler onun gün gün duran hâlleri.":
     "{dosya} is **all of your plans**; the files beside it are its day-by-day copies.",
   "{n} kapalı": "{n} off",
@@ -1456,8 +1442,6 @@ const EN: Sozluk = {
     "A teacher's open hours cannot be fewer than the hours loaded onto them.",
   "Üst çubuktaki **Kaydet** açık planı yazar; buradaki dosya **bütün planları**.":
     "**Save** above writes the open plan; this file holds **every plan**.",
-  "İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.":
-    "What is inside: every plan’s rooms, teachers, classes, lessons, laid-out timetable, name and draft mark. Preferences belonging to this computer, such as the theme, and the automatic backups are not included.",
   "İşareti kaldırılan şey kâğıda basılmaz.":
     "Anything unticked is left off the paper.",
   "E-posta":
@@ -1503,8 +1487,6 @@ const EN: Sozluk = {
     "No school name yet. Now: {hafta}. Change it if that is wrong.",
   "Okul adını ve zili gir":
     "Enter school name and bell",
-  "Derslik ekle":
-    "Add rooms",
   "{n} branş":
     "{n} {n:subject|subjects}",
   "Branş ekle":
@@ -1692,7 +1674,6 @@ const EN: Sozluk = {
   "Seviye": "Level",
   "{toplam} öğretmenin ilk {kac} tanesi.": "The first {kac} of {toplam} {toplam:teacher|teachers}.",
   "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden \"Dosyadan aç\" ile açabilirsiniz.": "This is not a file with every plan in it. Open a single plan with “Open from file” in the File menu of the top bar.",
-  "Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "The plan on screen will be replaced by the one in the file and the undo history cleared. If you may change your mind, press “Save” first.",
   "\"{plan}\" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.": "The plan \"{plan}\" cannot be read, so no plan is being written to the folder.",
   "**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "**The plan opened empty on this computer, but the {klasor} folder holds a fuller plan file:** {dosya}, {ogretmen} {ogretmen:teacher|teachers} and {ders} {ders:lesson|lessons}. Nothing is written to the folder until you choose.",
   "Belgelerim'deki son kaydı aç": "Open the last save in Documents",
@@ -1809,14 +1790,10 @@ const EN: Sozluk = {
     "No cell is left for these lessons. A lesson’s name shows it in the tray; to make room, open hours on the person's page or move a lesson.",
   "Program, **Okul bilgileri → Kurallar**'da girdiğiniz sınırları aşıyor.":
     "The timetable goes past the limits you set under **School details → Rules**.",
-  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Okul bilgileri → Kurallar’daki sayı geçerli olur.":
-    "The split is how those hours are divided across the week: 2+1 means two hours back to back on one day and a single hour on another. A block can be 2 or 3 hours; the rest are single. Per day ↑ is the most this lesson may take in one day; left empty, the number from School details → Rules applies.",
   "Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki \"Tümünü dosyadan aç\" düğmesini kullanın.":
     "It replaces every plan on this computer, not a single one. Use the \"Open all from file\" button in School details → Plans and backup.",
   "**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Okul bilgileri → Hakkında'dan tekrar deneyebilirsiniz.":
     "**The installation did not finish** (code {kod}). Mozaik opened as it was, your plans are in place. Restart the computer and try again from School details → About.",
-  "25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Mozaik'in ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Okul bilgileri → Hakkında → \"Her şeyi sil\" ile temizleyin.":
-    "25 teachers, 20 classes, 8 rooms and 99 lessons. For seeing what Mozaik does; before you start entering your own data, clear it with School details → About → \"Delete everything\".",
   "Aynısı sınıf için. Yalnız sorun listesinde uyarır.":
     "The same for a class. Warns only, in the problem list.",
   "Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Yazdır ve gönder** sekmesinde.":
@@ -1852,6 +1829,20 @@ const EN: Sozluk = {
   "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
   "Ayrı plan yap":
     "Make it a plan of its own",
+  "Önceki programa dön": "Back to the previous timetable",
+  "Yok say": "Ignore",
+  "{n}. sütun": "Column {n}",
+  "Daha büyük": "Larger",
+  "Çok büyük": "Very large",
+  "Yazıyı büyüt": "Larger text",
+  "Branşa göre süz": "Filter by subject",
+  "4 saat: 2+2 = iki gün ikişer saat": "4 hours: 2+2 = two days, two hours each",
+  "son 7 gün": "last 7 days",
+  "bütün planlar": "all plans",
+  "Ders süresi (dakika)": "Lesson length (minutes)",
+  "Ekrandaki plan dosyadakiyle değiştirilecek. Bundan sonra \"Geri al\" bu açılıştan öncesine dönemez. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "The plan on screen will be replaced by the one in the file. After that, “Undo” cannot go back past this opening. If you may change your mind, press “Save” first.",
+  "**Mozaik burada kendini günceller.** Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.": "**Mozaik updates itself here.** A line appears at the top when a new version is out; nothing changes until **Reload**.",
+  "Mozaik kendiliğinden saklıyor; dosya taşımak ve saklamak için.": "Mozaik saves by itself; the file is for moving and keeping a copy.",
 };
 
 registerSozluk("en", EN);

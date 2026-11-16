@@ -34,6 +34,7 @@ import {
   subjectKey,
   subjectLabel,
   subjectShort,
+  surname,
   teacherSubjects,
 } from '../entities';
 import { compareTr } from '../listview';
@@ -58,6 +59,8 @@ export type ColorOf = (d: State, lesson: Lesson) => number;
 export interface GridCell {
   lessonId: Id;
   top: string; // class name ("510") or teacher short form
+  /** The teacher's surname, drawn instead of `top` where the cell has room for it. */
+  full?: string;
   bottom: string; // room letter ("A") or subject
   color: number;
   /** Does the block continue into the next hour — then no separator is drawn. */
@@ -156,10 +159,14 @@ export function buildRows(
           };
         }
       }
+      // The surname where the head has room for it, the short form under it:
+      // "MÇ" alone was a code the father had to decode (walkthrough, 2026-11-16).
+      const last = surname(teacher.name);
+      const named = last !== '' && last !== teacher.short && [...last].length <= 10;
       return {
         id: teacher.id,
         kind: 'teacher' as const,
-        name: teacher.short,
+        name: named ? last : teacher.short,
         // Both, because this line IS the teacher — the cells in the row each
         // name the one subject their own lesson is taught under.
         //
@@ -168,9 +175,10 @@ export function buildRows(
         // never showed the second one at all; the cells of the grid have read
         // the short form all along, so the row head now says what its own row
         // says. `subjectShort` is the one place that resolves it.
-        secondary: teacherSubjects(teacher)
-          .map((name) => subjectShort(d.settings, name))
-          .join(' · '),
+        secondary: [
+          ...(named ? [teacher.short] : []),
+          ...teacherSubjects(teacher).map((name) => subjectShort(d.settings, name)),
+        ].join(' · '),
         color: teacher.color,
         cells,
         closed,
@@ -196,6 +204,7 @@ export function buildRows(
         cells[i] = {
           lessonId,
           top: teacher?.short ?? '?',
+          full: surname(teacher?.name ?? ''),
           // The LESSON's subject, not the teacher's first one: a teacher who
           // holds two is in this class for exactly one of them.
           bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
@@ -225,6 +234,7 @@ function sameCell(a: GridCell | null, b: GridCell | null): boolean {
   return (
     a.lessonId === b.lessonId &&
     a.top === b.top &&
+    a.full === b.full &&
     a.bottom === b.bottom &&
     a.color === b.color &&
     a.continues === b.continues &&

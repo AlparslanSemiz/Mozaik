@@ -151,7 +151,9 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
           and open they were the longest text on the screen. */}
       <details onToggle={(e) => seen(e.currentTarget.open)}>
         <summary>
-          <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
+          {/* The version only: its date is on the Sürüm row above, and two
+              dates for one version read as two versions. */}
+          <b>v{entry.version}</b>
         </summary>
         <ul>
           {entry.items.map((line) => (
@@ -185,17 +187,14 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
 
 /** The site and the local install: a service worker does the work. */
 function SiteUpdate({ update }: { update: UpdateRun }) {
-  const t = useT();
   return (
     <>
+      {/* No button: here it updates itself, and a button that asked what
+          the page asks anyway was one more thing to wonder about
+          (walkthrough, 2026-11-16). */}
       <p className="hint">
-        <T k="Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez." />
+        <T k="**Mozaik burada kendini günceller.** Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez." />
       </p>
-      <div className="form-row">
-        <button className="btn" onClick={update.check}>
-          {t('Güncellemeleri denetle')}
-        </button>
-      </div>
       {update.ready && (
         <p className="hint" role="status">
           <T k="**Yeni sürüm hazır.** Üstteki **Yenile** düğmesine basın." />

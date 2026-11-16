@@ -2,8 +2,7 @@
 //
 // A plan is a whole timetable: its own school, its own people, its own grid.
 // The top bar only SWITCHES between them; everything that creates, renames or
-// destroys one is here, next to "Her şeyi sil" — the two rarest and most
-// dangerous buttons in the app live on the same screen on purpose.
+// destroys one is here.
 //
 // A DRAFT is not a second kind of object, only a plan with a flag: the same
 // school with the grid emptied, kept so next term does not start by retyping
@@ -90,9 +89,6 @@ export default function Plans({ state, plans }: Props) {
       <HelpHead topic={t('Planlar ({n})', { n: library.plans.length })}>
         <p>
           <T k="Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir." />
-        </p>
-        <p>
-          <T k="Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır." />
         </p>
       </HelpHead>
 

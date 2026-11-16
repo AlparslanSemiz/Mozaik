@@ -21,7 +21,9 @@ import { expect, test } from './kapan';
 import {
   answerDialog,
   deletePerson,
+  dragAndDrop,
   open,
+  openGridMenu,
   openSettings,
   openSetup,
   openWithSample,
@@ -352,7 +354,7 @@ test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (den
 // reload the state from before them was nowhere (the audit of 2026-11-16).
 test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
   const lastDelete = (page: Page) =>
-    page.locator('.save-warning', { hasText: 'Son silmeyi geri almak için' });
+    page.locator('.update-bar', { hasText: 'Son silmeyi geri almak için' });
   const classesStored = async (page: Page) =>
     (JSON.parse((await stored(page, 'ders-programi')) ?? '{}') as { classes?: unknown[] }).classes
       ?.length;
@@ -384,6 +386,20 @@ test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
     await reopen(page);
     await lastDelete(page).getByRole('button', { name: 'Geri getir' }).click();
     await expect.poll(() => classesStored(page)).toBe(20);
+  });
+
+  // A relaid or emptied week is no deletion: the strip read "Son silmeyi geri
+  // almak için" after a reload when nothing had been deleted (walkthrough, 2026-11-16).
+  test('“Programı boşalt”tan sonra yenilemede silme önerilmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    await openGridMenu(page);
+    await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await page.waitForTimeout(700); // the 400 ms autosave
+    await reopen(page);
+    await page.waitForTimeout(500);
+    await expect(lastDelete(page)).toHaveCount(0);
   });
 
   test('geri alınmış silme yenilemede önerilmiyor', async ({ page }) => {

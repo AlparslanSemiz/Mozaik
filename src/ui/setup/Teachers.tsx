@@ -9,15 +9,16 @@ import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import {
   addTeachersFromRows,
   duplicateShorts,
-  genderLabel,
+  genderCell,
   subjectLabel,
+  subjectOptions,
   teacherSubjects,
   weeklyLoad,
 } from '../../pure/entities';
 import { type PanelProps, T, useT } from '../common';
 import { ListTools, Paste, useRowOrder } from '../lists';
 import { teacherListConfig } from '../../pure/lists';
-import { parseTeachers } from '../../pure/io';
+import { parseTeachers, splitGrid, teacherColumns, type TeacherColumn } from '../../pure/io';
 import { useInspect } from '../program';
 import { PersonRow } from './PersonRow';
 
@@ -84,13 +85,27 @@ export default function Teachers({ state, change }: PanelProps) {
         close={() => setPasteOpen(false)}
         title={t('Öğretmenleri yapıştır')}
         example={t('Ad Soyad · Kısa ad · Branş · Cinsiyet · İkinci branş · E-posta')}
-        parse={parseTeachers}
-        rowText={(x) =>
-          `${x.name} (${x.short}) · ${subjectLabel(x.subject)}` +
-          (x.subject2 === '' ? '' : ` + ${subjectLabel(x.subject2)}`) +
-          (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`) +
-          (x.email === '' ? '' : ` · ${x.email}`)
-        }
+        parse={(text, cols) => parseTeachers(text, subjectOptions(state), cols as TeacherColumn[])}
+        rowText={(x) => x.name}
+        columns={{
+          choices: [
+            ['name', t('Ad')],
+            ['short', t('Kısa ad')],
+            ['subject', t('Branş')],
+            ['subject2', t('İkinci branş')],
+            ['gender', t('Cinsiyet')],
+            ['email', t('E-posta')],
+            ['skip', t('Yok say')],
+          ],
+          detect: (text) => teacherColumns(splitGrid(text), subjectOptions(state)).cols,
+          value: (x, c) =>
+            c === 'subject' || c === 'subject2'
+              ? subjectLabel(x[c])
+              : c === 'gender'
+                ? genderCell(x.gender)
+                : x[c as 'name'],
+          always: 'short',
+        }}
         onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
       />
 

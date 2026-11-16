@@ -157,10 +157,11 @@ test.describe('12. Branş kısaltmaları', () => {
     // spoke two vocabularies about one subject. Asked for in one line:
     // "program kısmında branşlar kısaltmalar olsun sol tarafta".
     await page.getByRole('button', { name: 'Öğretmen görünümü' }).click();
+    // The short form leads the head's second line, under the surname (2026-11-16).
     const head = page
       .locator('tbody tr', {
-        has: page.locator('.row-head .inspect', {
-          hasText: new RegExp(`^${teacher}$`),
+        has: page.locator('.row-head .secondary', {
+          hasText: new RegExp(`^${teacher} · `),
         }),
       })
       .locator('.row-head .secondary');
@@ -384,8 +385,9 @@ test.describe('30. Kurulum — düzenleme', () => {
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // "Fzk", not "Fizik": the row head reads the subject SHORT, the same string
-    // the cells of its own row carry.
-    await expect(page.getByRole('rowheader', { name: 'YA Fzk' })).toBeVisible();
+    // the cells of its own row carry. The surname first, the short form under
+    // it (2026-11-16).
+    await expect(page.getByRole('rowheader', { name: 'Ad YA · Fzk' })).toBeVisible();
   });
 
   test('öğretmen sınırı: boş kutu okul varsayılanını kullanıyor', async ({ page }) => {
@@ -929,10 +931,21 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await expect(page.getByText('2 satır okundu.')).toBeVisible();
     // Scoped to the preview: the textarea still holds the pasted text and
     // would match the same words.
-    const preview = page.locator('.paste-preview li');
-    await expect(preview.first()).toHaveText('Nazlı Er (NE) · Fizik · Kadın');
+    // A table since 2026-11-16: one column per pasted column, under its choice.
+    const preview = page.locator('.paste-preview tbody tr');
+    expect(await preview.first().locator('td').allInnerTexts()).toEqual([
+      'Nazlı Er',
+      'NE',
+      'Fizik',
+      'Kadın',
+    ]);
     // The three-column row is not an error, and says nothing it does not know.
-    await expect(preview.nth(1)).toHaveText('Okan Su (OS) · Kimya');
+    expect(await preview.nth(1).locator('td').allInnerTexts()).toEqual([
+      'Okan Su',
+      'OS',
+      'Kimya',
+      '–',
+    ]);
   });
 
   // Pitfall 33's shape, and it happened again while this column was being

@@ -953,39 +953,6 @@ textarea {
   text-overflow: ellipsis;
 }
 
-/* Buttons that belong to one job, drawn as one control: the seam between them
-   is a single rule, not two borders and a gap. */
-.btn-group {
-  display: flex;
-  flex: 0 0 auto;
-}
-
-.btn-group > .btn + .btn {
-  margin-left: -1px;
-}
-
-.btn-group > .btn:not(:first-child):not(:last-child) {
-  border-radius: 0;
-}
-
-.btn-group > .btn:first-child:not(:last-child) {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.btn-group > .btn:last-child:not(:first-child) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-/* Whichever one the pointer is on has to be the one drawn on top, or its
-   hover border is half-covered by the neighbour it overlaps by 1px. */
-.btn-group > .btn:hover:not(:disabled),
-.btn-group > .btn:focus-visible {
-  position: relative;
-  z-index: 1;
-}
-
 /* Which plan is open. Capped, because a plan is named by hand and a long name
    would push the destinations off the row. */
 .plan-picker {
@@ -1056,7 +1023,7 @@ textarea {
   background: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   line-height: var(--lh-tight);
   white-space: nowrap;
   transition:
@@ -1194,9 +1161,6 @@ textarea {
     padding: var(--space-1) var(--space-2);
   }
 
-  .tab-label {
-    font-size: var(--fs-xs);
-  }
 
   /* The room the words take comes from the two text buttons beside them:
      "Dosyaya kaydet" and "Dosyadan aç" break onto two lines rather than the
@@ -1207,6 +1171,21 @@ textarea {
     line-height: var(--lh-tight);
     padding-block: var(--space-1);
     text-align: center;
+  }
+}
+
+/* Narrower still (1366 at %130 and %150) the bar wrapped wherever it ran out,
+   and "?" sat alone on a second row (walkthrough, 2026-11-16). The second row
+   is now on purpose: the tabs take it whole, words beside their icons again. */
+@container bar (max-width: 75em) {
+  .tabstrip {
+    order: 1;
+    flex-basis: 100%;
+  }
+
+  .tab {
+    flex-direction: row;
+    gap: var(--space-2);
   }
 }
 
@@ -1580,28 +1559,6 @@ textarea {
 .btn:disabled {
   opacity: 0.45;
   cursor: default;
-}
-
-/* "There could be something here." A dashed edge and muted ink, because this
-   button appears once per row in a list of twenty-five and almost every one of
-   them will be left alone: at full weight the column would read as twenty-five
-   things still to do. It is a real button, not a hint — so the border and the
-   focus ring stay, and only the VOLUME comes down. */
-.btn.subtle {
-  border-style: dashed;
-  text-align: left;
-  border-color: var(--hairline);
-  background: transparent;
-  color: var(--muted);
-  font-size: var(--fs-sm);
-  padding: var(--space-2) var(--space-3);
-}
-
-.btn.subtle:hover:not(:disabled) {
-  border-style: solid;
-  border-color: var(--accent);
-  background: var(--accent-bg);
-  color: var(--text);
 }
 
 .btn.primary {
@@ -1997,14 +1954,6 @@ table.list tbody tr {
 .suggestion-detail ul {
   margin: 0 0 var(--space-2);
   padding-left: 1.2em;
-}
-
-/* One change per line, its "Olmaz" right after it. */
-.suggestion-part {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-1);
 }
 
 /* A way's questions (TODO B5.11, "cevap defteri"): one line per question, the
@@ -2797,7 +2746,9 @@ table.grid tbody td:hover > .card-pin,
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--r-sm);
-  font-size: var(--fs-sm);
+  /* 14px, not 13: the menus and the tabs are what he reads to find his way
+     (walkthrough, 2026-11-16). */
+  font-size: var(--fs-md);
   cursor: pointer;
   user-select: none;
   outline: none;
@@ -3681,12 +3632,6 @@ main:focus {
   padding: 2px var(--space-2);
 }
 
-/* The strip above the grid: same furniture as the top bar, no second border. */
-.topbar.subbar {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
 .hint.inline {
   margin: 0;
 }
@@ -4396,18 +4341,6 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
 
 .add-panel-body > .form-row:last-child {
   margin-bottom: 0;
-}
-
-/* The name of the timetable you are in, riding the button that opens the
-   library. It is the only caption in the strip whose text the reader wrote, so
-   it is the only one that can be arbitrarily long: it gets a ceiling and an
-   ellipsis rather than the right to push "Yoğunluk" off the end (pitfall 48 —
-   a strip says in advance what it gives up first). */
-.ribbon-ellipsis {
-  max-width: 10rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .dlg-input {
@@ -5404,7 +5337,7 @@ table.availability {
 
 /* A finger drawn over the hours paints them instead of scrolling the page
    (iPad). Only the painted cells: the day and hour headings still scroll. */
-table.availability:not(.heat) tbody td {
+table.availability tbody td {
   touch-action: none;
 }
 
@@ -5444,11 +5377,6 @@ table.availability tbody td {
   height: 3.875rem;
 }
 
-/* ...but the heat map is NOT an availability sheet. It borrows this skeleton
-   to draw one glance at the whole school ("Haftanın darlığı"), it has no cell
-   to click and no cross to read, and growing it would cost a row per day for
-   nothing. It keeps the height the paint grid had before 2026-08-30, and the
-   selector (0,2,3) is what lets it. */
 table.availability thead th {
   line-height: var(--lh-tight);
   font-weight: 600;
@@ -6203,40 +6131,6 @@ table.bell-preview td {
   line-height: 1.5;
 }
 
-/* Panels that flow into as many columns as fit. Used by Kontrol, where the
-   number of panels depends on how many things are wrong: two fixed columns
-   would leave one of them empty exactly when everything is fine. */
-.panel-grid {
-  display: grid;
-  /* 360, not 440: the rail is gone, so every screen has 92px more to give and
-     a third column fits on the 1920px monitor this is used on. */
-  grid-template-columns: repeat(auto-fit, minmax(22.5rem, 1fr));
-  gap: 0 var(--space-5);
-  align-items: start;
-}
-
-/* The week read across everyone: how many are closed in each hour. Same table
-   skeleton as the availability grid, but the cell carries a COUNT and its ink
-   has to stay legible while its ground fades in with the count. */
-table.availability.heat td {
-  font-size: var(--fs-xs);
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-  cursor: default;
-}
-
-/* The count fades its GROUND, never its ink: an opacity on the cell takes the
-   number down with the background and the darkest hour becomes the hardest to
-   read — exactly backwards. */
-table.availability.heat td.closed {
-  color: var(--text);
-  /* No hatch here: the hatch means "you cannot use this", and a count of six
-     out of twenty-five does not. `--heat` is written per cell by the component
-     and rides the ALPHA, so the ink stays at full strength at every level. */
-  background-image: none;
-  background-color: color-mix(in srgb, var(--line-dark) calc(var(--heat, 0) * 70%), transparent);
-}
-
 /* ------------------------------------------------------------------ dialog
    Every question the program asks. Seventeen of them used to be the operating
    system's — twelve `confirm`, five `alert` — which meant they arrived in the
@@ -6538,14 +6432,28 @@ table.availability.heat td.closed {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 3rem;
+  /* Grows with a long short form rather than spilling out of the square. */
+  min-width: 3rem;
+  max-width: 8rem;
   height: 3rem;
+  padding-inline: var(--space-1);
+  overflow: hidden;
+  white-space: nowrap;
   border-radius: var(--r-md);
   background: var(--paper-sunk);
   color: var(--on-color);
   font-size: var(--fs-lg);
   font-weight: 600;
   letter-spacing: var(--ls-tight);
+}
+
+.sheet-mark.long {
+  font-size: var(--fs-sm);
+}
+
+/* Okul bilgileri → Hakkında → Sıfırla, alone and marked as what it is. */
+.panel.danger {
+  border-color: var(--bad);
 }
 
 .sheet-id {

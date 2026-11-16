@@ -67,6 +67,7 @@ export function programStrip({
   undoIf,
   keepBefore,
   strip,
+  status,
 }: StripContext): React.ReactElement {
   const { pending, placed, pinnedHours, gridEmpty, allPinned } = strip ?? describeStrip(state);
   const currentProgram = activeProgram(state);
@@ -78,7 +79,7 @@ export function programStrip({
         : t('Program yeniden yapıldı, sabitlenen {n} saat yerinde kaldı.', {
             n: pinnedHours,
           });
-    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    notify(said, 'info', { label: t('Önceki programa dön'), run: () => undoIf(next) });
   };
 
   // A file from before K2 may hold several programs in one plan. They are
@@ -108,7 +109,9 @@ export function programStrip({
     // step of the history (useSolver's `finish`), so its notice can offer
     // "Geri al" for the whole of it. Nothing on the grid moves until the run
     // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
-    keepBefore(state, t('Program yeniden yapıldı.'));
+    // Kept QUIETLY: a relaid week is no deletion, and the next start's strip
+    // offering "Son silmeyi geri al" for it was alarming (walkthrough, 2026-11-16).
+    keepBefore(state, t('Program yeniden yapıldı.'), true);
     solver.start(state, { keepPlaced: false }, relaidNotice);
   };
   // "Başka bir dizilim" (2026-11-16, main): the same rules, another of the
@@ -119,7 +122,7 @@ export function programStrip({
     // The week before the FIRST press is the one worth keeping: a second press
     // would push the hand-made week out of the one slot with a week this button
     // made (review, 2026-11-16).
-    if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'));
+    if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'), true);
     solver.start(state, { keepPlaced: false, seed: anotherSeed }, (next) => {
       anotherMade = next;
       relaidNotice(next);
@@ -136,15 +139,15 @@ export function programStrip({
       for (const key in before) if (after[key] !== before[key]) moved++;
       if (moved === 0) return;
       const said = t('Program yapıldı, {n} saat yer değiştirdi.', { n: moved });
-      keepBefore(state, said);
-      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+      keepBefore(state, said, true);
+      notify(said, 'info', { label: t('Önceki programa dön'), run: () => undoIf(next) });
     });
   const clearGrid = () => {
     // No question since SD1 (2026-11-15): it is undone with one click, so it
     // happens and the notice offers that click. The pinned cells stay, and so
     // do their pins: nothing takes a pinned block down but unpinning it.
     const next = keepPinnedOnly(state);
-    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
+    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }), true);
     change((d) => (d === state ? next : keepPinnedOnly(d)));
     notify(
       pinnedHours === 0
@@ -190,6 +193,14 @@ export function programStrip({
           <button className="btn danger" onClick={solver.stop}>
             <Square {...ICON} />
             {t('Durdur')}
+          </button>
+        ) : pending === 0 && placed > 0 && status.problems > 0 ? (
+          // Nothing waits, yet the week has problems (a lesson on an hour
+          // closed since): "Programı yap" had nothing to do and the way out
+          // was behind Daha fazla (usability walkthrough, 2026-11-16).
+          <button className="btn primary" onClick={rebuild}>
+            <RotateCcw {...ICON} />
+            {t('Yeniden yap')}
           </button>
         ) : (
           <button

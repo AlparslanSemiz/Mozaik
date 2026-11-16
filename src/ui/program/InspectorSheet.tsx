@@ -19,8 +19,10 @@ import {
   paletteColor,
 } from '../../leaf/model';
 import { placedBlocks } from '../../pure/constraints';
+import { DEFAULT_LESSON_HOURS } from '../../pure/forms';
 import {
   type InspectKind,
+  addLesson,
   deleteClass,
   deleteTeacher,
   deletionNotice,
@@ -36,6 +38,7 @@ import {
   subjectLabel,
   subjectOption,
   subjectOptions,
+  teacherSubjects,
   transferLesson,
   updateClass,
   updateLesson,
@@ -50,7 +53,6 @@ import {
   useDialogs,
   useKeepBefore,
   useReturnFocus,
-  useGoTo,
   useT,
   useToast,
   useUndoIf,
@@ -95,7 +97,6 @@ export function Inspector({
   const returnFocus = useReturnFocus(target !== null);
   const { confirm } = useDialogs();
   const toast = useToast();
-  const goTo = useGoTo();
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const [printing, setPrinting] = useState(false);
@@ -460,60 +461,6 @@ export function Inspector({
           </ul>
         )}
 
-        {/* THE HOURS IT CANNOT COME, the Müsaitlik grid itself, with the bell
-            times on: "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock
-            times, not lesson numbers. Its own heading names it per kind. */}
-        <h3 className="sheet-h">
-          {target.kind === 'teacher' ? t('Gelemediği saatler') : t('Kapalı saatler')}
-        </h3>
-        {/* Müsaitlik's own sentence, and its tooltip for dragging and the
-            headers: one wording for one grid in two places. */}
-        <p
-          className="hint"
-          title={t(
-            'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki saat numarasına tıklayınca haftanın o saati değişir.',
-          )}
-        >
-          {target.kind === 'teacher'
-            ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
-            : target.kind === 'class'
-              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
-              : t(
-                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
-                )}
-        </p>
-        <AvailGrid
-          key={target.id}
-          state={state}
-          change={change}
-          entityId={target.id}
-          teacher={target.kind === 'teacher'}
-          clock
-          label={
-            target.kind === 'teacher'
-              ? t('{kim} · müsait olmayan saatler', { kim: storedName })
-              : t('{kim} · kapalı saatler', { kim: view.facts.name })
-          }
-        />
-        {/* Müsaitlik's two whole-week buttons came here with its grid (K1,
-            2026-11-16): somebody who comes one day a week is closed in two
-            clicks, not seventy. */}
-        <div className="form-row">
-          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, false))}>
-            {t('Bütün haftayı aç')}
-          </button>
-          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, true))}>
-            {t('Bütün haftayı kapat')}
-          </button>
-        </div>
-        {stranded > 0 && (
-          <div className="warn-box">
-            {t('Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.', {
-              n: stranded,
-            })}
-          </div>
-        )}
-
         {/* "Öğretmenin bilgisine girip bir sınıfı başka bir hocaya aktarma
             olsun." A teacher's rows move the CLASS to another teacher, a
             class's rows move the TEACHER of one lesson. Not "Dersleri": that
@@ -524,36 +471,10 @@ export function Inspector({
             <h3 className="sheet-h">
               {target.kind === 'teacher' ? t('Verdiği dersler') : t('Aldığı dersler')}
             </h3>
-            {/* Where this person's lessons are ENTERED: the lesson form of
-                its tab, open on this person (K1). Closing the page first,
-                because the form is under it. */}
-            <p>
-              <button
-                className="btn"
-                onClick={() => {
-                  onClose();
-                  goTo({
-                    tab: target.kind === 'teacher' ? 'teachers' : 'classes',
-                    people: 'lessons',
-                    focus: target.id,
-                  });
-                  // The name that opened this page is gone with the list, so
-                  // the keyboard goes where the work now is: the form's first
-                  // box. After the sheet's own close has run.
-                  requestAnimationFrame(() =>
-                    requestAnimationFrame(() =>
-                      document
-                        .querySelector<HTMLElement>(
-                          'main .add-panel select:not(:disabled), main .add-panel input:not(:disabled)',
-                        )
-                        ?.focus(),
-                    ),
-                  );
-                }}
-              >
-                {t('Ders gir')}
-              </button>
-            </p>
+            {/* Where this person's lessons are ENTERED, on the page itself:
+                the "Ders gir" door left for the Dersler form under the sheet
+                (walkthrough, 2026-11-16). */}
+            <AddLesson state={state} change={change} kind={target.kind} id={target.id} />
             {lessons.length > 0 && (
               <table className="sheet-lessons">
                 <tbody>
@@ -612,6 +533,56 @@ export function Inspector({
               </table>
             )}
           </>
+        )}
+
+        {/* THE HOURS IT CANNOT COME, the Müsaitlik grid itself, with the bell
+            times on: "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock
+            times, not lesson numbers. Its own heading names it per kind. */}
+        <h3 className="sheet-h">
+          {target.kind === 'teacher' ? t('Gelemediği saatler') : t('Kapalı saatler')}
+        </h3>
+        {/* Müsaitlik's own sentence. The day and hour headings say what
+            they do in their own titles; a paragraph's tooltip was never
+            hovered (2026-11-16). */}
+        <p className="hint">
+          {target.kind === 'teacher'
+            ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
+            : target.kind === 'class'
+              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
+              : t(
+                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+                )}
+        </p>
+        <AvailGrid
+          key={target.id}
+          state={state}
+          change={change}
+          entityId={target.id}
+          teacher={target.kind === 'teacher'}
+          clock
+          label={
+            target.kind === 'teacher'
+              ? t('{kim} · müsait olmayan saatler', { kim: storedName })
+              : t('{kim} · kapalı saatler', { kim: view.facts.name })
+          }
+        />
+        {/* Müsaitlik's two whole-week buttons came here with its grid (K1,
+            2026-11-16): somebody who comes one day a week is closed in two
+            clicks, not seventy. */}
+        <div className="form-row">
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, false))}>
+            {t('Bütün haftayı aç')}
+          </button>
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, true))}>
+            {t('Bütün haftayı kapat')}
+          </button>
+        </div>
+        {stranded > 0 && (
+          <div className="warn-box">
+            {t('Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.', {
+              n: stranded,
+            })}
+          </div>
         )}
 
         {/* LIMITS, in the one place a person's limit is written (Sadeleşme,
@@ -771,7 +742,7 @@ export function Inspector({
             <>
               <div className="sheet-head">
                 <span
-                  className="sheet-mark"
+                  className={(view?.facts.short.length ?? 0) > 3 ? 'sheet-mark long' : 'sheet-mark'}
                   style={
                     view === null || view.facts.color === null
                       ? undefined
@@ -839,6 +810,72 @@ export function Inspector({
  * teachers was a fifth of the page's opening time at 4x, for lists nobody had
  * looked at yet. Its width is fixed so that drawing them moves nothing.
  */
+/** The other side and the hours: a lesson added without leaving the page. */
+function AddLesson({
+  state,
+  change,
+  kind,
+  id,
+}: {
+  state: State;
+  change: (fn: (d: State) => State) => void;
+  kind: 'teacher' | 'class';
+  id: Id;
+}) {
+  const t = useT();
+  const [other, setOther] = useState('');
+  const [hours, setHours] = useState(DEFAULT_LESSON_HOURS);
+  const teacher = kind === 'teacher';
+  return (
+    <div className="form-row">
+      <select
+        aria-label={teacher ? t('Sınıf') : t('Öğretmen')}
+        value={other}
+        onChange={(e) => setOther(e.target.value)}
+      >
+        <option value="">{teacher ? t('Sınıf seçin') : t('Öğretmen seçin')}</option>
+        {teacher
+          ? state.classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))
+          : state.teachers.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} · {teacherSubjects(p).map(subjectLabel).join(' / ')}
+              </option>
+            ))}
+      </select>
+      <input
+        type="number"
+        min={1}
+        max={40}
+        className="num"
+        aria-label={t('Haftalık saat')}
+        value={hours}
+        onChange={(e) => setHours(e.target.value)}
+      />
+      <button
+        className="btn"
+        disabled={other === ''}
+        onClick={() => {
+          change((d) =>
+            addLesson(d, {
+              classId: teacher ? other : id,
+              teacherId: teacher ? id : other,
+              weeklyHours: Number(hours) || 1,
+              blocks: [],
+            }),
+          );
+          setOther('');
+        }}
+      >
+        {t('Ekle')}
+      </button>
+    </div>
+  );
+}
+
 function TransferPick({
   state,
   from,

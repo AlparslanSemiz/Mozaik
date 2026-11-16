@@ -189,9 +189,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
           </button>
         }
         description={<T k="Bir ders = bir sınıfın bir öğretmenden aldığı haftalık saat." />}
-        more={t(
-          'Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Okul bilgileri → Kurallar’daki sayı geçerli olur.',
-        )}
+        more={t('4 saat: 2+2 = iki gün ikişer saat')}
         notice={
           state.classes.length === 0 || state.teachers.length === 0 ? (
             <div className="warn-box">
@@ -258,7 +256,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
           {askSubject &&
             (mode !== 'all' ? (
               <select
-                aria-label={t('Branş')}
+                aria-label={mode === 'teacher' ? t('Branş') : t('Branşa göre süz')}
                 value={subjectValue}
                 onChange={(e) => chooseSubject(e.target.value)}
               >
@@ -270,9 +268,9 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
                 ))}
               </select>
             ) : (
-              <Field label={t('Branş')}>
+              <Field label={t('Branşa göre süz')}>
                 <select
-                  aria-label={t('Branş')}
+                  aria-label={t('Branşa göre süz')}
                   value={subjectValue}
                   onChange={(e) => chooseSubject(e.target.value)}
                 >
@@ -304,7 +302,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
                   place a lesson is given one. */}
               {teacherPool.map((x) => (
                 <option key={x.id} value={x.id}>
-                  {x.short} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
+                  {x.name} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
                 </option>
               ))}
             </select>
@@ -319,12 +317,13 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
               onChange={(e) => setNewLesson({ ...newLesson, hours: e.target.value })}
             />
           </Field>
-          <Field label={t('Dağılım')}>
+          <Field label={t('Haftaya dağılış')}>
             <BlockCounts
               weeklyHours={newHours}
               blocks={newBlocks}
               dayLimit={newDayLimit}
               onPick={setNewSplit}
+              title={t('4 saat: 2+2 = iki gün ikişer saat')}
             />
           </Field>
           <button className="btn primary" disabled={!canAdd} onClick={add}>

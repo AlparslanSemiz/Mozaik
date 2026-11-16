@@ -160,11 +160,6 @@ export default function Data({
         <p>
           <T k="Üst çubuktaki **Kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
         </p>
-        <p>
-          {t(
-            'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve otomatik yedekler girmez.',
-          )}
-        </p>
       </HelpHead>
       <div className="form-row">
         <button className="btn" onClick={saveAll}>
@@ -206,9 +201,6 @@ export default function Data({
         <p>
           <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
         </p>
-        <p>
-          <T k="**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir." />
-        </p>
       </HelpHead>
 
       {/* The sample school's home. It used to live only on the Kurulum
@@ -226,13 +218,21 @@ export default function Data({
           {t('Örnek okulu yükle')}
         </button>
       </div>
+    </div>
+  );
 
+  // Not beside "Örnek okulu yükle": the widest click in the program had the
+  // most harmless one for a neighbour (walkthrough, 2026-11-16). Its own
+  // panel, at the foot of the side column, and still behind its question.
+  const resetPanel = (
+    <div className="panel danger">
       <h3>{t('Sıfırla')}</h3>
-      <div className="form-row">
-        <button className="btn danger" onClick={reset} title={t('Her şeyi siler')}>
-          {t('Her şeyi sil')}
-        </button>
-      </div>
+      <p className="hint">
+        <T k="**Açık olan plan** tamamen silinir; hemen ardından **Geri al** ile geri gelir." />
+      </p>
+      <button className="btn danger" onClick={reset}>
+        {t('Her şeyi sil')}
+      </button>
     </div>
   );
 
@@ -287,13 +287,6 @@ export default function Data({
             />
           </p>
         )}
-        {/* The one habit, spelled out. It used to be a sentence across the
-            top bar on every screen; it belongs next to the report that says
-            where the data actually lives, and the bar it left had six
-            destinations to hold instead. */}
-        <p className="hint">
-          <T k="Mozaik **kendiliğinden** saklıyor; **Kaydet** onun yanına gelir, yerine değil." />
-        </p>
         <table className="stat">
           <thead>
             <tr>
@@ -319,14 +312,6 @@ export default function Data({
             k="Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**."
             vars={{ yer: size(report.totalChars) }}
           />
-        </p>
-        {/* A row would be a lie in the "Yer" column: the table counts
-            localStorage characters, and a directory handle is not text —
-            it is the one thing only structured clone can carry, which is
-            why it lives in IndexedDB. Left out entirely it would be the
-            one key this report does not name. */}
-        <p className="hint">
-          <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
         </p>
       </div>
     </details>
@@ -415,7 +400,10 @@ export default function Data({
         <Changelog onSeen={onChangelogSeen} />
         {planDataPanel}
       </div>
-      <aside>{wherePanel}</aside>
+      <aside>
+        {wherePanel}
+        {resetPanel}
+      </aside>
     </div>
   );
 }

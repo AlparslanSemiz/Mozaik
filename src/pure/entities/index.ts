@@ -30,7 +30,7 @@ export {
   subjectLabel,
 } from '../../leaf/lang';
 
-export { newId, makeShort, genderLabel, genderCell, parseGender } from './identity';
+export { newId, makeShort, surname, genderLabel, genderCell, parseGender } from './identity';
 export {
   DEFAULT_BELL,
   makeDay,
