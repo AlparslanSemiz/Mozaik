@@ -287,6 +287,7 @@ function drawPrint(state: State) {
           setExcluded={() => undefined}
           scope="both"
           colored
+          setColored={() => undefined}
           options={PRINT_DEFAULTS}
           setOptions={() => undefined}
         />

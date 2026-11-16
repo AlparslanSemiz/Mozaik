@@ -11,14 +11,17 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { reopen, dragAndDrop, openWithSample, PDF_YALNIZ_CHROMIUM } from './helpers';
+import {
+  reopen,
+  dragAndDrop,
+  openWithSample,
+  openPrintClasses,
+  PDF_YALNIZ_CHROMIUM,
+} from './helpers';
 
 async function openPrint(page: Page) {
   await openWithSample(page);
-  await page
-    .locator('.tabstrip')
-    .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
-    .click();
+  await openPrintClasses(page);
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -30,10 +33,7 @@ async function openPrint(page: Page) {
 async function openPrintWithALesson(page: Page) {
   await openWithSample(page);
   await dragAndDrop(page);
-  await page
-    .locator('.tabstrip')
-    .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
-    .click();
+  await openPrintClasses(page);
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -176,10 +176,7 @@ test.describe('62. Sayfada ne olsun', () => {
     await box(page, 'Çıktı tarihi').uncheck();
 
     await reopen(page);
-    await page
-      .locator('.tabstrip')
-      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
-      .click();
+    await openPrintClasses(page);
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     await expect(box(page, 'Günün saatleri')).not.toBeChecked();

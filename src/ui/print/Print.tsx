@@ -50,6 +50,7 @@ interface Props {
   /** Which pages the preview builds. Owned by App; the tool strip CHANGES it. */
   scope: Scope;
   colored: boolean;
+  setColored: (next: boolean) => void;
   /**
    * What each page carries. ONE prop rather than five, because they are one
    * decision; App owns it so it survives a trip to Kurulum, and printOptions.ts
@@ -144,6 +145,7 @@ export default function Print({
   setExcluded,
   scope,
   colored,
+  setColored,
   options,
   setOptions,
 }: Props) {
@@ -323,8 +325,8 @@ export default function Print({
               exact` prints the colours with that box off too (measured in
               Chromium, 2026-11-16, e2e/yazdir.spec.ts). */}
           <h2>{t('Yazdır')}</h2>
-          {/* "Ne basılsın" moved to the tool strip and "Renkli bas" to its
-              Daha fazla; the
+          {/* "Ne basılsın" moved to the tool strip and "Renkli bas" to the
+              Sayfa düzeni panel; the
               button stayed, because the page COUNT comes from the tick lists
               right below it. */}
           <div className="form-row">
@@ -360,11 +362,6 @@ export default function Print({
             <div className="warn-box">{t('Hiçbir sayfa seçili değil, basılacak bir şey yok.')}</div>
           )}
         </div>
-
-        {/* Right under the printer: the other way a teacher's page leaves
-            this screen. Every teacher, whatever the tick lists say: sending
-            one teacher's week is not a print job. */}
-        <MailPanel state={state} ix={ix} spans={spans} colored={colored} />
 
         {/* HOW THE SHEET IS LAID OUT — two questions, and they are not the
             same question as "what is on it", so they are not in the same
@@ -413,6 +410,13 @@ export default function Print({
               </button>
             ))}
           </div>
+
+          {/* Colour on paper is chosen once, next to the other paper choices
+              (it used to be the strip's only Daha fazla item). */}
+          <label className="pick-item">
+            <input type="checkbox" checked={colored} onChange={() => setColored(!colored)} />
+            <span>{t('Renkli bas')}</span>
+          </label>
         </div>
 
         {/* Which of the things on a sheet are wanted on THIS school's sheets.
@@ -438,6 +442,11 @@ export default function Print({
             ))}
           </div>
         </div>
+
+        {/* After the sheet's look is chosen: the other way a teacher's page leaves
+            this screen. Every teacher, whatever the tick lists say: sending
+            one teacher's week is not a print job. */}
+        <MailPanel state={state} ix={ix} spans={spans} colored={colored} />
 
         {/* What the printer is about to produce, in the numbers that matter at
             the printer: how many sheets, and whether any of them is going to

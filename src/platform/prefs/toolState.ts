@@ -137,7 +137,7 @@ export function useToolState(firstTab: Tab): ToolState {
   });
   const [lessonFocus, setLessonFocus] = useState<Id>('');
   const [section, setSection] = useState<SectionId>('school');
-  const [scope, setScope] = useState<Scope>('classes');
+  const [scope, setScope] = useState<Scope>('teachers');
   const [colored, setColored] = useState(true);
   // 'problems' is where a reader arrives with a question, and it is also the
   // only part of the list that can be empty — an empty problems view is the

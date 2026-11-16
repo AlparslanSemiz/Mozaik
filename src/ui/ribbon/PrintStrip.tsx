@@ -2,7 +2,6 @@
 
 import type React from 'react';
 import { Layers } from 'lucide-react';
-import { MoreCheck, MoreMenu } from '../common';
 import { KIND_ICON } from '../program';
 import { Group, ICON, type StripContext } from './parts';
 
@@ -37,12 +36,6 @@ export function printStrip({ ui, t }: StripContext): React.ReactElement {
           {t('İkisi de')}
         </button>
       </Group>
-      {/* Colour on paper is chosen once (envanter: "bir kez"). */}
-      <MoreMenu>
-        <MoreCheck checked={ui.colored} onChange={ui.setColored}>
-          {t('Renkli bas')}
-        </MoreCheck>
-      </MoreMenu>
       {/* "Yazdır (N sayfa)" is NOT here: the N comes from the tick lists in
           the panel, and a button that says how many pages belongs next to the
           list that decides it. The strip carries what you are looking at. */}
