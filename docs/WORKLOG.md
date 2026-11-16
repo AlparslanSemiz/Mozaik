@@ -21,7 +21,9 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 Son güncelleme: 2026-11-16 sabah (gece çalışması). Bu blok yeni bir oturumun başlangıç noktası;
 ayrıntı aşağıdaki tarihli girdilerde, kararlar DECISIONS'ta. `sade/asama-2` Sadeleşme aşama 2'yi,
-kişi sayfasını (K5) taşıyor, birleşmedi (aşağıda tarihli girdi).
+kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). `sade/asama-3b` onun üstünde beş görev sekmesini
+(K1), ikinci dizilişin bir plan olmasını (K2) ve Kontrol'ün çipin sorun listesine geçmesini (K3)
+taşıyor, birleşmedi; aşama 3A (K6–K8) paralel dalda, ikisi birleştirilecek (aşağıda tarihli girdi).
 
 **Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
 önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
@@ -38,9 +40,9 @@ iyileştirme geçişi, Başka bir dizilim, kapasite açığı); kararsız testle
 bulguları (#68: yavaş hatta indirme, bekleyici, küçülme koruması, budama); Safari/iPad (#70);
 sadeleşme aşama 1 (#67: tek ana düğme, Daha fazla, Dosya menüsü, Başlarken 5 iş, K4 adları).
 
-**Sürüyor (dallarda):** sadeleşme aşama 2, kişi sayfası (`sade/asama-2`, K5); Linux paketi
-(`platform/linux`). Sonra: aşama 3 (beş sekme K1, Plan+Seçenek K2, Kontrol çipe K3, Sığdır ve
-Geçici görünüm kalkar K6/K7, Eski hâline dön K8), aşama 4 (öğretmene PDF gönder, ikame, hafta
+**Sürüyor (dallarda):** sadeleşme aşama 2, kişi sayfası (`sade/asama-2`, K5); aşama 3B (`sade/asama-3b`,
+K1–K3, aşama 2'nin üstünde); aşama 3A (K6 Sığdır, K7 Geçici görünüm, K8 Eski hâline dön); Linux
+paketi (`platform/linux`). Sonra: 3A ile 3B'nin birleşmesi, aşama 4 (öğretmene PDF gönder, ikame, hafta
 istisnası).
 
 **Alp'te bekleyenler:**
@@ -51,13 +53,91 @@ istisnası).
 3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
 4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
 
-**Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
-gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
+**Dikkat.** Brotli boyut payı 3B'den sonra 3,5 kB (eşik 306 000 B; aşama 2'de 213 B'ye inmişti). Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
 yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
 Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
 `npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
+
+## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
+
+`sade/asama-2`'nin (PR #74) üstünde, birleşmedi. Aşama 3A (K6–K8) paralel bir dalda; ikisi
+birleştirilecek (çakışma beklenen yerler: `ProgramStrip.tsx`'in Daha fazla'sı, `PoolMenu.tsx`,
+LAYOUT "Program", `program.spec.ts`'in havuz menüsü testi). Karar ve ters çevirdikleri DECISIONS
+"Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan".
+
+**Yapılan.** Sekmeler Program · Öğretmenler · Sınıflar · Yazdır ve gönder · Okul bilgileri
+(Alt+1..5, `shell/tabs.tsx`, `prefs/toolState.ts`; eski kimlikler `OLD_TAB`'ta, sekme
+saklanmadığı için taşınacak kayıt yok). Öğretmenler ve Sınıflar'ın ortak şeridi
+(`ribbon/PeopleStrip.tsx`): `Liste N` ve `Dersler` (o kişinin ders formu), Daha fazla'da `Bütün
+dersler tek listede` ve Kurallar; kişi sayfasında `Ders gir`. Okul bilgileri'nin şeridi: Zil ve
+günler · Derslikler N · Branşlar N · Kurallar · Görünüm, Daha fazla'da Planlar ve yedek, Hakkında;
+Başlarken ve örnek okul/taslak teklifi okul verisi bölümlerinin başında (`setup/index.tsx`'in
+`Start`'ı), boş plan oraya açılır. Müsaitlik sekmesi, şeridi ve "Haftanın darlığı" kalktı;
+`Bütün haftayı aç/kapat` kişi sayfasına geldi, dersliğin saatleri dersliğin sayfasında. Kontrol
+sekmesi ve şeridi kalktı: çip `ProblemList.tsx`'i açar (eski `Check.tsx`, aynı içerik; görünüm
+segmenti başında, yükler Daha fazla'da; `Müsaitlik'te aç` → `Sayfasını aç`), havuz kartının sağ
+tık menüsünün başında `Neden yerleşmedi?`, takılan koşunun satırında `Ayrıntı`. K2: Program →
+Daha fazla → `Bu programın kopyası` yeni bir plan açar; seçenek menüsü kalktı, eski dosyanın
+programları üst çubuk seçicisinde. Eski sekme adını anan cümleler yeniden yazıldı; dört dilde
+65 ölü anahtar çıktı, 26 yeni anahtar girdi.
+
+**Kontrol sekmesinin her parçasının yeni yeri.** Hüküm kutusu, haftanın sayıları, kapalı saatte
+ders (Göster, Sayfasını aç), kural ihlalleri (Göster), yerleşemeyen dersler (ders düğmesi havuzu
+gösterir, Sayfasını aç), İpuçları, öğretmen/sınıf/derslik yükleri: hepsi sorun listesinde. Boş
+planın "ne eksik" düğmeleri de orada. Hiçbiri kaybolmadı; E2E `kontrol.spec.ts` hepsini oradan
+sürüyor.
+
+**Bulunurluk** (sonraki derleme, örnek okul, Program'dan başlayarak yalnız görünen adlarla
+tıklanarak; betik oturumun scratch klasöründe, `bul.mjs`; 1920×1080 ve 1366×768'de aynı):
+öğretmenin gelemediği saati 2, sınıfın derslerini girmek 2, öğretmenin derslerini girmek 2,
+kişi sayfasından ders girmek 4, bütün dersler 3, okulun adı 1, derslik ekle 2, branş ekle 2,
+dersliğin kapalı saatleri 3, okul geneli kural 2, yazı büyüklüğü 2, programda ne sorun var 1,
+öğretmen yükleri 3, yazdır 1, e-postayla gönder 1, ikinci diziliş 1 (+menü), planlar ve yedek 2
+tıklama; 17 işin 17'si hedefine vardı.
+
+**Ölçüm: görünen kontrol** (ekranda / toplam; düğme, girdi, seçici ve bağlantı; ızgara, havuz ve
+müsaitlik hücreleri hariç; örnek okul; betik `olc.mjs`):
+
+| Ekran (önce → sonra) | 1920×1080 | 1366×768 |
+|---|---|---|
+| Üst çubukta sekme | 7 → 5 | 7 → 5 |
+| Okul / Öğretmenler → Öğretmenler / Liste | 76 → 73 | 60 → 57 |
+| Okul / Sınıflar → Sınıflar / Liste | 71 → 65 | 53 → 52 |
+| Okul / Derslikler → Okul bilgileri / Derslikler | 58 → 57 | 54 → 53 |
+| Okul / Branşlar → Okul bilgileri / Branşlar | 79 → 78 | 55 → 54 |
+| Müsaitlik → (kişi sayfası) | 46 → yok | 43 → yok |
+| Dersler / Sınıftan → Sınıflar / Dersler | 87 → 84 | 87 → 84 |
+| Dersler / Öğretmenden → Öğretmenler / Dersler | 74 → 71 | 69 → 66 |
+| Dersler / Genel → Bütün dersler | 148 → 145 | 113 → 110 |
+| Program | 20 → 18 | 20 → 18 |
+| Kontrol (sekme, çubuk dahil) → sorun listesi (yalnız liste) | 15 → 4 | 15 → 4 |
+| Çıktı → Yazdır ve gönder | 40 → 38 | 40 → 38 |
+| Ayarlar / Zil ve günler → Okul bilgileri / Zil ve günler | 39 → 42 | 39 → 35 |
+| Ayarlar / Kurallar | 40 → 40 | 36 → 36 |
+| Ayarlar / Görünüm | 56 → 56 | 45 → 45 |
+
+Ekran başına sayılar az değişti (iki sekme düğmesi ve şeritlerin birer düğmesi); asıl kazanç
+yer sayısı: 15 ekrandan 13'ü ve bir liste, Müsaitlik ile Kontrol'ün iki ekranı yok. Zil ve
+günler'de 1920'de üç kontrol arttı: Başlarken satırı artık orada.
+
+**Boyut** (`npm run boyut`, aynı makine): önce 1 192 401 B, brotli 305 787 B (eşiğe 213 B); sonra
+1 174 340 B (−18 061), brotli 302 530 B (−3 257; eşiğe 3 470 B). Eşik değişmedi.
+
+**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `npm run hizli` (73 dosya yeşil), `vite build`, `npm run boyut`. Bütün E2E süiti `--workers=2` önce: 787 testin 712'si yeşil, kalan 75'in çoğu `openLessons('all')` yardımcısının yanlış başlığa bakmasıydı; o 21 dosya yeniden: 558'in 555'i, kalan ikisi düzeltilip tek başına yeşil. Son bütün koşu: E2E_SON. `kayma.spec.ts` 128 (eski 129) bilinen macOS kaydırma çubuğu durumu: çift artık Hakkında ile Görünüm, ölçülecek çubuk macOS'ta yer kaplamıyor. Tıklama testi 1920×1080 ve 1366×768'de örnek okulla (`bul.mjs`, görüntüler oturumun scratch klasöründe `bul1920/`, `bul1366/`).
+
+**İnceleme.** Taze bağlamlı bir alt ajan farkı okudu. Düzeltilenler: eski sekme adını anan dört
+cümle (Kurallar'ın iki "Okul → …"su, Görünüm'ün "Okul → Öğretmenler"i, yanlış dosya uyarısı),
+dersliğin sayfasındaki sınıf cümlesi (Müsaitlik'in derslik cümlesi geri geldi), `[data-section]`
+kuralları yeni kimliklere, Alt+1..5 ve sekme düğmesi açık sorun listesini kapatıyor,
+`OLD_TAB` artık `goTo`'da kullanılıyor, ARCHITECTURE'ın üç bayat satırı. Bırakılanlar:
+"Sayfasını aç" ve "Ders gir"den sonra kapanan sayfanın odağı açan düğme yok olduğu için
+`<main>`'e düşüyor (`returnFocus.ts`'in bilinen yolu, gövdeye değil); eski dosyanın
+programları yeniden adlandırılamıyor (yalnız geçilir ve silinir, hiçbiri erişilmez olmadı);
+sorun listesinin segment grubunun adı ile satırların `Göster` düğmesi aynı kelime (grup adı,
+düğme adı değil). Tıklama testinde bulunan: 1366'da çipin "433 saat yerleşmedi"si kesiliyordu
+(sekmeler yedi kısa addan beş uzun ada geçince daha geniş), çip artık kendi genişliğinde.
 
 ## 2026-11-16 · Sadeleşme aşama 2: kişi sayfası (`sade/asama-2`, TODO SD8, K5)
 
