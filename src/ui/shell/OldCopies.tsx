@@ -35,10 +35,12 @@ function dayName(iso: string): string {
 export default function OldCopies({ open, onClose, planId, state, restore }: Props) {
   const t = useT();
   const returnFocus = useReturnFocus(open);
-  const now = JSON.stringify(state);
-  // Read when the dialog opens: a day's copy is written once a day.
+  // Read only while open: the dialog is mounted all the time.
+  const now = open ? JSON.stringify(state) : '';
   const copies = open ? dailyCopies(planId).filter((c) => JSON.stringify(c.state) !== now) : [];
-  const yesterday = isoDay(Date.now() - 86_400_000);
+  const day = new Date();
+  day.setDate(day.getDate() - 1);
+  const yesterday = isoDay(day.getTime());
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>

@@ -5,9 +5,9 @@
 // key still holding what the LAST day it was saved left there, so that text
 // is copied, as it is, under that day (`DAILY_MARK_KEY` remembers which day
 // it was). One write a day per plan, and no parse but the one that asks
-// whether the text holds any work. A day's copy is written once and never
-// written over: a restore writes the plan as it stood before it under today
-// first (`keepToday`), and the day's end does not replace that.
+// whether the text holds any work. A restore writes the plan as it stood
+// before it under today first (`keepToday`); the day's end, written the next
+// day, takes that place, and the before-delete slot still holds it.
 //
 // BOUNDED, and the plan comes first. `DAILY_COUNT` days per plan are kept.
 // When the storage is full a copy gives way, oldest first: the plan's own
@@ -30,6 +30,7 @@ import {
 import { safely } from '../../leaf/preference';
 import type { Id, State } from '../../leaf/model';
 import { isoDay } from './fileSaved';
+import { writesClosed } from './otherWindow';
 
 const DAY = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
 
@@ -116,23 +117,30 @@ export function keepDay(planId: Id, now = Date.now()): void {
   if (last !== undefined && last < day) {
     const text = safely(() => localStorage.getItem(planKey(planId))) ?? null;
     const key = dailyKey(last, planId);
-    if (text !== null && safely(() => localStorage.getItem(key)) == null && holdsWork(text)) {
-      put(key, text);
-    }
+    // The day's end wins over a copy a restore wrote that day (`keepToday`).
+    if (text !== null && holdsWork(text)) put(key, text);
     prune(planId);
   }
   marks[planId] = day;
-  safely(() => localStorage.setItem(DAILY_MARK_KEY, JSON.stringify(marks)));
+  // Given room like a copy: a mark that cannot be written would leave every
+  // later day finding the same old day.
+  put(DAILY_MARK_KEY, JSON.stringify(marks));
 }
 
 /**
- * Before a restore: the plan as it stands now becomes today's copy, unless
- * today has one. Returns whether today's copy holds it.
+ * Before a restore: the plan as it stands now becomes today's copy, over an
+ * earlier one of today. Nothing for an empty plan or once another window took
+ * over (VK1); the caller does not ask for a plan this copy could not read.
+ * Returns whether it landed.
  */
 export function keepToday(planId: Id, state: State, now = Date.now()): boolean {
-  const key = dailyKey(isoDay(now), planId);
-  if (safely(() => localStorage.getItem(key)) != null) return false;
-  const landed = put(key, JSON.stringify(state));
+  if (writesClosed()) return false;
+  if (
+    state.teachers.length + state.classes.length + state.lessons.length + state.rooms.length ===
+    0
+  )
+    return false;
+  const landed = put(dailyKey(isoDay(now), planId), JSON.stringify(state));
   prune(planId);
   return landed;
 }

@@ -2886,9 +2886,8 @@ table.grid tbody td:hover > .card-pin,
    The LINE BOX does not grow with the letters: it is the one the lines had
    at 12px (12px x --lh-base = 18px at %100), written out because `.card`'s
    `font: inherit` would otherwise hand them 1.5 x their new size and every
-   row would come out 4.5px taller. At %100 and below it is exactly Sığdır's
-   line box, so switching density moves no row (gorunum.spec.ts, "satır
-   kutusu"); above %100 Sığdır's floor stops growing and its box is smaller. */
+   row would come out 4.5px taller. These sizes are for the tray and the drag
+   ghost: on the grid the fitted 12px base below takes over (K6, 2026-11-16). */
 .card-top,
 .card-bottom {
   line-height: calc(var(--fs-xs) * var(--lh-base));
@@ -6921,13 +6920,12 @@ input.search-box:focus-visible {
    rather than by a number somebody has to re-derive whenever the root moves
    (pitfall 36). `toBeHidden()` and `innerText` both still say it is gone.
 
-   The grid's own `.hour-clock` keeps `display: none` under Sığdır, and that is
+   The grid draws no `.hour-clock` at all since 2026-11-16 (K6), and that is
    the opposite case on purpose: there the whole measured point IS the room the
-   line gives back (2461 -> 1728px, pitfall 37). That sentence was true and the
-   SELECTOR did not say it — the Sığdır rule was unscoped, so at that density it
-   took this heading's second line box too and the reader's "Saatler" button had
-   nothing left to switch. Scoped to `table.grid` now, and `gorunum.spec.ts` 50
-   measures it at Sığdır rather than only at the default density. */
+   line gives back (2461 -> 1728px, pitfall 37). Its old rule was once unscoped
+   and took this heading's second line box too, so the reader's "Saatler"
+   button had nothing left to switch; `gorunum.spec.ts` 50 still measures this
+   heading against the grid. */
 :root:not([data-avail-clock='acik']) table.availability:not(.with-clock) thead .hour-clock {
   visibility: hidden;
 }

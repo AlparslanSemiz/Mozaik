@@ -193,18 +193,17 @@ export function writePlanText(id: Id, text: string): boolean {
       return true;
     }) === true;
   if (put()) return true;
-  // Full: the copy from before the last deletion gives its room to the plan
-  // itself, which always comes first (`BEFORE_DELETE_KEY`).
+  // Full: the daily copies give their room first, oldest first (dailyCopies.ts,
+  // K8), then the copy from before the last deletion (`BEFORE_DELETE_KEY`). The
+  // plan itself always comes first.
+  while (dropOldestCopy()) if (put()) return true;
   const dropped =
     safely(() => {
       if (localStorage.getItem(BEFORE_DELETE_KEY) === null) return false;
       localStorage.removeItem(BEFORE_DELETE_KEY);
       return true;
     }) === true;
-  if (dropped && put()) return true;
-  // Then the daily copies, oldest first (dailyCopies.ts, K8).
-  while (dropOldestCopy()) if (put()) return true;
-  return false;
+  return dropped && put();
 }
 
 export function dropPlanText(id: Id): void {

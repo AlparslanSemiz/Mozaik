@@ -101,16 +101,18 @@ describe('günlük kopyalar', () => {
     expect(m.dailyCopies('b')).toHaveLength(DAILY_COUNT);
   });
 
-  it('geri dönmeden önce şimdiki hâl bugünün kopyası oluyor ve günün sonu onun üstüne yazmıyor', async () => {
+  it('geri dönmeden önce şimdiki hâl bugünün kopyası oluyor, günün sonu ertesi gün onun yerini alıyor', async () => {
     await save('1', FULL, day(10));
     await save('1', FULL, day(11)); // 10th kept
     const m = await import('./dailyCopies');
+    expect(m.keepToday('1', EMPTY, day(11))).toBe(false); // nothing to keep
     expect(m.keepToday('1', LESS, day(11))).toBe(true);
-    expect(m.keepToday('1', FULL, day(11))).toBe(false); // today has one
-    await save('1', FULL, day(12)); // the 11th's end would be FULL
+    expect(m.dailyCopies('1')[0]!.state.classes.length).toBe(LESS.classes.length);
+    // The restore put FULL back and the day ended with it.
+    await save('1', FULL, day(12));
     const copies = (await import('./dailyCopies')).dailyCopies('1');
     expect(copies.map((c) => c.day)).toEqual([iso(11), iso(10)]);
-    expect(copies[0]!.state.classes.length).toBe(LESS.classes.length);
+    expect(copies[0]!.state.classes.length).toBe(FULL.classes.length);
   });
 
   it('okunamayan kopya listelenmiyor', async () => {

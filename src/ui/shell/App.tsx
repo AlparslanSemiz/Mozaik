@@ -330,7 +330,7 @@ export default function App() {
   // copy first, then the slot a reload reaches, then a step of the history.
   const [oldCopiesOpen, setOldCopiesOpen] = useState(false);
   const restoreCopy = (copy: State, day: string) => {
-    keepToday(plans.planId, state);
+    if (unreadable === null) keepToday(plans.planId, state);
     const said = t('Plan eski hâline döndü: {gun}.', { gun: day });
     keepInStore(state, said, true);
     keepInFolder(state);
