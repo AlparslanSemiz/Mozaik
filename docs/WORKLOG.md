@@ -48,6 +48,18 @@ eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni 
 dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
 olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
 
+## 2026-11-16 · Program ve ızgara denetimi (`denetim/program`)
+
+Alp'in onayladığı sekiz değişiklik (kararlar ve ters çevirdikleri DECISIONS'ta): elle konan ve
+takasla yer değiştiren blok kendiliğinden sabitlenir (`applyDrop`, bildirimde `Geri al`, tek
+adım), ana düğme `Kalanı diz` (yer değiştirenleri adlarıyla söyler; bekleyen ders yokken düğme
+yok, `Hepsi yerleşti` okuması), tek `Yeniden yap` (her basışta yeni tohum; `Başka bir program
+yap` kalktı), dizili haftada havuz gizli, reddedilen fare bırakması bildirim ve şerit çubuğunda
+5,5 sn, kart menüsünde `Sabitle` ilk madde, `Bu planın kopyası` Dosya ▾'da. Plan belgesine A1/A2
+"yapıldı" ve soru çözüm giriş yolu notu. **Açık:** sabit kart sürüklenmediği için bir dersi iki
+kez elle taşımak önce raptiyeye basmayı ister (kural değişmedi, Alp'e not); `Kalanı diz`
+paletteki eylemi `relay` ve adlı bildirimi kullanmıyor (yalnız şeritteki düğme).
+
 ## 2026-11-16 · Öneri araması iki çekirdekte (`olcum/iki-cekirdek`, PR #78)
 
 Ölçüm `olcum-iki-cekirdek.yml` (windows-latest, AMD EPYC, 2 çekirdek / 4 mantıksal, 16 GB):

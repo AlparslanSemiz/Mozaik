@@ -356,8 +356,8 @@ sayıldığı için on günde on gerçek yedeğin hepsi budanıyordu (denetim 20
 
 Sorusuz her silmeden önce (sınıf, derslik, branş, seçenek, öğretmen, ders, `Programı boşalt`),
 `Her şeyi sil`, dolu planın yerine örnek okul ve `Dosyadan aç` öncesinde açık plan
-`ders-programi-silmeden-once`'ya yazılır; `Yeniden yap`, `Başka bir dizilim` ve yer değiştiren
-`Programı yap` öncesi de yazılır ama bir silme olmadıkları için sonraki açılışta önerilmez
+`ders-programi-silmeden-once`'ya yazılır; `Yeniden yap` ve yer değiştiren
+`Kalanı diz` öncesi de yazılır ama bir silme olmadıkları için sonraki açılışta önerilmez
 (`quiet`, 2026-11-16) (tek yuva, boş ve dondurulmuş plan yazılmaz), seçilen
 klasörde de günün `ders-programi-silmeden-once-YYYY-AA-GG.json` dosyasına (tek plan dosyası, gün
 içinde her silmede yeniden yazılır; budama bunların en yeni on gününü bırakır). Silmeden sonraki ilk otomatik kayıt yuvaya planın o hâlinin parmak izini yazar
@@ -491,7 +491,7 @@ ekler.
 Sabitlenmiş bir blok yalnız sabitleme kaldırılınca iner. Bu kilidi taşıyan
 yollar: `removeBlock` (sağ tık, menü, Delete), `dropMap` (üstüne bırakma ve takas),
 sürüklemenin başlangıcı, `solver.ts` (`keepPlaced: false` sabitlenmiş hücreleri
-tohum olarak alır), ve şeritteki `Baştan diz` ile `Programı boşalt`. Bilinen iki
+tohum olarak alır), ve şeritteki `Yeniden yap` ile `Programı boşalt`. Elle bırakılan bir blok bırakıldığı yerde bu kilidi alır (2026-11-16, `applyDrop` ve takasta yer değiştiren her blok). Bilinen iki
 istisna var. Bir dersi başka bir öğretmene ya da sınıfa aktarmak o dersin
 sabitlemelerini kaldırır. Ayarlar → Zil ve günler'de bir günü ya da saati kaldırmak
 o gün ya da saatteki sabitlemeleri de kaldırır, ama önce sabitli saatleri ayrıca
