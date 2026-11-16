@@ -202,7 +202,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `platform/search/index.ts` | çözücü ve öneri araması paketinin giriş noktası: `useSolver`, `samePlan`, worker'ın girişi (`inWorker`, `serveRelax`) ve `searchLog`; `relaxPool` paketin içinde kalır |
 | `platform/search/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını başlatır ve "Bu olmaz" ile yeniden başlatır |
-| `platform/search/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
+| `platform/search/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar. Exe'de CP-SAT varsa onun modellediği dört yolu ona verir ve bizim aramayı onun yanında koşar (`cpsatOr`) |
 | `platform/search/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
 | `platform/search/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
 | `platform/storage/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
@@ -459,6 +459,15 @@ kendi başlarına başlayınca çok daha kötü bir hafta bulurlar. Yedi worker 
 sonra onu `seed` olarak alırlar. Daha az worker'da en az saat yolunun hattında
 onun arkasından gelirler. Bir cevaptan sonra kendi eski haftaları varsa
 beklemezler.
+
+Exe'de OR-Tools varsa (`cpsatOr`, 2026-11-16) arama iki adımdır ve her adımda
+CP-SAT ile bizim arama yan yana koşar. Önce bizim arama üç öğretmen saati yolunu
+tek formülde arar, CP-SAT aynı anda en az saati takılan haftadan. Sonra CP-SAT
+modellediği dört yolu (`cpNative`) bizim haftalardan başlayarak, bizim arama
+geri kalan yolları en az saat haftasından başlayarak arar. Bizim yollar
+`handOff` ile ilk haftalarının yakınında kalır, ispatı CP-SAT'a bırakır. İki
+çekirdekte CP-SAT bir soruya en çok altı saniye bakar, hiç hafta bulamazsa tam
+süreyle bir kez daha. Kütüphane yoksa bugünkü arama aynen koşar.
 
 ### Exe bir adaptör takar
 

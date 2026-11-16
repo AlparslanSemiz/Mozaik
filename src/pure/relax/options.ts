@@ -116,6 +116,13 @@ export interface RelaxOptions {
    * with them kept, and a refusal cannot make one appear.
    */
   startRelaid: boolean;
+  /**
+   * CP-SAT searches beside this search (the exe with OR-Tools, relaxPool.ts):
+   * each way stops near its first week, without the whole-week question that
+   * proves "no fewer", and the ways that rarely find anything count less
+   * (HANDOFF_CONFLICTS).
+   */
+  handOff: boolean;
 }
 
 /**
@@ -144,6 +151,7 @@ export const DEFAULTS: RelaxOptions = {
   refused: [],
   previous: [],
   startRelaid: false,
+  handOff: false,
   accepted: [],
   seed: [],
 };
@@ -176,6 +184,19 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
   handHours: 60_000,
   blockShape: 30_000,
   weeklyHours: 30_000,
+};
+
+/**
+ * The same with CP-SAT beside the search (`handOff`, relaxPool.ts): the ways
+ * that on the father's week found nothing in their whole budget get a third
+ * of it. MEASURED 2026-11-16: dispatch, block shape and weekly hours spent
+ * 93 000 conflicts, a third of the search, and offered nothing.
+ */
+export const HANDOFF_CONFLICTS: Record<RelaxFamily, number> = {
+  ...FAMILY_CONFLICTS,
+  reassign: 10_000,
+  blockShape: 10_000,
+  weeklyHours: 10_000,
 };
 
 /**
@@ -253,6 +274,19 @@ export interface RelaxProgress {
   /** Suggestions found and checked so far, so they can be shown as they come. */
   suggestions: Suggestion[];
   elapsedMs: number;
+  /** SAT conflicts spent so far, every formula together: the work, the same on any machine. */
+  conflicts?: number;
+  /**
+   * How far the running way has got, 0 to 1: its conflicts against its budget,
+   * or CP-SAT's seconds against the question's limit. For the bar, so that a
+   * long way is seen to move.
+   */
+  share?: number;
+  /**
+   * The whole search in steps, for "N / M yol" and the bar: one per way, ours
+   * or CP-SAT's.
+   */
+  steps?: { done: number; total: number };
 }
 
 export interface RelaxResult {

@@ -1092,6 +1092,8 @@ const FR: Sozluk = {
     "(recherche d'une meilleure)",
   "Başka yollar da aranıyor… {sure} sn":
     "D’autres voies sont aussi recherchées… {sure} s",
+  "Yol {n} / {m} deneniyor: {ad}":
+    "Essai de la voie {n} sur {m} : {ad}",
   "Aramanın ilerlemesi":
     "Progression de la recherche",
   "Başka yollar ({n})":

@@ -207,6 +207,7 @@ export default function Suggestions({
     rows.push({ family, found });
   }
   const sure = Math.round((progress?.elapsedMs ?? 0) / 1000);
+  const steps = progress?.steps ?? { done: finished.size, total: FAMILY_ORDER.length };
   // Not once the plan moved: the stale note below then speaks alone.
   const why =
     !stale && !searching && !stopped && rows.length === 0 ? pinnedBreach?.message : undefined;
@@ -307,10 +308,21 @@ export default function Suggestions({
         {searching && (
           <progress
             className="suggestion-progress"
-            max={FAMILY_ORDER.length}
-            value={finished.size}
+            max={steps.total}
+            value={Math.min(steps.total, steps.done + (progress?.share ?? 0))}
             aria-label={t('Aramanın ilerlemesi')}
           />
+        )}
+        {searching && progress !== null && (
+          // What is being tried, so that a long way is not taken for a hang
+          // (two CPUs: one way ran 77 s with nothing new on screen, 2026-11-16).
+          <span className="hint inline" data-testid="suggestion-step">
+            {t('Yol {n} / {m} deneniyor: {ad}', {
+              n: Math.min(steps.total, steps.done + 1),
+              m: steps.total,
+              ad: wayName(t, progress.family),
+            })}
+          </span>
         )}
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">

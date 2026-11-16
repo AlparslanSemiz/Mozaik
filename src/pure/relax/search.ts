@@ -21,6 +21,7 @@ import {
   CP_QUICK_SECONDS,
   DEFAULTS,
   FAMILY_CONFLICTS,
+  HANDOFF_CONFLICTS,
   FIRST_CAP,
   HAND_CAP,
   HINT_CONFLICTS,
@@ -117,7 +118,14 @@ function relaxerCore(
 
   /** The running family's conflict count at which it has to stop. */
   let familyUntil = 0;
+  /** Conflicts spent so far, every formula together: the work, on any machine. */
+  let spent = 0;
+  /** Where the running way started counting, and how far it may count: its share for the bar. */
+  let familyFrom = 0;
+  let familyBudget = 1;
   const budgetLeft = () => opts.budgetMs - elapsedMs;
+  const conflictsFor = (which: RelaxFamily) =>
+    opts.handOff ? HANDOFF_CONFLICTS[which] : FAMILY_CONFLICTS[which];
 
   /** Asks the formula one question, a slice at a time, until `until` conflicts at most. */
   function* ask(
@@ -129,7 +137,9 @@ function relaxerCore(
     const stop = Math.min(until, familyUntil);
     for (;;) {
       if (budgetLeft() <= 0 || sat.conflicts >= stop) return 'budget';
+      const before = sat.conflicts;
       const status = sat.run(deadline, stop);
+      spent += sat.conflicts - before;
       if (status !== 'paused') return status;
       yield;
     }
@@ -223,6 +233,8 @@ function relaxerCore(
   function* familySearch(which: RelaxFamily): Generator<void, void> {
     family = which;
     stage = 'building';
+    familyFrom = spent;
+    familyBudget = conflictsFor(which);
     const kind = kindOf(which);
     let model = models.get(kind);
     const fresh = model === undefined;
@@ -248,7 +260,7 @@ function relaxerCore(
     const { sat } = model;
     const [cost, cost2] = costsOf(which, model);
     const openDays = base.settings.days.map((_, i) => i);
-    familyUntil = sat.conflicts + FAMILY_CONFLICTS[which];
+    familyUntil = sat.conflicts + conflictsFor(which);
 
     // Any week at all under this family's changes. A new formula first asks
     // for the hint week outright, briefly. It was written so because a phase
@@ -453,7 +465,10 @@ function relaxerCore(
     // few-teachers way: its first count is teachers, and its hours, the part
     // the reader asks of them, are only settled by the second.
     const early = which === 'fewTeachers' ? undefined : () => offer(which, model, best, false);
-    const first = yield* tighten(cost, must, true, early);
+    // CP-SAT has the ways it models (`handOff`, relaxPool.ts): ours stay near
+    // their first week, no whole-week question and no proof.
+    const quick = opts.handOff;
+    const first = yield* tighten(cost, must, !quick, early);
     // The hand-over way's week must open no hour at all, and `offer` drops one
     // that does. Searching fewer lessons handed over under a week that is
     // dropped anyway was the whole second half of its line: on the father's
@@ -473,7 +488,7 @@ function relaxerCore(
         // the rules the steps each limit goes up by: both are the answer. For
         // the others it is "side by side", a preference among equals, looked
         // for only near the best week.
-        const wide = which === 'fewTeachers' || which === 'rules';
+        const wide = !quick && (which === 'fewTeachers' || which === 'rules');
         proven = (yield* tighten(cost2, first.keep, wide)).done && proven;
       } else {
         proven = false;
@@ -677,10 +692,16 @@ function relaxerCore(
 
   function* pass(): Generator<CpAsk | void, void, CpAnswer | undefined> {
     doneFamilies = [];
-    for (const which of opts.families) {
+    for (const [i, which] of opts.families.entries()) {
       if (withCp) yield* cpFamilySearch(which);
       else yield* familySearch(which);
       doneFamilies.push(which);
+      // A formula no later way shares is let go: with its counters it is the
+      // largest thing the search holds, and kept to the end the ten ways'
+      // formulas were all alive at once (Node's peak 560 MB on the father's
+      // week, olcum-iki-cekirdek.yml, 2026-11-16).
+      const later = new Set(opts.families.slice(i + 1).map(kindOf));
+      for (const kind of [...models.keys()]) if (!later.has(kind)) models.delete(kind);
       // A week that needs no change at all is the answer to every family.
       if (suggestions.some((s) => s.changes.length === 0)) return;
     }
@@ -721,6 +742,9 @@ function relaxerCore(
     finished: [...doneFamilies],
     suggestions: [...suggestions],
     elapsedMs,
+    conflicts: spent,
+    ...(withCp ? {} : { share: Math.min(1, (spent - familyFrom) / familyBudget) }),
+    steps: { done: doneFamilies.length, total: opts.families.length },
   });
   const cancel = (): RelaxResult => {
     if (finished === null) finished = result('cancelled');

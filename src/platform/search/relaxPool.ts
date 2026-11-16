@@ -164,7 +164,7 @@ function startOn(
   options: Partial<RelaxOptions>,
 ): Relaxer {
   if (CP_SECOND_LOOK && isDesktop())
-    return cpsatOr(base, hint, options, () => onWorkers(base, hint, options));
+    return cpsatOr(base, hint, options, (o) => onWorkers(base, hint, o));
   return onWorkers(base, hint, options);
 }
 
@@ -178,142 +178,260 @@ function startOn(
 const CP_SECOND_LOOK = true;
 
 /**
- * The exe with OR-Tools CP-SAT next to it (src-tauri/src/cpsat.rs): the search
- * runs as everywhere else, and AFTER it CP-SAT looks again at the ways it
- * found that cpModel.ts writes (the teacher-hour ways and the rules), each
- * starting from that way's week. The others are left as our search found
- * them: on model.ts's recorded formula the second look did not prove even
- * these in time, and theirs is not measured. A week CP-SAT finds replaces the one
- * shown only when it is smaller, or as small and proven ("Bundan küçük bir
- * değişiklik yetmiyor"). Why after and not instead (MEASURED 2026-11-15, the
- * father's week): our search finds 4, 6 and 9 and proves none; CP-SAT
- * proves them, but finding the 4 hours from the stuck week took it 9-60 s
- * (scratch analiz/1-cpsat-model.md), so on its own it could show 5 where
- * today's search shows 4. After, it can only make the panel better. Without the library, or when it fails, the panel
- * gets exactly today's answer.
+ * CP-SAT's ceiling for one question on a machine with two cores or fewer, in
+ * seconds. MEASURED 2026-11-16 (olcum-iki-cekirdek.yml, two CPUs, the father's
+ * week): every proof came in under 8 s, and the three questions that ran out
+ * their 20 s ended where they began (6, 8 and 6). The C API gives no word of a
+ * new solution while it searches, so "stop when nothing better came for a
+ * while" is this ceiling.
+ */
+const CP_FEW_CORES_SECONDS = 6;
+
+/**
+ * The exe with OR-Tools CP-SAT next to it (src-tauri/src/cpsat.rs).
+ *
+ * Until 2026-11-16 our search ran first, all ten ways, and CP-SAT then looked
+ * again at the four it models (cpModel.ts: the three teacher-hour ways and the
+ * rules). MEASURED on two CPUs (olcum-iki-cekirdek.yml, the father's week): the
+ * whole search took 232 s, 154 of them ours before CP-SAT began, one way ran
+ * 77 s with nothing new on screen, and CP-SAT then ended where our search had
+ * (6, 4, 4, 9), proving only the 4.
+ *
+ * So now, with the library, in two steps, and in each of them CP-SAT and our
+ * search side by side (`handOff`: each of our ways stays near its first week
+ * and leaves the proof to CP-SAT):
+ *   1. Ours, the three teacher-hour ways, on one formula: the fewest-hours way
+ *      finds its 4 hours on the formula the few-teachers way leaves behind.
+ *      CP-SAT meanwhile, the fewest hours from the stuck week: on cpModel.ts it
+ *      found the 4 in 1-6 s on two workers, the first way on screen.
+ *   2. CP-SAT the four ways it models, each from our week of it; ours, on its
+ *      worker, the ways CP-SAT does not model, starting from the fewest-hours
+ *      week (`seed`).
+ * A way both looked for shows the smaller week, or as small and proven
+ * ("Bundan küçük bir değişiklik yetmiyor"). Without the library the panel gets
+ * today's search exactly; when it fails midway, our search looks for the ways
+ * it had not answered.
  */
 function cpsatOr(
   base: State,
   hint: Readonly<Record<string, Id>>,
   options: Partial<RelaxOptions>,
-  otherwise: () => Relaxer,
+  run: (o: Partial<RelaxOptions>) => Relaxer,
 ): Relaxer {
   const t0 = performance.now();
-  const ours = otherwise();
-  const available = desktopCpsatVar();
-  /** Our search's answer, once it is there. */
-  let first: RelaxResult | null = null;
-  let cp: CpRelaxer | null = null;
-  let finished: RelaxResult | null = null;
+  const all = options.families ?? DEFAULT_FAMILIES;
+  const cpWays = all.filter(cpNative);
+  const firstWays = all.filter(
+    (f) => f === 'fewTeachers' || f === 'teacherHours' || f === 'teacherDays',
+  );
+  const firstCp = all.filter((f) => f === 'teacherHours');
+  const restWays = all.filter((f) => !cpNative(f));
+  // At least two: on one worker CP-SAT ignores `subsolvers` and runs its
+  // single-thread default, which never gave the proof. On Windows the exe
+  // lowers its own priority while it solves (cpsat.rs), so the window stays
+  // usable on a weak machine whose every core this occupies.
+  const workers = Math.max(
+    2,
+    typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4),
+  );
+
   let cancelled = false;
+  /** Today's search, when there is no library. */
+  let plain: Relaxer | null = null;
+  /** Our searches, in order: step 1, step 2, and the ways CP-SAT failed to answer. */
+  const ours: Array<{ relaxer: Relaxer; ways: RelaxFamily[]; done: RelaxResult | null }> = [];
+  /** The CP-SAT relaxer asking now, what the finished ones found, and where it is. */
+  let cp: CpRelaxer | null = null;
+  const cpFound: Suggestion[] = [];
+  const cpSettled = new Set<RelaxFamily>();
+  let cpRejected = 0;
+  /** Step 1's CP-SAT part is over; step 2 has started; step 2's CP-SAT part is over. */
+  let firstCpDone = false;
+  let secondStarted = false;
+  let cpDone = false;
+  let cpBroken = false;
+  /** The question CP-SAT is answering: when it was asked and its limit, for the bar. */
+  let asking: { at: number; seconds: number } | null = null;
+  let finished: RelaxResult | null = null;
 
-  /** Our answer with every way CP-SAT did better on put in its place. */
-  const merged = (found: Suggestion[]): Suggestion[] => {
-    const out = [...(first?.suggestions ?? [])];
-    for (const s of found) {
-      const at = out.findIndex((x) => x.family === s.family && x.relaid === s.relaid);
-      const old = at < 0 ? undefined : out[at]!;
-      if (old === undefined) continue;
-      if (s.size < old.size || (s.size === old.size && s.proven && !old.proven)) out[at] = s;
-    }
-    return out;
+  const start = (o: Partial<RelaxOptions>, ways: RelaxFamily[]) => {
+    if (ways.length === 0) return null;
+    const line = { relaxer: run({ ...o, handOff: true, families: ways }), ways, done: null };
+    ours.push(line);
+    return line;
   };
-  const end = (phase: RelaxResult['phase'], found: Suggestion[], rejected: number) => {
-    finished = {
-      phase,
-      suggestions: merged(found),
-      elapsedMs: performance.now() - t0,
-      rejected: (first?.rejected ?? 0) + rejected,
-    };
-  };
+  /** Step 1's own search: null when it has no ways. */
+  let firstOurs: ReturnType<typeof start> = null;
 
-  const second = async (answer: RelaxResult) => {
-    const families = [...new Set(answer.suggestions.map((x) => x.family))].filter(cpNative);
-    const worth =
-      answer.phase === 'done' &&
-      families.length > 0 &&
-      !answer.suggestions.some((x) => x.changes.length === 0);
-    if (!worth || !(await available) || cancelled) {
-      finished ??= answer;
-      return;
-    }
-    if (typeof document !== 'undefined') document.documentElement.dataset['oneriMotor'] = 'cpsat';
-    cp = createCpRelaxer(base, hint, {
-      ...options,
-      families,
-      previous: answer.suggestions,
-      startRelaid: answer.suggestions.some((x) => x.relaid),
-    });
-    // At least two: on one worker CP-SAT ignores `subsolvers` and runs its
-    // single-thread default, which never gave the proof. On Windows the exe
-    // lowers its own priority while it solves (cpsat.rs), so the window stays
-    // usable on a weak machine whose every core this occupies.
-    const workers = Math.max(
-      2,
-      typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4),
-    );
+  /** One CP-SAT relaxer's questions, to the end; what it found goes to `cpFound`. */
+  const chain = async (families: RelaxFamily[], from: Partial<RelaxOptions>) => {
+    if (families.length === 0 || cpBroken) return;
+    const me = createCpRelaxer(base, hint, { ...options, ...from, families });
+    cp = me;
     let reply: CpAnswer | undefined;
-    for (;;) {
-      const step = cp.next(reply);
-      if ('done' in step) {
-        end('done', step.done.suggestions, step.done.rejected);
+    try {
+      for (;;) {
+        const step = me.next(reply);
+        if ('done' in step) {
+          cpFound.push(...step.done.suggestions);
+          cpRejected += step.done.rejected;
+          return;
+        }
+        // Two workers or fewer: a shorter look (CP_FEW_CORES_SECONDS), and
+        // the whole one only when the short one came back with no week at all.
+        const ask = async (seconds: number) => {
+          asking = { at: performance.now(), seconds };
+          return readAnswer(
+            await desktopCpsatCoz(
+              cpParams({
+                workers,
+                seconds,
+                hintConflicts: CP_HINT_CONFLICTS,
+                subsolvers: CP_PROOF_SUBSOLVERS,
+              }),
+              step.ask.bytes,
+            ),
+          );
+        };
+        const short = workers <= 2 && step.ask.seconds > CP_FEW_CORES_SECONDS;
+        reply = await ask(short ? CP_FEW_CORES_SECONDS : step.ask.seconds);
+        if (short && reply.status === 'unknown' && !cancelled) reply = await ask(step.ask.seconds);
+        // Cancelled while the library answered: `cancel` already returned what was found.
+        if (cancelled) return;
+      }
+    } catch {
+      // The library failed: what this relaxer found is kept, CP-SAT is not asked again.
+      cpFound.push(...me.progress().suggestions);
+      cpBroken = true;
+    } finally {
+      for (const f of families) cpSettled.add(f);
+      cp = null;
+    }
+  };
+
+  void desktopCpsatVar().then(
+    (ok) => {
+      if (cancelled) return;
+      if (!ok) {
+        plain = run(options);
         return;
       }
-      const bytes = await desktopCpsatCoz(
-        cpParams({
-          workers,
-          seconds: step.ask.seconds,
-          hintConflicts: CP_HINT_CONFLICTS,
-          subsolvers: CP_PROOF_SUBSOLVERS,
-        }),
-        step.ask.bytes,
-      );
-      // Cancelled while the library answered: `cancel` already returned what was found.
-      if (cancelled) return;
-      reply = readAnswer(bytes);
+      if (typeof document !== 'undefined') document.documentElement.dataset['oneriMotor'] = 'cpsat';
+      firstOurs = start(options, firstWays);
+      void chain(firstCp, {}).then(() => {
+        firstCpDone = true;
+      });
+    },
+    () => {
+      if (!cancelled) plain = run(options);
+    },
+  );
+
+  /** A way found twice (ours and CP-SAT's): the smaller, or as small and proven. */
+  const better = (a: Suggestion, b: Suggestion) =>
+    b.size < a.size || (b.size === a.size && b.proven && !a.proven) ? b : a;
+  const found = (): Suggestion[] => {
+    const out: Suggestion[] = [];
+    const add = (s: Suggestion) => {
+      const at = out.findIndex((x) => x.family === s.family && x.relaid === s.relaid);
+      if (at < 0) out.push(s);
+      else out[at] = better(out[at]!, s);
+    };
+    for (const o of ours) (o.done ?? o.relaxer.progress()).suggestions.forEach(add);
+    cpFound.forEach(add);
+    cp?.progress().suggestions.forEach(add);
+    return out;
+  };
+  const result = (phase: RelaxResult['phase']): RelaxResult => ({
+    phase,
+    suggestions: found(),
+    elapsedMs: performance.now() - t0,
+    rejected: cpRejected + ours.reduce((n, o) => n + (o.done?.rejected ?? 0), 0),
+  });
+
+  /** Both halves of step 1 are over: step 2, unless a week needs no change at all. */
+  const second = () => {
+    secondStarted = true;
+    const so = found();
+    if (so.some((s) => s.changes.length === 0)) {
+      cpDone = true;
+      return;
     }
+    const fewest = so.filter((s) => s.family === 'teacherHours');
+    const from: Partial<RelaxOptions> = {
+      seed: fewest,
+      startRelaid: so.some((s) => s.relaid),
+    };
+    // Not `previous` for ours: that is the search after a refusal, with wider
+    // neighbourhoods. CP-SAT starts each way from our week of it, and does not
+    // ask again for a fewest-hours week it has proven.
+    start({ ...options, ...from }, restWays);
+    const proven = new Set(cpFound.filter((s) => s.proven).map((s) => s.family));
+    void chain(
+      cpWays.filter((f) => !proven.has(f)),
+      { ...from, previous: so },
+    ).then(() => {
+      // The library failed: our search looks for the ways it had not answered.
+      const missing = cpWays.filter((f) => !found().some((s) => s.family === f));
+      if (cpBroken && !cancelled) start({ ...options, ...from }, missing);
+      cpDone = true;
+    });
   };
 
   return {
     step(sliceMs: number): RelaxResult | null {
       if (finished !== null) return finished;
-      if (first === null) {
-        const answer = ours.step(sliceMs);
-        if (answer === null) return null;
-        first = answer;
-        second(answer).catch(() => {
-          // The library failed: today's answer, as it is.
-          finished ??= answer;
-        });
+      if (plain !== null) {
+        finished = plain.step(sliceMs);
+        return finished;
       }
+      const live = ours.find((o) => o.done === null);
+      if (live !== undefined) live.done = live.relaxer.step(sliceMs);
+      if (!secondStarted && firstCpDone && (firstOurs === null || firstOurs.done !== null))
+        second();
+      if (cpDone && ours.every((o) => o.done !== null)) finished = result('done');
       return finished;
     },
     progress(): RelaxProgress {
-      if (first === null || cp === null) return ours.progress();
-      const p = cp.progress();
-      // Every way our search finished, less the ones CP-SAT is still looking
-      // at again: only those say "(daha iyisi aranıyor)".
-      const again = new Set(first.suggestions.map((x) => x.family).filter(cpNative));
-      for (const f of p.finished) again.delete(f);
-      const all = options.families ?? DEFAULT_FAMILIES;
+      const elapsedMs = performance.now() - t0;
+      if (plain !== null) return { ...plain.progress(), elapsedMs };
+      const live = ours.find((o) => o.done === null);
+      const mine = live?.relaxer.progress() ?? null;
+      const theirs = cp?.progress() ?? null;
+      // A way CP-SAT looks at is settled when it is done with it; the others
+      // when our search is.
+      const settled = new Set<RelaxFamily>();
+      for (const o of ours)
+        for (const f of o.done !== null ? o.ways : (mine?.finished ?? []))
+          if (!cpNative(f) || cpBroken) settled.add(f);
+      for (const f of cpSettled) if (secondStarted) settled.add(f);
+      for (const f of theirs?.finished ?? []) if (secondStarted) settled.add(f);
+      const share =
+        mine?.share ??
+        (asking === null
+          ? 0
+          : Math.min(1, (performance.now() - asking.at) / (asking.seconds * 1000)));
       return {
-        ...p,
-        finished: all.filter((f) => !again.has(f)),
-        suggestions: merged(p.suggestions),
-        elapsedMs: performance.now() - t0,
+        family: mine?.family ?? theirs?.family ?? all[0] ?? 'teacherHours',
+        stage: mine?.stage ?? theirs?.stage ?? 'building',
+        finished: all.filter((f) => settled.has(f)),
+        suggestions: found(),
+        elapsedMs,
+        share,
+        steps: { done: settled.size, total: all.length },
       };
     },
     cancel(): RelaxResult {
       if (finished !== null) return finished;
       cancelled = true;
-      if (first === null) {
-        finished = ours.cancel();
+      if (plain !== null) {
+        finished = plain.cancel();
         return finished;
       }
       void desktopCpsatDurdur();
-      const got = cp?.cancel();
-      end('cancelled', got?.suggestions ?? [], got?.rejected ?? 0);
-      return finished!;
+      for (const o of ours) o.done ??= o.relaxer.cancel();
+      finished = result('cancelled');
+      return finished;
     },
   };
 }
@@ -409,7 +527,11 @@ function onWorkers(
     const job: RelaxJob = {
       base,
       hint: { ...hint },
-      options: { ...options, families: plan[i]!.families, seed },
+      options: {
+        ...options,
+        families: plan[i]!.families,
+        seed: [...(options.seed ?? []), ...seed],
+      },
     };
     workers[i]!.postMessage(job);
   };
@@ -463,6 +585,8 @@ function onWorkers(
         finished: finishedFamilies(),
         suggestions: found(),
         elapsedMs: elapsed(),
+        ...(live?.share === undefined ? {} : { share: live.share }),
+        steps: { done: finishedFamilies().length, total: families.length },
       };
     },
     cancel(): RelaxResult {
