@@ -211,13 +211,23 @@ export function NewTeacher({ state, change, added }: Props) {
   );
 }
 
+/**
+ * The room the last new class was given, for the next one: classes are added
+ * one after another and usually in the same room (Okul's old add row kept it;
+ * the person page lost it in phase 2 and got it back on 2026-11-16).
+ */
+let lastRoom = '';
+
 export function NewClass({ state, change, added }: Props) {
   const t = useT();
   const [name, setName] = useState('');
-  const [roomId, setRoomId] = useState('');
+  const [roomId, setRoomId] = useState(() =>
+    state.rooms.some((r) => r.id === lastRoom) ? lastRoom : '',
+  );
 
   function add() {
     if (name.trim() === '') return;
+    lastRoom = roomId;
     const id = newId();
     change((d) => addClass(d, name, roomId || null, id));
     added(id);

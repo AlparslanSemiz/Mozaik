@@ -25,7 +25,6 @@ import {
 } from '../constraints';
 import { setAvailability, setTeacherLimit, updateLesson } from '../entities';
 import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
-import { lessonExcluded } from '../program';
 import { fixedCells } from '../solver';
 import { DEFAULTS, type RelaxOptions, type Suggestion } from './options';
 
@@ -128,7 +127,7 @@ function cutsInto(runs: readonly number[], plan: readonly number[]): boolean {
 export function verifySuggestion(
   base: State,
   s: Suggestion,
-  options?: Partial<Pick<RelaxOptions, 'keepPlaced' | 'exclusions'>>,
+  options?: Partial<Pick<RelaxOptions, 'keepPlaced'>>,
 ): string[] {
   const opts = { ...DEFAULTS, ...options };
   const problems: string[] = [];
@@ -198,13 +197,12 @@ export function verifySuggestion(
   // So for a lesson the run laid out whole, its runs on the grid have to cut
   // into its plan. Not for one with kept cells: those may sit in a shape the
   // plan does not (an old backup), and the run did not make it.
-  const fixed = fixedCells(base, opts.keepPlaced, opts.exclusions);
+  const fixed = fixedCells(base, opts.keepPlaced);
   const keptOf = new Set(Object.values(fixed));
   const grid = activePlacements(applied);
   const days = applied.settings.days.length;
   const hourCount = applied.settings.hours.length;
   for (const lesson of applied.lessons) {
-    if (lessonExcluded(lesson, opts.exclusions)) continue;
     if (pendingBlocks(applied, lesson).length > 0) {
       problems.push(`eksik kaldı: ${lesson.id}`);
       continue;

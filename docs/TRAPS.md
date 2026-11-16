@@ -1047,6 +1047,14 @@ başlıkları yatay kaydırmada köşenin üstüne boyandı; 40 px "ÖĞRE" okut
 DK3). Kural yazılıydı, uygulanmıyordu. Çare seçicinin kendisi: `table.grid thead th.corner`.
 Onu `program.spec.ts`'teki test ölçer, kutuya değil `elementFromPoint`'e sorarak (tuzak
 84).
+### 179 · `prettier --write src/styles.css` bütün dosyayı yeniden biçimler ve bir testi kırar
+`styles.css` projenin biçim komutunda (`npm run bicim`) yok: yalnız `.ts`, `.tsx`, `.mjs`
+ve `index.html` biçimlenir. Değişen dosyaların listesi elle `prettier --write`'a verilince
+CSS de gitti, 819 satır değişti (tek tırnaklar çift, uzun seçiciler bölündü), ve
+`preferences.test.ts`'in hareket bloğunu `:root[data-motion="az"]` diye arayan testi
+kırmızı oldu (Sadeleşme aşama 3A, 2026-11-16). Çare: prettier'a yalnız `bicim`'in
+kapsadığı uzantılar verilir; `styles.css` ve `src/leaf/lang/` (`.prettierignore`) elle
+yazıldığı gibi kalır. Biçim değişikliği içerik commit'ine girerse farkı okunmaz olur.
 
 ---
 
@@ -1701,7 +1709,7 @@ iddiası saati kapatarak sınanır.**
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
-| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
+| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142, 179 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143, 156 |
@@ -1712,7 +1720,7 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 178, yeni bir tuzak 179'dan devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
+büyük kullanılan numara 179 (177 ve 178 açık dallarda), yeni bir tuzak 180'den devam eder. 173 boş kaldı (açık bir dala ayrılmıştı). 167 ile 169 arası
 boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki

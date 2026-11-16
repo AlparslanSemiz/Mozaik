@@ -36,6 +36,36 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
+
+- **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",
+  yana kayan); artık tek düzen eski Sığdır ve seçici yok. Bunun bedeli açıkça yazılı:
+  Rahat'ta kartın satırları 14/13 px'ti (2026-11-15), ızgarada 12 px. Izgara saati çizmiyor (başlığın
+  `title`'ında). Arayüz yoğunluğu (2026-08-27, "Program ferahlığı … genel arayüz
+  ferahlığından farklı olsun") da kalktı: liste satırları ve paneller bugünkü Rahat
+  ölçüsünde. Eski kayıtlı değerler okunmuyor, silinmiyor, Veriler nerede'de kalıyor.
+  **Alp'in kararı (b), aynı gün:** Sığdır'ın "hafta her zaman sığar, yazı kesilir"
+  sözleşmesi (2026-09-01) ve 9 px tabanı (2026-09-26) ters çevrildi. Sütun en geniş
+  dersin okunduğu genişlikten dar olmaz (yazıdan ölçülür, `--cell-min`), sığmayan hafta
+  görünür bir çubukla yana kayar, kart yazısı hiçbir yerde 11 px'in altına inmez.
+  Örnek okulda kesik ders 1920 %150 ve 1366 %125/%150'de 317–319/376'dan 0'a indi;
+  1920 %100'de hafta hâlâ sığıyor (WORKLOG).
+- **K7.** Sağ tık menüsünün iki kapısı ve arkalarındaki her şey kalktı, çözücünün
+  `exclusions` seçeneği dahil (yalnız geçici görünüm kullanıyordu). Başlıklarda menü
+  yok. LAYOUT'un "Sağ tık menüsü" kuralı (üst düzeyde sık olan, kapı arkasında nadir
+  olan) kapısız kaldı.
+- **K8 · Günlük kopyalar localStorage'da, klasörde değil.** Exe'nin ve klasör seçmiş
+  tarayıcının günlük paketleri zaten var ama yalnız klasörü olanda; Eski hâline dön her
+  teslim yolunda aynı çalışsın diye kopyalar kaydın kendi deposunda, aynı kota
+  kuralıyla (plan önce gelir) ve aynı kapıdan (VK1, okunamayan plan). Yedi gün (aSc ve
+  Roboders'te karşılığı yok; "geçen haftanın aynı günü" dahil olsun diye bir hafta).
+  Bir günün kopyası o günün SONUNDAKİ hâl: ertesi çalışılan günün ilk kaydı alır, gün
+  boyunca yazım yok. Geri dönmeden önce şimdiki hâl bugünün kopyası olur; günün sonu
+  ertesi gün onun yerini alır (dönüşten önceki hâl silmeden-önce yuvasında kalır).
+  Dolu depoda kopyalar silmeden-önce yuvasından önce yer açar. **Denendi, bırakıldı:** oturum yedek
+  zincirini (`yedek-0..2`) günlüğe çevirmek: zincir plan başına değil açılıştaki plana
+  ait ve kayıtlı metnin biçimi tarih taşımıyor.
+
 ### 2026-11-16 · Kişi sayfası: bir kişi tek yerde (Sadeleşme aşama 2, K5)
 
 **Değişen.** Okul'un öğretmen ve sınıf listeleri düz yazı; ada tıklayınca sağda kişinin sayfası

@@ -236,7 +236,7 @@ kat yavaşlatılmış işlemcide dokuz açılışın dokuzunda, düzeltmeden son
 sıfırında. Klasik bir betik ayrıştırmayı bloklar, yani "ilk boyamadan önce" bir
 yarış olmaktan çıkıp bir garanti oluyor.
 
-Kapsam yalnız tema, çünkü ölçülen tek görünür fark o. Ölçek ve yoğunluk geç
+Kapsam yalnız tema, çünkü ölçülen tek görünür fark o. Ölçek geç
 uygulandığında düzen kayması 0,0002'nin altında kalıyor ve bir renk değişimi
 gibi göze çarpmıyor.
 
@@ -272,6 +272,11 @@ runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` d
 `haftalik.yml`'in Linux işleri de `ubuntu-24.04`'te (2026-10-10, Alp'in kararı); Linux'un
 sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO B7.29).
 `surum.yml`'in Windows işi `windows-latest`'te.
+`acilis.yml` `src/`'ye dokunan PR'da ve elle `file://` açılışını ölçer: dalı ve `main` ile
+ortak atasını derler, `scripts/acilis-olc.mjs` ikisini Chromium'da CPU 4× yavaş, 9 dönüşümlü
+koşuyla babanın haftasıyla açar, medyan ve aralığı işin özetine yazar. Hiçbir şeyi kilitlemez;
+dal tabandan %15'ten çok yavaşsa uyarı düşer. Yerel ölçüm yüklü makinede kirli kaldığı için
+CLAUDE.md'nin 4× ölçümü buradan alınabilir (koşu numarasıyla WORKLOG'a).
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı

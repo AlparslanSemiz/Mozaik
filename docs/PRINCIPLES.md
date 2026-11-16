@@ -86,7 +86,7 @@ bir işlemci ve anakart. Ekranı 27 inç, 1920×1080 (kullanıcı, 2026-10-08; W
 sürümü ve ekran kesin). E2E'nin varsayılan penceresi zaten bu boy
 (`playwright.config.ts`). Windows'un ekran ölçeği %100 (kullanıcı, 2026-10-09,
 kesin). Babanın ayarı programa göre değiştirilmez, ve program %125'te de düzgün
-görünmeli: %125'te sayfa 1536 CSS pikselde koşar, Sığdır'ın bilinen kırpılması
+görünmeli: %125'te sayfa 1536 CSS pikselde koşar, ızgaranın bilinen kırpılması
 orada, ve o kutular süitte kalıyor. Makinenin ne olduğu artık biliniyor, programın orada ne
 kadar yavaş olduğu bilinmiyor: geliştirme makinesinde açılış ve etkileşim süreleri
 ölçülüp [WORKLOG.md](WORKLOG.md)'ye yazılıyor, babanın makinesinde henüz ölçülmedi.

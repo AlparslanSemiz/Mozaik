@@ -114,7 +114,6 @@ export function buildCpWeek(
   const { fixed, fixedIx } = frame;
   const days = base.settings.days.length;
   const hours = base.settings.hours.length;
-  const excludedDays = new Set(opts.exclusions.dayNames);
   const classes = new Map(base.classes.map((x) => [x.id, x]));
   const { refusedDays, refusedHours, refusedTeachers, caps, refusedLimits } = refusalsOf(opts);
   const mayOpen = (teacherId: Id, day: number, hour: number) =>
@@ -189,7 +188,6 @@ export function buildCpWeek(
     for (const [size, count] of counts) {
       const g: CpGroup = { lesson, size, count, starts: [], vars: [] };
       for (let day = 0; day < days; day++) {
-        if (excludedDays.has(base.settings.days[day]!.name)) continue;
         for (let hour = 0; hour + size <= hours; hour++) {
           let ok = true;
           const closedHere: string[] = [];
@@ -238,7 +236,6 @@ export function buildCpWeek(
   for (const group of base.classes) {
     const open: string[] = [];
     for (let day = 0; day < days; day++) {
-      if (excludedDays.has(base.settings.days[day]!.name)) continue;
       for (let h = 0; h < hours; h++) {
         if (fixed[placementKey(group.id, day, h)] !== undefined) continue;
         if (base.unavailable[closedKey(group.id, day, h)] !== undefined) continue;

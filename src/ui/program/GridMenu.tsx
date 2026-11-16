@@ -1,21 +1,18 @@
-// The grid's right-click menu: a card, a row or day heading, or a column.
+// The grid's right-click menu, on a card. Headings open nothing since
+// 2026-11-16 (Sadeleşme K7): their bulk pins and the temporary view are gone.
 // What it reads about its target is `describeMenu` in pure/program; this file
 // only draws it and hands each choice back to Program.
 
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { Eye, EyeOff, Move, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
+import { Move, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import type { Id } from '../../leaf/model';
 import type { InspectKind } from '../../pure/entities';
-import type { PinScope } from '../../pure/constraints';
-import type { MaskMode, MenuFacts, MenuTarget } from '../../pure/program';
-import type { View } from '../../platform/prefs';
+import type { MenuFacts } from '../../pure/program';
 import { useT } from '../common';
 import { KIND_ICON } from './steps';
 
 interface Props {
   facts: MenuFacts;
-  menuTarget: MenuTarget | null;
-  view: View;
   /** The solver is rewriting the grid: the view-changing items wait. */
   running: boolean;
   /** Where the menu and its submenus are portalled. */
@@ -26,15 +23,10 @@ interface Props {
   editLesson: (lessonId: Id) => void;
   inspect: (kind: InspectKind, id: string) => void;
   togglePin: () => void;
-  toggleScope: (scope: PinScope) => void;
-  setMenuRowMode: (mode: MaskMode | undefined) => void;
-  setMenuDayMode: (mode: MaskMode | undefined) => void;
 }
 
 export default function GridMenu({
   facts,
-  menuTarget,
-  view,
   running,
   container,
   cellRemove,
@@ -42,80 +34,9 @@ export default function GridMenu({
   editLesson,
   inspect,
   togglePin,
-  toggleScope,
-  setMenuRowMode,
-  setMenuDayMode,
 }: Props) {
   const t = useT();
-  const {
-    at: menuAt,
-    rowId: menuRowId,
-    day: menuDay,
-    pinned: menuPinned,
-    lessonId: menuLessonId,
-    lesson: menuLesson,
-    cellMasked: menuCellMasked,
-    rowMode: menuRowMode,
-    dayMode: menuDayMode,
-  } = facts;
-
-  /**
-   * "Put this row (or this day) aside for a moment."
-   *
-   * Written once and drawn in two places: flat on a row or day heading, where
-   * the whole menu is two lines long, and one step in on a CARD, whose menu
-   * already asks seven other questions. Same items either way — a Radix
-   * `Item` is the same component in a `Content` and in a `SubContent`.
-   *
-   * "ghostla" is gone: it was an English verb wearing a Turkish suffix, in a
-   * program whose one language rule is that the interface is Turkish and the
-   * code is English. The MODE is still `ghost` in programMask.ts, because that
-   * is code.
-   */
-  const maskItems = (
-    <>
-      {menuRowId !== null && (
-        <>
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={running}
-            onSelect={() => setMenuRowMode(menuRowMode === 'ghost' ? undefined : 'ghost')}
-          >
-            <Eye size={15} aria-hidden="true" />
-            {menuRowMode === 'ghost' ? t('Satırı geri yükle') : t('Satırı soluklaştır')}
-          </ContextMenu.Item>
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={running}
-            onSelect={() => setMenuRowMode('hidden')}
-          >
-            <EyeOff size={15} aria-hidden="true" />
-            {t('Satırı gizle')}
-          </ContextMenu.Item>
-        </>
-      )}
-      {menuDay !== null && (
-        <>
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={running}
-            onSelect={() => setMenuDayMode(menuDayMode === 'ghost' ? undefined : 'ghost')}
-          >
-            <Eye size={15} aria-hidden="true" />
-            {menuDayMode === 'ghost' ? t('Günü geri yükle') : t('Günü soluklaştır')}
-          </ContextMenu.Item>
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={running}
-            onSelect={() => setMenuDayMode('hidden')}
-          >
-            <EyeOff size={15} aria-hidden="true" />
-            {t('Günü gizle')}
-          </ContextMenu.Item>
-        </>
-      )}
-    </>
-  );
+  const { at: menuAt, pinned: menuPinned, lessonId: menuLessonId, lesson: menuLesson } = facts;
 
   return (
     <ContextMenu.Portal container={container}>
@@ -128,13 +49,7 @@ export default function GridMenu({
                 a cancel finds the card by its cell (Program.tsx onCancel). */}
             <ContextMenu.Item
               className="menu-item"
-              disabled={
-                menuPinned ||
-                menuRowMode !== undefined ||
-                menuDayMode !== undefined ||
-                menuCellMasked ||
-                running
-              }
+              disabled={menuPinned || running}
               onSelect={() => {
                 const { rowId, day, hour } = menuAt;
                 setTimeout(() => cellPick(rowId, day, hour), 0);
@@ -146,12 +61,7 @@ export default function GridMenu({
             </ContextMenu.Item>
             <ContextMenu.Item
               className="menu-item"
-              disabled={
-                menuPinned ||
-                menuRowMode !== undefined ||
-                menuDayMode !== undefined ||
-                menuCellMasked
-              }
+              disabled={menuPinned}
               onSelect={() => cellRemove(menuAt.rowId, menuAt.day, menuAt.hour)}
             >
               <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
@@ -195,11 +105,7 @@ export default function GridMenu({
                 that wanted it. The card now carries a pin of its own,
                 so this is the same question asked the long way — and
                 the long way should still put it first. */}
-            <ContextMenu.Item
-              className="menu-item"
-              disabled={menuRowMode !== undefined || menuDayMode !== undefined || menuCellMasked}
-              onSelect={togglePin}
-            >
+            <ContextMenu.Item className="menu-item" onSelect={togglePin}>
               {menuPinned ? (
                 <PinOff size={15} aria-hidden="true" />
               ) : (
@@ -207,118 +113,6 @@ export default function GridMenu({
               )}
               {menuPinned ? t('Sabitlemeyi kaldır') : t('Dersi buraya sabitle')}
             </ContextMenu.Item>
-          </>
-        )}
-
-        {menuAt !== null ? (
-          /* ...and the three that lock MANY hours at once stay one step
-             in. They are the rarer question and the dangerous one: a
-             click here can freeze a whole day. */
-          <ContextMenu.Sub>
-            <ContextMenu.SubTrigger
-              className="menu-item"
-              disabled={menuRowMode !== undefined || menuDayMode !== undefined || menuCellMasked}
-            >
-              <Pin size={15} strokeWidth={2} aria-hidden="true" />
-              {t('Toplu sabitle')}
-            </ContextMenu.SubTrigger>
-            <ContextMenu.Portal container={container}>
-              <ContextMenu.SubContent className="menu" sideOffset={4}>
-                <ContextMenu.Item
-                  className="menu-item"
-                  onSelect={() =>
-                    toggleScope({
-                      kind: 'row',
-                      view,
-                      rowId: menuAt.rowId,
-                    })
-                  }
-                >
-                  <Pin size={15} aria-hidden="true" />
-                  {t('Satırı sabitle / kaldır')}
-                </ContextMenu.Item>
-                <ContextMenu.Item
-                  className="menu-item"
-                  onSelect={() =>
-                    toggleScope({
-                      kind: 'column',
-                      day: menuAt.day,
-                      hour: menuAt.hour,
-                    })
-                  }
-                >
-                  <Pin size={15} aria-hidden="true" />
-                  {t('Sütunu sabitle / kaldır')}
-                </ContextMenu.Item>
-                <ContextMenu.Item
-                  className="menu-item"
-                  onSelect={() => toggleScope({ kind: 'day', day: menuAt.day })}
-                >
-                  <Pin size={15} aria-hidden="true" />
-                  {t('Günü sabitle / kaldır')}
-                </ContextMenu.Item>
-              </ContextMenu.SubContent>
-            </ContextMenu.Portal>
-          </ContextMenu.Sub>
-        ) : menuTarget?.kind === 'row' ? (
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={menuRowMode !== undefined}
-            onSelect={() =>
-              toggleScope({
-                kind: 'row',
-                view,
-                rowId: menuTarget.rowId,
-              })
-            }
-          >
-            <Pin size={15} aria-hidden="true" />
-            {t('Satırı sabitle / kaldır')}
-          </ContextMenu.Item>
-        ) : menuTarget?.kind === 'day' ? (
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={menuDayMode !== undefined}
-            onSelect={() => toggleScope({ kind: 'day', day: menuTarget.day })}
-          >
-            <Pin size={15} aria-hidden="true" />
-            {t('Günü sabitle / kaldır')}
-          </ContextMenu.Item>
-        ) : menuTarget?.kind === 'column' ? (
-          <ContextMenu.Item
-            className="menu-item"
-            disabled={menuDayMode !== undefined}
-            onSelect={() =>
-              toggleScope({
-                kind: 'column',
-                day: menuTarget.day,
-                hour: menuTarget.hour,
-              })
-            }
-          >
-            <Pin size={15} aria-hidden="true" />
-            {t('Sütunu sabitle / kaldır')}
-          </ContextMenu.Item>
-        ) : null}
-
-        {(menuRowId !== null || menuDay !== null) && menuTarget?.kind !== 'column' && (
-          <>
-            <ContextMenu.Separator className="menu-sep" />
-            {menuAt !== null ? (
-              <ContextMenu.Sub>
-                <ContextMenu.SubTrigger className="menu-item" disabled={running}>
-                  <Eye size={15} strokeWidth={2} aria-hidden="true" />
-                  {t('Geçici görünüm')}
-                </ContextMenu.SubTrigger>
-                <ContextMenu.Portal container={container}>
-                  <ContextMenu.SubContent className="menu" sideOffset={4}>
-                    {maskItems}
-                  </ContextMenu.SubContent>
-                </ContextMenu.Portal>
-              </ContextMenu.Sub>
-            ) : (
-              maskItems
-            )}
           </>
         )}
       </ContextMenu.Content>

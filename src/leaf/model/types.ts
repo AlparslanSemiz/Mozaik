@@ -297,7 +297,7 @@ export interface ProgramVariant {
 /**
  * Which axis the Program grid's rows are. Here rather than in toolState.ts,
  * where the rest of the screen position lives, because pure modules read it
- * (the pin scope in constraints.ts, programMask.ts) and a pure module does not
+ * (the Program screen's rows, programView.ts) and a pure module does not
  * import the plumbing layer, not even for a type.
  */
 export type View = 'teacher' | 'class';

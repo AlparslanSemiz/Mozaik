@@ -136,7 +136,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/grid/index.ts` | ızgara paketinin giriş noktası: `programs.ts`'in hepsi |
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
-| `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), sağ tık menülerinin okuduğu (`describeMenu`, `poolMenuFacts`), bırakmanın cümlesi (`dropNotice`) ve kenara ayrılan günün reddi (`blockMaskedDays`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
 | `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
 | `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
@@ -170,7 +169,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
-| `platform/prefs/density.ts` | ızgaranın ve arayüzün yoğunluğu, iki ayrı karar; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/availClock.ts` | Müsaitlik ders numarasının altına başlangıç saatini yazar mı; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
@@ -192,7 +190,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
 | `platform/dom/roving.ts` | bir kutuyu tek Tab durağı yapar, oklarla içinde gezdirir (`attachRoving`); Program ızgarası, havuz ve Müsaitlik kullanır |
 | `platform/dom/gridKeys.ts` | Program ızgarasının okları, boş hücrenin odakta aldığı ad, kaldırmadan sonra odağın döndüğü hücre (`focusCellSoon`) |
-| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
+| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (ızgaranın sütunu ondan türüyor, tuzak 141), ve en geniş dersin yazısından sütunun alt sınırını ölçer (`--cell-min`); hafta sığmazsa ızgara yana kayar |
 | `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `platform/dom/rowDrag.ts` | liste satırını sürükleyerek sıralama |
 | `platform/dom/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
@@ -217,7 +215,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/Notices.tsx` | açık sekmenin üstündeki şeritler: kayıt çalışmıyor, depo dolu, başka pencere, okunamayan plan, yeni sürüm, klasör |
 | `ui/shell/useMachinePrefs.ts` | App'in tuttuğu makine tercihi kopyaları ve üç geçiş (şerit, hareket, tema) |
 | `ui/shell/useMainScroll.ts` | şeridin altındaki kaydırılan kutunun iki etkisi: sündürme ve şeridin çekilmesi |
-| `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
 | `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
 | `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
 | `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır; açık plan boşsa ve geri alınacak bir şey yoksa sormadan açar (`isEmptyPlan`) |
@@ -239,7 +236,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/common/GoTo.tsx` | bir sekmeye, Okul adımına ya da Ayarlar bölümüne götüren context ve `GoButton` |
 | `ui/common/NextStep.tsx` | boş ekranların düğmesi: eksik ilk adım ve okul adı boşken zil ve günler |
 | `ui/common/wrongFile.ts` | Mozaik'in kaydetmediği bir dosyaya söylenen iki cümle, iki dosya kapısında aynı |
-| `ui/program/useWeekCut.ts` | ızgaranın haftası yana taşıyor mu; Program çubuğu Sığdır'ı söyler |
 | `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Çıktı'da Yazdır'a basıldı mı |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in beş işi), `Rooms`, `Subjects`, `Teachers` ve `Classes` (düz yazı listeler; satırı `PersonRow`, adı kişi sayfasını açar) |
 | `ui/program/InspectorSheet.tsx` | kişi sayfası (2026-11-16, K5): öğretmenin, sınıfın ya da dersliğin bilgileri, gelemediği saatler, dersleri, sınırları, Yazdır, Gönder ve Sil; boş kimlikle `NewPerson.tsx`'in yeni öğretmen ya da sınıf formu |
@@ -318,7 +314,6 @@ dışında duruyor:
 
 - makine tercihleri (`platform/prefs/`, dil), çünkü koyu temalı bir makinede alınan yedek babanın temasını çevirmemeli ve kozmetik bir ayar için şema göçü yazılmamalı
 - bir oturumdaki pozisyon (`toolState.ts`), çünkü "şu an neye bakıyorum" yarın açılışta hatırlanması gereken bir şey değil
-- geçici görünüm (`programMask.ts`), aynı sebeple
 - plan kimliği ve kitaplık (`library.ts`), çünkü bir yedek dosyası tek bir plan
 - kullanıcının seçtiği klasörün tutamağı (IndexedDB), çünkü başka bir makinede o yol yok
 

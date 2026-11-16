@@ -21,7 +21,9 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 Son güncelleme: 2026-11-16 sabah (gece çalışması). Bu blok yeni bir oturumun başlangıç noktası;
 ayrıntı aşağıdaki tarihli girdilerde, kararlar DECISIONS'ta. `sade/asama-2` Sadeleşme aşama 2'yi,
-kişi sayfasını (K5) taşıyor, birleşmedi (aşağıda tarihli girdi).
+kişi sayfasını (K5) taşıyor, birleşmedi (aşağıda tarihli girdi). `sade/asama-3a` onun üstünde
+K6 (tek ızgara düzeni), K7 (toplu sabitleme ve geçici görünüm yok) ve K8 (Eski hâline dön)
+taşıyor, birleşmedi; aşama 3B (K1–K3) ayrı bir dalda.
 
 **Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
 önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
@@ -50,6 +52,9 @@ istisnası).
 2. Sadeleşmeden sonra babayı bir oturum izlemek (hangi seçenek görünür kalsın).
 3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
 4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
+
+**Dikkat.** `sade/asama-3a`'da brotli 302 162 B, eşiğe 3 838 B (main ile birleştikten sonra) (aşama 2'nin 305 787'si
+K6 ve K7 ile 300 437'ye indi, K8 ~1,7 kB aldı; (b) kararıyla küçültme kalktı). Tuzaklarda en büyük numara 179.
 
 **Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
 kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
@@ -97,6 +102,74 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 `npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
+
+## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
+
+`origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,
+Kontrol çipe) başka bir dalda; bu dal sekme yapısına, üst çubuğun gezinmesine, Kontrol'e ve
+seçenek değiştiriciye dokunmadı.
+
+- **K6.** Yoğunluk kalktı, eski Sığdır ızgaranın tek düzeni; arayüz yoğunluğu da gitti.
+  `density.ts`, `useWeekCut.ts`, iki seçici, Daha fazla → Yoğunluk, "hafta sığmıyor" ipucu,
+  ızgaradaki saat yazısı (başlığın `title`'ında kaldı), 36 çeviri anahtarı × 4 dil. Eski
+  anahtarlar okunmuyor, Veriler nerede'de tarihsel satır (`preferenceKeys.ts`).
+- **K7.** Toplu sabitle, Geçici görünüm, şeritteki geçici liste, `programMask.ts`,
+  `useProgramMask.ts`, `PinScope` (yalnız `allPinCells`/`togglePinAll` kaldı) ve çözücünün
+  `exclusions` seçeneği (solver, relax, cpModel, shortfall, improve, hole). Ağır çözücü
+  testleri (solver, relaxFullCourse, relaxLaidOut, invariants) 118/118 yeşil.
+- **K8.** `platform/storage/dailyCopies.ts`, `ui/shell/OldCopies.tsx`, Dosya ▾ ve Ctrl+K.
+  Kural DATA.md'de "Günlük kopyalar". Birim (`dailyCopies.test.ts`, 8) ve E2E
+  (`eski-hal.spec.ts`, 3).
+
+**Boyut** (`npm run boyut`, bayt): önce 1 192 401 ham / 305 787 brotli; K6+K7 sonrası
+1 167 137 / 300 437; K8 ile 1 174 176 / 302 154; (b) ve artıklarla, main birleşince 1 174 531 / 302 162 (eşik 1 200 000 / 306 000).
+
+**Izgara ölçümü** (örnek okul, Programı yap, 376 kart; CSS px = ekran / Windows ölçeği):
+
+| Kutu | Hücre | Taşma | Kırpılan kart | En küçük yazı |
+|---|---|---|---|---|
+| 1920 %100 | 28,3 | 0 | 0 | 12 |
+| 1920 %125 (1536) | 23,0 | 0 | 0 | 9,96 |
+| 1920 %150 (1280) | 19,4 | 0 | 317 | 9 |
+| 1366 %100 | 20,6 | 0 | 0 | 9 |
+| 1366 %125 (1093) | 16,8 | 0 | 319 | 9 |
+| 1366 %150 (911) | 14,3 | 0 | 319 | 9 |
+
+Hafta her kutuda sığıyordu ama 1920 %150 ve 1366 %125/%150'de tek saatlik kartlar "4…"
+okunuyordu, 10–12. saat numaraları da kırpılıyordu. **Alp (b)'yi seçti, aynı gün yazıldı:**
+sütun en geniş dersin okunduğu genişlikten dar olmuyor (`--cell-min`, yazıdan ölçülüyor:
+örnek okulda 23 px, en geniş satır "453" 21,61 px), kart yazısı en az 11 px (9 px küçültme
+kalktı), sığmayan hafta 14 px'lik hep çizilen bir çubukla yana kayıyor. Sonra:
+
+| Kutu | Hücre | Yana kayma | Kesik ders | En küçük yazı |
+|---|---|---|---|---|
+| 1920 %100 | 28,1 | 0 | 0 | 12 |
+| 1920 %125 | 26 | 232 | 0 | 12 |
+| 1920 %150 | 26 | 488 | 0 | 12 |
+| 1366 %100 | 26 | 402 | 0 | 12 |
+| 1366 %125 | 26 | 675 | 0 | 12 |
+| 1366 %150 | 26 | 857 | 0 | 12 |
+
+(Hücre ilk sütunda gün çizgisiyle birlikte. Playwright başsız Chromium kaydırma çubuğunu
+`--hide-scrollbars` ile gizliyor; çubuk o bayrak kaldırılarak görüldü.)
+
+**Koşular.** `tsc` (uygulama ve e2e), `eslint src`, `knip`, `depcruise` temiz; `npm run hizli`
+1 690 geçti (bir kez yük altında `emptyStart.test.ts` 5 s'de zaman aşımı, tek başına yeşil);
+tam Chromium E2E `--workers=2`: 786 geçti, 3 kırmızı: bilinen `kayma.spec.ts:129` (macOS),
+`renk.spec.ts:589` (ayraç 2,4 px, sığan ızgaranın ölçüsü; eşik 4 → 2) ve `temel.spec.ts:181`
+(saat başlıkta değil `title`'da); ikisi düzeltildi, yeniden koşuldu, yeşil.
+
+**İnceleme** (taze bağlamlı alt ajan): bugünün kopyasının günün sonunu engellemesi, bugünün
+kopyasında VK1/okunamayan/boş plan kapısının eksikliği, dolu depoda silmeden-önce yuvasının
+kopyalardan önce gitmesi, kapalı pencerede planın her çizimde metne çevrilmesi, gün kaydının
+yazılamaması, DST'de "dün", bayat yorumlar ve belge cümleleri: düzeldi, ayrı commit'te. Sonradan (Alp onayladı): silinen planın kopyaları sonraki açılışta budanıyor; yeni sınıf
+bir öncekinin dersliğiyle açılıyor (aşama 2'nin gerilemesi, `NewPerson.tsx`); aynı sınıfta
+iki dersi olan öğretmenin iki saat kutusu branşla ayrı adlar alıyor (`InspectorSheet.tsx`).
+Birim ve E2E (`dailyCopies.test.ts`, `kisi.spec.ts`).
+
+**Tıklama testi** (`dist/index.html`, Chromium): altı kutuda Program, 1920 ve 1366'da Dosya ▾
+→ Eski hâline dön (kopya yok / dünkü kopya) → Dünkü hâline dön → bildirim ve Geri al.
+Görüntüler oturumun scratch klasöründe (`shots/`).
 
 ## 2026-11-16 · Sadeleşme aşama 2: kişi sayfası (`sade/asama-2`, TODO SD8, K5)
 

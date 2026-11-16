@@ -196,12 +196,7 @@ export function useSolver(
       job.current = {
         from,
         hint: activePlacements(done.state),
-        options: {
-          keepPlaced: options.current.keepPlaced ?? true,
-          ...(options.current.exclusions === undefined
-            ? {}
-            : { exclusions: options.current.exclusions }),
-        },
+        options: { keepPlaced: options.current.keepPlaced ?? true },
       };
       kept.current = [];
       relaxer.current = startRelax(from, job.current.hint, {

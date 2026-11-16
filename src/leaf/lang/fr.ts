@@ -438,14 +438,7 @@ const FR: Sozluk = {
   // src/ui/settings/Appearance.tsx
   Tema: "Thème",
   "Yazı büyüklüğü": "Taille du texte",
-  Yoğunluk: "Densité",
   Izgara: "Grille",
-  "Izgara yoğunluğu": "Densité de la grille",
-  Ferah: "Aéré",
-  Rahat: "Confortable",
-  Sığdır: "Ajusté",
-  "Arayüzün geri kalanı": "Le reste de l’interface",
-  "Arayüz yoğunluğu": "Densité de l’interface",
   "Kaydırınca gizlenir": "Se masque au défilement",
   Örnek: "Exemple",
   Saat: "Heure",
@@ -1261,12 +1254,6 @@ const FR: Sozluk = {
   Görünüm: "Vue",
   Hakkında: "À propos",
   "Planlar ve yedek": "Plans et sauvegarde",
-  "Hücre en büyük, dersin alt satırı tam boyda":
-    "Case la plus grande, la ligne du bas de la leçon en taille réelle",
-  "Hücre geniş, başlangıç saatleri görünür":
-    "Case large, heures de début visibles",
-  "Programın tamamı ekrana sığar, başlangıç saatleri gizlenir":
-    "Tout l’emploi du temps tient à l’écran, les heures de début sont masquées",
   Öğretmenden: "Depuis un enseignant",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Choisissez un enseignant et saisissez à la suite toutes les classes qu’il assure",
@@ -1395,11 +1382,6 @@ const FR: Sozluk = {
   // way every entry here is: `i18n.test.ts` can tell us a key is DEAD, never
   // that one is missing - an untranslated sentence falls back to correct
   // Turkish and says nothing (pitfall 87).
-  " {n} ders geçici kapsam dışında kaldı.":
-    " {n} {n:leçon est restée|leçons sont restées} hors périmètre.",
-  " · {n} ders geçici kapsam dışında": " · {n} {n:leçon|leçons} hors périmètre",
-  "{gun} geçici olarak kapsam dışında":
-    "{gun} est temporairement hors périmètre",
   Seçenek: "Variante",
   "Bu seçeneğin kopyası": "Copie de cette variante",
   "Boş seçenek": "Variante vide",
@@ -1414,27 +1396,10 @@ const FR: Sozluk = {
   Kaydet: "Enregistrer",
   "Öğretmeni düzenle": "Modifier l’enseignant",
   "Sınıfı düzenle": "Modifier la classe",
-  "Toplu sabitle": "Épingler en bloc",
-  "Satırı sabitle / kaldır": "Épingler / détacher la ligne",
-  "Sütunu sabitle / kaldır": "Épingler / détacher la colonne",
-  "Günü sabitle / kaldır": "Épingler / détacher la journée",
-  "Geçici görünüm": "Mettre de côté",
-  "Geçici görünüm ({n})": "Mis de côté ({n})",
-  "Satırı soluklaştır": "Estomper la ligne",
-  "Satırı geri yükle": "Rétablir la ligne",
-  "Satırı gizle": "Masquer la ligne",
-  "Günü soluklaştır": "Estomper la journée",
-  "Günü geri yükle": "Rétablir la journée",
-  "Günü gizle": "Masquer la journée",
-  "Tümünü geri yükle": "Tout rétablir",
-  soluk: "estompé",
   gizli: "masqué",
   İşlemler: "Actions",
   "Tüm programı sabitle": "Épingler tout l’emploi du temps",
   "Tüm sabitlemeleri kaldır": "Tout détacher",
-  "{n} saat sabitlendi.": "{n} {n:heure épinglée|heures épinglées}.",
-  "{n} saatin sabitlemesi kaldırıldı.":
-    "{n} {n:heure détachée|heures détachées}.",
   "{sinif} sınıfının {gun} {saat} saatindeki ders sabitlenmiş":
     "Le cours de {sinif} le {gun}, heure {saat}, est épinglé",
   "{ust} {alt}: buraya sabitle": "{ust} {alt} : épingler ici",
@@ -1490,12 +1455,6 @@ const FR: Sozluk = {
     "**Ici, Mozaik ne se met jamais à jour** et ne se connecte nulle part. Dernière version :",
   "**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur.":
     "**Tous les plans** sont écrits seuls dans Documents ; les {gun} derniers jours sont gardés.",
-  "**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan.":
-    "**Aéré.** La cellule la plus grande : la plus lisible, celle qui défile le plus.",
-  "**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız.":
-    "**Confortable.** Cellules larges avec les heures ; l’emploi du temps ne tient pas, vous défilez.",
-  "**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**.":
-    "**Ajusté.** Tout l’emploi du temps sur un écran, au prix du **masquage des heures**.",
   "**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor.":
     "**Votre navigateur ne sait pas écrire dans un dossier.** Chrome et Edge le savent.",
   "**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz.":
@@ -1508,8 +1467,6 @@ const FR: Sozluk = {
     "Le **total** des heures des classes partageant une salle doit aussi tenir dans la semaine.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "Ce sont **vos propres enseignants** : si un nom ne tient pas, l’échelle est trop grande.",
-  "Basılan sayfada saatler her üç durumda da yazar.":
-    "La feuille imprimée porte les heures dans les trois cas.",
   "Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**.":
     "Un autre navigateur ne le **voit pas**, et « effacer les données » le **supprime**.",
   "Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır.":
@@ -1548,8 +1505,6 @@ const FR: Sozluk = {
     "Cochez les jours de cours ; la case à côté indique la **pause déjeuner**.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Les classes sans salle ne sont pas contrôlées ainsi.",
-  "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
-    "Le **reste** de l’écran : listes, panneaux, champs. La grille n’est pas touchée.",
   "Gün kaçta başlıyor, bir saat ve teneffüs kaç dakika. Zil saatleri bunlardan hesaplanır.":
     "À quelle heure commence la journée, et combien de minutes durent une heure et une récréation. Les horaires de sonnerie en sont déduits.",
   "Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**":
@@ -1580,8 +1535,6 @@ const FR: Sozluk = {
     "Il se trouve dans le stockage que le navigateur réserve à ce site.",
   "Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**.":
     "**{yer}** au total ; le navigateur accorde environ **5 Mo** à Mozaik.",
-  "Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı.":
-    "N’affecte que la grille **Emploi du temps** : taille des cellules et jours visibles.",
   "Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır.":
     "Le nouveau plan s’ouvre aussitôt et l’historique **d’annulation** est vidé.",
   "Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.":
@@ -1730,8 +1683,6 @@ const FR: Sozluk = {
     "Fermer toute la semaine",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "Si les couleurs ne s’impriment pas : dans la fenêtre d’impression, ouvrez **Plus de paramètres** et cochez **Graphiques d’arrière-plan**.",
-  "Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.":
-    "La semaine entière ne tient pas ; Plus → Densité → Ajusté montre tous les jours.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Cours de la semaine",
@@ -1959,6 +1910,15 @@ const FR: Sozluk = {
     "La matière se **choisit dans la liste** ; le nom court ouvre la ligne.",
   "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
     "Un groupe d’élèves au même emploi du temps ; la **salle** est sa salle fixe.",
+  // ------------------------------------------- Eski hâline dön (K8)
+  "Eski hâline dön": "Revenir à un jour précédent",
+  "Dünkü hâline dön": "Revenir à hier",
+  "Bu hâline dön": "Revenir à ce jour",
+  "Mozaik her gün bu planın bir kopyasını kendiliğinden saklar, **son 7 gün** burada. Döndüğünüzde şimdiki hâli de saklanır ve **Geri al** ile geri gelir.": "Chaque jour, Mozaik garde de lui-même une copie de ce plan ; les **7 derniers jours** sont ici. En revenant en arrière, le plan tel qu’il est maintenant est gardé lui aussi, et **Annuler** le ramène.",
+  "Henüz eski bir kopya yok. İlki, yarın bir şey değiştirdiğinizde burada olur.": "Pas encore de copie précédente. La première sera ici demain, dès que vous changerez quelque chose.",
+  "Plan eski hâline döndü: {gun}.": "Le plan est revenu à son état du {gun}.",
+  "günlük kopya": "copie quotidienne",
+  "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
 };
 
 registerSozluk("fr", FR);

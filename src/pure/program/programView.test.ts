@@ -14,22 +14,18 @@ import {
   placementKey,
   setBlockPinned,
 } from '../constraints';
-import { EMPTY_PROGRAM_MASK, setDayMask, setRowMask } from './index';
 import { replaceActiveGrid } from '../grid';
 import {
   buildPool,
   buildRows,
   classOfCell,
-  blockMaskedDays,
   describeBar,
   describeMenu,
   describeStrip,
   dropNotice,
   keepSameRows,
-  poolMenuFacts,
   markPreview,
   roomLetter,
-  visibleDays,
   waitingSubjects,
   type BarRun,
   type ColorOf,
@@ -67,16 +63,7 @@ describe('havuz', () => {
 
   it.each(sorts)('%s sırasında bir dersin büyük bloğu önce', (sort) => {
     const d = world();
-    const { cards } = buildPool(
-      d,
-      buildIndex(d),
-      'class',
-      EMPTY_PROGRAM_MASK,
-      sort,
-      '',
-      byTeacher,
-      t,
-    );
+    const { cards } = buildPool(d, buildIndex(d), 'class', sort, '', byTeacher, t);
     // Within one lesson the biggest block comes first. ('size' puts a lesson's
     // two-hour and one-hour cards under different headings, which is the
     // order itself.) The deck, a lesson's identical blocks as one run, gets no
@@ -95,8 +82,8 @@ describe('havuz', () => {
   it('sayaç süzgeçten önce sayar, tamamlanan ders kart vermez', () => {
     const d = world();
     const ix = buildIndex(d);
-    const all = buildPool(d, ix, 'class', EMPTY_PROGRAM_MASK, 'row', '', byTeacher, t);
-    const fizik = buildPool(d, ix, 'class', EMPTY_PROGRAM_MASK, 'row', 'fizik', byTeacher, t);
+    const all = buildPool(d, ix, 'class', 'row', '', byTeacher, t);
+    const fizik = buildPool(d, ix, 'class', 'row', 'fizik', byTeacher, t);
     expect([all.total, all.completed, all.cards.length]).toEqual([5, 0, 5]);
     expect([fizik.total, fizik.cards.map((c) => c.lessonId)]).toEqual([5, ['L2', 'L2']]);
 
@@ -108,16 +95,7 @@ describe('havuz', () => {
         [placementKey('s510', 0, 3)]: 'L2',
       },
     });
-    const rest = buildPool(
-      done,
-      buildIndex(done),
-      'class',
-      EMPTY_PROGRAM_MASK,
-      'row',
-      '',
-      byTeacher,
-      t,
-    );
+    const rest = buildPool(done, buildIndex(done), 'class', 'row', '', byTeacher, t);
     expect([rest.total, rest.completed, new Set(rest.cards.map((c) => c.lessonId))]).toEqual([
       3,
       1,
@@ -125,13 +103,9 @@ describe('havuz', () => {
     ]);
   });
 
-  it('bekleyen branşlar, gizli satırın dersi sayılmadan', () => {
-    const d = world();
-    expect(waitingSubjects(d, EMPTY_PROGRAM_MASK)).toEqual([
+  it('bekleyen branşlar', () => {
+    expect(waitingSubjects(world())).toEqual([
       ['fizik', 'Fizik'],
-      ['matematik', 'Matematik'],
-    ]);
-    expect(waitingSubjects(d, { ...EMPTY_PROGRAM_MASK, teachers: { oAY: 'hidden' } })).toEqual([
       ['matematik', 'Matematik'],
     ]);
   });
@@ -147,7 +121,7 @@ describe('ızgara', () => {
       lessons: [{ id: 'L1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
       placements: { [placementKey('s510', 0, 1)]: 'L1' },
     });
-    const rows = buildRows(d, buildIndex(d), 'class', EMPTY_PROGRAM_MASK, byTeacher, t);
+    const rows = buildRows(d, buildIndex(d), 'class', byTeacher, t);
     const diff = {
       opened: new Set([closedKey('oMC', 0, 1)]),
       moved: new Set([placementKey('s510', 0, 1)]),
@@ -171,8 +145,7 @@ describe('ızgara', () => {
       lessons: [{ id: 'L1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
       placements: { [placementKey('s510', 0, 1)]: 'L1' },
     });
-    const rowsOf = (x: State) =>
-      buildRows(x, buildIndex(x), 'class', EMPTY_PROGRAM_MASK, byTeacher, t);
+    const rowsOf = (x: State) => buildRows(x, buildIndex(x), 'class', byTeacher, t);
     const before = rowsOf(d);
     // The same plan built again: the very same array comes back.
     expect(keepSameRows(before, rowsOf(d))).toBe(before);
@@ -207,13 +180,6 @@ describe('ızgara', () => {
       '',
     ]);
   });
-
-  it('gizli gün sayılmaz, soluklaşan gün sayılır', () => {
-    const days = world().settings.days;
-    expect(visibleDays(days, {})).toEqual([0, 1]);
-    expect(visibleDays(days, { [days[0]!.name]: 'hidden' })).toEqual([1]);
-    expect(visibleDays(days, { [days[0]!.name]: 'ghost' })).toEqual([0, 1]);
-  });
 });
 
 describe('araç çubuğunun altındaki satır', () => {
@@ -223,7 +189,7 @@ describe('araç çubuğunun altındaki satır', () => {
     const running: BarRun = {
       ...idle,
       running: true,
-      progress: { placedBlocks: 1, totalBlocks: 4, nodes: 0, elapsedMs: 50, excludedBlocks: 0 },
+      progress: { placedBlocks: 1, totalBlocks: 4, nodes: 0, elapsedMs: 50 },
     };
     expect(describeBar(running, 'class', t, { applied: false, result: false })).toEqual({
       text: 'Program yapılıyor…',
@@ -246,7 +212,6 @@ describe('araç çubuğunun altındaki satır', () => {
         totalBlocks: 2,
         nodes: 0,
         elapsedMs: 0,
-        excludedBlocks: 0,
       },
     };
     expect(describeBar(said, 'class', t, { applied: false, result: false }).level).toBe('');
@@ -264,20 +229,18 @@ describe('araç çubuğunun altındaki satır', () => {
 // questions and "Otomatik diz (N)" read.
 describe('şeridin sayıları', () => {
   it('boş ızgarada bütün bloklar bekliyor, silinecek saat yok', () => {
-    expect(describeStrip(world(), EMPTY_PROGRAM_MASK)).toEqual({
-      exclusions: { teacherIds: [], classIds: [], dayNames: [] },
+    expect(describeStrip(world())).toEqual({
       pending: 5,
       placed: 0,
       pinnedHours: 0,
       gridEmpty: true,
-      masked: 0,
       allPinned: false,
     });
   });
 
   it('sabitlenen saat silinecekler arasında sayılmaz, hepsi sabitse kaldırma önerilir', () => {
     const placed = place(world(), 'L1', 0, 0, 2);
-    const loose = describeStrip(placed, EMPTY_PROGRAM_MASK);
+    const loose = describeStrip(placed);
     expect([
       loose.pending,
       loose.placed,
@@ -286,7 +249,7 @@ describe('şeridin sayıları', () => {
       loose.allPinned,
     ]).toEqual([4, 2, 0, false, false]);
 
-    const pinned = describeStrip(setBlockPinned(placed, 's510', 0, 0, true), EMPTY_PROGRAM_MASK);
+    const pinned = describeStrip(setBlockPinned(placed, 's510', 0, 0, true));
     expect([pinned.pending, pinned.placed, pinned.pinnedHours, pinned.allPinned]).toEqual([
       4,
       0,
@@ -294,78 +257,16 @@ describe('şeridin sayıları', () => {
       true,
     ]);
   });
-
-  it('bir kenara ayrılan öğretmenin dersleri beklemede sayılmaz, gün yalnız sayaçta', () => {
-    const mask = setDayMask(setRowMask(EMPTY_PROGRAM_MASK, 'teacher', 'oMC', 'ghost'), 'Pazartesi');
-    const counts = describeStrip(world(), mask);
-    expect(counts.pending).toBe(2);
-    expect(counts.masked).toBe(1);
-    expect(counts.exclusions.teacherIds).toEqual(['oMC']);
-  });
 });
 
 // The Program screen's menus and drag, moved out of `ui/program/Program.tsx`
 // without a change to what they compute (2026-10-24).
 describe('sağ tık menüsü ve sürükleme', () => {
-  it('bir kartın menüsü bloğu, dersini, sabitliğini ve satırın maskesini okuyor', () => {
+  it('bir kartın menüsü bloğu, dersini ve sabitliğini okuyor', () => {
     const d = setBlockPinned(place(world(), 'L1', 0, 1, 2), 's510', 0, 1, true);
-    const mask = setRowMask(EMPTY_PROGRAM_MASK, 'class', 's510', 'ghost');
-    const facts = describeMenu(d, buildIndex(d), 'class', mask, {
-      kind: 'card',
-      rowId: 's510',
-      day: 0,
-      hour: 2,
-    });
-    expect([facts.classId, facts.lessonId, facts.pinned, facts.cellMasked]).toEqual([
-      's510',
-      'L1',
-      true,
-      true,
-    ]);
-    expect([facts.rowId, facts.day, facts.rowMode, facts.dayMode]).toEqual([
-      's510',
-      0,
-      'ghost',
-      undefined,
-    ]);
-  });
-
-  it('bir gün başlığının menüsünde kart yok, gün ve maskesi var', () => {
-    const d = world();
-    const dayName = d.settings.days[1]!.name;
-    const mask = setDayMask(EMPTY_PROGRAM_MASK, dayName, 'hidden');
-    const facts = describeMenu(d, buildIndex(d), 'teacher', mask, { kind: 'day', day: 1 });
-    expect([facts.at, facts.rowId, facts.day, facts.dayName, facts.dayMode]).toEqual([
-      null,
-      null,
-      1,
-      dayName,
-      'hidden',
-    ]);
-    expect(describeMenu(d, buildIndex(d), 'teacher', mask, null).day).toBeNull();
-  });
-
-  it('havuz kartının menüsü açık görünümün satırını okuyor', () => {
-    const d = world();
-    const mask = setRowMask(EMPTY_PROGRAM_MASK, 'teacher', 'oAY', 'hidden');
-    expect(poolMenuFacts(buildIndex(d), 'teacher', mask, 'L2')).toMatchObject({
-      rowId: 'oAY',
-      rowMode: 'hidden',
-    });
-    expect(poolMenuFacts(buildIndex(d), 'class', mask, 'L2').rowId).toBe('s510');
-    expect(poolMenuFacts(buildIndex(d), 'class', mask, null).rowId).toBeNull();
-  });
-
-  it('kenara ayrılan günün hücreleri bırakmayı sebebiyle reddediyor', () => {
-    const d = world();
-    const ix = buildIndex(d);
-    const dayName = d.settings.days[1]!.name;
-    const map = dropMap(d, ix, 'L1', 2, null);
-    const before = map.get('0|0');
-    blockMaskedDays(map, d, { [dayName]: 'ghost' }, t);
-    expect(map.get('0|0')).toEqual(before);
-    expect(map.get('1|0')?.blocked).toContain('geçici olarak kapsam dışında');
-    expect(map.get('1|0')?.evicts).toEqual([]);
+    const facts = describeMenu(d, buildIndex(d), 'class', { rowId: 's510', day: 0, hour: 2 });
+    expect([facts.classId, facts.lessonId, facts.pinned]).toEqual(['s510', 'L1', true]);
+    expect(describeMenu(d, buildIndex(d), 'class', null).at).toBeNull();
   });
 
   it('boş hücreye bırakmanın cümlesi yok, birini havuza düşürenin var', () => {

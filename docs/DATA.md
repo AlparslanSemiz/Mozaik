@@ -152,9 +152,8 @@ geçmişi de silmez (2026-11-15'e kadar üçü de geçmişi temizliyordu): geçm
 tuttuğu için geri almak bir hamleyi başka bir alternatife uygulamaz, o alternatifi
 değişikliğiyle birlikte geri getirir.
 
-Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler, `programMask.ts`)
-plan başına ve yalnız bellekte tutulur. Yedeğe ve depoya yazılmıyor, aynı planın
-alternatifleri arasında ortak.
+Geçici görünüm (soluklaştırılan ya da gizlenen satır ve günler) 2026-11-16'da kalktı
+(Sadeleşme K7). Yalnız bellekte tutulduğu için hiçbir dosyada ya da depoda izi yok.
 
 ## Değişmeyen kimlikler
 
@@ -181,13 +180,15 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-planlar` | plan listesi: `{ activeId, plans: [{ id, name, draft }] }` |
 | `ders-programi-yedek-0`, `-1`, `-2` | oturum yedekleri, açılıştaki plana ait |
 | `ders-programi-silmeden-once` | son sorusuz silmeden önceki açık plan: `{ planId, at, label, state, seen? }` (TODO SD1) |
+| `ders-programi-gunluk-YYYY-AA-GG-<plan>` | o planın o günün sonundaki hâli, planın anahtarındaki metin olduğu gibi; bugünün kopyası bir dönüşten önceki hâl (Eski hâline dön, K8) |
+| `ders-programi-gunluk` | her planın son kaydedildiği gün: `{ [planId]: 'YYYY-AA-GG' }` |
 | `ders-programi-tema` | tema |
 | `ders-programi-dil` | arayüz dili |
 | `ders-programi-kenar` | kenar çubuğu tercihi, ray kalktığı için tarihsel |
 | `ders-programi-olcek` | yazı büyüklüğü (`--ui-scale`) |
-| `ders-programi-yogunluk` | ızgara yoğunluğu (`ferah`, `rahat`, `sigdir`) |
+| `ders-programi-yogunluk` | ızgara yoğunluğu, 2026-11-16'dan beri okunmuyor (K6); eski bir kopyanın yazdığı değer yerinde kalır ve tabloda görünür |
 | `ders-programi-program-rengi` | Program kartlarını boyayan varlık |
-| `ders-programi-arayuz-yogunluk` | arayüzün geri kalanının yoğunluğu |
+| `ders-programi-arayuz-yogunluk` | arayüzün yoğunluğu, aynı sebeple tarihsel |
 | `ders-programi-havuz` | havuz çekmecesi açık mı |
 | `ders-programi-havuz-boy` | havuz çekmecesinin boyu, rem |
 | `ders-programi-serit` | araç şeridi açık mı |
@@ -346,6 +347,26 @@ alınabilen bir adım; yerine geçtiği hâl de yuvaya yazılır ama bir daha ö
 yuva yer açar: kendi yazımı reddedilen yuva silinir (eskisi "son silme" diye önerilmesin), planın
 reddedilen otomatik kaydı yuvayı silip bir kez daha dener (`writePlanText`).
 
+**Günlük kopyalar (Eski hâline dön, Sadeleşme K8, 2026-11-16).** Ayar istemez, her
+teslim yolunda aynı: exe'nin penceresinin de localStorage'ı var, ve seçilen klasörün
+günlük paketleri bundan ayrı ikinci bir kopya. Bir planın yeni bir gündeki ilk kaydı,
+kaydetmeden önce, planın anahtarında duran metni (son kaydedildiği günün bıraktığı
+hâl) o günün anahtarına olduğu gibi kopyalar; hangi gün olduğunu `ders-programi-gunluk`
+söyler (o da yazılamazsa eski kopyalar ona yer açar). Günde plan başına bir yazım ve iş taşıyıp taşımadığını soran tek bir okuma;
+boş plan kopyalanmaz. Gün kaydı hiç yokken (bu sürümün ilk açılışı) metnin hangi güne
+ait olduğu bilinmediği için kopya alınmaz, ilki ertesi gün gelir. Günün sonu kazanır:
+bir dönüşten önce alınan bugünün kopyası ertesi günün ilk kaydında günün son hâliyle
+değişir, dönüşten önceki hâl o zaman silmeden-önce yuvasında kalır. Her planın en yeni yedi günü kalır (`DAILY_COUNT`,
+`library.ts`); silinen bir planın kopyaları o oturum boyunca kalır (silmenin
+`Geri al`'ı planı kopyalarıyla geri getirsin diye) ve sonraki açılışta gün kaydıyla birlikte
+silinir (`pruneOrphans`). Geri dönmek önce şimdiki hâli bugünün kopyası yapar (boş değilse,
+bugünün eski kopyasının yerine), sonra silmeden-önce yuvasına (önerilmeden) ve seçilen klasöre yazar,
+sonra kopyayı geri alınabilen bir adım olarak koyar. Depo dolunca plan önce gelir:
+sığmayan bir kopya yalnız daha eski kopyaları siler, planın reddedilen kaydı önce
+kopyaları en eskiden başlayarak, en son silmeden-önce yuvasını siler (`writePlanText`).
+Başka bir pencere yazmayı kapattıysa (VK1) ya da plan okunamadıysa kopya da yazılmaz,
+çünkü ikisi de kaydın kendi kapısından geçer. Kopyalar dosyaya ve pakete girmez.
+
 Plan listesi (`ders-programi-planlar`) yalnız metni değişecekse yazılır, ve bu kopyanın
 bilmediği alanlar, listenin kendisinde de her planın satırında da (kimliğiyle eşlenerek) korunur;
 2026-11-16'ya kadar her açılış listeyi `normalizeLibrary`'nin cevabıyla yeniden yazıp daha yeni
@@ -443,8 +464,6 @@ ekler.
 
 - **Takas.** Izgarada duran bir kart, altında tek bir hedef blok bulunan bir hücreye bırakılıyorsa ve iki hamle de yasalsa (`swapBlocks`), iki kart yer değiştirir. Hedef birden çok bloksa takas ancak o bloklar bırakılan saatleri tam dolduruyorsa (aynı gün, boşluksuz, üst üste binmeden, toplam boy aynı) ve hepsi aynı sırayla kartın eski saatlerine yasal olarak geçebiliyorsa teklif edilir: iki saatlik bir blok, öğretmenin başka sınıftaki iki tek saatiyle yer değiştirebilir (TODO B5.7). Sınıfın kendi dersi ile öğretmenin başka sınıftaki dersi aynı saatteyse bu bir takas değil, hücre reddedilir. Takas denenip reddedildiyse ve hücrenin engeli takas ortağının kendisiyse (öğretmen o saatte o sınıfta), cümle ortağı değil takasın hangi yarısının neden olmadığını söyler: "Takas olmaz, 431 · MÇ eski yerine geçemiyor: E dersliğinde Çarşamba 4 saatinde 430 var".
 - **Havuza döndürme.** Takas yoksa tek bir ret geçersiz kılınabilir: hücrede sınıfın kendi başka dersi varsa o ders havuza döner. Öteki retler başkasıyla ilgili (öğretmen başka sınıfta, derslik dolu, saat kapalı) ve önündeki bloğu havuza atmak onların hiçbirini doğru yapmaz. Oradaki blok sabitlenmişse hücre reddedilir ve sebep cümlesi sabitlemeyi söyler. Havuza döndürdükten sonra da reddedilen bir hücrenin cümlesi o asıl sebep olur, "sınıf dolu" değil. İzin verilen hücre yeşil değil sarı, çünkü izin var ama bir şey kaybediliyor. Bütün hamle tek geri al adımı ve kaybedilen ders bildirimde adıyla yazılır.
-
-Geçici görünümle kapsam dışına alınmış bir güne bırakılamaz.
 
 ### Sabitleme
 

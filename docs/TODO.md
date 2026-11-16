@@ -2183,10 +2183,13 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
       saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
       tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
-      Sırada: **aşama 3** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına katlanır, okul
-      geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe (K3),
-      Sığdır/Ferah/Rahat (K6) ile Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline
-      dön (K8, Dosya menüsünde yeri ayrıldı). 2. aşamadan sonra babanın bir oturumu izlenir.
+      **Aşama 3A** yazıldı (`sade/asama-3a`, aşama 2'nin üstünde, birleşmedi; WORKLOG): tek
+      ızgara düzeni (K6), toplu sabitleme ve geçici görünüm yok (K7), Dosya ▾ → Eski hâline
+      dön, son 7 günün kopyası (K8). Alp (b)'yi seçti ve yazıldı: sütun en geniş
+      dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar,
+      kart yazısı en az 11 px; altı kutuda kesik ders 0. Sırada: **aşama 3B** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına
+      katlanır, okul geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe
+      (K3), başka dalda. 2. aşamadan sonra babanın bir oturumu izlenir.
 
 ## §9. Ham notlar
 

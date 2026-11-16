@@ -10,29 +10,17 @@
 // that says what to do and how much of it.
 
 import { t } from '../../leaf/i18n';
-import { closedKey, placementKey, type Id, type Lesson, type State } from '../../leaf/model';
+import { closedKey, type Id, type Lesson, type State } from '../../leaf/model';
 import { lessonLimit, ruleLevel, relatedName, type Index } from '../constraints';
-import { activePlacements } from '../grid';
-import { lessonExcluded, type SolverExclusions } from '../program';
-
-function excludedDays(d: State, exclusions: SolverExclusions): (day: number) => boolean {
-  const names = new Set(exclusions.dayNames);
-  return (day) => {
-    const name = d.settings.days[day]?.name;
-    return name !== undefined && names.has(name);
-  };
-}
 
 /**
  * Every teacher, class and room whose lessons this run has to place outnumber
- * the hours it has open on the days the run may use: id -> the sentence.
+ * the hours it has open: id -> the sentence.
  */
-export function shortfalls(d: State, exclusions: SolverExclusions): Map<Id, string> {
+export function shortfalls(d: State): Map<Id, string> {
   const out = new Map<Id, string>();
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
-  const excluded = excludedDays(d, exclusions);
-  const placements = activePlacements(d);
 
   /**
    * One row: the hours of `lessons` the run has to find a place for, against
@@ -46,19 +34,10 @@ export function shortfalls(d: State, exclusions: SolverExclusions): Map<Id, stri
     say: (load: number, open: number) => string,
   ) => {
     let load = 0;
-    for (const lesson of lessons) {
-      if (lessonExcluded(lesson, exclusions)) continue;
-      load += lesson.weeklyHours;
-      // Hours already on an excluded day stay there and are not owed.
-      for (let day = 0; day < dayCount; day++) {
-        for (let h = 0; h < hourCount && excluded(day); h++) {
-          if (placements[placementKey(lesson.classId, day, h)] === lesson.id) load--;
-        }
-      }
-    }
+    for (const lesson of lessons) load += lesson.weeklyHours;
     let open = 0;
     for (let day = 0; day < dayCount; day++) {
-      for (let h = 0; h < hourCount && !excluded(day); h++) {
+      for (let h = 0; h < hourCount; h++) {
         if (closers.every((c) => c == null || d.unavailable[closedKey(c, day, h)] === undefined)) {
           open++;
         }
@@ -120,23 +99,16 @@ export function shortfalls(d: State, exclusions: SolverExclusions): Map<Id, stri
  * are. The fewest days a lesson needs is its hours over its daily limit (the
  * "aynı ders günde en fazla" rule, where it blocks), and one day without one.
  */
-export function bindingPair(
-  d: State,
-  ix: Index,
-  lessonId: Id,
-  exclusions: SolverExclusions,
-): string | null {
+export function bindingPair(d: State, ix: Index, lessonId: Id): string | null {
   const lesson = ix.lessonById.get(lessonId);
   if (lesson === undefined) return null;
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
-  const excluded = excludedDays(d, exclusions);
 
   const days = (x: Lesson): Set<number> => {
     const roomId = ix.classById.get(x.classId)?.roomId ?? null;
     const out = new Set<number>();
     for (let day = 0; day < dayCount; day++) {
-      if (excluded(day)) continue;
       for (let h = 0; h < hourCount; h++) {
         if (
           d.unavailable[closedKey(x.classId, day, h)] === undefined &&
@@ -150,17 +122,10 @@ export function bindingPair(
     }
     return out;
   };
-  const placements = activePlacements(d);
   const need = (x: Lesson): number => {
     const limit = lessonLimit(d, x);
     const capped = ruleLevel(d, 'maxSameLessonPerDay') === 'block' && limit > 0;
-    // Hours already on an excluded day stay there and need no day of their own.
-    let hours = x.weeklyHours;
-    for (let day = 0; day < dayCount; day++) {
-      for (let h = 0; h < hourCount && excluded(day); h++) {
-        if (placements[placementKey(x.classId, day, h)] === x.id) hours--;
-      }
-    }
+    const hours = x.weeklyHours;
     if (hours <= 0) return 0;
     return capped ? Math.ceil(hours / limit) : 1;
   };

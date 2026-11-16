@@ -4,19 +4,15 @@ import { Root } from './shell';
 import { applyDil, readDil } from '../leaf/i18n';
 import {
   applyAvailClock,
-  applyDensity,
   applyMotion,
   applyRibbon,
   applyScale,
   applyTheme,
-  applyUiDensity,
   readAvailClock,
-  readDensity,
   readMotion,
   readRibbon,
   readScale,
   readTheme,
-  readUiDensity,
 } from '../platform/prefs';
 import { inWorker, serveRelax } from '../platform/search';
 import '../styles.css';
@@ -35,12 +31,6 @@ function boot(): void {
   // Same reason, and it matters more here: --ui-scale drives the root font-size,
   // so applying it after the first paint would reflow the whole shell.
   applyScale(readScale());
-  // Same again: the density decides how wide a grid cell is, so applying it after
-  // the first paint would redraw 2100 cells.
-  applyDensity(readDensity());
-  // ...and its twin, which decides the padding of every list and panel: applied
-  // late it would move every row on the page once.
-  applyUiDensity(readUiDensity());
   // Same again: a strip that draws and then folds away is a jump on every load.
   applyRibbon(readRibbon());
   // ...and the availability heading, for the same reason: a clock that appears

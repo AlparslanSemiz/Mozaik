@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { deleteLesson, remapDays } from '../entities';
-import { place, setBlockPinned, togglePinScope } from '../constraints';
+import { place, setBlockPinned, togglePinAll } from '../constraints';
 import { parseState } from '../io/parseState';
 import {
   activeProgram,
@@ -93,21 +93,21 @@ describe('alternatif programlar', () => {
   });
 });
 
-describe('toplu sabitleme kapsamları', () => {
-  it('tıklanan sütunun kestiği uzun bloğun tamamını tek seferde sabitler ve kaldırır', () => {
+describe('tüm programı sabitle', () => {
+  it('her dolu bloğun her hücresini tek seferde sabitler, ikinci basış hepsini kaldırır', () => {
     let d = place(world(), 'x1', 0, 0, 2);
-    d = togglePinScope(d, { kind: 'column', day: 0, hour: 1 });
-    expect(Object.keys(activeProgram(d).pinned).sort()).toEqual(['s1|0|0', 's1|0|1']);
-    d = togglePinScope(d, { kind: 'column', day: 0, hour: 1 });
+    d = place(d, 'x2', 1, 3, 1);
+    d = togglePinAll(d);
+    expect(Object.keys(activeProgram(d).pinned)).toHaveLength(3);
+    d = togglePinAll(d);
     expect(activeProgram(d).pinned).toEqual({});
   });
 
-  it('satır ve tüm program kapsamları yalnız dolu blokları sabitler', () => {
+  it('bir kısmı sabitliyse önce hepsini sabitler', () => {
     let d = place(world(), 'x1', 0, 0, 2);
     d = place(d, 'x2', 1, 3, 1);
-    d = togglePinScope(d, { kind: 'row', view: 'teacher', rowId: 'o1' });
-    expect(Object.keys(activeProgram(d).pinned)).toHaveLength(2);
-    d = togglePinScope(d, { kind: 'all' });
+    d = setBlockPinned(d, 's1', 0, 0, true);
+    d = togglePinAll(d);
     expect(Object.keys(activeProgram(d).pinned)).toHaveLength(3);
   });
 });

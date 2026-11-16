@@ -247,9 +247,7 @@ function relaxerCore(
     }
     const { sat } = model;
     const [cost, cost2] = costsOf(which, model);
-    const openDays = base.settings.days.flatMap((d, i) =>
-      opts.exclusions.dayNames.includes(d.name) ? [] : [i],
-    );
+    const openDays = base.settings.days.map((_, i) => i);
     familyUntil = sat.conflicts + FAMILY_CONFLICTS[which];
 
     // Any week at all under this family's changes. A new formula first asks

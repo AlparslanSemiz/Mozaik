@@ -23,7 +23,7 @@ import Rules from './Rules';
 import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../common';
-import type { Density, Motion, Theme, SectionId } from '../../platform/prefs';
+import type { Motion, Theme, SectionId } from '../../platform/prefs';
 import type { FolderRun } from '../../platform/storage';
 import type { UpdateRun } from '../../platform/update';
 
@@ -39,10 +39,6 @@ interface Props extends PanelProps {
   /** A machine preference, so it comes down from App, not out of `State`. */
   scale: number;
   setScale: (next: number) => void;
-  density: Density;
-  setDensity: (next: Density) => void;
-  uiDensity: Density;
-  setUiDensity: (next: Density) => void;
   ribbonAuto: boolean;
   setRibbonAuto: (next: boolean) => void;
   theme: Theme;
@@ -64,10 +60,6 @@ export default function Settings({
   folder,
   scale,
   setScale,
-  density,
-  setDensity,
-  uiDensity,
-  setUiDensity,
   ribbonAuto,
   setRibbonAuto,
   theme,
@@ -91,10 +83,6 @@ export default function Settings({
           state={state}
           scale={scale}
           setScale={setScale}
-          density={density}
-          setDensity={setDensity}
-          uiDensity={uiDensity}
-          setUiDensity={setUiDensity}
           ribbonAuto={ribbonAuto}
           setRibbonAuto={setRibbonAuto}
           theme={theme}

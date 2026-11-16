@@ -66,7 +66,7 @@ import { settingsStrip } from './SettingsStrip';
 import { setupStrip } from './SetupStrip';
 
 export default function Ribbon(props: RibbonProps) {
-  const { ui, open, state, programMask } = props;
+  const { ui, open, state } = props;
   const t = useT();
   const dialogs = useDialogs();
   const notify = useToast();
@@ -74,15 +74,15 @@ export default function Ribbon(props: RibbonProps) {
   const keepBefore = useKeepBefore();
   // The Program strip's counts walk every lesson's blocks (~4.5 ms on the
   // father's week), and App draws the ribbon on every solver slice. Only the
-  // Program tab reads them, and they change only with the plan or the mask
+  // Program tab reads them, and they change only with the plan
   // (TODO RO2). Above the early return: a hook may not sit behind one.
   // The strip's counts follow the plan a moment late (`useDeferredValue`):
   // they are a frame and a half on the weak machine, and a drop should paint
   // the card in its new place before the buttons above recount it.
   const counted = useDeferredValue(state);
   const strip = useMemo(
-    () => (ui.tab === 'program' ? describeStrip(counted, programMask) : null),
-    [ui.tab, counted, programMask],
+    () => (ui.tab === 'program' ? describeStrip(counted) : null),
+    [ui.tab, counted],
   );
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold

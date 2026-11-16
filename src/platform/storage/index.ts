@@ -24,6 +24,7 @@ export {
   type MoveOutcome,
   type SendState,
 } from './move';
+export { dailyCopies, keepToday, type DailyCopy } from './dailyCopies';
 export { KEEP_DAILY, MAIN_NAME } from './folder';
 export { useFolder, type FolderRun } from './useFolder';
 export { routeName, storageAddress, storageKind, storageReport } from './storageReport';
