@@ -2173,11 +2173,9 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
       **Aşama 3A** yazıldı (`sade/asama-3a`, aşama 2'nin üstünde, birleşmedi; WORKLOG): tek
       ızgara düzeni (K6), toplu sabitleme ve geçici görünüm yok (K7), Dosya ▾ → Eski hâline
-      dön, son 7 günün kopyası (K8). **Karar bekliyor (K6'nın bedeli):** 1920 %150 ve 1366
-      %125/%150'de hafta sığıyor ama tek saatlik kartlar "4…" okunuyor (WORKLOG tablosu);
-      seçenekler (a) öyle kalsın, babanın ekranı %100; (b) hücre ~18 px'in altına inince
-      ızgara yeniden yana kaysın; (c) dar kutuda kart yalnız rengi ve sayıyı göstersin.
-      Öneri (b). Sırada: **aşama 3B** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına
+      dön, son 7 günün kopyası (K8). Alp (b)'yi seçti ve yazıldı: sütun en geniş
+      dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar,
+      kart yazısı en az 11 px; altı kutuda kesik ders 0. Sırada: **aşama 3B** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına
       katlanır, okul geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe
       (K3), başka dalda. 2. aşamadan sonra babanın bir oturumu izlenir.
 

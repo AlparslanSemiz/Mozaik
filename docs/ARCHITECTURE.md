@@ -190,7 +190,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/dom/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
 | `platform/dom/roving.ts` | bir kutuyu tek Tab durağı yapar, oklarla içinde gezdirir (`attachRoving`); Program ızgarası, havuz ve Müsaitlik kullanır |
 | `platform/dom/gridKeys.ts` | Program ızgarasının okları, boş hücrenin odakta aldığı ad, kaldırmadan sonra odağın döndüğü hücre (`focusCellSoon`) |
-| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (ızgaranın sütunu ondan türüyor, tuzak 141), ve sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
+| `platform/dom/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (ızgaranın sütunu ondan türüyor, tuzak 141), ve en geniş dersin yazısından sütunun alt sınırını ölçer (`--cell-min`); hafta sığmazsa ızgara yana kayar |
 | `platform/dom/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `platform/dom/rowDrag.ts` | liste satırını sürükleyerek sıralama |
 | `platform/dom/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |

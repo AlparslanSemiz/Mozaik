@@ -40,13 +40,16 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 - **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",
   yana kayan); artık tek düzen eski Sığdır ve seçici yok. Bunun bedeli açıkça yazılı:
-  Rahat'ta kartın satırları 14/13 px'ti (2026-11-15), sığan ızgarada 12 px ve sığmayan
-  satır 9 px'e kadar küçülür (DESIGN "Tek istisna"). Izgara saati çizmiyor (başlığın
+  Rahat'ta kartın satırları 14/13 px'ti (2026-11-15), ızgarada 12 px. Izgara saati çizmiyor (başlığın
   `title`'ında). Arayüz yoğunluğu (2026-08-27, "Program ferahlığı … genel arayüz
   ferahlığından farklı olsun") da kalktı: liste satırları ve paneller bugünkü Rahat
   ölçüsünde. Eski kayıtlı değerler okunmuyor, silinmiyor, Veriler nerede'de kalıyor.
-  1366 ekran %150'de (911 CSS px) hafta sığıyor ama tek saatlik kartlar 9 px'te de
-  "4…" okunuyor; o kutuda çıkış Yazı büyüklüğü'nü düşürmek (ölçüm WORKLOG'da).
+  **Alp'in kararı (b), aynı gün:** Sığdır'ın "hafta her zaman sığar, yazı kesilir"
+  sözleşmesi (2026-09-01) ve 9 px tabanı (2026-09-26) ters çevrildi. Sütun en geniş
+  dersin okunduğu genişlikten dar olmaz (yazıdan ölçülür, `--cell-min`), sığmayan hafta
+  görünür bir çubukla yana kayar, kart yazısı hiçbir yerde 11 px'in altına inmez.
+  Örnek okulda kesik ders 1920 %150 ve 1366 %125/%150'de 317–319/376'dan 0'a indi;
+  1920 %100'de hafta hâlâ sığıyor (WORKLOG).
 - **K7.** Sağ tık menüsünün iki kapısı ve arkalarındaki her şey kalktı, çözücünün
   `exclusions` seçeneği dahil (yalnız geçici görünüm kullanıyordu). Başlıklarda menü
   yok. LAYOUT'un "Sağ tık menüsü" kuralı (üst düzeyde sık olan, kapı arkasında nadir

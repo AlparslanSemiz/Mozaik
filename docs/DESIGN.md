@@ -64,11 +64,10 @@ tabana kendisi cevap veriyor, bunu da çoğu zaman Windows'un kendi ölçeklemes
 zaten büyükken yapıyor. Tipografi merdiveni her kök değişiminde yeniden
 sabitlendiği için %100'de 12 px hâlâ 12 px.
 
-Tek istisna Program ızgarasının kartları ve kullanıcının kararı (2026-09-26): ızgaranın
-işi haftanın tamamını kutuya sığdırmak, ve orada sığmayan bir kart satırı kesilmek
-yerine en çok 9 px'e küçülür. Yalnız sığmayan satır küçülür, satır yüksekliği değişmez
-([LAYOUT.md](LAYOUT.md), [DECISIONS.md](DECISIONS.md)). Kartın tabanı 12 px, çünkü
-14 px'lik bir ad sığma sözünü bozar. Bu 2026-11-16'ya kadar yalnız Sığdır
+Program ızgarasının kartları 12 px ve hiçbir ölçekte 11 px'ten küçük değil
+(2026-11-16, Alp): yazı küçültülerek sığdırılmaz, hafta o boyda sığmıyorsa ızgara yana
+kayar ([LAYOUT.md](LAYOUT.md)). 2026-09-26'dan o güne sığmayan satır 9 px'e kadar
+küçülüyordu. Kartın tabanı 12 px, çünkü 14 px'lik bir ad 1920'de haftayı sığdırmaz. Bu 2026-11-16'ya kadar yalnız Sığdır
 yoğunluğundaydı ve Ferah ile Rahat'ta kart 14/13 px'ti; yoğunluk kalkınca (Sadeleşme
 K6) ızgaranın tek düzeni bu, kartı büyütmenin yolu Yazı büyüklüğü.
 
@@ -125,7 +124,7 @@ tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil ok
 Ekranda 12 px'te kalan yerler (2026-11-15, varsayılan ölçek): şerit başlıkları, ızgara
 başlığındaki gün adı ve ders numarası, satır başının ikinci satırı, rozetler, havuzun
 seçicileri ve sayacı, sekme etiketi dar kutuda, şerit sözcüğü en dar adımda, ve ızgaranın
-kart satırları (sığmazsa 9 px'e kadar). `.hint` 13 px ve bu kararı TODO SD5 bekliyor.
+kart satırları (en az 11 px). `.hint` 13 px ve bu kararı TODO SD5 bekliyor.
 
 ---
 

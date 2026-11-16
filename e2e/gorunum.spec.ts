@@ -130,6 +130,10 @@ async function gridMetrics(page: import('@playwright/test').Page) {
           [...th.querySelectorAll('.secondary, .inspect')].some(overflows),
       ).length,
       heads: document.querySelectorAll('table.grid tbody th').length,
+      // The hour numbers: "10", "11", "12" read "1." once (2026-11-16).
+      hoursClipped: [...document.querySelectorAll('table.grid thead th[data-col]')].filter(
+        overflows,
+      ).length,
       cornerClipped: (() => {
         const c = document.querySelector('table.grid .corner');
         return c !== null && c.scrollWidth - c.clientWidth > 0.5;
@@ -338,7 +342,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(after.row, `%100'de ${before.row}px, %125'te ${after.row}px`).toBeGreaterThan(
       before.row * 1.15,
     );
-    expect([before.over, after.over]).toEqual([0, 0]);
+    expect(before.over).toBe(0);
   });
 
   test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({
@@ -456,17 +460,21 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
   });
 
   // The app's own scale (Ayarlar → Yazı büyüklüğü), and the boxes a 1366 and
-  // a 1920 screen give at Windows %125 and %150 (CSS px = screen / zoom).
+  // a 1920 screen give at Windows %100, %125 and %150 (CSS px = screen /
+  // zoom). Every lesson is read whole at 11px or more; where 72 such columns
+  // do not go in, the grid scrolls sideways (2026-11-16) and its last hour,
+  // and the row heads, are reachable.
   for (const target of [
-    { width: 1280, height: 720, scale: 100 },
-    { width: 1366, height: 768, scale: 125 },
-    { width: 1920, height: 1080, scale: 150 },
-    { width: 1366, height: 768, scale: 100 },
-    { width: 1093, height: 614, scale: 100 },
-    { width: 911, height: 512, scale: 100 },
-    { width: 1536, height: 864, scale: 100 },
+    { width: 1920, height: 1080, scale: 100, fits: true },
+    { width: 1536, height: 864, scale: 100, fits: false },
+    { width: 1280, height: 720, scale: 100, fits: false },
+    { width: 1366, height: 768, scale: 100, fits: false },
+    { width: 1093, height: 614, scale: 100, fits: false },
+    { width: 911, height: 512, scale: 100, fits: false },
+    { width: 1366, height: 768, scale: 125, fits: false },
+    { width: 1920, height: 1080, scale: 150, fits: false },
   ]) {
-    test(`${target.width}×${target.height} ve %${target.scale} ölçekte yatay kaydırma yok`, async ({
+    test(`${target.width}×${target.height} ve %${target.scale}: hiçbir ders kırpılmıyor`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: target.width, height: target.height });
@@ -479,27 +487,29 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
       });
 
       const fit = await gridMetrics(page);
-      expect(fit.overflow, `${target.width}px/%${target.scale}: ${fit.overflow}px taşma`).toBe(0);
-
-      const card = page.locator('table.grid .card').first();
-      await expect(card).toBeVisible();
-      const access = await card.evaluate((el) => {
-        const parent = el.getBoundingClientRect();
-        return {
-          name: el.getAttribute('aria-label') ?? '',
-          topSize: parseFloat(getComputedStyle(el.querySelector('.card-top')!).fontSize),
-          contained: [...el.children].every((child) => {
-            const box = child.getBoundingClientRect();
-            return box.left >= parent.left - 0.5 && box.right <= parent.right + 0.5;
-          }),
-        };
+      expect(fit.cards).toBeGreaterThan(300);
+      expect(fit.clipped, `${fit.clipped}/${fit.cards} ders kırpıldı`).toBe(0);
+      expect(fit.hoursClipped, `${fit.hoursClipped} saat numarası kırpıldı`).toBe(0);
+      expect(fit.smallestText, 'ders yazısı 11 px altına indi').toBeGreaterThanOrEqual(11);
+      if (target.fits) {
+        expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+        return;
+      }
+      expect(fit.overflow, 'sığmayan hafta kaymıyor').toBeGreaterThan(0);
+      // Scrolled all the way: the last day's last hour is in the box, and the
+      // row heads stayed where they were.
+      const head = page.locator('tbody .row-head').first();
+      const before = (await head.boundingBox())!;
+      const seen = await page.locator('.grid-wrap').evaluate((wrap) => {
+        wrap.scrollLeft = wrap.scrollWidth;
+        const last = [...wrap.querySelectorAll('thead th[data-col]')].at(-1)!;
+        const box = wrap.getBoundingClientRect();
+        const r = last.getBoundingClientRect();
+        return r.left >= box.left - 0.5 && r.right <= box.right + 0.5;
       });
-      expect(access.name.length).toBeGreaterThan(3);
-      // A line that does not fit is drawn smaller rather than cut, down to
-      // 9px (the user's choice, 2026-09-26). Every card is held to the floor.
-      expect(access.topSize).toBeGreaterThanOrEqual(9);
-      expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
-      expect(access.contained).toBe(true);
+      expect(seen, 'son saat görünmüyor').toBe(true);
+      await page.waitForTimeout(120);
+      expect(Math.abs((await head.boundingBox())!.x - before.x)).toBeLessThan(2);
     });
   }
 
@@ -530,7 +540,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
     });
   }
 
-  test('maximize edilmemiş 1600px kutuda da hafta sığıyor', async ({ page }) => {
+  test('maximize edilmemiş 1600px kutuda ders kırpılmıyor, satır başı da', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 968 });
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -538,9 +548,9 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     const fit = await gridMetrics(page);
-    // The contract, and only the contract: 72 columns at the 12px reading
-    // floor need about 1795 CSS px, so in a 1600px box the text gives.
-    expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+    // 72 columns at the 12px reading size need more than 1600 CSS px, so the
+    // grid scrolls here rather than cut a lesson (2026-11-16).
+    expect(fit.clipped, `${fit.clipped} ders kırpıldı`).toBe(0);
     expect(fit.headsClipped, `${fit.headsClipped} satır başı kırpıldı`).toBe(0);
   });
 
@@ -581,10 +591,10 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
  * At 1536 CSS px — a 1920 screen at Windows %125 — the sample school's "310"
  * needs 21px where the card has 19.2, and 315 of 374 cards were clipped.
  *
- * The fix the user chose has two halves: a card shows
- * the class name's first word ("411A"), and a line that still does not fit is
- * drawn smaller, down to a 9px floor, instead of being cut. Neither changes a
- * row's height: that is asked of the line box and of the table directly.
+ * The fix the user chose on 2026-09-26 had two halves: a card shows the class
+ * name's first word ("411A"), and a line that still did not fit was drawn
+ * smaller, down to 9px. The second half went on 2026-11-16: nothing under
+ * 11px, and a week that does not fit at that size scrolls sideways.
  *
  * The numbers below are what is left AFTER the fix, measured, not a hope.
  * A one-hour card was 24.5px at 1920 and 21.5 in the first hour of a day,
@@ -604,46 +614,14 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
   const dizili = () =>
     JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs-dizili.json', 'utf8')) as State;
 
-  /**
-   * Shrinking a line must not change the height of anything. Asked directly:
-   * the table's body with the shrink and without it. The first draft of the
-   * shrink made every row 38.5px -> 35px, and only this comparison sees it.
-   */
-  async function expectShrinkKeepsHeight(page: import('@playwright/test').Page) {
-    const h = await page.evaluate(() => {
-      const body = () => document.querySelector('table.grid tbody')!.getBoundingClientRect().height;
-      const lines = [...document.querySelectorAll<HTMLElement>('table.grid [style*="--fit"]')];
-      const kept = lines.map((line) => line.style.getPropertyValue('--fit'));
-      const shrunk = body();
-      for (const line of lines) line.style.removeProperty('--fit');
-      const whole = body();
-      lines.forEach((line, i) => line.style.setProperty('--fit', kept[i]!));
-      return { shrunk, whole, lines: lines.length };
-    });
-    expect(h.lines, 'küçülen satır yok, iddia bedava geçerdi').toBeGreaterThan(0);
-    expect(
-      Math.abs(h.shrunk - h.whole),
-      `küçülmüş ${h.shrunk}px, küçülmemiş ${h.whole}px`,
-    ).toBeLessThanOrEqual(0.5);
-  }
-
   const boxes = [
     { name: '1920', viewport: { width: 1920, height: 1080 }, dpr: 1 },
     { name: 'Windows %125', viewport: { width: 1536, height: 816 }, dpr: 1.25 },
   ] as const;
 
-  // Ceilings, per box and view, for the anonymised fixture ("411A SAY").
-  const DIZILI: Record<string, { cards: number; heads: number }> = {
-    '1920 · Öğretmen görünümü': { cards: 0, heads: 0 }, // before: 192 of 199, then 2 (B7.22)
-    '1920 · Sınıf görünümü': { cards: 0, heads: 0 }, // 26, and 20 of 20 heads
-    'Windows %125 · Öğretmen görünümü': { cards: 75, heads: 0 }, // 199
-    'Windows %125 · Sınıf görünümü': { cards: 24, heads: 0 }, // 63, then 27 (B7.22)
-  };
-  // ...and for the sample school, where only the %125 box ever clipped.
-  const ORNEK: Record<string, number> = {
-    'Öğretmen görünümü': 0, // before: 315 of 374
-    'Sınıf görünümü': 0, // 152, then 2 (B7.22)
-  };
+  // Zero everywhere since 2026-11-16: a lesson that does not fit makes the
+  // grid scroll. Before, the %125 box left 75 and 24 of the father's cards
+  // reading "41…" even at 9px.
 
   for (const box of boxes) {
     test.describe(box.name, () => {
@@ -656,17 +634,10 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
           await expect(page.locator('table.grid .card').first()).toBeVisible();
           const fit = await gridMetrics(page);
           expect(fit.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
-          const ceiling = DIZILI[`${box.name} · ${view}`]!;
-
-          expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-          expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBeLessThanOrEqual(
-            ceiling.cards,
-          );
-          expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(
-            ceiling.heads,
-          );
-          expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
-          await expectShrinkKeepsHeight(page);
+          expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBe(0);
+          expect(fit.hoursClipped).toBe(0);
+          expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(0);
+          expect(fit.smallestText, 'yazı 11 px altına indi').toBeGreaterThanOrEqual(11);
         });
       }
 
@@ -682,12 +653,8 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
             });
             const fit = await gridMetrics(page);
 
-            expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
-            expect(fit.clipped, `${fit.clipped}/374 kartın yazısı kırpıldı`).toBeLessThanOrEqual(
-              ORNEK[view]!,
-            );
-            expect(fit.smallestText).toBeGreaterThanOrEqual(9);
-            await expectShrinkKeepsHeight(page);
+            expect(fit.clipped, `${fit.clipped}/374 kartın yazısı kırpıldı`).toBe(0);
+            expect(fit.smallestText).toBeGreaterThanOrEqual(11);
           });
         }
       }

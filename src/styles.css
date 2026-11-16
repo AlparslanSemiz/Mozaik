@@ -2194,7 +2194,29 @@ table.list tbody tr {
 
 /* -------------------------------------------------------------------- grid */
 
+/* When the week does not fit at a readable width the grid scrolls sideways
+   (2026-11-16), and that has to be SEEN: the grid's bars are wider and darker
+   than the thin furniture elsewhere, and always drawn. Chromium draws the
+   `::-webkit-scrollbar` bar, never an overlay that vanishes, only while the
+   standard `scrollbar-width` and `scrollbar-color` are `auto` (the `*` rule
+   above sets them); Firefox reads those two and keeps its own bar. */
+.grid-wrap::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.grid-wrap::-webkit-scrollbar-track {
+  background: var(--chrome);
+}
+
+.grid-wrap::-webkit-scrollbar-thumb {
+  background: var(--line-dark);
+  background-clip: content-box;
+}
+
 .grid-wrap {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
   flex: 1 1 auto;
   overflow: auto;
   background: var(--paper);
@@ -2310,51 +2332,19 @@ table.grid thead tr:nth-child(2) th {
    longer draws it at all; the heading's `title` and every printed sheet still
    say it. Müsaitlik's heading keeps its own clock and its own button. */
 
-/* And the card's TOP line steps down one notch — measured, the way the clock
-   was, and only after the clock stopped being the floor.
-   With the default scale at 1.10 the clock alone was no longer enough: the
-   week came back 76px over. Each candidate was hidden in turn on a full grid,
-   under `file://`, at 1920x1080:
-
-     nothing hidden ................ table 1996 / box 1920, over 76
-     card's BOTTOM line hidden ..... 1996, over 76   (not the floor)
-     hour NUMBER hidden ............ 1996, over 76   (not the floor)
-     card's TOP line hidden ........ 1906, over  0   <- the floor
-     card text at --fs-2xs ......... 1907, over  0
-
-   So it is the class number ("411") setting the column's min-content, and one
-   step down the ladder is enough. A px floor and not the token alone: 12px is
-   a floor for a reader who has trouble seeing, so it is written in px ON
-   PURPOSE — it must not shrink with the scale the way a rem would.
-
-   `min(1, --ui-scale)` is the one thing it DOES follow, and only downwards.
-   At scale 1 this resolves to exactly 12px, so the default screen is
-   untouched; above 1 the floor must not grow, which is --fs-2xs's job. The
-   clarification of 2026-08-30 already says the floor is a promise about the
-   DEFAULT scale — "%80'e uzanan okuyucu tabana kendisi cevap veriyor" — and
-   this applies that sentence to the cards. It is the only knob that reaches
-   Windows at %125, where the box is 1536 CSS px: measured there, dropping the
-   app's own scale to %80 takes clipped cards from 315/374 to 25/374 (and the
-   row from 37px to 31px, so more rows fit as well). Left at scale 1 on a
-   %125 machine the columns do not hold that text: 72 columns of ~21.6px
-   text plus the head do not fit in 1536px, and no width rule makes them.
-
-   What does, since 2026-09-26, is the line giving way instead of being cut.
-   `--fit` is a ratio written by platform/dom/gridFit.ts on a line that does not
-   fit, never below 9px at the default scale (the user's choice, Sığdır
-   only, measured in gridFit.ts). The size is multiplied, the LINE HEIGHT is not: it stays at the
-   unshrunk size, so a row full of shrunk cards is exactly as tall as it was.
-   --lh-base and not the card's own --lh-tight, because that is what these
-   lines actually get: `.card`'s `font: inherit` comes after its line-height
-   and resets it to the cell's (measured 18px at 12px). Written with
-   --lh-tight, every row went 38.5px -> 35px. Measured at 1536 with DPR 1.25
-   on the sample school: 315/374 clipped -> 0, counted the way the ellipsis
-   itself decides (pitfall 140). */
+/* The card's lines: 12px at the default scale, NEVER under 11px (an older
+   reader, 2026-11-16), and never shrunk to fit. Until then a line that did not
+   fit was drawn smaller, down to 9px, and still read "4…" in a %125 or %150
+   box (317 of 376 cards). Now the column is as wide as the widest lesson needs
+   at this size (`--cell-min`, measured by platform/dom/gridFit.ts), and when
+   the week does not fit at that width the grid scrolls sideways instead (see
+   --cell-w below). The LINE HEIGHT is the size's own --lh-base, which is what
+   these lines get anyway: `.card`'s `font: inherit` resets it to the cell's. */
 :root .card-top,
 :root .card-bottom {
-  --fit-base: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-base));
+  --card-fs: max(11px, calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
+  font-size: var(--card-fs);
+  line-height: calc(var(--card-fs) * var(--lh-base));
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -2363,20 +2353,14 @@ table.grid thead tr:nth-child(2) th {
 }
 
 /* The two-hour card's top line keeps its one step up (`td.block-wide`, which
-   outranks the rule above), and shrinks from THAT size. */
+   outranks the rule above). */
 :root table.grid tbody td.block-wide .card-top {
-  --fit-base: var(--fs-sm);
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-base));
+  --card-fs: max(11px, var(--fs-sm));
 }
 
-/* The row head's second line gives way the same way: the father's class rows
-   read "derslik yok" (59px of text in 57px) and his teachers "Mat1 · Mat2",
-   and all twenty class heads were clipped at 1920. */
 :root table.grid .row-head .secondary {
-  --fit-base: var(--fs-xs);
-  font-size: calc(var(--fit-base) * var(--fit, 1));
-  line-height: calc(var(--fit-base) * var(--lh-tight));
+  font-size: var(--fs-xs);
+  line-height: calc(var(--fs-xs) * var(--lh-tight));
 }
 
 /* And a class name says its first word only: "411A SAY" -> "411A", on the
@@ -2404,10 +2388,9 @@ table.grid thead tr:nth-child(2) th {
    `style={{ width }}` is about a measurement written in the JSX, and a column
    count is data the layout needs.
 
-   There is still no readable-width FLOOR here, and that is deliberate: this
-   mode's contract is that the complete week fits horizontally, so when the box
-   is too narrow the card text ellipsises rather than the grid growing a
-   scrollbar. What changed on 2026-09-01 is what the lesson columns are given
+   Since 2026-11-16 there IS a readable-width floor (`--cell-min`, below): the
+   week fits when it can and scrolls sideways when it cannot, and a lesson is
+   never cut. The numbers that follow are from before it. What changed on 2026-09-01 is what the lesson columns are given
    to begin with. Measured on the sample school, `Otomatik diz`, 374 cards,
    counting cards whose .card-top actually overflows:
 
@@ -2447,16 +2430,25 @@ table.grid thead tr:nth-child(2) th {
    colgroup Chromium can round the table border one device pixel beyond the
    container at 1366px/%125, hence the final 1px subtraction on table width. */
 :root table.grid {
-  --rowhead-w: 5rem;
+  /* At least what the widest row head's text needs (`--head-min`, gridFit.ts). */
+  --rowhead-w: max(5rem, var(--head-min, 0px));
   --break-w: .1875rem;
+  /* The box's share, but never less than the widest lesson needs (B,
+     2026-11-16): below that the table grows past the box and `.grid-wrap`
+     scrolls sideways, with the row heads and the hour row sticky. */
   --cell-w: max(
-    0px,
+    var(--cell-min, 0px),
     (var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
         var(--day-cols) * var(--day-rule-w) - var(--space-4)) /
       var(--lesson-cols)
   );
-  width: calc(100% - 1px);
-  max-width: calc(100% - 1px);
+  width: max(
+    calc(100% - 1px),
+    calc(
+      var(--rowhead-w) + var(--break-cols) * var(--break-w) + var(--day-cols) *
+        var(--day-rule-w) + var(--lesson-cols) * var(--cell-w)
+    )
+  );
 }
 
 /* The day rule is drawn inside the first hour's cell (`.day-first`), so that
