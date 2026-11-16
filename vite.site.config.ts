@@ -65,6 +65,27 @@ if (location.origin === ${JSON.stringify(new URL(ADRES.eski).origin)} && typeof 
 }`;
 
 /**
+ * VISIT COUNTS for the web address only (Alp, 2026-11-16: "mozaike de kur").
+ *
+ * Cloudflare Web Analytics: cookieless, stores nothing on the device, sends the
+ * page address, referrer, browser and country, never anything from the
+ * schedule (which never leaves the device anyway). Loaded by an inline script
+ * rather than a <script src> so the page is still ONE file (site.yml's grep):
+ * the beacon is optional, and offline or blocked it simply does not load. Only
+ * at the new origin, so localhost, the tests and the old address count nothing;
+ * the double-clicked dist/index.html never has it (this file builds dist-site).
+ * The service worker only handles its own origin, so it never caches the beacon.
+ */
+const ziyaretSayaci = `
+if (location.origin === ${JSON.stringify(new URL(ADRES.yeni).origin)}) {
+  var s = document.createElement('script');
+  s.defer = true;
+  s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  s.setAttribute('data-cf-beacon', '{"token": "e166682d551741608b0cfce5d186f123"}');
+  document.head.appendChild(s);
+}`;
+
+/**
  * The manifest link and the registration script exist ONLY here.
  *
  * There is deliberately no <link rel="icon"> among them any more. index.html
@@ -92,7 +113,7 @@ function siteShell(): Plugin {
           attrs: { name: 'theme-color', content: '#2e4ba8' },
           injectTo: 'head' as const,
         },
-        { tag: 'script', children: REGISTER + yeniAdresYoklamasi, injectTo: 'body' as const },
+        { tag: 'script', children: REGISTER + yeniAdresYoklamasi + ziyaretSayaci, injectTo: 'body' as const },
       ],
     },
   };

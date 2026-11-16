@@ -146,4 +146,6 @@ değil ([DECISIONS.md](DECISIONS.md), 2026-10-08) ve bir özellik onları bozuyo
 reddedilmez. Ağa çıkan ya da bir servise bağlanan bir özellik (öğretmenlere e-posta,
 Eyotek'e gönderme, [TODO.md](TODO.md) B3.8) tasarımın ve KVKK'nın sorularıyla karar
 verilir: veri nereye gidiyor, kim saklıyor, bakımı kimde. İlke olan, açılışın ağa bağlı
-olmaması ("Çift tıkla çalışır", "Açılış ağa bağlı değil").
+olmaması ("Çift tıkla çalışır", "Açılış ağa bağlı değil"). Tek istisna, yalnız web
+adresinde: çerezsiz ziyaret sayımı (Cloudflare Web Analytics; programdan veri göndermez,
+yüklenmezse hiçbir şey değişmez; [DECISIONS.md](DECISIONS.md), 2026-11-16).
