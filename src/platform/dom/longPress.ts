@@ -7,8 +7,10 @@
 // trigger reads it as it reads those (Grid.tsx, LessonPool.tsx `openMenu`).
 // Before that, a `pointercancel` from the same place: it ends the drag the
 // press started (drag.ts listens for it on window) and clears Radix's own
-// 700 ms long press, which opens the menu WITHOUT `openMenu` and so on
-// whatever card was last asked for (pitfall 176). A mouse is left alone.
+// 700 ms long press where it runs (a pinned card, an empty cell; a draggable
+// card's `preventDefault` never lets it start), which opens the menu WITHOUT
+// `openMenu` and so on whatever card was last asked for (pitfall 176). A
+// mouse is left alone.
 
 import type { PointerEvent as ReactPointerEvent } from 'react';
 
