@@ -1591,6 +1591,7 @@ textarea {
    focus ring stay, and only the VOLUME comes down. */
 .btn.subtle {
   border-style: dashed;
+  text-align: left;
   border-color: var(--hairline);
   background: transparent;
   color: var(--muted);
@@ -3643,6 +3644,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 .step[data-empty="true"]:not([aria-pressed="true"]) {
   color: var(--muted);
   border-style: dashed;
+  text-align: left;
 }
 
 .step-count {
@@ -4666,11 +4668,10 @@ table.sheet-lessons td:last-child {
   white-space: nowrap;
 }
 
-/* Sized by the browser from its longest option, like every other picker whose
-   labels are names rather than a fixed vocabulary (pitfall 33/34). */
+/* A fixed width: its options are drawn only when it is reached
+   (`TransferPick`), and a box sized by them would jump under the pointer. */
 table.sheet-lessons select.transfer-pick {
-  width: auto;
-  max-width: 14rem;
+  width: 17rem;
 }
 
 /* The split editor: the current shape is one compact button. Its Radix popover
@@ -4970,15 +4971,6 @@ table.sheet-lessons select.transfer-pick {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-}
-
-/* The list row's way into its panel: a symbol AND a word ("Ayrıntı"), never
-   the symbol alone (Sadeleşme item 8). */
-.btn.row-detail {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
 }
 
@@ -5304,24 +5296,6 @@ table.sheet-lessons select.transfer-pick {
 @media (max-width: 68rem) {
   .cols {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* THE TEACHER TABLE IS THE ONE LIST WIDER THAN ITS COLUMN ON A SMALL SCREEN.
-   Thirteen columns of boxes; at 1366 x 768 (and 1536, Windows at 125 %) the
-   rail took 376 px of the 940 the table needed, the table scrolled sideways
-   and "Ders saati" and the delete button sat off the right edge. On that
-   step only, the rail goes under the list there: what is typed into wins over
-   the summary of it. 98rem (1568 px) and not 100: kabuk.spec measures the
-   rail itself at 1600, and 1920 does not change. */
-@media (max-width: 98rem) {
-  .cols:has(table.teacher-table) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .cols:has(table.teacher-table) > aside {
-    position: static;
-    max-height: none;
   }
 }
 
@@ -6008,6 +5982,7 @@ table.availability .av-head {
 .mail-row .mail-who {
   min-width: 4ch;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .mail-row .mail-to {
@@ -7092,7 +7067,7 @@ input.search-box:focus-visible {
    took this heading's second line box too and the reader's "Saatler" button had
    nothing left to switch. Scoped to `table.grid` now, and `gorunum.spec.ts` 50
    measures it at Sığdır rather than only at the default density. */
-:root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
+:root:not([data-avail-clock='acik']) table.availability:not(.with-clock) thead .hour-clock {
   visibility: hidden;
 }
 
@@ -7594,72 +7569,6 @@ body.row-dragging {
   min-width: 6ch;
 }
 
-/* The teacher's address (schema v17) gets the small floor, not the name's:
-   at 125 % one more 10ch column was the 14 px the teacher table spilled past
-   its panel (kurulum.spec.ts 65). An address scrolls inside its box. */
-.table-scroll table.list td > input[type='text'][inputmode='email']:not(.num):not(.text-sm) {
-  min-width: 6ch;
-}
-
-/* ...and while it is being typed in, the box is as wide as the address. The
-   column cannot grow for it (the 125 % rule above), so the focused box lifts
-   out of the row and over its neighbours instead: absolute, so the column
-   keeps the width every other row's box gives it and nothing beside it moves.
-   An address read six letters at a time is an address nobody checks, and the
-   reader who needs this most is the one with low vision (2026-10-24).
-   `field-sizing` (Chromium, which is the exe and the browser it ships for)
-   fits the box to the text; elsewhere 34ch holds the usual address and a
-   longer one scrolls, as before. Body size, never the table's smaller one.
-   The focus rules repeat the box's attributes: they have to outrank the 6ch
-   floor above, or their own floor never applies (review, 2026-10-24). */
-.table-scroll table.list td.email-cell {
-  position: relative;
-}
-
-.table-scroll table.list td.email-cell > input[type='text'][inputmode='email']:not(.num):not(.text-sm):focus {
-  position: absolute;
-  z-index: 6;
-  top: 50%;
-  left: 6px;
-  transform: translateY(-50%);
-  width: 34ch;
-  min-width: calc(100% - 12px);
-  max-width: 60ch;
-  font-size: var(--fs-base);
-  background: var(--paper);
-  box-shadow:
-    0 0 0 2px var(--paper),
-    0 4px 14px var(--shadow-shell);
-}
-
-@supports (field-sizing: content) {
-  /* Half a ch past the text: content-sized to the pixel, the box rounded
-     one pixel short of its last letter and the caret, measured. */
-  .table-scroll table.list td.email-cell > input[type='text'][inputmode='email']:not(.num):not(.text-sm):focus {
-    field-sizing: content;
-    width: auto;
-    min-width: max(calc(100% - 12px), 24ch);
-    padding-inline-end: calc(var(--space-3) + 0.5ch);
-  }
-}
-
-/* The add form's address box: wide enough for a whole address from the
-   first letter, growing with it where the browser can. */
-.form-row > input.email-box {
-  width: 30ch;
-  max-width: 100%;
-}
-
-@supports (field-sizing: content) {
-  .form-row > input.email-box {
-    field-sizing: content;
-    width: auto;
-    min-width: 30ch;
-    max-width: 60ch;
-    padding-inline-end: calc(var(--space-3) + 0.5ch);
-  }
-}
-
 /* ------------------------------------------------------- forced colours
    Windows' contrast themes (Ayarlar > Erişilebilirlik > Karşıtlık temaları)
    replace every colour on the page with a handful of system colours. Until
@@ -7716,4 +7625,171 @@ body.row-dragging {
     outline: 3px solid Highlight !important;
     outline-offset: 2px;
   }
+}
+
+/* ------------------------------------------------------------ person page
+   Sadeleşme, K5 (2026-11-16): the Okul lists are text and the name opens the
+   person's page, where everything about the person is edited. */
+
+/* A name in the list, read as text and pressed as a link: twenty-five framed
+   buttons down a column would be a cage. Body size, the full name. */
+.person-open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-xs);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.person-open:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+table.person-list tbody tr {
+  cursor: pointer;
+}
+
+table.person-list tbody tr:hover {
+  background: var(--accent-bg);
+}
+
+.person-status {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.person-status .bad {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* "+ Yeni öğretmen": one more row at the end of the list, the width of the
+   table, so the next name is added where it will stand. */
+.btn.add-row {
+  width: 100%;
+  justify-content: flex-start;
+  margin-top: var(--space-2);
+  border-style: dashed;
+  text-align: left;
+}
+
+.sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  max-width: 22rem;
+}
+
+.sheet-actions a.btn {
+  color: inherit;
+  text-decoration: none;
+}
+
+.sheet-said {
+  flex-basis: 100%;
+  text-align: right;
+  margin: 0;
+}
+
+/* The page's grid is the Müsaitlik grid, a little shorter: here it is one
+   section of five, and the whole week is read without scrolling. */
+.sheet table.availability tbody th,
+.sheet table.availability tbody td {
+  height: 2.5rem;
+}
+
+.sheet table.availability td.closed {
+  font-size: var(--fs-lg);
+}
+
+.sheet-more > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sheet-more[open] > summary {
+  margin-bottom: var(--space-3);
+}
+
+.sheet-foot {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--hairline);
+}
+
+/* Yazdır from the page: one sheet, drawn under <body> only while the print
+   window is up (PrintOne.tsx). On screen it is never seen; on paper it is the
+   only thing there. */
+.print-one-box {
+  display: none;
+}
+
+@media print {
+  html.print-one body > :not(.print-one-box) {
+    display: none !important;
+  }
+
+  html.print-one .print-one-box {
+    display: block;
+  }
+}
+
+/* The page is a flex column that scrolls, and a column shrinks its children
+   before it scrolls: the week grid (a scroll box, so its minimum is 0) came
+   out 0 px tall. Nothing on the page shrinks; the page scrolls. */
+.sheet > * {
+  flex-shrink: 0;
+}
+
+.sheet-actions .btn,
+.sheet-foot .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+table.sheet-lessons td.num {
+  width: 1%;
+  white-space: nowrap;
+}
+
+table.sheet-lessons td.num input.num {
+  width: 4.5rem;
+}
+
+/* The page's head stays on screen while the page scrolls: Yazdır, Gönder and
+   the close button are where they were, and Gönder's answer is read beside
+   it even when it put the keyboard in the address box further down. */
+.sheet > .sheet-head:first-child {
+  position: sticky;
+  top: calc(-1 * var(--space-6));
+  z-index: 2;
+  margin: calc(-1 * var(--space-6)) calc(-1 * var(--space-6)) 0;
+  padding: var(--space-5) var(--space-6) var(--space-3);
+  background: var(--paper);
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* Text rows: a name, a code, a number never wrap; the status is what gives. */
+table.person-list th,
+table.person-list td:not(.person-status) {
+  white-space: nowrap;
+}
+
+table.person-list td.person-status {
+  width: 100%;
 }

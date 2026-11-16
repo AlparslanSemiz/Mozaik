@@ -1,5 +1,6 @@
 // Çıktı's "send each teacher their week" (TODO B3.4): one button per teacher,
-// and the user's own mail program does the rest.
+// and the user's own mail program does the rest. The person page's Gönder
+// (Sadeleşme, K5) is the same button for one teacher, so both are here.
 //
 // NOTHING IS SENT FROM HERE. The button opens a new message in the mail
 // program this machine already has, from the account already in it, with the
@@ -12,11 +13,11 @@
 // and the page does not guess (a timer did, and was wrong both ways, review
 // 2026-10-24).
 
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
-import { paletteColor, type State, looksLikeEmail } from '../../leaf/model';
+import { paletteColor, type State, type Teacher, looksLikeEmail } from '../../leaf/model';
 import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
-import type { Index } from '../../pure/constraints';
+import { blockSpans, buildIndex, type Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';
 import { useT } from '../common';
 
@@ -29,33 +30,154 @@ interface Props {
 /** Why a teacher has no button, in the fewest words that say where to fix it. */
 type Why = 'adres yok' | 'adres hatalı' | 'programı boş' | 'e-postaya sığmıyor';
 
+type Translate = ReturnType<typeof useT>;
+
+/** One teacher's message, or why there is none. */
+function mailFor(
+  state: State,
+  ix: Index,
+  spans: Map<string, number>,
+  teacher: Teacher,
+  t: Translate,
+): { why: Why | null; url: string } {
+  if (teacher.email === '') return { why: 'adres yok', url: '' };
+  if (!looksLikeEmail(teacher.email)) return { why: 'adres hatalı', url: '' };
+  const mail = teacherMail(state, ix, spans, teacher, t);
+  if (mail === 'empty') return { why: 'programı boş', url: '' };
+  if (mail === 'tooLong') return { why: 'e-postaya sığmıyor', url: '' };
+  return { why: null, url: mail.url };
+}
+
+type Said = EpostaSonucu | 'tarayici' | null;
+
+/** What happened after a press. */
+function MailSaid({ said }: { said: Said }) {
+  const t = useT();
+  if (said === 'istemci-yok') {
+    return (
+      <div className="warn-box" role="status">
+        {t('Bu bilgisayarda seçili bir e-posta uygulaması yok.')}
+      </div>
+    );
+  }
+  if (said === 'tarayici') {
+    return (
+      <p className="hint" role="status">
+        {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
+      </p>
+    );
+  }
+  if (said === 'olmadi') {
+    return (
+      <div className="warn-box" role="status">
+        {t('E-posta uygulaması açılamadı.')}
+      </div>
+    );
+  }
+  return null;
+}
+
+/** A `mailto:` link in a browser, the shell's own call in the exe. */
+function MailButton({
+  url,
+  name,
+  children,
+  setSaid,
+}: {
+  url: string;
+  name: string;
+  children: ReactNode;
+  setSaid: (next: Said) => void;
+}) {
+  return isDesktop() ? (
+    <button
+      className="btn"
+      aria-label={name}
+      onClick={() => {
+        setSaid(null);
+        void desktopMail(url).then(setSaid);
+      }}
+    >
+      <Mail size={16} strokeWidth={2} aria-hidden="true" />
+      {children}
+    </button>
+  ) : (
+    <a className="btn" href={url} aria-label={name} onClick={() => setSaid('tarayici')}>
+      <Mail size={16} strokeWidth={2} aria-hidden="true" />
+      {children}
+    </a>
+  );
+}
+
+/**
+ * The person page's Gönder: the same message as the Çıktı row, or, when
+ * there is none, the one sentence that says how to get one. Pressed without
+ * an address it also puts the keyboard in the address box (`onMissing`).
+ *
+ * TODO(aşama 4): WhatsApp ile ve PDF olarak gönder; bugün yalnız e-posta.
+ */
+export function SendTeacher({
+  state,
+  teacher,
+  onMissing,
+}: {
+  state: State;
+  teacher: Teacher;
+  onMissing: () => void;
+}) {
+  const t = useT();
+  const [said, setSaid] = useState<Said>(null);
+  const [asked, setAsked] = useState(false);
+  const { why, url } = useMemo(
+    () => mailFor(state, buildIndex(state), blockSpans(state), teacher, t),
+    [state, teacher, t],
+  );
+  return (
+    <>
+      {why === null ? (
+        <MailButton
+          url={url}
+          name={t('{kim} için e-postayı aç', { kim: teacher.short })}
+          setSaid={setSaid}
+        >
+          {t('Gönder')}
+        </MailButton>
+      ) : (
+        <button
+          className="btn"
+          onClick={() => {
+            setAsked(true);
+            if (why === 'adres yok' || why === 'adres hatalı') onMissing();
+          }}
+        >
+          <Mail size={16} strokeWidth={2} aria-hidden="true" />
+          {t('Gönder')}
+        </button>
+      )}
+      {asked && why !== null && (
+        <p className="hint sheet-said" role="status">
+          {why === 'adres yok'
+            ? t('Göndermek için Bilgiler’de e-posta adresini yazın.')
+            : why === 'adres hatalı'
+              ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
+              : why === 'programı boş'
+                ? t('Programı henüz boş, gönderilecek bir şey yok.')
+                : t('Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.')}
+        </p>
+      )}
+      <MailSaid said={said} />
+    </>
+  );
+}
+
 export default function MailPanel({ state, ix, spans }: Props) {
   const t = useT();
-  const exe = isDesktop();
-  const [said, setSaid] = useState<EpostaSonucu | 'tarayici' | null>(null);
+  const [said, setSaid] = useState<Said>(null);
 
   const rows = useMemo(
-    () =>
-      state.teachers.map((teacher) => {
-        let why: Why | null = null;
-        let url = '';
-        if (teacher.email === '') why = 'adres yok';
-        else if (!looksLikeEmail(teacher.email)) why = 'adres hatalı';
-        else {
-          const mail = teacherMail(state, ix, spans, teacher, t);
-          if (mail === 'empty') why = 'programı boş';
-          else if (mail === 'tooLong') why = 'e-postaya sığmıyor';
-          else url = mail.url;
-        }
-        return { teacher, why, url };
-      }),
+    () => state.teachers.map((teacher) => ({ teacher, ...mailFor(state, ix, spans, teacher, t) })),
     [state, ix, spans, t],
   );
-
-  async function openInExe(url: string) {
-    setSaid(null);
-    setSaid(await desktopMail(url));
-  }
 
   return (
     <div className="panel no-print mail-panel">
@@ -66,30 +188,17 @@ export default function MailPanel({ state, ix, spans }: Props) {
         )}
       </p>
       {/* Above the list: the row pressed may be the first of twenty-five. */}
-      {said === 'istemci-yok' && (
-        <div className="warn-box" role="status">
-          {t('Bu bilgisayarda seçili bir e-posta uygulaması yok.')}
-        </div>
-      )}
-      {said === 'tarayici' && (
-        <p className="hint" role="status">
-          {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
-        </p>
-      )}
-      {said === 'olmadi' && (
-        <div className="warn-box" role="status">
-          {t('E-posta uygulaması açılamadı.')}
-        </div>
-      )}
+      <MailSaid said={said} />
       <ul className="mail-list">
         {rows.map(({ teacher, why, url }) => (
           <li key={teacher.id} className="mail-row">
             <span className="row-dot" style={{ background: paletteColor(teacher.color) }} />
-            <span className="mail-who" title={teacher.name}>
-              {teacher.short}
+            {/* The full name since 2026-11-16 (Sadeleşme): "MÇ" says who only
+                to somebody who already knows. */}
+            <span className="mail-who" title={teacher.short}>
+              {teacher.name}
             </span>
-            {/* Where it goes, before it goes: the address box in Okul is
-                narrow, and this is the line read before pressing. */}
+            {/* Where it goes, before it goes: the line read before pressing. */}
             {why === null && (
               <span className="mail-to" title={teacher.email}>
                 {teacher.email}
@@ -97,25 +206,14 @@ export default function MailPanel({ state, ix, spans }: Props) {
             )}
             {why !== null ? (
               <span className="muted-inline">{t(why)}</span>
-            ) : exe ? (
-              <button
-                className="btn"
-                aria-label={t('{kim} için e-postayı aç', { kim: teacher.short })}
-                onClick={() => void openInExe(url)}
-              >
-                <Mail size={16} strokeWidth={2} aria-hidden="true" />
-                {t('E-postada aç')}
-              </button>
             ) : (
-              <a
-                className="btn"
-                href={url}
-                aria-label={t('{kim} için e-postayı aç', { kim: teacher.short })}
-                onClick={() => setSaid('tarayici')}
+              <MailButton
+                url={url}
+                name={t('{kim} için e-postayı aç', { kim: teacher.short })}
+                setSaid={setSaid}
               >
-                <Mail size={16} strokeWidth={2} aria-hidden="true" />
                 {t('E-postada aç')}
-              </a>
+              </MailButton>
             )}
           </li>
         ))}

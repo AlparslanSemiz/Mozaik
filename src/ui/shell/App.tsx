@@ -465,7 +465,7 @@ export default function App() {
               />
             </section>
 
-            <InspectorProvider state={state} change={change}>
+            <InspectorProvider state={state} change={change} colored={ui.colored}>
               <LessonEditProvider state={state} change={change}>
                 <Commands
                   open={paletteOpen}

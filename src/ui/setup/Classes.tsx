@@ -1,39 +1,23 @@
-// Step: the classes. A class is a closed set of students, so two classes never
-// clash with each other — only through a shared room.
+// Step: the classes, as text. A class is a closed set of students, so two
+// classes never clash with each other — only through a shared room. Since
+// 2026-11-16 (Sadeleşme, K5) the name opens the class's page, where its room,
+// colour, closed hours, lessons, limit and Sil are.
 
 import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
-import {
-  addClass,
-  addClassesFromRows,
-  deleteClass,
-  deletionNotice,
-  updateClass,
-  weeklyLoad,
-} from '../../pure/entities';
-import { useInspect } from '../program';
-import {
-  ColorPick,
-  LimitBox,
-  moveFocusFromDeleted,
-  type PanelProps,
-  T,
-  useT,
-  useToast,
-  useKeepBefore,
-  useUndoIf,
-} from '../common';
+import { addClassesFromRows, roomName, weeklyLoad } from '../../pure/entities';
+import { type PanelProps, useT } from '../common';
 import { parseClasses } from '../../pure/io';
-import { Paste, ListTools, AddPanel, useRowOrder } from '../lists';
+import { ListTools, Paste, useRowOrder } from '../lists';
 import { classListConfig } from '../../pure/lists';
+import { useInspect } from '../program';
+import { PersonRow } from './PersonRow';
 
 export default function Classes({ state, change }: PanelProps) {
   const t = useT();
-  const notify = useToast();
-  const undoIf = useUndoIf();
-  const keepBefore = useKeepBefore();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
+  const [pasteOpen, setPasteOpen] = useState(false);
 
   const listCfg = useMemo(() => classListConfig(state, t), [state, t]);
   const shown = applyList(state.classes, query, listCfg);
@@ -44,250 +28,84 @@ export default function Classes({ state, change }: PanelProps) {
     query,
     change,
   });
-  const [newClass, setNewClass] = useState({ name: '', roomId: '' });
-  const [pasteOpen, setPasteOpen] = useState(false);
-  const dayCount = state.settings.days.length;
-  const hourCount = state.settings.hours.length;
-
-  // Enter adds, the way it does in Derslikler and Branşlar. Entering twenty
-  // classes is twenty trips to a button otherwise, and the room stays picked
-  // because it is usually the same one twice in a row.
-  function addNew() {
-    if (newClass.name.trim() === '') return;
-    change((d) => addClass(d, newClass.name, newClass.roomId || null));
-    setNewClass({ name: '', roomId: newClass.roomId });
-  }
+  const week = state.settings.days.length * state.settings.hours.length;
 
   return (
-    <>
-      {/* ADDING IS ITS OWN BLOCK — not a rule drawn across one panel.
-          ("Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok
-           olduğu gibi, yani sadece çizgi olmasın.")
-
-          A line says where something ends; a panel says the two are
-          different things. Nothing moved: the form is still above the list.
-          The COUNTED heading went with the list it counts, and this one
-          names the work — so the screen still has exactly one --fs-xl
-          heading, and it is the one over the rows being read.
-
-          The paste button rides the HEADING, not the form row: "Excel'den
-          yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
-          All five panels put it in the same corner. */}
-      <AddPanel
-        title={t('Yeni sınıf')}
-        action={
-          <button className="btn" onClick={() => setPasteOpen(true)}>
-            {t("Excel'den yapıştır")}
-          </button>
-        }
-        description={
-          <T k="Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir." />
-        }
-        more={t(
-          'Derslik dizerken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.',
-        )}
-      >
-        <div className="form-row">
-          <input
-            type="text"
-            placeholder={t('Sınıf adı, örn. 510')}
-            value={newClass.name}
-            onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') addNew();
-            }}
-          />
-          <select
-            aria-label={t('Yeni sınıfın dersliği')}
-            value={newClass.roomId}
-            onChange={(e) => setNewClass({ ...newClass, roomId: e.target.value })}
-          >
-            <option value="">{t('Derslik yok')}</option>
-            {state.rooms.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-          <button className="btn primary" disabled={newClass.name.trim() === ''} onClick={addNew}>
-            {t('Ekle')}
-          </button>
-        </div>
-
-        <Paste
-          open={pasteOpen}
-          close={() => setPasteOpen(false)}
-          title={t('Sınıfları yapıştır')}
-          example={t('Sınıf adı · Derslik adı')}
-          parse={parseClasses}
-          rowText={(x) =>
-            x.roomName
-              ? t('{ad} → {derslik} dersliği', {
-                  ad: x.name,
-                  derslik: x.roomName,
-                })
-              : x.name
-          }
-          onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
-        />
-      </AddPanel>
-
-      <div className="panel step-panel">
-        {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+    <div className="panel step-panel">
+      {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+      <div className="panel-head">
         <h2>{t('Sınıflar')}</h2>
-
-        {state.classes.length > 0 && (
-          <ListTools
-            items={state.classes}
-            query={query}
-            setQuery={setQuery}
-            config={listCfg}
-            shown={shown.length}
-            noun="sınıf"
-            countKey="{n} sınıf"
-            notice={order.notice}
-          />
-        )}
-
-        {state.classes.length > 0 && shown.length === 0 && (
-          <p className="hint">{t('Bu aramaya uyan sınıf yok.')}</p>
-        )}
-
-        {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
-            1.5: the browser answers by crushing whichever column can
-            still shrink, and at 150 % that was the NAME — 232 px down
-            to 26 px, measured. Wide content scrolls in its own box
-            rather than squeezing the reader's own words out. */}
-        {shown.length > 0 && (
-          <div className="table-scroll">
-            <table className="list">
-              <thead>
-                <tr>
-                  {order.head}
-                  <th className="w-col-xs">{t('Renk')}</th>
-                  <th className="w-col-xl">{t('Ad')}</th>
-                  {/* Narrower than the name beside it, and that is the point: a
-                    room is a letter, not a name. The box still has to hold its
-                    longest OPTION ("Derslik yok"), which is what --w-col-lg
-                    clears — the width is on the <th> because a <select> at
-                    `width: 100%` contributes nothing to max-content (pitfall
-                    34). */}
-                  <th className="w-col-lg">{t('Derslik')}</th>
-                  <th className="w-col-sm">{t('Ders saati')}</th>
-                  {/* The class's own daily limit — the middle of the three
-                    layers. Same box and the same "empty means the school's
-                    number" contract as the three on the teacher list. */}
-                  <th
-                    className="w-col-md"
-                    title={t('Bu sınıf bir günde aynı dersten en fazla kaç saat')}
-                  >
-                    {t('Günde aynı ders ↑')}
-                  </th>
-                  <th className="w-col-md">
-                    <span className="visually-hidden">{t('İşlemler')}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody ref={order.bodyRef}>
-                {shown.map((c, i) => (
-                  <tr key={c.id} data-row-name={c.name}>
-                    {order.grip(i, c.name)}
-                    <td>
-                      <ColorPick
-                        value={c.color}
-                        owner={c.name}
-                        onChange={(next) => change((d) => updateClass(d, c.id, { color: next }))}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        aria-label={t('{ad} adı', { ad: c.name })}
-                        defaultValue={c.name}
-                        onBlur={(e) =>
-                          change((d) =>
-                            updateClass(d, c.id, {
-                              name: e.target.value.trim(),
-                            }),
-                          )
-                        }
-                      />
-                    </td>
-                    <td>
-                      <select
-                        value={c.roomId ?? ''}
-                        aria-label={t('{ad} dersliği', { ad: c.name })}
-                        onChange={(e) =>
-                          change((d) =>
-                            updateClass(d, c.id, {
-                              roomId: e.target.value || null,
-                            }),
-                          )
-                        }
-                      >
-                        <option value="">{t('Derslik yok')}</option>
-                        {state.rooms.map((r) => (
-                          <option key={r.id} value={r.id}>
-                            {r.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>
-                      {weeklyLoad(state, 'class', c.id)}
-                      {' / '}
-                      {dayCount * hourCount}
-                    </td>
-                    <td>
-                      <LimitBox
-                        value={c.maxSameLessonPerDay}
-                        fallback={state.settings.limits.maxSameLessonPerDay}
-                        title={t('{ad} bir günde aynı dersten en fazla kaç saat', { ad: c.name })}
-                        onSet={(v) =>
-                          change((d) => updateClass(d, c.id, { maxSameLessonPerDay: v }))
-                        }
-                      />
-                    </td>
-                    <td>
-                      <div className="form-row nowrap">
-                        {/* Its whole week, its load and what it is tied to, without
-                        leaving the list. The information was always there; it
-                        was spread over four tabs. */}
-                        <button
-                          className="btn row-detail"
-                          title={t('Bilgileri ve haftalık programı')}
-                          onClick={() => inspect('class', c.id)}
-                        >
-                          {t('Ayrıntı')}
-                          <span className="visually-hidden"> · {c.name}</span>
-                        </button>
-                        <button
-                          className="btn danger"
-                          onClick={(e) => {
-                            // No question since SD1: the deletion happens, and
-                            // its notice says what went with it.
-                            const said = deletionNotice(state, 'class', c.id);
-                            const next = deleteClass(state, c.id);
-                            moveFocusFromDeleted(e.currentTarget);
-                            keepBefore(state, said);
-                            change((d) => (d === state ? next : deleteClass(d, c.id)), said);
-                            notify(said, 'info', {
-                              label: t('Geri al'),
-                              run: () => undoIf(next),
-                            });
-                          }}
-                        >
-                          {t('Sil')}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <button className="btn" onClick={() => setPasteOpen(true)}>
+          {t("Excel'den yapıştır")}
+        </button>
       </div>
-    </>
+
+      <Paste
+        open={pasteOpen}
+        close={() => setPasteOpen(false)}
+        title={t('Sınıfları yapıştır')}
+        example={t('Sınıf adı · Derslik adı')}
+        parse={parseClasses}
+        rowText={(x) =>
+          x.roomName ? t('{ad} → {derslik} dersliği', { ad: x.name, derslik: x.roomName }) : x.name
+        }
+        onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
+      />
+
+      {state.classes.length > 0 && (
+        <ListTools
+          items={state.classes}
+          query={query}
+          setQuery={setQuery}
+          config={listCfg}
+          shown={shown.length}
+          noun="sınıf"
+          countKey="{n} sınıf"
+          notice={order.notice}
+        />
+      )}
+
+      {state.classes.length > 0 && shown.length === 0 && (
+        <p className="hint">{t('Bu aramaya uyan sınıf yok.')}</p>
+      )}
+
+      {shown.length > 0 && (
+        <div className="table-scroll">
+          <table className="list person-list">
+            <thead>
+              <tr>
+                {order.head}
+                <th>{t('Ad')}</th>
+                <th>{t('Derslik')}</th>
+                <th className="num">{t('Ders saati')}</th>
+                <th>{t('Durum')}</th>
+              </tr>
+            </thead>
+            <tbody ref={order.bodyRef}>
+              {shown.map((c, i) => (
+                <PersonRow
+                  key={c.id}
+                  state={state}
+                  kind="class"
+                  id={c.id}
+                  name={c.name}
+                  color={c.color}
+                  grip={order.grip(i, c.name)}
+                  cells={[
+                    roomName(state, c.roomId) || '—',
+                    `${weeklyLoad(state, 'class', c.id)} / ${week}`,
+                  ]}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* One row at the end of the list, where the next class goes. */}
+      <button className="btn add-row" onClick={() => inspect('class', '')}>
+        {t('+ Yeni sınıf')}
+      </button>
+    </div>
   );
 }

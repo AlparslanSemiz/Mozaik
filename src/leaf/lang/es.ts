@@ -698,8 +698,6 @@ const ES: Sozluk = {
   "Bu aramaya uyan sınıf yok.": "Ninguna clase coincide con esta búsqueda.",
   "Ders saati": "Horas de clase",
   "Günde aynı ders ↑": "Misma asig./día ↑",
-  "Bu sınıf bir günde aynı dersten en fazla kaç saat":
-    "Cuántas horas de una asignatura puede tener esta clase en un día",
   "{ad} bir günde aynı dersten en fazla kaç saat":
     "cuántas horas de una asignatura puede tener {ad} en un día",
   yok: "ninguno",
@@ -789,22 +787,13 @@ const ES: Sozluk = {
   "Branş seçin": "Elija una asignatura",
   "+ Yeni branş…": "+ Asignatura nueva…",
   "Yeni branşın adı": "Nombre de la asignatura nueva",
-  "+ İkinci branş": "+ Segunda asignatura",
   "İkinci branş": "Segunda asignatura",
-  "İkinci branş yok": "Sin segunda asignatura",
   "Öğretmenleri yapıştır": "Pegar profesores",
   "Ad Soyad · Kısa ad · Branş · Cinsiyet · İkinci branş · E-posta":
     "Nombre y apellidos · Nombre corto · Asignatura · Sexo · Segunda asignatura · Correo",
   "Bu aramaya uyan öğretmen yok.":
     "Ningún profesor coincide con esta búsqueda.",
   "2. branş": "2.ª asignatura",
-  "Art arda en fazla kaç saat": "Cuántas horas seguidas como máximo",
-  "Bir günde en fazla kaç saat": "Cuántas horas al día como máximo",
-  "Geldiği gün en az kaç saat": "Cuántas horas como mínimo el día que viene",
-  "{kim} branşı": "asignatura de {kim}",
-  "{kim} için ikinci branş ekle": "Añadir una segunda asignatura para {kim}",
-  "İkinci branş ekle": "Añadir segunda asignatura",
-  "{kim} ikinci branşı": "segunda asignatura de {kim}",
   Yok: "Ninguna",
   "{kim} art arda en fazla kaç saat":
     "cuántas horas seguidas como máximo para {kim}",
@@ -1510,8 +1499,6 @@ const ES: Sozluk = {
     "El idioma de la interfaz. Pertenece a este ordenador, no al archivo de plan.",
   "Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı.":
     "Las horas **totales** de los grupos que comparten aula también deben caber en la semana.",
-  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
-    "Un grupo de alumnos con el mismo horario; el **aula** es su sala fija.",
   "Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir.":
     "Estos son **sus propios profesores**: si un nombre no cabe, la escala es excesiva.",
   "Basılan sayfada saatler her üç durumda da yazar.":
@@ -1526,12 +1513,8 @@ const ES: Sozluk = {
     "Una clase = las horas semanales que un grupo recibe de un profesor.",
   "Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur.":
     "Elija una carpeta; **todos los planes** se escriben ahí y se guardan {gun} días.",
-  "Bir öğretmen iki branş veriyorsa + İkinci branş ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; boş bırakılırsa Ayarlar → Kurallar’daki sayı geçerli olur.":
-    "Si un profesor imparte dos materias, + Segunda materia registra la otra; entonces en cada clase se elige además cuál de las dos es. El color se asigna solo y no choca con nadie. Las tres casillas de la derecha son los límites propios de este profesor; si se dejan vacías, rige el número de Ajustes → Reglas.",
   "Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez.":
     "Los movimientos breves al aparecer algo; apagarlos no cambia nada más.",
-  "Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur.":
-    "La materia se **elige de la lista**; el nombre corto encabeza la fila.",
   "Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde.":
     "Pertenece a este ordenador y **no afecta a la impresión**; la letra del papel, en **Salida**.",
   "Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**.":
@@ -1556,8 +1539,6 @@ const ES: Sozluk = {
     "El reparto es cómo se dividen esas horas en la semana: 2+1 significa dos horas seguidas un día y una hora suelta otro. Un bloque puede ser de 2 o 3 horas; el resto son sueltas. Por día ↑ es el máximo de esta clase en un día; si se deja vacío, rige el número de Ajustes → Reglas.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Marque los días con clase; la casilla al lado indica el **recreo largo**.",
-  "Derslik dizerken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":
-    "El aula no se elige al colocar, y dos grupos que la comparten no pueden ocupar la misma hora. El color se asigna solo, no choca con nadie y aparece como el punto al inicio de la fila y en el título de la hoja impresa.",
   "Dersliği olmayan sınıflar için bu kontrol yapılmaz.":
     "Los grupos sin aula no pasan por esta comprobación.",
   "Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz.":
@@ -1568,14 +1549,8 @@ const ES: Sozluk = {
     "Una escuela lista: 25 profesores, 20 grupos, 99 clases. **Sustituye al plan abierto.**",
   "Her planın **verisi ayrıdır**; üst çubuktaki listeden aralarında geçilir.":
     "Cada plan **tiene sus propios datos**; la lista superior cambia entre ellos.",
-  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
-    "Para un solo grupo: **Escuela → Grupos**.",
   "Her sınıfın sabit dersliği; aynı dersliği paylaşan iki sınıf aynı saate konamaz.":
     "El aula fija de cada grupo; dos grupos que la comparten no pueden coincidir.",
-  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
-    "Para un profesor: **Escuela → Profesores**.",
-  "Kapalı saatler taralı; değiştirmek için **Müsaitlik** sekmesine gidin.":
-    "Las horas cerradas van rayadas; se cambian en **Disponibilidad**.",
   "Okulun listesinde **bulunmayan** hazır branşlar; eklemek için tıklayın.":
     "Materias incorporadas que **no** están en la lista de la escuela; pulse para añadir.",
   "Mozaik **kendiliğinden** saklıyor; **Kaydet** onun yanına gelir, yerine değil.":
@@ -1621,8 +1596,6 @@ const ES: Sozluk = {
     "Lo que se desmarca no se imprime.",
   "E-posta":
     "Correo",
-  "{kim} e-postası":
-    "Correo de {kim}",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "Aquí va una sola dirección de correo: nombre@ejemplo.com",
   "E-postayla gönder":
@@ -1748,8 +1721,6 @@ const ES: Sozluk = {
     "Abrir toda la semana",
   "Bütün haftayı kapat":
     "Cerrar toda la semana",
-  "**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli.":
-    "**Seguidas**: como máximo cuántas horas sin pausa. **Al día ↑**: como máximo, **Al día ↓**: como mínimo. Vacío: el número de Reglas.",
   "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
     "Si los colores no salen: en la ventana de impresión, abra **Más ajustes** y marque **Gráficos de fondo**.",
   "Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.":
@@ -1831,8 +1802,6 @@ const ES: Sozluk = {
     "{n} {n:clase perdió|clases perdieron} la clase de {brans}: {siniflar}.",
   "Programdan {n} saat kalktı.":
     "Se {n:quitó|quitaron} {n} {n:hora colocada|horas colocadas} del horario.",
-  "{ad} kısa adı": "nombre corto de {ad}",
-  "Yeni sınıfın dersliği": "Aula de la nueva clase",
   "İçeriğe geç": "Saltar al contenido",
   "Ders günü": "Día lectivo",
   "Geri alındı.": "Deshecho.",
@@ -1874,7 +1843,6 @@ const ES: Sozluk = {
   "Gelemediği saatleri işaretle": "Marcar las horas en que no pueden venir",
   "{d} derslik · {b} branş · {o} öğretmen · {s} sınıf": "{d} {d:aula|aulas} · {b} {b:materia|materias} · {o} {o:profesor|profesores} · {s} {s:grupo|grupos}",
   "Başlarken listesini göster": "Mostrar la lista de primeros pasos",
-  "Art arda, Günde ↑, Günde ↓": "Seguidas, Por día ↑, Por día ↓",
   "Teknik bilgiler": "Información técnica",
   "**Program tamam.** Bütün dersler yerleşti ve kurallara uyuyor.": "**El horario está completo.** Todas las clases están colocadas y cumplen las reglas.",
   "Yazdır": "Imprimir",
@@ -1927,6 +1895,63 @@ const ES: Sozluk = {
     "No se trasladó ningún plan.",
   "Planları taşı":
     "Trasladar planes",
+  // ------------------------------------------- the person page (K5)
+  "Sayfasını aç":
+    "Abrir página",
+  "Gönder":
+    "Enviar",
+  "Göndermek için Bilgiler’de e-posta adresini yazın.":
+    "Para enviar, escriba el correo en Datos.",
+  "Programı henüz boş, gönderilecek bir şey yok.":
+    "El horario aún está vacío, no hay nada que enviar.",
+  "Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.":
+    "El horario no cabe en un correo; imprímalo con Imprimir.",
+  "Bilgiler":
+    "Datos",
+  "Gelemediği saatler":
+    "Horas en que no puede venir",
+  "Kapalı saatler":
+    "Horas cerradas",
+  "Saate tıklayın ya da basılı tutup sürükleyin; gün adı bütün günü değiştirir.":
+    "Haga clic en una hora o mantenga y arrastre; el nombre del día cambia todo el día.",
+  "{kim} · kapalı saatler":
+    "{kim} · horas cerradas",
+  "Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin.":
+    "Aún no tiene clases. Para añadir una, vaya a la pestaña **Clases**.",
+  "{ne} · Haftalık saat":
+    "{ne} · Horas semanales",
+  "saat":
+    "h",
+  "Sınırları":
+    "Límites",
+  "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.":
+    "Una casilla vacía usa el ajuste del centro; un número escrito lo sustituye.",
+  "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer. Bir dersin Dersler’deki kendi sayısı bunun da yerine geçer.":
+    "Una casilla vacía usa el ajuste del centro; un número escrito lo sustituye. El número propio de una clase en Clases sustituye también a este.",
+  "Okul ayarı geçerli: {n}":
+    "Se aplica el ajuste del centro: {n}",
+  "Kendi sayısı; okul ayarı: {n}":
+    "Número propio; ajuste del centro: {n}",
+  "Öğretmeni sil":
+    "Eliminar profesor",
+  "Sınıfı sil":
+    "Eliminar clase",
+  "+ Yeni öğretmen":
+    "+ Nuevo profesor",
+  "+ Yeni sınıf":
+    "+ Nueva clase",
+  "{gunler} gelmiyor":
+    "no viene {gunler}",
+  "{gunler} kapalı":
+    "{gunler} cerrado",
+  "{n} saat kapalı":
+    "{n} {n:hora cerrada|horas cerradas}",
+  "{n} saat fazla":
+    "{n} {n:hora|horas} de más",
+  "Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın.":
+    "El número propio de un profesor se escribe en su página y sustituye a este: **Escuela → Profesores**, haga clic en el nombre.",
+  "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
+    "El número propio de una clase se escribe en su página y sustituye a este: **Escuela → Clases**, haga clic en el nombre.",
 };
 
 registerSozluk("es", ES);

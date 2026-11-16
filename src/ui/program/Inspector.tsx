@@ -15,13 +15,12 @@
  * bookkeeping are not written here for the third time.
  *
  * All of the counting is in `pure/entities/` (`entityFacts`, `entityWeek`). The
- * sheet draws — and, since 2026-08-30, EDITS: "öğretmeni düzenleme ve sınıfı
- * düzenlemede her şeyi düzenleyebilelim". Every box in the block below is the
- * control the Okul list draws, bound to the same mutator (`updateTeacher`,
- * `updateClass`, `updateRoom`, `setTeacherLimit`), so there is no second copy
- * of any rule. What is new is the ROAD: the grid's row head, a card's
- * right-click menu and the command palette all open this, and none of them
- * used to end anywhere you could change a name.
+ * sheet draws and, since 2026-08-30, EDITS: "öğretmeni düzenleme ve sınıfı
+ * düzenlemede her şeyi düzenleyebilelim". Since 2026-11-16 (Sadeleşme, K5) it
+ * is the person page and the ONLY place in Okul a teacher or class is edited:
+ * the lists are text and open this, an empty id opens a page for a new one,
+ * and the grid's row head, a card's right-click menu, the command palette and
+ * Müsaitlik's heading all lead here too.
  *
  * This file is the road: the context, `useInspect()` and the provider that
  * draws the sheet. The sheet itself is `InspectorSheet.tsx` (2026-10-24).
@@ -46,13 +45,16 @@ export function useInspect(): Open {
 export function InspectorProvider({
   state,
   change,
+  colored = true,
   children,
 }: {
   state: State;
   // The panel used to be read-only, so this is new. It is here rather than in
   // the sheet because the provider is the only thing that knows the store, and
   // the sheet is drawn from it.
-  change: (apply: (d: State) => State) => void;
+  change: (apply: (d: State) => State, label?: string) => void;
+  /** Çıktı's "Renkli bas", which the page's own Yazdır follows. */
+  colored?: boolean;
   children: ReactNode;
 }) {
   const [target, setTarget] = useState<Target | null>(null);
@@ -61,7 +63,14 @@ export function InspectorProvider({
   return (
     <InspectContext.Provider value={open}>
       {children}
-      <Inspector state={state} change={change} target={target} onClose={() => setTarget(null)} />
+      <Inspector
+        state={state}
+        change={change}
+        target={target}
+        open={open}
+        onClose={() => setTarget(null)}
+        colored={colored}
+      />
     </InspectContext.Provider>
   );
 }

@@ -80,12 +80,14 @@ export function addTeacher(
     gender?: Gender;
     subject2?: string;
     email?: string;
+    /** Chosen by the caller when it has to open the new teacher's page. */
+    id?: Id;
   },
 ): State {
   // An empty short form would leave a nameless row in the grid: derive one.
   const short = fields.short.trim() === '' ? makeShort(fields.name) : fields.short;
   const created: Teacher = {
-    id: newId(),
+    id: fields.id ?? newId(),
     name: fields.name.trim(),
     short: short.trim(),
     subject: fields.subject.trim(),
@@ -126,9 +128,9 @@ export function deleteTeacher(d: State, id: Id): State {
 
 // -------------------------------------------------------------------- class
 
-export function addClass(d: State, name: string, roomId: Id | null): State {
+export function addClass(d: State, name: string, roomId: Id | null, id: Id = newId()): State {
   const created: ClassGroup = {
-    id: newId(),
+    id,
     name: name.trim(),
     roomId,
     color: firstFreeColor(d.classes.map((x) => x.color)),

@@ -5,6 +5,7 @@ import { type RuleLevel, type RuleName, paletteColor } from '../../leaf/model';
 import { buildIndex, findViolations, type Violation } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
 import { HelpHead, type PanelProps, T, useT } from '../common';
+import { useInspect } from '../program';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -54,6 +55,7 @@ const LEVEL_LABEL: Record<RuleLevel, string> = {
 
 export default function Rules({ state, change }: PanelProps) {
   const t = useT();
+  const inspect = useInspect();
   // What the numbers on the left ALREADY cost, on the timetable as it stands.
   // Kontrol shows the same list one tab away; the point of showing it here is
   // that "Engelle" and "Uyar" mean nothing until you see what they catch.
@@ -175,12 +177,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}>
             <p>
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın." />
             </p>
           </HelpHead>
           {custom.length === 0 ? (
             <p className="hint">
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın." />
             </p>
           ) : (
             <table className="list">
@@ -201,7 +203,13 @@ export default function Rules({ state, change }: PanelProps) {
                         style={{ background: paletteColor(t.color) }}
                         aria-hidden="true"
                       />
-                      {t.short} · {t.name}
+                      <button
+                        type="button"
+                        className="person-open"
+                        onClick={() => inspect('teacher', t.id)}
+                      >
+                        {t.name} ({t.short})
+                      </button>
                     </td>
                     <td className="num">{t.limits.maxConsecutive ?? '–'}</td>
                     <td className="num">{t.limits.maxPerDay ?? '–'}</td>
@@ -220,12 +228,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}>
             <p>
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın." />
             </p>
           </HelpHead>
           {customClasses.length === 0 ? (
             <p className="hint">
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın." />
             </p>
           ) : (
             <table className="list">
@@ -244,7 +252,13 @@ export default function Rules({ state, change }: PanelProps) {
                         style={{ background: paletteColor(c.color) }}
                         aria-hidden="true"
                       />
-                      {c.name}
+                      <button
+                        type="button"
+                        className="person-open"
+                        onClick={() => inspect('class', c.id)}
+                      >
+                        {c.name}
+                      </button>
                     </td>
                     <td className="num">{c.maxSameLessonPerDay}</td>
                   </tr>

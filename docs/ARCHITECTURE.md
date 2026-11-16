@@ -241,7 +241,10 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/common/wrongFile.ts` | Mozaik'in kaydetmediği bir dosyaya söylenen iki cümle, iki dosya kapısında aynı |
 | `ui/program/useWeekCut.ts` | ızgaranın haftası yana taşıyor mu; Program çubuğu Sığdır'ı söyler |
 | `platform/prefs/checklist.ts` | Başlarken açık mı, dar mı, kapalı mı, ve Çıktı'da Yazdır'a basıldı mı |
-| `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in dokuz adımı), `Rooms`, `Subjects`, `Teachers` (liste; ekleme bloğu `TeacherForm`, satırı `TeacherRow`, ikisinin cinsiyet seçenekleri `genders.ts`), `Classes` |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Checklist` (Başlarken'in beş işi), `Rooms`, `Subjects`, `Teachers` ve `Classes` (düz yazı listeler; satırı `PersonRow`, adı kişi sayfasını açar) |
+| `ui/program/InspectorSheet.tsx` | kişi sayfası (2026-11-16, K5): öğretmenin, sınıfın ya da dersliğin bilgileri, gelemediği saatler, dersleri, sınırları, Yazdır, Gönder ve Sil; boş kimlikle `NewPerson.tsx`'in yeni öğretmen ya da sınıf formu |
+| `ui/common/AvailGrid.tsx` | bir varlığın boyanan kapalı saat ızgarası; Müsaitlik ve kişi sayfası aynı bileşeni çizer |
+| `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Çıktı'nın seçimlerine dokunmadan |
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |

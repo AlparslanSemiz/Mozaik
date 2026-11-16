@@ -229,7 +229,13 @@ export default function Print({
     const items =
       kind === 'classes'
         ? state.classes.map((x) => ({ id: x.id, label: x.name, color: x.color }))
-        : state.teachers.map((x) => ({ id: x.id, label: x.short, color: x.color }));
+        : // The full name since 2026-11-16 (Sadeleşme): "MÇ" says who only to
+          // somebody who already knows.
+          state.teachers.map((x) => ({
+            id: x.id,
+            label: `${x.name} (${x.short})`,
+            color: x.color,
+          }));
     const chosen = items.filter((x) => !excluded[kind].has(x.id)).length;
 
     return (
