@@ -64,17 +64,18 @@ describe('notices', () => {
     expect(shown()).toHaveLength(0);
   });
 
-  it('a pointer resting on one does not keep it for ever', () => {
+  it('a pointer resting on one holds it, but not for ever', () => {
     draw();
     act(() => void say('held'));
     const toast = host.querySelector('.toast');
     act(() => {
-      toast?.dispatchEvent(new MouseEvent('pointerover', { bubbles: true }));
-      toast?.dispatchEvent(new PointerEvent('pointerenter'));
+      toast?.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
     });
+    // Past its ten seconds, and still there: the pointer holds it.
     act(() => void vi.advanceTimersByTime(15_000));
-    // Whether jsdom delivered the enter or not, nothing may outlive the cap.
-    act(() => void vi.advanceTimersByTime(20_000));
+    expect(shown()).toEqual(['held']);
+    // ...but the cap ends it, pointer or not.
+    act(() => void vi.advanceTimersByTime(16_000));
     expect(shown()).toHaveLength(0);
   });
 

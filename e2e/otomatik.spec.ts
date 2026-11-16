@@ -144,6 +144,9 @@ test.describe('22. Otomatik dizme', () => {
     // keeps the room.
     await expect(run).toHaveCount(0);
     await expect(page.locator('.strip-done')).toHaveText('Hepsi yerleşti');
+    // The button that was pressed is gone; the keyboard goes to the reading
+    // and not to <body> (audit, 2026-11-17).
+    await expect(page.locator('.strip-done')).toBeFocused();
     await expect(page.locator('aside.pool')).toBeHidden();
 
     const cards = page.locator('table.grid .card');
