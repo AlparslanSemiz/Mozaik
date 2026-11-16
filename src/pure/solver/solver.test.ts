@@ -242,7 +242,7 @@ describe('solve — yerleşmişleri koruma', () => {
     expectLegal(result.state);
   });
 
-  // "Baştan diz" means "throw away the timetable you built", not "throw away
+  // "Yeniden yap" means "throw away the timetable you built", not "throw away
   // the decisions I made by hand". Without this the one thing a reader is sure
   // about — the block they placed and locked — would be the first casualty of
   // the button next to it.

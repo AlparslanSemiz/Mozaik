@@ -260,10 +260,25 @@ describe('uygulama açılıyor', () => {
     for (const [section, text] of [
       ['Zil ve günler', 'Zil ve günler'],
       ['Kurallar', 'Öğretmen art arda'],
+    ] as const) {
+      click(button(section));
+      expect(container.textContent, section).toContain(text);
+    }
+    // The two rare sections are behind the strip's Daha fazla since
+    // Sadeleşme phase 1 (2026-11-16): a Radix menu, opened from the keyboard.
+    for (const [section, text] of [
       ['Planlar ve yedek', 'Bütün planlar tek dosyada'],
       ['Hakkında', 'Her şeyi sil'],
     ] as const) {
-      click(button(section));
+      const more = container.querySelector<HTMLButtonElement>('.ribbon .more-menu')!;
+      act(() => {
+        more.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      });
+      const item = [...document.body.querySelectorAll('[role^="menuitem"]')].find((e) =>
+        (e.textContent ?? '').includes(section),
+      );
+      expect(item, section).toBeDefined();
+      click(item!);
       expect(container.textContent, section).toContain(text);
     }
   });
@@ -273,7 +288,7 @@ describe('uygulama açılıyor', () => {
     render();
     const topbar = container.querySelector('.topbar')!;
     expect(topbar.textContent).not.toContain('Sıfırla');
-    expect(topbar.textContent).toContain('Dosyaya kaydet');
+    expect(topbar.textContent).toContain('Kaydet');
   });
 });
 import { activeProgram } from '../../pure/grid/programs';

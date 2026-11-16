@@ -38,7 +38,7 @@ export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: SIDEBAR_KEY, label: 'kenar çubuğu tercihi' },
   { key: SCALE_KEY, label: 'yazı büyüklüğü tercihi' },
   { key: DENSITY_KEY, label: 'ızgara yoğunluğu tercihi' },
-  { key: PROGRAM_COLOR_KEY, label: 'program kart rengi tercihi' },
+  { key: PROGRAM_COLOR_KEY, label: 'program renk tercihi' },
   { key: UI_DENSITY_KEY, label: 'arayüz yoğunluğu tercihi' },
   { key: DOCK_KEY, label: 'havuz çekmecesi tercihi' },
   { key: DOCK_H_KEY, label: 'havuz çekmecesinin boyu' },

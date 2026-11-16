@@ -134,7 +134,7 @@ export default function Suggestions({
 
   const staleNote = stale && (
     <p className="hint">
-      {t('Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.')}
+      {t('Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.')}
     </p>
   );
 
@@ -164,13 +164,13 @@ export default function Suggestions({
             {enough
               ? t('Olur dedikleriniz yetiyor: program kuruluyor')
               : as.relaid
-                ? t('Program baştan dizilince değişiklik gerekmeden kuruluyor')
+                ? t('Program yeniden yapılınca değişiklik gerekmeden kuruluyor')
                 : t('Program değişiklik gerekmeden kuruluyor')}
           </h2>
           <span className="hint inline">
             {enough
               ? t('Uygulayınca cevaplarınız veriye yazılır ve program dizilir.')
-              : t('Otomatik dizme bu programı bulamadı; ikinci arama buldu ve denetledi.')}
+              : t('İlk arama bu programı bulamadı; ikinci arama buldu ve denetledi.')}
           </span>
           <button
             className="btn"
@@ -182,7 +182,7 @@ export default function Suggestions({
             {t('Izgarada göster')}
           </button>
           <button ref={first} className="btn primary" disabled={stale} onClick={() => onApply(as)}>
-            {as.relaid ? t('Uygula ve baştan diz') : t('Uygula ve diz')}
+            {as.relaid ? t('Uygula ve yeniden yap') : t('Uygula ve diz')}
           </button>
           <button className="btn" onClick={onClose}>
             {t('Kapat')}
@@ -245,7 +245,7 @@ export default function Suggestions({
             disabled={stale}
             onClick={() => onApply(found)}
           >
-            {found.relaid ? t('Uygula, baştan diz') : t('Uygula')}
+            {found.relaid ? t('Uygula, yeniden yap') : t('Uygula')}
           </button>
           <button
             className="btn"

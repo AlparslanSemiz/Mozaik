@@ -360,7 +360,7 @@ describe('veriler nerede — depo raporu', () => {
       ['ders-programi-kenar', 'kenar çubuğu tercihi'],
       ['ders-programi-olcek', 'yazı büyüklüğü tercihi'],
       ['ders-programi-yogunluk', 'ızgara yoğunluğu tercihi'],
-      ['ders-programi-program-rengi', 'program kart rengi tercihi'],
+      ['ders-programi-program-rengi', 'program renk tercihi'],
       ['ders-programi-arayuz-yogunluk', 'arayüz yoğunluğu tercihi'],
       ['ders-programi-havuz', 'havuz çekmecesi tercihi'],
       ['ders-programi-havuz-boy', 'havuz çekmecesinin boyu'],

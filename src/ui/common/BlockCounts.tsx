@@ -83,7 +83,7 @@ export default function BlockPatternPicker({
               const impossible = dayLimit > 0 && longest > dayLimit;
               const selected = sameBlocks(option.blocks, blocks);
               const why = impossible
-                ? t('Günde en fazla {n} saat kuralı bu kartı hiçbir yere sığdırmaz', {
+                ? t('Günde en fazla {n} saat kuralı bu dersi hiçbir yere sığdırmaz', {
                     n: dayLimit,
                   })
                 : undefined;

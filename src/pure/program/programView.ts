@@ -81,7 +81,7 @@ export interface GridCell {
   /** The hour has since been closed for this teacher, class or room. */
   conflict: string | null;
   /**
-   * The reader has locked this block in place: it survives "Baştan diz", it
+   * The reader has locked this block in place: it survives "Yeniden yap", it
    * cannot be dragged, removed or dropped on. Drawn with a mark and not only
    * with a colour — colour alone never carries state here.
    */
@@ -504,7 +504,7 @@ function poolGroup(card: PoolCard, sort: PoolSort, t: Translate): string {
     case 'subject':
       return card.subject;
     case 'size':
-      return t('{n} saatlik kartlar', { n: card.size });
+      return t('{n} saatlik dersler', { n: card.size });
     case 'left':
       return t('{n} saat kaldı', { n: card.total - card.placed });
     case 'name':
@@ -725,7 +725,7 @@ export interface StripCounts {
   exclusions: SolverExclusions;
   /** "Otomatik diz (N)": blocks still in the tray, rows set aside excluded. */
   pending: number;
-  /** Placed hours that are NOT pinned: what "Baştan diz" and "Programı boşalt" take away. */
+  /** Placed hours that are NOT pinned: what "Yeniden yap" and "Programı boşalt" take away. */
   placed: number;
   pinnedHours: number;
   /** The active grid holds no placement at all. */
@@ -803,15 +803,15 @@ export function describeBar(
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
-      text: t('Otomatik diziliyor…'),
+      text: t('Program yapılıyor…'),
       counter:
-        t('{yerlesen}/{toplam} kart · {sure} sn', {
+        t('{yerlesen}/{toplam} ders · {sure} sn', {
           yerlesen: p.placedBlocks,
           toplam: p.totalBlocks,
           sure: seconds(p.elapsedMs),
         }) +
         (p.excludedBlocks > 0
-          ? t(' · {n} kart geçici kapsam dışında', { n: p.excludedBlocks })
+          ? t(' · {n} ders geçici kapsam dışında', { n: p.excludedBlocks })
           : ''),
       level: 'busy',
     };
@@ -834,10 +834,10 @@ export function describeBar(
       text:
         view === 'teacher'
           ? t(
-              'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+              'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
             )
           : t(
-              'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş kartı sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+              'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
             ),
       level: '',
     };
@@ -846,12 +846,12 @@ export function describeBar(
   if (done.stuck.length === 0) {
     return {
       text:
-        t('Program dizildi. {n} kart yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
+        t('Program yapıldı. {n} ders yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
           n: done.placedBlocks,
           sure: seconds(done.elapsedMs),
         }) +
         (done.excludedBlocks > 0
-          ? t(' {n} kart geçici kapsam dışında kaldı.', {
+          ? t(' {n} ders geçici kapsam dışında kaldı.', {
               n: done.excludedBlocks,
             })
           : ''),
@@ -864,11 +864,11 @@ export function describeBar(
     done.stuck.length > 1 ? t(' (ve {n} ders daha)', { n: done.stuck.length - 1 }) : '';
   const head =
     done.phase === 'cancelled'
-      ? t('Durduruldu. {yerlesen}/{toplam} kart yerleşti.', {
+      ? t('Durduruldu. {yerlesen}/{toplam} ders yerleşti.', {
           yerlesen: done.placedBlocks,
           toplam: done.totalBlocks,
         })
-      : t('{yerlesen}/{toplam} kart yerleşti.', {
+      : t('{yerlesen}/{toplam} ders yerleşti.', {
           yerlesen: done.placedBlocks,
           toplam: done.totalBlocks,
         });

@@ -271,7 +271,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   // ONE mutable dictionary and ONE index for the whole search. `work` shares
   // the dictionary object, so blocker() sees every assignment immediately.
-  // A clean sheet still keeps the PINNED cells. "Baştan diz" means "throw away
+  // A clean sheet still keeps the PINNED cells. "Yeniden yap" means "throw away
   // the timetable you built", not "throw away the decisions I made by hand" —
   // and the rest of the search needs no telling: `work` shares this dictionary,
   // so `placedHours`, `placedBlocks` and `pendingBlocks` below all count the

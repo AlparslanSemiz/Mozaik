@@ -90,7 +90,7 @@ export default function ColorPick({ value, owner, onChange }: Props) {
             ))}
           </div>
           <p className="hint">
-            {t('Renk kimliktir: ızgaradaki satırı havuzdaki kartıyla eşleştiren şey budur.')}
+            {t('Renk kimliktir: ızgaradaki satırı havuzdaki dersiyle eşleştiren şey budur.')}
           </p>
           <div className="form-row nowrap">
             <button type="button" className="btn" onClick={() => setOpen(false)}>

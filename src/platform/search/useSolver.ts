@@ -115,7 +115,7 @@ export interface SolverRun {
   applied: Suggestion | null;
   /**
    * `placed` hears the state the run put in place, once it is in place: the
-   * notice that offers "Geri al" for "Baştan diz" needs it (TODO SD1).
+   * notice that offers "Geri al" for "Yeniden yap" needs it (TODO SD1).
    */
   start: (base: State, options?: Partial<SolverOptions>, placed?: (next: State) => void) => void;
   /** Stops the run, or the suggestion search after it. */

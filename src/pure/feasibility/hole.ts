@@ -87,7 +87,7 @@ export function holeReason(
 
   if (counts.size === 0) {
     if (holes === 0) return t('{sinif} sınıfında boş açık saat kalmadı', { sinif: group.name });
-    return t('Boş kalan saatler bu dersin {boy} saatlik kartına uymuyor', {
+    return t('Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor', {
       boy: sizes[0] ?? 1,
     });
   }
