@@ -86,6 +86,36 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-16 · Kararsız testler (`test/kararsiz`)
+
+CI'ın son 300 koşusu (`ci.yml`, 2026-10-09'dan beri) tarandı: aynı commit'te önce düşüp
+yeniden koşunca geçen tek test `program.spec.ts`'in "dağılım seçicisi bütün seçenekleri
+açıyor"u (43769965101 ve 43773651075, ikisi de "> 146, received 146"). Öteki kırmızıların
+çoğu dal zincirinin kendi gerilemesiydi (zincirin her dalında aynı test, sonra düzeldi), ya
+da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzgeci,
+`kurulum.spec` cinsiyet testinin `savedState`'i).
+
+- **Dağılım seçicisi:** havuz `useDeferredValue` ile bir render geriden geliyor, test havuzu
+  ızgara boşaldıktan sonra bir kez okuyordu (tuzak 170). `poolHours()` yığın boyuyla sayıyor,
+  `dragAndDrop()` havuz kartı bırakana kadar dönmüyor, sonrası `expect.poll`. Kanıt: işlemci 8
+  kat yavaşlatılınca (CDP) eski hâl 6 koşunun 3'ünde CI'ın hatasıyla düştü (2'si 30 s'yi aştı),
+  yeni hâl 6/6 geçti. Yavaşlatmasız eski hâl bu Mac'te 15/15 geçiyordu. Yükte ikinci bir
+  düşüş: 30 s'lik test sınırı, çünkü `dragAndDrop()` satırın her görünen hücresinde 40 ms
+  bekliyordu (CI'da test 11-13 s). Yardımcı artık yalnız sürüklemenin başta `can-ok` diye
+  boyadığı hücreleri deniyor ve vurgunun boyanmasını bekliyor: beş sürükleme testi aynı
+  yükte 8,9-14,8 s'den 3,5-6,8 s'ye.
+- **Birim süre sınırları (tuzak 171):** yük ortalaması 78–266 (8 çekirdek) iken `hizli`'de
+  `linuxKur`, `useFolder`, `App`, `sentences`, `programScreen` ve `relax.test`'in "aynı
+  girdi"si 5 s'yi aştı, derslik darboğazı 30 s'ye yaklaştı (24 s). Bekleme ya da yarış yok,
+  iş ağır ve belirli: dosya başında gerekçeli `vi.setConfig({ testTimeout: 30_000 })`,
+  darboğaz 120 s.
+  `sample.test`'in dropMap testi açgözlü doldurmayı ikinci kez koşuyordu ve 50 ms'lik mutlak
+  eşiği vardı: doldurma bir kez, eşik dolu/boş medyan oranı < 4 (bugün ~1,3). Hücre başına
+  `blockAt` çağıran mutasyon oranı 6,7'ye çıkardı ve kırmızı, eski eşik onda 13 ms ile yeşil kalırdı.
+
+Belgeler: TRAPS 170 ve 171 (açık dallar 159–165'i aldığı için 170'ten başlandı), TESTPLAN
+"Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.
+
 ## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
 
 Cmd+C/V elle denendi, çalışıyor (Alp, 2026-11-16). Alp'in önceliği: Windows ve web önce, Mac
