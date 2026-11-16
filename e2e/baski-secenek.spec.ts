@@ -116,9 +116,11 @@ test.describe('62. Sayfada ne olsun', () => {
     const head = page.locator('.print-sheet').first().locator('.p-head');
     // A real date, not a placeholder: gg.aa.yyyy ss:dd.
     await expect(head).toContainText(/\d{2}\.\d{2}\.\d{4} \d{2}:\d{2} · Sayfa 1 \/ \d+/);
-    // Every sheet carries one, not only the first.
-    const sheets = await page.locator('.print-sheet').count();
-    await expect(page.locator('.p-head')).toHaveCount(sheets);
+    // Every sheet carries one, not only the first. Asked of each sheet, not as
+    // two counts: the tab draws its sheets a frame at a time, so a count taken
+    // now can be behind the heads counted a moment later.
+    await expect(page.locator('.print-sheet:not(:has(> .p-head))')).toHaveCount(0);
+    expect(await page.locator('.print-sheet').count()).toBeGreaterThan(1);
 
     await box(page, 'Çıktı tarihi').uncheck();
     await expect(head).not.toContainText(/\d{2}\.\d{2}\.\d{4}/);
