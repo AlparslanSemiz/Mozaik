@@ -76,7 +76,9 @@ function ps(betik) {
 /** The paths of every running Mozaik.exe. */
 function calisanlar() {
   const cikti = ps(
-    'Get-Process -Name Mozaik -ErrorAction SilentlyContinue | ForEach-Object { $_.Path }',
+    // `exit 0`: with no Mozaik running, Get-Process leaves $? false even under
+    // SilentlyContinue and PowerShell exits 1; "none running" is an answer, not an error.
+    'Get-Process -Name Mozaik -ErrorAction SilentlyContinue | ForEach-Object { $_.Path }; exit 0',
   );
   return cikti === '' ? [] : cikti.split(/\r?\n/).map((s) => s.trim().toLowerCase());
 }
