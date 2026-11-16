@@ -261,6 +261,26 @@ export async function visibleCells(page: Page, selector: string) {
 }
 
 /**
+ * The hours the tray offers right now. Identical cards are drawn as one
+ * `.pool-card` in a `.pool-stack` that says how many it holds, so the sum is
+ * stack size times block size: summing the cards alone does not move when one
+ * card of a stack of three is dropped.
+ *
+ * The tray follows the plan a render late (`useDeferredValue` in Program.tsx),
+ * so a test that compares this number before and after a change polls it
+ * rather than reading it once (pitfall 170).
+ */
+export async function poolHours(page: Page): Promise<number> {
+  return page.locator('.pool-stack').evaluateAll((stacks) =>
+    stacks.reduce((sum, stack) => {
+      const card = stack.querySelector<HTMLElement>('.pool-card');
+      const count = Number((stack as HTMLElement).dataset.count ?? 1);
+      return sum + count * Number(card?.dataset.size ?? 0);
+    }, 0),
+  );
+}
+
+/**
  * Drags a card from the pool into the first valid cell of the grid.
  *
  * Tries the next card when a whole row has no droppable cell ON SCREEN: with
@@ -270,6 +290,7 @@ export async function visibleCells(page: Page, selector: string) {
  */
 export async function dragAndDrop(page: Page): Promise<{ day: string; hour: string; row: string }> {
   const cardCount = await page.locator('.pool-card').count();
+  const trayBefore = await poolHours(page);
 
   for (let index = 0; index < Math.min(cardCount, 8); index++) {
     await startDrag(page, index);
@@ -284,6 +305,10 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
         const hour = (await cell.getAttribute('data-hour'))!;
         const row = (await cell.getAttribute('data-row'))!;
         await page.mouse.up();
+        // The grid paints the drop first and the tray a render later
+        // (`useDeferredValue` in Program.tsx). Returning on the grid alone let a
+        // caller read the tray before it had let go of the card (pitfall 170).
+        await expect.poll(() => poolHours(page)).toBeLessThan(trayBefore);
         return { day, hour, row };
       }
     }
