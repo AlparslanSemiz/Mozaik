@@ -2161,15 +2161,18 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       (5) `hiz/tepki` zinciriyle birleşti (`Check.tsx`, `Availability.tsx`, `App.tsx` iki tarafın davranışıyla).
 - [x] **SD6 · Okul'daki etiketsiz kutular.** Yapıldı (2026-11-15, `erisim/anlam`, §8e'nin
       `label` maddesi). Dersler'deki haftalık saat kutusu ve bütün sınır
-      kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
-      e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
-      36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).
+      kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki kutular
+      2026-11-16'da (`sade/asama-2`, K5) kalktı; kişi sayfasındaki karşılıkları adlı.
 - [~] **SD8 · Sadeleşme (Alp onayladı, K1–K8, 2026-11-16, DECISIONS).** Aşama 1
       "Sakinleştirme" yazıldı (`sade/asama-1`, birleşmedi): tek ana düğme, her şeridin sağ
       ucunda Daha fazla, sade üst çubuk (Dosya ▾, Kaydet, ?), yardım "?" arkasında, tek
       sayım, yeni adlar (K4a, K4b), Başlarken beş iş, Ctrl+K işleri buluyor, nötr sekme.
-      Sırada: **aşama 2** kişi sayfası (K5: öğretmen ve sınıfın tek sayfası, sayfadan Yazdır,
-      sınırlar tek yerde), **aşama 3** beş sekme (K1), Plan + Seçenek (K2), Kontrol çipe (K3),
+      **Aşama 2** kişi sayfası yazıldı (`sade/asama-2`, aşama 1'in üstünde, birleşmedi; WORKLOG):
+      listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
+      saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
+      tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
+      Sırada: **aşama 3** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına katlanır, okul
+      geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe (K3),
       Sığdır/Ferah/Rahat (K6) ile Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline
       dön (K8, Dosya menüsünde yeri ayrıldı). 2. aşamadan sonra babanın bir oturumu izlenir.
 

@@ -20,7 +20,8 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 ## Şu an
 
 Son güncelleme: 2026-11-15 akşam. 2026-11-16: `sade/asama-1` dalında Sadeleşme aşama 1 yazıldı,
-birleşmedi (aşağıda tarihli girdi, TODO SD8). Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
+birleşmedi (aşağıda tarihli girdi, TODO SD8); onun üstünde `sade/asama-2` aşama 2'yi, kişi
+sayfasını (K5) taşıyor, birleşmedi. Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
 olduğu gibi aşağıda, "2026-11-15 · Önceki 'Şu an'" girdisinde.
 
 **Sürüm.** 2.2.0 sahada (2026-09-26). Üstüne çok iş birikti ve yayınlanmadı (CHANGELOG
@@ -112,6 +113,61 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Sadeleşme aşama 2: kişi sayfası (`sade/asama-2`, TODO SD8, K5)
+
+`sade/asama-1`'in (PR #67) üstünde, birleşmedi. Karar ve ters çevirdikleri DECISIONS "Kişi
+sayfası: bir kişi tek yerde".
+
+**Yapılan.** Okul'un Öğretmenler ve Sınıflar listeleri düz yazı (`PersonRow.tsx`): tam ad (kişi
+sayfasını açan bağlantı), kısa ad, branş, ders saati, durum (bütün gün gelmediği günler, kapalı saat
+sayısı, sığmıyorsa kırmızıyla kaç saat fazla); sınıfta ad, derslik, ders saati, durum. Ekleme formu
+kalktı, listenin sonunda `+ Yeni öğretmen` / `+ Yeni sınıf` boş bir kişi sayfası açıyor
+(`NewPerson.tsx`, `Ekle` sayfayı yeni kişinin sayfası yapıyor); `Excel'den yapıştır` liste
+başlığında. Kişi sayfası `InspectorSheet.tsx`'in genişlemesi: sayılar, Bilgiler, Gelemediği /
+Kapalı saatler (`common/AvailGrid.tsx`, Müsaitlik'ten çıkarılan ızgara, saatleri hep açık),
+Verdiği / Aldığı dersler (haftalık saat kutusu, `Başka öğretmene aktar…`; seçenekleri ilk
+odakta çiziliyor), Sınırları (`Okul ayarı geçerli: N` / `Kendi sayısı; okul ayarı: N`), katlı
+Haftalık programı (kapalı saatte kalmış ders varsa kendiliğinden açık ve bir uyarı satırı), Sil.
+Başta `Yazdır` (`print/PrintOne.tsx`: tek sayfa, `html.print-one`, Çıktı'nın seçimine dokunmuyor)
+ve öğretmende `Gönder` (`SendTeacher`, Çıktı'nın e-posta yolu; adres yoksa nereye yazılacağını
+söyleyip E-posta kutusuna götürüyor; WhatsApp/PDF aşama 4, kodda TODO). Baş yapışkan. Odak
+açılışta sayfaya, Esc kapatıyor, odak ada dönüyor, silinince komşu ada. Müsaitlik başlığında
+`Sayfasını aç`; Kurallar'ın kendi sınırı olanlar listesi adlarla sayfayı açıyor; Çıktı'nın onay
+listesi ve e-posta listesi tam ad. Sözlüklerden 22 ölü anahtar çıktı, 29 yeni anahtar dört dilde.
+
+**Ölçüm: görünen kontrol ve kelime, Okul adımları** (önce `origin/sade/asama-1` → sonra; betik
+`denetim3/yuk/olc.mjs`'in Okul'a daraltılmış kopyası, oturumun scratch klasöründe `a2/olc-okul.mjs`;
+"ekranda" görünür ve pencerenin içinde olan düğme/girdi/seçici, "toplam" kaydırınca görünenler de;
+kelime etiket + yardım, ad kutusunun içindeki yazı sayılmaz, düz yazı sayılır).
+
+| Ekran (babanın verisi, 1920×1080) | Ekranda kontrol | Toplam kontrol | Satırdaki kontrol | İlk satır (% yükseklik) | Kelime (etiket+yardım) |
+|---|---|---|---|---|---|
+| Okul / Derslikler | 61 → 61 | 62 → 62 | 4 → 4 | 45 → 45 | 188 → 188 |
+| Okul / Branşlar | 86 → 86 | 87 → 87 | 4 → 4 | 38 → 38 | 119 → 119 |
+| Okul / Öğretmenler | 192 → 77 | 286 → 80 | 13 → 2 | 51 → 38 | 222 → 367 |
+| Okul / Sınıflar | 119 → 65 | 169 → 66 | 7 → 2 | 44 → 30 | 158 → 314 |
+| Öğretmen paneli → sayfası | 23 → 115 | 23 → 130 | | | 138 → 110 |
+| Sınıf paneli → sayfası | 10 → 107 | 10 → 107 | | | 119 → 125 |
+
+1366×768'de Öğretmenler 114 → 61 (toplam 286 → 80), ilk satır %72 → %54; Sınıflar 70 → 48, %61 →
+%42. Örnek okulda (aşama 1 tablosunun verisi) Öğretmenler 204 → 78 (toplam 375 → 92), Sınıflar
+121 → 73. Listelerde kelime arttı, çünkü kutunun içindeki ad artık düz yazı ve sayılıyor (25 ad,
+kısa ad, branş ve durum); okunacak etiket ve yardım cümlesi değişmedi. Sayfada kontrol arttı,
+çünkü eski panelde olmayan müsaitlik ızgarası (90 düğme, tek Tab durağı) ve ders satırları
+oraya geldi; ızgara hariç sayfa 25 kontrol.
+
+**Hız.** Sayfanın açılışı, babanın verisi (`tam-dolu-kurs-dizili.json`), Playwright Chromium, CDP
+ile 4× işlemci yavaşlatması, tıklamadan ızgaranın çizilip bir karenin geçmesine: ilk açılış 97–163
+ms, sonrakiler 62–85 ms (makine yüklü, yük ortalaması 4–16: kirli). Ölçerken iki şey kısaltıldı:
+katlı haftalık tablo açılmadıkça çizilmiyor, aktarma listesinin öğretmenleri ilk odakta çiziliyor
+(onsuz sonrakiler 74–100 ms). İlk açılışın 100 ms'yi aşması yüklü makinede; temiz koşulda
+yeniden ölçülmeli.
+
+**Boyut.** `dist/index.html` 1 190 100 → BOYUT_HAM bayt, brotli 304 460 → BOYUT_BR (sınırlar 1 200 000 ve 306 000;
+eşik yükseltilmedi).
+
+**Koşulanlar.** KOSULANLAR
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 

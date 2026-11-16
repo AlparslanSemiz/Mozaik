@@ -248,7 +248,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler: `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/availability/Availability.tsx` | Müsaitlik |
-| `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
+| `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, kişi sayfası (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menülerini bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |
 | `ui/program/GridMenu.tsx` | ızgaranın sağ tık menüsü (kart, satır ya da gün başlığı, sütun); okuduğunu `describeMenu` hesaplar, seçimleri Program'a döner |
 | `ui/program/PoolMenu.tsx` | havuz kartının sağ tık menüsü; okuduğunu `poolMenuFacts` hesaplar |
@@ -261,13 +261,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/LessonPool.tsx` | havuz |
 | `ui/program/Check.tsx` | Kontrol |
 | `ui/program/reveal.ts` | Kontrol'ün `Göster`i: Program'daki kartı ya da havuzdaki kartı görünür yapıp işaretler (`data-reveal`) |
-| `ui/program/Inspector.tsx` | varlık panelini açan yol: bağlam, `useInspect()` ve paneli çizen provider |
-| `ui/program/InspectorSheet.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası, bilgileri ve düzenlenmesi |
+| `ui/program/Inspector.tsx` | kişi sayfasını açan yol: bağlam, `useInspect()` ve sayfayı çizen provider |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
-| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına bir düğme ya da neden olmadığı; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı |
+| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına bir düğme ya da neden olmadığı; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı. Kişi sayfasının `Gönder`'i (`SendTeacher`) aynı yol |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
 | `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
 | `ui/common/ColorPick.tsx` | renk seçme diyaloğu |

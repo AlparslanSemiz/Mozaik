@@ -36,6 +36,36 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Kişi sayfası: bir kişi tek yerde (Sadeleşme aşama 2, K5)
+
+**Değişen.** Okul'un öğretmen ve sınıf listeleri düz yazı; ada tıklayınca sağda kişinin sayfası
+açılır ve bir öğretmen ya da sınıf yalnız orada düzenlenir (`InspectorSheet.tsx`). Sayfa işin
+sırasıyla: Bilgiler, Gelemediği saatler (Müsaitlik ızgarasının kendisi, `common/AvailGrid.tsx`,
+saatleriyle), dersleri (haftalık saat ve başka öğretmene aktar), Sınırları, ve `Yazdır`, `Gönder`,
+`Sil`. **Gerekçe.** Bulunurluk testi: bir öğretmenin bilgisi altı yere dağılmıştı (Okul tablosu,
+Müsaitlik, Dersler, Kurallar, panel, Çıktı) ve baba kişiye göre düşünüyor ("Ayşe Hoca salı
+gelemiyor"); öğretmen satırı on iki kontroldü.
+
+- **Ters çevirdiği: 2026-08-30 "Varlık paneli düzenliyor".** O kayıt paneli Okul satırıyla aynı
+  fonksiyonlara bağlı ikinci bir düzenleme yeri yapıyordu; artık satırda kutu yok, panel tek yer.
+  Kayıt silindi (bu dosyanın kuralı), metni git geçmişinde.
+- **Satırdan kalkanlar:** Cinsiyet, E-posta, 2. branş, üç sınır kutusu, sınıfın günlük sınırı,
+  renk düğmesi, ad, kısa ad, branş ve derslik kutuları, `Ayrıntı` ve `Sil`. Silme sayfanın en
+  altında, eskisi gibi sorusuz, bildirimde `Geri al` ve öncesinin kopyası (`keepBefore`).
+- **Ekleme listenin sonunda bir satır:** `+ Yeni öğretmen`, `+ Yeni sınıf` boş bir kişi sayfası
+  açar, `Ekle` onu yeni kişinin sayfası yapar (sıradaki iş gelemediği saatler). Toplu ekleme
+  liste başlığındaki `Excel'den yapıştır`. Tek tek yirmi beş öğretmen girmek eskisinden bir
+  tıklama uzun; kabul edildi, çünkü dönemde bir kez yapılıyor ve yapıştırma duruyor.
+- **Sınırlar tek yerde:** okul geneli Ayarlar → Kurallar'da (aşama 3'te Okul bilgileri'ne
+  gidecek), kişiye özel yalnız kişi sayfasında; her kutunun yanında hangisinin geçerli olduğu
+  (`Okul ayarı geçerli: N` ya da `Kendi sayısı; okul ayarı: N`). Kişinin sayısı okulunkinin yerine
+  geçer. Dersler'deki `Günde ↑` kaldı: o dersin kendi sayısı, sınıfınkinin de yerine geçen üçüncü
+  katman, aynı kural değil.
+- **Yazdır iki tıklama:** sayfa tek kişinin kâğıdını Çıktı'ya gitmeden basar (`PrintOne.tsx`);
+  Çıktı'nın onay listeleri değişmez, çünkü tek kişi basmak bir sonraki çıktının kararı değil.
+  **Gönder** Çıktı'daki e-posta yolunun aynısı; WhatsApp ve PDF aşama 4.
+- **Müsaitlik sekmesi kaldı** (aşama 3 sekmeleri yeniden kuracak), başlığında `Sayfasını aç`.
+
 ### 2026-11-16 · Sadeleşme (Alp onayladı, K1–K8)
 
 **Karar (Alp, 2026-11-16).** Babanın şikâyeti "çok seçenek var, karışık, neyin nerede olduğunu
@@ -64,7 +94,7 @@ bir ana düğme, az kullanılan her şey her ekranda aynı köşedeki tek bir "D
 - **K5 · Listeler düz yazı, düzenleme kişi sayfasında:** öğretmen ve sınıf satırı kutu değil yazı,
   tıklayınca sağda sayfası açılır. Ters çevirdiği: DECISIONS 2026-08-30 "Varlık paneli düzenliyor"
   ile Okul satırının yan yana düzenlemesi (iki yerde düzenleme), LAYOUT "Okul" satır kutuları.
-  Aşama 2.
+  Aşama 2'de yapıldı (aşağıdaki kayıt).
 - **K6 · Sığdır / Ferah / Rahat kalkar:** ızgara ekrana kendiliğinden sığar, yazı boyu Ayarlar'da.
   Ters çevirdiği: LAYOUT "Izgara · Yoğunluk", DESIGN "Tek istisna Sığdır" (DECISIONS 2026-09-26
   "Sığdır kesmiyor, küçültüyor"). Aşama 3; aşama 1 yoğunluğu yalnız Daha fazla'ya taşıdı.
@@ -2129,14 +2159,6 @@ alındı, çünkü üstteyken kısa ekranda tek kart satırını kırpıyordu (t
 tablosu eski boyunda kaldı. **Gerekçe.** Kullanıcı: *"müsaitlik programlarının
 satırlarını uzat"*. Isı tablosu bir müsaitlik programı değil, tıklanacak hücresi
 yok. Sayfanın dikey taşması iki ölçekte de 0 ölçüldü.
-
-### 2026-08-30 · Varlık paneli düzenliyor
-
-**Değişen.** Öğretmen, sınıf ve derslik paneli (`Inspector.tsx`) yalnız
-göstermiyor, düzenliyor da: her kutu Okul listesinin kutusuyla aynı fonksiyona
-bağlı. Yeni olan kontrol değil yol: ızgaranın satır başı, kartın sağ tık menüsü ve
-komut paleti oraya çıkıyor, ve `Öğretmeni düzenle` ile `Sınıfı düzenle` ızgaranın
-çizilmediği eksene ulaşmanın tek yolu.
 
 ### 2026-08-29 · Tauri kimliği geri alındı
 
