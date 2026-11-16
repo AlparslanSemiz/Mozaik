@@ -4976,10 +4976,18 @@ table.sheet-lessons select.transfer-pick {
 /* The list row's way into its panel: a symbol AND a word ("Ayrıntı"), never
    the symbol alone (Sadeleşme item 8). */
 .btn.row-detail {
+  /* The name after the word is `.visually-hidden`, which is absolutely
+     placed: without a positioned box here it was placed against the page and
+     every row's copy stretched the DOCUMENT below the scroll box (the page
+     itself scrolled on Linux and the strip lost a scrollbar's width). */
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
+  /* As narrow as the word allows: the teacher list's eleven columns were
+     measured to the pixel before this column held a word (%125 spilled). */
+  padding: var(--space-2);
+  font-size: var(--fs-sm);
 }
 
 /* Başlarken, done or closed: one line with one link back. */
