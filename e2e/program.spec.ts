@@ -11,7 +11,6 @@ import {
   onScreen,
   openGridMenu,
   openMore,
-  openMoreSub,
   openSettings,
   openSetup,
   openWithSample,
@@ -22,6 +21,7 @@ import {
   tokens,
   visibleCells,
   openLessons,
+  savedText,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -653,6 +653,8 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await card.click({ button: 'right' });
     const menu = page.locator('.menu');
     await expect(menu.getByRole('menuitem')).toHaveText([
+      // First on a card in the tray since K3 (2026-11-16).
+      'Neden yerleşmedi?',
       'Havuza kaldır',
       'Dersi düzenle',
       'Öğretmeni düzenle',
@@ -2269,83 +2271,102 @@ test.describe('86. Sabitleme', () => {
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(0);
   });
 
-  test('program kopyası bağımsız kalıyor ve programlar arasında geçiliyor', async ({ page }) => {
-    await openWithSample(page);
-    await dragAndDrop(page);
-    const cards = page.locator('table.grid .card');
-    await expect(cards).toHaveCount(1);
-
-    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
-    // strip READS the open one's name once there are two.
-    const programs = page.locator('.ribbon');
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
-    await answerDialog(page);
-    await expect(programs).toContainText('Seçenek 2');
-
-    await cards.first().focus();
-    await page.keyboard.press('Delete');
-    await expect(cards).toHaveCount(0);
-
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
-    await expect(cards).toHaveCount(1);
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 2' }).click();
-    await expect(cards).toHaveCount(0);
-  });
-
-  test('seçenek sormadan siliniyor ve Geri al onu yerleşimiyle getiriyor', async ({ page }) => {
-    await openWithSample(page);
-    await dragAndDrop(page);
-    const cards = page.locator('table.grid .card');
-    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
-    // strip READS the open one's name once there are two.
-    const programs = page.locator('.ribbon');
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
-    await answerDialog(page);
-    await expect(programs).toContainText('Seçenek 2');
-
-    // SD1: no question. The notice counts the hours and never the pins.
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Seçeneği sil' }).click();
-    await expect(page.locator('.dlg')).toHaveCount(0);
-    await expect(programs).not.toContainText('Seçenek 2');
-    const notice = page.locator('.toast', { hasText: 'seçeneği silindi' });
-    await expect(notice).toContainText(/yerleşmiş \d+ saati de gitti/);
-    await expect(notice).not.toContainText('sabitleme');
-
-    await notice.getByRole('button', { name: 'Geri al' }).click();
-    await expect(programs).toContainText('Seçenek 2');
-    await expect(cards).toHaveCount(1);
-  });
-
-  test('seçenek değiştirmek geri al geçmişini silmiyor, Ctrl+Z doğru seçeneğe dönüyor', async ({
+  // K2 (2026-11-16): a second arrangement is a second PLAN. "Bu programın
+  // kopyası" opens one, and the top bar's plan picker comes with it.
+  test('Bu programın kopyası yeni bir plan açıyor, ikisi bağımsız ve seçiciyle geçiliyor', async ({
     page,
   }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     const cards = page.locator('table.grid .card');
-    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
-    // strip READS the open one's name once there are two.
-    const programs = page.locator('.ribbon');
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
-    await answerDialog(page);
+    await expect(cards).toHaveCount(1);
+    const picker = page.locator('.topbar .plan-picker');
+    await expect(picker).toHaveCount(0);
 
-    // On Seçenek 2: take the card off, then go to Seçenek 1.
+    await openMore(page);
+    await page.getByRole('menuitem', { name: 'Bu programın kopyası' }).click();
+    await expect(picker.locator('option')).toHaveCount(2);
+    await expect(cards).toHaveCount(1);
+
     await cards.first().focus();
     await page.keyboard.press('Delete');
     await expect(cards).toHaveCount(0);
-    await openMoreSub(page, /^Seçenek/);
-    await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
+
+    const [first, copy] = await picker
+      .locator('option')
+      .evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+    await picker.selectOption(first!);
+    await expect(cards).toHaveCount(1);
+    await picker.selectOption(copy!);
+    await expect(cards).toHaveCount(0);
+  });
+
+  /** A file from before K2 with two programs ("seçenek") in one plan. */
+  async function twoPrograms(page: Page) {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    type Saved = {
+      programs: Array<{ id: string; name: string; placements: object; pinned: object }>;
+    };
+    // The drop is in storage only after the debounce (pitfall 24).
+    await expect
+      .poll(async () => {
+        const saved = JSON.parse(await savedText(page)) as Saved;
+        return Object.keys(saved.programs[0]!.placements).length;
+      })
+      .toBeGreaterThan(0);
+    const state = JSON.parse(await savedText(page)) as Saved;
+    state.programs.push({ id: 'ikinci', name: 'Seçenek 2', placements: {}, pinned: {} });
+    await loadWorld(page, state);
+    return page.locator('.topbar .plan-picker');
+  }
+
+  test('eski dosyanın iki programı plan seçicide, açık olan sormadan siliniyor ve Geri al getiriyor', async ({
+    page,
+  }) => {
+    const picker = await twoPrograms(page);
+    const cards = page.locator('table.grid .card');
+    await expect(picker.locator('option')).toHaveCount(2);
+    await expect(picker.locator('option').nth(1)).toContainText('Seçenek 2');
     await expect(cards).toHaveCount(1);
 
-    // Looking at Seçenek 1 is not a step. Ctrl+Z takes back the last change,
-    // and that change was made in Seçenek 2: it comes back on screen, card and all.
+    await picker.selectOption({ index: 1 });
+    await expect(cards).toHaveCount(0);
+    await picker.selectOption({ index: 0 });
+    await expect(cards).toHaveCount(1);
+
+    // SD1: no question. The notice counts the hours and never the pins.
+    await openMore(page);
+    await page.getByRole('menuitem', { name: /· Sil$/ }).click();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(picker).toHaveCount(0);
+    const notice = page.locator('.toast', { hasText: 'silindi' });
+    await expect(notice).toContainText(/yerleşmiş \d+ saati de kalktı/);
+    await expect(notice).not.toContainText('sabitleme');
+
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(picker.locator('option')).toHaveCount(2);
+    await expect(cards).toHaveCount(1);
+  });
+
+  test('eski dosyada program değiştirmek geri al geçmişini silmiyor, Ctrl+Z doğru programa dönüyor', async ({
+    page,
+  }) => {
+    const picker = await twoPrograms(page);
+    const cards = page.locator('table.grid .card');
+
+    // On the first program: take the card off, then go to the second.
+    await cards.first().focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(0);
+    await picker.selectOption({ index: 1 });
+    await expect(cards).toHaveCount(0);
+
+    // Looking at another program is not a step. Ctrl+Z takes back the last
+    // change, and that change was made in the first: it comes back on screen.
     await page.locator('body').press('Control+z');
-    await expect(programs).toContainText('Seçenek 2');
+    await expect(picker).toHaveValue(/ /);
+    expect(await picker.inputValue()).not.toContain('ikinci');
     await expect(cards).toHaveCount(1);
     await expect(page.locator('.sr-only[role=status]')).toContainText('Geri alındı');
   });

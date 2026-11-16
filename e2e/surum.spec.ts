@@ -140,7 +140,7 @@ test.describe('79. Yenilikler', () => {
 
   test('Ayarlar sekmesindeki nokta, panel açılınca kayboluyor ve kalıcı', async ({ page }) => {
     await open(page);
-    const dot = page.locator('.tab[data-section="settings"] .tab-dot');
+    const dot = page.locator('.tab[data-section="school"] .tab-dot');
     // A fresh profile has never seen any version, so the dot starts lit.
     await expect(dot).toBeVisible();
 

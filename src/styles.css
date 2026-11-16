@@ -27,7 +27,7 @@
      09:00, 12) and Plex's digits are tabular by construction — every one of
      them is 600 units wide, measured, no `tnum` feature needed. The fallback
      stack below keeps the tool working if the face ever fails to decode. */
-  font-family: "IBM Plex Sans";
+  font-family: 'IBM Plex Sans';
   font-style: normal;
   font-weight: 400 700;
   /* block, NOT swap. Measured: with `swap`, the first layout resolves `ch`
@@ -38,7 +38,7 @@
      nothing is painted with the wrong metrics because nothing is painted at
      all until it is ready. */
   font-display: block;
-  src: url("./fonts/IBMPlexSans-subset.woff2") format("woff2-variations");
+  src: url('./fonts/IBMPlexSans-subset.woff2') format('woff2-variations');
 }
 
 /* THREE PLANES, and everything on screen sits on exactly one of them.
@@ -95,16 +95,16 @@
   /* THE PLANES. Four now, not three: the desk, the tool, the tool's second
      step back, and the sheet. --chrome-lit is the top stop of the top bar's
      gradient and lives only there. */
-  --bg:          #cfd8e4;
-  --chrome:      #f3f6fb;
-  --chrome-2:    #ecf0f6;
-  --chrome-lit:  #fcfdff;
-  --paper:       #ffffff;
-  --paper-sunk:  #f1f5fa;
+  --bg: #cfd8e4;
+  --chrome: #f3f6fb;
+  --chrome-2: #ecf0f6;
+  --chrome-lit: #fcfdff;
+  --paper: #ffffff;
+  --paper-sunk: #f1f5fa;
   /* The grid's day band: odd days get this ground so the eye sees SIX DAYS
      instead of 78 columns. Far below the 14 that separates two functional
      colours, or it would read as a state (pitfall 40). */
-  --band:        #f8fafd;
+  --band: #f8fafd;
   /* Every second row of a list: the reader asked for rows one after another
      on slightly different grounds, the same in every list. The same value as
      --chrome-2, written out rather than borrowed so the two cannot drift into
@@ -112,13 +112,13 @@
      against --paper: ΔL* -5.34, ΔE 6.31, ratio 1.14, i.e. seen at once and
      still far below anything that reads as a state. The dark twin moves the
      same ΔL* the other way (+5.43). */
-  --zebra:       #ecf0f6;
+  --zebra: #ecf0f6;
 
   /* Three rules, three jobs: --hairline shell, --line control edge and table
      head, --line-dark the loudest there is (day separator, row head). */
-  --hairline:    #e0e4eb;
-  --line:        #c6cdd7;
-  --line-dark:   #8a93a0;
+  --hairline: #e0e4eb;
+  --line: #c6cdd7;
+  --line-dark: #8a93a0;
   /* The edge of a CONTROL — field, select, button — and the one line here with
      a floor that is not taste: WCAG 1.4.11 asks 3:1 for the boundary that
      says "this is a thing you can use". Fields stood on --hairline (1.16:1
@@ -130,14 +130,14 @@
   --border-strong: #6d7784;
   /* One step past --line-dark, and it has exactly one job: where one day ends
      and the next begins, across 78 columns. */
-  --day-edge:    #5b6572;
+  --day-edge: #5b6572;
 
-  --text:        #131a25;
+  --text: #131a25;
   /* One step darker than the ramp's first pick (#505763) since the zebra:
      on --zebra that one measured 6.65 and the rows a low-vision reader scans
      hold their numbers and hints in this ink. Now 8.53 on --paper, 7.46 on
      --zebra, and still well behind --text (17.47), so it stays secondary. */
-  --muted:       #464d58;
+  --muted: #464d58;
 
   /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
      ink blue on the grounds that 36 identity colours plus three functional
@@ -148,12 +148,17 @@
      Measured: 7.47 on --paper, 6.28 on its own ground, 7.47 for white on it,
      and ΔE 121-144 from every functional colour — it cannot be mistaken for
      a state, which is the only thing loudness had to buy off. */
-  --accent: #373bdb;  --accent-hover: #2a20bc;
-  --accent-bg: #e1ecff;  --on-accent: #ffffff;
+  --accent: #373bdb;
+  --accent-hover: #2a20bc;
+  --accent-bg: #e1ecff;
+  --on-accent: #ffffff;
 
-  --ok: #177431;  --ok-bg: #d5f0dc;
-  --warn: #8a6100;  --warn-bg: #fdf0cf;
-  --bad: #b0201c;  --bad-bg: #fbdcda;
+  --ok: #177431;
+  --ok-bg: #d5f0dc;
+  --warn: #8a6100;
+  --warn-bg: #fdf0cf;
+  --bad: #b0201c;
+  --bad-bg: #fbdcda;
   /* THE INK of a state written ON its own ground: a badge, the health pill,
      the reason bar. --ok on --ok-bg was 4.84:1 at 12-13px (and --warn 4.89,
      --bad 5.33), under the 7:1 the rows hold (TODO E1). The three colours above
@@ -161,8 +166,11 @@
      edges of the same states. The ink is the same colour pushed toward black
      in Oklab (25 / 20 / 15%), so it keeps its hue and the functional channel
      keeps its distances. Measured on the ground: 7.47 · 7.63 · 7.20. */
-  --ok-ink: #0e5422;  --warn-ink: #654600;  --bad-ink: #8d1814;
-  --closed: #d5d8dd;  --hatch: #e8eaee;
+  --ok-ink: #0e5422;
+  --warn-ink: #654600;
+  --bad-ink: #8d1814;
+  --closed: #d5d8dd;
+  --hatch: #e8eaee;
 
   /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg:
      those are also the RESTING colours of the reason bar and of a warned cell,
@@ -266,12 +274,14 @@
   /* Ink that does NOT turn with the theme: it lands on the 36 palette colours,
      and those are the same in both themes because they are printed on paper
      (pitfall 15 and 35). */
-  --on-color: #1b1f24;  --on-color-sub: #3a3f46;
-  --block-cont: rgba(0,0,0,.12);
-  --edge: rgba(0,0,0,.4);
-  --dot-border: rgba(0,0,0,.3);
-  --print-line: #444;  --print-head-bg: #eee;
-  --shadow: rgba(0,0,0,.35);
+  --on-color: #1b1f24;
+  --on-color-sub: #3a3f46;
+  --block-cont: rgba(0, 0, 0, 0.12);
+  --edge: rgba(0, 0, 0, 0.4);
+  --dot-border: rgba(0, 0, 0, 0.3);
+  --print-line: #444;
+  --print-head-bg: #eee;
+  --shadow: rgba(0, 0, 0, 0.35);
 
   /* TWO shadow inks, because they land on two different kinds of surface and
      only one of them belongs to the block above.
@@ -283,7 +293,7 @@
                        plane is not a shadow, it is nothing: the lip that says
                        "the week is scrolling under this" simply was not there.
      One token used in both places is how that went unnoticed for a version. */
-  --shadow-shell: rgba(16,24,40,.35);
+  --shadow-shell: rgba(16, 24, 40, 0.35);
 
   /* ELEVATION — five steps. The old two ("the sheet on the desk" and "the
      three things that genuinely float") could not describe a shell that has a
@@ -296,10 +306,10 @@
        --elev-4  the drag ghost — the only thing under the pointer
      Two soft layers each, because one hard shadow reads as a cut-out. */
   --elev-0: none;
-  --elev-1: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.05);
-  --elev-2: 0 1px 3px rgba(16,24,40,.07), 0 4px 10px rgba(16,24,40,.06);
-  --elev-3: 0 4px 12px rgba(16,24,40,.10), 0 12px 32px rgba(16,24,40,.12);
-  --elev-4: 0 6px 16px rgba(16,24,40,.16), 0 24px 56px rgba(16,24,40,.20);
+  --elev-1: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --elev-2: 0 1px 3px rgba(16, 24, 40, 0.07), 0 4px 10px rgba(16, 24, 40, 0.06);
+  --elev-3: 0 4px 12px rgba(16, 24, 40, 0.1), 0 12px 32px rgba(16, 24, 40, 0.12);
+  --elev-4: 0 6px 16px rgba(16, 24, 40, 0.16), 0 24px 56px rgba(16, 24, 40, 0.2);
 
   /* TYPOGRAPHY. Nine steps, up from six: with only six, a page heading and a
      panel heading had to share one size and the hierarchy came out flat.
@@ -325,21 +335,21 @@
      That last line is where the room actually comes from: spacing, cells, the
      strip, the `ch` columns and the dock all follow the root and none of them
      has a floor to respect. */
-  --fs-2xs:  .846rem;  /* 11px — print preview furniture ONLY, never screen UI */
-  --fs-xs:   .923rem;  /* 12px — the screen floor */
-  --fs-sm:   1rem;     /* 13px */
-  --fs-md:   1.077rem; /* 14px */
+  --fs-2xs: 0.846rem; /* 11px — print preview furniture ONLY, never screen UI */
+  --fs-xs: 0.923rem; /* 12px — the screen floor */
+  --fs-sm: 1rem; /* 13px */
+  --fs-md: 1.077rem; /* 14px */
   --fs-base: 1.154rem; /* 15px — body */
-  --fs-lg:   1.308rem; /* 17px */
-  --fs-xl:   1.538rem; /* 20px */
-  --fs-2xl:  1.923rem; /* 25px */
-  --fs-3xl:  2.385rem; /* 31px */
+  --fs-lg: 1.308rem; /* 17px */
+  --fs-xl: 1.538rem; /* 20px */
+  --fs-2xl: 1.923rem; /* 25px */
+  --fs-3xl: 2.385rem; /* 31px */
 
   /* Tracking. Plex wants a touch of negative at display sizes, real positive
      when small text is set in caps, and a hair of negative on headings. */
-  --ls-tight: -.011em;
-  --ls-tighter: -.021em;
-  --ls-caps:   .06em;
+  --ls-tight: -0.011em;
+  --ls-tighter: -0.021em;
+  --ls-caps: 0.06em;
 
   /* PAPER — its own ladder, in pt, because A4 is a fixed physical size and
      --ui-scale is a screen comfort setting. Raised across the board on
@@ -356,11 +366,16 @@
      where the multipliers are, which is the only place it can be. */
 
   --lh-tight: 1.2;
-  --lh-base:  1.5;
-  --lh-head:  1.25;
+  --lh-base: 1.5;
+  --lh-head: 1.25;
 
-  --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
-  --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
+  --space-1: 0.125rem;
+  --space-2: 0.25rem;
+  --space-3: 0.5rem;
+  --space-4: 0.75rem;
+  --space-5: 1rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
   --space-8: 3rem;
 
   /* RADIUS — five steps and a pill. The old three were a plane rule; with a
@@ -373,7 +388,11 @@
        --r-xl  a sheet     dialog, slide-over
      px, not rem: a corner radius is not a size that is READ, it is how sharp
      the edge is, and it should not grow when the type does. */
-  --r-xs: 3px;  --r-sm: 5px;  --r-md: 8px;  --r-lg: 14px;  --r-xl: 20px;
+  --r-xs: 3px;
+  --r-sm: 5px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --r-xl: 20px;
   --r-full: 999px;
 
   /* MOTION. The <=150ms cap and the closed list of what may move are gone
@@ -392,9 +411,9 @@
   --dur-fast: 110ms;
   --dur: 180ms;
   --dur-slow: 280ms;
-  --ease: cubic-bezier(.2, 0, 0, 1);
-  --ease-out: cubic-bezier(.16, 1, .3, 1);
-  --ease-spring: cubic-bezier(.34, 1.4, .64, 1);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 
   /* HOW FAR things move, as four tokens rather than a number written out in
      each rule. The durations were already switchable from one place; the
@@ -408,10 +427,10 @@
      rem and not px for --slide, so a reader at 150% gets a movement in
      proportion to what moved (pitfall 36: a derived measure is computed from
      what it derives from). */
-  --slide: .5rem;
+  --slide: 0.5rem;
   --sweep: 100%;
   --press: 1px;
-  --pop: .97;
+  --pop: 0.97;
 
   /* Focus. Two rings, so it survives on any plane: a --paper gap first, then
      the accent. Keyboard navigation has to be visible on the grid, on a
@@ -423,14 +442,15 @@
      --fs-xs); a BOX's width lives on the box and is in the body's ch. The
      same ~70px is 10ch in one place and 8ch in the other, and that is
      correct (pitfall 34). */
-  --w-col-xs:  8ch;
+  --w-col-xs: 8ch;
   --w-col-sm: 10ch;
   --w-col-md: 13ch;
   --w-col-lg: 16ch;
   --w-col-xl: 26ch;
   --w-col-2xl: 32ch;
 
-  --cell-w: 2.125rem;  --cell-h: 2.125rem;
+  --cell-w: 2.125rem;
+  --cell-h: 2.125rem;
   /* The sticky first column. 8.25rem was never measured; asked to shrink it
      (2026-08-26, "sol taraftaki öğretmen ya da sınıf tarafının genişliği biraz
      daha kısaltılabilir") it was, and the widest thing it ever has to hold is
@@ -454,7 +474,7 @@
      formula subtracts it. It was written by hand in both, so narrowing one
      silently made the other's arithmetic wrong by --break-cols pixels
      (pitfall 36: a derived measure is computed from what it derives from). */
-  --break-w: .375rem;
+  --break-w: 0.375rem;
 
   /* The day rule's thickness, a token for the same reason as --break-w: the
      rule is drawn INSIDE the first hour's cell, so Sığdır's --cell-w formula
@@ -527,7 +547,7 @@
   interpolate-size: allow-keywords;
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   color-scheme: dark;
 
   /* The same hue and the same derivation, lifted — and on 2026-08-27 lowered
@@ -600,7 +620,9 @@
   --bad: #ff9089;
   --bad-bg: #401614;
   /* Already over 7:1 on their grounds in this theme (8.78 for ok). */
-  --ok-ink: var(--ok);  --warn-ink: var(--warn);  --bad-ink: var(--bad);
+  --ok-ink: var(--ok);
+  --warn-ink: var(--warn);
+  --bad-ink: var(--bad);
   --closed: #2f363e;
   --hatch: #222831;
 
@@ -636,12 +658,12 @@
   /* Deeper and blacker: on a dark ground the light theme's values are simply
      not there. The same is true of the sticky lip, which is why it has its own
      ink — see --shadow-shell above. */
-  --shadow-shell: rgba(0,0,0,.85);
+  --shadow-shell: rgba(0, 0, 0, 0.85);
 
-  --elev-1: 0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
-  --elev-2: 0 1px 3px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.35);
-  --elev-3: 0 4px 12px rgba(0,0,0,.50), 0 12px 32px rgba(0,0,0,.45);
-  --elev-4: 0 6px 16px rgba(0,0,0,.55), 0 24px 56px rgba(0,0,0,.60);
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --elev-2: 0 1px 3px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.35);
+  --elev-3: 0 4px 12px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --elev-4: 0 6px 16px rgba(0, 0, 0, 0.55), 0 24px 56px rgba(0, 0, 0, 0.6);
 }
 
 /* THE SETTING — Ayarlar > Gorunum > Hareket, three steps.
@@ -658,7 +680,7 @@
    written AFTER these two and at equal specificity, so it wins. A reader whose
    system asks for less motion gets none whatever this setting says; the setting
    can only go further than the machine asked. See src/theme.ts. */
-:root[data-motion="az"] {
+:root[data-motion='az'] {
   --dur-fast: 60ms;
   --dur: 90ms;
   --dur-slow: 90ms;
@@ -668,7 +690,7 @@
   --pop: 1;
 }
 
-:root[data-motion="kapali"] {
+:root[data-motion='kapali'] {
   --dur-fast: 0ms;
   --dur: 0ms;
   --dur-slow: 0ms;
@@ -683,8 +705,8 @@
    line is here because a zero-length animation still fires start/end events and
    `document.getAnimations()` still reports it, and "nothing is running" is what
    the suite measures. */
-:root[data-motion="kapali"] .toast,
-:root[data-motion="kapali"] [data-reveal] {
+:root[data-motion='kapali'] .toast,
+:root[data-motion='kapali'] [data-reveal] {
   animation: none;
 }
 
@@ -697,7 +719,7 @@
   scroll-behavior: auto;
 }
 
-:root[data-motion="tam"] .main {
+:root[data-motion='tam'] .main {
   scroll-behavior: smooth;
 }
 
@@ -706,8 +728,8 @@
    the four distance tokens. Last on purpose (see above). */
 @media (prefers-reduced-motion: reduce) {
   :root,
-  :root[data-motion="tam"],
-  :root[data-motion="az"] {
+  :root[data-motion='tam'],
+  :root[data-motion='az'] {
     --dur: 0ms;
     --dur-fast: 0ms;
     --dur-slow: 0ms;
@@ -754,7 +776,13 @@ body,
 }
 
 body {
-  font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  font-family:
+    'IBM Plex Sans',
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    Arial,
+    sans-serif;
   font-size: var(--fs-base);
   line-height: var(--lh-base);
   color: var(--text);
@@ -844,11 +872,21 @@ textarea {
 /* Which section's colour this chrome is drawing. One custom property resolved
    from the attribute App writes, so nothing downstream has to know the tab
    names and no colour is ever written in the JSX. */
-[data-section="teachers"] { --sec: var(--sec-setup); }
-[data-section="classes"] { --sec: var(--sec-lessons); }
-[data-section="program"] { --sec: var(--sec-program); }
-[data-section="print"] { --sec: var(--sec-print); }
-[data-section="school"] { --sec: var(--sec-settings); }
+[data-section='teachers'] {
+  --sec: var(--sec-setup);
+}
+[data-section='classes'] {
+  --sec: var(--sec-lessons);
+}
+[data-section='program'] {
+  --sec: var(--sec-program);
+}
+[data-section='print'] {
+  --sec: var(--sec-print);
+}
+[data-section='school'] {
+  --sec: var(--sec-settings);
+}
 
 .topbar {
   display: flex;
@@ -887,10 +925,11 @@ textarea {
    volume, and the two things that ANSWER "where am I" are the filled tab and
    the 4px line, both of which stay at full strength. 16% -> 8%, 6% -> 3%. */
 :root:not([data-theme='dark']) .topbar {
-  background:
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%
+  );
 }
 
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
@@ -901,11 +940,12 @@ textarea {
    old --chrome; against the darkened one that fill was the brightest thing on
    the screen, and the bar stopped reading as the plane that never scrolls away
    and started reading as a coloured banner. 14% -> 5%, top-lit like light. */
-:root[data-theme="dark"] .topbar {
-  background:
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
+:root[data-theme='dark'] .topbar {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+    color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%
+  );
 }
 
 /* The section's wash moves with you. `background-color` and not `background`:
@@ -1020,9 +1060,8 @@ textarea {
   border-radius: 0.42rem; /* 112/512 of 1.75rem — the drawing's own corner */
 }
 
-
 .tabstrip {
-  /* SEVEN EQUAL COLUMNS, not seven content-width buttons. Same request and the
+  /* EQUAL COLUMNS, not content-width buttons (five since K1). Same request and the
      same mechanism as `.ribbon-group`: `1fr` in a grid sized by its own content
      is the widest tab's max-content, so "Yazdır" and "Müsaitlik" occupy the
      same box and the strip reads as a row of seven rather than a row of seven
@@ -1127,7 +1166,7 @@ textarea {
    the bottom: on a 1920px bar six equal white tabs with a 2px line under one
    of them is a difference you have to look for. Mixed from --sec, so the six
    identities stay one token each. */
-.tab[aria-current="true"] {
+.tab[aria-current='true'] {
   /* SOLID, and since 2026-11-15 FLAT. Two revisions ago the lit tab was a
      white sheet with a 2px rule under it — true to the tab metaphor and, on a
      1920px bar with six of them, a difference you had to go looking for. It is
@@ -1149,14 +1188,14 @@ textarea {
   box-shadow: var(--elev-2);
 }
 
-:root[data-theme='dark'] .tab[aria-current="true"] {
+:root[data-theme='dark'] .tab[aria-current='true'] {
   /* The dark section colours are LIGHT and the label is dark ink, so the
      step goes the other way. */
   background: color-mix(in oklab, #fff 25%, var(--sec, var(--accent)));
   border-color: var(--sec, var(--accent));
 }
 
-.tab[aria-current="true"] svg {
+.tab[aria-current='true'] svg {
   color: var(--on-accent);
 }
 
@@ -1254,8 +1293,8 @@ textarea {
    the strip moved and sometimes it did not, which is exactly how it was
    reported. `.tab[aria-current]` in the bar above uses the same equal-column
    grid and has never moved, because it says where you are in colour alone. */
-.ribbon .btn[aria-pressed="true"],
-.ribbon .btn[aria-pressed="true"]:hover:not(:disabled) {
+.ribbon .btn[aria-pressed='true'],
+.ribbon .btn[aria-pressed='true']:hover:not(:disabled) {
   background: var(--sec, var(--accent));
   border-color: var(--sec, var(--accent));
   color: var(--on-accent);
@@ -1279,10 +1318,11 @@ textarea {
      order, is the block below. */
   container: serit / inline-size;
   padding: var(--space-2) var(--space-4);
-  background:
-    linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
+    color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%
+  );
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
@@ -1605,9 +1645,11 @@ textarea {
 }
 
 .btn.primary {
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     color-mix(in oklab, #fff 8%, var(--accent)) 0%,
-    var(--accent) 100%);
+    var(--accent) 100%
+  );
   border-color: color-mix(in oklab, #000 12%, var(--accent));
   color: var(--on-accent);
   box-shadow: var(--elev-1);
@@ -1615,9 +1657,11 @@ textarea {
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     color-mix(in oklab, #fff 6%, var(--accent-hover)) 0%,
-    var(--accent-hover) 100%);
+    var(--accent-hover) 100%
+  );
   border-color: var(--accent-hover);
   box-shadow: var(--elev-2);
 }
@@ -1625,9 +1669,11 @@ textarea {
 :root[data-theme='dark'] .btn.primary {
   /* The dark accent is a LIGHT blue, so the highlight stop has to go the other
      way or the button gets paler as it rises. */
-  background: linear-gradient(180deg,
+  background: linear-gradient(
+    180deg,
     var(--accent) 0%,
-    color-mix(in oklab, #000 10%, var(--accent)) 100%);
+    color-mix(in oklab, #000 10%, var(--accent)) 100%
+  );
 }
 
 /* A two-position button (theme, availability kind, view switch): it must show
@@ -1637,8 +1683,8 @@ textarea {
    the hover state has to be named explicitly — without it the button you just
    pressed goes pale under the pointer that pressed it. This used to be two
    separate rules 1000 lines apart that disagreed about the colour. */
-.btn[aria-pressed="true"],
-.btn[aria-pressed="true"]:hover:not(:disabled) {
+.btn[aria-pressed='true'],
+.btn[aria-pressed='true']:hover:not(:disabled) {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
@@ -1666,7 +1712,9 @@ textarea {
   gap: var(--space-2);
 }
 
-.ribbon .btn > svg { flex: 0 0 auto; }
+.ribbon .btn > svg {
+  flex: 0 0 auto;
+}
 
 .btn.icon {
   display: inline-flex;
@@ -1682,8 +1730,8 @@ textarea {
 
 /* More specific than the pressed rule further up, so the ink has to be
    repeated here too: accent on accent would be an invisible icon. */
-.btn.icon[aria-pressed="true"],
-.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
+.btn.icon[aria-pressed='true'],
+.btn.icon[aria-pressed='true']:hover:not(:disabled) {
   color: var(--on-accent);
 }
 
@@ -1713,7 +1761,7 @@ textarea {
   color: var(--accent);
 }
 
-.btn.link[aria-current="true"] {
+.btn.link[aria-current='true'] {
   color: var(--accent);
 }
 
@@ -1829,13 +1877,19 @@ table.list tbody tr {
   );
 }
 
-.scroll-fade.faded-top { --fade-top: 1.75rem; }
-.scroll-fade.faded-bot { --fade-bot: 1.75rem; }
+.scroll-fade.faded-top {
+  --fade-top: 1.75rem;
+}
+.scroll-fade.faded-bot {
+  --fade-bot: 1.75rem;
+}
 
 /* Paper has no edges to run past, and a mask on the print tree would fade the
    top of the first page and the bottom of the last one. */
 @media print {
-  .scroll-fade { mask-image: none; }
+  .scroll-fade {
+    mask-image: none;
+  }
 }
 
 .main.no-overflow {
@@ -1986,7 +2040,7 @@ table.list tbody tr {
    rather than a row per way still being looked for. */
 .suggestion-progress {
   width: 10em;
-  height: .6em;
+  height: 0.6em;
   accent-color: var(--accent);
 }
 
@@ -2509,11 +2563,13 @@ table.grid thead tr:nth-child(2) th {
    container at 1366px/%125, hence the final 1px subtraction on table width. */
 :root[data-density='sigdir'] table.grid {
   --rowhead-w: 5rem;
-  --break-w: .1875rem;
+  --break-w: 0.1875rem;
   --cell-w: max(
     0px,
-    (var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
-        var(--day-cols) * var(--day-rule-w) - var(--space-4)) /
+    (
+        var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
+          var(--day-cols) * var(--day-rule-w) - var(--space-4)
+      ) /
       var(--lesson-cols)
   );
   width: calc(100% - 1px);
@@ -2585,7 +2641,6 @@ table.grid thead tr:nth-child(2) th {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 
 /* ------------------------------- The INTERFACE's density, its own axis
    "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
@@ -2877,7 +2932,7 @@ table.grid tbody td.unavailable {
      fixed button fills a tight cell corner to corner and leaves nowhere to
      take hold of the card (pitfall 36 — a size that comes from another size is
      calculated from it, not copied). */
-  --pin-size: clamp(.75rem, calc(var(--cell-h) * .48), 1.125rem);
+  --pin-size: clamp(0.75rem, calc(var(--cell-h) * 0.48), 1.125rem);
   width: var(--pin-size);
   height: var(--pin-size);
   display: grid;
@@ -3073,9 +3128,15 @@ td.block-cont {
        pitfall 40, the same rule, a second time.
      - these rules come BEFORE td.drop-*, which carries !important and so wins
        whatever the specificity: the cursor's cell always outranks the row. */
-table.grid tbody td.can-ok:not(.unavailable) { background-color: var(--can-ok-bg); }
-table.grid tbody td.can-warn:not(.unavailable) { background-color: var(--can-warn-bg); }
-table.grid tbody td.can-no:not(.unavailable) { background-color: var(--can-no-bg); }
+table.grid tbody td.can-ok:not(.unavailable) {
+  background-color: var(--can-ok-bg);
+}
+table.grid tbody td.can-warn:not(.unavailable) {
+  background-color: var(--can-warn-bg);
+}
+table.grid tbody td.can-no:not(.unavailable) {
+  background-color: var(--can-no-bg);
+}
 
 /* THE SAME ANSWER, ON THE CARD THAT IS HIDING IT.
    "o kartların arkasından ya da başka bir şekilde o kartın oraya gelip
@@ -3210,7 +3271,9 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   /* --elev-2 is "raised chrome", and a heading with the week scrolling under
      it is exactly that. Clipped to one side so it reads as a lip, not a
      floating slab. */
-  box-shadow: 0 6px 12px -8px var(--shadow-shell), 0 1px 0 var(--line);
+  box-shadow:
+    0 6px 12px -8px var(--shadow-shell),
+    0 1px 0 var(--line);
 }
 
 .grid-wrap.scrolled-x .row-head,
@@ -3291,7 +3354,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    handle", so it is visible AT REST rather than on hover: a hairline between
    two panes reads as a border, and borders do not move. */
 .pool-split::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 2.25rem;
   height: 5px;
@@ -3481,7 +3544,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    a deck used to carry, moved to where it costs nothing (2026-08-28 took the
    badge off the card by request; the count itself was never the complaint). */
 .pool-group-count {
-  padding: 0 .35em;
+  padding: 0 0.35em;
   border-radius: var(--r-sm);
   background: var(--bg);
   color: var(--muted);
@@ -3507,7 +3570,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    identical stack. Two pseudo-elements draw the visible deck depth, cutting
    hundreds of buried nodes out of the Program tab's opening paint. */
 .pool-stack {
-  --stack-step: .3rem;
+  --stack-step: 0.3rem;
   position: relative;
   flex: 0 0 auto;
   padding-bottom: calc(var(--layers, 0) * var(--stack-step));
@@ -3515,7 +3578,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 .pool-stack::before,
 .pool-stack::after {
-  content: "";
+  content: '';
   display: none;
   position: absolute;
   left: 0;
@@ -3530,13 +3593,13 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
     inset 0 0 0 1px color-mix(in oklab, var(--on-color) 22%, transparent);
 }
 
-.pool-stack:not([data-count="1"])::before {
+.pool-stack:not([data-count='1'])::before {
   display: block;
   transform: translateY(var(--stack-step));
   z-index: 1;
 }
 
-.pool-stack:not([data-count="1"]):not([data-count="2"])::after {
+.pool-stack:not([data-count='1']):not([data-count='2'])::after {
   display: block;
   transform: translateY(calc(var(--stack-step) * 2));
   z-index: 2;
@@ -3639,7 +3702,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 /* Nothing entered yet: dashed, so an empty step reads as an outline waiting to
    be filled rather than as a disabled control. */
-.step[data-empty="true"]:not([aria-pressed="true"]) {
+.step[data-empty='true']:not([aria-pressed='true']) {
   color: var(--muted);
   border-style: dashed;
   text-align: left;
@@ -3701,12 +3764,30 @@ table.stat th.num {
 }
 
 /* The column-width ladder, applied. Nothing here sets a width in the JSX. */
-table.list th.w-col-xs,  table.stat th.w-col-xs  { width: var(--w-col-xs); }
-table.list th.w-col-sm,  table.stat th.w-col-sm  { width: var(--w-col-sm); }
-table.list th.w-col-md,  table.stat th.w-col-md  { width: var(--w-col-md); }
-table.list th.w-col-lg,  table.stat th.w-col-lg  { width: var(--w-col-lg); }
-table.list th.w-col-xl,  table.stat th.w-col-xl  { width: var(--w-col-xl); }
-table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
+table.list th.w-col-xs,
+table.stat th.w-col-xs {
+  width: var(--w-col-xs);
+}
+table.list th.w-col-sm,
+table.stat th.w-col-sm {
+  width: var(--w-col-sm);
+}
+table.list th.w-col-md,
+table.stat th.w-col-md {
+  width: var(--w-col-md);
+}
+table.list th.w-col-lg,
+table.stat th.w-col-lg {
+  width: var(--w-col-lg);
+}
+table.list th.w-col-xl,
+table.stat th.w-col-xl {
+  width: var(--w-col-xl);
+}
+table.list th.w-col-2xl,
+table.stat th.w-col-2xl {
+  width: var(--w-col-2xl);
+}
 
 .grow {
   width: 100%;
@@ -3953,8 +4034,8 @@ main:focus {
    The hairline went too far the other way: 1.16:1 against the recess, so for
    a reader who has trouble seeing a field was a slightly greyer patch with no
    edge. --border-strong is the 3:1 floor and no louder (see the token). */
-input[type="text"],
-input[type="number"],
+input[type='text'],
+input[type='number'],
 select,
 textarea {
   padding: var(--space-2) var(--space-3);
@@ -3969,15 +4050,15 @@ textarea {
 }
 
 /* Hovering a recess should say it is writable before you click it. */
-input[type="text"]:hover:not(:disabled),
-input[type="number"]:hover:not(:disabled),
+input[type='text']:hover:not(:disabled),
+input[type='number']:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
   border-color: var(--muted);
 }
 
-input[type="text"]:hover:not(:disabled),
-input[type="number"]:hover:not(:disabled),
+input[type='text']:hover:not(:disabled),
+input[type='number']:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
   border-color: var(--muted);
@@ -4064,7 +4145,7 @@ table.grid tbody td:focus-visible {
 
 textarea {
   width: 100%;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: Consolas, 'Courier New', monospace;
   font-size: var(--fs-sm);
   resize: vertical;
 }
@@ -4637,7 +4718,9 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
   animation: reveal-pulse calc(var(--dur-slow) * 2) var(--ease) 3;
 }
 @keyframes reveal-pulse {
-  50% { outline-color: transparent; }
+  50% {
+    outline-color: transparent;
+  }
 }
 
 /* A number never wraps. `.num` is 8ch wide and "433 / 433" is nine characters,
@@ -4826,13 +4909,13 @@ table.sheet-lessons select.transfer-pick {
    do I press". A pressed toggle is now a SEGMENT: a light ground, an accent
    edge and a 3px underline, never a fill. The weight still does not change in
    the strip (pitfall 94). */
-.btn[aria-pressed="true"],
-.btn[aria-pressed="true"]:hover:not(:disabled),
-.ribbon .btn[aria-pressed="true"],
-.ribbon .btn[aria-pressed="true"]:hover:not(:disabled),
+.btn[aria-pressed='true'],
+.btn[aria-pressed='true']:hover:not(:disabled),
+.ribbon .btn[aria-pressed='true'],
+.ribbon .btn[aria-pressed='true']:hover:not(:disabled),
 .segmented > .btn[aria-pressed='true'],
-.btn.icon[aria-pressed="true"],
-.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
+.btn.icon[aria-pressed='true'],
+.btn.icon[aria-pressed='true']:hover:not(:disabled) {
   background: var(--accent-bg);
   border-color: var(--accent);
   color: var(--text);
@@ -4868,15 +4951,17 @@ table.sheet-lessons select.transfer-pick {
   box-shadow: none;
 }
 
-.tab[aria-current="true"],
-:root[data-theme='dark'] .tab[aria-current="true"] {
+.tab[aria-current='true'],
+:root[data-theme='dark'] .tab[aria-current='true'] {
   background: var(--paper);
   border-color: var(--border-strong);
   color: var(--text);
-  box-shadow: inset 0 -3px 0 var(--accent), var(--elev-1);
+  box-shadow:
+    inset 0 -3px 0 var(--accent),
+    var(--elev-1);
 }
 
-.tab[aria-current="true"] svg {
+.tab[aria-current='true'] svg {
   color: var(--text);
 }
 
@@ -5177,7 +5262,7 @@ table.sheet-lessons select.transfer-pick {
 }
 
 .entity.over .entity-count,
-.entity.over[aria-current="true"] .entity-count {
+.entity.over[aria-current='true'] .entity-count {
   color: var(--bad);
   font-weight: 700;
 }
@@ -5522,7 +5607,7 @@ table.sheet-lessons select.transfer-pick {
   outline-offset: -2px;
 }
 
-.entity[aria-current="true"] {
+.entity[aria-current='true'] {
   background: var(--accent-bg);
   border-color: var(--accent);
   /* --text, not the accent: the accent on its own ground is 6.28 / 6.70, and
@@ -5540,9 +5625,14 @@ table.sheet-lessons select.transfer-pick {
   color: var(--muted);
 }
 
-.entity-icon svg { width: 1rem; height: 1rem; }
+.entity-icon svg {
+  width: 1rem;
+  height: 1rem;
+}
 
-.entity[aria-current="true"] .entity-icon { color: inherit; }
+.entity[aria-current='true'] .entity-icon {
+  color: inherit;
+}
 
 .entity-name {
   flex: 1 1 auto;
@@ -5558,7 +5648,7 @@ table.sheet-lessons select.transfer-pick {
   color: var(--muted);
 }
 
-.entity[aria-current="true"] .entity-count {
+.entity[aria-current='true'] .entity-count {
   color: inherit;
 }
 
@@ -5739,12 +5829,12 @@ table.availability .av-head {
   --p-zoom: 1;
   --p-type: calc(var(--p-fit) * var(--p-zoom));
 
-  --fs-p-xl:   calc(17pt   * var(--p-type)); /* page title */
-  --fs-p-lg:   calc(12pt   * var(--p-type)); /* .p-top, .p-daycol */
-  --fs-p-md:   calc(10.5pt * var(--p-type)); /* the credit line */
-  --fs-p-base: calc(10pt   * var(--p-type)); /* table body and heading */
-  --fs-p-sm:   calc(9pt    * var(--p-type)); /* .p-bottom */
-  --fs-p-xs:   calc(8pt    * var(--p-type)); /* .p-clock */
+  --fs-p-xl: calc(17pt * var(--p-type)); /* page title */
+  --fs-p-lg: calc(12pt * var(--p-type)); /* .p-top, .p-daycol */
+  --fs-p-md: calc(10.5pt * var(--p-type)); /* the credit line */
+  --fs-p-base: calc(10pt * var(--p-type)); /* table body and heading */
+  --fs-p-sm: calc(9pt * var(--p-type)); /* .p-bottom */
+  --fs-p-xs: calc(8pt * var(--p-type)); /* .p-clock */
 
   /* One day's row. Was written inside `@media print` alone, which is why the
      preview's rows were 30 px against the paper's 86.93 — the thing
@@ -5775,13 +5865,19 @@ table.availability .av-head {
   }
 
   @container print-tray (max-width: 1150px) {
-    .print-sheet { zoom: .85; }
+    .print-sheet {
+      zoom: 0.85;
+    }
   }
   @container print-tray (max-width: 980px) {
-    .print-sheet { zoom: .75; }
+    .print-sheet {
+      zoom: 0.75;
+    }
   }
   @container print-tray (max-width: 860px) {
-    .print-sheet { zoom: .65; }
+    .print-sheet {
+      zoom: 0.65;
+    }
   }
 }
 
@@ -5820,16 +5916,16 @@ table.availability .av-head {
    because an inherited colour arrives already computed from <body>. Screen
    only: on paper the `@media print` pins below speak alone. */
 @media screen {
-:root[data-theme="dark"] .print-sheet {
-  color-scheme: light;
-  --paper: #ffffff;
-  --text: #131a25;
-  --muted: #505763;
-  --line: #c6cdd7;
-  --print-line: #444;
-  --print-head-bg: #eee;
-  color: var(--text);
-}
+  :root[data-theme='dark'] .print-sheet {
+    color-scheme: light;
+    --paper: #ffffff;
+    --text: #131a25;
+    --muted: #505763;
+    --line: #c6cdd7;
+    --print-line: #444;
+    --print-head-bg: #eee;
+    color: var(--text);
+  }
 }
 
 /* ONE TIMETABLE. Not renamed to `.print-plan` even though that is what it is:
@@ -5849,11 +5945,19 @@ table.availability .av-head {
 /* TWO AND FOUR UP. The vertical is what halves in both cases, so they share a
    row height; the type does not, because at four up the WIDTH halves as well
    and twelve columns have to fit 138 mm instead of 277. */
-.print-area[data-per='2'] .print-sheet { grid-template: 1fr 1fr / 1fr; }
-.print-area[data-per='4'] .print-sheet { grid-template: 1fr 1fr / 1fr 1fr; }
+.print-area[data-per='2'] .print-sheet {
+  grid-template: 1fr 1fr / 1fr;
+}
+.print-area[data-per='4'] .print-sheet {
+  grid-template: 1fr 1fr / 1fr 1fr;
+}
 
-.print-area[data-per='2'] { --p-fit: .72; }
-.print-area[data-per='4'] { --p-fit: .5; }
+.print-area[data-per='2'] {
+  --p-fit: 0.72;
+}
+.print-area[data-per='4'] {
+  --p-fit: 0.5;
+}
 
 .print-area[data-per='2'] .print-page,
 .print-area[data-per='4'] .print-page {
@@ -5861,8 +5965,12 @@ table.availability .av-head {
 }
 
 /* The reader's own adjustment, on top of whatever the layout demanded. */
-.print-area[data-size='kucuk'] { --p-zoom: .85; }
-.print-area[data-size='buyuk'] { --p-zoom: 1.18; }
+.print-area[data-size='kucuk'] {
+  --p-zoom: 0.85;
+}
+.print-area[data-size='buyuk'] {
+  --p-zoom: 1.18;
+}
 
 /* ONE DAY'S ROW IS WHAT IS LEFT OVER, and that is the whole answer to
    "yazdırmada yazıları büyük yapınca yazdırma bozuluyor".
@@ -6041,7 +6149,7 @@ table.availability .av-head {
 
 /* The box stays on the first line of the label it belongs to. */
 .form-col > .pick-item > input[type='checkbox'] {
-  margin-top: .2em;
+  margin-top: 0.2em;
   flex: none;
 }
 
@@ -6169,7 +6277,7 @@ table.bell-preview td {
   /* Paper is always light, whatever the screen is set to. Dark ink on dark
      paper would waste a printout my father only notices after printing it. */
   :root,
-  :root[data-theme="dark"] {
+  :root[data-theme='dark'] {
     color-scheme: light;
 
     /* Pinned, and this is the answer to "does printing follow --ui-scale?":
@@ -6418,7 +6526,7 @@ table.availability.heat td.closed {
 .dlg-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 14, 22, .45);
+  background: rgba(10, 14, 22, 0.45);
   backdrop-filter: blur(3px);
   z-index: 40;
 }
@@ -6465,8 +6573,14 @@ table.availability.heat td.closed {
   color: var(--accent);
 }
 
-.dlg-icon.bad { background: var(--bad-bg); color: var(--bad); }
-.dlg-icon.warn { background: var(--warn-bg); color: var(--warn); }
+.dlg-icon.bad {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+.dlg-icon.warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
 
 .dlg-title {
   margin: 0;
@@ -6523,14 +6637,18 @@ table.availability.heat td.closed {
 }
 
 @starting-style {
-  .dlg-overlay { opacity: 0; }
+  .dlg-overlay {
+    opacity: 0;
+  }
   .dlg {
     opacity: 0;
     transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
   }
 }
 
-.dlg-overlay[data-state='closed'] { opacity: 0; }
+.dlg-overlay[data-state='closed'] {
+  opacity: 0;
+}
 .dlg[data-state='closed'] {
   opacity: 0;
   transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
@@ -6571,8 +6689,12 @@ table.availability.heat td.closed {
   animation: toast-in var(--dur) var(--ease-out);
 }
 
-.toast.info { border-left-color: var(--accent); }
-.toast.warn { border-left-color: var(--warn); }
+.toast.info {
+  border-left-color: var(--accent);
+}
+.toast.warn {
+  border-left-color: var(--warn);
+}
 
 .toast-icon {
   display: inline-flex;
@@ -6580,8 +6702,12 @@ table.availability.heat td.closed {
   color: var(--ok);
 }
 
-.toast.info .toast-icon { color: var(--accent); }
-.toast.warn .toast-icon { color: var(--warn); }
+.toast.info .toast-icon {
+  color: var(--accent);
+}
+.toast.warn .toast-icon {
+  color: var(--warn);
+}
 
 .toast-text {
   flex: 1 1 auto;
@@ -6626,8 +6752,14 @@ table.availability.heat td.closed {
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(var(--slide)); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(var(--slide));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* A list of choices inside explanatory text — three densities, three file
@@ -6840,11 +6972,7 @@ table.availability.heat td.closed {
 /* Closed and empty: the same hatch the availability grid uses, so the two
    screens say the same thing the same way. */
 .sheet-week td.unavailable {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--closed) 0 3px,
-    var(--hatch) 3px 6px
-  );
+  background: repeating-linear-gradient(-45deg, var(--closed) 0 3px, var(--hatch) 3px 6px);
 }
 
 /* A lesson left sitting on an hour that was closed afterwards. It is NOT
@@ -6864,10 +6992,14 @@ table.availability.heat td.closed {
 }
 
 @starting-style {
-  .sheet { transform: translateX(var(--sweep)); }
+  .sheet {
+    transform: translateX(var(--sweep));
+  }
 }
 
-.sheet[data-state='closed'] { transform: translateX(var(--sweep)); }
+.sheet[data-state='closed'] {
+  transform: translateX(var(--sweep));
+}
 
 /* A name in a list that opens the sheet. It reads as a link, not as a button:
    there are twenty-five of them down a column and twenty-five frames would be
@@ -7145,30 +7277,59 @@ table.availability thead .hour-clock:empty::before {
 
 .health-dot {
   flex: 0 0 auto;
-  width: .5rem;
-  height: .5rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: var(--r-full);
   background: var(--ok);
 }
 
-.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-ink); }
-.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn-ink); }
-.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad-ink); }
+.health.ok {
+  background: var(--ok-bg);
+  border-color: var(--ok);
+  color: var(--ok-ink);
+}
+.health.tight {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--warn-ink);
+}
+.health.impossible {
+  background: var(--bad-bg);
+  border-color: var(--bad);
+  color: var(--bad-ink);
+}
 
-.health.tight .health-dot { background: var(--warn); }
-.health.impossible .health-dot { background: var(--bad); }
+.health.tight .health-dot {
+  background: var(--warn);
+}
+.health.impossible .health-dot {
+  background: var(--bad);
+}
 
-.health:hover { box-shadow: var(--elev-1); }
+.health:hover {
+  box-shadow: var(--elev-1);
+}
 
 /* Below this the bar has six destinations, a document name and six buttons to
    hold: the chip trades its sentence for two words ("3 sorun"). It used to keep
    only the dot, and a coloured pill with a dot in it read as an on/off switch
    (usability review, 2026-11-15). */
-.health-short { display: none; }
+.health-short {
+  display: none;
+}
 @media (max-width: 1500px) {
-  .health-text { display: none; }
-  .health-short { display: inline; }
-  .health { flex-shrink: 0; }
+  .health-text {
+    display: none;
+  }
+  .health-short {
+    display: inline;
+  }
+  /* Its own width, not a grown share of the bar: the five tabs of K1 are
+     wider than the seven were, and a share left "433 saat yerleşme" cut at
+     1366 px. The document's name gives way instead. */
+  .health {
+    flex: 0 0 auto;
+  }
 }
 
 /* --------------------------------------------------------- command palette
@@ -7277,7 +7438,7 @@ kbd {
 .palette-row[data-active='true'] .palette-icon,
 .palette-row[data-active='true'] .palette-hint {
   color: inherit;
-  opacity: .85;
+  opacity: 0.85;
 }
 
 .palette-dot {
@@ -7304,7 +7465,7 @@ kbd {
 
 .palette-enter {
   flex: 0 0 auto;
-  opacity: .7;
+  opacity: 0.7;
 }
 
 .palette-empty {
@@ -7730,9 +7891,9 @@ table.person-list tbody tr {
   height: 2.5rem;
 }
 
-.sheet table.availability td.closed {
-  font-size: var(--fs-lg);
-}
+/* The cross keeps Müsaitlik's size: since 2026-11-16 (K1) this is the only
+   grid closed hours are marked on, and it has to out-speak the Program
+   grid's quiet one (e2e/renk.spec.ts). */
 
 .sheet-more > summary {
   cursor: pointer;

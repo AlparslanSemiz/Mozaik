@@ -46,7 +46,10 @@ export function peopleStrip({ ui, state, t }: StripContext): React.ReactElement 
           }
           onClick={() => ui.setPeople(tab, 'lessons')}
         >
-          {lessonIcon}
+          {/* Drawn at the tabs' 22px; the box sizes it to the strip's 18. */}
+          <span className="step-icon" aria-hidden="true">
+            {lessonIcon}
+          </span>
           {t('Dersler')}
         </button>
       </Group>

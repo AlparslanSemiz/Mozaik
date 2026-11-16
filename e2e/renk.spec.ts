@@ -351,6 +351,8 @@ test.describe('8. Tema', () => {
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await darkTheme(page);
+    // The offer stands over the school's own data, not over Görünüm (K1).
+    await openSettings(page, 'Zil ve günler');
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();

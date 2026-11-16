@@ -144,7 +144,12 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
       return geometry(page);
     };
 
-    const fits = await section('Zil ve günler');
+    // Hakkında folds its long panels, so it fits; Zil ve günler and Kurallar
+    // carry Başlarken or long tables since K1 and overflow at 900.
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitemradio', { name: 'Hakkında' }).click();
+    await page.waitForTimeout(200);
+    const fits = await geometry(page);
     const overflows = await section('Görünüm');
 
     // TWO GUARDS BEFORE THE ASSERTION, and neither is optional.
@@ -155,7 +160,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     // take room: with `--hide-scrollbars` — the default every other spec in
     // this suite runs under — it takes none, and a bar of zero pixels can never
     // take any away.
-    expect(fits.overflowing, '"Zil ve günler" taşıyor — çift seçilmeli').toBe(false);
+    expect(fits.overflowing, '"Hakkında" taşıyor — çift seçilmeli').toBe(false);
     expect(overflows.overflowing, '"Görünüm" taşmıyor — çift seçilmeli').toBe(true);
     expect(
       overflows.gutter,

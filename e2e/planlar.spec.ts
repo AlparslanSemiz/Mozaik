@@ -297,10 +297,8 @@ test.describe('41. Taslaklar', () => {
     // A brand new empty plan: this is the screen a new term starts on.
     await openPlans(page);
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
-    await page
-      .locator('.tabstrip')
-      .getByRole('button', { name: 'Okul bilgileri', exact: true })
-      .click();
+    // Başlarken and the drafts stand over Okul bilgileri's school data (K1).
+    await openSettings(page, 'Zil ve günler');
 
     const start = page.getByRole('button', { name: /taslağı ile başla$/ });
     await expect(start).toBeVisible();
