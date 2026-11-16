@@ -145,6 +145,24 @@ export function keepToday(planId: Id, state: State, now = Date.now()): boolean {
   return landed;
 }
 
+/**
+ * Once at startup: the copies of plans the library no longer has go, with
+ * their day marks. Not when the plan is deleted: within the session the delete
+ * has its "Geri al", and an undone delete must find its copies where they were.
+ */
+export function pruneOrphans(planIds: readonly Id[]): void {
+  if (writesClosed()) return;
+  const keep = new Set(planIds);
+  for (const c of copyKeys()) {
+    if (!keep.has(c.planId)) safely(() => localStorage.removeItem(c.key));
+  }
+  const marks = readMarks();
+  const stale = Object.keys(marks).filter((id) => !keep.has(id));
+  if (stale.length === 0) return;
+  for (const id of stale) delete marks[id];
+  safely(() => localStorage.setItem(DAILY_MARK_KEY, JSON.stringify(marks)));
+}
+
 export interface DailyCopy {
   day: string;
   state: State;

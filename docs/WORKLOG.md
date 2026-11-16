@@ -54,7 +54,7 @@ istisnası).
 4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
 
 **Dikkat.** `sade/asama-3a`'da brotli 302 154 B, eşiğe 3 846 B (aşama 2'nin 305 787'si
-K6 ve K7 ile 300 437'ye indi, K8 ~1,7 kB aldı). Tuzaklarda en büyük numara 179. Eskisi: Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
+K6 ve K7 ile 300 437'ye indi, K8 ~1,7 kB aldı; (b) kararıyla küçültme kalktı). Tuzaklarda en büyük numara 179. Eskisi: Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
 gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
 yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
 Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
@@ -94,8 +94,23 @@ seçenek değiştiriciye dokunmadı.
 | 1366 %125 (1093) | 16,8 | 0 | 319 | 9 |
 | 1366 %150 (911) | 14,3 | 0 | 319 | 9 |
 
-Hafta her kutuda sığıyor; 1920 %150 ve 1366 %125/%150'de tek saatlik kartlar "4…" okunuyor,
-10–12. saat numaraları da kırpılıyor. Babanın makinesi %100 (PRINCIPLES), açık soru TODO'da.
+Hafta her kutuda sığıyordu ama 1920 %150 ve 1366 %125/%150'de tek saatlik kartlar "4…"
+okunuyordu, 10–12. saat numaraları da kırpılıyordu. **Alp (b)'yi seçti, aynı gün yazıldı:**
+sütun en geniş dersin okunduğu genişlikten dar olmuyor (`--cell-min`, yazıdan ölçülüyor:
+örnek okulda 23 px, en geniş satır "453" 21,61 px), kart yazısı en az 11 px (9 px küçültme
+kalktı), sığmayan hafta 14 px'lik hep çizilen bir çubukla yana kayıyor. Sonra:
+
+| Kutu | Hücre | Yana kayma | Kesik ders | En küçük yazı |
+|---|---|---|---|---|
+| 1920 %100 | 28,1 | 0 | 0 | 12 |
+| 1920 %125 | 26 | 232 | 0 | 12 |
+| 1920 %150 | 26 | 488 | 0 | 12 |
+| 1366 %100 | 26 | 402 | 0 | 12 |
+| 1366 %125 | 26 | 675 | 0 | 12 |
+| 1366 %150 | 26 | 857 | 0 | 12 |
+
+(Hücre ilk sütunda gün çizgisiyle birlikte. Playwright başsız Chromium kaydırma çubuğunu
+`--hide-scrollbars` ile gizliyor; çubuk o bayrak kaldırılarak görüldü.)
 
 **Koşular.** `tsc` (uygulama ve e2e), `eslint src`, `knip`, `depcruise` temiz; `npm run hizli`
 1 690 geçti (bir kez yük altında `emptyStart.test.ts` 5 s'de zaman aşımı, tek başına yeşil);
@@ -106,7 +121,10 @@ tam Chromium E2E `--workers=2`: 786 geçti, 3 kırmızı: bilinen `kayma.spec.ts
 **İnceleme** (taze bağlamlı alt ajan): bugünün kopyasının günün sonunu engellemesi, bugünün
 kopyasında VK1/okunamayan/boş plan kapısının eksikliği, dolu depoda silmeden-önce yuvasının
 kopyalardan önce gitmesi, kapalı pencerede planın her çizimde metne çevrilmesi, gün kaydının
-yazılamaması, DST'de "dün", bayat yorumlar ve belge cümleleri: düzeldi, ayrı commit'te. Silinen planın kopyaları budanmıyor: bilerek, yer gerekince ilk onlar gider.
+yazılamaması, DST'de "dün", bayat yorumlar ve belge cümleleri: düzeldi, ayrı commit'te. Sonradan (Alp onayladı): silinen planın kopyaları sonraki açılışta budanıyor; yeni sınıf
+bir öncekinin dersliğiyle açılıyor (aşama 2'nin gerilemesi, `NewPerson.tsx`); aynı sınıfta
+iki dersi olan öğretmenin iki saat kutusu branşla ayrı adlar alıyor (`InspectorSheet.tsx`).
+Birim ve E2E (`dailyCopies.test.ts`, `kisi.spec.ts`).
 
 **Tıklama testi** (`dist/index.html`, Chromium): altı kutuda Program, 1920 ve 1366'da Dosya ▾
 → Eski hâline dön (kopya yok / dünkü kopya) → Dünkü hâline dön → bildirim ve Geri al.

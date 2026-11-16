@@ -357,8 +357,9 @@ boş plan kopyalanmaz. Gün kaydı hiç yokken (bu sürümün ilk açılışı) 
 ait olduğu bilinmediği için kopya alınmaz, ilki ertesi gün gelir. Günün sonu kazanır:
 bir dönüşten önce alınan bugünün kopyası ertesi günün ilk kaydında günün son hâliyle
 değişir, dönüşten önceki hâl o zaman silmeden-önce yuvasında kalır. Her planın en yeni yedi günü kalır (`DAILY_COUNT`,
-`library.ts`); silinen bir planın kopyaları kalır ve Veriler nerede'de görünür, yer
-gerekince ilk onlar gider. Geri dönmek önce şimdiki hâli bugünün kopyası yapar (boş değilse,
+`library.ts`); silinen bir planın kopyaları o oturum boyunca kalır (silmenin
+`Geri al`'ı planı kopyalarıyla geri getirsin diye) ve sonraki açılışta gün kaydıyla birlikte
+silinir (`pruneOrphans`). Geri dönmek önce şimdiki hâli bugünün kopyası yapar (boş değilse,
 bugünün eski kopyasının yerine), sonra silmeden-önce yuvasına (önerilmeden) ve seçilen klasöre yazar,
 sonra kopyayı geri alınabilen bir adım olarak koyar. Depo dolunca plan önce gelir:
 sığmayan bir kopya yalnız daha eski kopyaları siler, planın reddedilen kaydı önce

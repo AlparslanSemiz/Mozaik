@@ -123,6 +123,21 @@ describe('günlük kopyalar', () => {
   });
 });
 
+describe('silinen planın kopyaları', () => {
+  it('açılışta gidiyor, var olan planınkiler kalıyor', async () => {
+    for (const d of [10, 11]) {
+      await save('1', FULL, day(d));
+      await save('b', LESS, day(d));
+    }
+    const m = await import('./dailyCopies');
+    expect(m.dailyCopies('b')).toHaveLength(1);
+    m.pruneOrphans(['1']);
+    expect(m.dailyCopies('b')).toEqual([]);
+    expect(m.dailyCopies('1')).toHaveLength(1);
+    expect(Object.keys(JSON.parse(localStorage.getItem(DAILY_MARK_KEY)!))).toEqual(['1']);
+  });
+});
+
 describe('dolu depo: plan önce gelir', () => {
   it('sığmayan kopya yalnız eski kopyaları siler, başka hiçbir anahtarı', async () => {
     const one = JSON.stringify(FULL).length;

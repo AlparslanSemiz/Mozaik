@@ -32,7 +32,7 @@ import {
 } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import { keepBeforeDelete, noteAfter, offerAtStart, type Offer } from './beforeDelete';
-import { keepDay } from './dailyCopies';
+import { keepDay, pruneOrphans } from './dailyCopies';
 import type { Id, State } from '../../leaf/model';
 import { t } from '../../leaf/i18n';
 
@@ -64,6 +64,8 @@ function initialBox(): Box {
   // timetable is already sitting in. Adoption therefore copies NOTHING.
   const library = readLibraryAtStart();
   writeLibrary(library);
+  // Daily copies of plans deleted in an earlier session (K8).
+  pruneOrphans(library.plans.map((p) => p.id));
   let planId = library.activeId;
   let present = loadPlanAtStart(planId);
   setAsideAtStart = [];

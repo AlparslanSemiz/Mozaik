@@ -194,6 +194,49 @@ test.describe('Kişi sayfası', () => {
     await expect(page.locator('tr[data-person-id="tMC"]')).toHaveCount(1);
   });
 
+  // Two lessons of one teacher in one class: two boxes, two names (2026-11-16).
+  test('aynı sınıfta iki dersin saat kutusunun adı branşla ayrılıyor', async ({ page }) => {
+    const w = world();
+    const two: State = {
+      ...w,
+      teachers: w.teachers.map((t) => (t.id === 'tAY' ? { ...t, subject2: 'Kimya' } : t)),
+      lessons: [...w.lessons, { ...w.lessons[0]!, id: 'l3', second: true, weeklyHours: 1 }],
+    };
+    await loadWorld(page, two, 'Okul');
+    await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
+    const boxes = page.getByRole('spinbutton', { name: /^510 · .* · Haftalık saat$/ });
+    await expect(boxes).toHaveCount(2);
+    const names = await boxes.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+    expect(new Set(names).size).toBe(2);
+  });
+
+  // The person page lost the old add row's habit in phase 2; back on 2026-11-16.
+  test('yeni sınıf bir öncekinin dersliğiyle açılıyor', async ({ page }) => {
+    await loadWorld(
+      page,
+      {
+        ...world(),
+        rooms: [
+          { id: 'dA', name: 'A' },
+          { id: 'dB', name: 'B' },
+        ],
+      },
+      'Okul',
+    );
+    await openSetup(page, 'Sınıflar');
+    await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+    let sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
+    await page.keyboard.type('512');
+    await sheet.getByRole('combobox', { name: 'Derslik', exact: true }).selectOption('dB');
+    await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: '512' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+    sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
+    await expect(sheet.getByRole('combobox', { name: 'Derslik', exact: true })).toHaveValue('dB');
+  });
+
   test('+ Yeni öğretmen boş bir sayfa açıyor, Ekle onu kişinin sayfası yapıyor', async ({
     page,
   }) => {
