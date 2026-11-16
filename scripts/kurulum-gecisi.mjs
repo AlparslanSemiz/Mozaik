@@ -81,6 +81,42 @@ function calisanlar() {
   return cikti === '' ? [] : cikti.split(/\r?\n/).map((s) => s.trim().toLowerCase());
 }
 
+/** What the machine looks like when the install did not come up: the waiter's
+    own log, the folders, the processes, and the installer's events. */
+function teshis() {
+  const bak = (ne, betik) => {
+    try {
+      console.log(`--- ${ne}\n${ps(betik)}`);
+    } catch (e) {
+      console.log(`--- ${ne}: okunamadı (${e.message})`);
+    }
+  };
+  bak(
+    'bekleyicinin günlüğü',
+    "Get-Content (Join-Path $env:TEMP 'Mozaik-kurulum.log') -ErrorAction SilentlyContinue",
+  );
+  bak(
+    'kurulum klasörü',
+    "Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Programs') -Recurse -Depth 2 -ErrorAction SilentlyContinue | Select-Object FullName, Length | Format-Table -AutoSize | Out-String -Width 200",
+  );
+  bak(
+    'profil',
+    "Get-ChildItem (Join-Path $env:LOCALAPPDATA 'com.dersprogrami.arac') -ErrorAction SilentlyContinue | Select-Object Name, LastWriteTime | Out-String -Width 200",
+  );
+  bak(
+    'süreçler',
+    "Get-Process | Where-Object { $_.Name -like '*Mozaik*' -or $_.Name -like '*kurulum*' -or $_.Name -like '*setup*' } | Select-Object Id, Name, Path, StartTime | Out-String -Width 250",
+  );
+  bak(
+    'kayıt defteri',
+    "Get-ChildItem 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall' -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*Mozaik*' } | ForEach-Object { Get-ItemProperty $_.PSPath } | Out-String -Width 250",
+  );
+  bak(
+    'uygulama olayları',
+    'Get-WinEvent -LogName Application -MaxEvents 30 -ErrorAction SilentlyContinue | Where-Object { $_.TimeCreated -gt (Get-Date).AddMinutes(-10) } | Select-Object TimeCreated, ProviderName, Id, Message | Format-List | Out-String -Width 250',
+  );
+}
+
 async function bekleKi(ne, kosul, ms) {
   const son = Date.now() + ms;
   while (Date.now() < son) {
@@ -140,13 +176,18 @@ try {
   console.log(uiaBas(ADLAR.kur, { tam: true, sureMs: 120_000 }));
 
   const not = join(yerler.profil, 'kurulu-yol.txt');
-  await bekleKi(
-    'Kurulan programın açılıp notunu yazması',
-    () =>
-      existsSync(not) &&
-      readFileSync(not, 'utf8').split(/\r?\n/)[0].trim().toLowerCase() === kurulu.toLowerCase(),
-    300_000,
-  );
+  try {
+    await bekleKi(
+      'Kurulan programın açılıp notunu yazması',
+      () =>
+        existsSync(not) &&
+        readFileSync(not, 'utf8').split(/\r?\n/)[0].trim().toLowerCase() === kurulu.toLowerCase(),
+      300_000,
+    );
+  } catch (e) {
+    teshis();
+    throw e;
+  }
   console.log(`kuruldu ve açıldı: ${kurulu}`);
   const eksik = DOSYALAR.filter((d) => !existsSync(join(klasor, d)));
   if (eksik.length > 0) throw new Error(`kurulumda yok: ${eksik.join(', ')}`);
