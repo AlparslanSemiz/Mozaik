@@ -109,6 +109,21 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
 
+## 2026-11-16 · Checkout yeri `~/dev/Mozaik` (`duzen/checkout-yeri`)
+
+**Ne yapıldı.** Linux'taki kalıcı checkout artık `~/dev/Mozaik`; eski konum ajanlara kapalı.
+`scripts/linux-kur.sh` sabit bir yoldan değil, kendi durduğu depodan (`scripts/..`) derliyor;
+main, temiz ve worktree değil kontrolleri aynı. `src/linuxKur.test.ts` betiği sahte deponun içine
+kopyalayıp oradan koşuyor; iki yeni test: depo başka bir yerde de olsa kendi deposundan kuruyor,
+bir git deposunun içinde değilse 3 ile reddediyor. Başka bir tam klon da kurabildiği için yeni
+bir kapı: kurulu commit bu klonun main'inden yeniyse 8 ile reddediyor (geri sürüm plan şemasının
+altına düşürmesin), testiyle; bağlantıyla çağrılan betik gerçek dosyasının deposunu buluyor. `scripts/dal-temizle.mjs`'in arşivi
+`~/dev/Mozaik-arsiv/`'e taşındı (eski arşivler eski konumda duruyor). CLAUDE.md, README, BUILD
+yeni yolu söylüyor; tarihli kayıtlar olduğu gibi.
+
+**Koşulan.** `npx vitest run src/linuxKur.test.ts` 13/13 (shellcheck dahil), `npm run hizli`
+1746/1746.
+
 ## 2026-11-16 · İkame ve hafta istisnası (`ozellik/ikame`, TODO SD9)
 
 **Ne yapıldı.** Taban haftanın üstünde tarihli bir katman, şema v18 (`State.dated`: `absent`,
