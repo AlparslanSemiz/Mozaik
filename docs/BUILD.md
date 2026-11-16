@@ -217,6 +217,12 @@ durmaz, yalnız site derlemesinde bir `transformIndexHtml` eklentisiyle eklenir
 çevrimdışı iddiası okunarak doğrulanabilir kalır ve `site.spec.ts` tam olarak
 bunu ölçer (tuzak 32).
 
+Aynı eklenti site derlemesine bir ziyaret sayacı da koyar: satır içi bir betik,
+yalnız `adres.json`'daki yeni kökende Cloudflare Web Analytics beacon'ını
+`document.createElement` ile ekler. Etiket çalışma anında kurulduğu için
+`site.yml`'in `<script src=` denetimi bilerek geçer: sayfa yine tek dosya, beacon
+isteğe bağlı ve yüklenemezse hiçbir şey değişmez (DECISIONS 2026-11-16).
+
 Site derlemesinde `<link rel="icon">` yok: `index.html` favicon'u `data:` URI
 olarak taşıyor ve bu iki derlemede de geçerli. İkinci bir bağlantı `<head>`
 sırasında kazanır ve sekmeye ayrıntılı işareti getirirdi.

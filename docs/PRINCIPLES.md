@@ -42,7 +42,9 @@ simgeler dosyanın içine gömülüdür. Ağ isteyen bir özellik (göndermek, g
 denetlemek) ağ yokken kendi işini yapamaz ve bunu söyler, ama programı durdurmaz.
 Bugün program çalışırken ağa hiç çıkmıyor, ve bu `vite-plugin-singlefile`,
 `e2e/temel.spec.ts`, `e2e/site.spec.ts` ve `e2e/kapan.ts` ile mekanik olarak
-ölçülüyor. Ağ isteyen bir özellik girerse bu ölçüm ona göre daraltılır, kaldırılmaz.
+ölçülüyor. Tek istisna web adresindeki çerezsiz ziyaret sayımı (aşağıda "Ağ ve
+servisler"); o yalnız canlı kökende yüklenir, testler localhost'ta koştuğu için ölçüm
+onu görmez. Ağ isteyen bir özellik girerse bu ölçüm ona göre daraltılır, kaldırılmaz.
 
 ## Türkçe kaynak dil
 

@@ -115,6 +115,9 @@ what is around it.
    rights, no `hosts` file edit. Chrome and Edge resolve `*.localhost`
    themselves. Nothing leaves the machine.
 3. **The site.** GitHub Pages, a service worker, works with the plug pulled.
+   At the live address only, it also loads Cloudflare Web Analytics: a
+   cookieless visit count (page address, referrer, browser, country, load
+   times), nothing from the timetable. If it cannot load, nothing changes.
 4. **The `.exe`.** Tauri, WebView2, one binary. It writes every plan into
    `Documents\Ders Programı` on its own, without being asked, and it can
    update itself, but only when you press the button.

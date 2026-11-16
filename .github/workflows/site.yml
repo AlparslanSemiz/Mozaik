@@ -53,6 +53,8 @@ jobs:
       # The claim this project makes about itself, checked on the machine that
       # publishes rather than only on the one that develops: the page carries
       # its own code, so a browser that has it does not need us again.
+      # The visit counter (vite.site.config.ts) builds its <script> at run time
+      # on purpose and passes this grep: it is optional, not part of the app.
       - name: Is dist-site still one file
         run: |
           set -o pipefail
