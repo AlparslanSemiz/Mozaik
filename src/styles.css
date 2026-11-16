@@ -952,6 +952,8 @@ textarea {
   max-width: max-content;
   min-width: 0;
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  /* The same height as the destinations beside it (31/29/25px before). */
+  min-height: var(--ribbon-h);
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   background: var(--paper);
@@ -961,7 +963,8 @@ textarea {
   margin: 0;
   font-size: var(--fs-sm);
   font-weight: 600;
-  letter-spacing: var(--ls-tight);
+  letter-spacing: normal;
+  word-spacing: .12em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1460,7 +1463,7 @@ textarea {
   position: absolute;
   top: var(--space-2);
   bottom: var(--space-2);
-  left: calc(var(--space-4) + var(--ribbon-lead-w) + var(--space-3) / 2);
+  left: calc(var(--edge-x) + var(--ribbon-lead-w) + var(--space-3) / 2);
   width: 1px;
   background: var(--line);
 }
@@ -1574,7 +1577,11 @@ textarea {
 }
 
 .btn:disabled {
-  opacity: 0.45;
+  /* Read, not faded: .45 opacity was under 3:1 for the word. */
+  opacity: 1;
+  color: var(--muted);
+  background: var(--paper-sunk);
+  border-color: var(--border-strong);
   cursor: default;
 }
 
@@ -1842,7 +1849,7 @@ table.list tbody tr {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0 var(--space-4);
+  padding: 0 var(--edge-x);
   /* Nothing wrong: the plain state, and the strip where the grid's own
      description sits. It is a shade of PAPER, not of chrome — it belongs to
      the timetable below it, not to the tools above it. */
@@ -2773,10 +2780,25 @@ table.grid tbody td.unavailable {
   cursor: pointer;
   /* Faint at rest (it was invisible, and a control nobody can see is a control
      nobody finds), fully opaque when aimed at or on. */
-  opacity: .45;
+  opacity: 0;
   transition:
     opacity var(--dur-fast) var(--ease),
     background var(--dur-fast) var(--ease);
+}
+
+/* The wide block has room beside its room letter: there the pin rests at
+   3:1 (.45 was 2.3:1). On the narrow single card, the pin sat on the room
+   letter, so it is only drawn when aimed at or on. */
+:where(table.grid tbody td.block-wide) > .card-pin {
+  opacity: .65;
+}
+
+/* A pinned card's SECOND mark, besides the pin: a filled chip behind it, so
+   "pinned" does not rest on a 74%-box glyph alone. The ink is --on-color over
+   a --paper chip, neither of which turns with the theme's colour channel. */
+.card-pin[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--paper) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--on-color) 35%, transparent);
 }
 
 /* The target reaches into the cell's own padding, down and to the left, and
@@ -2840,7 +2862,7 @@ table.grid tbody td:hover > .card-pin,
 .menu-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--r-sm);
   /* 14px, not 13: the menus and the tabs are what he reads to find his way
@@ -2889,8 +2911,8 @@ table.grid tbody td:hover > .card-pin,
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
+  width: max(16px, 1.15em);
+  height: max(16px, 1.15em);
 }
 
 .menu-why {
@@ -2942,6 +2964,10 @@ table.grid tbody td:hover > .card-pin,
 .card-top {
   font-size: var(--fs-md);
   font-weight: 700;
+  /* Two cards side by side share only the 2px line between them: this keeps
+     the digits off it, and equal-width so "111" and "450" take the same room. */
+  padding-inline: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-bottom {
@@ -3255,7 +3281,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   align-items: center;
   gap: var(--space-2);
   flex: 0 0 auto;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--edge-x);
 }
 
 /* "neye göre filtrelensin sıralansın ayarı bile olabilir." Pushed to the far
@@ -3335,7 +3361,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
      edge came out 0.0125px above the box, because the lift resolves to
      2.2000122 rather than 2.2. Measured, the same way pitfall 37 measured the
      grid's two pixels of column-border rounding. */
-  padding: calc(var(--slide) / 4 + 4px) var(--space-3) var(--space-3);
+  padding: calc(var(--slide) / 4 + 4px) var(--edge-x) var(--space-3);
 }
 
 /* ONE RUN OF CARDS, UNDER A NAME.
@@ -3781,10 +3807,13 @@ main:focus {
    narrow panel the two do not fit, and a clipped button is pitfall 64. */
 .panel-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-3);
+  /* One row height for the heading and its buttons (2nd audit): baseline
+     alignment left the buttons 8px below the word. */
+  min-height: var(--row-ctl-h);
   /* The 10px a bare heading carries under it, moved to the wrapper: on the
      heading it sat inside the flex row and pushed the "?" 5px below the word. */
   margin-bottom: 10px;
@@ -3802,6 +3831,7 @@ main:focus {
    is exactly what the functional channel cannot afford. */
 .panel > h2:first-child,
 .panel > .panel-head:first-child > h2,
+.panel > .checklist-head:first-child > h2,
 .panel > h3:first-child {
   margin-top: 0;
 }
@@ -3811,7 +3841,8 @@ main:focus {
    section-colour rule and the type size would quietly leave the four panels
    that grew one. */
 .panel > h2,
-.panel > .panel-head > h2 {
+.panel > .panel-head > h2,
+.panel > .checklist-head > h2 {
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -3822,7 +3853,8 @@ main:focus {
 }
 
 .panel > h2::before,
-.panel > .panel-head > h2::before {
+.panel > .panel-head > h2::before,
+.panel > .checklist-head > h2::before {
   content: '';
   flex: 0 0 auto;
   width: 4px;
@@ -4370,8 +4402,8 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
    look the person up again. */
 .row-dot {
   display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: max(9px, .7em);
+  height: max(9px, .7em);
   border-radius: var(--r-sm);
   border: 1px solid var(--edge);
   margin-right: var(--space-2);
@@ -4381,8 +4413,8 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
 
 .color-dot {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: max(14px, 1.05em);
+  height: max(14px, 1.05em);
   border: 1px solid var(--dot-border);
   border-radius: var(--r-sm);
   vertical-align: -2px;
@@ -4446,10 +4478,15 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
 }
 
 .add-panel-head {
-  /* Reserve the same rail even when this panel has no heading action. The
-     paste button is the tallest common occupant; without this floor Branşlar
-     pulled its description and form four pixels upward. */
-  min-height: 3rem;
+  /* The same one-row height as every `.panel-head` (--row-ctl-h, set there):
+     the 3rem floor this had put the heading's baseline 7-8px off the list
+     panel's beside it. */
+  min-height: 0;
+}
+
+.panel-head .btn {
+  min-height: var(--row-ctl-h);
+  padding-block: 0;
 }
 
 /* Heading, "?", and the paste button pushed to the far end. */
@@ -4837,7 +4874,7 @@ table.sheet-lessons td:last-child {
 .panel-head.with-help {
   justify-content: flex-start;
   align-items: center;
-  gap: 0;
+  gap: var(--space-3);
 }
 
 .help-pop {
@@ -4871,7 +4908,7 @@ table.sheet-lessons td:last-child {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: 0 var(--space-3);
 }
 
 /* The list row's way into its panel: a symbol AND a word ("Ayrıntı"), never
@@ -4983,6 +5020,9 @@ table.sheet-lessons td:last-child {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  /* The same one-row height as `.panel-head`, so the heading and its bar are
+     the size every other panel's are. */
+  min-height: var(--row-ctl-h);
   gap: var(--space-3) var(--space-4);
 }
 
@@ -5867,6 +5907,7 @@ table.availability .av-head {
 
 .pick-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
@@ -5875,6 +5916,7 @@ table.availability .av-head {
 
 .pick-head b {
   margin-right: auto;
+  white-space: nowrap;
 }
 
 /* NO CEILING OF ITS OWN. It was `max-height: 168px`, and two things were wrong
@@ -5886,8 +5928,11 @@ table.availability .av-head {
    it, which is bounded by `100cqh` and was always going to be the one box
    doing the scrolling here. */
 .pick-items {
-  display: flex;
-  flex-wrap: wrap;
+  /* A grid and not a wrapping flex row: with `flex-wrap` the second column
+     started wherever the first row's names happened to end, so it came out
+     jagged. Equal columns; a name too long for one is clipped at the cell. */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
   gap: var(--space-2) var(--space-4);
   padding: var(--space-3);
   overflow-x: hidden;
@@ -5897,7 +5942,11 @@ table.availability .av-head {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
   white-space: nowrap;
+  /* `clip` with a margin, not `hidden`: the checkbox's focus ring must stay. */
+  overflow: clip;
+  overflow-clip-margin: 4px;
 }
 
 /* The "Gönder" panel: one teacher per line, the short name, then the
@@ -6487,6 +6536,15 @@ table.bell-preview td {
   pointer-events: none;
 }
 
+/* With the pool drawer OPEN the toast would sit on the cards, and a toast with
+   an Undo is the thing to reach. Lifted over the drawer's top edge instead.
+   `--dock-h` is written on `.program-body`, which the toasts are not inside, so
+   this is the drawer's default height (a drawer the reader resized is covered
+   by the same lift, which is generous rather than exact). */
+:root:has(.pool:not(.pool-closed):not(.pool-empty)) .toasts {
+  bottom: calc(var(--space-6) + var(--dock-h, 11rem));
+}
+
 .toast {
   display: flex;
   align-items: center;
@@ -6611,7 +6669,7 @@ table.bell-preview td {
 
 .sheet-edit {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(4.5rem, max-content) 1fr;
   align-items: center;
   gap: var(--space-3) var(--space-4);
   margin: 0;
@@ -6878,6 +6936,13 @@ table.bell-preview td {
   align-items: flex-end;
   gap: var(--space-4);
   flex-wrap: wrap;
+}
+
+.search > svg {
+  /* The magnifier follows the word's size like every other symbol. */
+  flex: 0 0 auto;
+  width: max(16px, 1.15em);
+  height: max(16px, 1.15em);
 }
 
 .search {
@@ -7189,6 +7254,10 @@ kbd {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  /* Room for the return mark, which is placed over it: in flow it pushed the
+     shortcut left on the selected row. */
+  position: relative;
+  padding-right: 2.25rem;
 }
 
 /* The highlight follows the KEYBOARD, and the mouse moves it rather than
@@ -7243,7 +7312,10 @@ kbd {
 }
 
 .palette-enter {
-  flex: 0 0 auto;
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  translate: 0 -50%;
   opacity: .7;
 }
 
@@ -7565,6 +7637,20 @@ table:is(.list, .stat, .sheet-lessons) td :is(.btn, input[type='text'], input[ty
   padding-block: 0;
 }
 
+/* ONE SIZE FOR EVERY BUTTON IN A ROW: "Ayrıntı" was 13px, "Sil" 14px. The
+   narrower padding is what keeps %125 from spilling. */
+table:is(.list, .stat, .sheet-lessons) td .btn {
+  font-size: var(--fs-sm);
+  padding-inline: var(--space-3);
+}
+
+/* A FORM ROW IS ONE HEIGHT TOO, same as a table row (.dated's 44px boxes
+   keep theirs). */
+.form-row:not(.dated) > :is(.btn, input[type='text'], input[type='number'], select) {
+  min-height: var(--row-ctl-h);
+  padding-block: 0;
+}
+
 /* A SYMBOL FOLLOWS THE WORD'S SIZE. Lucide draws at the `size` attribute
    (16px) whatever the type is: a 13px word beside a 16px symbol, a 15px menu
    row beside the same 16px. `em` keeps the pair in proportion at every scale
@@ -7601,7 +7687,7 @@ table:is(.list, .stat, .sheet-lessons) td :is(.btn, input[type='text'], input[ty
    `:where()` keeps the specificity at a bare class, so the focus ring, the
    drag ring and the conflict wedge still win. */
 :where(table.grid tbody td:not(.block-in):not(.block-cont) + td) > .card {
-  box-shadow: inset 1px 0 0 var(--paper);
+  box-shadow: inset 2px 0 0 var(--paper);
 }
 
 /* A DISABLED PRIMARY BUTTON IS READ, NOT FADED. At .45 opacity "Programı yap"
@@ -7790,13 +7876,29 @@ table.person-list tbody tr {
   order: 9;
   flex: 1 0 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-  align-items: center;
+  /* Six columns: the teacher's five buttons lay out 3 + 2 (the first three
+     span 2, the other two span 3), a class's three come out three equal. */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: stretch;
   gap: var(--space-2);
 }
 
 .sheet-actions > .btn {
+  grid-column: span 2;
   justify-content: center;
+  min-width: 0;
+  text-align: center;
+  white-space: normal;
+}
+
+.sheet-actions > .btn:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
+/* The page's head is sticky-height ink the reader must not scroll under: the
+   page writes its measured height to --sheet-head-h. */
+.sheet {
+  scroll-padding-top: calc(var(--sheet-head-h, 9rem) + var(--space-3));
 }
 
 .sheet-actions a.btn {

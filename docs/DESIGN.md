@@ -239,7 +239,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.topbar` | tek satır. Üstünde ince bir bölüm rengi şeridi, içinde o rengin hafif bir washı |
 | `.tabstrip` `.tab` `.tab-label` | seçili sekme kâğıt zeminli ve accent alt çizgili, tek ve nötr. `flex: 0 0`, daralan çubukta feda edilmez (tuzak 48) |
 | `.health` `.health-dot` `.health-text` | durum çipi: her sekmede, sorunu adlandırır. Yer daralınca noktasına iner |
-| `.panel-head` | başlık ve tek bir kontrol (Okul listelerinde ve Dersler'de "Excel'den yapıştır"). `baseline` hizalı, sarabilir |
+| `.panel-head` | başlık ve tek bir kontrol (Okul listelerinde ve Dersler'de "Excel'den yapıştır"). tek satır yüksekliği (`--row-ctl-h`), `center` hizalı, sarabilir; başlıktaki düğmeler aynı yüksekliktedir |
 | `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, her sekmede. Basılı kontrol bir segment (zemin ve alt çizgi). Sağ ucunda `.more-menu` (Daha fazla ▾, `common/More.tsx`). `-label` bir grubun başlığı (büyük harf, soluk), `-value` bir grubun değeri (normal, tam mürekkep) |
 | `.topbar-doc` `.app-title` `.plan-picker` | hangi belge açık |
 | `.btn-group` `.topbar-sep` `.spacer` | bitişik düğme kümesi · ayraç · itici |
@@ -272,7 +272,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.grid` `.row-head` `.corner` `.day-head` `.hour-clock` `.day-first` | iskelet |
 | `.break-col` | öğle arası. `data-day` ve `data-hour` taşımaz (tuzak 13) |
 | `.card` `.card-top` `.card-bottom` `.card.conflict` | yerleşmiş ders |
-| `.card-pin` | karttaki raptiye düğmesi. Kartın kardeşi, dururken görünmez, hover, odak ve sabitli durumda görünür |
+| `.card-pin` | karttaki raptiye düğmesi. Kartın kardeşi, dar tekli kartta dururken görünmez (oda harfinin üstüne basıyordu), geniş blokta `.65`; hover, odak ve sabitli durumda tam. Sabitli kartta ikinci işaret: raptiyenin arkasında dolu zemin |
 | `.band` | tek indeksli günün zemini, bir durum gibi okunmaz (tuzak 40) |
 | `.block-cont` `.block-in` | bloğun devam hücreleri |
 | `.col-hot` · `tr:hover` | imleç haçı (`gridChrome.ts`, saf DOM) |
