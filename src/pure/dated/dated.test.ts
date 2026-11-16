@@ -35,6 +35,7 @@ function teacher(id: string, subject: string, subject2 = ''): Teacher {
     color: 0,
     limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
     email: '',
+    phone: '',
   };
 }
 

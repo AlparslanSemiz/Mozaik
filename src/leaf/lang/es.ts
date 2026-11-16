@@ -1239,8 +1239,7 @@ const ES: Sozluk = {
   "Hücrenin alt satırı": "La línea inferior de la celda",
   "Öğretmenin kısa adı ya da derslik": "El nombre corto del profesor o el aula",
   "Çıktı tarihi": "Fecha de impresión",
-  "Sayfanın altında yazdırılma tarihi ve saati":
-    "La fecha y hora de impresión al pie de la página",
+  "Sayfanın üstünde yazdırılma tarihi ve saati": "La fecha y hora de impresión en la parte superior de la página",
   "Öğretmen art arda en fazla": "Profesor, como máximo seguidas",
   "Bir öğretmen arka arkaya kaç saat derse girebilir.":
     "Cuántas horas seguidas puede dar clase un profesor.",
@@ -1461,10 +1460,7 @@ const ES: Sozluk = {
     "Correo",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "Aquí va una sola dirección de correo: nombre@ejemplo.com",
-  "E-postayla gönder":
-    "Enviar por correo",
-  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
-    "El horario del docente se abre como un mensaje nuevo en su aplicación de correo. Usted pulsa Enviar.",
+  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "El horario del docente se abre como un mensaje nuevo en su aplicación de correo. Usted pulsa Enviar.",
   "adres yok":
     "sin dirección",
   "adres hatalı":
@@ -1572,8 +1568,7 @@ const ES: Sozluk = {
     "Abrir toda la semana",
   "Bütün haftayı kapat":
     "Cerrar toda la semana",
-  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
-    "Si los colores no salen: en la ventana de impresión, abra **Más ajustes** y marque **Gráficos de fondo**.",
+  "Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın.": "Para guardarlo como archivo, elija **Guardar como PDF** en Destino, en la ventana de impresión.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Clases de la semana",
@@ -1840,6 +1835,11 @@ const ES: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "El plan ha vuelto a como estaba: {gun}.",
   "günlük kopya": "copia diaria",
   "{hafta} {gun} {ay}": "{hafta} {gun} de {ay}",
+  "Sayfa {n} / {m}": "Página {n} de {m}",
+  "Telefon": "Teléfono",
+  "Göndermek için Bilgiler’de telefon numarasını yazın.": "Para enviarlo, escriba el número de teléfono en Datos.",
+  "PDF kaydet": "Guardar PDF",
+  "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} se guardó en la carpeta Descargas. Adjúntelo al mensaje o al chat con el clip.",
   // ------------------------------------------- the dated layer (DayDialog.tsx)
   "Boş geçsin": "Clase libre",
   "Bu gün değişen ders yok.": "Ninguna clase cambia este día.",
@@ -1876,6 +1876,7 @@ const ES: Sozluk = {
   "Ekrandaki plan dosyadakiyle değiştirilecek. Bundan sonra \"Geri al\" bu açılıştan öncesine dönemez. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "El plan de la pantalla se sustituirá por el del archivo. Después, «Deshacer» no podrá volver a antes de esta apertura. Si puede cambiar de idea, pulse antes «Guardar».",
   "**Mozaik burada kendini günceller.** Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.": "**Aquí Mozaik se actualiza solo.** Al salir una versión aparece una línea arriba; nada cambia hasta pulsar **Recargar**.",
   "Mozaik kendiliğinden saklıyor; dosya taşımak ve saklamak için.": "Mozaik guarda solo; el archivo sirve para llevarlo y conservarlo.",
+  "WhatsApp açılamadı.": "No se pudo abrir WhatsApp.",
 };
 
 registerSozluk("es", ES);

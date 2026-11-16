@@ -496,6 +496,7 @@ pub fn run() {
             read_file,
             data_dir_path,
             mail::eposta_ac,
+            mail::whatsapp_ac,
             update::check_update,
             update::self_update_supported,
             update::download_update,

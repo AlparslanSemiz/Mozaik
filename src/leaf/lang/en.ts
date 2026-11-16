@@ -1224,8 +1224,7 @@ const EN: Sozluk = {
   "Hücrenin alt satırı": "The cell's bottom line",
   "Öğretmenin kısa adı ya da derslik": "The teacher's short name or the room",
   "Çıktı tarihi": "Print date",
-  "Sayfanın altında yazdırılma tarihi ve saati":
-    "The date and time of printing at the foot of the page",
+  "Sayfanın üstünde yazdırılma tarihi ve saati": "The date and time of printing at the top of the page",
   "Öğretmen art arda en fazla": "Teacher, at most in a row",
   "Bir öğretmen arka arkaya kaç saat derse girebilir.":
     "How many hours in a row a teacher may teach.",
@@ -1446,10 +1445,7 @@ const EN: Sozluk = {
     "E-mail",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "One e-mail address goes here: name@example.com",
-  "E-postayla gönder":
-    "Send by e-mail",
-  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
-    "The teacher's timetable opens as a new message in your mail app. You press Send.",
+  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "The teacher's timetable opens as a new message in your mail app. You press Send.",
   "adres yok":
     "no address",
   "adres hatalı":
@@ -1557,8 +1553,7 @@ const EN: Sozluk = {
     "Open the whole week",
   "Bütün haftayı kapat":
     "Close the whole week",
-  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
-    "If the colours do not print: in the print window, open **More settings** and tick **Background graphics**.",
+  "Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın.": "To keep it as a file, set Destination to **Save as PDF** in the print window.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Weekly lessons",
@@ -1825,6 +1820,11 @@ const EN: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "The plan is back as it was: {gun}.",
   "günlük kopya": "daily copy",
   "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
+  "Sayfa {n} / {m}": "Page {n} of {m}",
+  "Telefon": "Phone",
+  "Göndermek için Bilgiler’de telefon numarasını yazın.": "To send it, enter the phone number under Details.",
+  "PDF kaydet": "Save PDF",
+  "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} was saved in the Downloads folder. Attach it to the message or chat with the paperclip.",
   // ------------------------------------------- the dated layer (DayDialog.tsx)
   "Boş geçsin": "Class free",
   "Bu gün değişen ders yok.": "No lesson changes this day.",
@@ -1861,6 +1861,7 @@ const EN: Sozluk = {
   "Ekrandaki plan dosyadakiyle değiştirilecek. Bundan sonra \"Geri al\" bu açılıştan öncesine dönemez. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "The plan on screen will be replaced by the one in the file. After that, “Undo” cannot go back past this opening. If you may change your mind, press “Save” first.",
   "**Mozaik burada kendini günceller.** Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez.": "**Mozaik updates itself here.** A line appears at the top when a new version is out; nothing changes until **Reload**.",
   "Mozaik kendiliğinden saklıyor; dosya taşımak ve saklamak için.": "Mozaik saves by itself; the file is for moving and keeping a copy.",
+  "WhatsApp açılamadı.": "WhatsApp could not be opened.",
 };
 
 registerSozluk("en", EN);

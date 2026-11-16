@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { Script } from 'node:vm';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { SCHEMA_VERSION } from '../src/leaf/model/types';
 import {
   FILE,
   FIXTURE,
@@ -427,7 +428,8 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect
       .poll(async () => (await kayit()).teachers?.map((t) => t.email))
       .toEqual(['mehmet.celik@example.com', '']);
-    expect((await kayit()).schemaVersion).toBe(18);
+    // The version of today's build, not a number: each schema bump broke this line.
+    expect((await kayit()).schemaVersion).toBe(SCHEMA_VERSION);
 
     await reopen(page);
     await openSetup(page, 'Öğretmenler');

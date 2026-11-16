@@ -18,6 +18,7 @@ import {
 import { closedKey, placementKey, type Index } from '../constraints';
 import { activePlacements } from '../grid';
 import { cellSpan } from './cut';
+import { dayStamp } from '../../leaf/app';
 import type { Vars } from '../../leaf/i18n';
 import type { ClassGroup, State, Teacher } from '../../leaf/model';
 
@@ -67,6 +68,12 @@ export interface Sheet {
   /** Small line: whose it is. '' = not printed. */
   sub: string;
   days: SheetDay[];
+  /**
+   * Who the codes in the cells are, "MÇ Mehmet Çelik", sorted by code. Only a
+   * class sheet with the cell's second line has any: a code on a wall is read
+   * by parents and new teachers too, who do not know them.
+   */
+  legend: string[];
 }
 
 export interface SheetHour {
@@ -152,7 +159,8 @@ export function classSheet(
   t: Translate,
 ): Sheet {
   const room = group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
-  return {
+  const who = new Map<string, string>();
+  const sheet: Sheet = {
     id: group.id,
     color: group.color,
     title: t('{ad} sınıfı · Haftalık ders programı', { ad: group.name }),
@@ -177,6 +185,9 @@ export function classSheet(
         // the wall has to say which.
         const subject =
           lesson === undefined ? '' : subjectShort(state.settings, lessonSubject(state, lesson));
+        if (teacher !== undefined && options.cellBottom && teacher.short !== teacher.name) {
+          who.set(teacher.short, `${teacher.short} ${teacher.name}`);
+        }
         cells.push({
           span,
           breakAfter: breakAfter(day.longBreakAfter, s + span - 1),
@@ -187,7 +198,10 @@ export function classSheet(
       });
       return { label: dayLabel(day.name), cells };
     }),
+    legend: [],
   };
+  sheet.legend = [...who.keys()].sort((a, b) => a.localeCompare(b, 'tr')).map((k) => who.get(k)!);
+  return sheet;
 }
 
 /** A teacher's week, the same shape. */
@@ -244,5 +258,17 @@ export function teacherSheet(
       });
       return { label: dayLabel(day.name), cells };
     }),
+    legend: [],
   };
+}
+
+/**
+ * What the saved file is called: "Mozaik – 510 – 2026-11-16". The browser's
+ * "PDF olarak kaydet" offers the page title as the name, so this is the title
+ * while the print window is open (`usePrintTitle`). The characters Windows
+ * refuses in a file name are replaced rather than left to each browser.
+ */
+export function paperName(who: string, now: Date): string {
+  const name = who.replace(/[\\/:*?"<>|]+/g, '-').trim();
+  return ['Mozaik', name, dayStamp(now)].filter((x) => x !== '').join(' – ');
 }

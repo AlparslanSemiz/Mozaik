@@ -15,7 +15,9 @@ import {
   type Id,
   type State,
   cleanEmail,
+  cleanPhone,
   looksLikeEmail,
+  whatsappNumber,
   paletteColor,
 } from '../../leaf/model';
 import { placedBlocks } from '../../pure/constraints';
@@ -57,7 +59,7 @@ import {
   useToast,
   useUndoIf,
 } from '../common';
-import { PrintOne, SendTeacher } from '../print';
+import { PrintOne, SavePdf, SendTeacher } from '../print';
 import { DayDialog } from '../dated';
 import { addAway, coverCount, isAway } from '../../pure/dated';
 import { dayStamp } from '../../leaf/app';
@@ -108,6 +110,7 @@ export function Inspector({
   const [made, setMade] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const emailBox = useRef<HTMLInputElement>(null);
+  const phoneBox = useRef<HTMLInputElement>(null);
   // Where the keyboard goes after Sil: the next person's name in the list,
   // because the one that opened this page is gone with the person.
   const afterDelete = useRef<HTMLElement | null>(null);
@@ -389,6 +392,29 @@ export function Inspector({
                     // Tabbing through is not an edit, and not an undo step.
                     if (email === teacherOf.email) return;
                     change((d) => updateTeacher(d, teacherOf.id, { email }));
+                  }}
+                />
+              </dd>
+
+              {/* For WhatsApp (v18). Kept as typed, only what a number is
+                  written with (`cleanPhone`); one WhatsApp cannot read says
+                  so here, where it is fixed. */}
+              <dt>{t('Telefon')}</dt>
+              <dd>
+                <input
+                  ref={phoneBox}
+                  key={`p-${teacherOf.id}-${teacherOf.phone}`}
+                  type="text"
+                  inputMode="tel"
+                  autoComplete="off"
+                  className="dlg-input"
+                  aria-label={t('Telefon')}
+                  defaultValue={teacherOf.phone}
+                  aria-invalid={teacherOf.phone !== '' && whatsappNumber(teacherOf.phone) === null}
+                  onBlur={(e) => {
+                    const phone = cleanPhone(e.target.value);
+                    if (phone === teacherOf.phone) return;
+                    change((d) => updateTeacher(d, teacherOf.id, { phone }));
                   }}
                 />
               </dd>
@@ -798,13 +824,19 @@ export function Inspector({
                         key={teacherOf.id}
                         state={state}
                         teacher={teacherOf}
-                        onMissing={() => emailBox.current?.focus()}
+                        colored={colored}
+                        onMissing={(box) =>
+                          (box === 'phone' ? phoneBox : emailBox).current?.focus()
+                        }
                       />
                     )}
                     {teacherOf !== undefined && covers[0] > 0 && (
                       <span className="sheet-said hint">
                         {t('İkame: bu hafta {m}, toplam {n} saat', { m: covers[1], n: covers[0] })}
                       </span>
+                    )}
+                    {target.kind === 'class' && (
+                      <SavePdf key={target.id} state={state} id={target.id} colored={colored} />
                     )}
                   </div>
                 )}

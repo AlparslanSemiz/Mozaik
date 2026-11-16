@@ -1,10 +1,15 @@
-// Çıktı's "send each teacher their week" (TODO B3.4): one button per teacher,
-// and the user's own mail program does the rest. The person page's Gönder
-// (Sadeleşme, K5) is the same button for one teacher, so both are here.
+// Çıktı's "send each teacher their week" (TODO B3.4): per teacher, the user's
+// own mail program and WhatsApp. The person page's Gönder and WhatsApp
+// (Sadeleşme, K5) are the same buttons for one teacher, and its PDF kaydet
+// the same file for a class, so all of them are here.
 //
-// NOTHING IS SENT FROM HERE. The button opens a new message in the mail
-// program this machine already has, from the account already in it, with the
-// teacher's address and week filled in; the user reads it and presses Send.
+// NOTHING IS SENT FROM HERE. Each press first saves the timetable as a PDF in
+// İndirilenler (`send.ts`), then opens a new message in the mail program this
+// machine already has, or the teacher's chat in WhatsApp; the user attaches
+// the file, reads it and presses Send. A `mailto:` cannot carry a file and
+// neither can a wa.me link, so the line under the buttons names the file and
+// says where to attach it.
+//
 // In the exe the shell is asked (src-tauri/src/mail.rs), which can also say
 // that no mail program is chosen at all. In a browser it is a plain `mailto:`
 // link, and a page cannot ask: the browser may first show its own "open the
@@ -14,17 +19,20 @@
 // 2026-10-24).
 
 import { type ReactNode, useMemo, useState } from 'react';
-import { Mail } from 'lucide-react';
+import { FileDown, Mail, MessageCircle } from 'lucide-react';
 import { paletteColor, type State, type Teacher, looksLikeEmail } from '../../leaf/model';
 import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
 import { blockSpans, buildIndex, type Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';
 import { useT } from '../common';
+import { sendPdf, sheetFile, whatsappLink } from './send';
 
 interface Props {
   state: State;
   ix: Index;
   spans: Map<string, number>;
+  /** Whether the saved PDF is in colour, as the printed sheet would be. */
+  colored: boolean;
 }
 
 /** Why a teacher has no button, in the fewest words that say where to fix it. */
@@ -48,47 +56,84 @@ function mailFor(
   return { why: null, url: mail.url };
 }
 
-type Said = EpostaSonucu | 'tarayici' | null;
+type Said = EpostaSonucu | 'tarayici' | 'wa-olmadi' | null;
 
-/** What happened after a press. */
-function MailSaid({ said }: { said: Said }) {
-  const t = useT();
-  if (said === 'istemci-yok') {
-    return (
-      <div className="warn-box" role="status">
-        {t('Bu bilgisayarda seçili bir e-posta uygulaması yok.')}
-      </div>
-    );
-  }
-  if (said === 'tarayici') {
-    return (
-      <p className="hint" role="status">
-        {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
-      </p>
-    );
-  }
-  if (said === 'olmadi') {
-    return (
-      <div className="warn-box" role="status">
-        {t('E-posta uygulaması açılamadı.')}
-      </div>
-    );
-  }
-  return null;
+/** The name of the PDF just saved. */
+type Saved = string | null;
+
+/** Where a press sends the saved PDF: nothing more, or that teacher's chat. */
+type Save = (to?: { whatsapp: string }) => void;
+
+/**
+ * The press itself: one sheet's PDF into İndirilenler, then the chat, and
+ * the two lines that say so (`MailSaid`).
+ */
+function saver(
+  state: State,
+  kind: 'teacher' | 'class',
+  colored: boolean,
+  t: Translate,
+  setSaved: (name: Saved) => void,
+  setSaid: (said: Said) => void,
+) {
+  return (id: string): Save =>
+    (to) => {
+      const file = sheetFile(state, kind, id, colored, t);
+      if (file === null) return;
+      setSaved(file.name);
+      void sendPdf(file, to).then((opened) => {
+        if (!opened) setSaid('wa-olmadi');
+      });
+    };
 }
 
-/** A `mailto:` link in a browser, the shell's own call in the exe. */
+/** What happened after a press. */
+function MailSaid({ said, saved }: { said: Said; saved: Saved }) {
+  const t = useT();
+  return (
+    <>
+      {saved !== null && (
+        <p className="hint sheet-said" role="status">
+          {t('{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.', {
+            ad: saved,
+          })}
+        </p>
+      )}
+      {said === 'istemci-yok' ? (
+        <div className="warn-box" role="status">
+          {t('Bu bilgisayarda seçili bir e-posta uygulaması yok.')}
+        </div>
+      ) : said === 'tarayici' ? (
+        <p className="hint" role="status">
+          {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
+        </p>
+      ) : said === 'wa-olmadi' ? (
+        <div className="warn-box" role="status">
+          {t('WhatsApp açılamadı.')}
+        </div>
+      ) : said === 'olmadi' ? (
+        <div className="warn-box" role="status">
+          {t('E-posta uygulaması açılamadı.')}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/** A `mailto:` link in a browser, the shell's own call in the exe; the PDF is saved first. */
 function MailButton({
   url,
   name,
   children,
   setSaid,
+  save,
 }: {
   url: string;
   /** Omitted on the person page: there the visible "Gönder" is the name (WCAG 2.5.3). */
   name?: string;
   children: ReactNode;
   setSaid: (next: Said) => void;
+  save: Save;
 }) {
   return isDesktop() ? (
     <button
@@ -96,6 +141,7 @@ function MailButton({
       aria-label={name}
       onClick={() => {
         setSaid(null);
+        save();
         void desktopMail(url).then(setSaid);
       }}
     >
@@ -103,91 +149,169 @@ function MailButton({
       {children}
     </button>
   ) : (
-    <a className="btn" href={url} aria-label={name} onClick={() => setSaid('tarayici')}>
+    <a
+      className="btn"
+      href={url}
+      aria-label={name}
+      onClick={() => {
+        save();
+        setSaid('tarayici');
+      }}
+    >
       <Mail size={16} strokeWidth={2} aria-hidden="true" />
       {children}
     </a>
   );
 }
 
+/** The teacher's chat, after the PDF is saved; without a number, `missing` says why. */
+function WhatsappButton({
+  url,
+  name,
+  save,
+  missing,
+}: {
+  url: string | null;
+  name?: string;
+  save: Save;
+  missing: () => void;
+}) {
+  return (
+    <button
+      className="btn"
+      aria-label={name}
+      onClick={() => {
+        if (url === null) missing();
+        else save({ whatsapp: url });
+      }}
+    >
+      <MessageCircle size={16} strokeWidth={2} aria-hidden="true" />
+      WhatsApp
+    </button>
+  );
+}
+
+/** The person page's PDF kaydet, for a class: the same file a teacher is sent. */
+export function SavePdf({ state, id, colored }: { state: State; id: string; colored: boolean }) {
+  const t = useT();
+  const [saved, setSaved] = useState<Saved>(null);
+  const save = saver(state, 'class', colored, t, setSaved, () => undefined)(id);
+  return (
+    <>
+      <button className="btn" onClick={() => save()}>
+        <FileDown size={16} strokeWidth={2} aria-hidden="true" />
+        {t('PDF kaydet')}
+      </button>
+      <MailSaid said={null} saved={saved} />
+    </>
+  );
+}
+
 /**
- * The person page's Gönder: the same message as the Çıktı row, or, when
- * there is none, the one sentence that says how to get one. Pressed without
- * an address it also puts the keyboard in the address box (`onMissing`).
- *
- * TODO(aşama 4): WhatsApp ile ve PDF olarak gönder; bugün yalnız e-posta.
+ * The person page's Gönder and WhatsApp: the same message as the Çıktı row,
+ * or, when there is none, the one sentence that says how to get one. Pressed
+ * without an address or a number it also puts the keyboard in that box
+ * (`onMissing`).
  */
 export function SendTeacher({
   state,
   teacher,
+  colored,
   onMissing,
 }: {
   state: State;
   teacher: Teacher;
-  onMissing: () => void;
+  colored: boolean;
+  onMissing: (box: 'email' | 'phone') => void;
 }) {
   const t = useT();
   const [said, setSaid] = useState<Said>(null);
-  const [asked, setAsked] = useState(false);
+  const [saved, setSaved] = useState<Saved>(null);
+  const [asked, setAsked] = useState<Why | 'telefon' | null>(null);
   const { why, url } = useMemo(
     () => mailFor(state, buildIndex(state), blockSpans(state), teacher, t),
     [state, teacher, t],
   );
+  const send = saver(state, 'teacher', colored, t, setSaved, setSaid)(teacher.id);
+  const save: Save = (to) => {
+    setAsked(null);
+    setSaid(null);
+    send(to);
+  };
   return (
     <>
       {why === null ? (
-        <MailButton url={url} setSaid={setSaid}>
+        <MailButton url={url} setSaid={setSaid} save={save}>
           {t('Gönder')}
         </MailButton>
       ) : (
         <button
           className="btn"
           onClick={() => {
-            setAsked(true);
-            if (why === 'adres yok' || why === 'adres hatalı') onMissing();
+            setSaved(null);
+            setAsked(why);
+            if (why === 'adres yok' || why === 'adres hatalı') onMissing('email');
           }}
         >
           <Mail size={16} strokeWidth={2} aria-hidden="true" />
           {t('Gönder')}
         </button>
       )}
-      {asked && why !== null && (
+      <WhatsappButton
+        url={whatsappLink(teacher, t)}
+        save={save}
+        missing={() => {
+          setSaved(null);
+          setAsked('telefon');
+          onMissing('phone');
+        }}
+      />
+      {asked !== null && (
         <p className="hint sheet-said" role="status">
-          {why === 'adres yok'
-            ? t('Göndermek için Bilgiler’de e-posta adresini yazın.')
-            : why === 'adres hatalı'
-              ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
-              : // Çıktı's own words for the other two, so the two places
-                // agree and the dictionaries carry one sentence less each.
-                t(why)}
+          {asked === 'telefon'
+            ? t('Göndermek için Bilgiler’de telefon numarasını yazın.')
+            : asked === 'adres yok'
+              ? t('Göndermek için Bilgiler’de e-posta adresini yazın.')
+              : asked === 'adres hatalı'
+                ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
+                : // Çıktı's own words for the other two, so the two places
+                  // agree and the dictionaries carry one sentence less each.
+                  t(asked)}
         </p>
       )}
-      <MailSaid said={said} />
+      <MailSaid said={said} saved={saved} />
     </>
   );
 }
 
-export default function MailPanel({ state, ix, spans }: Props) {
+export default function MailPanel({ state, ix, spans, colored }: Props) {
   const t = useT();
   const [said, setSaid] = useState<Said>(null);
+  const [saved, setSaved] = useState<Saved>(null);
 
   const rows = useMemo(
-    () => state.teachers.map((teacher) => ({ teacher, ...mailFor(state, ix, spans, teacher, t) })),
+    () =>
+      state.teachers.map((teacher) => ({
+        teacher,
+        wa: whatsappLink(teacher, t),
+        ...mailFor(state, ix, spans, teacher, t),
+      })),
     [state, ix, spans, t],
   );
+  const save = saver(state, 'teacher', colored, t, setSaved, setSaid);
 
   return (
     <div className="panel no-print mail-panel">
-      <h2>{t('E-postayla gönder')}</h2>
+      <h2>{t('Gönder')}</h2>
       <p className="hint">
         {t(
           'Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
         )}
       </p>
       {/* Above the list: the row pressed may be the first of twenty-five. */}
-      <MailSaid said={said} />
+      <MailSaid said={said} saved={saved} />
       <ul className="mail-list">
-        {rows.map(({ teacher, why, url }) => (
+        {rows.map(({ teacher, why, url, wa }) => (
           <li key={teacher.id} className="mail-row">
             <span className="row-dot" style={{ background: paletteColor(teacher.color) }} />
             {/* The full name since 2026-11-16 (Sadeleşme): "MÇ" says who only
@@ -208,9 +332,19 @@ export default function MailPanel({ state, ix, spans }: Props) {
                 url={url}
                 name={t('{kim} için e-postayı aç', { kim: teacher.short })}
                 setSaid={setSaid}
+                save={save(teacher.id)}
               >
                 {t('E-postada aç')}
               </MailButton>
+            )}
+            {/* Only with a number: the place to type one is the person page. */}
+            {wa !== null && (
+              <WhatsappButton
+                url={wa}
+                name={`${teacher.short} · WhatsApp`}
+                save={save(teacher.id)}
+                missing={() => undefined}
+              />
             )}
           </li>
         ))}

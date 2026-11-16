@@ -1116,6 +1116,19 @@ bildirmiyor. Çocukların sınırları içerik kutusuyla karşılaştırılır. 
 yarısı: `emulateMedia({ media: 'print' })` pencereyi değiştirmez, kâğıdı ölçen
 test pencereyi de kâğıdın boyuna getirir.
 
+### 210 · PDF metnindeki sekizlik kaçış hep üç hane yazılır
+Elle yazılan PDF'te (`pdf.ts`) `–` 150 baytı `\226`, `ş` 254 baytı `\376` olur. İlk
+sürüm sayıyı `toString(8)` ile yazıyordu: `\26` ardından gelen `6` (`Plan 1 – 6.`)
+okuyucu için tek bir `\266` baytıydı ve satırın kalanı kaydı. Kaçış en çok üç hane okunur,
+yani her zaman `padStart(3, '0')` ile yazılır; `pdf.test.ts` iki haneli bir kaçış arar.
+
+### 211 · "Arka plan grafikleri" kutusu `print-color-adjust: exact` varken gerekmiyor
+Çıktı'nın yardımı aylarca "renkler çıkmazsa Diğer ayarlar → Arka plan grafikleri"
+diyordu. Ölçüldü (2026-11-16, Chromium `page.pdf({ printBackground: false })`): kural
+yokken hücre rengi PDF'te yok, `print-color-adjust: exact` varken var. Edge ve exe
+aynı motor. Bir öğüt ekrana yazılmadan önce öğüdün kaldırdığı sorun ölçülür;
+`yazdir.spec.ts` rengi kutu kapalıyken arıyor.
+
 ---
 
 ## Ad çakışması ve erişilebilir ad
