@@ -14,6 +14,8 @@ export * from './Undo';
 export * from './GoTo';
 export * from './NextStep';
 export * from './wrongFile';
+export * from './More';
+export * from './Help';
 export { useReturnFocus } from './returnFocus';
 export * from './deleteFocus';
 export { default as Field } from './Field';

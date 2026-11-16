@@ -4515,8 +4515,10 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
      paragraph is longer than the rail (Öğretmenler, Dersler) are boxed by
      their own text and give back only the padding. The next lever there is the
      sentence, not the geometry. */
-  grid-template-rows: minmax(3rem, auto) minmax(3.25rem, auto) auto 1fr;
-  min-height: 13rem;
+  grid-template-rows: minmax(3rem, auto) auto 1fr;
+  /* 13rem to 9.75rem on 2026-11-16: the description rail went behind the
+     heading's "?" (Sadeleşme, phase 1). */
+  min-height: 9.75rem;
   padding: var(--space-5);
 }
 
@@ -4527,8 +4529,14 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
   min-height: 3rem;
 }
 
-.add-panel-description > .hint {
-  margin-top: var(--space-2);
+/* Heading, "?", and the paste button pushed to the far end. */
+.add-panel-head {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.add-panel-head > .help-btn + * {
+  margin-left: auto;
 }
 
 .add-panel-notice {
@@ -4804,6 +4812,191 @@ table.sheet-lessons select.transfer-pick {
   background: none;
   border-color: transparent;
   color: var(--text);
+}
+
+/* ------------------------------------------------------- Sadeleşme, phase 1
+   (2026-11-16, DECISIONS "Sadeleşme (Alp onayladı, K1–K8)").
+
+   ONE PRIMARY PER SCREEN. `.btn.primary` is the only solid button: the one
+   thing to do here. A pressed toggle used to be a solid fill too (the section
+   colour in the strip, the accent elsewhere), so a screen with a view switch
+   and a "Programı yap" showed three filled rectangles and no answer to "what
+   do I press". A pressed toggle is now a SEGMENT: a light ground, an accent
+   edge and a 3px underline, never a fill. The weight still does not change in
+   the strip (pitfall 94). */
+.btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover:not(:disabled),
+.ribbon .btn[aria-pressed="true"],
+.ribbon .btn[aria-pressed="true"]:hover:not(:disabled),
+.segmented > .btn[aria-pressed='true'],
+.btn.icon[aria-pressed="true"],
+.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+/* ONE NEUTRAL TAB. Colour is for data (a teacher's, a class's identity) and
+   for state (green, yellow, red); the seven section colours told him which
+   room he was in, which the lit tab's word already says. `--sec` is the
+   accent everywhere now, so every rule that read it (a panel heading's rule,
+   a pressed chip, the strip's hover) speaks one colour. The seven tokens stay
+   defined for a later decision; nothing draws them. */
+[data-section] {
+  --sec: var(--accent);
+}
+
+.topbar::before {
+  display: none;
+}
+
+:root:not([data-theme='dark']) .topbar,
+:root[data-theme='dark'] .topbar {
+  background: linear-gradient(180deg, var(--chrome-lit) 0%, var(--chrome) 100%);
+}
+
+.ribbon {
+  border-left: 0;
+  background: var(--chrome-2);
+}
+
+.tab:hover {
+  background: var(--accent-bg);
+  box-shadow: none;
+}
+
+.tab[aria-current="true"],
+:root[data-theme='dark'] .tab[aria-current="true"] {
+  background: var(--paper);
+  border-color: var(--border-strong);
+  color: var(--text);
+  box-shadow: inset 0 -3px 0 var(--accent), var(--elev-1);
+}
+
+.tab[aria-current="true"] svg {
+  color: var(--text);
+}
+
+/* "Daha fazla ▾" (common/More.tsx): the strip's one door, at its right end. */
+.btn.more-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.more-caret {
+  opacity: 0.7;
+}
+
+.ribbon > .more-menu {
+  margin-left: auto;
+}
+
+/* "?" (common/Help.tsx): a round button with a glyph that is a word. 24px at
+   the least (WCAG 2.5.8), its edge the control edge every button has. */
+.help-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin-left: var(--space-2);
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.help-btn:hover,
+.help-btn[aria-expanded='true'] {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+/* The bar is a fixed 1.625rem (drag writes, pitfall 117), so its "?" is the
+   small one; the 24px target is met by the spacing around it (WCAG 2.5.8). */
+.reason-bar .help-btn {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0;
+  font-size: var(--fs-sm);
+}
+
+/* A panel heading with its "?" right after the word (HelpHead). */
+.panel-head.with-help {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
+}
+
+.help-pop {
+  z-index: 1200;
+  width: min(26rem, calc(100vw - 2rem));
+  padding: var(--space-4);
+  border: 1px solid var(--line-dark);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  color: var(--text);
+  box-shadow: 0 12px 32px var(--shadow-shell);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+}
+
+.help-body > * + * {
+  margin-top: var(--space-2);
+}
+
+.help-body p,
+.help-body ul {
+  margin: 0;
+}
+
+.help-body ul {
+  padding-left: 1.2em;
+}
+
+/* The top bar's quiet file buttons: a word each, never a solid fill. */
+.topbar .btn.topbar-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* The list row's way into its panel: a symbol AND a word ("Ayrıntı"), never
+   the symbol alone (Sadeleşme item 8). */
+.btn.row-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Başlarken, done or closed: one line with one link back. */
+.checklist-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+/* Hakkında → "Teknik bilgiler": closed until asked for. */
+.tech-details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--fs-base);
+}
+
+.tech-details[open] > summary {
+  margin-bottom: var(--space-3);
 }
 
 /* A result line that reports a FAILURE has to leave the muted grey: an import
