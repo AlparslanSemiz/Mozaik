@@ -27,6 +27,7 @@ Everything below is a finished file. Nothing to build.
 | **[Mozaik.exe](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
 | **[Mozaik-mac-arm64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-arm64.dmg)** | Mac with Apple silicon (M1 and later). Drag Mozaik into Applications. Read [the first launch](#mac-the-first-launch-needs-one-extra-click) first. |
 | **[Mozaik-mac-x86_64.dmg](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-mac-x86_64.dmg)** | The same, for an Intel Mac. macOS 11 or later on both. |
+| **[Mozaik-linux-x86_64.AppImage](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-linux-x86_64.AppImage)** | Linux (Ubuntu 22.04 and later, Debian 12, Fedora). One file, updates itself. Read [Linux](#linux-one-file-the-appimage) first. |
 
 Or use it without downloading anything:
 **<https://alparslansemiz.github.io/Mozaik/>** works offline after
@@ -50,6 +51,26 @@ costs money and this project does not have one. So:
 * If a scanner flags it, a false-positive report helps everyone:
   [Microsoft](https://www.microsoft.com/en-us/wdsi/filesubmission) ·
   [Google Safe Browsing](https://safebrowsing.google.com/safebrowsing/report_error/).
+
+### Linux: one file, the AppImage
+
+One file for every distribution, with its own copy of the web engine. It
+needs glibc 2.35 or later (Ubuntu 22.04+, Debian 12+, Fedora 36+) and an
+x86_64 machine. Updates are checked against this project's signature, as on
+Windows and the Mac. In Turkish, step by step:
+
+1. `Mozaik-linux-x86_64.AppImage`'ı indirin ve ev klasörünüzde kalacağı bir
+   yere koyun, örneğin **Belgeler** ya da **Uygulamalar** diye bir klasör.
+   Mozaik kendini o dosyanın yanına indirerek günceller: yazamadığınız bir
+   klasörde (örneğin `/opt`) kendini güncelleyemez.
+2. Dosyaya sağ tıklayın → **Özellikler** → **İzinler** → **Programı
+   çalıştırmaya izin ver** (ya da uçbirimde
+   `chmod +x Mozaik-linux-x86_64.AppImage`). Sonra çift tıklayın.
+3. Açılmıyorsa sistemde FUSE eksiktir. Ubuntu 24.04'te
+   `sudo apt install libfuse2t64`, Ubuntu 22.04 ve Debian'da
+   `sudo apt install libfuse2`, Fedora'da `sudo dnf install fuse-libs`.
+4. Planlar Belgeler klasörünüzdeki **Ders Programı**'na yazılır. Güncelleme
+   Windows'taki gibi: **Ayarlar → Hakkında → Güncellemeleri denetle**.
 
 ### Mac: the first launch needs one extra click
 
@@ -98,9 +119,11 @@ what is around it.
    `Documents\Ders Programı` on its own, without being asked, and it can
    update itself, but only when you press the button.
 
-### Linux
+### Linux, from a checkout
 
-Not a fifth route: the same `dist/index.html`, opened in Google Chrome's app
+For a machine that builds Mozaik itself (the development machine); everyone
+else takes [the AppImage](#linux-one-file-the-appimage). Not a fifth route:
+the same `dist/index.html`, opened in Google Chrome's app
 mode with a Chrome profile of its own (`~/.local/share/mozaik/profil`), so
 clearing Chrome's history does not touch the plans. Only Chrome: if it is not
 installed the launcher says so and stops, because any other browser would

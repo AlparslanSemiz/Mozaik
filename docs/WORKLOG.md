@@ -111,6 +111,11 @@ Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe,
 dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
 Gerçek Windows exe'de koşulmadı.
 
+**Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
+kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
+`linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
+(DECISIONS "Linux sürümü", tuzak 177, 178). Mac'te yazıldı: hiç Linux'ta derlenmedi, hiç açılmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -121,6 +126,38 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Linux sürümü: AppImage (`platform/linux`)
+
+Alp'in hedefi "her yerde, güzelce", Windows ve web önce. Karar DECISIONS "Linux sürümü":
+yalnız AppImage, kendini güncelliyor, `.deb` yok. 2026-10-10'un "Linux Release'e girmiyor"
+kuralı yeniden tartıldı: gerekçesinin yarısı (Windows'u bekletmek) Mac'in `always()` kapısıyla
+çözülmüştü, öteki yarısı (WebKitGTK) babanın yolunu etkilemiyor.
+
+**Yapılan.** `src-tauri/src/update_linux.rs` (APPIMAGE yalnız program APPDIR'in içindeyse,
+`AI\x02` imi, `.yeni` + sabit bağlı `.eski` + tek rename, yazılamayan klasörde indirmeden önce
+cümle), `update.rs`'e `Hedef::Linux` ve dört isteğe bağlı `linux_appimage*` alanı, `cpsat.rs`'e
+`linux_yolu` (yalnız AppImage'ın kendi bağlamasındaki `usr/lib/Mozaik`, bağlar çözülmüş,
+başkalarının yazamadığı; güvenlik incelemesinin isteğiyle sıkılaştırıldı), `tauri.linux.conf.json`,
+`scripts/ortools-linux.sh`, `linux-paket.sh`, `linux-acilis.sh`, `surum.yml`'e `linux` işi,
+`sign`'a ve `publish`'e AppImage, `.github/workflows/linux.yml`, `kontrat.test.ts`'e iki test.
+
+**Ölçülen (bu Mac'te).** OR-Tools 9.15'in resmi Linux arşivleri `gh api` ile listelendi;
+AlmaLinux 8.10 arşivi indirildi (SHA-256 `c43b473b…a1e9`, GitHub'ın kendi özetiyle aynı) ve
+`llvm-objdump -p` ile okundu: `libortools.so.9`'un kapanışı 99 dosya, 65 MB, en çok GLIBC_2.26,
+GLIBCXX_3.4.22, CXXABI_1.3.11; sistemden yalnız libc, libm, libdl, libpthread, librt,
+libstdc++, libgcc_s ve ld-linux; hepsinde `RUNPATH $ORIGIN` (libz, libbz2, libutf8_validity
+hariç, onlar yalnız sistem kütüphanesi istiyor). Tauri'nin Linux kaynak klasörü
+`tauri-utils` 2.10'un `resource_dir`'inden okundu: `<exe>/../lib/<productName>`.
+
+**Koşulan.** `cargo test` (macOS, 108/108), rustfmt, `actionlint` (yeni bulgu yok; kanarya'nın
+`ubuntu-26.04` etiketi ve `surum.yml`'in eski SC2012 bilgileri önceden vardı), shellcheck (yalnız
+bilgi), `vitest` `kontrat.test.ts` ve `surum.test.ts`, ve aşağıdaki `hizli`.
+**Koşulmayan.** Linux hedefine `cargo check` (bu Mac'te GTK/WebKitGTK'nın pkg-config'i yok, Docker
+yok); Linux'a özgü kod `cfg!` ile her platformda derleniyor, yalnız `#[cfg(target_os = "linux")]`
+blokları (lib.rs'in önceden var olanları) burada derlenmedi. AppImage hiç üretilmedi, hiç açılmadı;
+güncelleme uçtan uca denenmedi; FUSE'suz Ubuntu 24.04'te ne olduğu bilinmiyor. İlk `linux.yml`
+koşusu bunların ilk ölçümü olacak.
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 
