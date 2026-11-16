@@ -59,8 +59,8 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
   ve ölçülemeyen bir e-posta programı demek, yapılmadı.
 - **Telefon State'te (şema v19; v18 İkame'nin),** e-posta ile aynı kural ve aynı KVKK notu. Yalnız kullanıcının
   tıkladığı `wa.me` bağlantısına girer; Türkiye'nin yazılış biçimleri (0532…, 532…) 90'a çevrilir.
-- **Ölçülen boyut, ve aşılan bütçe:** dalın tamamı +2,5 kB brotli (302,04 → 304,56 kB; ham
-  1 174,5 → 1 183,1 kB). Bütçe 1,5 kB'tı; PDF yazıcısı tek başına 1,3 kB. Tek dosyalı derlemede
+- **Ölçülen boyut, ve aşılan bütçe:** dal, 3B ve İkame'nin üstüne +2,8 kB brotli (301,91 →
+  304,68 kB, eşik 306; ham 1 168,5 → 1 178,0 kB). Bütçe 1,5 kB'tı; PDF yazıcısı tek başına 1,3 kB. Tek dosyalı derlemede
   tembel yüklenen bir parça yok (`vite-plugin-singlefile` her şeyi satır içine alır, tuzak 19),
   yani PDF yazıcısı ya pakette ya hiç yok. Karar Alp'in (WORKLOG'da seçenekler).
 

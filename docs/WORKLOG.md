@@ -122,12 +122,12 @@ oluyor). Kararlar DECISIONS 2026-11-16'da.
 - **Şema v19** `Teacher.phone` (v18 İkame'nin, bu dal onun üstünde); **PDF** elle (`pdf.ts`, Helvetica, Latin-5); **WhatsApp** tek
   tıklama (PDF İndirilenler'e, sonra `wa.me`), exe'de `mail.rs`'te `whatsapp_ac` (yalnız
   `https://wa.me/<rakam>…`, `cargo test mail` Mac'te 4/4; Windows modülü derlenmedi).
-- **Boyut (bütçe aşıldı).** brotli 302,04 → 304,56 kB (+2,52; eşik 306), ham 1 174,5 →
-  1 183,1 kB (+8,6). PDF yazıcısı +1,30 kB brotli (onsuz derleme 303,49 kB, düğüm brotli'siyle
-  ölçüldü). Bütçe 1,5 kB'tı, kalan pay 1,44 kB 3B ve İkame için. Seçenekler: (a) böyle
-  birleşir, 3B ve İkame kalan 1,4 kB'a sığar ya da eşik ölçülerek yükselir; (b) PDF yazıcısı
-  çıkar, PDF yalnız yazdırma penceresinden (dosya adı doğru), WhatsApp yalnız sohbeti açar;
-  (c) sözlüklerde yer açılır. Öneri (a).
+- **Boyut (bütçe aşıldı).** 3B ve İkame'nin üstüne (`ozellik/ikame` f7234d1): brotli 301,91 →
+  304,68 kB (+2,77; eşik 306, kalan 1,32), ham 1 168,5 → 1 178,0 kB (+9,6). PDF yazıcısı bunun
+  +1,3 kB brotli'si (onsuz derleme, düğüm brotli'siyle ölçüldü). Bütçe 1,5 kB'tı. Seçenekler:
+  (a) böyle birleşir, sonraki iş kalan 1,3 kB'a sığar ya da eşik açılış ölçülerek yükselir;
+  (b) PDF yazıcısı çıkar, PDF yalnız yazdırma penceresinden (dosya adı doğru), WhatsApp yalnız
+  sohbeti açar; (c) sözlüklerde yer açılır. Öneri (a).
 - **Doğrulanmadı:** WebView2'de indirmenin İndirilenler'e gittiği (Linux exe testinde ölçülü,
   tuzak 132) ve `whatsapp_ac`'ın varsayılan tarayıcıyı açtığı; PDF'in telefonda WhatsApp
   önizlemesinde Türkçe harflerle okunduğu (Mac'in Önizleme'si ve `sips` doğru çiziyor).
