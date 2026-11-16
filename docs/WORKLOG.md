@@ -182,6 +182,18 @@ sorun listesinin segment grubunun adı ile satırların `Göster` düğmesi ayn�
 düğme adı değil). Tıklama testinde bulunan: 1366'da çipin "433 saat yerleşmedi"si kesiliyordu
 (sekmeler yedi kısa addan beş uzun ada geçince daha geniş), çip artık kendi genişliğinde.
 
+**PR #80'den sonra (Alp onayladı).** Odak: bir dialog kapanınca açan yoksa dialogların dışında en
+son odaklanan yere döner (`returnFocus.ts`; sorun listesinin `Sayfasını aç`'ından sonra durum
+çipi), `Ders gir` formun ilk kutusuna. Eski dosyanın programı Daha fazla → `Ayrı plan yap` ile
+kendi adını taşıyan bir plan olur ve her plan gibi adlandırılır. Ölü Müsaitlik saat tercihi
+kalktı (`availClock.ts`, `data-avail-clock` kuralı; anahtar Veriler nerede'de tarihsel). Sözlük:
+İspanyolcada sınıf "grupo" (98 değer), Almancada ders "Unterricht" (105 değer); İngilizce ve
+Fransızcada çakışma yoktu. Almancada sayılan dersin bir kısmı hâlâ "Stunden" diyor. `knip` ve
+`depcruise` temiz (knip'in iki yapılandırma ipucu `main`'de de var). CI'ın `e2e-ek` işindeki
+stres testi ve Windows betikleri (`kurulum-gecisi.mjs`, `gercek-exe`, `guncelleme-exe`) Okul
+bilgileri → Daha fazla → Hakkında yolunu kullanıyor; stres testi yerelde 7/7, Windows'unkiler
+koşulmadı.
+
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 
 `origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,
