@@ -788,8 +788,10 @@ yerleşimi ~270 ms; aynı iki yazı ilk boyamadan sonraki karede 35 ms (iki yön
 ölçüldü, 2026-11-16; nedeni tarayıcının içinde, burada çözülmedi). Ayrıca
 `document.fonts`'a sormak sayfanın stilini ve yerleşimini günceller: tutturma
 anında sorulunca açılışın ilk yerleşimi oydu. Çare: ilk taban ilk boyamadan sonra
-yazılır, o kareye kadar tablo `data-fitting` ile gizli (yerini tutar, tabansız
-hiç çizilmez); `fonts.ready` de o zaman sorulur; `attachGridFit` yerleşim
+yazılır, o kareye kadar tablo `data-fitting` ile saydam (yerini tutar, tabansız
+hiç görünmez; `visibility: hidden` değil, çünkü gizli hücre odak almaz ve
+`innerText`'i boş: Kontrol'ün Göster'i Program'ı bağlayıp aynı anda bir karta odaklanıyor,
+E2E'de iki test kırmızıydı); gizli bir sekmede saydamlık hemen kalkar; `fonts.ready` de o zaman sorulur; `attachGridFit` yerleşim
 etkisinde tutturulur ki gizleme ilk yerleşimden önce gelsin, sonra gelince bir
 stil geçişi daha. Ölçü `scripts/acilis-olc.mjs` (`enUzun`, `izgara` artık görünür
 ızgarayı sayar).

@@ -119,7 +119,8 @@ yüzü ancak ilk yerleşimde istendiği için ~700 ms sonra geliyor, sayfa ve ta
 sağlık raporu ~38, zaten paylaşılan tek kopya). Gizli sekmeler çizilmiyor.
 
 **Ne değişti:** iki taban önce okunup sonra yazılıyor; ilk taban ilk boyamadan sonra, tablo o
-kareye kadar `data-fitting` ile gizli, `gridFit` yerleşim etkisinde tutturuluyor (tuzak 221);
+kareye kadar `data-fitting` ile saydam (önce `visibility: hidden` denendi: Göster'in odağı ve
+satır başının `innerText`'i boş kaldı, E2E'de 2 kırmızı), `gridFit` yerleşim etkisinde tutturuluyor (tuzak 221);
 `document.fonts.load` açılışta; ilk çizim `startTransition` içinde. `acilis-olc.mjs`'in `izgara`'sı
 artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son geometri iki derlemede aynı
 (`--cell-min` 32px, `--head-min` 73px, tablo 2410×695, bütün `col` genişlikleri, 1920 ve 1366).

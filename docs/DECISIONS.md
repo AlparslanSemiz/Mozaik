@@ -39,7 +39,8 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 ### 2026-11-16 · Açılışta ızgara ilk boyamadan sonra görünür (`hiz/acilis`)
 
 - **Ne değişti.** Babanın haftasıyla açılışta ızgaranın tablosu ilk boyamada yerini tutar ama
-  çizilmez (`data-fitting`), `gridFit` iki tabanını ilk boyamadan sonraki karede yazar ve tabloyu açar (gizlilik ~2 kare). Kabuk
+  saydamdır (`data-fitting`, `opacity: 0`), `gridFit` iki tabanını ilk boyamadan sonraki karede
+  yazar ve saydamlığı kaldırır (~2 kare). Kabuk
   ve havuz önce, ızgara ~2 kare sonra görünür; önceden hepsi birlikte ve daha geç geliyordu.
   Son hâl (taban, sütunlar, tablo genişliği, çekmece boyu) iki derlemede aynı, 1920 ve 1366'da
   ölçüldü. Her Grid bağlanışında böyle (açılıştan başka bir yeniden bağlanış da tabloyu ~2 kare

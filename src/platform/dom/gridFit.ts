@@ -90,8 +90,13 @@ export function attachGridFit(wrap: HTMLElement): () => void {
   });
   const run = () => {
     const table = wrap.querySelector<HTMLElement>('table.grid');
-    // A hidden tab has no widths; the ResizeObserver brings it back here.
-    if (table === null || table.getClientRects().length === 0) return;
+    // A hidden tab has no widths; the ResizeObserver brings it back here. The
+    // table is not kept transparent for that: a tab shown later is drawn the
+    // way it always was.
+    if (table === null || table.getClientRects().length === 0) {
+      delete wrap.dataset.fitting;
+      return;
+    }
     // Both are read before either is written. A write between the two reads
     // made the second one lay the whole table out again: on the father's week
     // at 4x CPU that was a style pass over 3348 elements and a table layout,

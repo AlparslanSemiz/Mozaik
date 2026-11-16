@@ -2241,10 +2241,12 @@ table.grid {
 }
 
 /* Until gridFit.ts has measured the first floor, in the frame after the
-   first paint (about two frames): the table is laid out and keeps its room, it is only not drawn
-   without the widths it is about to get. */
+   first paint (about two frames): the table is laid out and keeps its room, it
+   is only not drawn without the widths it is about to get. Opacity and not
+   `visibility`: a hidden cell cannot take focus and has no innerText, and
+   Kontrol's Göster mounts Program and focuses a card in the same moment. */
 .grid-wrap[data-fitting] table.grid {
-  visibility: hidden;
+  opacity: 0;
 }
 
 /* THE CAGE IS GONE, and this is the single change that stops the timetable
