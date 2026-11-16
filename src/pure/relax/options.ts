@@ -188,8 +188,8 @@ export const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
 
 /**
  * The same with CP-SAT beside the search (`handOff`, relaxPool.ts): the ways
- * that on the father's week found nothing in their whole budget get a third
- * of it. MEASURED 2026-11-16: dispatch, block shape and weekly hours spent
+ * that on the father's week found nothing in their whole budget get a
+ * fifteenth to a tenth of it. MEASURED 2026-11-16: dispatch, block shape and weekly hours spent
  * 93 000 conflicts, a third of the search, and offered nothing.
  */
 export const HANDOFF_CONFLICTS: Record<RelaxFamily, number> = {
@@ -197,6 +197,10 @@ export const HANDOFF_CONFLICTS: Record<RelaxFamily, number> = {
   reassign: 10_000,
   blockShape: 10_000,
   weeklyHours: 10_000,
+  // The one of ours that keeps its whole-week question (search.ts, `quick`):
+  // without it it came back 7 on two CPUs where it had been 5 (MEASURED
+  // 2026-11-16, olcum-iki-cekirdek.yml). Capped, so it cannot run on.
+  mixed: 60_000,
 };
 
 /**

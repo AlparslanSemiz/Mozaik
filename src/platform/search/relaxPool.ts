@@ -225,7 +225,12 @@ function cpsatOr(
     (f) => f === 'fewTeachers' || f === 'teacherHours' || f === 'teacherDays',
   );
   const firstCp = all.filter((f) => f === 'teacherHours');
-  const restWays = all.filter((f) => !cpNative(f));
+  // The mixed way first: it then starts from the fewest-hours week itself, as
+  // it did after the teacher's days before, and not from a hand-over week.
+  const restWays = [
+    ...all.filter((f) => f === 'mixed'),
+    ...all.filter((f) => !cpNative(f) && f !== 'mixed'),
+  ];
   // At least two: on one worker CP-SAT ignores `subsolvers` and runs its
   // single-thread default, which never gave the proof. On Windows the exe
   // lowers its own priority while it solves (cpsat.rs), so the window stays
@@ -239,7 +244,8 @@ function cpsatOr(
   /** Today's search, when there is no library. */
   let plain: Relaxer | null = null;
   /** Our searches, in order: step 1, step 2, and the ways CP-SAT failed to answer. */
-  const ours: Array<{ relaxer: Relaxer; ways: RelaxFamily[]; done: RelaxResult | null }> = [];
+  type Line = { relaxer: Relaxer; ways: RelaxFamily[]; done: RelaxResult | null };
+  const ours: Line[] = [];
   /** The CP-SAT relaxer asking now, what the finished ones found, and where it is. */
   let cp: CpRelaxer | null = null;
   const cpFound: Suggestion[] = [];
@@ -254,14 +260,14 @@ function cpsatOr(
   let asking: { at: number; seconds: number } | null = null;
   let finished: RelaxResult | null = null;
 
-  const start = (o: Partial<RelaxOptions>, ways: RelaxFamily[]) => {
+  const start = (o: Partial<RelaxOptions>, ways: RelaxFamily[]): Line | null => {
     if (ways.length === 0) return null;
-    const line = { relaxer: run({ ...o, handOff: true, families: ways }), ways, done: null };
+    const line: Line = { relaxer: run({ ...o, handOff: true, families: ways }), ways, done: null };
     ours.push(line);
     return line;
   };
   /** Step 1's own search: null when it has no ways. */
-  let firstOurs: ReturnType<typeof start> = null;
+  let firstOurs = null as Line | null;
 
   /** One CP-SAT relaxer's questions, to the end; what it found goes to `cpFound`. */
   const chain = async (families: RelaxFamily[], from: Partial<RelaxOptions>) => {
@@ -357,7 +363,12 @@ function cpsatOr(
       cpDone = true;
       return;
     }
-    const fewest = so.filter((s) => s.family === 'teacherHours');
+    // Our own fewest-hours week, not whichever of ours and CP-SAT's came out
+    // ahead: the ways after it then start from the same week on any machine.
+    const ownFewest = (firstOurs?.done?.suggestions ?? []).filter(
+      (s) => s.family === 'teacherHours',
+    );
+    const fewest = ownFewest.length > 0 ? ownFewest : so.filter((s) => s.family === 'teacherHours');
     const from: Partial<RelaxOptions> = {
       seed: fewest,
       startRelaid: so.some((s) => s.relaid),

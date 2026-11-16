@@ -466,8 +466,10 @@ function relaxerCore(
     // the reader asks of them, are only settled by the second.
     const early = which === 'fewTeachers' ? undefined : () => offer(which, model, best, false);
     // CP-SAT has the ways it models (`handOff`, relaxPool.ts): ours stay near
-    // their first week, no whole-week question and no proof.
-    const quick = opts.handOff;
+    // their first week, no whole-week question and no proof. Not the mixed
+    // way: CP-SAT does not look at it, and near its first week alone it
+    // stayed two over its best (HANDOFF_CONFLICTS).
+    const quick = opts.handOff && which !== 'mixed';
     const first = yield* tighten(cost, must, !quick, early);
     // The hand-over way's week must open no hour at all, and `offer` drops one
     // that does. Searching fewer lessons handed over under a week that is

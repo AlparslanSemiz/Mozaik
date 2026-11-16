@@ -103,6 +103,39 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
 
+## 2026-11-16 · Öneri araması iki çekirdekte (`olcum/iki-cekirdek`, PR #78)
+
+Ölçüm `olcum-iki-cekirdek.yml` (windows-latest, AMD EPYC, 2 çekirdek / 4 mantıksal, 16 GB):
+süreç ağacı `start /affinity 3` ile iki CPU'da, `navigator.hardwareConcurrency` 2, CP-SAT
+cpsat.rs'in C API'siyle ve surum.yml'in DLL'iyle; aynı runner kısıtsız da. Babanın haftası
+(`tam-dolu-kurs.json`), `keepPlaced: false`.
+
+**Önce** (koşu 43853161019, `main` gibi: bizim arama on yolun hepsi, sonra CP-SAT):
+
+| koşu | ilk öneri | CP-SAT başlar | toplam | yeni bir şeysiz en uzun | sonuç |
+|---|---|---|---|---|---|
+| 2 CPU | 11.6 s | 154.4 s | 231.7 s | 77.4 s | fewTeachers 6, teacherHours 4✓, handFew 6, handHours 5, teacherDays 4, mixed 5, rules 9 |
+| kısıtsız | 8.7 s | 150.2 s | 198.5 s | 48.4 s | fewTeachers 6✓, teacherHours 4✓, handFew 6, handHours 5, teacherDays 4, mixed 5, rules 9✓ |
+
+CP-SAT'ın 20 s'lik sorularından üçü (2 CPU) sınırına kadar koştu ve ilk cevabında kaldı
+(6, 8, 6); ispatlar 0.6-7.9 s'de geldi. Node tepe RSS 560 MB, CP-SAT süreci en çok 71 MB.
+Otomatik diz 2.8 s, örnek okul 1.1 s.
+
+**Sonra** (koşu 43875966792, `cpsatOr` iki adım, `handOff`, iki çekirdekte soru başına 6 s):
+
+| koşu | ilk öneri | toplam | yazı ve çubuk durgun en uzun | yeni yolsuz en uzun | sonuç |
+|---|---|---|---|---|---|
+| 2 CPU | 7.2 s | 67.8 s | 7.2 s | 17.3 s | fewTeachers 6, teacherHours 4, teacherDays 4, handFew 5, handHours 5, mixed 7, rules 9 |
+| kısıtsız | 9.2 s | 75.2 s | 6.2 s | 16.5 s | fewTeachers 6✓, teacherHours 4✓, teacherDays 4, handFew 5, handHours 4, mixed 5, rules 9✓ |
+
+İki CPU'da `mixed` 5'ten 7'ye kötüleşti; bunun üstüne `mixed` adım 2'de ilk sırada, en az
+saat haftasından ve bütün hafta sorusuyla (HANDOFF_CONFLICTS 60 000) koşuyor, adım 2'nin
+tohumu bizim kendi en az saat haftamız. Bu hâli ölçülmedi, sonraki koşu söyleyecek.
+CP-SAT'ın "bir süre iyileşmezse dur" kuralı C API'de yapılamıyor (çözüm geri bildirimi
+yok), yerine tavan. Formüller artık kullanılmayınca bırakılıyor: Node tepe RSS 560 → 283 MB
+(2 CPU), CP-SAT süreci en çok 62 MB; yerelde sonuçlar aynı. Yerel süreler kirli,
+ölçülmedi sayılır.
+
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 
 `origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,
