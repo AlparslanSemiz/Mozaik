@@ -1583,7 +1583,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 
 ### 171 · Birim testinin süre sınırı, yüklü bir makinede makineyi ölçer
 Başka oturumların aynı çekirdekleri doldurduğu bir gecede (2026-11-16, 8 çekirdekte yük
-ortalaması 78 ile 266 arası) `npm run hizli`'de yedi test Vitest'in 5 s'sini aştı:
+ortalaması 78 ile 266 arası) `npm run hizli`'de yedi test Vitest'in sınırını aştı ya da ona dayandı:
 `linuxKur.test.ts` (bash, git ve `npm run build` başlatıyor), `useFolder.test.tsx`
 (her açılışta modülleri baştan yüklüyor), `App.test.tsx`, `sentences.test.tsx` ve
 `programScreen.test.tsx` (bütün uygulamayı jsdom'da çiziyor), `relax.test.ts`
@@ -1623,7 +1623,7 @@ JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
 büyük kullanılan numara 171, yeni bir tuzak 172'den devam eder. 166 ile 169 arası
-boş: 2026-11-16'da açık dallar 159-162'yi almıştı, kararsız testler dalı çakışmasın
+boş: 2026-11-16'da 159-165 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.
