@@ -23,10 +23,12 @@ import {
   BACKUP_COUNT,
   BEFORE_DELETE_KEY,
   backupKey,
+  DAILY_MARK_KEY,
   LIBRARY_KEY,
   planKey,
   type Library,
 } from '../../pure/io';
+import { copyKeys } from './dailyCopies';
 import { isDesktop } from '../exe';
 import { t } from '../../leaf/i18n';
 import { PREFERENCE_ROWS, safely } from '../../leaf/preference';
@@ -125,6 +127,17 @@ export function storageReport(lib: Library): StorageReport {
     what: t('son silmeden önceki hâl'),
     chars: charsAt(BEFORE_DELETE_KEY),
   });
+  // "Eski hâline dön" (K8): one row per day a copy is kept, read off the
+  // storage itself, so a copy of a deleted plan is listed too.
+  for (const c of copyKeys()) {
+    const name = lib.plans.find((p) => p.id === c.planId)?.name ?? c.planId;
+    rows.push({
+      key: c.key,
+      what: `${name} · ${t('günlük kopya')} · ${c.day}`,
+      chars: charsAt(c.key),
+    });
+  }
+  rows.push({ key: DAILY_MARK_KEY, what: t('günlük kopya'), chars: charsAt(DAILY_MARK_KEY) });
   // Every preference key, from the one list their modules take them from. A
   // key that is written and not named here once hid for weeks, twice (the
   // drawer's height and the strip, then the print options), and the one thing

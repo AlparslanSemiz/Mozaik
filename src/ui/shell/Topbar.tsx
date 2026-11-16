@@ -10,6 +10,7 @@ import {
   CopyPlus,
   FileText,
   FolderOpen,
+  History,
   Info,
   Keyboard,
   Library,
@@ -49,6 +50,8 @@ interface Props {
   openChecklist: () => void;
   /** Dosya ▾ → Yeni dönem için kopyala. */
   copyForNewTerm: () => void;
+  /** Dosya ▾ → Eski hâline dön (K8). */
+  openOldCopies: () => void;
   /** The last plan file's day, YYYY-MM-DD; null when this browser never wrote one. */
   lastFileDay: string | null;
 }
@@ -73,6 +76,7 @@ export default function Topbar({
   openAbout,
   openChecklist,
   copyForNewTerm,
+  openOldCopies,
   lastFileDay,
 }: Props) {
   const t = useT();
@@ -115,8 +119,9 @@ export default function Topbar({
         <MoreItem icon={<CopyPlus size={15} />} onSelect={copyForNewTerm}>
           {t('Yeni dönem için kopyala')}
         </MoreItem>
-        {/* TODO(Sadeleşme aşama 3, K8): "Eski hâline dön", the dated daily
-            copies, goes here. */}
+        <MoreItem icon={<History size={15} />} onSelect={openOldCopies}>
+          {t('Eski hâline dön')}
+        </MoreItem>
         <MoreItem icon={<Library size={15} />} onSelect={openPlans}>
           {t('Planlar ve yedek')}
         </MoreItem>

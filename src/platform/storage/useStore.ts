@@ -32,6 +32,7 @@ import {
 } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import { keepBeforeDelete, noteAfter, offerAtStart, type Offer } from './beforeDelete';
+import { keepDay } from './dailyCopies';
 import type { Id, State } from '../../leaf/model';
 import { t } from '../../leaf/i18n';
 
@@ -227,6 +228,8 @@ export function useStore(announce: (text: string) => void = () => undefined) {
     // A plan this copy could not read is on screen as an empty stand-in, and
     // the stand-in is never saved: the strip says so instead (A1).
     if (writesClosed() || frozenPlan(id) !== null) return;
+    // The first save of a new day keeps the last day's plan first (K8).
+    keepDay(id);
     const landed = savePlan(id, d);
     if (landed) noteAfter(id, d);
     setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');

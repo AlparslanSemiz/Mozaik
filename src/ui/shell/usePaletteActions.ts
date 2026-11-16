@@ -35,6 +35,7 @@ interface PaletteInputs {
   openShortcuts: () => void;
   openFile: () => void;
   copyForNewTerm: () => void;
+  openOldCopies: () => void;
   toggleRibbon: () => void;
   toggleMotion: () => void;
 }
@@ -50,6 +51,7 @@ export function usePaletteActions({
   openShortcuts,
   openFile,
   copyForNewTerm,
+  openOldCopies,
   toggleRibbon,
   toggleMotion,
 }: PaletteInputs): PaletteAction[] {
@@ -94,6 +96,13 @@ export function usePaletteActions({
         label: t('Yeni dönem için kopyala'),
         extra: 'kopya kopyala yeni dönem plan',
         run: copyForNewTerm,
+      },
+      {
+        id: 'old',
+        label: t('Eski hâline dön'),
+        hint: t('Dosya'),
+        extra: 'dün dünkü geri eski kopya yedek önceki gün',
+        run: openOldCopies,
       },
       {
         id: 'backup',
@@ -166,6 +175,7 @@ export function usePaletteActions({
       openShortcuts,
       openFile,
       copyForNewTerm,
+      openOldCopies,
       toggleRibbon,
       toggleMotion,
     ],

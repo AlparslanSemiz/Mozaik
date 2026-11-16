@@ -1903,6 +1903,15 @@ const DE: Sozluk = {
     "Das Fach wird **aus der Liste gewählt**; der Kurzname steht am Zeilenkopf.",
   "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
     "Eine Schülergruppe mit gemeinsamem Stundenplan; der **Raum** ist ihr fester Raum.",
+  // ------------------------------------------- Eski hâline dön (K8)
+  "Eski hâline dön": "Früheren Stand zurückholen",
+  "Dünkü hâline dön": "Stand von gestern zurückholen",
+  "Bu hâline dön": "Diesen Stand zurückholen",
+  "Mozaik her gün bu planın bir kopyasını kendiliğinden saklar, **son 7 gün** burada. Döndüğünüzde şimdiki hâli de saklanır ve **Geri al** ile geri gelir.": "Mozaik legt jeden Tag von selbst eine Kopie dieses Plans ab; hier sind die **letzten 7 Tage**. Beim Zurückholen wird auch der jetzige Stand aufbewahrt, und **Rückgängig** bringt ihn zurück.",
+  "Henüz eski bir kopya yok. İlki, yarın bir şey değiştirdiğinizde burada olur.": "Noch keine frühere Kopie. Die erste steht morgen hier, sobald Sie etwas ändern.",
+  "Plan eski hâline döndü: {gun}.": "Der Plan ist wieder wie am {gun}.",
+  "günlük kopya": "Tageskopie",
+  "{hafta} {gun} {ay}": "{hafta}, {gun}. {ay}",
 };
 
 registerSozluk("de", DE);

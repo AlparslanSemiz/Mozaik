@@ -43,6 +43,7 @@ import {
 import { safely } from '../../leaf/preference';
 import type { Id } from '../../leaf/model';
 import { writesClosed } from './otherWindow';
+import { dropOldestCopy } from './dailyCopies';
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);
@@ -200,7 +201,10 @@ export function writePlanText(id: Id, text: string): boolean {
       localStorage.removeItem(BEFORE_DELETE_KEY);
       return true;
     }) === true;
-  return dropped && put();
+  if (dropped && put()) return true;
+  // Then the daily copies, oldest first (dailyCopies.ts, K8).
+  while (dropOldestCopy()) if (put()) return true;
+  return false;
 }
 
 export function dropPlanText(id: Id): void {

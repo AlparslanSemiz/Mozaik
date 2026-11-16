@@ -1889,6 +1889,15 @@ const EN: Sozluk = {
     "The subject is **picked from the list**; the short name heads the grid row.",
   "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
     "A group of pupils sharing one timetable; the **room** is that class's fixed room.",
+  // ------------------------------------------- Eski hâline dön (K8)
+  "Eski hâline dön": "Go back to an earlier day",
+  "Dünkü hâline dön": "Go back to yesterday",
+  "Bu hâline dön": "Go back to this day",
+  "Mozaik her gün bu planın bir kopyasını kendiliğinden saklar, **son 7 gün** burada. Döndüğünüzde şimdiki hâli de saklanır ve **Geri al** ile geri gelir.": "Every day Mozaik keeps a copy of this plan by itself; the **last 7 days** are here. When you go back, the plan as it is now is kept too, and **Undo** brings it back.",
+  "Henüz eski bir kopya yok. İlki, yarın bir şey değiştirdiğinizde burada olur.": "No earlier copy yet. The first one will be here tomorrow, once you change something.",
+  "Plan eski hâline döndü: {gun}.": "The plan is back as it was: {gun}.",
+  "günlük kopya": "daily copy",
+  "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
 };
 
 registerSozluk("en", EN);

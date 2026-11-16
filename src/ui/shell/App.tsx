@@ -18,6 +18,7 @@ import {
   askToKeep,
   downloadBackup,
   isoDay,
+  keepToday,
   markChanged,
   reminderDue,
   storageKind,
@@ -45,6 +46,7 @@ import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../../platform/changelog';
 import { TABS } from './tabs';
 import Topbar from './Topbar';
+import OldCopies from './OldCopies';
 import Notices from './Notices';
 import { useMachinePrefs } from './useMachinePrefs';
 import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
@@ -291,6 +293,7 @@ export default function App() {
     openShortcuts,
     openFile: () => fileInput.current?.click(),
     copyForNewTerm,
+    openOldCopies: () => setOldCopiesOpen(true),
     toggleRibbon,
     toggleMotion,
   });
@@ -319,6 +322,19 @@ export default function App() {
     keepInStore(state, said, true);
     keepInFolder(state);
     const next = replaceState(lastDelete.state, said);
+    if (next === null) notify(said, 'info');
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+  };
+
+  // Dosya ▾ → Eski hâline dön (K8). The plan as it is now becomes today's
+  // copy first, then the slot a reload reaches, then a step of the history.
+  const [oldCopiesOpen, setOldCopiesOpen] = useState(false);
+  const restoreCopy = (copy: State, day: string) => {
+    keepToday(plans.planId, state);
+    const said = t('Plan eski hâline döndü: {gun}.', { gun: day });
+    keepInStore(state, said, true);
+    keepInFolder(state);
+    const next = replaceState(copy, said);
     if (next === null) notify(said, 'info');
     else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
@@ -423,7 +439,15 @@ export default function App() {
                 goTo({ tab: 'setup' });
               }}
               copyForNewTerm={copyForNewTerm}
+              openOldCopies={() => setOldCopiesOpen(true)}
               lastFileDay={reminder.savedDay}
+            />
+            <OldCopies
+              open={oldCopiesOpen}
+              onClose={() => setOldCopiesOpen(false)}
+              planId={plans.planId}
+              state={state}
+              restore={restoreCopy}
             />
 
             {/* Row two: the tools of whichever section is open. A named region

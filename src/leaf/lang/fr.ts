@@ -1910,6 +1910,15 @@ const FR: Sozluk = {
     "La matière se **choisit dans la liste** ; le nom court ouvre la ligne.",
   "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
     "Un groupe d’élèves au même emploi du temps ; la **salle** est sa salle fixe.",
+  // ------------------------------------------- Eski hâline dön (K8)
+  "Eski hâline dön": "Revenir à un jour précédent",
+  "Dünkü hâline dön": "Revenir à hier",
+  "Bu hâline dön": "Revenir à ce jour",
+  "Mozaik her gün bu planın bir kopyasını kendiliğinden saklar, **son 7 gün** burada. Döndüğünüzde şimdiki hâli de saklanır ve **Geri al** ile geri gelir.": "Chaque jour, Mozaik garde de lui-même une copie de ce plan ; les **7 derniers jours** sont ici. En revenant en arrière, le plan tel qu’il est maintenant est gardé lui aussi, et **Annuler** le ramène.",
+  "Henüz eski bir kopya yok. İlki, yarın bir şey değiştirdiğinizde burada olur.": "Pas encore de copie précédente. La première sera ici demain, dès que vous changerez quelque chose.",
+  "Plan eski hâline döndü: {gun}.": "Le plan est revenu à son état du {gun}.",
+  "günlük kopya": "copie quotidienne",
+  "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
 };
 
 registerSozluk("fr", FR);
