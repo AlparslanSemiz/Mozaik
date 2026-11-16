@@ -144,6 +144,6 @@ Bu listede olmayan bir iş yapılacak demek değil, istenirse ölçülüp karar 
 Mozaik bugün sunucusuz çalışıyor ve ağdan bir şey çekmiyor, ama ikisi de bir ilke
 değil ([DECISIONS.md](DECISIONS.md), 2026-10-08) ve bir özellik onları bozuyor diye
 reddedilmez. Ağa çıkan ya da bir servise bağlanan bir özellik (öğretmenlere e-posta,
-Eyotek'e gönderme, [TODO.md](TODO.md) B3.8) tasarımın ve KVKK'nın sorularıyla karar
+[TODO.md](TODO.md) B3.8) tasarımın ve KVKK'nın sorularıyla karar
 verilir: veri nereye gidiyor, kim saklıyor, bakımı kimde. İlke olan, açılışın ağa bağlı
 olmaması ("Çift tıkla çalışır", "Açılış ağa bağlı değil").

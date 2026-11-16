@@ -112,7 +112,7 @@ ProgramVariant {
   ayrı biçimde ("Soru çözüm", gerekirse sınıf adı).
 - **B9 · Sınıf kâğıdı, okul geneli sınıf çizelgesi ve öğrenciye giden her şey içermez.**
   Bunu bir testle sabitle: sınıf çıktısının HTML'inde "Soru çözüm" geçmez.
-- **B10 · Okul geneli öğretmen çizelgesi ve Eyotek'e giden öğretmen programı** içerir (S5).
+- **B10 · Okul geneli öğretmen çizelgesi** içerir (müdür/baba görür). Eyotek yok (S5).
 
 ### İkame ile ilişkisi (sonra)
 
@@ -127,7 +127,8 @@ istemez (boş geçebilir). İlk sürümde yalnız görünür, atama yok.
 - **S2** Elle taşınan ders kendiliğinden sabitlensin mi? → Evet.
 - **S3** Sınıfa mı ait? → Hayır, herkese açık.
 - **S4** Ders sayısına / ücrete girer mi? → Hayır, ikisine de girmez.
-- **S5** Eyotek'e giden programda olsun mu? → Evet.
+- **S5** Eyotek'e giden programda olsun mu? → Önce evet; sonra **Eyotek kalktı**: baba artık
+  Eyotek kullanmıyor (Alp, 2026-11-16). Öğretmene giden yol yalnız Mozaik'in PDF'i ve Öğretmene gönder.
 
 ## Sıra
 

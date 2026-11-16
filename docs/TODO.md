@@ -37,7 +37,8 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
    KS ve Ö maddelerinin önüne geçiyor. (PRINCIPLES "Kullanılabilirlik"e de yazıldı.)
 2. **Öğretmen programlarını göndermek.** Roboders'te tek tıkla her öğretmenin kendi
    programı Eyotek sistemine gidiyor. Baba ayrıca öğretmenlere e-postayla göndermek
-   istiyor. → **B3.8** (özellik, açık soruları orada). Roboders'in bunu nasıl yaptığı
+   istiyor. → **B3.8** (özellik, açık soruları orada). **2026-11-16: Eyotek kalktı**, baba
+   artık Eyotek kullanmıyor (Alp); gönderme Öğretmene gönder ile (PDF, WhatsApp, e-posta). Roboders'in bunu nasıl yaptığı
    [ROBODERS.md](ROBODERS.md)'de açık soru.
 3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
    listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
@@ -101,7 +102,7 @@ Kayıt [DECISIONS.md](DECISIONS.md)'de.
 
 **Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ve zebra
 `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
-(önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
+(önce D) → e-posta → Roboders turları (§1). (Eyotek turu ve Eyotek'e gönderme 2026-11-16'da kalktı.)
 Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
 **Yayın kapısı: TP7 ve B7.37 (2026-10-24, Alp).** Gerçek Windows exe'de B7.37'nin yolları
@@ -382,7 +383,11 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       içerik çıkarmadan önce ne taşıdığı sorulur).
 
 - [ ] **B3.8 Öğretmen programlarını Eyotek'e ve e-postayla göndermek (babanın
-      isteği, 2026-10-08).** Roboders'te tek tıkla her öğretmenin kendi programı
+      isteği, 2026-10-08).** **2026-11-16: Eyotek kalktı** (Alp: baba artık Eyotek
+      kullanmıyor; DECISIONS). Aşağıdaki Eyotek maddeleri tarihsel kayıt, yapılmayacak;
+      `gez.mjs`/`giris.mjs`'in `--hedef eyotek` ayarı kullanılmıyor, koruma bir dahaki
+      sefere elden geçerken çıkarılır. Kalan iş e-posta yolu; PDF ve `mailto:` Öğretmene
+      gönder (#86) ile var. Roboders'te tek tıkla her öğretmenin kendi programı
       Eyotek sistemine gidiyor; baba Mozaik'ten öğretmenlere e-postayla da göndermek
       istiyor. 2026-10-08'den beri bir ilkeyle çatışmıyor (DECISIONS). B3.2'ye
       (öğretmen başına ayrı PDF) ve B3.4'e (öğretmenin e-postası) dayanıyor.
@@ -1191,8 +1196,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `ders-programi` adresinden soruyor, v2.0.3 ve sonrası `Mozaik`'ten; depo adı ya
       da görünürlüğü bir gün değişirse hangi sürümün güncellenebilir kalacağını bu
       belirler (DECISIONS 2026-10-08, depodaki gerçek veri).
-- [ ] **Eyotek'e gelen program öğretmene bir bildirim olarak gidiyor mu? (2026-10-08,
-      B3.8)** Push ya da SMS.
+- [x] **Eyotek'e gelen program öğretmene bir bildirim olarak gidiyor mu? (2026-10-08,
+      B3.8)** Push ya da SMS. **Kalktı (2026-11-16):** baba artık Eyotek kullanmıyor.
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil. **Babaya sorulmayacak (2026-10-09):** Roboders'teki
       gerçek verisinde vekil modülünün kullanılıp kullanılmadığı R6'nın Tur 3 ve 4'ünde
