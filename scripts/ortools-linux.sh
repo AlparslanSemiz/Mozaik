@@ -102,7 +102,7 @@ done
 cp "$kok/src-tauri/lisanslar/UCUNCU-TARAF.txt" "$hedef/"
 
 # Linux resources land in Tauri's resource folder, `usr/lib/Mozaik` beside
-# `usr/bin` (cpsat.rs, `linux_yeri`), each under its own name.
+# `usr/bin` (cpsat.rs, `linux_yolu`), each under its own name.
 node -e '
   const fs = require("fs");
   const [ciktilar, yol] = process.argv.slice(1);

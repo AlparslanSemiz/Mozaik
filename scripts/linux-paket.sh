@@ -5,7 +5,7 @@
 #
 # The AppImage is unpacked (`--appimage-extract` needs no FUSE) and looked
 # over: the AppImage magic, the program, CP-SAT and its licence in Tauri's
-# resource folder (cpsat.rs, `linux_yeri`), CP-SAT's `RUNPATH $ORIGIN` still in
+# resource folder (cpsat.rs, `linux_yolu`), CP-SAT's `RUNPATH $ORIGIN` still in
 # place after Tauri's bundler (linuxdeploy) went over the folder, and the most
 # glibc the program asks for. Last, CP-SAT's tiny model is solved by the
 # library AS SHIPPED, out of the unpacked AppImage: a library that is there but
@@ -43,6 +43,10 @@ test -f "$kaynak/UCUNCU-TARAF.txt" || { echo "UCUNCU-TARAF.txt AppImage'da yok" 
 paket=$(find "$kaynak" -maxdepth 1 -name '*.so*' | wc -l)
 yerel=$(find "$kok/src-tauri/ortools" -maxdepth 1 -name '*.so*' | wc -l)
 [ "$paket" = "$yerel" ] || { echo "AppImage $paket kütüphane taşıyor, $yerel olmalı" >&2; exit 1; }
+# cpsat.rs refuses a library or folder that group or others can write: one
+# shipped so would load nothing, quietly.
+yazilir=$(find "$kaynak" -maxdepth 1 -perm /022)
+[ -z "$yazilir" ] || { echo "AppImage'da başkalarının yazabildiği dosyalar var:" >&2; echo "$yazilir" >&2; exit 1; }
 readelf -d "$kaynak/libortools.so.9" | grep -E '(RUNPATH|RPATH)' | grep -q '\$ORIGIN' \
   || { echo "libortools.so.9'un RUNPATH'i \$ORIGIN değil" >&2; readelf -d "$kaynak/libortools.so.9" | grep -i path >&2; exit 1; }
 
