@@ -119,7 +119,7 @@ jobs:
         run: >-
           npx playwright test --shard=${{ matrix.parca }}/3
           --grep-invert @arama
-          --reporter=blob,list --trace=retain-on-failure
+          --reporter=blob,list,github --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
         continue-on-error: true
@@ -156,7 +156,7 @@ jobs:
       - name: E2E, öneri aramasının testleri, ${{ matrix.parca }}/3
         run: >-
           npx playwright test --grep @arama --shard=${{ matrix.parca }}/3 --workers=1
-          --reporter=blob,list --trace=retain-on-failure
+          --reporter=blob,list,github --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
         continue-on-error: true
