@@ -83,6 +83,7 @@ function build(): State {
     activeProgramId: 'program-1',
     answers: { accepted: [], refused: [] },
     relations: [],
+    dated: { absent: [], covers: [] },
   };
 }
 

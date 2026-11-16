@@ -79,7 +79,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
             B4.4 baskı tasarımları ──> §3 Bölüm 3 (çıktı aileleri)
                                               |
                                         B3.4 e-posta/WhatsApp
-                                        (e-posta v17'de, telefon v18'de geldi)
+                                        (e-posta v17'de, telefon v19'da geldi)
 
 §6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (YENİ ŞEMA) ──> B6.3 A/B haftası
 ```
@@ -349,7 +349,7 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       bir e-posta programında (Outlook, Windows Posta, Thunderbird) uzun gövdenin nasıl
       geldiği ölçülmedi, runner'da e-posta programı kurulamıyor; Edge'de bağlantı ölçülemedi.
       **WhatsApp yarısı ve PDF yazıldı, Windows'ta doğrulanmadı (2026-11-16, `ozellik/gonder`):**
-      şema v18'de `Teacher.phone`, kişi sayfasında Telefon kutusu; kişi sayfasında `WhatsApp`, Çıktı'da
+      şema v19'da `Teacher.phone`, kişi sayfasında Telefon kutusu; kişi sayfasında `WhatsApp`, Çıktı'da
       numarası olanın satırında `WhatsApp`: önce öğretmenin kâğıdı elle yazılan bir PDF olarak
       İndirilenler'e (`pdf.ts`), sonra `https://wa.me/<numara>?text=` (exe'de `whatsapp_ac`).
       E-posta düğmeleri de PDF'i kaydediyor; sınıfın sayfasında `PDF kaydet`. Açık: WebView2'de
@@ -2196,6 +2196,18 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       birleşmedi; WORKLOG): beş görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve
       Sınıflar'ın şeridine, Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir
       plan (K2), Kontrol çipin açtığı sorun listesi (K3). Sonra babanın bir oturumu izlenir.
+
+- [~] **SD9 · İkame ve hafta istisnası (Alp'in önceliği, 2026-11-16).** Yazıldı
+      (`ozellik/ikame`, `sade/asama-3a`'nın üstünde, birleşmedi; DECISIONS "İkame ve hafta
+      istisnası", WORKLOG): şema v18 `dated` (gelmeyen öğretmen ya da sınıf, tarih aralığıyla;
+      saat saat ikame ya da boş geçsin), kişi sayfasında `Gelmiyor…`, Program şeridinde tarih
+      çipi, tarih sayfası ve İkame listesinin Yazdır'ı, öğretmen sayfasında ikame sayısı,
+      `Bu haftanın değişikliklerini sil`. Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
+      v18) ve E2E (`e2e/ikame.spec.ts`, axe dahil) yeşil. **Kalan:** (1) tatil günü (bir tarihin
+      bütün dersleri) ve bir dersi yalnız o hafta başka saate taşımak, bütçe yüzünden yok;
+      (2) ızgara o haftayı göstermiyor, değişiklik yalnız çipte ve tarih sayfasında; (3) İkame
+      listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle; (4) 3B birleşince çip yeni
+      Program şeridine taşınır; (5) brotli +2,6 kB, bütçe 2 kB idi (WORKLOG).
 
 ## §9. Ham notlar
 

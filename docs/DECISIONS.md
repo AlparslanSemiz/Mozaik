@@ -57,13 +57,41 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 - **E-posta yolu aynı kaldı, PDF'i ekliyor:** `mailto:` dosya taşıyamaz; düğme önce PDF'i kaydeder
   ve satır "iletiye ekleyin" der. Exe'den "ekli ileti aç" (MAPI) Windows'ta yeni bir yerel kod
   ve ölçülemeyen bir e-posta programı demek, yapılmadı.
-- **Telefon State'te (şema v18),** e-posta ile aynı kural ve aynı KVKK notu. Yalnız kullanıcının
+- **Telefon State'te (şema v19; v18 İkame'nin),** e-posta ile aynı kural ve aynı KVKK notu. Yalnız kullanıcının
   tıkladığı `wa.me` bağlantısına girer; Türkiye'nin yazılış biçimleri (0532…, 532…) 90'a çevrilir.
 - **Ölçülen boyut, ve aşılan bütçe:** dalın tamamı +2,5 kB brotli (302,04 → 304,56 kB; ham
   1 174,5 → 1 183,1 kB). Bütçe 1,5 kB'tı; PDF yazıcısı tek başına 1,3 kB. Tek dosyalı derlemede
   tembel yüklenen bir parça yok (`vite-plugin-singlefile` her şeyi satır içine alır, tuzak 19),
   yani PDF yazıcısı ya pakette ya hiç yok. Karar Alp'in (WORKLOG'da seçenekler).
 
+### 2026-11-16 · İkame ve hafta istisnası: taban haftanın üstünde tarihli bir katman (`ozellik/ikame`, şema v18)
+
+**Karar (Alp'in önceliği "İkame ve hafta istisnası").** Taban hafta saf kalır: tarihli her
+değişiklik `State.dated`'da, iki listede durur. `absent` bir öğretmenin ya da sınıfın bir tarih
+aralığında gelmediğini, `covers` o tarihte bir sınıfın bir saatine kimin girdiğini (ya da
+`null`, "boş geçsin") söyler. Izgara, havuz, Kontrol, kâğıt ve çözücü onu okumaz; bir tarih
+geçince kayıt bir şey değiştirmez (kendiliğinden biter) ama silinmez, çünkü ikameler öğretmenin
+adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
+
+- **Hafta istisnası = gelmeyen sınıf.** Gezi ya da sınav haftası bir sınıfın o günlerde
+  gelmemesi: dersleri ikame istemez, öğretmenleri o saatlerde boş sayılır ve ikame önerisine
+  girer. Ayrı bir "dersi taşı" ya da "tatil günü" kavramı yok (aşağıda).
+- **Öneri sırası:** o saatte ders vermeyen, başka bir saate ikame girmemiş, kendi saatlerinde
+  müsait ve o gün gelmeyen olmayan öğretmenler; önce aynı branş (birinci ya da ikinci), sonra bu
+  hafta en az ikameye girmiş, sonra o gün zaten okulda olan. Seçim babanındır; Mozaik kimseyi
+  kendiliğinden atamaz.
+- **Girişler:** kişi sayfasında `Gelmiyor…` (bugün, sayfadaki tarih değişince tek günlük yokluk
+  o güne taşınır) ve Program şeridinde tek bir tarih çipi (`Bugün kim yok?`, bu hafta değişiklik
+  varsa `Bu hafta: 18–22 Kasım, 3 değişiklik`). Tarih sayfasının tek ana düğmesi `Yazdır`
+  (İkame listesi). Yerleri yeni dosyalarda (`ui/dated/`), aşama 3B'nin sekmelerine ve şeridine
+  dokunmadan: çip Program şeridine tek satırla giriyor, 3B onu yeni şeride taşır.
+- **Şema v18, ve eski kopya.** Alan sürüm artırılmadan eklenseydi eski kopya dosyayı açar ve ilk
+  kayıtta alanı silerdi; artırıldığı için eski kopya "daha yeni bir sürüm" der ve dokunmaz.
+- **Bırakılan, bütçe yüzünden (brotli):** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı
+  ve çıkarıldı; bir dersi yalnız o hafta başka saate taşımak hiç yazılmadı, çünkü ızgaranın
+  sürüklemesini tarihli katmana bağlamak 3B'nin dosyalarına girer. İkisi TODO'da.
+- **Gönderme:** İkame listesi bugün yalnız basılıyor (Yazdır'dan PDF de). WhatsApp ve e-posta
+  "gönder" işiyle (aşama 4).
 ### 2026-11-16 · Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan (Sadeleşme aşama 3B, K1–K3)
 
 **Değişen (K1).** Yedi yer yerine beş iş, bu sırayla ve Alt+1..5: **Program · Öğretmenler ·

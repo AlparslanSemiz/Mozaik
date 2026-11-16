@@ -77,6 +77,11 @@ Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe,
 dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
 Gerçek Windows exe'de koşulmadı.
 
+**İkame ve hafta istisnası (2026-11-16, `ozellik/ikame`, `sade/asama-3a`'nın üstünde,
+birleşmedi; 3B'den sonra birleşir):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
+şeridinde tarih çipi, tarih sayfası ve İkame listesi (TODO SD9, DECISIONS). Brotli 302 044 →
+304 684 B (+2 640; bütçe 2 kB'tı, eşiğe 1 316 B kaldı), ham 1 174 531 → 1 185 596 B.
+
 **Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
 kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
 `linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
@@ -114,7 +119,7 @@ oluyor). Kararlar DECISIONS 2026-11-16'da.
   altında "Hedef'i PDF olarak kaydet yapın". **Ölçüldü:** "Arka plan grafikleri" kapalıyken
   renk basılıyor (tuzak 211); 1/2/4 × üç boyutun dokuzunda kâğıt taşmıyor ve en küçük yazı
   9,33 px (7 pt); A4 yatay `@page` ile zorunlu, dikey Chromium'un penceresinde seçilemiyor.
-- **Şema v18** `Teacher.phone`; **PDF** elle (`pdf.ts`, Helvetica, Latin-5); **WhatsApp** tek
+- **Şema v19** `Teacher.phone` (v18 İkame'nin, bu dal onun üstünde); **PDF** elle (`pdf.ts`, Helvetica, Latin-5); **WhatsApp** tek
   tıklama (PDF İndirilenler'e, sonra `wa.me`), exe'de `mail.rs`'te `whatsapp_ac` (yalnız
   `https://wa.me/<rakam>…`, `cargo test mail` Mac'te 4/4; Windows modülü derlenmedi).
 - **Boyut (bütçe aşıldı).** brotli 302,04 → 304,56 kB (+2,52; eşik 306), ham 1 174,5 →
@@ -126,9 +131,32 @@ oluyor). Kararlar DECISIONS 2026-11-16'da.
 - **Doğrulanmadı:** WebView2'de indirmenin İndirilenler'e gittiği (Linux exe testinde ölçülü,
   tuzak 132) ve `whatsapp_ac`'ın varsayılan tarayıcıyı açtığı; PDF'in telefonda WhatsApp
   önizlemesinde Türkçe harflerle okunduğu (Mac'in Önizleme'si ve `sips` doğru çiziyor).
-- **Şema çakışması:** İkame dalı da şema artırırsa ikinci birleşen v19 olur (sürüm, kabul
-  listesi, örnek dosya).
+- **Birleşme sırası:** 3B (`origin/sade/asama-3b`) → İkame (`ozellik/ikame`, şema v18) → bu dal
+  (şema v19); ikisi de bu dalın içinde. v1–v18 örnek dosyaları İkame'ninkiyle bayt bayt aynı.
 
+## 2026-11-16 · İkame ve hafta istisnası (`ozellik/ikame`, TODO SD9)
+
+**Ne yapıldı.** Taban haftanın üstünde tarihli bir katman, şema v18 (`State.dated`: `absent`,
+`covers`). `pure/dated/` tarihin gün sütununu kayıtlı gün adından okur, gelmeyen öğretmenin o
+günkü saatlerini ve o saatte boş olanları sıralar (aynı branş, bu hafta en az ikame, o gün
+okulda); gelmeyen sınıfın saatleri ikame istemez ve öğretmenini boşaltır. `ui/dated/` tarih
+sayfası (tek ana düğme Yazdır, `usePrintNow` PrintOne'dan çıkarıldı) ve Program şeridindeki
+çip; kişi sayfasında `Gelmiyor…` ve ikame sayısı. OldCopies'in gün adı `dayName`'e taşındı.
+Örnek dosya reçetesine v18 basamağı; v1–v17 bayt bayt aynı.
+
+**Boyut.** `main`'li `sade/asama-3a` 302 044 B brotli, bu dal 304 684 B (+2 640, inceleme düzeltmeleriyle), ham +11 065 B.
+Ölçülen parçalar: çevirilerin dört dili ~400 B, çip ve hafta adı ~340 B, tatil günü ~60 B
+(çıkarıldı). Bütçe 2 kB'tı; daha inmek için ilk adaylar `Son gün` (aralık) ve haftayı geri alma,
+ikisi de istenen işin parçası olduğu için kesilmedi.
+
+**Doğrulama.** `tsc` (uygulama ve araçlar), eslint, prettier, knip, depcruise, `npm run hizli`,
+`pure/dated` ve `fixtures` birim testleri, `e2e/ikame.spec.ts` (axe dahil) Chromium'da yeşil.
+Tıklama testi 1920 ve 1366'da örnek okulla (görüntüler `scratch/ikame/`). Bütün Chromium E2E (`--workers=2`):
+791 geçti, 3 kaldı: `kayma.spec.ts:129` (bilinen, yalnız macOS), `serit.spec.ts:282` 1024 px (yükte
+30 s zaman aşımı; tek başına 12/12 geçti) ve `temel.spec.ts:401` (v17'yi sabit yazıyordu, v18'e
+çekildi, geçti). İnceleme alt ajanının bulguları ayrı commit'te: yokluk gidince ikamesi de gider,
+dolan hoca seçicide kalır, Gelmiyor… yalnız kendi yokluğunu taşır, İkame listesi Başlarken'in
+Yazdır adımını işaretlemez.
 ## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
 
 `sade/asama-2`'nin (PR #74) üstünde, birleşmedi. Aşama 3A (K6–K8) paralel bir dalda; ikisi

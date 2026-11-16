@@ -23,6 +23,27 @@ import { useT } from '../common';
 import Sheet, { PaperHead } from './Sheet';
 import { usePrintTitle } from './usePrintTitle';
 
+/**
+ * Prints the `.print-one-box` drawn beside it, then calls `done` once the
+ * print window has closed. The person page's sheet and the İkame listesi.
+ */
+export function usePrintNow(done: () => void, program = true) {
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add('print-one');
+    // The one Başlarken step the plan cannot show (Checklist.tsx): a program,
+    // not an İkame listesi.
+    if (program) markPrinted();
+    window.addEventListener('afterprint', done, { once: true });
+    const frame = requestAnimationFrame(() => window.print());
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('afterprint', done);
+      root.classList.remove('print-one');
+    };
+  }, [done, program]);
+}
+
 export function PrintOne({
   state,
   kind,
@@ -55,19 +76,7 @@ export function PrintOne({
   // Before the effect below: its `window.print()` fires `beforeprint`.
   usePrintTitle(paperName(who.find((x) => x.id === id)?.name ?? '', new Date()));
 
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add('print-one');
-    // The one Başlarken step the plan cannot show (Checklist.tsx).
-    markPrinted();
-    window.addEventListener('afterprint', done, { once: true });
-    const frame = requestAnimationFrame(() => window.print());
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('afterprint', done);
-      root.classList.remove('print-one');
-    };
-  }, [done]);
+  usePrintNow(done);
 
   if (sheet === null) return null;
   return createPortal(

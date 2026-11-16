@@ -1,4 +1,4 @@
-// The teacher's phone number (schema v18), and the WhatsApp link it fills.
+// The teacher's phone number (schema v19), and the WhatsApp link it fills.
 //
 // Mozaik sends nothing. The number goes into a `https://wa.me/` link that
 // opens only when the user clicks it, and WhatsApp itself asks before

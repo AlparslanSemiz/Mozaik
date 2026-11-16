@@ -232,13 +232,37 @@ export function sanitize(d: State): State {
   // An address (schema v17) never keeps a line break or a control character:
   // it ends up in a `mailto:`, and a break there ends the address and starts
   // something the user never typed. Whatever else was typed stays as typed.
-  // A phone (v18) keeps only what a number is written with (`cleanPhone`).
+  // A phone (v19) keeps only what a number is written with (`cleanPhone`).
   let teachers = d.teachers;
   const clean = (t: Teacher) => t.email === cleanEmail(t.email) && t.phone === cleanPhone(t.phone);
   if (!teachers.every(clean)) {
     teachers = teachers.map((t) =>
       clean(t) ? t : { ...t, email: cleanEmail(t.email), phone: cleanPhone(t.phone) },
     );
+    changed = true;
+  }
+
+  // The dated layer (v18) names people, classes and hours like the grid: an
+  // absence of somebody deleted, or a cover whose class, hour or substitute is
+  // gone, goes with them. A date is never judged here: the past is history.
+  const givenDated = d.dated ?? { absent: [], covers: [] };
+  const people = (id: Id) => teacherIds.has(id) || classIds.has(id);
+  const absent = givenDated.absent.filter((a) => people(a.id));
+  const covers = givenDated.covers.filter(
+    (c) =>
+      classIds.has(c.classId) &&
+      Number.isInteger(c.hour) &&
+      c.hour >= 0 &&
+      c.hour < hourCount &&
+      (c.teacherId === null || teacherIds.has(c.teacherId)),
+  );
+  let dated = givenDated;
+  if (
+    d.dated === undefined ||
+    absent.length !== givenDated.absent.length ||
+    covers.length !== givenDated.covers.length
+  ) {
+    dated = { ...givenDated, absent, covers };
     changed = true;
   }
 
@@ -253,5 +277,6 @@ export function sanitize(d: State): State {
     activeProgramId,
     answers,
     relations: relations.length === givenRelations.length ? givenRelations : relations,
+    dated,
   };
 }

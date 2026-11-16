@@ -1865,6 +1865,21 @@ const DE: Sozluk = {
   "Göndermek için Bilgiler’de telefon numarasını yazın.": "Zum Senden die Telefonnummer unter Angaben eintragen.",
   "PDF kaydet": "PDF speichern",
   "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} wurde im Ordner Downloads gespeichert. Mit der Büroklammer an die Nachricht oder den Chat anhängen.",
+  // ------------------------------------------- the dated layer (DayDialog.tsx)
+  "Boş geçsin": "Klasse frei",
+  "Bu gün değişen ders yok.": "An diesem Tag ändert sich kein Unterricht.",
+  "bu hafta {n}": "{n} diese Woche",
+  "Bu hafta: {gunler}, {n} değişiklik": "Diese Woche: {gunler}, {n} {n:Änderung|Änderungen}",
+  "Bu haftanın değişikliklerini sil": "Änderungen dieser Woche entfernen",
+  "Bugün kim yok?": "Wer fehlt heute?",
+  "Gelmeyen ekle…": "Abwesende hinzufügen…",
+  "Gelmeyen": "Abwesend",
+  "Gelmiyor…": "Fehlt…",
+  "İkame listesi": "Vertretungsplan",
+  "İkame: bu hafta {m}, toplam {n} saat": "Vertretung: {m} diese Woche, insgesamt {n} {n:Stunde|Stunden}",
+  "Seçilmedi": "Nicht gewählt",
+  "Son gün": "Letzter Tag",
+  "Yerine": "Vertreten durch",
   "Ayrı plan yap":
     "Als eigenen Plan anlegen",
 };

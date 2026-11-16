@@ -90,6 +90,20 @@ export function gunYazisi(iso: string, hafta: string): string {
   return t('{hafta} {gun} {ay}', { hafta, gun: Number(m[3]), ay: t(ay) });
 }
 
+/**
+ * "18–22 Kasım", or "30 Kasım–4 Aralık" across a month: some days of one week
+ * (the dated layer, v18). '' when either is not a date.
+ */
+export function aralikYazisi(from: string, to: string): string {
+  const ay = (iso: string) => AYLAR[Number(iso.slice(5, 7)) - 1];
+  const gun = (iso: string) => Number(iso.slice(8));
+  const a = ay(from);
+  const b = ay(to);
+  if (a === undefined || b === undefined) return '';
+  if (from === to) return `${gun(from)} ${t(a)}`;
+  return a === b ? `${gun(from)}–${gun(to)} ${t(a)}` : `${gun(from)} ${t(a)}–${gun(to)} ${t(b)}`;
+}
+
 /** "v1.1.0 · 27 Ağustos 2026", or just "v1.1.0" when there is no date. */
 export function surumEtiketi(s: Surum = SURUM): string {
   const tarih = tarihYazisi(s.date);

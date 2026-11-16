@@ -38,9 +38,9 @@ const OUT = join(import.meta.dirname, '..', 'src', 'fixtures');
  * taught under it, a two-hour block, a three-hour block, a lesson with no
  * block at all, a pinned cell, a closed hour, and a laid-out timetable.
  */
-function v18() {
+function v17() {
   return {
-    schemaVersion: 18,
+    schemaVersion: 17,
     settings: {
       schoolName: 'Birey Kurs',
       // NOT A SINGLE VALUE HERE IS THE PROGRAM'S DEFAULT, and that is the
@@ -89,9 +89,6 @@ function v18() {
         // v17: one teacher with an address (a reserved example domain, never a
         // real inbox) and one without, because '' is the usual answer.
         email: 'mehmet.celik@example.com',
-        // v18: a number in the shape it is typed in, a reserved-looking one
-        // (555 is not handed out to subscribers), and none for the other.
-        phone: '0555 000 00 01',
       },
       {
         id: 'tAV',
@@ -103,7 +100,6 @@ function v18() {
         color: 7,
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
         email: '',
-        phone: '',
       },
     ],
     classes: [
@@ -177,6 +173,39 @@ function v18() {
   };
 }
 
+/**
+ * Today's shape (v18): v17 and the dated layer. MÇ is away on Tuesday 17
+ * November 2026 and AV covers his first hour in 510; class 511 is away on a
+ * trip for three days. The second hour has no cover chosen yet.
+ */
+function v18() {
+  return {
+    ...v17(),
+    schemaVersion: 18,
+    dated: {
+      absent: [
+        { id: 'tMC', from: '2026-11-17', to: '2026-11-17' },
+        { id: 'c511', from: '2026-11-17', to: '2026-11-19' },
+      ],
+      covers: [{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' }],
+    },
+  };
+}
+
+/**
+ * Today's shape (v19): v18 and the teachers' phones, one in the shape it is
+ * typed in (555 is not handed out to subscribers) and one empty, because ''
+ * is the usual answer.
+ */
+function v19() {
+  const raw = v18();
+  return {
+    ...raw,
+    schemaVersion: 19,
+    teachers: raw.teachers.map((t, i) => ({ ...t, phone: i === 0 ? '0555 000 00 01' : '' })),
+  };
+}
+
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
 /** The single program's grid, as every version before v12 stored it: at the top. */
@@ -191,13 +220,18 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v18 with fifteen steps undone.
+ * key. The chain is applied in order, so v3 is v19 with sixteen steps undone.
  */
 const DOWN = {
-  17: (raw) => {
-    // v18 brought the teacher's phone. Below it a teacher has none.
-    raw.schemaVersion = 17;
+  18: (raw) => {
+    // v19 brought the teacher's phone. Below it a teacher has none.
+    raw.schemaVersion = 18;
     for (const t of raw.teachers) delete t.phone;
+  },
+  17: (raw) => {
+    // v18 brought the dated layer. Below it a file has none.
+    raw.schemaVersion = 17;
+    delete raw.dated;
   },
   16: (raw) => {
     // v17 brought the teacher's address. Below it a teacher has none.
@@ -328,13 +362,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v18();
-writeFileSync(join(OUT, 'v18.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v19();
+writeFileSync(join(OUT, 'v19.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`18 örnek dosya yazıldı: ${OUT}`);
+console.log(`19 örnek dosya yazıldı: ${OUT}`);

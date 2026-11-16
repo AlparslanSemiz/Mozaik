@@ -163,6 +163,7 @@ function build(): State {
     activeProgramId: 'program-1',
     answers: { accepted: [], refused: [] },
     relations: [],
+    dated: { absent: [], covers: [] },
   };
 }
 
@@ -574,7 +575,7 @@ describe('sanitize — öğretmenin e-postası (v17)', () => {
     expect(s.teachers.slice(1)).toEqual(kirli.teachers.slice(1));
   });
 
-  it('telefonda (v18) numara karakteri olmayan düşüyor, adres yerinde kalıyor', () => {
+  it('telefonda (v19) numara karakteri olmayan düşüyor, adres yerinde kalıyor', () => {
     const d = build();
     const kirli = {
       ...d,

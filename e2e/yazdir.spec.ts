@@ -1256,7 +1256,10 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
 
   test('her kâğıdın üstünde plan ve "Sayfa i / N", kâğıt ortamında da', async ({ page }) => {
     await openWithSample(page);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await choose(page, '2');
     await page.emulateMedia({ media: 'print' });
     const sheets = page.locator('.print-sheet');
@@ -1296,7 +1299,10 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
     world.teachers[0]!.name = 'Mehmet Çelik';
     world.teachers[1]!.name = 'Ayşe Vural';
     await loadWorld(page, world, null);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     const first = page.locator('.print-page').first();
     await expect(first.locator('.p-legend')).toHaveText('AV Ayşe Vural · MÇ Mehmet Çelik');
     const codes = new Set(await first.locator('.p-bottom').allTextContents());
@@ -1307,7 +1313,10 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
 
   test('dokuz birleşimin hiçbirinde kâğıtta 7 pt’tan küçük yazı yok', async ({ page }) => {
     await openWithSample(page);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     const small: Record<string, number> = {};
     for (const per of ['1', '2', '4']) {
       for (const size of ['Küçük', 'Normal', 'Büyük']) {
@@ -1339,7 +1348,10 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
     page,
   }) => {
     await openWithSample(page);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     const before = await page.title();
     const day = new Date().toLocaleDateString('sv-SE');
     const during = () =>
@@ -1366,7 +1378,10 @@ test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () =
     test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     const zlib = await import('node:zlib');
     await openWithSample(page);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
     await page.locator('.pick-item').first().locator('input').check();
     const pdf = (await page.pdf({ preferCSSPageSize: true, printBackground: false })).toString(
@@ -1408,7 +1423,10 @@ test.describe('Çıktı: öğretmene WhatsApp’tan', () => {
     world.teachers[0]!.phone = '0555 000 00 01';
     world.teachers[1]!.phone = '123';
     await loadWorld(page, world, null);
-    await page.locator('.tabstrip').getByRole('button', { name: 'Yazdır ve gönder', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
     await page.evaluate(() => {
       window.open = ((url: string) => {
         (window as unknown as { acilan: string }).acilan = url;

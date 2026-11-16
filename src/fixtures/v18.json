@@ -71,8 +71,7 @@
         "maxPerDay": null,
         "minPerDay": null
       },
-      "email": "mehmet.celik@example.com",
-      "phone": "0555 000 00 01"
+      "email": "mehmet.celik@example.com"
     },
     {
       "id": "tAV",
@@ -87,8 +86,7 @@
         "maxPerDay": null,
         "minPerDay": null
       },
-      "email": "",
-      "phone": ""
+      "email": ""
     }
   ],
   "classes": [
@@ -200,5 +198,27 @@
         "l3"
       ]
     }
-  ]
+  ],
+  "dated": {
+    "absent": [
+      {
+        "id": "tMC",
+        "from": "2026-11-17",
+        "to": "2026-11-17"
+      },
+      {
+        "id": "c511",
+        "from": "2026-11-17",
+        "to": "2026-11-19"
+      }
+    ],
+    "covers": [
+      {
+        "date": "2026-11-17",
+        "classId": "c510",
+        "hour": 0,
+        "teacherId": "tAV"
+      }
+    ]
+  }
 }

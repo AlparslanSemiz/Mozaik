@@ -60,7 +60,7 @@ export interface Teacher {
    */
   email: string;
   /**
-   * The teacher's phone, for WhatsApp (schema v18), or '' for none. Personal
+   * The teacher's phone, for WhatsApp (schema v19), or '' for none. Personal
    * data, carried exactly as `email` is; it only fills a `wa.me` link the
    * user clicks (`whatsappUrl`).
    */
@@ -269,6 +269,39 @@ export interface Relation {
   lessonIds: [Id, Id];
 }
 
+/**
+ * One teacher or one class away on a run of dates (schema v18). `from` and `to`
+ * are local calendar days, 'YYYY-MM-DD', both included. A class away is a trip
+ * or an exam: its hours that day need nobody, and its teachers are free.
+ */
+export interface Absence {
+  id: Id;
+  from: string;
+  to: string;
+}
+
+/**
+ * Who takes one class at one hour on one date in place of its absent teacher
+ * (v18, "ikame"). `teacherId: null` is "boş geçsin": the class is free.
+ */
+export interface Cover {
+  date: string;
+  classId: Id;
+  hour: number;
+  teacherId: Id | null;
+}
+
+/**
+ * The dated layer over the base week (v18): who is away and who covers for
+ * them. The base program never reads it and neither does the solver; a date in
+ * the past simply stops mattering, and its covers stay as the count each
+ * teacher's fairness is judged by.
+ */
+export interface Dated {
+  absent: Absence[];
+  covers: Cover[];
+}
+
 export interface State {
   schemaVersion: typeof SCHEMA_VERSION;
   settings: Settings;
@@ -288,6 +321,7 @@ export interface State {
   activeProgramId: Id;
   answers: Answers;
   relations: Relation[];
+  dated: Dated;
 }
 
 /** One alternative timetable inside a plan. */
@@ -351,6 +385,9 @@ export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
  *      it has none.
  * v17: Teacher.email — where the teacher's week is sent. A file below it has
  *      none, and '' is what none means.
- * v18: Teacher.phone — the number WhatsApp opens. A file below it has none.
+ * v18: State.dated — absences and covers on given dates, over the
+ *      base week. A file below it has none. An older copy refuses a v18 file
+ *      as "newer" rather than opening it and dropping the field on save.
+ * v19: Teacher.phone — the number WhatsApp opens. A file below it has none.
  */
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 19;

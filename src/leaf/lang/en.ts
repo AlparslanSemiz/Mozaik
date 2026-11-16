@@ -1851,6 +1851,21 @@ const EN: Sozluk = {
   "Göndermek için Bilgiler’de telefon numarasını yazın.": "To send it, enter the phone number under Details.",
   "PDF kaydet": "Save PDF",
   "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} was saved in the Downloads folder. Attach it to the message or chat with the paperclip.",
+  // ------------------------------------------- the dated layer (DayDialog.tsx)
+  "Boş geçsin": "Class free",
+  "Bu gün değişen ders yok.": "No lesson changes this day.",
+  "bu hafta {n}": "{n} this week",
+  "Bu hafta: {gunler}, {n} değişiklik": "This week: {gunler}, {n} {n:change|changes}",
+  "Bu haftanın değişikliklerini sil": "Remove this week's changes",
+  "Bugün kim yok?": "Who is away today?",
+  "Gelmeyen ekle…": "Add someone away…",
+  "Gelmeyen": "Away",
+  "Gelmiyor…": "Away…",
+  "İkame listesi": "Cover list",
+  "İkame: bu hafta {m}, toplam {n} saat": "Cover: {m} this week, {n} {n:hour|hours} in all",
+  "Seçilmedi": "Not chosen",
+  "Son gün": "Last day",
+  "Yerine": "Covered by",
   "Ayrı plan yap":
     "Make it a plan of its own",
 };

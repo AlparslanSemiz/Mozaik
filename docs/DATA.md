@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 17
+  schemaVersion: 18
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -21,7 +21,10 @@ State {
   activeProgramId: Id                                  // ekranda, Kontrol'de ve kâğıtta olan
   answers: { accepted: Relaxation[]; refused: Refusal[] }   // öneriye verilen cevaplar
   relations: Relation[]   // iki ders arasındaki kural: aynı gün olmasın
+  dated: { absent: Absence[]; covers: Cover[] }   // taban haftanın üstünde tarihli katman (v18)
 }
+Absence    { id, from, to }                    // öğretmen ya da sınıf, 'YYYY-AA-GG', iki uç dahil
+Cover      { date, classId, hour, teacherId }  // o tarihte o saate kim girer; null = boş geçsin
 ProgramVariant {
   id, name
   placements: Record<`${classId}|${day}|${hour}`, lessonId>
@@ -52,7 +55,7 @@ Alanların anlamı:
 
 - `Teacher.subject2` öğretmenin ikinci branşı ya da `''`. `''` bir değer, eksik veri değil: listelerin çoğu tek branşlı ve bu da veri.
 - `Teacher.email` öğretmenin haftasının gönderileceği adres ya da `''` (v17, TODO B3.4). Kişisel veri: plan dosyasıyla, her yedekle ve paylaşılan her dosyayla birlikte taşınır (kullanıcının kararı, 2026-10-24: State'te). Yazıldığı gibi saklanır; yalnız satır sonu ve denetim karakteri düşer, okuyucuda da `sanitize()`'da da (`cleanEmail`), çünkü bir `mailto:`'da satır sonu adresi bitirip başka bir şey başlatır. Tek bir adrese benzeyip benzemediği (`looksLikeEmail`) saklamayı değil, Çıktı'daki düğmeyi belirler. Mozaik hiçbir şey göndermez: adres yalnız kullanıcının kendi e-posta programının açtığı bir `mailto:`'ya girer.
-- `Teacher.phone` öğretmenin WhatsApp numarası ya da `''` (v18, TODO B3.4). Kişisel veri, `email` gibi taşınır. Yazıldığı gibi saklanır ama yalnız numaranın yazıldığı karakterler kalır (rakam, boşluk, `+ ( ) - .`, en çok 32), okuyucuda da `sanitize()`'da da (`cleanPhone`). WhatsApp'ın okuyacağı biçime (`whatsappNumber`: başında 0 olan 11 hane ya da 5'le başlayan 10 hane Türkiye'nin, gerisi `+` ya da `00` ile) yalnız düğme çevirir. Numara hiçbir yere gönderilmez: yalnız kullanıcının tıkladığı bir `https://wa.me/` bağlantısına girer.
+- `Teacher.phone` öğretmenin WhatsApp numarası ya da `''` (v19, TODO B3.4). Kişisel veri, `email` gibi taşınır. Yazıldığı gibi saklanır ama yalnız numaranın yazıldığı karakterler kalır (rakam, boşluk, `+ ( ) - .`, en çok 32), okuyucuda da `sanitize()`'da da (`cleanPhone`). WhatsApp'ın okuyacağı biçime (`whatsappNumber`: başında 0 olan 11 hane ya da 5'le başlayan 10 hane Türkiye'nin, gerisi `+` ya da `00` ile) yalnız düğme çevirir. Numara hiçbir yere gönderilmez: yalnız kullanıcının tıkladığı bir `https://wa.me/` bağlantısına girer.
 - `Teacher.gender` `''`, `'k'` ya da `'e'`. Listelerde sıralama ve gruplama için, kâğıda çıkmaz. Bir boolean değil, çünkü boolean ikisinden birini varsayılan seçip herkese sessizce atardı.
 - `Teacher.color` ve `ClassGroup.color` paletin indeksi, bir hex değer değil.
 - `ClassGroup.roomId` sınıfın sabit dersliği. `null` ise derslik çakışması denetlenmez.
@@ -70,6 +73,11 @@ Alanların anlamı:
   - Sert bir kural: çözücü ve öneri araması onu hiç çiğnemez, onu çiğneyecek bir bırakma reddedilir. Dersler yerleştirildikten sonra eklenen ve çiğnenen bir ilişki Kontrol'de ihlal olarak listelenir, dersler yerinden oynatılmaz.
   - Öneri araması onu esnetilebilir bir yol saymaz.
   - Silinen bir dersin (sınıfıyla ya da öğretmeniyle birlikte silinenin de) ilişkisi `sanitize()` ile düşer, iki ucu aynı ders olan ya da tekrarlanan bir çift de.
+- `dated`, taban haftanın üstünde tarihli katman (v18, ikame ve hafta istisnası, DECISIONS 2026-11-16 "İkame"):
+  - `absent`: bir öğretmen ya da sınıf, `from`'dan `to`'ya (yerel takvim günü, iki uç dahil) gelmiyor. Gelmeyen sınıf gezi ya da sınav haftası: o günlerde dersleri ikame istemez, öğretmenleri boş sayılır.
+  - `covers`: o tarihte bir sınıfın bir saatine kimin girdiği; `teacherId: null` "boş geçsin". Yer anahtarı değil tarih: hangi gün sütunu olduğu kayıtlı gün ADINDAN okunur (`WEEK`, Türkçe saklanır), yeniden adlandırılmış bir günün tarihi yoktur.
+  - Taban hafta, ızgara, Kontrol ve çözücü bu katmanı okumaz; geçen bir tarihin kaydı silinmez, yalnız artık bir şey değiştirmez, ve ikameler öğretmenin adalet sayısı (`coverCount`) olarak kalır.
+  - Silinen öğretmenin ya da sınıfın yokluğu, sınıfı, saati ya da yerine gireni silinen ikame `sanitize()` ile düşer; okunamayan tek bir kayıt (tarih değil, `from > to`, saat sayı değil) okurken tek başına düşer.
 - `Lesson.second` dersin öğretmenin ikinci branşından mı verildiği. Öğretmenin ikinci branşı silinince `sanitize()` onu `false` yapar, yoksa ders kimsenin vermediği bir branşı iddia ederdi.
 
 ### Varsayılanlar
@@ -106,9 +114,10 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v15 | `answers`: öneriye verilen Olur ve Olmaz cevapları; eksik alan boş, okunamayan tek bir cevap tek başına düşer |
 | v16 | `relations`: iki dersin aynı güne konmaması; eksik alan boş, okunamayan tek bir ilişki tek başına düşer |
 | v17 | `Teacher.email`: öğretmenin adresi; eksik ya da metin olmayan alan `''`, satır sonu ve denetim karakteri düşer |
-| v18 | `Teacher.phone`: öğretmenin telefonu; eksik ya da metin olmayan alan `''`, numara karakteri olmayan düşer |
+| v18 | `dated`: tarihli gelmeyenler ve ikameler; eksik alan boş, okunamayan tek bir kayıt tek başına düşer |
+| v19 | `Teacher.phone`: öğretmenin telefonu; eksik ya da metin olmayan alan `''`, numara karakteri olmayan düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v18'e her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v19'a her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -131,10 +140,17 @@ v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünk
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
 Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 
+**Eski bir kopya yeni dosyayı açınca.** Bir alan sürüm artırılmadan eklenseydi eski kopya
+dosyayı açar, alanı tanımadığı için okumaz ve ilk otomatik kayıtta silerdi. Bu yüzden her yeni
+alan sürümü artırır: v17'lik bir program v18 dosyasını "daha yeni bir sürümle yazılmış" diye
+reddeder, depodaki planı dondurur ve hiçbir şeyin üstüne yazmaz (`readStoredPlan`,
+`readPlanFile`). Bedeli: v18 yazan bir program bir kez kaydettiyse, tarihli kaydı olmasa da,
+o plan eski kopyada güncelleme ister.
+
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v18 çıkarılırken `version === 17` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v19 çıkarılırken `version === 18` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri
@@ -266,7 +282,7 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 ## Dosya biçimleri
 
 ```
-{ "schemaVersion": 17, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 18, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 

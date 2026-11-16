@@ -141,6 +141,7 @@ function world(): State {
     activeProgramId: '1',
     answers: { accepted: [], refused: [] },
     relations: [],
+    dated: { absent: [], covers: [] },
   };
 }
 
