@@ -124,12 +124,14 @@ export const Row = memo(function Row({
         }
       }
       const spans = span > 1;
-      // The surname where it fits, about three letters an hour; the short
-      // form where it does not (walkthrough, 2026-11-16).
+      // The surname where it fits, two letters an hour; the short form where
+      // it does not (walkthrough, 2026-11-16). Three an hour ("Doğan" over a
+      // double) raised the measured floor (gridFit.ts) and the exe's 1920 box
+      // scrolled 50px sideways in the class view (gorunum.spec.ts 45).
       const top =
         cell === null
           ? ''
-          : cell.full !== undefined && cell.full !== '' && [...cell.full].length <= 3 * span
+          : cell.full !== undefined && cell.full !== '' && [...cell.full].length <= 2 * span
             ? cell.full
             : cell.top;
 
