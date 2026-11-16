@@ -33,14 +33,15 @@ vite-plugin-singlefile 2.3.4 (#58'in bir parçası).
 **Sürüm.** 2.2.0 sahada; Unreleased'de çok iş var. Windows'ta sürümün önünde bilinen engel yok
 (gerçek 2.2.0 → yeni exe → kurulum → kaldırma, Windows CI). Etiket Alp'in (`npm run yayinla`).
 
+**Bağımlılık kararları (2026-11-16 akşam).** Dependabot #57, #60 main'de; #59 (TypeScript 7)
+kapatıldı: typescript-eslint `<6.1.0` istiyor ve TS 7'nin klasik programatik API'si yok, peer
+aralığı genişleyince yeniden bakılır. #58'in yerine açılan #88 (react/react-dom 19.3 ≈ +7 kB
+brotli, radix dörtlüsü ≈ +0,9 kB, lucide-react) kapatıldı: birlikte 315,3 kB, eşik 307 kB, ve
+eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni PR olarak gelir.
+
 **Alp'te bekleyenler:**
-1. Dependabot #58'in kalan yedi paketi (react/react-dom 19.3 ≈ +7 kB brotli, radix dörtlüsü
-   ≈ +0,9 kB, lucide-react): birlikte 315,3 kB, eşik 307 kB. Eşik kararı ya da yer açmak.
-2. Dependabot #59 (TypeScript 7): uyumlu değil, typescript-eslint `<6.1.0` istiyor ve TS 7'nin
-   klasik programatik API'si yok. Öneri: PR'ı kapat, TS 7'yi şimdilik yoksay; peer aralığı
-   genişleyince yeniden bak.
-3. #78'in Windows ölçümünde `mixed` (öncesi 5, son ölçülen 7, hedef ≤ 5) CI günlüğünde okunmadı.
-4. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen;
+1. #78'in Windows ölçümünde `mixed` (öncesi 5, son ölçülen 7, hedef ≤ 5) CI günlüğünde okunmadı.
+2. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen;
    sadeleşmeden sonra babayı bir oturum izlemek.
 
 **Açık notlar.** SD9 (Daha fazla menüsü Windows UIA'da Hakkında'yı açmıyor; NVDA/Narrator ile
