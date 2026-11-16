@@ -67,6 +67,7 @@ function build(): State {
         subject: 'Matematik',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -78,6 +79,7 @@ function build(): State {
         subject: 'Fizik',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 1,
         limits: { ...NO_TEACHER_LIMITS },
@@ -89,6 +91,7 @@ function build(): State {
         subject: 'Kimya',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 2,
         limits: { ...NO_TEACHER_LIMITS },
@@ -570,6 +573,19 @@ describe('sanitize — öğretmenin e-postası (v17)', () => {
     const s = sanitize(kirli);
     expect(s.teachers[0]!.email).toBe('a@example.comb');
     expect(s.teachers.slice(1)).toEqual(kirli.teachers.slice(1));
+  });
+
+  it('telefonda (v19) numara karakteri olmayan düşüyor, adres yerinde kalıyor', () => {
+    const d = build();
+    const kirli = {
+      ...d,
+      teachers: d.teachers.map((t, i) =>
+        i === 1 ? { ...t, email: 'b@example.com', phone: '0555\n000&text=00 01' } : t,
+      ),
+    };
+    const s = sanitize(kirli);
+    expect(s.teachers[1]).toEqual({ ...kirli.teachers[1], phone: '055500000 01' });
+    expect(s.teachers[0]).toBe(kirli.teachers[0]);
   });
 });
 

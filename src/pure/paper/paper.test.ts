@@ -5,7 +5,7 @@
 // is what sending a teacher their timetable needs (B3.8).
 
 import { blockSpans, buildIndex, placementKey } from '../constraints';
-import { classSheet, sheetHead, teacherSheet, type SheetOptions } from './index';
+import { classSheet, paperName, sheetHead, teacherSheet, type SheetOptions } from './index';
 import { translate } from '../../leaf/i18n/i18n';
 import type { State } from '../../leaf/model/types';
 import { makeWorld } from '../worlds';
@@ -113,5 +113,26 @@ describe('kâğıt modeli', () => {
     expect(sheetHead(world(), { ...ALL, clock: false }).every((h) => h.clock.length === 0)).toBe(
       true,
     );
+  });
+
+  it('sınıf sayfasında kodların açıklaması, yalnız alt satır basılıyorsa', () => {
+    const d = world();
+    const named = { ...d, teachers: d.teachers.map((x) => ({ ...x, name: 'Mehmet Çelik' })) };
+    const on = sheets(named, ALL);
+    expect(on.c510.legend).toEqual(['MÇ Mehmet Çelik']);
+    // 511 has no lesson, a teacher's own sheet names nobody else, and with
+    // no codes in the cells there is nothing to explain.
+    expect(on.c511.legend).toEqual([]);
+    expect(on.mc.legend).toEqual([]);
+    expect(sheets(named, { ...ALL, cellBottom: false }).c510.legend).toEqual([]);
+    // A short form that IS the name explains nothing.
+    expect(sheets(world(), ALL).c510.legend).toEqual([]);
+  });
+
+  it('kaydedilen dosyanın adı: kim ve hangi gün, Windows’un kabul etmediği harfsiz', () => {
+    const day = new Date(2026, 10, 16, 23, 30);
+    expect(paperName('510', day)).toBe('Mozaik – 510 – 2026-11-16');
+    expect(paperName(' 9/A: "SAY" ', day)).toBe('Mozaik – 9-A- -SAY- – 2026-11-16');
+    expect(paperName('', day)).toBe('Mozaik – 2026-11-16');
   });
 });

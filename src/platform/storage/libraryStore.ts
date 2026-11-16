@@ -49,6 +49,12 @@ export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);
 }
 
+/** The open plan's name, as the paper's header prints it; '' when none is stored. */
+export function activePlanName(): string {
+  const lib = readLibrary();
+  return lib.plans.find((p) => p.id === lib.activeId)?.name ?? '';
+}
+
 /**
  * The directory as the program opens it: `readLibrary`, with every plan whose
  * key is in storage but in no entry put back (`adoptOrphans`). At startup

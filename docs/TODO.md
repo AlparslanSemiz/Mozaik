@@ -79,7 +79,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
             B4.4 baskı tasarımları ──> §3 Bölüm 3 (çıktı aileleri)
                                               |
                                         B3.4 e-posta/WhatsApp
-                                        (e-posta v17'de geldi; tel = YENİ ŞEMA, bugün v17)
+                                        (e-posta v17'de, telefon v19'da geldi)
 
 §6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (YENİ ŞEMA) ──> B6.3 A/B haftası
 ```
@@ -328,7 +328,8 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       zorunda ve seçim **ölçülerek** yapılır (bağımlılık politikası,
       2026-08-26: eklendikten sonra dosya boyutu ve açılış süresi WORKLOG'a
       yazılır).
-- [ ] **B3.2 Ayrı ayrı birden fazla PDF.** Şu an tek yazdırma işi çıkıyor;
+- [ ] **B3.2 Ayrı ayrı birden fazla PDF.** Bir kişinin PDF'i artık tek tıkla iniyor (B3.4,
+      `pdf.ts`), "seçilenleri ayrı PDF olarak kaydet" yok. Şu an tek yazdırma işi çıkıyor;
       istenen her sınıf/öğretmen için **ayrı dosya**. Tarayıcı yolunda
       `window.print()` tek iş verir, yani bu madde exe yolunu da düşünmek
       zorunda — hangi teslim yolunun neyi verebildiği ölçülecek.
@@ -347,8 +348,13 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       programının o uzunlukta gövdeyi kesmeden açtığı görülmedi. Açık: gerçek
       bir e-posta programında (Outlook, Windows Posta, Thunderbird) uzun gövdenin nasıl
       geldiği ölçülmedi, runner'da e-posta programı kurulamıyor; Edge'de bağlantı ölçülemedi.
-      **WhatsApp yarısı açık:** öğretmene **telefon** alanı (yeni şema), `https://wa.me/<numara>?text=`,
-      o da **tıklanınca** açılır.
+      **WhatsApp yarısı ve PDF yazıldı, Windows'ta doğrulanmadı (2026-11-16, `ozellik/gonder`):**
+      şema v19'da `Teacher.phone`, kişi sayfasında Telefon kutusu; kişi sayfasında `WhatsApp`, Çıktı'da
+      numarası olanın satırında `WhatsApp`: önce öğretmenin kâğıdı elle yazılan bir PDF olarak
+      İndirilenler'e (`pdf.ts`), sonra `https://wa.me/<numara>?text=` (exe'de `whatsapp_ac`).
+      E-posta düğmeleri de PDF'i kaydediyor; sınıfın sayfasında `PDF kaydet`. Açık: WebView2'de
+      indirmenin ve `whatsapp_ac`'ın gerçek Windows'ta denenmesi, PDF'in WhatsApp önizlemesinde
+      (telefon) Türkçe harflerle okunması, ve bütçe kararı (DECISIONS 2026-11-16).
       **Not:** bu aSc'nin "Sharing"i DEĞİL (o EduPage'e yüklüyor, hesap açıyor,
       şifre veriyor). O 2026-10-08'de "yapılmıyor" listesinden çıktı, ama
       istenmedi.
@@ -2182,7 +2188,7 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       **Aşama 2** kişi sayfası yazıldı (`sade/asama-2`, aşama 1'in üstünde, birleşmedi; WORKLOG):
       listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
       saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
-      tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
+      tek yerde. Sayfanın WhatsApp'ı ve PDF'i yazıldı (`ozellik/gonder`, 3B'den sonra birleşir; B3.4).
       **Aşama 3A** `main`'de (b44b59a; WORKLOG): tek ızgara düzeni (K6), toplu sabitleme ve
       geçici görünüm yok (K7), Dosya ▾ → Eski hâline dön, son 7 günün kopyası (K8); sütun en
       geniş dersin okunduğu genişlikten dar olmaz, sığmayan hafta görünür çubukla yana kayar, kart

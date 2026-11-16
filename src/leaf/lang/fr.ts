@@ -1252,8 +1252,7 @@ const FR: Sozluk = {
   "Öğretmenin kısa adı ya da derslik":
     "Le nom court de l’enseignant ou la salle",
   "Çıktı tarihi": "Date d’impression",
-  "Sayfanın altında yazdırılma tarihi ve saati":
-    "La date et l’heure d’impression en bas de page",
+  "Sayfanın üstünde yazdırılma tarihi ve saati": "La date et l’heure d’impression en haut de page",
   "Öğretmen art arda en fazla": "Enseignant, au plus d’affilée",
   "Bir öğretmen arka arkaya kaç saat derse girebilir.":
     "Combien d’heures d’affilée un enseignant peut faire cours.",
@@ -1486,10 +1485,7 @@ const FR: Sozluk = {
     "E-mail",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "Une seule adresse e-mail ici : nom@exemple.fr",
-  "E-postayla gönder":
-    "Envoyer par e-mail",
-  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
-    "L'emploi du temps de l'enseignant s'ouvre comme un nouveau message dans votre messagerie. C'est vous qui cliquez sur Envoyer.",
+  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "L'emploi du temps de l'enseignant s'ouvre comme un nouveau message dans votre messagerie. C'est vous qui cliquez sur Envoyer.",
   "adres yok":
     "pas d'adresse",
   "adres hatalı":
@@ -1599,8 +1595,7 @@ const FR: Sozluk = {
     "Ouvrir toute la semaine",
   "Bütün haftayı kapat":
     "Fermer toute la semaine",
-  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
-    "Si les couleurs ne s’impriment pas : dans la fenêtre d’impression, ouvrez **Plus de paramètres** et cochez **Graphiques d’arrière-plan**.",
+  "Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın.": "Pour le garder en fichier, choisissez **Enregistrer au format PDF** comme Destination dans la fenêtre d’impression.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Cours de la semaine",
@@ -1872,6 +1867,11 @@ const FR: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "Le plan est revenu à son état du {gun}.",
   "günlük kopya": "copie quotidienne",
   "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
+  "Sayfa {n} / {m}": "Page {n} sur {m}",
+  "Telefon": "Téléphone",
+  "Göndermek için Bilgiler’de telefon numarasını yazın.": "Pour l’envoyer, saisissez le numéro de téléphone dans Informations.",
+  "PDF kaydet": "Enregistrer en PDF",
+  "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} a été enregistré dans le dossier Téléchargements. Joignez-le au message ou à la discussion avec le trombone.",
   // ------------------------------------------- the dated layer (DayDialog.tsx)
   "Boş geçsin": "Classe libre",
   "Bu gün değişen ders yok.": "Aucun cours ne change ce jour.",
@@ -1894,6 +1894,7 @@ const FR: Sozluk = {
   "Programda göster": "Afficher dans l'emploi du temps",
   "Ayrı plan yap":
     "En faire un plan à part",
+  "WhatsApp açılamadı.": "Impossible d’ouvrir WhatsApp.",
 };
 
 registerSozluk("fr", FR);

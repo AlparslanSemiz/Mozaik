@@ -1247,8 +1247,7 @@ const DE: Sozluk = {
   "Hücrenin alt satırı": "Die untere Zeile der Zelle",
   "Öğretmenin kısa adı ya da derslik": "Der Kurzname der Lehrkraft oder der Raum",
   "Çıktı tarihi": "Druckdatum",
-  "Sayfanın altında yazdırılma tarihi ve saati":
-    "Datum und Uhrzeit des Drucks am Seitenfuß",
+  "Sayfanın üstünde yazdırılma tarihi ve saati": "Datum und Uhrzeit des Drucks oben auf der Seite",
   "Öğretmen art arda en fazla": "Lehrkraft, höchstens am Stück",
   "Bir öğretmen arka arkaya kaç saat derse girebilir.":
     "Wie viele Stunden am Stück eine Lehrkraft unterrichten darf.",
@@ -1480,10 +1479,7 @@ const DE: Sozluk = {
     "E-Mail",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "Hier steht genau eine E-Mail-Adresse: name@beispiel.de",
-  "E-postayla gönder":
-    "Per E-Mail senden",
-  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.":
-    "Der Stundenplan der Lehrkraft öffnet sich als neue Nachricht in Ihrer E-Mail-App. Auf Senden drücken Sie selbst.",
+  "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "Der Stundenplan der Lehrkraft öffnet sich als neue Nachricht in Ihrer E-Mail-App. Auf Senden drücken Sie selbst.",
   "adres yok":
     "keine Adresse",
   "adres hatalı":
@@ -1593,8 +1589,7 @@ const DE: Sozluk = {
     "Ganze Woche öffnen",
   "Bütün haftayı kapat":
     "Ganze Woche sperren",
-  "Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin.":
-    "Wenn die Farben nicht gedruckt werden: Öffnen Sie im Druckfenster **Weitere Einstellungen** und aktivieren Sie **Hintergrundgrafiken**.",
+  "Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın.": "Um es als Datei zu behalten, wählen Sie im Druckfenster als Ziel **Als PDF speichern**.",
 
   // Keyboard on the Program and Müsaitlik grids (erisim/klavye-izgara, 2026-11-15)
   "Haftalık dersler": "Wochenstunden",
@@ -1866,6 +1861,11 @@ const DE: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "Der Plan ist wieder wie am {gun}.",
   "günlük kopya": "Tageskopie",
   "{hafta} {gun} {ay}": "{hafta}, {gun}. {ay}",
+  "Sayfa {n} / {m}": "Seite {n} von {m}",
+  "Telefon": "Telefon",
+  "Göndermek için Bilgiler’de telefon numarasını yazın.": "Zum Senden die Telefonnummer unter Angaben eintragen.",
+  "PDF kaydet": "PDF speichern",
+  "{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.": "{ad} wurde im Ordner Downloads gespeichert. Mit der Büroklammer an die Nachricht oder den Chat anhängen.",
   // ------------------------------------------- the dated layer (DayDialog.tsx)
   "Boş geçsin": "Klasse frei",
   "Bu gün değişen ders yok.": "An diesem Tag ändert sich kein Unterricht.",
@@ -1888,6 +1888,7 @@ const DE: Sozluk = {
   "Programda göster": "Im Stundenplan zeigen",
   "Ayrı plan yap":
     "Als eigenen Plan anlegen",
+  "WhatsApp açılamadı.": "WhatsApp konnte nicht geöffnet werden.",
 };
 
 registerSozluk("de", DE);

@@ -9,6 +9,7 @@ import {
   type Teacher,
   firstFreeColor,
   cleanEmail,
+  cleanPhone,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { NO_TEACHER_LIMITS } from './defaults';
@@ -76,10 +77,11 @@ export function addTeacher(
   // Omit: every caller that predates them — the add form, the paste rows, a
   // dozen tests — still hands over three fields, and each required newcomer
   // would have made a listing question into a compile error everywhere.
-  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender' | 'subject2' | 'email'> & {
+  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender' | 'subject2' | 'email' | 'phone'> & {
     gender?: Gender;
     subject2?: string;
     email?: string;
+    phone?: string;
     /** Chosen by the caller when it has to open the new teacher's page. */
     id?: Id;
   },
@@ -96,6 +98,7 @@ export function addTeacher(
     color: firstFreeColor(d.teachers.map((x) => x.color)),
     limits: { ...NO_TEACHER_LIMITS },
     email: cleanEmail(fields.email),
+    phone: cleanPhone(fields.phone),
   };
   return { ...d, teachers: [...d.teachers, created] };
 }
