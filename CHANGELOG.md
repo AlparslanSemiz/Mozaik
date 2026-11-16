@@ -27,6 +27,7 @@ release is incomplete, the entry says so.
 - The empty Program, Check, Printing, Availability and Lessons screens have a button that takes you to the missing step, and one for the school's name and bell while it is not set.
 - Wherever Mozaik says it needs updating to open a file, a "See the update" button opens Settings → About.
 - On a small screen, the Program bar says when the week does not fit and that "Fit" shows every day.
+- On a touch screen (iPad), holding a finger on a lesson card for half a second opens the same menu as a right click, so a lesson can be sent back to the tray without a mouse. A finger drawn across Availability now closes every hour it passes over, instead of only the first one, and no longer scrolls the page.
 
 - Each teacher's week can be sent by e-mail from Çıktı: "Open in e-mail" opens a new message in your own mail program with the teacher's address and the week as plain text, and you press Send; Mozaik sends nothing itself. The address is a new column in Okul → Öğretmenler (plan file version 17; older backups open with no addresses); the box opens to the whole address while you type in it, and an address can also be typed in the add form or pasted from Excel as a sixth column. If no mail program is chosen, one line says so.
 
@@ -73,6 +74,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- In Safari, leaving the Program tab and coming back kept the timetable but jumped it back to the top-left corner; it now stays where you left it.
 - If the app opens empty while the folder (Belgelerim\Ders Programı in the .exe) holds a fuller plan file, a strip says so, with "Belgelerim'deki son kaydı aç" (open it) and "Boş başla" (start empty); nothing is written to the folder until one is pressed. Before this, a wiped app profile opened empty, the first teacher typed in went over the whole school in the folder's main file and today's backup, and on each following day one more real daily backup was pruned.
 - A change that would leave the plan with under half the rooms, teachers, classes and lessons of the folder's last file no longer goes over it: it is written to that day's rescue file (`ders-programi-kurtarma-YYYY-MM-DD.json`) and a strip says so, with buttons to open the folder's copy or, after a question, keep the smaller plan. The daily backup with the most work in it is never pruned.
 - Deletions that ask no question (class, room, subject, option, teacher, lesson, "Empty the timetable", "Lay out again"), "Delete everything", the sample school over a plan and "Open from file" now keep the plan as it was before them. After a reload, if the plan has not changed since, a strip offers it once: "Son silmeyi geri almak için: Geri getir". Before this their undo lived only in memory and a reload lost it. In a folder the copy is also written as that day's `ders-programi-silmeden-once-YYYY-MM-DD.json`.

@@ -130,7 +130,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 - Izgarada satır gün, sütun ders, çünkü bu bir günü okuma ekranı (aSc'nin "Time off" penceresi de öyle). Sağda varlık listesi.
 - Kapalı saat büyük, kırmızı bir çarpıyla ve taramayla işaretlenir. Kararın gerekçesi kapsamdı: Program ızgarasında kırmızı "bu bırakma reddedildi" demek, Müsaitlik'te ise ne bırakma ne ret var ve ekranın söylediği tek şey açık ya da kapalı. Tarama da duruyor, çünkü renk tek başına bir durum taşımıyor. 2.0.2'den beri Program ızgarası da kapalı saatlerde aynı çarpıyı kullanıyor (`styles.css`), yani bu kapsam gerekçesi bugün tarihsel.
-- Her hücre ve her başlık bir düğme (`aria-pressed` hücrenin durumu, adı "Salı 3. saat, müsait değil"), tablo `role="grid"` ve tek bir Tab durağı: oklar hücreler ve başlıklar arasında gezer, Space ya da Enter saati, başlıkta bütün günü ya da saati değiştirir. Fareyle boyama hücrenin kendi `pointerdown`'ında kaldı; düğmenin `click`'i yalnız klavyeden gelince (`e.detail === 0`) çalışır, yoksa bir tık saati iki kez çevirirdi.
+- Her hücre ve her başlık bir düğme (`aria-pressed` hücrenin durumu, adı "Salı 3. saat, müsait değil"), tablo `role="grid"` ve tek bir Tab durağı: oklar hücreler ve başlıklar arasında gezer, Space ya da Enter saati, başlıkta bütün günü ya da saati değiştirir. Fareyle boyama hücrenin kendi `pointerdown`'ında kaldı; düğmenin `click`'i yalnız klavyeden gelince (`e.detail === 0`) çalışır, yoksa bir tık saati iki kez çevirirdi. Parmakla boyama (iPad, 2026-11-16) aynı yoldan: dokunma ilk hücreye yakalandığı için öteki hücreler `pointerenter` duymaz, tablo `pointermove`'da parmağın altındaki hücreyi `elementFromPoint` ile sorar (`td[data-cell]`), ve boyanan hücrelerde `touch-action: none` sayfayı kaydırmaz; başlıklar kaydırır (tuzak 175).
 - Satırlar Program ızgarasınınkinden uzun. "Haftanın darlığı" ısı tablosu (`table.availability.heat`) aynı iskeleti kullanır ama bir müsaitlik programı değil, tıklanacak hücresi yok ve kısa satırlarla kalır.
 - Başlıkta ders numarası, altında başlangıç saati. Saat şeritteki `Saatler` ile kapatılır, ve kapalıyken yerini korur, yani tablonun boyu değişmez (tuzak 102 ve 103).
 
@@ -188,6 +188,7 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 - Satır başında satırı sabitleme ve satırın iki geçici görünüm kalemi, gün başlığında günün karşılıkları, saat başlığında yalnız sütunu sabitleme çıkar. Boş bir hücrede menü açılmaz. Havuzdaki bir kartta aynı menü açılır ve ızgaraya ait kalemler kapalıdır.
 - `Öğretmeni düzenle` ve `Sınıfı düzenle` ızgaranın çizilmediği eksene ulaşmanın yolu, satır başı zaten bakılan ekseni açıyor.
 - Menü tabloyu saran tek bir `ContextMenu.Root`. İki bin hücreye birer tetikleyici konmaz, tıklamanın yeri `data-row`, `data-day` ve `data-hour`'dan okunur. Karta gelmeyen bir sağ tıkta `preventDefault()` çağrılır ve Radix'in kendi işleyicisi hiç koşmaz.
+- Dokunmatik ekranda (iPad, 2026-11-16) menü karta yarım saniye basılı tutunca açılır: iOS uzun basışta `contextmenu` göndermez. Yeni bir düğme yok; `platform/dom/longPress.ts` parmağın indiği yere aynı `contextmenu`'yü gönderir, önce bir `pointercancel` ile başlayan sürüklemeyi ve Radix'in kendi 700 ms'lik basışını bitirerek (tuzak 176). 8 pikselden fazla kayan parmak sürüklemedir, menü açılmaz. Fare ve klavye değişmedi.
 
 ### Sabitleme
 
