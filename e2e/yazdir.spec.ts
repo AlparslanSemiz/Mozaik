@@ -1057,8 +1057,15 @@ test.describe('84. Çıktının sağ rayı', () => {
         const sheet = document.querySelector('.print-sheet') as HTMLElement;
         const lists = [...aside.querySelectorAll<HTMLElement>('.pick-list')];
         return {
+          // A scroller is a box that CAN scroll and has something to scroll.
+          // Overflow alone is not one: Firefox gives inline boxes and visible
+          // overflow a scrollHeight too, and counted 19 "scrollers" here.
           scrollers: boxes
-            .filter((e) => e.scrollHeight > e.clientHeight + 1)
+            .filter(
+              (e) =>
+                /auto|scroll/.test(getComputedStyle(e).overflowY) &&
+                e.scrollHeight > e.clientHeight + 1,
+            )
             .map((e) => `${e.className || e.tagName}+${e.scrollHeight - e.clientHeight}`),
           listCount: lists.length,
           tops: lists.map((e) => Math.round(e.getBoundingClientRect().top)),

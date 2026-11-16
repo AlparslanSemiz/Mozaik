@@ -24,6 +24,21 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
  */
 export const PDF_YALNIZ_CHROMIUM = "page.pdf() yalnız Chromium'da var";
 
+/**
+ * Why a test is skipped outside Chromium: it measures the File System Access
+ * API (`showDirectoryPicker`, the folder panel's "Klasör seç") or what
+ * Chromium answers for `file://`'s origin. Firefox and WebKit have no folder
+ * picker, and Firefox calls the origin `null`. The exe and the father's Edge
+ * are Chromium; the claim is about them.
+ */
+export const KLASOR_YALNIZ_CHROMIUM = "klasör API'si ve file:// kökeni Chromium'un ölçüsü";
+
+/**
+ * Why a test is skipped in Firefox: Playwright's Firefox answers
+ * `locator.screenshot({ omitBackground: true })` with "Not implemented".
+ */
+export const SAYDAM_GORUNTU_FIREFOX_YOK = "Firefox'ta saydam zeminli öğe görüntüsü yok";
+
 // The language is pinned in `kapan.ts`, for every test in every config at
 // once — see the note there.
 /**
