@@ -3,11 +3,12 @@
 #
 #   scripts/linux-kur.sh
 #
-# Builds from ~/GitHub/Mozaikler/Mozaik and nowhere else, and takes the launcher and the
-# icon from there too, whichever copy of this script is run: that is the one
-# lasting checkout (CLAUDE.md, "Çalışma düzeni"), and a worktree's dist/ is
-# whatever branch that session is on. It refuses a checkout that is not on
-# main, has anything uncommitted, or is itself a worktree.
+# Builds from the repository this script sits in (~/dev/Mozaik on the
+# development machine), and takes the launcher and the icon from there too.
+# That checkout must be the one lasting checkout (CLAUDE.md, "Çalışma düzeni"),
+# not a worktree: a worktree's dist/ is whatever branch that session is on. It
+# refuses a checkout that is not on main, has anything uncommitted, or is
+# itself a worktree.
 #
 # What it writes, all under ${XDG_DATA_HOME:-~/.local/share}:
 #   mozaik/app/index.html   a COPY of dist/index.html, never a link: a link
@@ -26,7 +27,6 @@
 
 set -eu
 
-kaynak="$HOME/GitHub/Mozaikler/Mozaik"
 veri="${XDG_DATA_HOME:-$HOME/.local/share}"
 app="$veri/mozaik/app"
 
@@ -34,6 +34,10 @@ dur() {
   echo "linux-kur: $2" >&2
   exit "$1"
 }
+
+# The checkout this script belongs to: scripts/.. of wherever it was run from.
+kaynak="$(cd -P -- "$(dirname -- "$0")/.." && pwd)" ||
+  dur 3 "betiğin deposu bulunamadı ($0)."
 
 [ -d "$kaynak" ] || dur 3 "$kaynak yok."
 ust="$(git -C "$kaynak" rev-parse --show-toplevel 2>/dev/null)" ||
