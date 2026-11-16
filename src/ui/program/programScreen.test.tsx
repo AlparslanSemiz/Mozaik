@@ -270,6 +270,7 @@ function drawProgram(state: State, p: ProgramProps = {}) {
           poolFilter={p.poolFilter ?? ''}
           setPoolFilter={() => undefined}
           colorMode={p.colorMode ?? 'teacher'}
+          problems={0}
         />
       </Providers>,
     ),
@@ -410,7 +411,7 @@ describe('Program ızgarası', () => {
     expect(gridLines()).toMatchInlineSnapshot(`
       [
         "510 SAY — A dersliği: 0.0(day-first unavailable) 0.1(block-cont):MÇ/Mat#rgb(195, 162, 205) | 0.2×2(block-wide block-in):MÇ/Mat#rgb(195, 162, 205) 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band):MÇ/Mat#rgb(195, 162, 205)[conflict]",
-        "511 — derslik yok: 0.0(day-first):MÇ/Mat#rgb(195, 162, 205) 0.1 | 0.2 0.3 0.4(unavailable) 1.0×2(day-first block-wide band):AY/Fzk#rgb(159, 242, 146)[pinned] 1.2(band):AY/Fzk#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
+        "511 — derslik yok: 0.0(day-first):MÇ/Mat#rgb(195, 162, 205) 0.1 | 0.2 0.3 0.4(unavailable) 1.0×2(day-first block-wide band):Yılmaz/Fzk#rgb(159, 242, 146)[pinned] 1.2(band):AY/Fzk#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
       ]
     `);
   });
@@ -420,7 +421,7 @@ describe('Program ızgarası', () => {
     expect(gridLines()).toMatchInlineSnapshot(`
       [
         "MÇ — Mat: 0.0(day-first):511/#rgb(195, 162, 205) 0.1(block-cont):510 SAY/A#rgb(195, 162, 205) | 0.2×2(block-wide block-in):510 SAY/A#rgb(195, 162, 205) 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band):510 SAY/A#rgb(195, 162, 205)[conflict]",
-        "AY — Fzk · Kim: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0×2(day-first block-wide band):511/#rgb(159, 242, 146)[pinned] 1.2(band):511/#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
+        "Yılmaz — AY · Fzk · Kim: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0×2(day-first block-wide band):511/#rgb(159, 242, 146)[pinned] 1.2(band):511/#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
         "ZK — Mat: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band)",
       ]
     `);
@@ -468,7 +469,7 @@ describe('Program ızgarası', () => {
         "class": {
           "grid": [
             "510 SAY — A dersliği: 0.0(day-first unavailable) 0.1(block-cont):MÇ/Mat#rgb(195, 162, 205) | 0.2×2(block-wide block-in):MÇ/Mat#rgb(195, 162, 205) 0.4:MÇ/Mat#rgb(195, 162, 205)[mark-moved] 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band):MÇ/Mat#rgb(195, 162, 205)[mark-opened]",
-            "511 — derslik yok: 0.0(day-first) 0.1 | 0.2 0.3 0.4(unavailable) 1.0×2(day-first block-wide band):AY/Fzk#rgb(159, 242, 146)[pinned] 1.2(band):AY/Fzk#rgb(159, 242, 146) | 1.3(band):MÇ/Mat#rgb(195, 162, 205)[mark-moved] 1.4(band)",
+            "511 — derslik yok: 0.0(day-first) 0.1 | 0.2 0.3 0.4(unavailable) 1.0×2(day-first block-wide band):Yılmaz/Fzk#rgb(159, 242, 146)[pinned] 1.2(band):AY/Fzk#rgb(159, 242, 146) | 1.3(band):MÇ/Mat#rgb(195, 162, 205)[mark-moved] 1.4(band)",
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",
           "pool": [
@@ -479,7 +480,7 @@ describe('Program ızgarası', () => {
         "teacher": {
           "grid": [
             "MÇ — Mat: 0.0(day-first) 0.1(block-cont):510 SAY/A#rgb(195, 162, 205) | 0.2×2(block-wide block-in):510 SAY/A#rgb(195, 162, 205) 0.4:510 SAY/A#rgb(195, 162, 205)[mark-moved] 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band):511/#rgb(195, 162, 205)[mark-moved] 1.4(band):510 SAY/A#rgb(195, 162, 205)[mark-opened]",
-            "AY — Fzk · Kim: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0×2(day-first block-wide band):511/#rgb(159, 242, 146)[pinned] 1.2(band):511/#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
+            "Yılmaz — AY · Fzk · Kim: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0×2(day-first block-wide band):511/#rgb(159, 242, 146)[pinned] 1.2(band):511/#rgb(159, 242, 146) | 1.3(band) 1.4(band)",
             "ZK — Mat: 0.0(day-first) 0.1 | 0.2 0.3 0.4 1.0(day-first band) 1.1(band) 1.2(band) | 1.3(band) 1.4(band)",
           ],
           "legend": "1 öğretmen saati açılıyor1 ders yer değiştiriyor",

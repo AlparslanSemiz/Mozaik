@@ -72,15 +72,10 @@ test.describe('5. Yedek ve şema göçü', () => {
       page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
     ).toHaveAttribute('title', /kendiliğinden saklıyor/);
 
-    // In HAKKINDA, which is where "Veriler nerede" is — the comment above
-    // already said so, and the assertion had been reading Planlar ve yedek,
-    // where the same phrase happened to appear in the session-backup hint.
-    // That hint got shorter on 2026-08-30 and the coincidence ended.
+    // Since 2026-11-16 the tooltip alone says it: the same sentence in
+    // Hakkında's folded "Teknik bilgiler" was a second copy nobody opened.
     await expect(page.getByRole('button', { name: 'Sıfırla' })).toHaveCount(0);
     await openSettings(page, 'Hakkında');
-    await expect(
-      page.locator('.panel', { hasText: 'kendiliğinden saklıyor' }).last(),
-    ).toBeVisible();
 
     // "Sıfırla" is not in the top bar at all any more: it was one careless
     // click from "Dosyadan aç" and it cannot be undone. It is in Ayarlar > Hakkında.

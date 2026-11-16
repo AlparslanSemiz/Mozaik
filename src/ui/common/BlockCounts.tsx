@@ -63,7 +63,7 @@ export default function BlockPatternPicker({
           type="button"
           className="split-pick"
           title={title}
-          aria-label={`${t('Dağılım')}: ${current}`}
+          aria-label={`${t('Haftaya dağılış')}: ${current}`}
         >
           <span>{current}</span>
           <ChevronDown size={15} aria-hidden="true" />
@@ -76,8 +76,8 @@ export default function BlockPatternPicker({
           collisionPadding={8}
           align="start"
         >
-          <strong className="split-popover-title">{t('Dağılım')}</strong>
-          <div className="split-options" role="listbox" aria-label={t('Dağılım')}>
+          <strong className="split-popover-title">{t('Haftaya dağılış')}</strong>
+          <div className="split-options" role="listbox" aria-label={t('Haftaya dağılış')}>
             {options.map((option) => {
               const longest = option.plan[0] ?? 1;
               const impossible = dayLimit > 0 && longest > dayLimit;

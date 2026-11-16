@@ -30,6 +30,11 @@ export function makeShort(name: string): string {
     .join('');
 }
 
+/** The last word of a name: "Mehmet Çelik" -> "Çelik". */
+export function surname(name: string): string {
+  return name.trim().split(/\s+/).pop() ?? '';
+}
+
 /**
  * What a gender reads as in PROSE: a chip, a count, a paste preview. ONE home,
  * because a chip saying "k" would be a chip nobody clicks.

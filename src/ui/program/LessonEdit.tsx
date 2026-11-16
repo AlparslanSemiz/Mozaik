@@ -251,7 +251,7 @@ function LessonSheet({
                   >
                     {state.teachers.map((x) => (
                       <option key={x.id} value={x.id}>
-                        {x.short} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
+                        {x.name} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
                       </option>
                     ))}
                   </select>
@@ -306,14 +306,14 @@ function LessonSheet({
                   />
                 </dd>
 
-                <dt>{t('Dağılım')}</dt>
+                <dt>{t('Haftaya dağılış')}</dt>
                 <dd>
                   <BlockCounts
                     weeklyHours={lesson.weeklyHours}
                     blocks={lesson.blocks}
                     dayLimit={blockCeiling(state, lesson)}
                     title={t(
-                      'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da',
+                      'Haftaya dağılış değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da',
                     )}
                     onPick={(blocks) => change((d) => updateLesson(d, lesson.id, { blocks }))}
                   />

@@ -536,7 +536,7 @@ describe('health', () => {
     });
   });
 
-  it('dizilmemiş ders "havuzda" olarak SAYILIYOR ama sorun değil', () => {
+  it('dizilmemiş ders sayılıyor ve çip sarı: sorun değil ama bitmedi', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     d = addTeacher(d, {
@@ -555,8 +555,10 @@ describe('health', () => {
     const h = health(d);
     expect(h.pending).toBe(4);
     expect(h.message).toContain('4 saat yerleşmedi');
-    // Nothing is WRONG with a timetable that has not been laid out yet.
-    expect(h.level).toBe('ok');
+    // Nothing is WRONG with it, but it is not done: green read as done
+    // beside "4 saat yerleşmedi" (usability walkthrough, 2026-11-16).
+    expect(h.level).toBe('tight');
+    expect(h.problems).toBe(0);
   });
 
   it('kapalı saatte kalmış ders sorunu KIRMIZI yapıyor ve sayıyor', () => {

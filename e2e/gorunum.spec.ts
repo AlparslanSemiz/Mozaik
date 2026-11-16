@@ -176,15 +176,15 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     // for: "yüzde yüzü biraz daha küçült ... default yüzde 100 olsun".
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * SCALE_DEFAULT, 1);
 
-    await chooseScale(page, 125);
-    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.25, 1);
+    await chooseScale(page, 130);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.3, 1);
 
     // The preference is a machine preference, so it lives in localStorage and
     // has to survive the reload that proves it is not React state.
     await reopen(page);
-    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.25, 1);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.3, 1);
     await openSettings(page, 'Görünüm');
-    await expect(page.getByRole('button', { name: '%125', exact: true })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: 'Daha büyük', exact: true })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
@@ -209,14 +209,9 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
       .getByRole('group', { name: 'Yazı büyüklüğü' })
       .getByRole('button')
       .allInnerTexts();
-    // The ladder starts BELOW 100% since 2026-08-30. Windows has a display
-    // scale of its own and my father's is set large, so the two multiply and
-    // %80 is the only end of that product this program owns.
-    expect(steps[0]).toBe('%80');
-    expect(steps[steps.length - 1]).toBe('%150');
-    // 0.80 to 1.50 in steps of 0.05: fifteen rungs, and they are buttons rather
-    // than a slider because the ladder has exactly fifteen legal values.
-    expect(steps).toHaveLength(15);
+    // Four named steps since 2026-11-16: fifteen "%" buttons were hard to
+    // find and to choose from (walkthrough). An older stored %80 still draws.
+    expect(steps).toEqual(['Normal', 'Büyük', 'Daha büyük', 'Çok büyük']);
 
     await chooseScale(page, 150);
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.5, 1);

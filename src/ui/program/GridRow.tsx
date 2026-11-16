@@ -123,6 +123,14 @@ export const Row = memo(function Row({
         }
       }
       const spans = span > 1;
+      // The surname where it fits, about three letters an hour; the short
+      // form where it does not (walkthrough, 2026-11-16).
+      const top =
+        cell === null
+          ? ''
+          : cell.full !== undefined && cell.full !== '' && [...cell.full].length <= 3 * span
+            ? cell.full
+            : cell.top;
 
       const className = [
         s === 0 ? 'day-first' : '',
@@ -160,7 +168,7 @@ export const Row = memo(function Row({
           // (styles.css, `td.unavailable`).
           aria-label={cell === null && closed ? closedWord : undefined}
           className={className}
-          title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
+          title={cell !== null && cell.conflict === null ? `${top} ${cell.bottom}` : undefined}
         >
           {cell !== null ? (
             // A left click used to REMOVE the block, which made moving a lesson
@@ -232,7 +240,7 @@ export const Row = memo(function Row({
                   n: spans ? `${s + 1}–${s + span}` : s + 1,
                 }),
                 row.name,
-                cell.top,
+                top,
                 cell.bottom,
                 cell.mark === 'opened'
                   ? t('açılan öğretmen saatinde')
@@ -255,7 +263,7 @@ export const Row = memo(function Row({
               }
             >
               <span className="card-top">
-                {row.kind === 'teacher' ? <ClassName name={cell.top} /> : cell.top}
+                {row.kind === 'teacher' ? <ClassName name={top} /> : top}
               </span>
               {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
               {cell.mark === 'opened' && (

@@ -21,10 +21,11 @@ export function useUndoIf(): (expected: State) => boolean {
  * where a reload can still find it (platform/storage/beforeDelete.ts, and in
  * a folder the day's `silmeden-once` file). The undo above lives in memory.
  */
-const KeepBeforeContext = createContext<(state: State, label: string) => void>(() => undefined);
+type KeepBefore = (state: State, label: string, quiet?: boolean) => void;
+const KeepBeforeContext = createContext<KeepBefore>(() => undefined);
 
 export const KeepBeforeProvider = KeepBeforeContext.Provider;
 
-export function useKeepBefore(): (state: State, label: string) => void {
+export function useKeepBefore(): KeepBefore {
   return useContext(KeepBeforeContext);
 }

@@ -8,11 +8,9 @@
 // migration. It lives in localStorage next to the theme and the rail
 // (`platform/prefs/`), which is where every other machine preference already is.
 //
-// BUTTONS, NOT A SLIDER. The scale has FIFTEEN legal values (0.80 to 1.50 in
-// steps of 0.05, `STEPS` below — it said six here while the ceiling was 1.25,
-// and eleven while the floor was still 1.00), so a slider
-// would invent a continuum that does not exist and then hide which rung it
-// landed on. The buttons reuse the `aria-pressed` state the tool already has
+// BUTTONS, NOT A SLIDER. The scale offers four named steps (`SCALE_STEPS`,
+// also in the "?" menu), so a slider would invent a continuum that does not
+// exist and then hide which rung it landed on. The buttons reuse the `aria-pressed` state the tool already has
 // four of (`.btn[aria-pressed="true"]`), so there is no new control to learn
 // and no new CSS. The same applies to the theme, the strip and the motion
 // setting below: one control shape.
@@ -28,9 +26,8 @@ import {
   applyTheme,
   applyMotion,
   applyScale,
-  SCALE_MAX,
-  SCALE_MIN,
-  SCALE_STEP,
+  nearestStep,
+  SCALE_STEPS,
   type Motion,
   type Theme,
 } from '../../platform/prefs';
@@ -67,10 +64,6 @@ const MOTIONS: Array<{ id: Motion; label: string }> = [
   { id: 'az', label: 'Az' },
   { id: 'kapali', label: 'Kapalı' },
 ];
-
-const STEPS = Array.from({ length: Math.round((SCALE_MAX - SCALE_MIN) / SCALE_STEP) + 1 }, (_, i) =>
-  Number((SCALE_MIN + i * SCALE_STEP).toFixed(2)),
-);
 
 export default function Appearance({
   state,
@@ -165,8 +158,8 @@ export default function Appearance({
           </HelpHead>
           {segmented(
             'Yazı büyüklüğü',
-            STEPS.map((value) => ({ id: String(value), label: `%${Math.round(value * 100)}` })),
-            String(scale),
+            SCALE_STEPS.map(([value, name]) => ({ id: String(value), label: t(name) })),
+            String(nearestStep(scale)),
             (id) => choose(Number(id)),
           )}
         </div>

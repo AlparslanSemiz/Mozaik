@@ -111,7 +111,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
           weeklyHours={x.weeklyHours}
           blocks={x.blocks}
           dayLimit={blockCeiling(state, x, group)}
-          title={t('Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar')}
+          title={t('Haftaya dağılış değiştirilirse bu dersin programdaki yerleşimleri kalkar')}
           onPick={(blocks) => change((d) => updateLesson(d, x.id, { blocks }))}
         />
       </td>

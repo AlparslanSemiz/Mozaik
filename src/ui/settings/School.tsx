@@ -196,6 +196,7 @@ export default function School({ state, change }: PanelProps) {
                 </th>
                 <th>{t('Gün')}</th>
                 <th className="w-col-2xl">{t('Öğle arası')}</th>
+                <th>{t('Zil saatleri')}</th>
               </tr>
             </thead>
             <tbody>
@@ -229,6 +230,22 @@ export default function School({ state, change }: PanelProps) {
                           ))}
                         </select>
                       )}
+                    </td>
+                    {/* The day's first bell and last, beside the day: on a
+                        1366 screen the table on the right was a scroll away
+                        (walkthrough, 2026-11-16). */}
+                    <td className="num">
+                      {day !== undefined &&
+                        hourCount > 0 &&
+                        (() => {
+                          const p = dayPeriods(
+                            state.settings.bell,
+                            state.settings.hours,
+                            day.longBreakAfter,
+                          );
+                          // Word joiners: one line, never "09:00–" over "19:10".
+                          return `${p[0]?.start ?? ''}\u2060–\u2060${p[p.length - 1]?.end ?? ''}`;
+                        })()}
                     </td>
                   </tr>
                 );
@@ -307,7 +324,7 @@ export default function School({ state, change }: PanelProps) {
                 </select>
               </span>
             </div>
-            <Field label={t('Saat (dk)')}>
+            <Field label={t('Ders süresi (dakika)')}>
               <input
                 type="number"
                 min={5}
@@ -373,13 +390,9 @@ export default function School({ state, change }: PanelProps) {
           are still being typed. */}
       <aside>
         <div className="panel">
-          <HelpHead topic="Zil saatleri">
-            <p>
-              {t(
-                'Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.',
-              )}
-            </p>
-          </HelpHead>
+          {/* No "?": the panel beside it already says the bell is computed
+              from the start and three durations. */}
+          <h2>{t('Zil saatleri')}</h2>
 
           {/* Twelve lessons and their breaks, and on a short window that is
               taller than the panel: the one box here that can outgrow the

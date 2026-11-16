@@ -49,8 +49,9 @@ export interface StripContext extends RibbonProps {
   /** A notice, and the undo its "Geri al" button runs (SD1). */
   notify: ReturnType<typeof useToast>;
   undoIf: (expected: PlanState) => boolean;
-  /** Before a deletion: the plan as it is, where a reload finds it (SD1). */
-  keepBefore: (state: PlanState, label: string) => void;
+  /** Before a deletion: the plan as it is, where a reload finds it (SD1).
+      `quiet` for a relaid week: kept, never offered at the next start. */
+  keepBefore: (state: PlanState, label: string, quiet?: boolean) => void;
   /** The Program strip's counts, memoised in `index.tsx`; null on every other tab. */
   strip: StripCounts | null;
 }

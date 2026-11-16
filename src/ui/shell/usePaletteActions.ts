@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 import type { State } from '../../leaf/model';
-import type { Motion } from '../../platform/prefs';
+import { type Motion, SCALE_STEPS } from '../../platform/prefs';
 import type { SolverRun } from '../../platform/search';
 import { downloadBackup } from '../../platform/storage';
 import type { Place, useT } from '../common';
@@ -39,6 +39,8 @@ interface PaletteInputs {
   openOldCopies: () => void;
   toggleRibbon: () => void;
   toggleMotion: () => void;
+  scale: number;
+  chooseScale: (next: number) => void;
 }
 
 export function usePaletteActions({
@@ -55,6 +57,8 @@ export function usePaletteActions({
   openOldCopies,
   toggleRibbon,
   toggleMotion,
+  scale,
+  chooseScale,
 }: PaletteInputs): PaletteAction[] {
   return useMemo(() => {
     const school = t('Okul bilgileri');
@@ -158,7 +162,7 @@ export function usePaletteActions({
         id: 'lessons',
         label: t('Ders gir'),
         hint: t('Sınıflar'),
-        extra: 'dersler ders ekle haftalık saat dağılım',
+        extra: 'dersler ders ekle haftalık saat dağılım dağılış',
         run: () => goTo({ tab: 'classes', people: 'lessons' }),
       },
       {
@@ -174,6 +178,13 @@ export function usePaletteActions({
         hint: look,
         extra: 'yazı boyu büyüt küçült ölçek',
         run: () => goTo({ tab: 'school', section: 'appearance' }),
+      },
+      {
+        // Does it, a step at a time: "yazı büyüt" is a wish, not a place.
+        id: 'bigger',
+        label: t('Yazıyı büyüt'),
+        extra: 'yazı büyüt büyük',
+        run: () => chooseScale(SCALE_STEPS.find(([v]) => v > scale)?.[0] ?? scale),
       },
       {
         id: 'ribbon',
@@ -207,5 +218,7 @@ export function usePaletteActions({
     openOldCopies,
     toggleRibbon,
     toggleMotion,
+    scale,
+    chooseScale,
   ]);
 }

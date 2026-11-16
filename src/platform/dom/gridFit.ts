@@ -50,10 +50,15 @@ function floorOf(table: HTMLElement, lines: string): number {
     // A row head's line may be narrower than its cell (an inline button), so
     // what is around it is the head's own padding and border, read as such;
     // asking the boxes would hand back the slack and grow the head each run.
+    // On the left that is everything before the text: the padding, and on the
+    // name line the colour dot too, which a surname (2026-11-16) is long
+    // enough to be pushed off by ("Duman" drew as "…").
     const style = getComputedStyle(cell);
     const around = cell.classList.contains('row-head')
-      ? ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce(
-          (sum, k) => sum + (Number.parseFloat(style[k as 'paddingLeft']) || 0),
+      ? range.getBoundingClientRect().left -
+        cell.getBoundingClientRect().left +
+        ['paddingRight', 'borderRightWidth'].reduce(
+          (sum, k) => sum + (Number.parseFloat(style[k as 'paddingRight']) || 0),
           0,
         )
       : cell === line

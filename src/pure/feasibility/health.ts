@@ -96,7 +96,9 @@ export function health(d: State): Health {
   const level: Level =
     blocked > 0 || stranded > 0 || report.unplaceable.length > 0
       ? 'impossible'
-      : warnings > 0
+      : // Hours still in the pool are not "fine" either: a green chip beside
+        // "12 saat yerleşmedi" read as done (usability walkthrough, 2026-11-16).
+        warnings > 0 || pending > 0
         ? 'tight'
         : 'ok';
 

@@ -113,6 +113,7 @@ export default function App() {
     setTheme,
     scale,
     setScale,
+    chooseScale,
     programColor,
     setProgramColor,
     motion,
@@ -337,6 +338,8 @@ export default function App() {
     openOldCopies: () => setOldCopiesOpen(true),
     toggleRibbon,
     toggleMotion,
+    scale,
+    chooseScale,
   });
 
   // Before a deletion: the open plan goes to the storage's one slot and, with
@@ -344,8 +347,8 @@ export default function App() {
   // undo itself lives in memory and a wiped profile takes the slot with it.
   const keepInFolder = folder.keepBefore;
   const keepBefore = useCallback(
-    (before: State, label: string) => {
-      keepInStore(before, label);
+    (before: State, label: string, quiet?: boolean) => {
+      keepInStore(before, label, quiet);
       keepInFolder(before);
     },
     [keepInStore, keepInFolder],
@@ -484,6 +487,8 @@ export default function App() {
               switchProgram={(id) => viewProgram((d) => switchProgram(d, id))}
               openOldCopies={() => setOldCopiesOpen(true)}
               lastFileDay={reminder.savedDay}
+              scale={scale}
+              chooseScale={chooseScale}
             />
             <OldCopies
               open={oldCopiesOpen}
@@ -608,6 +613,7 @@ export default function App() {
                         poolFilter={ui.poolFilter}
                         setPoolFilter={ui.setPoolFilter}
                         colorMode={programColor}
+                        problems={status.problems}
                       />
                     </Activity>
                     {tab === 'print' && (
