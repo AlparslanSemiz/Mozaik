@@ -176,7 +176,23 @@ yeniden ölçülmeli.
 **Boyut.** `dist/index.html` 1 190 100 → BOYUT_HAM bayt, brotli 304 460 → BOYUT_BR (sınırlar 1 200 000 ve 306 000;
 eşik yükseltilmedi).
 
-**Koşulanlar.** KOSULANLAR
+**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `depcruise`, `knip`,
+`npm run hizli` (73 dosya yeşil), `vite build`, `npm run boyut`. Bütün E2E süiti `--workers=2`:
+ilk koşu 777 testin 702'si yeşil, 75'i eski satır kutularını süren testlerdi; hepsi kişi sayfasına
+çevrildi ve o 17 dosya yeniden koşuldu (487 test, kalan beşi düzeltildi ve tek başına yeşil).
+`kayma.spec.ts` 129 aşama 1'den bilinen macOS kaydırma çubuğu durumu (aşağıda). Yeni
+`kisi.spec.ts` (10 test), `erisim.spec.ts` kişi sayfalarını da tarıyor. `scripts/agir.sh` bu
+makinede çalışmadı (`flock` yok), Playwright doğrudan koşuldu. Tıklama testi 1920×1080 ve
+1366×768'de, babanın verisiyle (ekran görüntüleri oturumun scratch klasöründe, `a2/shots/`).
+
+**İnceleme.** Taze bağlamlı bir alt ajan farkı okudu. Düzeltilenler: sayfa kişiden kişiye geçince
+katlı hafta ve yazdırma durumu sıfırlanıyor; Gönder'in erişilebilir adı görünen sözü; satır üstüne
+gelme zemin değil halka (DESIGN); yeni kişi sayfasına branş ve derslik cümlesi; kısa ad çakışması
+sayfada da; fareyle satıra tıklayınca odak adda; bayat belge cümleleri. Bırakılanlar: aynı sınıfta
+iki dersi olan öğretmende "510 · Haftalık saat" adı iki kez geçiyor (seyrek, aşama 3'te ders
+satırıyla birlikte); `role="status"` satırlarının içerikle birlikte doğması (programın başka
+yerlerindeki desenle aynı); yeni sınıfta derslik bir sonrakine taşınmıyor (artık tek tek ekleme
+sayfa sayfa, toplu ekleme yapıştırma).
 
 ## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
 
