@@ -8,7 +8,7 @@
 // on a full grid, one per card and one per pin.
 
 import { expect, test } from './kapan';
-import { dragAndDrop, openWithSample, openPerson, openSetup } from './helpers';
+import { dragAndDrop, dragAndDropLoose, openWithSample, openPerson, openSetup } from './helpers';
 
 const grid = 'table.grid';
 
@@ -55,7 +55,7 @@ test.describe('95. Klavyeyle ızgara', () => {
 
   test('ızgaradaki kart T ile alınıp oklarla taşınıyor', async ({ page }) => {
     await openWithSample(page);
-    const { day, hour } = await dragAndDrop(page);
+    const { day, hour } = await dragAndDropLoose(page);
     const card = page.locator(`${grid} .card`).first();
     await card.focus();
 
@@ -80,14 +80,16 @@ test.describe('95. Klavyeyle ızgara', () => {
     page,
   }) => {
     await openWithSample(page);
-    const { day, hour } = await dragAndDrop(page);
+    const { day, hour } = await dragAndDropLoose(page);
     const card = page.locator(`${grid} .card`).first();
     await card.focus();
 
     await page.keyboard.press('Enter');
     const menu = page.getByRole('menu');
-    await expect(menu.getByRole('menuitem').first()).toHaveText(/^Taşı/);
-    await page.keyboard.press('Enter'); // the first item
+    // The pin leads since 2026-11-16; "Taşı" is the second item.
+    await expect(menu.getByRole('menuitem').nth(1)).toHaveText(/^Taşı/);
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
     await expect(menu).toHaveCount(0);
     await expect(page.locator('.reason-bar')).toContainText('alındı');
     await page.keyboard.press('ArrowRight');
@@ -140,7 +142,7 @@ test.describe('95. Klavyeyle ızgara', () => {
 
   test('Delete sonrası odak aynı hücrede kalıyor ve söyleniyor', async ({ page }) => {
     await openWithSample(page);
-    const { day, hour } = await dragAndDrop(page);
+    const { day, hour } = await dragAndDropLoose(page);
     await page.locator(`${grid} .card`).first().focus();
     await page.keyboard.press('Delete');
 
@@ -157,7 +159,7 @@ test.describe('95. Klavyeyle ızgara', () => {
 
   test('P odaklı kartı sabitliyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const card = page.locator(`${grid} .card`).first();
     await card.focus();
     await page.keyboard.press('p');

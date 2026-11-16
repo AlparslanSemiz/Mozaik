@@ -1363,7 +1363,7 @@ test.describe('67. Ders dağılımı', () => {
     const card = page.locator('.pool-card', { hasText: name }).first();
     await expect(card).toHaveAttribute('data-size', '3');
 
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 60_000,
     });
@@ -1485,7 +1485,7 @@ test.describe('67. Ders dağılımı', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.pool-card', { hasText: name }).first()).toBeVisible();
 
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 60_000,
     });

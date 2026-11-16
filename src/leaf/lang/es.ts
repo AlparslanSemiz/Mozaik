@@ -68,7 +68,6 @@ const ES: Sozluk = {
   "plan dosyası": "archivo de plan",
   "Plan dosyaya yazıldı. İndirilenler klasörüne bakın.":
     "Plan escrito en un archivo. Mire en la carpeta Descargas.",
-  "Programı yap": "Hacer el horario",
   Program: "Horario",
   "Düğme satırını gizle": "Ocultar la barra de botones",
   "Düğme satırını göster": "Mostrar la barra de botones",
@@ -176,8 +175,8 @@ const ES: Sozluk = {
     "**Hay puntos a los que prestar atención.** En las listas siguientes, las filas marcadas",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "impiden montar el horario. Resuélvalas primero.",
-  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz.":
-    "Las **{n}** horas restantes no están colocadas. **Hacer el horario** en la pestaña **Horario** las coloca.",
+  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz.":
+    "Las **{n}** horas restantes no están colocadas. **Colocar el resto** en la pestaña **Horario** las coloca.",
   "İpuçları ({n})": "Consejos ({n})",
   "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
     "Esto no bloquea el horario; son puntos que pueden haberse pasado por alto al introducir los datos.",
@@ -790,8 +789,8 @@ const ES: Sozluk = {
     "Si dos clases que no deben coincidir en el mismo día están el mismo día, la fila **No el mismo día** de la ficha de la clase las muestra.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} y {iki} están fijadas el {gun}; no deben coincidir en el mismo día, así que no hay ninguna salida hasta que una se mueva.",
-  "İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "Si las dos están **fijadas**, **Hacer el horario** no puede buscar sugerencias; suelte una o muévala a otro día.",
+  "İkisi de **sabitlenmişse** **Kalanı diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Si las dos están **fijadas**, **Colocar el resto** no puede buscar sugerencias; suelte una o muévala a otro día.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} puede dar como máximo {sinir} horas el {gun}; aquí serían {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -935,8 +934,8 @@ const ES: Sozluk = {
     "{ders}: {yeni} en lugar de {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders}: {yeni} horas a la semana en lugar de {eski}",
-  "Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.":
-    "El horario ha cambiado entretanto. Pulse Hacer el horario para volver a ver una sugerencia.",
+  "Program o arada değişti. Öneriyi yeniden görmek için Kalanı diz düğmesine basın.":
+    "El horario ha cambiado entretanto. Pulse Colocar el resto para volver a ver una sugerencia.",
   "Program değişiklik gerekmeden kuruluyor":
     "El horario se puede montar sin ningún cambio",
   "İlk arama bu programı bulamadı; ikinci arama buldu ve denetledi.":
@@ -1603,8 +1602,6 @@ const ES: Sozluk = {
   "Yeni dönem için bir kopya açıldı: dersler duruyor, program boş. Eski plan Dosya → Planlar ve yedek’te.": "Se ha abierto una copia para el nuevo curso: las clases están, el horario está vacío. El plan anterior está en Archivo → Planes y copias de seguridad.",
   "Gizlensin": "Oculta",
   "Yerleşmiş dersi sürükleyerek taşıyın.": "Arrastre una clase colocada para moverla.",
-  "Yerleşmeyi bekleyen ders yok": "No hay clases esperando a colocarse",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir": "Coloca las clases sin colocar respetando las reglas",
   "Dersleri gir": "Introducir las clases",
   "Kapalı saatleri işaretle": "Marcar las horas cerradas",
   "{d} derslik · {b} branş · {o} öğretmen · {s} sınıf": "{d} {d:aula|aulas} · {b} {b:materia|materias} · {o} {o:profesor|profesores} · {s} {s:grupo|grupos}",
@@ -1631,8 +1628,6 @@ const ES: Sozluk = {
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Este plan más pequeño sustituye al último archivo de plan de la carpeta. El estado anterior queda en las copias diarias.",
 
   // src/pure/solver (2026-11-16)
-  "Başka bir program yap": "Hacer otro horario",
-  "Program yapıldı, {n} saat yer değiştirdi.": "El horario está hecho; {n} {n:hora movida|horas movidas}.",
   "{kim}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{kim}: {yuk} horas de clase, {acik} abiertas; hay que abrir {fazla}",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} horas de clase, {acik} abiertas; hay que abrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Aula {derslik}: {yuk} horas de clase, {acik} abiertas; abrir {fazla} más o pasar un grupo a otra aula",
@@ -1709,8 +1704,6 @@ const ES: Sozluk = {
     "Datos del centro",
   "Yazdır ve gönder":
     "Imprimir y enviar",
-  "Bu programın kopyası":
-    "Copia de este horario",
   "Neden yerleşmedi?":
     "¿Por qué no se colocó?",
   "Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.":
@@ -1815,11 +1808,15 @@ const ES: Sozluk = {
   "Kaydırınca gizlensin": "Ocultar al desplazar",
   "Kural aşımları": "Reglas incumplidas",
   "Yeni sürüm notu var": "Hay una nota de versión nueva",
+  "Kalanı diz": "Colocar el resto",
   "Sabitle": "Fijar",
   "{ders} yerleşti ve sabitlendi.": "{ders} colocada y fijada.",
   "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} colocada y fijada: {yer}.",
   "{olay}, yerlerinde sabitlendi.": "{olay}; fijadas donde están.",
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} colocada y fijada; {olay}.",
+  "Kalan dizildi, {adlar} yer değiştirdi.": "El resto está colocado; se movió {adlar}.",
+  "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "El resto está colocado; se movieron {adlar} y {n} {n:clase más|clases más}.",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Coloca las clases sin colocar respetando las reglas; las fijadas y las puestas a mano no se tocan",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Permite mover la clase otra vez: Colocar el resto o Rehacer pueden moverla.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Mantiene la clase donde está: Colocar el resto y Rehacer no la tocan.",
 };

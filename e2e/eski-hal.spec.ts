@@ -5,7 +5,7 @@
 
 import { expect, test } from './kapan';
 import {
-  dragAndDrop,
+  dragAndDropLoose,
   openFileMenu,
   openGridMenu,
   openWithSample,
@@ -24,7 +24,7 @@ test.describe('Eski hâline dön', () => {
     page,
   }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const placed = await placedHours(page);
     expect(placed).toBeGreaterThan(0);
     await page.waitForTimeout(700); // the 400 ms autosave

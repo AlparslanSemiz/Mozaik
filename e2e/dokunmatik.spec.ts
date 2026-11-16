@@ -12,7 +12,7 @@
 
 import { type Locator } from '@playwright/test';
 import { expect, test } from './kapan';
-import { dragAndDrop, openPerson, openSetup, openWithSample } from './helpers';
+import { dragAndDropLoose, openPerson, openSetup, openWithSample } from './helpers';
 
 test.use({ hasTouch: true });
 
@@ -77,7 +77,7 @@ test.describe('Dokunmatik: basılı tutmak kartın menüsünü açıyor', () => 
     page,
   }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const cards = page.locator('table.grid .card');
     const before = await cards.count();
     expect(before).toBeGreaterThan(0);
@@ -95,7 +95,7 @@ test.describe('Dokunmatik: basılı tutmak kartın menüsünü açıyor', () => 
 
   test('parmak kayınca menü açılmıyor: o bir sürükleme', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const card = page.locator('table.grid td:has(.card)').first();
     const next = card.locator('xpath=following-sibling::td[1]');
 
@@ -107,7 +107,7 @@ test.describe('Dokunmatik: basılı tutmak kartın menüsünü açıyor', () => 
   // whatever card was asked for last (pitfall 176).
   test('BOŞ hücrede basılı tutmak hiçbir menü açmıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const empty = page.locator('table.grid tbody td[data-day]:not(:has(.card))').first();
 
     await stroke(empty, [], 1000);

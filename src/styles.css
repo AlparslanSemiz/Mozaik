@@ -7913,3 +7913,21 @@ table.person-list th,
 table.person-list td:not(.person-status) {
   white-space: nowrap;
 }
+
+/* A WEEK WITH NOTHING LEFT TO PLACE. The strip says "Hepsi yerleşti" in the
+   main button's place (a reading, not a button: it has no hover and takes no
+   Tab stop), and the pool's head, which used to say it, is gone: the grid
+   keeps the room. Both come back with the next waiting lesson. */
+.strip-done {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  min-height: 2.25rem;
+  font-weight: 600;
+  color: var(--ok-ink);
+}
+
+.pool.pool-empty {
+  display: none;
+}

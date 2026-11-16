@@ -152,7 +152,7 @@ test.describe('53. Durum çipi', () => {
     await expect(chip).toContainText('saat yerleşmedi');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await expect(chip).toContainText('Sorun yok');
 

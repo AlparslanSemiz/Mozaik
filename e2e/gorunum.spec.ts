@@ -445,7 +445,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
     // The grid has to be FULL. An empty sample would let both the fit and the
     // "nothing is clipped" assertion pass on a grid with nothing in it
     // (pitfall 33): the cards are what set the column's floor.
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('table.grid .card').first()).toBeVisible();
 
@@ -482,7 +482,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
       await openWithSample(page);
       if (target.scale !== 100) await chooseScale(page, target.scale);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
-      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+      await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
       await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
         timeout: 30_000,
       });
@@ -526,7 +526,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
       await openWithSample(page);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
       await page.getByRole('button', { name: view }).click();
-      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+      await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
       await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
         timeout: 30_000,
       });
@@ -545,7 +545,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
     await page.setViewportSize({ width: 1600, height: 968 });
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     const fit = await gridMetrics(page);
@@ -566,7 +566,7 @@ test.describe('45. Görünüm — ızgara kutuya kendiliğinden sığıyor (A5, 
     });
     await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     expect(
       await page.evaluate(() => [
@@ -648,7 +648,7 @@ test.describe('45b. Izgara babanın şeklindeki veride ve Windows %125 kutusunda
             await openWithSample(page);
             await page.getByRole('button', { name: 'Program', exact: true }).click();
             await page.getByRole('button', { name: view }).click();
-            await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+            await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
             await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
               timeout: 30_000,
             });
@@ -704,7 +704,7 @@ test.describe('51. Program: programı boşalt', () => {
   test('dizilmiş programı havuza geri gönderiyor, geri alınabiliyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     const placed = await page.locator('table.grid .card').count();
     expect(placed).toBeGreaterThan(0);

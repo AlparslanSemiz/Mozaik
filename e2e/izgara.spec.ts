@@ -252,7 +252,7 @@ test.describe('47. Izgara enstrümanı', () => {
     await expect(page.locator('table.grid')).toBeVisible();
 
     // Fill the week, so the grid really carries merged blocks.
-    const run = page.getByRole('button', { name: 'Programı yap', exact: true });
+    const run = page.getByRole('button', { name: 'Kalanı diz', exact: true });
     await run.click();
     await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 60_000 });
     const doubles = await page.locator("table.grid td[data-span='2']").count();

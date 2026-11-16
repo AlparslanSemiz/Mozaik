@@ -305,7 +305,7 @@ export default function App() {
     );
   }, [plans, state, notify, t]);
 
-  // Program → Daha fazla → "Bu programın kopyası" (K2): a second arrangement
+  // Dosya ▾ → "Bu planın kopyası" (K2; Program's Daha fazla until 2026-11-16): a second arrangement
   // is a second plan, holding this one's data and week; the plan picker in
   // the top bar appears with it.
   const copyPlan = useCallback(() => {
@@ -483,6 +483,8 @@ export default function App() {
                 goTo({ tab: 'school', section: 'school' });
               }}
               copyForNewTerm={copyForNewTerm}
+              copyPlan={copyPlan}
+              copyBusy={solver.running || solver.advice?.searching === true}
               openProblems={() => setProblems({ lesson: null })}
               switchProgram={(id) => viewProgram((d) => switchProgram(d, id))}
               openOldCopies={() => setOldCopiesOpen(true)}
@@ -513,7 +515,6 @@ export default function App() {
                 state={state}
                 change={change}
                 manageProgram={manageProgram}
-                copyPlan={copyPlan}
                 solver={solver}
                 programColor={programColor}
                 setProgramColor={setProgramColor}

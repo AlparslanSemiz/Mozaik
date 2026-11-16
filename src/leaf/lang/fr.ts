@@ -68,7 +68,6 @@ const FR: Sozluk = {
   "plan dosyası": "fichier de plan",
   "Plan dosyaya yazıldı. İndirilenler klasörüne bakın.":
     "Plan écrit dans un fichier. Regardez dans le dossier Téléchargements.",
-  "Programı yap": "Faire l’emploi du temps",
   Program: "Emploi du temps",
   "Düğme satırını gizle": "Masquer la barre de boutons",
   "Düğme satırını göster": "Afficher la barre de boutons",
@@ -176,8 +175,8 @@ const FR: Sozluk = {
     "**Certains points méritent votre attention.** Dans les listes ci-dessous, les lignes marquées",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "empêchent de construire l’emploi du temps. Réglez-les d’abord.",
-  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz.":
-    "Les **{n}** heures restantes ne sont pas placées. **Faire l’emploi du temps** dans l’onglet **Emploi du temps** les place.",
+  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz.":
+    "Les **{n}** heures restantes ne sont pas placées. **Placer le reste** dans l’onglet **Emploi du temps** les place.",
   "İpuçları ({n})": "Conseils ({n})",
   "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
     "Cela ne bloque pas l’emploi du temps ; ce sont des points qui ont pu être oubliés lors de la saisie des données.",
@@ -795,8 +794,8 @@ const FR: Sozluk = {
     "Quand deux cours qui ne doivent pas tomber le même jour sont le même jour, la ligne **Pas le même jour** de la fiche du cours les montre.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} et {iki} sont épinglés le {gun} ; ils ne doivent pas tomber le même jour, donc aucune solution n’existe tant que l’un ne bouge pas.",
-  "İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "Si les deux sont **épinglés**, **Faire l’emploi du temps** ne peut pas chercher de suggestions ; détachez-en un ou déplacez-le à un autre jour.",
+  "İkisi de **sabitlenmişse** **Kalanı diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Si les deux sont **épinglés**, **Placer le reste** ne peut pas chercher de suggestions ; détachez-en un ou déplacez-le à un autre jour.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} peut faire au plus {sinir} heures le {gun} ; ici cela ferait {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -939,8 +938,8 @@ const FR: Sozluk = {
     "{ders} : {yeni} au lieu de {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders} : {yeni} heures par semaine au lieu de {eski}",
-  "Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.":
-    "L’emploi du temps a changé entre-temps. Appuyez sur Faire l’emploi du temps pour revoir une suggestion.",
+  "Program o arada değişti. Öneriyi yeniden görmek için Kalanı diz düğmesine basın.":
+    "L’emploi du temps a changé entre-temps. Appuyez sur Placer le reste pour revoir une suggestion.",
   "Program değişiklik gerekmeden kuruluyor":
     "L’emploi du temps peut être construit sans aucun changement",
   "İlk arama bu programı bulamadı; ikinci arama buldu ve denetledi.":
@@ -1608,8 +1607,6 @@ const FR: Sozluk = {
   "Yeni dönem için bir kopya açıldı: dersler duruyor, program boş. Eski plan Dosya → Planlar ve yedek’te.": "Une copie pour le nouveau semestre est ouverte : les cours sont là, l’emploi du temps est vide. L’ancien plan est dans Fichier → Plans et sauvegarde.",
   "Gizlensin": "Masqué",
   "Yerleşmiş dersi sürükleyerek taşıyın.": "Faites glisser une leçon placée pour la déplacer.",
-  "Yerleşmeyi bekleyen ders yok": "Aucune leçon n’attend d’être placée",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir": "Place les leçons non placées en respectant les règles",
   "Dersleri gir": "Saisir les cours",
   "Kapalı saatleri işaretle": "Marquer les heures fermées",
   "{d} derslik · {b} branş · {o} öğretmen · {s} sınıf": "{d} {d:salle|salles} · {b} {b:matière|matières} · {o} {o:enseignant|enseignants} · {s} {s:classe|classes}",
@@ -1636,8 +1633,6 @@ const FR: Sozluk = {
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Ce plan plus petit remplace le dernier fichier de plan du dossier. L’ancien état reste dans les sauvegardes quotidiennes.",
 
   // src/pure/solver (2026-11-16)
-  "Başka bir program yap": "Faire un autre emploi du temps",
-  "Program yapıldı, {n} saat yer değiştirdi.": "L’emploi du temps est fait ; {n} {n:heure déplacée|heures déplacées}.",
   "{kim}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{kim} : {yuk} heures de cours, {acik} ouvertes ; il faut en ouvrir {fazla}",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif} : {yuk} heures de cours, {acik} ouvertes ; il faut en ouvrir {fazla}",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Salle {derslik} : {yuk} heures de cours, {acik} ouvertes ; en ouvrir {fazla} ou passer une classe dans une autre salle",
@@ -1714,8 +1709,6 @@ const FR: Sozluk = {
     "Infos de l’école",
   "Yazdır ve gönder":
     "Imprimer et envoyer",
-  "Bu programın kopyası":
-    "Copie de cet emploi du temps",
   "Neden yerleşmedi?":
     "Pourquoi n’est-il pas placé ?",
   "Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.":
@@ -1820,11 +1813,15 @@ const FR: Sozluk = {
   "Kaydırınca gizlensin": "Masquer au défilement",
   "Kural aşımları": "Règles enfreintes",
   "Yeni sürüm notu var": "Il y a une nouvelle note de version",
+  "Kalanı diz": "Placer le reste",
   "Sabitle": "Épingler",
   "{ders} yerleşti ve sabitlendi.": "{ders} placé et épinglé.",
   "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} placé et épinglé : {yer}.",
   "{olay}, yerlerinde sabitlendi.": "{olay} ; épinglés à leur place.",
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placé et épinglé ; {olay}.",
+  "Kalan dizildi, {adlar} yer değiştirdi.": "Le reste est placé ; {adlar} déplacé.",
+  "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "Le reste est placé ; {adlar} et {n} {n:autre cours|autres cours} déplacés.",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Place les leçons non placées en respectant les règles ; les cours épinglés ou posés à la main restent",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Rend le cours de nouveau déplaçable : Placer le reste ou Refaire peut le déplacer.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Garde le cours en place : Placer le reste et Refaire n’y touchent pas.",
 };

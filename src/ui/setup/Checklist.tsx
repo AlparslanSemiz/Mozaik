@@ -124,11 +124,11 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
     },
     {
       id: 'solve',
-      name: t('Programı yap'),
+      name: t('Kalanı diz'),
       done: placed > 0,
       detail: t('{yer} / {toplam} saat yerleşmiş', { yer: placed, toplam: lessonHours }),
       to: { tab: 'program' },
-      action: t('Programı yap'),
+      action: t('Kalanı diz'),
     },
     {
       id: 'print',

@@ -20,7 +20,7 @@ const APP_BUDGET_MS = 15_000;
 
 async function autoFill(page: Page): Promise<string> {
   const before = await settledText(page);
-  await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+  await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
   await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
   return before;
 }
@@ -66,7 +66,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
   test('sayfa dizim SÜRESİNCE de tıklanabiliyor', async ({ page }) => {
     const world = HEAVY_WORLDS[0]!;
     await loadWorld(page, world.state);
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     // If the search held the main thread this would time out instead of answering.
     await expect(page.locator('.topbar .health')).toBeEnabled();
     // `exact: true`, and the name is the WORD: the button carried a literal "■"

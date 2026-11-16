@@ -370,7 +370,7 @@ function Report({
         {placed < totalWanted && (
           <p className="hint">
             <T
-              k="Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz."
+              k="Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz."
               vars={{ n: totalWanted - placed }}
             />
           </p>
@@ -434,12 +434,12 @@ function Report({
                   <T k="Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir." />
                 </p>
               )}
-              {/* TODO RK2: with both of them pinned, Programı yap has no
+              {/* TODO RK2: with both of them pinned, Kalanı diz has no
                   suggestion to offer until one moves; said here as well as
                   in the panel, in one sentence. */}
               {pinnedBreaks > 0 && (
                 <p className="hint">
-                  <T k="İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
+                  <T k="İkisi de **sabitlenmişse** **Kalanı diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın." />
                 </p>
               )}
               <table className="list">

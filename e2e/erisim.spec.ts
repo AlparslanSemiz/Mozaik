@@ -273,7 +273,7 @@ test.describe('91. Odak: diyalog kapanınca ve içeriğe geçerken', () => {
 
   test('kart menüsünden açılan ders penceresi kapanınca odak karta döner', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     const card = page.locator('table.grid .card').first();

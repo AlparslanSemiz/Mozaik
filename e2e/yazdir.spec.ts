@@ -66,7 +66,7 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
   test('blok kâğıtta TEK hücre — ve satır hâlâ tam hafta', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page
@@ -96,7 +96,7 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
   test('birleşmiş hücre ÖĞLE ARASINI yutmuyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page
