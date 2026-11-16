@@ -393,6 +393,24 @@ describe('exe klasörü · silinmiş profil (denetim 2026-11-16)', () => {
     expect(box.folder!.shrunk).toBeNull();
   });
 
+  it('kabul tek yazım için: sonraki toplu silme yine kurtarma dosyasına gidiyor', async () => {
+    const disk = fakeDisk(realFolder());
+    const { box, act, wait } = await launch(disk);
+    act(() => box.folder!.release());
+    act(() => box.store!.change(() => ONE_TEACHER));
+    await wait(3000);
+    await act(() => box.folder!.acceptShrink());
+    expect(teachersIn(disk.files.get('ders-programi-tumu.json'))).toBe(1);
+    // The school typed back in, then deleted again by accident.
+    act(() => box.store!.change(() => FULL_STATE));
+    await wait(3000);
+    expect(teachersIn(disk.files.get('ders-programi-tumu.json'))).toBe(FULL_STATE.teachers.length);
+    act(() => box.store!.change(() => ONE_TEACHER));
+    await wait(3000);
+    expect(teachersIn(disk.files.get('ders-programi-tumu.json'))).toBe(FULL_STATE.teachers.length);
+    expect(box.folder!.shrunk?.before.teachers).toBe(FULL_STATE.teachers.length);
+  });
+
   it('on bir gün tek öğretmenli plan: on dolu günlüğün onu da kalıyor (sondanın tekrarı)', async () => {
     const disk = fakeDisk(realFolder());
     localStorage.setItem(BASE_KEY, JSON.stringify(ONE_TEACHER));
@@ -404,6 +422,23 @@ describe('exe klasörü · silinmiş profil (denetim 2026-11-16)', () => {
     }
     expect(big()).toBe(11); // the live file and all ten dailies
     expect(disk.files.get('ders-programi-tumu.json')).toBe(FULL_BUNDLE);
+  });
+
+  it('kurtarma ve silmeden-önce dosyalarının her türünden en yeni on kalıyor', async () => {
+    const seed = realFolder();
+    for (let b = 1; b <= 12; b++) {
+      const d = day(b).replace('ders-programi-', '');
+      seed[`ders-programi-kurtarma-${d}`] = FULL_BUNDLE;
+      seed[`ders-programi-silmeden-once-${d}`] = '{}';
+    }
+    const disk = fakeDisk(seed);
+    localStorage.setItem(BASE_KEY, FULL);
+    await launch(disk);
+    const kalan = (kind: string) =>
+      [...disk.files.keys()].filter((n) => n.startsWith(`ders-programi-${kind}-`)).sort();
+    expect(kalan('kurtarma')).toHaveLength(10);
+    expect(kalan('silmeden-once')).toHaveLength(10);
+    expect(kalan('kurtarma')[0]).toBe(day(10).replace('ders-programi-', 'ders-programi-kurtarma-'));
   });
 
   it('küçük hâli kabul edilse de en dolu günlük budanmıyor', async () => {

@@ -21,6 +21,8 @@ import {
   openedWithoutQuestion,
   reopen,
   savedText,
+  KLASOR_YALNIZ_CHROMIUM,
+  SAYDAM_GORUNTU_FIREFOX_YOK,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -927,7 +929,8 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
   // old claim has to make these go red first. The numbers are Chromium's, and
   // a change in them is worth knowing about either way.
 
-  test('GÜVENLİ BAĞLAM ve klasör API’si file:// altında VAR', async ({ page }) => {
+  test('GÜVENLİ BAĞLAM ve klasör API’si file:// altında VAR', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     await open(page);
     const facts = await page.evaluate(() => ({
       secure: window.isSecureContext,
@@ -946,7 +949,8 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
     expect(facts.idb).toBe('object');
   });
 
-  test('...ama gerçek bir KÖKEN yok, ve fark bu', async ({ page }) => {
+  test('...ama gerçek bir KÖKEN yok, ve fark bu', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     await open(page);
     const facts = await page.evaluate(async () => {
       const out: Record<string, unknown> = { origin: location.origin };
@@ -1066,7 +1070,8 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
     for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
   });
 
-  test('32 ve üstü AYRINTILI çizim, 16, 20 ve 24 sade', async ({ page }) => {
+  test('32 ve üstü AYRINTILI çizim, 16, 20 ve 24 sade', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', SAYDAM_GORUNTU_FIREFOX_YOK);
     // Compared by pixels, because the .ico holds PNGs and the .svg files hold
     // rectangles: the only thing the two have in common is what they look
     // like. Each entry is decoded and put next to a fresh render of both

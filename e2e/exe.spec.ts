@@ -19,7 +19,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { answerDialog, open, openSettings, openTechnical } from './helpers';
+import { answerDialog, KLASOR_YALNIZ_CHROMIUM, open, openSettings, openTechnical } from './helpers';
 
 /**
  * What the far side answers when the update is asked about.
@@ -218,7 +218,9 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await expect(panel.getByText(/tarama verilerini temizle/)).toHaveCount(0);
   });
 
-  test('AYNI dosya tarayıcıda bunların hiçbirini yapmıyor', async ({ page }) => {
+  test('AYNI dosya tarayıcıda bunların hiçbirini yapmıyor', async ({ page, browserName }) => {
+    // Its browser half is the folder panel's "Klasör seç", a Chromium API.
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     // The guard on the whole round: the exe path is chosen by feature
     // detection, not by a build flag, so the very same dist/index.html must
     // keep behaving like a browser page when the bridge is absent. Without

@@ -151,7 +151,8 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
 
   // 'bulundu' (above): nothing goes to the folder until the user chose.
   const held = useRef(false);
-  // The user said the smaller plan is the one to keep (`acceptShrink`).
+  // The user said the smaller plan is the one to keep (`acceptShrink`), for
+  // the write that click starts and no other.
   const shrinkOk = useRef(false);
   const [shrunk, setShrunk] = useState<Shrunk | null>(null);
 
@@ -402,12 +403,18 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     setStatus({ kind: 'bekliyor', name: handle.name });
   }, []);
 
+  // The "yes" is for this one write: left on, a later mass deletion in the
+  // same session (in the exe, every session) went over the live file unasked.
   const acceptShrink = useCallback(async () => {
-    shrinkOk.current = true;
     setShrunk(null);
     if (dir.current === null) return;
     window.clearTimeout(timer.current);
-    await write(dir.current);
+    shrinkOk.current = true;
+    try {
+      await write(dir.current);
+    } finally {
+      shrinkOk.current = false;
+    }
   }, [write]);
 
   const folderCopy = useCallback(async () => {

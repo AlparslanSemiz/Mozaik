@@ -53,6 +53,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
   Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
   2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
+- Dalda, birleşmedi: `tarayici/safari-ipad` (2026-11-16): WebKit'te Program'ın kaydırması sekme
+  dönüşünde korunuyor (tuzak 174), iPad'de Müsaitlik parmakla boyanıyor (175) ve karta basılı
+  tutmak menüyü açıyor (176); `npm run test:firefox`; Firefox/WebKit'te dürüst süit (aşağıdaki girdi).
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -102,6 +105,12 @@ brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
 seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
 dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
 aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
+**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
+birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
+Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
+dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
+Gerçek Windows exe'de koşulmadı.
 
 ---
 
@@ -238,6 +247,65 @@ raptiye testi yükten zaman aşımı, tek başına yeşil. `scripts/agir.sh` bu 
 **Bilinen.** `kayma.spec.ts`'in "taşan bölümle taşmayan bölüm" testi Görünüm artık 1080'de
 taşmadığı için 900 piksel yüksekliğe alındı; macOS'ta kaydırma çubuğu yer kaplamadığı için
 burada doğrulanamadı, CI'da (Linux) bakılmalı.
+
+---
+
+## 2026-11-16 · Safari ve iPad (`tarayici/safari-ipad`)
+
+Tarayıcı denetiminin (Firefox ve WebKit koşusu, `scratchpad/denetim4/tarayici/hatalar.txt`)
+bulguları. Bu makine macOS, `agir.sh` çalışmıyor; Playwright kilitsiz ve `--workers=2`.
+
+- **WebKit kaydırması** (tuzak 174): `display: none` olan `<Activity>` dalında WebKit
+  `.grid-wrap`'in kaydırmasını sıfırlıyordu (repro: 600/200 → 0/0, Chromium 600/200).
+  `useProgramScrollKeep` (`ui/shell/useMainScroll.ts`) not edip geri yazıyor; repro sonra 600/200.
+  `program.spec.ts`'in "kaydırmayı korurken" testi iki eksende, WebKit'te yeşil.
+- **iPad boyama** (tuzak 175): `pointermove` + `elementFromPoint`, boyanan hücrelerde
+  `touch-action: none`. Çare geri alınınca `dokunmatik.spec.ts` WebKit'te 4 yerine 1 hücre.
+- **iPad menü** (tuzak 176): `platform/dom/longPress.ts`, 500 ms, 8 px; önce `pointercancel`, sonra
+  `contextmenu`. Çare geri alınınca iki menü testi kırmızı; `pointercancel` çıkarılınca boş hücre
+  testi kırmızı. Gerçek bir iPad'de denenmedi. Dokunmatik Windows'ta Chromium kendi `contextmenu`'sünü
+  de gönderir, menü iki kez istenir (aynı hedef, zararsız sanılıyor, ölçülmedi).
+- **Yalnız test:** `KLASOR_YALNIZ_CHROMIUM` (temel 75'in iki testi, exe 76'nın tarayıcı testi),
+  `SAYDAM_GORUNTU_FIREFOX_YOK` (temel 79), Çıktı rayının kaydırıcısı hesaplanmış `overflow-y` ile.
+  Kurulum 65'in sayı kutusu: Firefox'un boş `input[type=number]`'ı 65 px istiyor, kutu 7ch = 63;
+  3× ekran görüntüsünde "16", "88", "10" spinnerın yanında tam okunuyor, CSS değişmedi, Firefox'ta
+  o kutu karşılaştırmadan çıktı. `playwright.firefox.config.ts` ve `npm run test:firefox`, CI'da değil.
+- **Koşulanlar:** Chromium program, musaitlik, temel, yazdir, kurulum, exe, dokunmatik 255/255;
+  WebKit program, musaitlik, dokunmatik 95/95; Firefox temel, yazdir, exe, dokunmatik 80 geçti
+  10 atlandı, kurulum 65 14/14. `tsc`, eslint, prettier, `vite build`, `boyut` (ham 1,17 MB,
+  brotli 299,88 kB, 6,12 kB pay). Tam süit Firefox ve WebKit'te koşulmadı.
+
+---
+
+## 2026-11-16 · İncelemenin dört küçük bulgusu (`duzeltme/inceleme`)
+
+`ci/kurulum-durdur`'dan (PR #65) açıldı.
+
+- **İndirme süresi (tuzak 172).** `getir` `istemci(300)` ile indiriyordu: 300 s bütün gövdeyi
+  kapsıyordu, 31 MB'lık kurulum 0,85 Mbit/s'nin altında hiç inemezdi. Şimdi `connect_timeout`
+  20 s ve `read_timeout` 60 s, boy sınırı yine akışta; manifest toplam 20 s'de. İndirme
+  `guncelleme-indirme` olayıyla yüzde başına bir kez `[inen, toplam]` yolluyor, Ayarlar "Yeni
+  sürüm iniyor… %N" yazıyor. `cargo test`'te yerel yavaş sunucu: 1,5 s süren ama 2 s susmayan hat
+  bitiyor, aynı hatta 600 ms'lik toplam sınırlı istemci bitiremiyor; 20 s susan hat 500 ms'lik
+  sessizlik sınırında "İnternet yanıt vermedi".
+- **Bekleyici.** `Mozaik-kurulum-bekleyici.exe` sabit `%TEMP%` yolundan kurulumun kendi taze
+  klasörüne (`bekleyici_yolu`); sonraki indirmenin süpürmesi klasörle birlikte siliyor, eski sabit
+  dosya da siliniyor. `BEKLEYICI_ADI`'nın yorumu `mainBinaryName`'i söylüyor.
+- **Küçülme kabulü.** `acceptShrink` bayrağı yalnız başlattığı yazım için açık (`finally`'de
+  kapanıyor); önce oturum boyu, exe'de hiç kapanmıyordu. Gerileme testi düzeltmesiz kırmızıydı.
+- **Kurtarma budaması.** `sparePrunable`: oturumluk kurtarma kopyaları, günlük kurtarma
+  dosyaları ve silmeden-önce dosyalarının her türünden en yeni on, en yenisi hiç; günlük budamayla
+  aynı anda. Rust `remove_in` artık `yedek_mi`'ye bakıyor (aynı üç kalıp, saatli üst çubuk yedeği ve
+  başka adlar yine reddediliyor). İnceleme alt ajanı iki türün tek sayılmasını buldu: on oturum
+  günün küçülme dosyasını itebilirdi, ayrıldı.
+
+Koşulan: `cargo test` 97/97, `cargo clippy` (yalnız eski iki uyarı), `tsc`, `eslint`, `prettier`
+(değişen dosyalar), `npm run hizli` 1712 geçti, `vite build`, `npm run boyut` (1,17 MB, brotli
+299,05 kB), E2E `klasor` (site, 1 işçi) 9/9, `okunamayan` + `exe` (2 işçi) 26/26. Koşulamayan:
+`cargo check --target x86_64-pc-windows-msvc` (bu Mac'te `llvm-rc` yok, `tauri-winres` duruyor);
+değişen kodun hiçbiri `cfg(windows)` altında değil. Tıklama testi yapılmadı: yüzde yalnız
+gerçek exe'nin indirmesinde görünüyor.
+
 ## 2026-11-16 · Daha iyi program: iyileştirme geçişi, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
 
 Alp'in önceliği "daha iyi program". Denetimin bağımsız denetçisi test kâhini oldu

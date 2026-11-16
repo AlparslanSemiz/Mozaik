@@ -118,6 +118,19 @@ export function AvailGrid({ state, change, entityId, teacher, label, clock = fal
         aria-label={label}
         onPointerUp={endPaint}
         onPointerLeave={endPaint}
+        onPointerCancel={endPaint}
+        // A touch pointer is captured by the cell it went down on, so no
+        // other cell hears `pointerenter`: the finger's cell is asked for by
+        // position instead (pitfall 175). A mouse paints by enter.
+        onPointerMove={(e) => {
+          if (pending === null || e.pointerType === 'mouse') return;
+          const key = document
+            .elementFromPoint(e.clientX, e.clientY)
+            ?.closest<HTMLElement>('td[data-cell]')?.dataset.cell;
+          if (key === undefined) return;
+          const { day, hour } = parseCellKey(key);
+          continuePaint(day, hour);
+        }}
       >
         <thead>
           <tr>
@@ -162,6 +175,7 @@ export function AvailGrid({ state, change, entityId, teacher, label, clock = fal
               {state.settings.hours.map((_, s) => (
                 <td
                   key={s}
+                  data-cell={cellKey(g, s)}
                   className={[
                     shownClosed(g, s) ? 'closed' : '',
                     // The break sits at a different lesson on each row, so it

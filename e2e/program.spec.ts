@@ -805,10 +805,14 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     const wrap = page.locator('.grid-wrap');
     await wrap.evaluate((el) => {
       el.scrollLeft = 600;
+      el.scrollTop = 40;
       (window as unknown as { __keptGrid?: Element }).__keptGrid = el;
     });
-    const before = await wrap.evaluate((el) => el.scrollLeft);
-    expect(before).toBeGreaterThan(0);
+    // Both axes: WebKit drops a `display: none` box's offset on BOTH, and
+    // `useProgramScrollKeep` writes them back (pitfall 174).
+    const before = await wrap.evaluate((el) => [el.scrollLeft, el.scrollTop]);
+    expect(before[0]).toBeGreaterThan(0);
+    expect(before[1]).toBeGreaterThan(0);
 
     await openSetup(page, 'Öğretmenler');
     // On the teacher's page since 2026-11-16 (K5).
@@ -824,7 +828,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
         (el) => (window as unknown as { __keptGrid?: Element }).__keptGrid === el,
       ),
     ).toBe(true);
-    expect(await wrap.evaluate((el) => el.scrollLeft)).toBe(before);
+    expect(await wrap.evaluate((el) => [el.scrollLeft, el.scrollTop])).toEqual(before);
     await expect(page.locator('table.grid .row-head', { hasText: 'ZZ' })).toBeVisible();
   });
 

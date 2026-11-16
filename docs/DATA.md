@@ -328,7 +328,8 @@ yerleşim sayılmaz, "Programı boşalt" bilerek siler) ikisine de yazılmaz: pa
 dosyasına (`ders-programi-kurtarma-YYYY-AA-GG.json`) gider, budama koşmaz, ve bir şerit iki sayıyı
 söyler, iki düğmeyle: "Belgelerim'deki son kaydı aç" klasördeki kopyayı açar (küçük hâl kurtarma
 dosyasında ve silmeden-önce yuvasında kalır), "Yeni hâlini asıl dosya yap" bir soru sorup o klasör
-için küçülmeyi kabul eder ve hemen yazar; başka klasör seçmek ya da unutmak kabulü sıfırlar. Budama en
+için küçülmeyi kabul eder ve hemen yazar. Kabul yalnız o yazım için: sonraki keskin küçülme yine
+kurtarma dosyasına gider (2026-11-16'ya kadar kabul oturum boyu sürüyordu, exe'de hiç sıfırlanmıyordu). Budama en
 dolu günlüğü (`largest`, eşitlerde en yenisi) hiç silmez. 2026-11-16'ya kadar silinmiş bir profilde
 tek öğretmen canlı dosyanın ve günün yedeğinin üstüne yazılıyor, tek öğretmenli günlükler de dolu
 sayıldığı için on günde on gerçek yedeğin hepsi budanıyordu (denetim 2026-11-16, tuzak 159).
@@ -337,8 +338,7 @@ Sorusuz her silmeden önce (sınıf, derslik, branş, seçenek, öğretmen, ders
 `Baştan diz`), `Her şeyi sil`, dolu planın yerine örnek okul ve `Dosyadan aç` öncesinde açık plan
 `ders-programi-silmeden-once`'ya yazılır (tek yuva, boş ve dondurulmuş plan yazılmaz), seçilen
 klasörde de günün `ders-programi-silmeden-once-YYYY-AA-GG.json` dosyasına (tek plan dosyası, gün
-içinde her silmede yeniden yazılır; exe yalnız günlüğü sildiği için tarihli ad başına bir dosya
-birikirdi). Silmeden sonraki ilk otomatik kayıt yuvaya planın o hâlinin parmak izini yazar
+içinde her silmede yeniden yazılır; budama bunların en yeni on gününü bırakır). Silmeden sonraki ilk otomatik kayıt yuvaya planın o hâlinin parmak izini yazar
 (`noteAfter`). Sonraki açılış, yuva açılan plana aitse, görülmemişse, açılan plandan farklıysa ve
 plan silmeden sonra değişmemişse (parmak izi tutuyorsa) bir kez bir şerit gösterir; değiştiyse
 geri getirmek sonraki işi de silerdi, yuva sessizce kalır. Şerit: "… Son silmeyi geri almak için: Geri getir". Geri getirmek geri
@@ -354,8 +354,11 @@ bir kopyanın alanlarını siliyordu.
 Bu tarayıcının kendi deposu kaydı reddederken (kota, VK2) her klasör yazımı oturuma özel
 bir kurtarma kopyası da bırakır: `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`, aynı
 paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski durumla yeniden
-yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
-uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
+yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve günlük budamasına
+girmez. Oturumluk kurtarma kopyalarının, günlük kurtarma dosyalarının ve silmeden-önce dosyalarının her
+türünden en yeni on kalır, en yenisi hiç silinmez (`sparePrunable`; 2026-11-16'ya kadar hiçbiri
+silinmiyor, Belgelerim'de birikiyordu). Exe'nin `remove_file`'ı yalnız bu üç tarihli kalıbı siler
+(`yedek_mi`). Başka bir pencere açık planı ya da plan listesini
 değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
 şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Açılışta açık plan okunamıyorsa
 (dondurulur, yukarıda) okunabilen ilk plan açılır; okunamayan anahtarında bayt bayt ve dizinde

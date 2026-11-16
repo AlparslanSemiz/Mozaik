@@ -6,7 +6,12 @@
 
 import { dayLabel } from '../../leaf/lang';
 import type { Settings } from '../../leaf/model';
-import { attachGridChrome, attachGridFit, attachGridKeys } from '../../platform/dom';
+import {
+  attachGridChrome,
+  attachGridFit,
+  attachGridKeys,
+  startLongPress,
+} from '../../platform/dom';
 import { dayPeriods } from '../../pure/entities';
 import type { GridRow, MaskMode, MenuTarget } from '../../pure/program';
 import { useT } from '../common';
@@ -159,7 +164,7 @@ function GridInner({
   return (
     <div className="grid-wrap" ref={wrapRef}>
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
-        <ContextMenu.Trigger asChild onContextMenu={openMenu}>
+        <ContextMenu.Trigger asChild onContextMenu={openMenu} onPointerDown={startLongPress}>
           {/* role=grid: the arrows belong to the table (platform/dom/gridKeys.ts),
               and a screen reader in browse mode would otherwise keep them. */}
           <table className="grid" role="grid" style={columns}>

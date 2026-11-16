@@ -38,6 +38,7 @@ import {
   maxDockHeight,
   attachScrollFade,
   attachRoving,
+  startLongPress,
 } from '../../platform/dom';
 import type { PoolCard } from '../../pure/program';
 import { useT } from '../common';
@@ -455,7 +456,7 @@ function LessonPool({
       </div>
 
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
-        <ContextMenu.Trigger asChild onContextMenu={openMenu}>
+        <ContextMenu.Trigger asChild onContextMenu={openMenu} onPointerDown={startLongPress}>
           {/* One Tab stop for the whole tray: the cards inside are a roving
               group (arrows move, Enter picks up), so the list itself takes no
               extra stop (axe `scrollable-region-focusable` is met by the cards). */}

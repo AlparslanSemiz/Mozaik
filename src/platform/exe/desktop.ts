@@ -25,7 +25,7 @@ type Invoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
 /** The same `invoke`, with a raw body: Tauri passes a Uint8Array through as bytes. */
 type RawInvoke = <T>(cmd: string, body: Uint8Array) => Promise<T>;
 
-type Listen = (event: string, handler: () => void) => Promise<() => void>;
+type Listen = <P>(event: string, handler: (e: { payload: P }) => void) => Promise<() => void>;
 
 declare global {
   interface Window {
@@ -206,6 +206,28 @@ function bridge(): Invoke {
 /** Asks the release manifest what the newest version is. */
 export function desktopCheck(current: string): Promise<UpdateCevap> {
   return bridge()<UpdateCevap>('check_update', { current });
+}
+
+/**
+ * The download's progress (update.rs, `INDIRME_OLAYI`): bytes in hand and the
+ * whole, once per percent. Outside the exe, or in a bridge without events,
+ * nothing. Returns the unsubscribe.
+ */
+export function onDesktopDownload(haber: (inen: number, toplam: number) => void): () => void {
+  const listen = window.__TAURI__?.event?.listen;
+  if (!listen) return () => undefined;
+  let off: (() => void) | undefined;
+  let gone = false;
+  void listen<[number, number]>('guncelleme-indirme', (e) => {
+    if (!gone) haber(e.payload[0], e.payload[1]);
+  }).then((unlisten) => {
+    if (gone) unlisten();
+    else off = unlisten;
+  });
+  return () => {
+    gone = true;
+    off?.();
+  };
 }
 
 /** Downloads it NEXT TO the running program and stops there. */
