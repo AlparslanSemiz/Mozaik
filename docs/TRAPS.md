@@ -286,9 +286,9 @@ kaydını silerdi ve klasörler git'e görünmez olurdu; birinde işlenmemiş de
 `scripts/linux-kur.sh` ana klasörü `$HOME/GitHub/Mozaik` diye sabit yazıyordu ve "yok"
 deyip çıkacaktı. Karşı önlem: klasör taşınınca önce ana klasörden
 `git worktree repair <yeni yollar>`, sonra `git worktree list`'te "prunable" kalmadığına
-bakılır, `prune` koşulmaz; sabit yol `git grep 'GitHub/Mozaik'` ile aranır.
-`src/linuxKur.test.ts` betiği sahte bir evde yeni yolla koşuyor, betiği eski yola döndüren
-mutasyon kırmızı.
+bakılır, `prune` koşulmaz. 2026-11-16'dan beri `linux-kur.sh` sabit bir yol tutmuyor,
+kendi durduğu depodan (`$0`) derliyor; `src/linuxKur.test.ts` betiği sahte deponun içine
+kopyalayıp oradan koşuyor, depo başka bir yerdeyken de.
 
 ### 154 · `git worktree remove` yoksayılan dosyaları sormadan siler
 `--force` olmadan da: komut yalnız izlenen değişiklik ve izlenmeyen dosya varsa durur,
@@ -296,7 +296,7 @@ mutasyon kırmızı.
 ölçüm betikleri, raporlar ve bir işin bütün ara çıktısı (2026-10-24'te bir worktree'de 132 MB).
 Karşı önlem: `npm run dal-temizle` bir worktree'yi kaldırmadan önce yoksayılan her yolu,
 yeniden üretilen önbellekler (`node_modules`, `dist*`, `src-tauri/target`, `test-results`...)
-dışında, `~/GitHub/Mozaikler/_arsiv/<dal>/`'a taşır, sonra `git worktree remove`'u
+dışında, `~/dev/Mozaik-arsiv/<dal>/`'a taşır, sonra `git worktree remove`'u
 `--force`'suz verir. Elle kaldırırken de önce `git ls-files --others --ignored
 --exclude-standard --directory`'ye bakılır. `src/dalPlan.test.ts` `scratch/`'in önbellek
 sayılmadığını ölçüyor.

@@ -71,7 +71,7 @@ npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, ye�
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
 npm run dal-temizle        # biten dal ve worktree'lerin planı, hiçbir şey değiştirmeden
 npm run dal-temizle -- --uygula  # planı uygular: önce bundle ve arsiv/ etiketi, sonra siler
-scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaikler/Mozaik'in main'inden kurar ya da günceller
+scripts/linux-kur.sh       # Linux: kendi checkout'unun (~/dev/Mozaik) main'inden kurar ya da günceller
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
@@ -457,7 +457,7 @@ Google Chrome'un app modu ([TODO.md](TODO.md) B7.28). Beşinci bir derleme deği
 açılan dosya babanın çift tıkladığı dosyanın kendisi, ve dört yoldan hiçbiri
 değişmedi.
 
-`scripts/linux-kur.sh` yalnız `~/GitHub/Mozaikler/Mozaik`'ten derler, ve o klasör `main`'de değilse,
+`scripts/linux-kur.sh` yalnız kendi durduğu checkout'tan derler (bu makinede `~/dev/Mozaik`), ve o klasör `main`'de değilse,
 `git status`'u temiz değilse ya da bir worktree ise reddeder: bir worktree'nin `dist/`'i
 o oturumun dalıdır. Derlenen dosyayı `~/.local/share/mozaik/app/` altına kopyalar (bağ
 değil), yanına hangi commit'ten kurulduğunu (`~/.local/share/mozaik/app/kaynak.txt`) ve başlatıcıyı yazar, ve
