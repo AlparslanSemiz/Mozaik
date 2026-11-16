@@ -109,14 +109,18 @@ katlı haftalık tablo açılmadıkça çizilmiyor, aktarma listesinin öğretme
 (onsuz sonrakiler 74–100 ms). İlk açılışın 100 ms'yi aşması yüklü makinede; temiz koşulda
 yeniden ölçülmeli.
 
-**Boyut.** `dist/index.html` 1 190 100 → BOYUT_HAM bayt, brotli 304 460 → BOYUT_BR (sınırlar 1 200 000 ve 306 000;
-eşik yükseltilmedi).
+**Boyut** (`origin/main` ile birleştikten sonra, aynı makinede): `main` 1 192 510 bayt, brotli 305 071;
+bu dal 1 192 400 (−110), brotli 305 886 (+815). Sınırlar 1 200 000 ve 306 000, eşiğe 114 B kaldı;
+eşik yükseltilmedi. Brotli'yi eşiğin altına indirmek için sayfanın dört yeni cümlesi programın var
+olan cümleleriyle değiştirildi.
 
 **Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `depcruise`, `knip`,
 `npm run hizli` (73 dosya yeşil), `vite build`, `npm run boyut`. Bütün E2E süiti `--workers=2`:
 ilk koşu 777 testin 702'si yeşil, 75'i eski satır kutularını süren testlerdi; hepsi kişi sayfasına
 çevrildi ve o 17 dosya yeniden koşuldu (487 test, kalan beşi düzeltildi ve tek başına yeşil).
-`kayma.spec.ts` 129 aşama 1'den bilinen macOS kaydırma çubuğu durumu (aşağıda). Yeni
+`kayma.spec.ts` 129 aşama 1'den bilinen macOS kaydırma çubuğu durumu (aşağıda). `main` ile birleştikten sonra bütün süit `--workers=2`: 791 testin 790'ı yeşil, kalan
+`kayma.spec.ts` 129 (aynı macOS durumu). Açılış ölçümü birleşmeden sonra yeniden: makine çok yüklü
+(yük ortalaması 20–27), ilk açılış 200–245 ms, sonrakiler 31–116 ms; kirli, temiz koşulda ölçülmeli. Yeni
 `kisi.spec.ts` (10 test), `erisim.spec.ts` kişi sayfalarını da tarıyor. `scripts/agir.sh` bu
 makinede çalışmadı (`flock` yok), Playwright doğrudan koşuldu. Tıklama testi 1920×1080 ve
 1366×768'de, babanın verisiyle (ekran görüntüleri oturumun scratch klasöründe, `a2/shots/`).
