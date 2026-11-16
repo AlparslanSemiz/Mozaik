@@ -476,6 +476,23 @@ describe('şema örnekleri — öğretmenin e-postası (v17)', () => {
   });
 });
 
+describe('şema örnekleri — öğretmenin telefonu (v18)', () => {
+  it.each(VERSIONS)('v%i dosyasının numaraları doğru geliyor', (version) => {
+    const phones = parse(version).teachers.map((t) => t.phone);
+    // v18 brought them. A file below it has none, and '' is what none means.
+    expect(phones).toEqual(version >= 18 ? ['0555 000 00 01', ''] : ['', '']);
+  });
+
+  it('numarada yalnız rakam, boşluk ve + ( ) - . kalıyor, metin olmayan numara boş', () => {
+    const state = edited<{ teachers: Array<Record<string, unknown>> }>(SCHEMA_VERSION, (raw) => {
+      raw.teachers[0]!['phone'] = ' +90 (555) 000-00.01\r\n<b>x</b> ';
+      raw.teachers[1]!['phone'] = 5550000001;
+    });
+    expect(state).not.toBeNull();
+    expect(state!.teachers.map((t) => t.phone)).toEqual(['+90 (555) 000-00.01', '']);
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**

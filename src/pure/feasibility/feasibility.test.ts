@@ -49,6 +49,7 @@ function build(): State {
         subject: 'Matematik',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -173,6 +174,7 @@ describe('buildReport — derslik darboğazı', () => {
       color: 1,
       limits: { ...NO_TEACHER_LIMITS },
       email: '',
+      phone: '',
     });
     d.lessons.push({
       id: 'x2',

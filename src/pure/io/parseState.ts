@@ -32,6 +32,7 @@ import {
   type Teacher,
   SCHEMA_VERSION,
   cleanEmail,
+  cleanPhone,
 } from '../../leaf/model';
 import { sanitize } from '../constraints';
 import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../entities';
@@ -285,7 +286,7 @@ function migrateV2toV3(raw: LegacyV2): State {
       ),
     },
     rooms: asArray<Room>(raw.rooms, []),
-    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2' | 'email'>>(
+    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2' | 'email' | 'phone'>>(
       raw.teachers,
       [],
     ).map((x) => ({
@@ -296,6 +297,7 @@ function migrateV2toV3(raw: LegacyV2): State {
       gender: '',
       subject2: '',
       email: '',
+      phone: '',
       limits: { ...NO_TEACHER_LIMITS },
     })),
     // The same two readers the v3+ path runs over this list. A bare `asArray`
@@ -436,6 +438,7 @@ export function parseState(text: string): State | null {
     version === 14 ||
     version === 15 ||
     version === 16 ||
+    version === 17 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -516,6 +519,8 @@ export function parseState(text: string): State | null {
           subject2: asText(t.subject2, ''),
           // v17. Below it there is no address, and '' is what none means.
           email: cleanEmail(t.email),
+          // v18, the same way: below it there is no number.
+          phone: cleanPhone(t.phone),
           limits: {
             maxConsecutive: asBox(t.limits?.maxConsecutive),
             maxPerDay: asBox(t.limits?.maxPerDay),

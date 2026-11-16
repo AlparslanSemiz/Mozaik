@@ -32,15 +32,15 @@ import { join } from 'node:path';
 const OUT = join(import.meta.dirname, '..', 'src', 'fixtures');
 
 /**
- * A small school in TODAY's shape (v15). Small on purpose: a fixture is read
+ * A small school in TODAY's shape (v18). Small on purpose: a fixture is read
  * by a person when a migration breaks. It still carries the awkward parts,
  * because those are where a migration goes wrong: a second subject, a lesson
  * taught under it, a two-hour block, a three-hour block, a lesson with no
  * block at all, a pinned cell, a closed hour, and a laid-out timetable.
  */
-function v17() {
+function v18() {
   return {
-    schemaVersion: 17,
+    schemaVersion: 18,
     settings: {
       schoolName: 'Birey Kurs',
       // NOT A SINGLE VALUE HERE IS THE PROGRAM'S DEFAULT, and that is the
@@ -89,6 +89,9 @@ function v17() {
         // v17: one teacher with an address (a reserved example domain, never a
         // real inbox) and one without, because '' is the usual answer.
         email: 'mehmet.celik@example.com',
+        // v18: a number in the shape it is typed in, a reserved-looking one
+        // (555 is not handed out to subscribers), and none for the other.
+        phone: '0555 000 00 01',
       },
       {
         id: 'tAV',
@@ -100,6 +103,7 @@ function v17() {
         color: 7,
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
         email: '',
+        phone: '',
       },
     ],
     classes: [
@@ -187,9 +191,14 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v17 with fourteen steps undone.
+ * key. The chain is applied in order, so v3 is v18 with fifteen steps undone.
  */
 const DOWN = {
+  17: (raw) => {
+    // v18 brought the teacher's phone. Below it a teacher has none.
+    raw.schemaVersion = 17;
+    for (const t of raw.teachers) delete t.phone;
+  },
   16: (raw) => {
     // v17 brought the teacher's address. Below it a teacher has none.
     raw.schemaVersion = 16;
@@ -319,13 +328,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v17();
-writeFileSync(join(OUT, 'v17.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v18();
+writeFileSync(join(OUT, 'v18.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`17 örnek dosya yazıldı: ${OUT}`);
+console.log(`18 örnek dosya yazıldı: ${OUT}`);

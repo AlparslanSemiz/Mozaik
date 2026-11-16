@@ -68,6 +68,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `leaf/model/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
 | `leaf/model/email.ts` | öğretmenin e-posta adresi (şema v17): saklanan adresin temizliği (`cleanEmail`), tek adrese benzerlik (`looksLikeEmail`) ve `mailto:` bağlantısı (`mailtoUrl`) |
+| `leaf/model/phone.ts` | öğretmenin telefonu (şema v18): saklanan numaranın temizliği (`cleanPhone`), WhatsApp'ın okuduğu biçim (`whatsappNumber`) ve `wa.me` bağlantısı (`whatsappUrl`) |
 | `leaf/model/keys.ts` | sözlük anahtarları, motorun dosyaları ile `rules.ts` birbirini import etmesin diye |
 | `leaf/model/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
 | `leaf/i18n/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi, ve derlenmiş dosyanın paketli sözlüğünü ilk istenişte açan `sozlukOf`. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |

@@ -94,10 +94,10 @@ describe('şema sürümü düz metne karşı, ve bir artış göç ister', () =>
   const fixture = (version: number) =>
     readFileSync(join(import.meta.dirname, '../../fixtures', `v${version}.json`), 'utf8');
 
-  it('bugünkü sürüm 17', () => {
+  it('bugünkü sürüm 18', () => {
     // A bump changes this literal in the same commit as the migration, the
-    // accepted-version list in parseState.ts, and a new `src/fixtures/v18.json`.
-    expect(SCHEMA_VERSION).toBe(17);
+    // accepted-version list in parseState.ts, and a new `src/fixtures/v19.json`.
+    expect(SCHEMA_VERSION).toBe(18);
   });
 
   it('bugünkü sürümün ve bir öncekinin dosyası açılıyor', () => {

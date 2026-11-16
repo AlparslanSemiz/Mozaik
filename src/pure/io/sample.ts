@@ -147,6 +147,7 @@ export function sampleState(): State {
     // Nobody in the sample has an address: it is personal data, and a made-up
     // one would be a real stranger's inbox the first time somebody pressed Send.
     email: '',
+    phone: '',
     color: i % PALETTE_SIZE,
     // Every third teacher gets a personal limit so the rule engine is actually
     // exercised by the sample data, not only by the tests.

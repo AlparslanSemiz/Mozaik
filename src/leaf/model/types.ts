@@ -59,6 +59,12 @@ export interface Teacher {
    * mail program opens.
    */
   email: string;
+  /**
+   * The teacher's phone, for WhatsApp (schema v18), or '' for none. Personal
+   * data, carried exactly as `email` is; it only fills a `wa.me` link the
+   * user clicks (`whatsappUrl`).
+   */
+  phone: string;
 }
 
 export interface TeacherLimits {
@@ -345,5 +351,6 @@ export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
  *      it has none.
  * v17: Teacher.email — where the teacher's week is sent. A file below it has
  *      none, and '' is what none means.
+ * v18: Teacher.phone — the number WhatsApp opens. A file below it has none.
  */
-export const SCHEMA_VERSION = 17;
+export const SCHEMA_VERSION = 18;
