@@ -36,6 +36,23 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Denetim turu: tek adlar (`denetim/metin`)
+
+Babanın gözüyle yapılan arayüz denetimi, aynı şeye ekranda iki ad verilen yerleri
+buldu (SD3: her kavrama ekranda tek ad). Karar: ekranda yalnız saat sayılır, havuzun
+başı, sonuç satırı ve Kontrol'ün özeti "ders" saymaz. Kapalı saat her yerde `Kapalı
+saatler` ve `Açık saat`; "müsait" ve "gelemediği saatler" ekrandan kalktı. Kural
+sınırını aşan şey `aşım` (ihlal değil), seviyesi `Yok`/`Tercih`/`Kesin`. Araç şeridi
+`Düğme satırı`, şeridin grup etiketi `Göster`, hareket `Ekran hareketleri`.
+Toplu seçim `Hepsini seç`/`Hiçbirini seçme`, "tüm/tümü" yerine `Bütün`. Kişi
+sayfasında `Bugün yok…` (bir günlük yokluk), listede `Kapalı gün` (haftalık kapalı
+gün). Gerekçe: ikinci bir ad, babaya ikinci bir şey öğretmek demek. Başlarken'in üç
+gizleme düğmesi (`Listeyi daralt`, `Listeyi kapat`, `Bir daha gösterme`) tek düğmeye
+indirilmedi: biri kayıtlı bir tercihin (`ders-programi-ilk-adimlar`) kendisi, biri
+başka bir anahtar, davranış değişikliği olurdu.
+
+---
+
 ### 2026-11-16 · Eyotek kalktı
 
 **Ne.** Eyotek'e gönderme ve Eyotek turu yapılmayacak: baba artık Eyotek kullanmıyor (Alp).

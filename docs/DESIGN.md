@@ -285,7 +285,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.inspect` | bir adı kişi sayfasına bağlayan bağlantı (ızgaranın satır başı) |
 | `.person-open` `table.person-list` `.person-status` `.btn.add-row` | Öğretmenler ve Sınıflar listesi: kutusuz satırlar, kalın tam ad bir bağlantı gibi okunur, durum küçük ve `--muted` (sığmayan hafta `--bad`), listenin sonundaki ekleme satırı kesik kenarlı, tablonun eni kadar bir düğme |
 
-### Listeler · Dersler · Gelemediği saatler · Yazdır ve gönder
+### Listeler · Dersler · Kapalı saatler · Yazdır ve gönder
 | Sınıf | İş |
 |---|---|
 | `.step` `.step-count` `.step-icon` | şeritlerdeki liste düğmeleri, sayısıyla (Liste, Derslikler, Branşlar) |
