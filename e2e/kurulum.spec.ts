@@ -33,13 +33,17 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.getByText('2 satır okundu.')).toBeVisible();
 
     await page.getByRole('button', { name: /2 satırı ekle/ }).click();
-    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('2');
+    // The count is on the strip's "Liste" since K1 (2026-11-16).
+    await expect(page.locator('.ribbon .step', { hasText: 'Liste' })).toContainText('2');
   });
 
-  test('Kurulum adımlar hâlinde: sayaçlar doğru, geçiş serbest', async ({ page }) => {
+  // Since K1 (2026-11-16) the four lists are in three places, each counted
+  // where it is chosen: Derslikler and Branşlar in Okul bilgileri's strip,
+  // teachers and classes on their tab's "Liste".
+  test('listeler sayılı ve her biri bir tıkla açılıyor', async ({ page }) => {
     await open(page);
-    // An empty step is dimmed — that is the whole point of the counter
-    await expect(page.locator('.step', { hasText: 'Derslikler' })).toHaveAttribute(
+    // An empty list is dimmed — that is the whole point of the counter
+    await expect(page.locator('.ribbon .step', { hasText: 'Derslikler' })).toHaveAttribute(
       'data-empty',
       'true',
     );
@@ -47,26 +51,15 @@ test.describe('5. Kurulum ve yedek', () => {
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
 
-    await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
-    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
-    await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
-
-    // FOUR steps: Dersler left for a tab of its own, and Branşlar came IN from
-    // Ayarlar — the list a teacher picks from belongs beside the teacher.
-    await expect(page.locator('.ribbon .step')).toHaveCount(4);
-    await expect(page.getByRole('heading', { name: 'Zil ve günler' })).toHaveCount(0);
-
-    // Only the current step is on screen; the 1132-line scroll is gone
+    await openSetup(page, 'Derslikler');
+    await expect(page.locator('.ribbon .step', { hasText: 'Derslikler' })).toContainText('8');
     await expect(page.getByRole('heading', { name: /^Derslikler/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toHaveCount(0);
-
     await openSetup(page, 'Öğretmenler');
+    await expect(page.locator('.ribbon .step', { hasText: 'Liste' })).toContainText('25');
     await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /^Derslikler/ })).toHaveCount(0);
-
-    // Not a locked wizard: jumping straight to the last step works.
     await openSetup(page, 'Sınıflar');
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
+    await expect(page.locator('.ribbon .step', { hasText: 'Liste' })).toContainText('20');
 
     // The strip is the ONLY way between steps now. "Kurulum durumu" used to be
     // a second one, and it repeated the four counters three pixels below the

@@ -350,10 +350,10 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
   // sheet scrolling sideways.
   async function box(page: Page) {
     return page.evaluate(() => {
-      const main = document.querySelector('.main') as HTMLElement;
+      const doc = document.scrollingElement as HTMLElement;
       const sheet = document.querySelector('.sheet.problem-list') as HTMLElement;
       return {
-        vertical: main.scrollHeight - main.clientHeight,
+        vertical: doc.scrollHeight - doc.clientHeight,
         horizontal: Math.max(
           document.body.scrollWidth - document.body.clientWidth,
           sheet.scrollWidth - sheet.clientWidth,

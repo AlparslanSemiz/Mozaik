@@ -156,7 +156,14 @@ export default function ProblemList({ state, status, open, onClose, ui }: Props)
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
-            (e.currentTarget as HTMLElement | null)?.focus();
+            // Into the list, or onto the lesson a pool card asked about (its
+            // row is drawn by now; the Report marks it).
+            const box = e.currentTarget as HTMLElement | null;
+            const chip =
+              open?.lesson == null
+                ? null
+                : box?.querySelector<HTMLElement>(`[data-lesson="${CSS.escape(open.lesson)}"]`);
+            (chip ?? box)?.focus();
           }}
           onCloseAutoFocus={(e) => {
             if (leaving.current) {
@@ -273,7 +280,6 @@ function Report({
     if (lesson === null) return;
     const chip = body.current?.querySelector<HTMLElement>(`[data-lesson="${CSS.escape(lesson)}"]`);
     if (chip === null || chip === undefined) return;
-    chip.focus();
     chip.scrollIntoView({ block: 'center' });
     chip.setAttribute('data-reveal', '');
   }, [lesson]);
