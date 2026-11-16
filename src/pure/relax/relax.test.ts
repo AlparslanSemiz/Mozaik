@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   applyRelaxations,
   applySuggestion,
@@ -19,6 +19,13 @@ import { parseKey } from '../../leaf/model/keys';
 import { WORLDS, closeHours, closeWeek, illegalBlocks, makeWorld } from '../worlds';
 import { forbids } from '../entities';
 import type { State } from '../../leaf/model/types';
+
+// Every case here runs the solver to a stuck week and then the suggestion
+// search, a SAT search with no clock in it (the budget is 600 s and never
+// reached). "Aynı girdi aynı öneriyi veriyor" runs it twice: 1.2 s on a quiet
+// run, over Vitest's 5 s on 2026-11-16 with other sessions on the same cores.
+// The limit only measured the machine (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
 
 // TODO B5.9: when a week cannot be built, what would have to change. The rules
 // every suggestion keeps, whatever the data:
