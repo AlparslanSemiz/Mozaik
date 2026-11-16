@@ -24,7 +24,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'minPerDay',
     label: 'Öğretmen günde en az',
-    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız Kontrol sekmesinde uyarır.',
+    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız sorun listesinde uyarır.',
     canBlock: false,
   },
   {
@@ -42,7 +42,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'maxGapsClass',
     label: 'Sınıfın dersleri arasında en fazla boşluk',
-    hint: 'Aynısı sınıf için. Yalnız Kontrol sekmesinde uyarır.',
+    hint: 'Aynısı sınıf için. Yalnız sorun listesinde uyarır.',
     canBlock: false,
   },
 ];

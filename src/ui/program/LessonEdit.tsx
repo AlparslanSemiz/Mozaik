@@ -336,7 +336,7 @@ function LessonSheet({
               </dl>
 
               <p className="hint">
-                <T k="**Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir." />
+                <T k="**Sınıflar → Dersler**’de ders silinebilir, yeni ders eklenebilir." />
               </p>
             </>
           ) : (

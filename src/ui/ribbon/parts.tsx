@@ -11,7 +11,7 @@
 import type React from 'react';
 import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
-import type { Density, ProgramColorMode, Theme, ToolState } from '../../platform/prefs';
+import type { Density, ProgramColorMode, ToolState } from '../../platform/prefs';
 import type { ProgramMask, StripCounts } from '../../pure/program';
 import type { health } from '../../pure/feasibility';
 import { type useDialogs, type useToast, useT } from '../common';
@@ -24,24 +24,16 @@ export interface RibbonProps {
   state: State;
   /** Only the strip's own destructive action needs it: "Programı boşalt". */
   change: (fn: (d: State) => State, label?: string) => void;
-  /** The seçenek list: switch, add, rename, delete. Each is a step of the
-      history since 2026-11-15; `label` names it for the undo's announcement. */
+  /** An old file's second program, deleted: a step of the history since
+      2026-11-15; `label` names it for the undo's announcement. */
   manageProgram: (fn: (d: State) => State, label?: string) => void;
-  /** Another seçenek on screen: not a step of the history (undo.ts, `view`). */
-  viewProgram: (fn: (d: State) => State) => void;
+  /** "Bu programın kopyası": a new plan holding this one (K2). */
+  copyPlan: () => void;
   solver: SolverRun;
   programMask: ProgramMask;
   setProgramMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
   density: Density;
   setDensity: (next: Density) => void;
-  /** Müsaitlik's hour labels. A MACHINE preference, so App still owns it —
-      only the control moved here, out of Ayarlar → Görünüm. */
-  availClock: boolean;
-  setAvailClock: (next: boolean) => void;
-  /** Ayarlar → Görünüm's strip carries the theme; the top bar's button stays.
-      Same state, two doors — that one is the shortcut, this is the section. */
-  theme: Theme;
-  setTheme: (next: Theme) => void;
   programColor: ProgramColorMode;
   setProgramColor: (next: ProgramColorMode) => void;
   changelogUnseen: boolean;
@@ -86,7 +78,7 @@ export function Spacer() {
  *
  *   * direct, because `e2e/serit.spec.ts` reads `bar.firstElementChild` to
  *     check that every strip opens with a caption, and because the first
- *     caption on each of the seven strips is padded to one width so the first
+ *     caption on each strip is padded to one width so the first
  *     BUTTON lands at the same x wherever you are;
  *   * boxed, because buttons that belong to one question should be the same
  *     width, and CSS has no way to say that without a box (`.ribbon-group` is

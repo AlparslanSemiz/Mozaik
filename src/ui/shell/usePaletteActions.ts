@@ -5,8 +5,9 @@
 // "yazı boyu", "programı yap". Each action carries the words somebody would
 // type for it (`extra`), because he types what he wants done, not the name
 // of the screen it is on. An action either does the thing (Kaydet, Programı
-// yap) or opens the one place it is done (tema → Ayarlar → Görünüm: the theme
-// is in exactly one place).
+// yap) or opens the one place it is done (tema → Okul bilgileri → Görünüm:
+// the theme is in exactly one place). The places are named the way the tabs
+// and the strips name them, joined by an arrow.
 
 import { useMemo } from 'react';
 import type { State } from '../../leaf/model';
@@ -56,8 +57,10 @@ export function usePaletteActions({
   toggleRibbon,
   toggleMotion,
 }: PaletteInputs): PaletteAction[] {
-  return useMemo(
-    () => [
+  return useMemo(() => {
+    const school = t('Okul bilgileri');
+    const look = `${school} → ${t('Görünüm')}`;
+    return [
       {
         id: 'auto',
         label: t('Programı yap'),
@@ -74,7 +77,7 @@ export function usePaletteActions({
       {
         id: 'print',
         label: t('Yazdır'),
-        hint: t('Çıktı'),
+        hint: t('Yazdır ve gönder'),
         extra: 'çıktı kâğıt baskı yazıcı pdf e-posta gönder',
         run: () => goTo({ tab: 'print' }),
       },
@@ -102,46 +105,63 @@ export function usePaletteActions({
         run: copyForNewTerm,
       },
       {
+        // The Kontrol tab's words too: that is what a reader of an older
+        // version types for this (K3).
+        id: 'problems',
+        label: t('Programın durumu'),
+        extra: 'kontrol sorun sorunlar ipuçları yerleşmedi neden yük',
+        run: () => goTo({ tab: 'program', problems: true }),
+      },
+      {
         id: 'backup',
         label: t('Planlar ve yedek'),
-        hint: t('Ayarlar'),
-        extra: 'yedek klasör plan otomatik yedekler tümünü',
-        run: () => goTo({ tab: 'settings', section: 'plans' }),
+        hint: school,
+        extra: 'yedek klasör plan otomatik yedekler tümünü ayarlar',
+        run: () => goTo({ tab: 'school', section: 'plans' }),
       },
       {
         id: 'school',
         label: t('Okul adını ve zili gir'),
-        hint: t('Ayarlar'),
-        extra: 'okul adı zil günler saat teneffüs öğle',
-        run: () => goTo({ tab: 'settings', section: 'school' }),
+        hint: school,
+        extra: 'okul adı zil günler saat teneffüs öğle ayarlar',
+        run: () => goTo({ tab: 'school', section: 'school' }),
       },
       {
         id: 'rules',
         label: t('Kurallar'),
-        hint: t('Ayarlar'),
-        extra: 'günde en fazla art arda boşluk sınır',
-        run: () => goTo({ tab: 'settings', section: 'rules' }),
+        hint: school,
+        extra: 'günde en fazla art arda boşluk sınır ayarlar',
+        run: () => goTo({ tab: 'school', section: 'rules' }),
       },
       {
+        // Müsaitlik is the person's page since K1: the list is one click
+        // from it.
         id: 'closed',
         label: t('Kapalı saat işaretle'),
-        hint: t('Müsaitlik'),
-        extra: 'gelemediği saatler müsait değil kapalı izin',
-        run: () => goTo({ tab: 'availability' }),
+        hint: t('Öğretmenler'),
+        extra: 'gelemediği saatler müsait değil kapalı izin müsaitlik',
+        run: () => goTo({ tab: 'teachers', people: 'list' }),
+      },
+      {
+        id: 'lessons',
+        label: t('Ders gir'),
+        hint: t('Sınıflar'),
+        extra: 'dersler ders ekle haftalık saat dağılım',
+        run: () => goTo({ tab: 'classes', people: 'lessons' }),
       },
       {
         id: 'theme',
         label: t('Tema'),
-        hint: t('Ayarlar → Görünüm'),
+        hint: look,
         extra: 'koyu açık karanlık gece',
-        run: () => goTo({ tab: 'settings', section: 'appearance' }),
+        run: () => goTo({ tab: 'school', section: 'appearance' }),
       },
       {
         id: 'scale',
         label: t('Yazı büyüklüğü'),
-        hint: t('Ayarlar → Görünüm'),
+        hint: look,
         extra: 'yazı boyu büyüt küçült ölçek',
-        run: () => goTo({ tab: 'settings', section: 'appearance' }),
+        run: () => goTo({ tab: 'school', section: 'appearance' }),
       },
       {
         id: 'ribbon',
@@ -151,7 +171,7 @@ export function usePaletteActions({
       {
         id: 'motion',
         label: motion === 'kapali' ? t('Animasyonları aç') : t('Animasyonları kapat'),
-        hint: t('Ayarlar → Görünüm'),
+        hint: look,
         run: toggleMotion,
       },
       {
@@ -160,21 +180,20 @@ export function usePaletteActions({
         hint: '?',
         run: openShortcuts,
       },
-    ],
-    [
-      state,
-      ribbon,
-      motion,
-      solver,
-      goTo,
-      notify,
-      t,
-      programMask,
-      openShortcuts,
-      openFile,
-      copyForNewTerm,
-      toggleRibbon,
-      toggleMotion,
-    ],
-  );
+    ];
+  }, [
+    state,
+    ribbon,
+    motion,
+    solver,
+    goTo,
+    notify,
+    t,
+    programMask,
+    openShortcuts,
+    openFile,
+    copyForNewTerm,
+    toggleRibbon,
+    toggleMotion,
+  ]);
 }

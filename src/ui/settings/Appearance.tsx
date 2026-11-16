@@ -184,7 +184,7 @@ export default function Appearance({
               )}
             </p>
             <p>
-              <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde." />
+              <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Yazdır ve gönder** sekmesinde." />
             </p>
           </HelpHead>
           {segmented(

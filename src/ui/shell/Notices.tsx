@@ -75,7 +75,7 @@ export default function Notices({
   const quiet = move.live || (update.ready && !updateHidden) || saveTrouble !== null || !canSave;
   const [kurulumGizli, setKurulumGizli] = useState(false);
   const guncellemeyeBak = () => {
-    goTab('settings');
+    goTab('school');
     ui.setSection('about');
   };
   return (
@@ -181,7 +181,7 @@ export default function Notices({
               <button
                 className="btn"
                 onClick={() => {
-                  goTab('settings');
+                  goTab('school');
                   ui.setSection('about');
                 }}
               >
@@ -317,7 +317,7 @@ export default function Notices({
         <div className="save-warning" role="alert">
           ⚠{' '}
           <T
-            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Ayarlar → Hakkında'dan tekrar deneyebilirsiniz."
+            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Okul bilgileri → Hakkında'dan tekrar deneyebilirsiniz."
             vars={{ kod: update.kurulum.olmadi }}
           />{' '}
           <button className="btn" onClick={guncellemeyeBak}>
@@ -395,7 +395,7 @@ export default function Notices({
           <button
             className="btn"
             onClick={() => {
-              goTab('settings');
+              goTab('school');
               ui.setSection('plans');
             }}
           >

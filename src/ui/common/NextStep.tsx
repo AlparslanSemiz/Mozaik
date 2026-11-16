@@ -9,9 +9,11 @@ import { useT } from './T';
 /** The first list a timetable cannot do without, or null when all are there. */
 export function missingStep(d: State): { to: Place; label: string } | null {
   if (d.teachers.length === 0)
-    return { to: { tab: 'setup', step: 'teachers' }, label: 'Öğretmen ekle' };
-  if (d.classes.length === 0) return { to: { tab: 'setup', step: 'classes' }, label: 'Sınıf ekle' };
-  if (d.lessons.length === 0) return { to: { tab: 'lessons' }, label: 'Ders gir' };
+    return { to: { tab: 'teachers', people: 'list' }, label: 'Öğretmen ekle' };
+  if (d.classes.length === 0)
+    return { to: { tab: 'classes', people: 'list' }, label: 'Sınıf ekle' };
+  if (d.lessons.length === 0)
+    return { to: { tab: 'classes', people: 'lessons' }, label: 'Ders gir' };
   return null;
 }
 
@@ -26,9 +28,7 @@ export function NextStep({ state }: { state: State }) {
         </GoButton>
       )}
       {state.settings.schoolName.trim() === '' && (
-        <GoButton to={{ tab: 'settings', section: 'school' }}>
-          {t('Okul adını ve zili gir')}
-        </GoButton>
+        <GoButton to={{ tab: 'school', section: 'school' }}>{t('Okul adını ve zili gir')}</GoButton>
       )}
     </span>
   );

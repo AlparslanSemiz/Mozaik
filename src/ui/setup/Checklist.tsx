@@ -63,21 +63,21 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
   const missing: Array<{ to: Place; action: string }> = [];
   if (name === '') {
     missing.push({
-      to: { tab: 'settings', section: 'school' },
+      to: { tab: 'school', section: 'school' },
       action: t('Okul adını ve zili gir'),
     });
   }
   if (d.rooms.length === 0) {
-    missing.push({ to: { tab: 'setup', step: 'rooms' }, action: t('Derslik ekle') });
+    missing.push({ to: { tab: 'school', section: 'rooms' }, action: t('Derslik ekle') });
   }
   if (d.settings.subjects.length === 0) {
-    missing.push({ to: { tab: 'setup', step: 'subjects' }, action: t('Branş ekle') });
+    missing.push({ to: { tab: 'school', section: 'subjects' }, action: t('Branş ekle') });
   }
   if (d.teachers.length === 0) {
-    missing.push({ to: { tab: 'setup', step: 'teachers' }, action: t('Öğretmen ekle') });
+    missing.push({ to: { tab: 'teachers', people: 'list' }, action: t('Öğretmen ekle') });
   }
   if (d.classes.length === 0) {
-    missing.push({ to: { tab: 'setup', step: 'classes' }, action: t('Sınıf ekle') });
+    missing.push({ to: { tab: 'classes', people: 'list' }, action: t('Sınıf ekle') });
   }
   const lists = t('{d} derslik · {b} branş · {o} öğretmen · {s} sınıf', {
     d: d.rooms.length,
@@ -86,7 +86,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
     s: d.classes.length,
   });
   const school = missing[0] ?? {
-    to: { tab: 'settings', section: 'school' },
+    to: { tab: 'school', section: 'school' },
     action: t('Okul adını ve zili gir'),
   };
 
@@ -107,7 +107,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
       name: t('Dersleri gir'),
       done: d.lessons.length > 0,
       detail: t('{ders} ders · {saat} saat', { ders: d.lessons.length, saat: lessonHours }),
-      to: { tab: 'lessons' },
+      to: { tab: 'classes', people: 'lessons' },
       action: t('Ders gir'),
     },
     {
@@ -120,7 +120,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
         closed > 0
           ? t('{n} kapalı saat', { n: closed })
           : t('Herkes her saat gelebiliyorsa geçin.'),
-      to: { tab: 'availability' },
+      to: { tab: 'teachers', people: 'list' },
       action: t('Kapalı saat işaretle'),
     },
     {
@@ -139,7 +139,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
         ? t('Bu bilgisayarda bir kez yazdırıldı')
         : t('Sınıflara ve öğretmenlere birer sayfa'),
       to: { tab: 'print' },
-      action: t('Çıktıya geç'),
+      action: t('Yazdırmaya geç'),
     },
   ];
 }
@@ -147,7 +147,7 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
 export function Checklist({ state, children }: { state: State; children?: React.ReactNode }) {
   const t = useT();
   // Read once and then owned here: the only writers are the three buttons
-  // below and Çıktı's Yazdır, which is on another tab, so this mounts fresh
+  // below and Yazdır ve gönder's Yazdır, which is on another tab, so this mounts fresh
   // after it.
   const [pref, setPref] = useState<ChecklistPref>(readChecklist);
   useEffect(() => {

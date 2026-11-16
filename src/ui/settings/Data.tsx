@@ -190,7 +190,7 @@ export default function Data({
         <p className={note.bad ? 'hint bad' : 'hint'} role="status">
           {note.text}{' '}
           {note.update === true && (
-            <GoButton to={{ tab: 'settings', section: 'about' }}>{t('Güncellemeye bak')}</GoButton>
+            <GoButton to={{ tab: 'school', section: 'about' }}>{t('Güncellemeye bak')}</GoButton>
           )}
         </p>
       )}

@@ -5,15 +5,12 @@ import {
   Copy,
   Eraser,
   Eye,
-  Library,
   Maximize2,
   Minimize2,
   Palette as PaletteIcon,
-  Pencil,
   Pin,
   PinOff,
   Play,
-  Plus,
   RotateCcw,
   Rows3,
   Shuffle,
@@ -22,21 +19,9 @@ import {
 } from 'lucide-react';
 import { applyDensity, type Density, type ProgramColorMode, type View } from '../../platform/prefs';
 import { setDayMask, setRowMask } from '../../pure/program';
-import {
-  activePlacements,
-  activeProgram,
-  addProgram,
-  blankProgram,
-  keepPinnedOnly,
-  nextProgramName,
-  removeProgram,
-  renameProgram,
-  switchProgram,
-  validProgramName,
-} from '../../pure/grid';
+import { activePlacements, activeProgram, keepPinnedOnly, removeProgram } from '../../pure/grid';
 import { sanitize, togglePinScope } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
-import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
 import { MoreItem, MoreLabel, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
@@ -100,7 +85,6 @@ export function programStrip({
   state,
   change,
   manageProgram,
-  viewProgram,
   solver,
   programMask,
   setProgramMask,
@@ -109,7 +93,7 @@ export function programStrip({
   programColor,
   setProgramColor,
   t,
-  dialogs: { prompt, alert },
+  copyPlan,
   notify,
   undoIf,
   keepBefore,
@@ -129,62 +113,17 @@ export function programStrip({
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
 
-  const askProgramName = async (initial: string, exceptId?: string) => {
-    const name = await prompt({
-      title: t('Seçenek adı'),
-      body: t('Bu planın verilerini kullanan seçenek için bir ad yazın.'),
-      defaultValue: initial,
-      inputLabel: t('Seçenek adı'),
-      confirmLabel: t('Kaydet'),
-    });
-    if (name === null) return null;
-    const clean = validProgramName(state.programs, name, exceptId);
-    if (clean !== null) return clean;
-    await alert({
-      title:
-        name.trim() === '' ? t('Seçenek adı boş olamaz') : t('Bu seçenek adı zaten kullanılıyor'),
-      tone: 'warn',
-    });
-    return null;
-  };
-
-  const copyCurrent = async () => {
-    const name = await askProgramName(nextProgramName(state.programs));
-    if (name === null) return;
-    const source = activeProgram(state);
-    manageProgram((d) =>
-      addProgram(d, {
-        id: newId(),
-        name,
-        placements: { ...source.placements },
-        pinned: { ...source.pinned },
-      }),
-    );
-  };
-
-  const createBlank = async () => {
-    const name = await askProgramName(nextProgramName(state.programs));
-    if (name === null) return;
-    manageProgram((d) => addProgram(d, blankProgram(newId(), name)));
-  };
-
-  const renameCurrent = async () => {
-    const name = await askProgramName(currentProgram.name, currentProgram.id);
-    if (name !== null) manageProgram((d) => renameProgram(d, currentProgram.id, name));
-  };
-
-  // No question since 2026-11-15 (TODO SD1): a seçenek switch no longer
-  // empties the history, so deleting one is an ordinary step that "Geri al"
-  // brings back with every hour in it. The question used to say "0
-  // sabitleme silinecek"; the pins go with the hours and are not counted.
+  // A file from before K2 may hold several programs in one plan. They are
+  // switched in the top bar's plan picker, and the open one can go: no
+  // question (TODO SD1), "Geri al" brings it back with every hour in it.
   const deleteCurrent = () => {
     if (state.programs.length <= 1) return;
     const hours = Object.keys(currentProgram.placements).length;
     const said =
       hours === 0
-        ? t('{ad} seçeneği silindi.', { ad: currentProgram.name })
-        : t('{ad} seçeneği silindi, yerleşmiş {n} saati de gitti.', {
-            ad: currentProgram.name,
+        ? t('{ne} silindi.', { ne: currentProgram.name })
+        : t('{ne} silindi, yerleşmiş {n} saati de kalktı.', {
+            ne: currentProgram.name,
             n: hours,
           });
     const next = sanitize(removeProgram(state, currentProgram.id));
@@ -302,17 +241,6 @@ export function programStrip({
         )}
       </Group>
 
-      {/* Which seçenek is open — said only once there are two. Choosing and
-          managing them is in Daha fazla; phase 3 folds them into plans (K2). */}
-      {state.programs.length > 1 && (
-        <>
-          <Sep />
-          <Group label="Seçenek">
-            <span className="ribbon-value">{currentProgram.name}</span>
-          </Group>
-        </>
-      )}
-
       <Spacer />
 
       {/* EVERYTHING ELSE behind the one door every strip has, at the same
@@ -332,36 +260,16 @@ export function programStrip({
           {t('Başka bir dizilim')}
         </MoreItem>
         <MoreSep />
-        <MoreSub
-          icon={<Library size={15} />}
-          disabled={busy}
-          label={t('Seçenek: {ad}', { ad: currentProgram.name })}
-        >
-          <MoreRadio
-            value={state.activeProgramId}
-            onChange={(id) => viewProgram((d) => switchProgram(d, id))}
-            options={state.programs.map((program) => ({ id: program.id, label: program.name }))}
-          />
-          <MoreSep />
-          <MoreItem icon={<Copy size={15} />} onSelect={() => void copyCurrent()}>
-            {t('Bu seçeneğin kopyası')}
+        {/* A second arrangement is a second PLAN (K2, 2026-11-16): one word
+            for one thing, and the switcher in the top bar appears with it. */}
+        <MoreItem icon={<Copy size={15} />} disabled={busy} onSelect={copyPlan}>
+          {t('Bu programın kopyası')}
+        </MoreItem>
+        {state.programs.length > 1 && (
+          <MoreItem icon={<Trash2 size={15} />} danger disabled={busy} onSelect={deleteCurrent}>
+            {currentProgram.name} · {t('Sil')}
           </MoreItem>
-          <MoreItem icon={<Plus size={15} />} onSelect={() => void createBlank()}>
-            {t('Boş seçenek')}
-          </MoreItem>
-          <MoreItem icon={<Pencil size={15} />} onSelect={() => void renameCurrent()}>
-            {t('Yeniden adlandır')}
-          </MoreItem>
-          <MoreSep />
-          <MoreItem
-            icon={<Trash2 size={15} />}
-            danger
-            disabled={state.programs.length <= 1}
-            onSelect={deleteCurrent}
-          >
-            {t('Seçeneği sil')}
-          </MoreItem>
-        </MoreSub>
+        )}
         <MoreSub icon={<PaletteIcon size={15} />} label={t('Renk')}>
           <MoreRadio
             value={programColor}

@@ -3,7 +3,7 @@
 // two menus read alike. Its facts are `poolMenuFacts` in pure/program.
 
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { Eye, EyeOff, Pencil, Pin, Trash2 } from 'lucide-react';
+import { CircleHelp, Eye, EyeOff, Pencil, Pin, Trash2 } from 'lucide-react';
 import type { Id, Lesson } from '../../leaf/model';
 import type { InspectKind } from '../../pure/entities';
 import type { MaskMode } from '../../pure/program';
@@ -18,6 +18,8 @@ interface Props {
   container: HTMLElement | null;
   editLesson: (lessonId: Id) => void;
   inspect: (kind: InspectKind, id: string) => void;
+  /** Opens the problem list on this lesson (K3). */
+  why: (lessonId: Id) => void;
   setPoolMenuRowMode: (mode: MaskMode | undefined) => void;
 }
 
@@ -29,12 +31,24 @@ export default function PoolMenu({
   container,
   editLesson,
   inspect,
+  why,
   setPoolMenuRowMode,
 }: Props) {
   const t = useT();
   return (
     <ContextMenu.Portal container={container}>
       <ContextMenu.Content className="menu" collisionPadding={8}>
+        {/* FIRST on a card that is not on the grid: why it is not, and what
+            frees a place for it (K3, 2026-11-16). */}
+        <ContextMenu.Item
+          className="menu-item"
+          disabled={poolMenuLesson === undefined}
+          onSelect={() => poolMenuLesson !== undefined && why(poolMenuLesson.id)}
+        >
+          <CircleHelp size={15} strokeWidth={2} aria-hidden="true" />
+          {t('Neden yerleşmedi?')}
+        </ContextMenu.Item>
+        <ContextMenu.Separator className="menu-sep" />
         <ContextMenu.Item className="menu-item" disabled>
           <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
           {t('Havuza kaldır')}

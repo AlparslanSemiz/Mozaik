@@ -95,7 +95,7 @@ export function openPlanFile({
         tone: 'warn',
         body: bundle
           ? t(
-              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
+              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
             )
           : WRONG_FILE.map((k) => t(k)).join(' '),
       });

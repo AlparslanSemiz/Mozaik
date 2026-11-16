@@ -2,7 +2,7 @@ import { Activity, useCallback, useEffect, useRef, useState } from 'react';
 import { useDeferredValue, useMemo } from 'react';
 import Commands from './Commands';
 import { health } from '../../pure/feasibility';
-import { Check, InspectorProvider, LessonEditProvider, Program } from '../program';
+import { InspectorProvider, LessonEditProvider, Program, ProblemList } from '../program';
 import {
   GoToProvider,
   KeepBeforeProvider,
@@ -27,6 +27,7 @@ import {
   useStore,
 } from '../../platform/storage';
 import {
+  lessonModeOf,
   useToolState,
   readPrintOptions,
   writePrintOptions,
@@ -35,9 +36,8 @@ import {
 import { useSolver } from '../../platform/search';
 import { onDesktopClose } from '../../platform/exe';
 import { useUpdate } from '../../platform/update';
-import Setup from '../setup';
+import Setup, { Start } from '../setup';
 import Lessons from '../lessons';
-import { Availability } from '../availability';
 import Ribbon from '../ribbon';
 import { NOTHING_EXCLUDED, Print, type Excluded } from '../print';
 import Settings from '../settings';
@@ -52,11 +52,11 @@ import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
+import { activeProgram, blankProgram, DEFAULT_PROGRAM_ID, switchProgram } from '../../pure/grid';
 import { openChecklist } from '../../platform/prefs';
 import { useMoveIn, useMoveOut } from './useMove';
 import { parseBundle } from '../../pure/io';
-import type { State } from '../../leaf/model';
+import type { Id, State } from '../../leaf/model';
 
 // The shell: the tabs, the top bar, the long-lived state and the keyboard.
 // What each of those is made of lives beside this file (ARCHITECTURE, "React
@@ -92,8 +92,9 @@ export default function App() {
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
   // that shows them is drawn above <main>.
-  // With no data, start on Setup — an empty Program screen tells him nothing.
-  const ui = useToolState(state.lessons.length > 0 ? 'program' : 'setup');
+  // With no data, start on Okul bilgileri, where Başlarken is — an empty
+  // Program screen tells him nothing.
+  const ui = useToolState(state.lessons.length > 0 ? 'program' : 'school');
   const { tab, setTab } = ui;
   const fileInput = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -115,8 +116,6 @@ export default function App() {
     setProgramColor,
     uiDensity,
     setUiDensity,
-    availClock,
-    setAvailClock,
     motion,
     setMotion,
     ribbon,
@@ -125,8 +124,8 @@ export default function App() {
   } = useMachinePrefs();
 
   /**
-   * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
-   * command palette and the status chip.
+   * Every navigation goes through here — the five tab buttons, Alt+1..5 and
+   * the command palette.
    *
    * It used to wrap the change in `document.startViewTransition`, and it was
    * MEASURED and taken back out. A view transition replaces the captured
@@ -145,16 +144,23 @@ export default function App() {
    * reasoning that left `motion` (127 KB) on the shelf: pay for what you use.
    */
   const goTab = setTab;
+  // The status chip's problem list (K3): open, and on which lesson's row.
+  const [problems, setProblems] = useState<{ lesson: Id | null } | null>(null);
   // Where an empty screen's button or a Başlarken step sends the reader: the
-  // tab, and inside it Okul's list or Ayarlar's section (common/GoTo.tsx).
-  const { setStep, setSection } = ui;
+  // tab, and inside it the view, the section or the problem list
+  // (common/GoTo.tsx).
+  const { setSection, setPeople, setLessonFocus } = ui;
   const goTo = useCallback(
     (place: Place) => {
-      if (place.step !== undefined) setStep(place.step);
       if (place.section !== undefined) setSection(place.section);
+      if (place.people !== undefined && (place.tab === 'teachers' || place.tab === 'classes'))
+        setPeople(place.tab, place.people);
+      if (place.focus !== undefined) setLessonFocus(place.focus);
       setTab(place.tab);
+      if (place.problems !== undefined)
+        setProblems({ lesson: place.problems === true ? null : place.problems });
     },
-    [setStep, setSection, setTab],
+    [setSection, setPeople, setLessonFocus, setTab],
   );
 
   useMainScroll(mainRef, appRef, tab, ribbonAuto);
@@ -286,6 +292,20 @@ export default function App() {
     );
   }, [plans, state, notify, t]);
 
+  // Program → Daha fazla → "Bu programın kopyası" (K2): a second arrangement
+  // is a second plan, holding this one's data and week; the plan picker in
+  // the top bar appears with it.
+  const copyPlan = useCallback(() => {
+    const name = plans.library.plans.find((p) => p.id === plans.planId)?.name ?? 'Plan';
+    const program = activeProgram(state);
+    plans.createPlan(t('{ad} kopyası', { ad: name }), {
+      ...state,
+      programs: [program],
+      activeProgramId: program.id,
+    });
+    notify(t('Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.'));
+  }, [plans, state, notify, t]);
+
   const paletteActions = usePaletteActions({
     state,
     ribbon,
@@ -373,7 +393,7 @@ export default function App() {
     confirm,
     alert,
     notify,
-    goUpdate: () => goTo({ tab: 'settings', section: 'about' }),
+    goUpdate: () => goTo({ tab: 'school', section: 'about' }),
     canUndo,
   });
 
@@ -423,13 +443,15 @@ export default function App() {
               fileChosen={fileChosen}
               setPaletteOpen={setPaletteOpen}
               openShortcuts={openShortcuts}
-              openPlans={() => goTo({ tab: 'settings', section: 'plans' })}
-              openAbout={() => goTo({ tab: 'settings', section: 'about' })}
+              openPlans={() => goTo({ tab: 'school', section: 'plans' })}
+              openAbout={() => goTo({ tab: 'school', section: 'about' })}
               openChecklist={() => {
                 openChecklist();
-                goTo({ tab: 'setup' });
+                goTo({ tab: 'school', section: 'school' });
               }}
               copyForNewTerm={copyForNewTerm}
+              openProblems={() => setProblems({ lesson: null })}
+              switchProgram={(id) => viewProgram((d) => switchProgram(d, id))}
               lastFileDay={reminder.savedDay}
             />
 
@@ -441,23 +463,19 @@ export default function App() {
             <section className="ribbon-band" aria-label={t('Araç şeridi')}>
               <Ribbon
                 ui={ui}
-                /* Ayarlar chooses its sections in the strip, and the way to
-                   unfold it is in Ayarlar → Görünüm: folded there, the strip
+                /* Okul bilgileri chooses its sections in the strip, and the
+                   way to unfold it is in its Görünüm: folded there, the strip
                    would hide its own way back. */
-                open={ribbon || tab === 'settings'}
+                open={ribbon || tab === 'school'}
                 state={state}
                 change={change}
                 manageProgram={manageProgram}
-                viewProgram={viewProgram}
+                copyPlan={copyPlan}
                 solver={solver}
                 programMask={programMask}
                 setProgramMask={setProgramMask}
                 density={density}
                 setDensity={setDensity}
-                availClock={availClock}
-                setAvailClock={setAvailClock}
-                theme={theme}
-                setTheme={setTheme}
                 programColor={programColor}
                 setProgramColor={setProgramColor}
                 changelogUnseen={changelogUnseen}
@@ -468,6 +486,13 @@ export default function App() {
 
             <InspectorProvider state={state} change={change} colored={ui.colored}>
               <LessonEditProvider state={state} change={change}>
+                <ProblemList
+                  state={state}
+                  status={status}
+                  open={problems}
+                  onClose={() => setProblems(null)}
+                  ui={ui}
+                />
                 <Commands
                   open={paletteOpen}
                   setOpen={setPaletteOpen}
@@ -523,28 +548,20 @@ export default function App() {
                         : 'main scroll-fade'
                     }
                   >
-                    {tab === 'setup' && (
-                      <Setup state={state} change={change} plans={plans} step={ui.step} />
-                    )}
-                    {tab === 'availability' && (
-                      <Availability
-                        state={state}
-                        change={change}
-                        kind={ui.kind}
-                        chosen={ui.chosen}
-                        setChosen={ui.setChosen}
-                        showHeat={ui.showHeat}
-                      />
-                    )}
-                    {tab === 'lessons' && (
-                      <Lessons
-                        state={state}
-                        change={change}
-                        mode={ui.lessonMode}
-                        focus={ui.lessonFocus}
-                        setFocus={ui.setLessonFocus}
-                      />
-                    )}
+                    {/* Öğretmenler and Sınıflar: the list, or the lessons
+                        entered from that side (K1). */}
+                    {(tab === 'teachers' || tab === 'classes') &&
+                      (ui.people[tab] === 'list' ? (
+                        <Setup state={state} change={change} step={tab} />
+                      ) : (
+                        <Lessons
+                          state={state}
+                          change={change}
+                          mode={lessonModeOf(tab, ui.people)}
+                          focus={ui.lessonFocus}
+                          setFocus={ui.setLessonFocus}
+                        />
+                      ))}
                     <Activity mode={tab === 'program' ? 'visible' : 'hidden'} name="Program grid">
                       <Program
                         active={tab === 'program'}
@@ -561,7 +578,6 @@ export default function App() {
                         colorMode={programColor}
                       />
                     </Activity>
-                    {tab === 'check' && <Check state={state} view={ui.checkView} ui={ui} />}
                     {tab === 'print' && (
                       <Print
                         state={state}
@@ -576,7 +592,18 @@ export default function App() {
                         }}
                       />
                     )}
-                    {tab === 'settings' && (
+                    {/* Başlarken stands over the school's own data, where an
+                        empty project lands. */}
+                    {tab === 'school' &&
+                      (ui.section === 'school' ||
+                        ui.section === 'rooms' ||
+                        ui.section === 'subjects') && (
+                        <Start state={state} change={change} plans={plans} />
+                      )}
+                    {tab === 'school' && (ui.section === 'rooms' || ui.section === 'subjects') && (
+                      <Setup state={state} change={change} step={ui.section} />
+                    )}
+                    {tab === 'school' && ui.section !== 'rooms' && ui.section !== 'subjects' && (
                       <Settings
                         state={state}
                         change={change}

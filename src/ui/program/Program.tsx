@@ -38,7 +38,7 @@ import {
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { Help, NextStep, useToast, T, useT } from '../common';
+import { Help, NextStep, useGoTo, useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -176,6 +176,9 @@ function Program({
   // the entity sheet is the one that edits an entity, and from a card it is
   // the only way to reach the axis the grid is NOT drawn along.
   const inspect = useInspect();
+  // The status chip's problem list, from the bar's "Ayrıntı" and the pool
+  // card's "Neden yerleşmedi?" (K3).
+  const goTo = useGoTo();
 
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
@@ -584,7 +587,7 @@ function Program({
               sentence below says what is missing, the heading says where. */}
           <h2 className="visually-hidden">{t('Program')}</h2>
           <strong>{t('Henüz dizilecek ders yok.')}</strong>
-          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
+          <T k="Önce **Öğretmenler** ve **Sınıflar** sekmelerinde öğretmenleri ve sınıfları, sonra her sınıfın derslerini girin." />
           <br />
           <br />
           {t('Buraya döndüğünüzde dersler alttaki havuzda bekliyor olacak.')}
@@ -645,7 +648,9 @@ function Program({
           !solver.running && (
             <span className="bar-actions">
               {solver.result !== null && solver.result.stuck.length > 0 && (
-                <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
+                <button className="btn" onClick={() => goTo({ tab: 'program', problems: true })}>
+                  {t('Ayrıntı')}
+                </button>
               )}
               <button className="btn" onClick={solver.clear}>
                 {t('Tamam')}
@@ -742,6 +747,7 @@ function Program({
               container={menuPortalRef.current}
               editLesson={editLesson}
               inspect={inspect}
+              why={(id) => goTo({ tab: 'program', problems: id })}
               setPoolMenuRowMode={setPoolMenuRowMode}
             />
           }

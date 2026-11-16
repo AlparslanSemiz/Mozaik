@@ -11,10 +11,10 @@ export function useShortcuts(
   goTab: (tab: Tab) => void,
   openShortcuts: () => void,
 ): void {
-  // Ctrl/⌘+K opens the palette; Alt+1..7 go to a section.
+  // Ctrl/⌘+K opens the palette; Alt+1..5 go to a task.
   //
   // Alt and not a bare digit: a bare "5" while a lesson card has focus would
-  // jump to Yazdır, and every card on the grid is a focusable button. The
+  // jump to a tab, and every card on the grid is a focusable button. The
   // modifier is what keeps a shortcut from being a trap.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -23,7 +23,7 @@ export function useShortcuts(
         setPaletteOpen((open) => !open);
         return;
       }
-      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-7]$/.test(e.key)) {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-5]$/.test(e.key)) {
         const next = TABS[Number(e.key) - 1];
         if (next !== undefined) {
           e.preventDefault();
