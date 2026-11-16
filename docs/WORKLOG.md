@@ -168,7 +168,8 @@ gidince paneller ekrana sığdı, görünen kontrol 48'den 56'ya çıktı ama to
 (yalnız `linuxKur.test.ts`'in iki testi yükten zaman aşımı, tek başına yeşil), `npx vite
 build`, `npm run boyut`. Bütün E2E süiti `--workers=2 --retries=0` ile: 765 testin 763'ü
 yeşil; zebra'nın grup çipi testi bir yarış yüzünden düşüyordu, düzeltildi ve tek başına yeşil,
-`kayma.spec.ts` aşağıda. `scripts/agir.sh` bu makinede
+`kayma.spec.ts` aşağıda. `main` ile birleştikten sonra yeniden: 776 testin 774'ü yeşil;
+raptiye testi yükten zaman aşımı, tek başına yeşil. `scripts/agir.sh` bu makinede
 çalışmadı (`flock` yok), Playwright doğrudan koşuldu. Tıklama testi 1920×1080 ve 1366×768'de;
 1366'da üst çubuk tek satır.
 
