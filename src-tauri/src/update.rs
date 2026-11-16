@@ -653,22 +653,100 @@ pub fn kurulum_dogru_mu(kurulum: &Path, ozet_beklenen: &str) -> Option<i32> {
     }
 }
 
+/// The waiter's own record, in the temporary folder beside it: what it did
+/// and when, for whoever has to find out why an install did not finish (the
+/// first CI run of the installer gate, 2026-11-16, ended with nothing to read).
+pub const BEKLEYICI_GUNLUGU: &str = "Mozaik-kurulum.log";
+
+fn gunluk(satir: &str) {
+    use std::io::Write;
+    let an = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0);
+    if let Ok(mut f) = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(std::env::temp_dir().join(BEKLEYICI_GUNLUGU))
+    {
+        let _ = writeln!(f, "{an} {satir}");
+    }
+}
+
+/// The installed program the waiter starts itself when the installer's own
+/// `/R` did not (Tauri starts it through the desktop shell's token, which is
+/// not always there): the installer's default folder under `%LOCALAPPDATA%`,
+/// only if it really is an installed program.
+fn kurulan_varsayilan() -> Option<PathBuf> {
+    let yerel = std::env::var_os("LOCALAPPDATA")?;
+    let exe = Path::new(&yerel)
+        .join("Programs")
+        .join("Mozaik")
+        .join("Mozaik.exe");
+    (exe.is_file() && kurulu_mu(&exe)).then_some(exe)
+}
+
+/// After a finished install: give `/R` a moment, then start the installed
+/// program if it has not written its note since. A second start while the
+/// first is still coming up only brings its window forward (single instance).
+fn kurulan_acilsin() {
+    let not =
+        std::env::var_os("LOCALAPPDATA").map(|y| Path::new(&y).join(KIMLIK).join(KURULU_NOTU));
+    let once = std::time::SystemTime::now() - Duration::from_secs(5);
+    for _ in 0..30 {
+        let yazildi = not
+            .as_ref()
+            .and_then(|n| fs::metadata(n).ok())
+            .and_then(|m| m.modified().ok())
+            .is_some_and(|t| t >= once);
+        if yazildi {
+            gunluk("kurulan program acildi (/R)");
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(500));
+    }
+    match kurulan_varsayilan() {
+        Some(exe) => {
+            let acildi = std::process::Command::new(&exe).spawn().is_ok();
+            gunluk(&format!(
+                "/R acmadi; bekleyici aciyor {}: {acildi}",
+                exe.display()
+            ));
+        }
+        None => gunluk("/R acmadi ve kurulan program bulunamadi"),
+    }
+}
+
 /// The waiter's whole life: wait for the old copy to go, run the installer,
 /// and if it did not finish start the old copy again with the reason. Never
 /// returns. No window, no Tauri: a process that only waits.
 pub fn bekle_ve_bitir(b: Bekleyici) -> ! {
-    eskisi_gitsin(std::io::stdin(), DEVIR_SURESI);
+    gunluk(&format!("bekleyici basladi: {b:?}"));
+    let gitti = eskisi_gitsin(std::io::stdin(), DEVIR_SURESI);
+    gunluk(&format!("eski kopya kapandi: {gitti}"));
     let kod = match kurulum_dogru_mu(&b.kurulum, &b.ozet) {
-        Some(kod) => kod,
-        None => match std::process::Command::new(&b.kurulum)
-            .args(kurulum_argumanlari(b.kurulu))
-            .status()
-        {
-            Ok(s) if s.success() => std::process::exit(0),
-            Ok(s) => s.code().unwrap_or(-1),
-            Err(_) => -2,
-        },
+        Some(kod) => {
+            gunluk(&format!("kurulum ozeti tutmadi: {kod}"));
+            kod
+        }
+        None => {
+            let args = kurulum_argumanlari(b.kurulu);
+            gunluk(&format!("ozet tamam, kurulum basliyor: {args:?}"));
+            match std::process::Command::new(&b.kurulum).args(&args).status() {
+                Ok(s) if s.success() => {
+                    gunluk("kurulum bitti: 0");
+                    kurulan_acilsin();
+                    std::process::exit(0)
+                }
+                Ok(s) => s.code().unwrap_or(-1),
+                Err(e) => {
+                    gunluk(&format!("kurulum baslatilamadi: {e}"));
+                    -2
+                }
+            }
+        }
     };
+    gunluk(&format!("kurulum bitmedi: {kod}, eski kopya aciliyor"));
     let _ = std::process::Command::new(&b.eski)
         .args([KURULUM_OLMADI, &kod.to_string()])
         .spawn();

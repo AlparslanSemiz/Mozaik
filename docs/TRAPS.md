@@ -370,6 +370,17 @@ bekleyip başarısızlıkta eski kopyayı `--kurulum-olmadi <kod>` ile yeniden a
 yazan bir uyarı gösteriyor. Koruyan: `the_installer_runs_passive_never_silent`,
 `the_waiter_reads_its_arguments...`; başarısız yolu bugün hiçbir CI koşmuyor.
 
+### 166 · `productName` dosya adı değildir: kurulan program Cargo'nun adıyla kuruldu
+Ölçüldü 2026-11-16 (`kurulum-windows.yml`, koşu 43786629480). `productName: "Mozaik"` pencere
+başlığını, kurulum klasörünü (`Programs\Mozaik`) ve kısayolları adlandırıyor, ama kurulumun
+içindeki ikili Cargo paketinin adını taşıyordu: `Programs\Mozaik\ders-programi.exe`, kaldırma
+kaydında `MainBinaryName : ders-programi.exe`. Görev Yöneticisi babaya "ders-programi" derdi,
+ve `Mozaik.exe` arayan CI adımı ile bekleyicinin yedek açışı onu bulamadı. Tek başına exe'nin
+`Mozaik.exe` olması `surum.yml`'in dosyayı yeniden adlandırmasından geliyordu, kurulumda böyle
+bir adım yok. Karşı önlem: `tauri.conf.json`'da `mainBinaryName: "Mozaik"` (Mac'in
+yapılandırması zaten taşıyordu). Koruyan: `src/surum.test.ts` ("ekrandaki ad Mozaik"), ve
+`kurulum-windows.yml`'in kurulan programın yolunu ve sürecini `Mozaik.exe` adıyla araması.
+
 ### 165 · Tauri `script-src`'e özet ekleyince `style-src`'e de nonce ekler, ve `'unsafe-inline'` düşer
 Ölçüldü 2026-11-16, CSP eklenirken (`e2e/csp.spec.ts`). `tauri.conf.json`'da bir `csp`
 verilince Tauri sayfayı gömerken her satır içi `<script>`'in `sha256-`'sını `script-src`'e,
@@ -1648,7 +1659,7 @@ iddiası saati kapatarak sınanır.**
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165, 166 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141, 174, 175, 176 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1663,8 +1674,8 @@ iddiası saati kapatarak sınanır.**
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 172 ve 173 açık bir dala ayrıldı. 166 ile 169 arası
-boş: 2026-11-16'da 159-165 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
+büyük kullanılan numara 176, yeni bir tuzak 177'den devam eder. 172 ve 173 açık bir dala ayrıldı. 167 ile 169 arası
+boş: 2026-11-16'da 159-166 alınmıştı ve açık dallar da numara bekliyordu, kararsız testler dalı çakışmasın
 diye 170'ten başladı. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

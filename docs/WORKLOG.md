@@ -94,6 +94,11 @@ kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtar
 budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
 ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
 
+**Daha iyi program (2026-11-16, `cozucu/iyilestirme`, birleşmedi):** bitmiş haftaya iyileştirme
+geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığı söyleyen tıkanma cümlesi
+(TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
+brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
+
 **Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
 seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
 dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
@@ -134,6 +139,54 @@ bulguları. Bu makine macOS, `agir.sh` çalışmıyor; Playwright kilitsiz ve `-
   WebKit program, musaitlik, dokunmatik 95/95; Firefox temel, yazdir, exe, dokunmatik 80 geçti
   10 atlandı, kurulum 65 14/14. `tsc`, eslint, prettier, `vite build`, `boyut` (ham 1,17 MB,
   brotli 299,88 kB, 6,12 kB pay). Tam süit Firefox ve WebKit'te koşulmadı.
+
+## 2026-11-16 · Daha iyi program: iyileştirme geçişi, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
+
+Alp'in önceliği "daha iyi program". Denetimin bağımsız denetçisi test kâhini oldu
+(`pure/solver/oracle.ts`). Ölçüm makinesi çok yüklüydü (yük 8–250): **kirli, süreler yön
+gösterir**; geçişin kendi süresi sayaçla ayrıca okundu. "Önce" = aynı kod `improve: false`, yani
+`main`'in araması (sayılar denetimle aynı).
+
+| Hafta | öğretmen boşluğu | öğretmen günü | sınıf boşluğu | yığılma | geçişin süresi |
+|---|---|---|---|---|---|
+| Babanın haftası (Roboders saatleri) | 151 → 118 | 63 → 63 | 0 → 0 | 1 → 1 | ~30 ms |
+| Örnek okul | 271 → 61 | 110 → 110 | 251 → 225 | 20 → 18 | ~0,55 s (300 000 aday) |
+| gercek-olcek-sikisik (tıkanıyor) | 374 → 374 | 109 → 109 | 413 → 413 | 76 → 76 | koşmuyor |
+| parcalanmis-gunler | 5 → 5 | 12 → 12 | 0 → 0 | 2 → 2 | ~0 ms, aday yok |
+
+Hiçbir dünyada Engelle ihlali yok, yerleşen blok sayısı aynı. 4× yavaşta babanın haftasında geçiş
+~0,1 s, örnek okulda ~2,2 s (sayaçtan; tarayıcıda 4×'te uçtan uca ölçüm makine yükünden okunamadı).
+Tıkanmış haftada geçiş koşmuyor: öneri aramasının ilk tahmini kötüleşti (en az saat yolu 4 → 5,
+`relaxFullCourse.test.ts`). Denenip bırakılan tekmeli sürüm babanın haftasını 114'e indiriyordu
+(DECISIONS).
+
+**Kararlılık** (örnek okul, bir dersin dağılımı 1+1 → 2 yapılınca; `solver.test.ts`):
+katı Otomatik diz tıkanıyor; yakın yeniden dizme 17/433 hücre değiştiriyor (11 saat yer değişti),
+`Baştan diz` 418. Öteki beş düzenlemede: 9, 2, 6, 4, 4 hücre (Baştan diz 339–482). Babanın haftasında
+üç öğretmen devri tıkanıyor (yeni öğretmen dolu), yakın yeniden dizme 30–380 ms'de vazgeçiyor;
+babanın kurulamayan kendi haftası (`tam-dolu-kurs-dizili.json`) önerileri 0,7 s geç görüyor.
+`Başka bir dizilim`: tohum 0, 1, 2 her çiftte 100'den çok hücre farklı, aynı tohum aynı hafta.
+
+**Tıkanma cümlesi** (denetimin dünyaları): K1 "MÇ: 18 saat ders, 15 müsait saat; 3 saat açılmalı",
+K3 "A dersliği: 24 saat ders, 20 açık saat; 4 saat açılmalı ya da bir sınıf başka dersliğe
+geçmeli", K4 "… aynı güne konmamalı: 3 + 3 gün gerekiyor, 4 gün var".
+
+**E2E'de yakalanan:** geçiş bir dersin iki kartını yan yana koyunca ızgara aynı hücreleri başka
+kartlara bölüyordu (tuzak 75; Baştan diz ve sabitleme testleri kırmızı). Yan yana koyma yasak,
+okumanın konumları adım adım denetleniyor, `improve.test.ts` kart ve koşu sayısını soruyor.
+
+**Boyut.** Dal tek başına 1 317 720 B / brotli 305,93 kB (eşiğin altında). `main` aynı gece 1 319 030
+B'a geldi; birleşince 1 335 122 B / 309,37 kB. Geçiş + açık + çözücü ~12 kB, sözlükler ~3,4 kB.
+`file://` açılışı 4×'te, 9 dönüşümlü koşu, yük 65–130: medyan `main` 1 461 ms, dal 1 189 ms; son
+dört çift ~700 ms ikisinde de, fark gürültünün altında. Eşik yükseltilmedi (TODO B5.12).
+
+**Koşulanlar:** `tsc`, `eslint src`, `prettier --check`, `npm run hizli` (yük altında bir zaman
+aşımı, tek başına yeşil; `linuxKur.test.ts` de öyle), `solver.test.ts`, `improve.test.ts`,
+`shortfall.test.ts`, `cpModel.test.ts`, `invariants.test.ts`, E2E otomatik + otomatik-dunyalar +
+program (`--workers=2`, `@arama` hariç). `relaxFullCourse.test.ts` yük 250'de zaman aşımıyla, `solver.test.ts`'in "Roboders'teki saatlerle" testi 15 s bütçeyi aşıp düştü,
+öncesinde yeşildi (tıkanmış hafta `main` ile aynı, arama değişmedi). Taze bağlamlı inceleme: kural
+çiğneme yolu bulmadı; bulgular düzeltildi (aynı-gün çiftinde kapsam dışı gün, "Başka bir dizilim"
+ikinci basışta el emeğini yedekten itmiyor, yorumlar).
 
 ## 2026-11-16 · Kararsız testler (`test/kararsiz`)
 
