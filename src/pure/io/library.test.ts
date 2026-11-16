@@ -355,6 +355,7 @@ describe('veriler nerede — depo raporu', () => {
       backupKey(2),
     ]);
     expect(rows.slice(6).map((r) => [r.key, r.what])).toEqual([
+      ['ders-programi-silmeden-once', 'son silmeden önceki hâl'],
       ['ders-programi-tema', 'tema tercihi'],
       ['ders-programi-dil', 'dil tercihi'],
       ['ders-programi-kenar', 'kenar çubuğu tercihi'],

@@ -58,20 +58,26 @@ on:
 permissions:
   contents: read
 
+# ÖNBELLEK YOK (güvenlik denetimi 2026-11-16): ne `setup-node`'un npm önbelleği
+# ne rust-cache. Önbellek başka dallardaki koşulardan da beslenir; imzalanacak
+# ikili ondan geri yüklenmiş bir hedef klasörden derlenmesin. Bedeli dakikalar.
+
 jobs:
   # ------------------------------------------------------------ 1 · package
   package:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-          cache: npm
 
-      - run: npm ci
+      # Kurulum betikleri koşmaz: bir bağımlılığın `postinstall`'ı imzalanacak
+      # programa dokunamasın. Lock'ta betiği olan tek paket fsevents (yalnız
+      # macOS); esbuild ve rolldown'un ikilileri optionalDependencies'ten iner.
+      - run: npm ci --ignore-scripts
 
       # `paket` zaten `build:site`'i çağırıyor; `build` ayrı, çünkü tek dosya
       # yolu ondan çıkıyor ve ikisi ayrı config.
@@ -109,7 +115,7 @@ jobs:
           (cd dist-kurulum && zip -qr "../teslim/Mozaik-Windows-kurulum.zip" .)
           ls -l teslim
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: package
           path: teslim/*
@@ -119,21 +125,20 @@ jobs:
   exe:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-          cache: npm
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
         with:
           toolchain: stable
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          workspaces: src-tauri -> target
 
-      - run: npm ci
+      # Kurulum betikleri koşmaz: bir bağımlılığın `postinstall`'ı imzalanacak
+      # programa dokunamasın. Lock'ta betiği olan tek paket fsevents (yalnız
+      # macOS); esbuild ve rolldown'un ikilileri optionalDependencies'ten iner.
+      - run: npm ci --ignore-scripts
 
       # Sayfa ÖNCE derlenir: bir TypeScript hatası otuz saniyede düşsün,
       # Rust bağlama adımından sonra değil.
@@ -254,7 +259,7 @@ jobs:
       # in a build instead of turning up in a complaint six months later.
       - name: Are the icon and the version info REALLY embedded
         run: node scripts/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: exe
           path: teslim/*
@@ -288,23 +293,20 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
-          cache: npm
       - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable dalı, 2026-11-15
         with:
           toolchain: stable
           targets: ${{ matrix.hedef }}
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          workspaces: src-tauri -> target
-          key: ${{ matrix.hedef }}
 
-      - run: npm ci
+      # Betiksiz ve önbelleksiz, Windows işi gibi (yukarıda, ve BUILD.md
+      # "Yayın güvenliği"). OR-Tools'u npm değil `ortools-mac.sh` getiriyor.
+      - run: npm ci --ignore-scripts
       - run: npm run build
 
       # OR-Tools'un resmi macOS arşivi, SHA-256'sı betikte sabit; .app'e
@@ -337,11 +339,14 @@ jobs:
           done
           if [ -n "${APPLE_CERTIFICATE:-}" ]; then
             echo "Developer ID ile imzalanıyor"
-            # Notarize için sertleştirilmiş çalışma zamanı şart.
+            # Sertleştirilmiş çalışma zamanı her durumda açık (tauri.macos.conf.json).
+            # Aynı ekip kimliğiyle imzalanan dylib'ler kütüphane doğrulamasından
+            # geçer, yani ad-hoc'un ihtiyacı olan istisna burada çıkarılır
+            # (`null` birleştirmede anahtarı siler).
             node -e '
               const fs = require("fs"), y = "src-tauri/tauri.ortools.json";
               const c = JSON.parse(fs.readFileSync(y, "utf8"));
-              c.bundle.macOS.hardenedRuntime = true;
+              c.bundle.macOS.entitlements = null;
               fs.writeFileSync(y, JSON.stringify(c, null, 2));'
             # Notarization üçü birden ister; eksik bir üçlü hiç verilmez.
             if [ -z "${APPLE_ID:-}" ] || [ -z "${APPLE_PASSWORD:-}" ] || [ -z "${APPLE_TEAM_ID:-}" ]; then
@@ -365,6 +370,8 @@ jobs:
           app="$kok/macos/Mozaik.app"
           test -d "$app" || { echo "Mozaik.app üretilmedi" >&2; ls -R "$kok" | head -50; exit 1; }
           codesign --verify --deep --strict --verbose=2 "$app"
+          # Sertleştirilmiş çalışma zamanı (DECISIONS 2026-11-16).
+          codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime'
           test -f "$app/Contents/Frameworks/libortools.9.dylib"
           test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
           [ "$(ls "$app/Contents/Frameworks" | wc -l | tr -d ' ')" = "$(ls src-tauri/ortools/*.dylib | wc -l | tr -d ' ')" ]
@@ -380,15 +387,92 @@ jobs:
           cp "$dmg" "teslim/Mozaik-mac-${{ matrix.mimari }}.dmg"
           ls -l teslim
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mac-${{ matrix.mimari }}
           path: teslim/*
           if-no-files-found: error
 
-  # ------------------------------------------------------------- 4 · publish
+  # ---------------------------------------------------------------- 4 · sign
+  # İMZALAYAN TEK İŞ, ve anahtarı gören tek iş (DECISIONS 2026-11-16). Sır depo
+  # düzeyinde değil `release` ortamında; o ortamı yalnız `v*` etiketleri
+  # kullanabilir (ayarları BUILD.md'nin "Yayın güvenliği" bölümünde). Bu iş kod
+  # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe ve Mac artefaktlarını
+  # indirir, imzalar, `.minisig`'leri yükler. Yayınlayan iş anahtarı hiç görmez.
+  # Mac'i beklemez gibi değil, bekler ama ona takılmaz (`always()`, `publish`'teki
+  # kuralın aynısı): gelmeyen bir mimari imzalanmaz.
+  sign:
+    needs: [exe, mac]
+    environment: release
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    if: >-
+      always() &&
+      needs.exe.result == 'success' &&
+      (startsWith(github.ref, 'refs/tags/v') || inputs.publish)
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: exe
+          path: teslim
+      # Hiç Mac artefaktı yoksa bu adım boş döner, düşmez.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: mac-*
+          merge-multiple: true
+          path: teslim
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            package.json
+          sparse-checkout-cone-mode: false
+          path: depo
+
+      # İMZA (güvenlik denetimi 2026-11-15). Özet aynı Release'ten geliyor, yani
+      # dosyanın eksiksiz indiğini söylüyor ama bizim olduğunu söylemiyor; imza
+      # söylüyor. Anahtarın gizli yarısı `release` ortamının sırrı
+      # MOZAIK_IMZA_ANAHTARI (2026-11-16'ya kadar depo sırrıydı), açık yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
+      # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
+      - name: Sign the programs
+        env:
+          ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
+        run: |
+          test -n "$ANAHTAR" || { echo "MOZAIK_IMZA_ANAHTARI sırrı tanımlı değil" >&2; exit 1; }
+          sudo apt-get install -y -qq minisign >/dev/null
+          gizli=$(mktemp -d); chmod 700 "$gizli"
+          # Adım hangi satırda düşerse düşsün anahtar dosyası diskte kalmaz.
+          trap 'rm -rf "$gizli"' EXIT
+          umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
+          # Güvenilen yorum sürümü ve dosyayı bağlıyor (update.rs, `imza_yorumu`):
+          # eski imzalı bir sürüm yenisi diye, ya da bir dosya ötekinin yerine
+          # sunulamaz.
+          surum=$(node -p "require('./depo/package.json').version")
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig \
+            -t "mozaik $surum Mozaik.exe"
+          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
+            -t "mozaik $surum Mozaik-Kurulum.exe"
+          # Mac'in güncelleme arşivleri, aynı anahtar ve aynı biçimde yorum
+          # (update_mac.rs), yalnız iki dosyası da gelen mimari (`publish` aynı
+          # kuralla seçer). .dmg'ler elle kurulur, program onları indirmez.
+          for m in arm64 x86_64; do
+            if [ -s "teslim/Mozaik-mac-$m.app.tar.gz" ] && [ -s "teslim/Mozaik-mac-$m.dmg" ]; then
+              minisign -S -s "$gizli/anahtar" -m "teslim/Mozaik-mac-$m.app.tar.gz" -x "imza-mac-$m.minisig" \
+                -t "mozaik $surum Mozaik-mac-$m.app.tar.gz"
+            fi
+          done
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: imza
+          path: imza-*.minisig
+          if-no-files-found: error
+
+  # ------------------------------------------------------------- 5 · publish
   publish:
-    needs: [package, exe, mac]
+    needs: [package, exe, mac, sign]
     permissions:
       contents: write
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
@@ -397,27 +481,34 @@ jobs:
       always() &&
       needs.package.result == 'success' &&
       needs.exe.result == 'success' &&
+      needs.sign.result == 'success' &&
       (startsWith(github.ref, 'refs/tags/v') || inputs.publish)
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: indirilen
 
       - name: Did the assets arrive
         run: |
+          mv indirilen/imza/imza-*.minisig .
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
           for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe Mozaik-Kurulum.exe; do
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
-          # Mac: bir mimari ancak iki dosyası da geldiyse yayına girer. Gelmeyen
+          for f in imza-exe.minisig imza-kurulum.minisig; do
+            test -s "$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
+          done
+          # Mac: bir mimari ancak iki dosyası da geldiyse ve `sign` onu
+          # imzaladıysa yayına girer. Gelmeyen
           # durdurmaz, görünür olur: uyarı ve iş özeti.
           var=""
           for m in arm64 x86_64; do
-            if [ -s "teslim/Mozaik-mac-$m.app.tar.gz" ] && [ -s "teslim/Mozaik-mac-$m.dmg" ]; then
+            if [ -s "teslim/Mozaik-mac-$m.app.tar.gz" ] && [ -s "teslim/Mozaik-mac-$m.dmg" ] \
+               && [ -s "imza-mac-$m.minisig" ]; then
               var="$var $m"
             else
-              rm -f "teslim/Mozaik-mac-$m.app.tar.gz" "teslim/Mozaik-mac-$m.dmg"
+              rm -f "teslim/Mozaik-mac-$m.app.tar.gz" "teslim/Mozaik-mac-$m.dmg" "imza-mac-$m.minisig"
               echo "::warning title=Mac paketi bu sürümde yok::$m derlenmedi; Windows ve surum.json yine yayınlanıyor, bu mimarideki Mac kopyaları güncelleme görmez."
               echo "**Mac paketi bu sürümde yok: $m.** Windows ve web yayınlandı." >> "$GITHUB_STEP_SUMMARY"
             fi
@@ -425,8 +516,9 @@ jobs:
           echo "MAC_VAR=${var# }" >> "$GITHUB_ENV"
           echo "Mac: ${var:- yok}"
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           sparse-checkout: |
             .github/surum-notu.md
             package.json
@@ -442,35 +534,6 @@ jobs:
       # `__SURUM__` odur (scripts/surum.mjs), yani exe kendini o numarayla
       # tanıtır. Etiket ondan başkaysa iş burada durur — yayınlanmış ama
       # kendini asla güncel sayamayan bir exe, hiç yayınlamamaktan kötüdür.
-      # İMZA (güvenlik denetimi 2026-11-15). Özet aynı Release'ten geliyor, yani
-      # dosyanın eksiksiz indiğini söylüyor ama bizim olduğunu söylemiyor; imza
-      # söylüyor. Anahtarın gizli yarısı depo sırrı MOZAIK_IMZA_ANAHTARI, açık
-      # yarısı update.rs'in IMZA_ANAHTARI'sı. Sır yoksa yayın burada durur:
-      # imzasız bir sürümü yeni kopyalar kurmaz, eskileri ise hiç doğrulamaz.
-      - name: Sign the programs
-        env:
-          ANAHTAR: ${{ secrets.MOZAIK_IMZA_ANAHTARI }}
-        run: |
-          test -n "$ANAHTAR" || { echo "MOZAIK_IMZA_ANAHTARI sırrı tanımlı değil" >&2; exit 1; }
-          sudo apt-get install -y -qq minisign >/dev/null
-          gizli=$(mktemp -d); chmod 700 "$gizli"
-          umask 077; printf '%s\n' "$ANAHTAR" > "$gizli/anahtar"
-          # Güvenilen yorum sürümü ve dosyayı bağlıyor (update.rs, `imza_yorumu`):
-          # eski imzalı bir sürüm yenisi diye, ya da bir dosya ötekinin yerine
-          # sunulamaz.
-          surum=$(node -p "require('./depo/package.json').version")
-          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik.exe -x imza-exe.minisig \
-            -t "mozaik $surum Mozaik.exe"
-          minisign -S -s "$gizli/anahtar" -m teslim/Mozaik-Kurulum.exe -x imza-kurulum.minisig \
-            -t "mozaik $surum Mozaik-Kurulum.exe"
-          # Mac'in güncelleme arşivleri, aynı anahtar ve aynı biçimde yorum
-          # (update_mac.rs). .dmg'ler elle kurulur, program onları indirmez.
-          for m in $MAC_VAR; do
-            minisign -S -s "$gizli/anahtar" -m "teslim/Mozaik-mac-$m.app.tar.gz" -x "imza-mac-$m.minisig" \
-              -t "mozaik $surum Mozaik-mac-$m.app.tar.gz"
-          done
-          rm -rf "$gizli"
-
       - name: Build surum.json
         env:
           ETIKET: ${{ inputs.tag || github.ref_name }}

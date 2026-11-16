@@ -18,11 +18,14 @@
 //               -> guncelleme-windows.yml (the last released exe's data,
 //                  and update.rs's own update into this build; waited for
 //                  before every release, started here if it did not run)
+//               -> kurulum-windows.yml (the installer: the standalone exe's
+//                  move to it, CP-SAT on its libraries, the uninstall that
+//                  keeps the data; the same, since 2026-11-16)
 //   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
 // So the order is: commit, push main ALONE, wait for that commit's ci.yml,
-// windows.yml, exe-windows.yml and guncelleme-windows.yml runs, and only when
-// all four are green tag it and push the tag. The upgrade gate waits for every
+// windows.yml, exe-windows.yml, guncelleme-windows.yml and kurulum-windows.yml
+// runs, and only when all five are green tag it and push the tag. The upgrade gate waits for every
 // release, whatever it changed (the user's decision, 2026-10-24). The tag used to go in the same push as the commit, i.e.
 // before any test had looked at it (2026-10-08); the Windows run joined on
 // 2026-10-09 and the real exe on 2026-10-10, because the tag is what reaches
@@ -35,8 +38,8 @@
 //
 // `--kuru` (dry run) changes nothing in the repository: it takes HEAD, which
 // must already be pushed, finds and waits for its runs, says the result,
-// and stops where the tag would be cut. It may START two: exe-windows.yml and
-// guncelleme-windows.yml when HEAD has none (below).
+// and stops where the tag would be cut. It may START three: exe-windows.yml,
+// guncelleme-windows.yml and kurulum-windows.yml when HEAD has none (below).
 //
 // Refuses outside the main checkout or off `main`, on a dirty tree, on a tag
 // that exists, and without a logged-in `gh`. Every one of those has a right
@@ -161,10 +164,12 @@ async function kosuVarMi(is, sha) {
 async function ciYesilMi(sha, kirmizidaNe) {
   await kosuVarMi('exe-windows.yml', sha);
   await kosuVarMi('guncelleme-windows.yml', sha);
+  await kosuVarMi('kurulum-windows.yml', sha);
   await kosuYesilMi('ci.yml', sha, kirmizidaNe);
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
   await kosuYesilMi('exe-windows.yml', sha, kirmizidaNe);
   await kosuYesilMi('guncelleme-windows.yml', sha, kirmizidaNe);
+  await kosuYesilMi('kurulum-windows.yml', sha, kirmizidaNe);
 }
 
 // The first gate, before the arguments are even read: a release run from a

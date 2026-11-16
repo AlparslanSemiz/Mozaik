@@ -6,7 +6,18 @@
 // file this program did not write.
 
 import { describe, expect, it, vi } from 'vitest';
-import { dailyName, holdsWork, KEEP_DAILY, MAIN_NAME, prunable } from './folder';
+import {
+  beforeDeleteName,
+  dailyName,
+  holdsWork,
+  KEEP_DAILY,
+  largest,
+  MAIN_NAME,
+  prunable,
+  shrinkName,
+  shrinks,
+  workOf,
+} from './folder';
 
 describe('dailyName', () => {
   it('ay ve gün iki basamak', () => {
@@ -141,5 +152,69 @@ describe('holdsWork', () => {
     expect(holdsWork('{"bundleVersion":1}')).toBeNull();
     expect(holdsWork('eski')).toBeNull();
     expect(holdsWork('null')).toBeNull();
+  });
+});
+
+// The audit of 2026-11-16: one-teacher backups counted as full and pushed out
+// every real one. The fullest daily is spared, and a sharp shrink is told.
+describe('largest · prunable(spare)', () => {
+  const ad = (d: number) => dailyName(new Date(2026, 9, d));
+
+  it('en dolu günlüğü, eşitlerde en yenisini seçiyor; boşları değil', () => {
+    const sizes = new Map([
+      [ad(1), 400],
+      [ad(2), 400],
+      [ad(3), 1],
+      [ad(4), 0],
+    ]);
+    expect(largest(sizes)).toBe(ad(2));
+    expect(largest(new Map([[ad(1), 0]]))).toBeNull();
+  });
+
+  it('on küçük günlükten sonra bile en dolu günlük silinmiyor', () => {
+    const names = Array.from({ length: 21 }, (_, i) => ad(i + 1));
+    const old = prunable(names, KEEP_DAILY, () => true, ad(10));
+    expect(old).not.toContain(ad(10));
+    expect(old).toEqual(
+      Array.from({ length: 11 }, (_, i) => ad(i + 1)).filter((n) => n !== ad(10)),
+    );
+  });
+});
+
+describe('workOf · shrinks', () => {
+  const bundle = (...states: unknown[]) =>
+    JSON.stringify({
+      bundleVersion: 1,
+      plans: states.map((state, i) => ({ id: String(i), name: 'x', draft: false, state })),
+    });
+
+  it('dört listeyi, öğretmeni, dersi ve her seçeneğin yerleşimini sayıyor', () => {
+    const today = {
+      teachers: [{}, {}],
+      classes: [{}],
+      lessons: [{}, {}, {}],
+      rooms: [],
+      programs: [{ placements: { a: 1, b: 1 } }, { placements: { c: 1 } }],
+    };
+    const v1 = { ogretmenler: [{}], dersler: [{}], yerlesim: { x: 1 } };
+    expect(workOf(bundle(today, v1))).toEqual({ lists: 8, teachers: 3, lessons: 4, placed: 4 });
+    expect(workOf('eski')).toBeNull();
+  });
+
+  it('yarının altı keskin küçülme; yerleşimin gitmesi değil', () => {
+    const w = (lists: number, placed = 0) => ({ lists, teachers: 0, lessons: 0, placed });
+    expect(shrinks(w(152), w(1))).toBe(true);
+    expect(shrinks(w(152), w(76))).toBe(false);
+    expect(shrinks(w(152, 600), w(152, 0))).toBe(false); // Programı boşalt
+    expect(shrinks(null, w(1))).toBe(false);
+  });
+});
+
+describe('yeni dosya adları', () => {
+  it('kurtarma ve silmeden-önce dosyaları budama kalıbına uymuyor', () => {
+    const now = new Date(2026, 10, 16, 14, 30, 5);
+    expect(shrinkName(now)).toBe('ders-programi-kurtarma-2026-11-16.json');
+    expect(beforeDeleteName(now)).toBe('ders-programi-silmeden-once-2026-11-16.json');
+    expect(prunable([shrinkName(now), beforeDeleteName(now)], 0)).toEqual([]);
   });
 });

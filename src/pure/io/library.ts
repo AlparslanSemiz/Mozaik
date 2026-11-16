@@ -64,6 +64,14 @@ export function backupKey(i: number): string {
   return `${BASE_KEY}-yedek-${i}`;
 }
 
+/**
+ * The open plan as it was before the last deletion that asked no question,
+ * or before "Her şeyi sil", the sample school over a plan, "Baştan diz" and
+ * "Dosyadan aç" (TODO SD1). One slot: the undo of those lives in memory, and
+ * this is what is left of it after a reload (`platform/storage/beforeDelete.ts`).
+ */
+export const BEFORE_DELETE_KEY = `${BASE_KEY}-silmeden-once`;
+
 export function defaultLibrary(): Library {
   return {
     activeId: FIRST_PLAN_ID,

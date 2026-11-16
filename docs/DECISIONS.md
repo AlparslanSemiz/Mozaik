@@ -36,6 +36,80 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · İmza anahtarı `release` ortamında, exe'nin sayfası CSP altında (`guvenlik/sertlestirme`)
+
+**Karar (Alp, 2026-11-16).** İkinci güvenlik denetiminin en ağır bulgusu: imza anahtarı bir depo
+sırrıydı, yani her dalın her iş akışı onu okuyabilirdi, ve bu anahtar babanın exe'sinin neyi
+kuracağına karar veriyor. Sır `release` adlı bir GitHub ortamına taşınıyor ve o ortamı yalnız
+`v*` etiketleri kullanabiliyor. **Onaylayıcı yok:** tek bakımcılı bir depoda onay düğmesi kendine
+onay vermek olurdu, koruma etiket kuralından ve etiketi yalnız yöneticinin açabilmesinden geliyor.
+İmza kendi işine (`sign`) ayrıldı: anahtarı gören iş kod derlemiyor, npm koşturmuyor, yazma
+token'ı taşımıyor. Ayarların kendisi BUILD.md'de, "Yayın güvenliği".
+
+Aynı dalda dört küçük kapı:
+- **Yayın derlemesi betiksiz ve önbelleksiz.** `npm ci --ignore-scripts` (betiği olan tek paket
+  macOS'un `fsevents`'i), npm ve Rust önbellekleri `surum.yml`'den çıktı. Bedel birkaç dakika.
+- **CSP.** 2026-11-15'te "exe'de ölçülmeden yanlışsa sessizce kırılıyor" diye bırakılmıştı.
+  Ölçüm yolu bulundu: Tauri'nin politikaya eklediklerini aynı hesapla kurup derlenmiş sayfayı o
+  başlık altında Chromium'da açmak (`e2e/csp.spec.ts`). `style-src` `'unsafe-inline'` taşıyor,
+  çünkü Radix çalışma anında `<style>` yazıyor; Tauri'nin oraya nonce eklemesi kapatıldı (tuzak
+  159). `withGlobalTauri` açık kaldı: kapatmak `@tauri-apps/api`'yi `dist`'e sokmak ve sahte
+  köprüyle koşan E2E'yi yeniden yazmak demekti, kazancı ise sayfadaki bir betiğin köprüyü bulması
+  zorlaşırdı, ki CSP o betiğin gelişini zaten kapatıyor. Gerçek WebView2'de doğrulama
+  `exe-windows.yml`'in işi.
+- **CP-SAT yalnız kurulu kopyadan.** Tek başına `Mozaik.exe` İndirilenler'de durur, yanına
+  `ortools.dll` adlı her dosya bırakılabilir. Kütüphane yalnız `uninstall.exe`'nin yanındaki
+  exe'de, `LoadLibraryExW` ile ve yalnız kendi klasörü ve System32'de arayarak açılıyor;
+  `MOZAIK_ORTOOLS` yalnız debug derlemede.
+- **İndirme sınırlı, kurulum kendi klasöründe.** `boyut`'u aşan ilk parçada durulur (en çok 256
+  MB), kurulum her seferinde `%TEMP%` altında yeni ve tahmin edilemez adlı bir klasöre yazılır.
+- **Mac (main'e birleştikten sonra).** Mac arşivlerini de `sign` imzalıyor, `publish`'le aynı
+  kuralla (iki dosyası da gelen mimari); Mac işi de betiksiz, önbelleksiz ve SHA'ya sabit; Mac
+  indirmesi de sınırlı. Sertleştirilmiş çalışma zamanı her zaman açık. Seçenekler: (a) dylib'leri
+  "aynı kimlikle" imzalamak, ad-hoc'ta ekip kimliği olmadığı için imkânsız; (b)
+  `disable-library-validation` yalnız ad-hoc pakette. (b) seçildi, ölçerek: ad-hoc ve
+  `--options runtime` imzalı bir süreç paketin dylib'ini "different Team IDs" ile reddetti, istisnayla
+  CP-SAT'ın küçük modeli geçti; paket açıldı ve 20 s ayakta kaldı. Açılan güncelleme paketindeki
+  her bağ paketin içinde kalmalı (`icerde_mi`).
+
+### 2026-11-16 · 2.2.0'dan kuruluma: aynı sürümde öneri, bekleyici, eski dosya kalır (`guncelleme/windows-yolu`)
+
+**Karar.** Windows denetiminin bulguları (TRAPS 161–164), Alp'in verdiği işle. Baba 2.2.0'da,
+tek başına exe'de; bir sonraki sürüm ona kurulumu ve CP-SAT'ı güvenle getirmeli.
+
+- **Aynı sürümde geçiş.** 2.2.0 kurulum alanlarını tanımaz ve tek başına exe'yi takas eder;
+  o exe aynı numarayla sorduğu için 2026-11-15'in köprüsü kurulumu hiç önermezdi. Artık
+  kurulmamış bir kopya (`kurulu_mu` değil, yalnız Windows) aynı sürümün imzalı kurulumunu
+  `gecis` olarak görür; Hakkında "Mozaik'i bu bilgisayara kurun: öneri araması (CP-SAT) için
+  gerekli" der. Kurulu kopya aynı sürümde güncel kalır. Güncellemeden sonraki ilk açılışta
+  (`--guncellendi` ya da 2.2.0'ın bıraktığı `.eski`) şerit bir kez öneriyor; ağa yine yalnız
+  düğmeyle çıkılıyor.
+- **Bekleyici ve `/P`.** Kurulum `/S` yerine `/P /R` ile (ilerleme çubuğu; bir hata bir kutu),
+  ve program kurulumu kendisi değil, geçici klasöre kopyalanmış bir bekleyici
+  (`Mozaik-kurulum-bekleyici.exe`) çalıştırıyor: Tauri'nin kurulumu çalışan her `Mozaik.exe`'yi
+  kapatır, bekleyici o adı taşımadığı için kalır. Kurulum bitmezse eski kopyayı
+  `--kurulum-olmadi <kod>` ile açar, sayfa kodlu bir uyarı gösterir. **Seçenek:** yalnız `/P`
+  (bekleyicisiz) daha basitti ama başarısızlıkta programı kapalı bırakırdı.
+- **Eski dosya kalır, kurulan programı açar.** Kurulan program eski kopyayı silmiyor;
+  her açılışta yolunu `kurulu-yol.txt`'ye (profil klasöründe) yazıyor, ve tek başına kopya o
+  notu bulursa ve kurulan program en az kendisi kadar yeniyse (notun ikinci satırı sürüm; elle
+  indirilmiş daha yeni bir exe kendisi açılır) kurulan programı açıp çıkıyor.
+  Görev çubuğundaki ve masaüstündeki simge çalışmaya devam ediyor. **Seçenek:** silip yeni
+  kısayol açmak; sabitlenmiş simgeyi kırdığı için bırakıldı. **Bedel:** iki program dosyası
+  kalıyor (eskisi 4 MB) ve eskisi kaldırılana kadar bir yönlendirici.
+- **CP-SAT.** OR-Tools 9.15'in Windows DLL'leri AVX2 istemiyor: `ortools.dll`'in 4,5 milyon
+  komutundan 675'i VEX kodlu ve her biri MSVC'nin `__isa_available` denetiminin arkasında
+  (AVX-512 yolları da öyle); `highs.dll`'in AVX2 çekirdekleri de çalışma anında seçiliyor ve
+  CP-SAT onları çağırmıyor. CPUID kapısı eklenmedi. `CP_PROOF_SUBSOLVERS`'ta kanıtı veren
+  `max_lp_sym` ve `core` başa alındı (az işçide listenin sonu düşer), işçi en az 2, ve exe soru
+  sürerken kendi sürecini `BELOW_NORMAL`'a indiriyor (sayfa WebView2'nin süreçlerinde).
+  İki işçide ölçülmedi.
+- **CI.** `guncelleme-windows.yml` yayınlanmış v2.2.0'ı kendi düğmeleriyle koşuyor: adresi
+  derlenmiş olduğu için github.com runner'da hosts ve makinenin güvendiği bir sertifikayla
+  yerel sunucuya çevriliyor. Yeni `kurulum-windows.yml` kurulumu derleyip bekleyiciyle kuruyor,
+  CP-SAT'ı kurulan DLL'lerle koşuyor ve kaldırmanın veriyi bıraktığını ölçüyor; `yayinla`
+  ikisini de bekliyor. İkisi de henüz koşmadı.
+
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 
 **Karar (Alp, 2026-11-16).** Babanın programı Windows'ta ve sitede; Mac ikinci sırada. `surum.yml`'in
@@ -135,8 +209,8 @@ Rahat'tan geniş kalsın diye 3,5rem oldu.
   yerde" ilkesinin bilinçli bir istisnası: `prunable()` hangisinin gideceğine karar veriyor,
   Rust neyin hiç gidemeyeceğine. Liste yine her şeyi gösteriyor.
 
-**Bırakılan.** `core:default`'u daraltmak ve CSP yazmak bu dala girmedi: ikisi de exe'de
-ölçülmeden yanlışsa sessizce kırılıyor (kapanışta son düzenleme, ya da açılmayan sayfa).
+**Bırakılan.** `core:default`'u daraltmak bu dala girmedi: exe'de ölçülmeden yanlışsa
+sessizce kırılıyor (kapanışta son düzenleme). CSP 2026-11-16'da geldi (yukarıda).
 
 ### 2026-11-15 · Güncellemeler imzalı (`guvenlik/imza`)
 
@@ -146,7 +220,8 @@ ile sessiz çalışıyordu. Özet dosyanın eksiksiz geldiğini söyler, bizim o
 `surum.yml` iki programı minisign (ed25519) ile imzalıyor, imzalar `surum.json`'da (`imza`,
 `kurulum_imza`), ve yayınlanan kopya imzası bizim anahtarımızla tutmayan hiçbir şeyi kurmuyor
 (`update.rs`, `imza_dogru`; doğrulayıcı `minisign-verify`, bağımlılıksız). Anahtarın açık yarısı
-`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı depo sırrı `MOZAIK_IMZA_ANAHTARI` ve Alp'in makinesinde
+`IMZA_ANAHTARI`'da derlenmiş, gizli yarısı `release` ortamının sırrı `MOZAIK_IMZA_ANAHTARI`
+(2026-11-16, yukarıda) ve Alp'in makinesinde
 `~/.config/mozaik-imza/` (600). Sır yoksa yayın durur. Test kopyası (`TEST_KOKU`) yerel sunucudan
 beslendiği için imza istemez. **Bedel:** anahtar değişirse dağıtılmış her kopya yeni sürümü
 reddeder; gizli yarı kaybolursa aynı. Yedeği Alp'te.
@@ -170,11 +245,9 @@ tam o klasörü `RmDir /r` ile siliyordu; `src-tauri/nsis/kancalar.nsh` kutunun 
 kaldırma bölümünün başında sıfırlıyor ve `surum.yml` kancanın üretilen betikte olduğunu
 ölçmeden kurulumu yayına sokmuyor.
 
-**Köprü.** Manifeste iki isteğe bağlı alan girdi (`kurulum`, `kurulum_boyut`). Sahadaki
-2.2.0 onları tanımaz ve tek dosyayı takas etmeye devam eder; o yeni exe bir sonraki
-"Denetle"de kurulumu önerir, kurulumu `/S /R` ile çalıştırır ve kendi yolunu
-`eski-kopya.txt`'ye yazar; kurulan program açılışta o eski dosyayı siler
-(`update.rs`, `silinecek_eski`: yalnız kurulu bir program, yalnız başka bir `.exe`).
+**Köprü.** Manifeste isteğe bağlı kurulum alanları girdi (`kurulum`, `kurulum_boyut`,
+`kurulum_sha256`, `kurulum_imza`). Sahadaki 2.2.0 onları tanımaz ve tek dosyayı takas etmeye
+devam eder; o exe'nin kuruluma nasıl geçtiği 2026-11-16'da.
 
 **Klasör.** Tauri'nin varsayılanı `%LOCALAPPDATA%\Mozaik`, `Kur.cmd`'nin tarayıcı
 kurulumunun klasörü. Kanca yalnız varsayılanı `%LOCALAPPDATA%\Programs\Mozaik`'e çeviriyor.

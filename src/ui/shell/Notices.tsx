@@ -6,6 +6,8 @@ import { surumEtiketi } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
 import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
+import { useState } from 'react';
+
 import { T, useT } from '../common';
 
 interface Props {
@@ -17,6 +19,14 @@ interface Props {
   updateHidden: boolean;
   setUpdateHidden: (hidden: boolean) => void;
   folder: FolderRun;
+  /** The folder's fuller copy, after an empty start ('bulundu'). */
+  openFolderCopy: () => void;
+  /** The shrink strip's "keep the small one", behind a question (App). */
+  acceptShrink: () => void;
+  /** The open plan before the last deletion of an earlier session (SD1). */
+  lastDelete: ReturnType<typeof useStore>['lastDelete'];
+  restoreLastDelete: () => void;
+  closeLastDelete: () => void;
   goTab: (tab: Tab) => void;
   ui: { setSection: (section: SectionId) => void };
 }
@@ -30,10 +40,20 @@ export default function Notices({
   updateHidden,
   setUpdateHidden,
   folder,
+  openFolderCopy,
+  acceptShrink,
+  lastDelete,
+  restoreLastDelete,
+  closeLastDelete,
   goTab,
   ui,
 }: Props) {
   const t = useT();
+  const [kurulumGizli, setKurulumGizli] = useState(false);
+  const guncellemeyeBak = () => {
+    goTab('settings');
+    ui.setSection('about');
+  };
   return (
     <>
       {!canSave && (
@@ -117,6 +137,69 @@ export default function Notices({
         </div>
       )}
 
+      {/* THE START READ NOTHING, AND THE FOLDER HOLDS A PLAN (the audit of
+      2026-11-16). A wiped WebView2 profile opens Mozaik empty while
+      Belgelerim\Ders Programı holds the school; nothing goes to the folder
+      until one of the two buttons is pressed (useFolder's `bulundu`). */}
+      {folder.status.kind === 'bulundu' && (
+        <div className="save-warning" role="status">
+          ⚠{' '}
+          <T
+            k="**Plan bu bilgisayarda boş açıldı, ama {klasor} klasöründe daha dolu bir plan dosyası var:** {dosya}, {ogretmen} öğretmen ve {ders} ders. Siz seçene kadar klasöre hiçbir şey yazılmıyor."
+            vars={{
+              klasor: folder.status.name,
+              dosya: folder.status.copy.name,
+              ogretmen: folder.status.copy.work.teachers,
+              ders: folder.status.copy.work.lessons,
+            }}
+          />{' '}
+          <button className="btn primary" onClick={openFolderCopy}>
+            {t("Belgelerim'deki son kaydı aç")}
+          </button>{' '}
+          <button className="btn" onClick={folder.release}>
+            {t('Boş başla')}
+          </button>
+        </div>
+      )}
+
+      {/* THE PLAN SHRANK SHARPLY: the live file in the folder was kept and
+      the new state went to the day's rescue file (folder.ts, `shrinks`). */}
+      {folder.shrunk !== null && (
+        <div className="save-warning" role="status">
+          ⚠{' '}
+          <T
+            k="**Plan çok küçüldü:** {ogretmen} öğretmen ve {ders} ders kaldı, klasördeki son plan dosyasında {eskiOgretmen} öğretmen ve {eskiDers} ders var. O dosya korundu, yeni hâli **{dosya}** adıyla ayrıca yazıldı."
+            vars={{
+              ogretmen: folder.shrunk.now.teachers,
+              ders: folder.shrunk.now.lessons,
+              eskiOgretmen: folder.shrunk.before.teachers,
+              eskiDers: folder.shrunk.before.lessons,
+              dosya: folder.shrunk.file,
+            }}
+          />{' '}
+          <button className="btn primary" onClick={openFolderCopy}>
+            {t("Belgelerim'deki son kaydı aç")}
+          </button>{' '}
+          <button className="btn" onClick={acceptShrink}>
+            {t('Yeni hâlini asıl dosya yap')}
+          </button>
+        </div>
+      )}
+
+      {/* THE LAST DELETION OF AN EARLIER SESSION, ONCE (TODO SD1). Its undo
+      lived in memory; the state before it waited in one slot. */}
+      {lastDelete !== null && (
+        <div className="save-warning" role="status">
+          {t('{ne} Son silmeyi geri almak için:', { ne: lastDelete.label })}{' '}
+          <button className="btn primary" onClick={restoreLastDelete}>
+            {t('Geri getir')}
+          </button>{' '}
+          <button className="btn" onClick={closeLastDelete}>
+            {t('Kapat')}
+          </button>
+        </div>
+      )}
+
       {/* A NEW BUILD IS RUNNING THE SERVICE WORKER, this page is still the
       old one. Announced rather than applied: the double-click principle's promise is
       that nothing updates itself out from under him, and a timetable
@@ -140,6 +223,49 @@ export default function Notices({
               {t('Sonra')}
             </button>
           </span>
+        </div>
+      )}
+
+      {/* THE STANDALONE EXE HAS JUST BEEN UPDATED, and the installer is what
+      brings CP-SAT (update.rs, `guncelleme_durumu`). Said once, at this start,
+      with no network: the button is the click that asks (TRAPS 161). */}
+      {update.kurulum.oner && !kurulumGizli && update.kurulum.olmadi === null && (
+        <div className="update-bar" role="status">
+          <span>
+            <T k="**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır." />
+          </span>
+          <span className="update-acts">
+            <button
+              className="btn primary"
+              onClick={() => {
+                // Said once: from here Hakkında carries it.
+                setKurulumGizli(true);
+                guncellemeyeBak();
+                update.check();
+              }}
+            >
+              {t('Kuruluma bak')}
+            </button>
+            <button className="btn" onClick={() => setKurulumGizli(true)}>
+              {t('Sonra')}
+            </button>
+          </span>
+        </div>
+      )}
+
+      {/* THE INSTALLER DID NOT FINISH, and its waiter opened this copy again
+      (update.rs, `bekle_ve_bitir`). Before 2026-11-16 the program just
+      vanished here (TRAPS 163). */}
+      {update.kurulum.olmadi !== null && (
+        <div className="save-warning" role="alert">
+          ⚠{' '}
+          <T
+            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Ayarlar → Hakkında'dan tekrar deneyebilirsiniz."
+            vars={{ kod: update.kurulum.olmadi }}
+          />{' '}
+          <button className="btn" onClick={guncellemeyeBak}>
+            {t('Güncellemeye bak')}
+          </button>
         </div>
       )}
 

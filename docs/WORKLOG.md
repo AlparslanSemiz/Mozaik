@@ -48,11 +48,17 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Dalda, birleşmedi: `erisim/geri-al` (`metin/tek-ad`'ın üstünde) SD1'in kalanını yapıyor: sınıf,
   derslik, branş, seçenek silme ve `Baştan diz` sormuyor, `Her şeyi sil` tek soru; bildirim 10 s
   ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
+- Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
+  Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
+  2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
 **Alp'te bekleyenler (yeni oturum bunları sormalı):**
-1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). Bu Mac'te gerçek
+1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). `guvenlik/sertlestirme`
+   (2026-11-16) onu `release` ortamına taşıyan iş akışını getiriyor; ayarlar Alp'te, komutları
+   BUILD.md "Yayın güvenliği"nde, ve dal birleşmeden ÖNCE uygulanmalı (yoksa `sign` depo sırrıyla
+   koşar, korumasız). Bu Mac'te gerçek
    anahtarla `minisign -S` (şifresiz, `surum.yml`'in komutuyla) ve `-V` denendi, imza ve
    güvenilen yorum doğrulandı; `cargo test` 59/59. Kalan: `~/.config/mozaik-imza/mozaik.key`'in
    yedeği (parola yöneticisi ya da şifreli USB); kaybolursa dağıtılmış kopyalar yeni sürümü
@@ -64,16 +70,22 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
    Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
 3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
-   (2.2.0 → yeni), antivirüs/SmartScreen davranışı.
+   (2.2.0 → yeni exe → kurulum, 2026-11-16'dan beri aynı sürümde önerilen), antivirüs/SmartScreen
+   davranışı; bekleyici exe'nin geçici klasörden çalışması bir tarayıcıya takılır mı.
 5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
    imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
 
-**Açık teknik işler (TODO):** capability daraltma ve
-CSP gerçek exe'de denenmeli (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
+**Açık teknik işler (TODO):** capability daraltma gerçek exe'de denenmeli, CSP
+(`guvenlik/sertlestirme`) gerçek WebView2'de doğrulanmalı (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
 `.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
 LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
 weeklyHours) eski formülle ve ikinci bakışa girmiyor; `hiz/tepki`'den sonra bırakma 4×'te hâlâ
 ~156 ms (hedef 100) ve öneri aramasında iki işçi iki gerçek çekirdekte ölçülmedi.
+
+**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
+kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
+budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
+ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
 
 ---
 
@@ -113,8 +125,51 @@ da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzg
   eşiği vardı: doldurma bir kez, eşik dolu/boş medyan oranı < 4 (bugün ~1,3). Hücre başına
   `blockAt` çağıran mutasyon oranı 6,7'ye çıkardı ve kırmızı, eski eşik onda 13 ms ile yeşil kalırdı.
 
-Belgeler: TRAPS 170 ve 171 (açık dallar 159–165'i aldığı için 170'ten başlandı), TESTPLAN
+Belgeler: TRAPS 170 ve 171 (159–165 alınmış, açık dallar da numara beklediği için 170'ten başlandı), TESTPLAN
 "Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.
+
+---
+
+## 2026-11-16 · Boyut eşiği geçici olarak 1 340 000 B ve brotli 310 000 B (`guvenlik/sertlestirme`, zincirin ucu)
+
+Veri koruması, Windows geçişi ve güvenlik zinciri `dist/index.html`'i 1 327 749 B'a taşıdı
+(eşik 1 320 000, `main` f5d4417'de 1 319 045), brotli 306,5 kB (eşik 306). `file://` açılışı,
+işlemci 4× yavaş, 9 koşu dönüşümlü: `main` medyan 619 ms, uç 624 ms (makine çok yüklü, yük
+117–159; fark gürültünün içinde). Eşikler geçici: `boyut/kucult` dalı (sözlükler, çift gömülen
+işçi kodu) birleşince yeniden düşürülecek.
+
+---
+
+## 2026-11-16 · Veri koruması: silinmiş profil, küçülme, yenilemeden sonra geri getir (`veri/koruma`)
+
+Denetimin sondası (oturum scratch'inde `denetim2/veri/`) beş yolu ölçmüştü. (1) Exe'nin WebView2
+deposu boş okununca Mozaik boş açılıyor, ilk öğretmen ya da örnek okul `ders-programi-tumu.json`'ın
+ve günün yedeğinin üstüne gidiyor, sonraki günlerde tek öğretmenli günlük "dolu" sayıldığı için
+budama gerçek yedekleri birer birer siliyordu: 10 gerçek günlük + 11 gün tek öğretmen = 0 büyük
+kopya. Şimdi boş ya da okunamayan açılış klasördeki daha dolu kaydı şeritle öneriyor
+("Belgelerim'deki son kaydı aç" / "Boş başla") ve seçilene kadar klasöre yazmıyor; dört liste
+satırının yarısının altına düşüren yazım günün `ders-programi-kurtarma-YYYY-AA-GG.json`'ına
+gidiyor ve şerit söylüyor ("Yeni hâlini asıl dosya yap" kabul ediyor); budama en dolu günlüğü
+silmiyor. Yerleşim ölçüte girmiyor: "Programı boşalt" bilerek her saati alıyor. (2) SD1'in sorusuz
+silmeleri ve `Her şeyi sil` geri almayı yalnız bellekte tutuyordu; şimdi önceki hâl tek bir depo
+yuvasında ve klasörde günün `silmeden-once` dosyasında, sonraki açılış bir kez "Geri getir" diyor.
+(3) Paketteki kimliksiz ya da tekrarlanan plan adıyla söyleniyor. (4) Plan listesi her açılışta
+yeniden yazılmıyor, bilinmeyen alanlar kalıyor. (5) JSON olmayan plan klasör satırını kırmızı
+yapıyor (B7.37'nin kalanı).
+
+Kararlar: silmeden-önce dosyası gün başına tek (exe'nin `remove_in`'i yalnız günlüğü siliyor;
+tarihli ad başına dosya Belgelerim'de birikirdi; Rust'a dokunulmadı). Klasör kopyasını açmak
+`explicitly` olmadan: dondurulmuş plan anahtarında kalıyor. Yeni şeritlerin yalnız İngilizcesi
+yazıldı (boyut: brotli 304,2 / 306 kB, ham 1 312 741 / 1 320 000 B). Taze bağlamlı incelemenin
+bulguları düzeltildi: başka klasör seçmek tutmayı ve küçülme kabulünü sıfırlıyor; kopya yalnız
+buradaki OKUNAN planlarda satır yoksa öneriliyor (dondurulmuş plan sayılmıyor), klasör okunurken
+yazılmıyor; küçülme şeridinde "son kaydı aç" da var ve kabul soru soruyor; yuva yalnız plan
+silmeden sonra değişmediyse öneriliyor (`noteAfter`); kilitli dosya küçülme denetiminde hata
+değil; JSON olmayan planda "klasörü yeniden seçin" denmiyor. Reddedilen: canlı dosyanın küçülme
+şeridi kapatılmazsa günlerce eski kalması (bilerek: eski ve büyük olan güvenli yön; şerit her
+oturum yeniden çıkıyor). Doğrulama: `npm run hizli` 1604/1604 (linuxKur süre aşımı tek başına
+yeşil), E2E klasor, exe, okunamayan (yeni 7 test), planlar, ayarlar, kurulum, iki-kopya 168/168
+(`--workers=2`). Gerçek Windows exe'de koşulmadı.
 
 ## 2026-11-16 · Mac yayını engellemez; Cmd+C/V elle denendi (`platform/mac`)
 
@@ -173,6 +228,71 @@ src/kontrat.test.ts src/surum.test.ts` yeşil, `npx tsc --noEmit -p .` 0, dokunu
 
 ---
 
+
+## 2026-11-16 · Güvenlik sertleştirmesi, ikinci tur (`guvenlik/sertlestirme`)
+
+İkinci güvenlik denetiminin yedi bulgusu (notlar oturumun scratch'inde). `main`'den (c8b46ac)
+açıldı, birleşmedi. Ayrıntı ve gerekçe DECISIONS 2026-11-16, ayarlar BUILD.md "Yayın güvenliği".
+
+- **İmza anahtarı:** `surum.yml`'de imza ayrı `sign` işinde, `environment: release`; `publish`
+  anahtarı görmüyor. Ortamı, etiket kuralını, sırrın taşınmasını, etiket kural setini ve SHA
+  zorunluluğunu Alp `gh api` ile yapacak (bu dal hiçbir ayara dokunmadı). Başka iş akışı
+  `MOZAIK_IMZA_ANAHTARI`'yı anmıyor (`grep`). Bütün eylemler SHA'ya sabit (`actions/*` dahil).
+- **Yayın derlemesi:** `npm ci --ignore-scripts`, önbelleksiz. Temiz bir kopyada `npm ci
+  --ignore-scripts && npm run build && npm run paket` yeşil, `dist/index.html` 1 301 713 B.
+- **CSP:** `tauri.conf.json`'da katı politika, `e2e/csp.spec.ts` (3 test). Kırmızı ölçüldü:
+  `worker-src blob:` silinince arama ana iş parçacığında koştu (`data-oneri-isci` 0) ve ihlaller
+  konsola düştü; `dangerousDisableAssetCspModification` olmadan Radix'in `<style>`'ı reddedildi
+  (tuzak 165). Gerçek WebView2'de doğrulanmadı.
+- **CP-SAT:** yalnız kurulu kopyanın klasöründen, Windows'ta `LoadLibraryExW`
+  (`LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32`); `MOZAIK_ORTOOLS` yalnız
+  debug. Windows hedefi için tam `cargo check` bu Mac'te `llvm-rc` olmadığı için koşmadı; aynı
+  `ac()` gövdesi `libloading 0.7.4`'le ayrı bir küçük paket olarak `x86_64-pc-windows-msvc`'ye
+  derlendi.
+- **Güncelleme:** indirme parça parça, `boyut`'u (en çok 256 MB) aşan ilk parçada durur; kurulum
+  her seferinde `%TEMP%` altında yeni bir klasöre (Unix'te 0700), öncekiler silinerek. `kurulumu_baslat`'a ve karar
+  mantığına dokunulmadı (`guncelleme/windows-yolu` orada çalışıyor).
+
+- **Mac, main'le birleşince (78f1062):** Mac imzası `sign`'da, Mac işi betiksiz ve önbelleksiz,
+  `mac.yml` SHA'ya sabit, Mac indirmesi sınırlı, `icerde_mi`, sertleştirilmiş çalışma zamanı ve
+  ad-hoc pakete `disable-library-validation`. Bu Mac'te: `scripts/ortools-mac.sh arm64`, `tauri
+  build` (`Mozaik.app` 57 MB, `codesign --verify --deep --strict` temiz, `flags=adhoc,runtime`),
+  paket sahte ev dizininde açıldı ve 20 s ayakta kaldı, sayfa CSP altında WKWebView'de çizildi.
+  CP-SAT'ın küçük modeli, paketin `Contents/Frameworks/libortools.9.dylib`'iyle, aynı biçimde
+  imzalı (ad-hoc + runtime) bir test ikilisinde: istisnasız "different Team IDs", istisnayla geçti.
+  Paketin kendi sürecinde öneri araması tıklanmadı.
+
+Koşulanlar: `cargo test` (66), `npm run hizli`, `tsc`, `eslint`, `prettier`, `vite build`, `npm run
+boyut`, `actionlint` (yalnız `kanarya.yml`'in bilinen `ubuntu-26.04` etiketi), `e2e/csp.spec.ts`.
+Bu makinede `flock` yok, Playwright kilitsiz koştu.
+
+---
+
+---
+
+## 2026-11-16 · 2.2.0'dan kuruluma giden Windows yolu (`guncelleme/windows-yolu`)
+
+Windows denetiminin altı bulgusu (DECISIONS 2026-11-16, tuzak 161–164). Commit'ler: `update.rs`
+ve `lib.rs` (aynı sürümde `gecis`, bekleyici ve `/P /R`, eski dosyanın kurulan programı açması,
+`guncelleme_durumu`), sayfa (Hakkında metinleri, şerit, dört sözlük), CP-SAT (alt çözücü sırası,
+en az iki işçi, `BELOW_NORMAL`), CI (`guncelleme-220.mjs`, `kurulum-windows.yml`, `yayinla`
+bekliyor), belgeler.
+
+**AVX2 (ölçüldü, bu Mac, `objdump -d`).** `surum.yml`'in sabitlediği arşiv indirildi, özeti tuttu
+(`43429c74…ea30`). `ortools.dll` 34,5 MB, 4 523 099 satır; VEX kodlu 675 komut (en çok
+`vmovdqu` 100, `vpblendvb` 43, `vpmullq` 32 AVX-512DQ), `%ymm` 413, FMA 0; bakılan yollar
+`cmpl $0x6, __isa_available` arkasında (MSVC'nin çalışma anı seçimi). Ötekiler: `highs` 5 834 VEX
+/ 4 578 ymm (HiGHS'ın kendi seçimli çekirdekleri, CP-SAT çağırmıyor), `abseil` 209, `libprotobuf`
+164, `libscip` 93, `re2` 25, `zlib1`/`bz2`/`libutf8_validity` 0. Sonuç: taban x86-64 (SSE2),
+AVX2 gerekmiyor, CPUID kapısı eklenmedi. DLL'in başlatıcıları ayrıca ayıklanmadı.
+
+**Koşulan.** `cargo test` 68/68 (bu Mac); `MOZAIK_ORTOOLS` Mac'teki `libortools.9.dylib`'le küçük
+model geçti; `cargo check --target x86_64-pc-windows-msvc --all-targets` uyarısız (llvm-rc yerine
+boş çıktı yazan bir taslakla; bağlama yok); `cargo clippy` yeni uyarı yok; `npm run tipler`,
+eslint, prettier, `kontrat`/`docs`/sözlük testleri yeşil; `npm run hizli` yük 41 iken iki koşuda 4 ve 7 testi süre aşımıyla düşürdü (`linuxKur`, `App`, `relax`, `sentences`, `programScreen`), beşi tek başına uzun süre sınırıyla 65/65; `actionlint` iki iş
+akışında temiz. **Koşulmayan:** iki Windows iş akışı (Windows makinesi yok, dal itilmedi),
+Playwright, iki işçide CP-SAT ölçümü (babanın verisi bu oturumda yok; örnek okulla ölçmek
+kanıt sorusunu cevaplamazdı).
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
 

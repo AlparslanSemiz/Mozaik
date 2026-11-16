@@ -860,20 +860,31 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [~] **B7.38 Kurulum paketi ve CP-SAT (2026-11-15, DECISIONS).** Yazıldı:
       `teslim/kurulum-paketi` (NSIS, veri silmeyen kaldırıcı, köprü). Kalan, sırayla:
       (1) `surum.yml`'i yayınlamadan koşup kurulumun üretildiğini ve kancaların girdiğini
-      görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
+      görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi.
+      Yazıldı, doğrulanmadı (2026-11-16, `guncelleme/windows-yolu`, DECISIONS): köprü exe
+      kurulumu aynı sürümde öneriyor (`gecis`), güncellemeden sonra bir kez şeritte; kurulum
+      bekleyiciyle `/P /R`, bitmezse eski kopya kodlu uyarıyla açılıyor; eski dosya silinmiyor,
+      kurulan programı açıyor; CI'da gerçek 2.2.0'ın güncelleyicisi (`guncelleme-windows.yml`,
+      ikinci evre) ve kurulum kapısı (`kurulum-windows.yml`), ikisi de henüz koşmadı. Kalan:
+      ikisini `main`'de ya da elle koşup yeşile çekmek; başarısız kurulum yolunu (`--kurulum-olmadi`)
+      gerçek bir Windows'ta bir kez denemek (CI'da yok); babanın makinesinde kurulumun virüs
+      tarayıcısına takılmadığına bakmak;
       (3) Yazıldı (`ozellik/cpsat`): DLL'ler kurulumda, Rust C API'si, `CpFormula`, ikinci
       bakış (`cpsatOr`), CP-SAT'a kendi modeli (`cpModel.ts`, öğretmen saati aileleri ve
       kurallar) — ikinci bakış açık (`CP_SECOND_LOOK`, DECISIONS; ölçüm kirli). Kalan:
       (a) öteki aileler `cpModel.ts`'e (mixed, hand, reassign, blockShape, weeklyHours) ve
       ikinci bakışa, (b) babanın makinesinde çekirdek sayısı ve süre, temiz koşulda yeniden
       ölçüm, (c) gerçek exe'de `cpsat_var` doğru mu (WebView2'de ham bayt `invoke`'u
-      ölçülmedi), (d) CP-SAT'lı altın sayı testi (4, 6+..., 9) yerelde ya da haftalık işte.
+      ölçülmedi; `kurulum-windows.yml` yalnız kurulan DLL'in küçük modeli çözdüğünü ölçüyor),
+      (d) CP-SAT'lı altın sayı testi (4, 6+..., 9) yerelde ya da haftalık işte, (e) iki işçide
+      (iki çekirdekli makine) kanıt ve süre: `CP_PROOF_SUBSOLVERS`'ın yeni sırası ve
+      `BELOW_NORMAL` ölçülmedi. AVX2: DLL'ler istemiyor (DECISIONS 2026-11-16), kapı yok.
 - [~] **B7.39 Güvenlik sertleştirmesi (2026-11-15, `guvenlik/sertlestirme`, #20'nin üstünde).**
       Güvenlik ve veri denetiminin küçük maddeleri. **Yapılan:** `write_in` geçici dosyayı
       `sync_all` ile diske yazıp yeniden adlandırıyor, Unix'te klasörü de (V2); `verify`
       `boyut == 0`'ı reddediyor (G4); `.eski` yeni sürümün sayfası yüklenince siliniyor (V9);
       `remove_file` yalnız `ders-programi-YYYY-AA-GG.json` siliyor (G7); `.yeni` ve kurulum
-      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun (`ESKI_KOPYA_NOTU`) sınırının testleri (V8); üçüncü
+      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun sınırının testleri (V8; not ve silme 2026-11-16'da kalktı, sınır artık `kurulu_hedef`'te); üçüncü
       taraf action'lar SHA ile sabit (G5); Dependabot'ta cargo. Hepsi `cargo test`'te, Windows'ta
       koşulmadı. **Kalan, karar ya da ölçüm isteyen:**
       (1) **Capability (G6).** `core:default` yerine yalnız `core:event:allow-listen` ve
@@ -883,13 +894,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       düzenlemeyi yazmadan kapanır, bunu ölçen bir CI testi yok. Önce gerçek exe'de (`gercek-exe`
       süiti, kapanış testiyle) denenmeli; sonra `build.rs`'e `AppManifest::commands` ve
       capability'ye yalnız kullanılan `allow-*` izinleri.
-      (2) **CSP (G4).** `tauri.conf.json` `csp: null` bilerek kaldı. Öneri:
-      `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'
-      data: blob:; worker-src blob:; connect-src ipc: http://ipc.localhost; object-src 'none';
-      base-uri 'none'; form-action 'none'`. Risk: tek dosyalı derleme betiği satır içi
-      koyuyor; Tauri yalnız kendi eklediklerine hash basıyorsa sayfa açılmaz. Exe'de bir kez
-      açılıp konsolda CSP ihlali aranmalı, gerekiyorsa satır içi betiğin hash'i derlemede
-      üretilmeli.
+      (2) ~~**CSP (G4).**~~ Yazıldı 2026-11-16 (`guvenlik/sertlestirme`, DECISIONS 2026-11-16):
+      `e2e/csp.spec.ts` derlenmiş sayfayı Tauri'nin hesabıyla aynı başlık altında Chromium'da
+      yürüyor (worker'lar dahil). Gerçek WebView2'de doğrulanmadı: birleşince `exe-windows.yml`
+      (ya da dalda elle `workflow_dispatch`) konsolda CSP ihlali olmadan yeşil olmalı.
       (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
       Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
       (4) ~~`apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).~~
@@ -917,9 +925,17 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       **Yayın kapısı (2026-10-24, Alp; İÇİNDEKİLER'in altı):** bu kalan ve TP7 yeşil olmadan
       etiket yok. **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
       `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
-      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
-      değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
-      olsa, dolu ana dosyanın ve günün yedeğinin üstüne yazar (dünkü yedekler kalır).
+      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor.
+      ~~Okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile değilse) bunu ekranda
+      söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile olsa, dolu ana dosyanın ve
+      günün yedeğinin üstüne yazar.~~ **Yazıldı (2026-11-16, `veri/koruma`, birleşmedi; sahte köprüde
+      doğrulandı, gerçek Windows exe'de koşulmadı):** JSON olmayan plan klasör satırını kırmızı
+      yapıyor, planın adıyla; boş ya da okunamayan açılış klasördeki daha dolu kaydı şeritle
+      öneriyor ("Belgelerim'deki son kaydı aç" / "Boş başla") ve seçilene kadar klasöre yazmıyor;
+      yarının altına küçülten yazım günün kurtarma dosyasına gidiyor ve şerit söylüyor; budama en
+      dolu günlüğü silmiyor (DATA "Dosya biçimleri", tuzak 159). Kalan: kurtarma ve silmeden-önce
+      dosyaları exe'de budanmıyor (`remove_in` yalnız günlüğü siliyor), gün başına bir dosya
+      birikiyor; yeni şeritlerin dört dilde çevirisi.
       **Birleşmede:** `tb7-sekme-kapanis`'in yeni gerçek exe testi ("X ile hemen kapanan
       pencere…") taze profilde klasörün kendiliğinden yazılmasını bekleyerek başlıyor; o satır
       1,5 s beklemeyle değişir (ölçüldü: birleşik kopyada gerçek Linux exe'de yeşil).
@@ -2033,7 +2049,12 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       sonra odak sonraki (son satırda önceki, liste boşsa ekleme kutusuna) satırın `Sil`'ine
       gidiyor, bildirim ekran okuyucuya "Geri almak için Ctrl+Z" diyor, Ctrl+Z "Geri alındı: …"
       diyor. Seçenek değiştirmek geri al geçmişini artık silmiyor ve kendisi bir adım değil (geçmiş
-      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
+      bütün durumları tutuyor, geri alma değişikliğin yapıldığı seçeneği getiriyor).
+      **Yenilemeden sonra (2026-11-16, `veri/koruma`, birleşmedi):** geri al bellekteydi, yenileme
+      silmeden önceki hâli hiçbir yerde bırakmıyordu (tuzak 160). Artık her sorusuz silmeden,
+      `Her şeyi sil`, örnek okul, `Baştan diz` ve `Dosyadan aç`tan önce açık plan
+      `ders-programi-silmeden-once` yuvasına (klasörde günün `silmeden-once` dosyasına) yazılıyor ve
+      sonraki açılış bir kez "Son silmeyi geri almak için: Geri getir" diyor (DATA). Kalan: KS26 (30 adımlık tavan sessizce bitiyor);
       `Dosyadan aç` geçmişi hâlâ siliyor (bilerek, soru soruyor); bildirime klavyeyle doğrudan
       gidecek bir kısayol yok (F6 tarayıcının; odak `Geri al`dan sonra geldiği yere dönüyor);
       Derslikler'in Özet kutusu hâlâ "Derslik çakışması onlar için hiç kontrol edilmez" diyor.

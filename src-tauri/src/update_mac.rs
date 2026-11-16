@@ -203,7 +203,46 @@ pub fn ac(paket: &Path, exe_adi: &std::ffi::OsStr) -> Result<PathBuf, String> {
     if !tam {
         return Err("İnen paket eksik: içinde çalışacak bir Mozaik yok.".into());
     }
+    icerde_mi(&yeni)?;
     Ok(yeni)
+}
+
+/// Does every entry of the unpacked bundle stay inside it (güvenlik denetimi
+/// 2026-11-16)? The archive is signed, so this is the second lock, not the
+/// first: a symlink is accepted only when it is relative, resolves, and lands
+/// inside the bundle; anything that is neither a file, a folder nor such a
+/// link (a FIFO, a device) is refused. `/usr/bin/tar` already refuses `..` and
+/// absolute names on the way in; this looks at what came out, before the swap
+/// puts it where the program runs.
+pub fn icerde_mi(kok: &Path) -> Result<(), String> {
+    let hata = |e: std::io::Error| format!("Paket okunamadı: {e}");
+    let gercek_kok = fs::canonicalize(kok).map_err(hata)?;
+    let mut sira = vec![kok.to_path_buf()];
+    while let Some(klasor) = sira.pop() {
+        for girdi in fs::read_dir(&klasor).map_err(hata)? {
+            let yol = girdi.map_err(hata)?.path();
+            let tur = fs::symlink_metadata(&yol).map_err(hata)?.file_type();
+            if tur.is_symlink() {
+                let hedef = fs::read_link(&yol).map_err(hata)?;
+                let icerde = !hedef.is_absolute()
+                    && fs::canonicalize(&yol).is_ok_and(|g| g.starts_with(&gercek_kok));
+                if !icerde {
+                    return Err(format!(
+                        "İnen paket dışarıyı gösteren bir bağ taşıyor: {}",
+                        yol.display()
+                    ));
+                }
+            } else if tur.is_dir() {
+                sira.push(yol);
+            } else if !tur.is_file() {
+                return Err(format!(
+                    "İnen pakette beklenmeyen bir dosya: {}",
+                    yol.display()
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Exchanges two folders' places. On the Mac one call does it atomically: at
@@ -274,6 +313,54 @@ mod tests {
         fs::create_dir_all(yer.join("Contents/MacOS")).unwrap();
         fs::write(yer.join("Contents/Info.plist"), "<plist/>").unwrap();
         fs::write(yer.join("Contents/MacOS/mozaik"), icerik).unwrap();
+    }
+
+    #[test]
+    fn a_plain_bundle_stays_inside() {
+        let tmp = Scratch::new("icerde-duz");
+        let app = tmp.0.join("Mozaik.app");
+        paket_yap(&app, "yeni");
+        assert!(icerde_mi(&app).is_ok());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_link_inside_the_bundle_is_fine_one_leaving_it_is_not() {
+        use std::os::unix::fs::symlink;
+        let tmp = Scratch::new("icerde-bag");
+        let app = tmp.0.join("Mozaik.app");
+        paket_yap(&app, "yeni");
+        symlink("MacOS/mozaik", app.join("Contents/kisayol")).unwrap();
+        assert!(icerde_mi(&app).is_ok());
+
+        let disari = [
+            ("mutlak", PathBuf::from("/etc/hosts")),
+            ("yukari", PathBuf::from("../../../disarida")),
+            ("kirik", PathBuf::from("yok-boyle-bir-sey")),
+        ];
+        fs::write(tmp.0.join("disarida"), "x").unwrap();
+        for (ad, hedef) in disari {
+            let bag = app.join("Contents/MacOS").join(ad);
+            symlink(&hedef, &bag).unwrap();
+            assert!(icerde_mi(&app).is_err(), "{ad}");
+            fs::remove_file(&bag).unwrap();
+        }
+        assert!(icerde_mi(&app).is_ok());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_fifo_in_the_bundle_is_refused() {
+        let tmp = Scratch::new("icerde-fifo");
+        let app = tmp.0.join("Mozaik.app");
+        paket_yap(&app, "yeni");
+        let fifo = app.join("Contents/boru");
+        let durum = std::process::Command::new("mkfifo")
+            .arg(&fifo)
+            .status()
+            .unwrap();
+        assert!(durum.success());
+        assert!(icerde_mi(&app).is_err());
     }
 
     #[test]
