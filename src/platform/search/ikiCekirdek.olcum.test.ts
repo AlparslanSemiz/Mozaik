@@ -19,7 +19,7 @@
 //   MOZAIK_OLCUM_MASK    affinity the CP-SAT process sets on itself (Windows)
 //   MOZAIK_OLCUM_PYTHON  python to run (default `python`)
 
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { availableParallelism, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -36,8 +36,8 @@ const PYTHON = process.env['MOZAIK_OLCUM_PYTHON'] || 'python';
 const CEKIRDEK = Number(process.env['MOZAIK_OLCUM_CEKIRDEK'] || 0);
 
 interface Soru {
-  /** Which way the search was on when it asked. */
-  family: string;
+  /** When it was asked, from the search's start. */
+  atMs: number;
   limitS: number;
   workers: number;
   wallS: number;
@@ -53,15 +53,14 @@ interface Soru {
 }
 
 const hook = vi.hoisted(() => ({
-  ask: null as null | ((params: Uint8Array, model: Uint8Array) => Uint8Array),
+  ask: null as null | ((params: Uint8Array, model: Uint8Array) => Promise<Uint8Array>),
 }));
 
 vi.mock('../exe', async (original) => ({
   ...(await original<typeof import('../exe')>()),
   isDesktop: () => true,
   desktopCpsatVar: () => Promise.resolve(true),
-  desktopCpsatCoz: (params: Uint8Array, model: Uint8Array) =>
-    Promise.resolve(hook.ask!(params, model)),
+  desktopCpsatCoz: (params: Uint8Array, model: Uint8Array) => hook.ask!(params, model),
   desktopCpsatDurdur: () => Promise.resolve(),
 }));
 
@@ -154,35 +153,33 @@ async function layout(d: State, options: Partial<SolverOptions>) {
 /** The suggestion search after a stuck run, as useSolver starts it. */
 async function suggest(from: State, stuck: State, sorular: Soru[], errors: string[]) {
   let cpStartMs: number | null = null;
-  let beforeCp: Array<{ family: string; size: number; proven: boolean }> = [];
   const t0 = performance.now();
-  const dir = mkdtempSync(join(tmpdir(), 'olcum-'));
-  let relaxer: ReturnType<typeof startRelax> | null = null;
-  hook.ask = (params, model) => {
-    if (cpStartMs === null) {
-      cpStartMs = performance.now() - t0;
-      beforeCp = relaxer!.progress().suggestions.map((s) => ({
-        family: s.family,
-        size: s.size,
-        proven: s.proven,
-      }));
-    }
+  /** One process per question, not waited for: our search goes on beside it, as in the exe. */
+  const run = (dir: string) =>
+    new Promise<{ status: number | null; out: string; err: string }>((resolve) => {
+      const child = spawn(PYTHON, [
+        join(import.meta.dirname, '../../../scripts/olcum/cpsat-soru.py'),
+        DLL,
+        dir,
+      ]);
+      let out = '';
+      let err = '';
+      child.stdout.on('data', (b: Buffer) => (out += b.toString()));
+      child.stderr.on('data', (b: Buffer) => (err += b.toString()));
+      child.on('error', (e) => resolve({ status: -1, out, err: err + String(e) }));
+      child.on('close', (status) => resolve({ status, out, err }));
+    });
+  hook.ask = async (params, model) => {
+    const atMs = Math.round(performance.now() - t0);
+    if (cpStartMs === null) cpStartMs = atMs;
+    const dir = mkdtempSync(join(tmpdir(), 'olcum-'));
     writeFileSync(join(dir, 'params.bin'), params);
     writeFileSync(join(dir, 'model.bin'), model);
-    const run = spawnSync(
-      PYTHON,
-      [join(import.meta.dirname, '../../../scripts/olcum/cpsat-soru.py'), DLL, dir],
-      {
-        encoding: 'utf8',
-        maxBuffer: 256 * 2 ** 20,
-      },
-    );
-    const out = run.stdout ?? '';
+    const { status, out, err } = await run(dir);
     const line = out.split(/\r?\n/).find((l) => l.startsWith('OLCUM '));
-    if (run.status !== 0 || line === undefined) {
-      // relaxPool swallows a failed question (it keeps our own answer), so
-      // the failure is written down here or nowhere.
-      const why = `cpsat-soru.py: ${run.status} ${run.error?.message ?? ''} ${run.stderr} ${out.slice(-2000)}`;
+    if (status !== 0 || line === undefined) {
+      // relaxPool swallows a failed question, so the failure is written down here or nowhere.
+      const why = `cpsat-soru.py: ${status} ${err} ${out.slice(-2000)}`;
       errors.push(why);
       throw new Error(why);
     }
@@ -196,7 +193,7 @@ async function suggest(from: State, stuck: State, sorular: Soru[], errors: strin
     const read = readAnswer(answer);
     const logged = readLog(out);
     sorular.push({
-      family: relaxer!.progress().family,
+      atMs,
       ...readParams(params),
       wallS: own.wallS,
       firstS: logged.firstS,
@@ -211,22 +208,29 @@ async function suggest(from: State, stuck: State, sorular: Soru[], errors: strin
     return answer;
   };
 
-  relaxer = startRelax(from, activePlacements(stuck), { keepPlaced: false });
+  const relaxer = startRelax(from, activePlacements(stuck), { keepPlaced: false });
   let firstSuggestionMs: number | null = null;
-  let seen = '';
-  let lastChange = 0;
-  let longestQuietMs = 0;
+  /** Two clocks of silence: nothing new at all on screen (text or bar), and no new or smaller way. */
+  const quiet = { seen: '', last: 0, longest: 0 };
+  const news = { seen: '', last: 0, longest: 0 };
+  const arrivals: Array<{ family: string; size: number; proven: boolean; atMs: number }> = [];
+  const mark = (c: typeof quiet, sig: string, now: number) => {
+    if (sig === c.seen) return;
+    c.longest = Math.max(c.longest, now - c.last);
+    c.last = now;
+    c.seen = sig;
+  };
   const look = (p: RelaxProgress) => {
     const now = performance.now() - t0;
-    const sig = JSON.stringify([
-      p.family,
-      p.finished,
-      p.suggestions.map((s) => [s.family, s.size, s.proven]),
-    ]);
-    if (sig !== seen) {
-      longestQuietMs = Math.max(longestQuietMs, now - lastChange);
-      lastChange = now;
-      seen = sig;
+    const ways = p.suggestions.map((s) => [s.family, s.size, s.proven]);
+    const total = p.steps?.total ?? 10;
+    const bar = Math.floor((100 * ((p.steps?.done ?? p.finished.length) + (p.share ?? 0))) / total);
+    mark(quiet, JSON.stringify([p.family, p.steps, bar, ways]), now);
+    mark(news, JSON.stringify(ways), now);
+    for (const s of p.suggestions) {
+      const was = [...arrivals].reverse().find((a) => a.family === s.family);
+      if (was === undefined || was.size !== s.size || was.proven !== s.proven)
+        arrivals.push({ family: s.family, size: s.size, proven: s.proven, atMs: Math.round(now) });
     }
     if (firstSuggestionMs === null && p.suggestions.length > 0) firstSuggestionMs = now;
   };
@@ -235,13 +239,15 @@ async function suggest(from: State, stuck: State, sorular: Soru[], errors: strin
     look(relaxer.progress());
     if (r !== null) {
       const now = performance.now() - t0;
-      longestQuietMs = Math.max(longestQuietMs, now - lastChange);
+      quiet.longest = Math.max(quiet.longest, now - quiet.last);
+      news.longest = Math.max(news.longest, now - news.last);
       return {
         wallMs: Math.round(now),
         firstSuggestionMs: firstSuggestionMs === null ? null : Math.round(firstSuggestionMs),
         cpStartMs: cpStartMs === null ? null : Math.round(cpStartMs),
-        longestQuietMs: Math.round(longestQuietMs),
-        beforeCp,
+        longestQuietMs: Math.round(quiet.longest),
+        longestNoNewsMs: Math.round(news.longest),
+        arrivals,
         suggestions: r.suggestions.map((s) => ({
           family: s.family,
           size: s.size,

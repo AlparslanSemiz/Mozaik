@@ -61,7 +61,7 @@ for (const [ad, r] of runs) {
 
 out.push('', '### Öneri araması (takılan hafta)', '');
 out.push(
-  '| okul | koşu | ilk öneri | CP-SAT başlar | toplam | en uzun sessizlik | bizim arama | sonuç | CP-SAT tepe bellek |',
+  '| okul | koşu | ilk öneri | ilk CP-SAT sorusu | toplam | en uzun durgunluk (yazı ve çubuk) | yeni yolsuz en uzun | sonuç | CP-SAT tepe bellek |',
 );
 out.push('|---|---|---|---|---|---|---|---|---|');
 for (const [ad, r] of runs) {
@@ -72,21 +72,32 @@ for (const [ad, r] of runs) {
     }
     const peak = Math.max(0, ...x.sorular.map((q) => q.peakMb));
     out.push(
-      `| ${x.name} | ${ad} | ${s(x.search.firstSuggestionMs)} | ${s(x.search.cpStartMs)} | ${s(x.search.wallMs)} | ${s(x.search.longestQuietMs)} | ${ways(x.search.beforeCp)} | ${ways(x.search.suggestions)} | ${peak ? `${Math.round(peak)} MB` : '—'} |`,
+      `| ${x.name} | ${ad} | ${s(x.search.firstSuggestionMs)} | ${s(x.search.cpStartMs)} | ${s(x.search.wallMs)} | ${s(x.search.longestQuietMs)} | ${s(x.search.longestNoNewsMs)} | ${ways(x.search.suggestions)} | ${peak ? `${Math.round(peak)} MB` : '—'} |`,
     );
+  }
+}
+
+out.push('', '### Yolların gelişi', '');
+for (const [ad, r] of runs) {
+  for (const x of r.schools) {
+    if (!x.search?.arrivals?.length) continue;
+    const list = x.search.arrivals
+      .map((a) => `${s(a.atMs)} ${a.family} ${a.size}${a.proven ? '✓' : ''}`)
+      .join(' · ');
+    out.push(`- ${ad}, ${x.name}: ${list}`);
   }
 }
 
 out.push('', '### CP-SAT soruları', '');
 out.push(
-  '| okul | koşu | # | yol | sınır | ilk çözüm | süre | durum | amaç (ilk → son) | tepe bellek |',
+  '| okul | koşu | # | soruldu | sınır | ilk çözüm | süre | durum | amaç (ilk → son) | tepe bellek |',
 );
 out.push('|---|---|---|---|---|---|---|---|---|---|');
 for (const [ad, r] of runs) {
   for (const x of r.schools) {
     x.sorular.forEach((q, i) => {
       out.push(
-        `| ${x.name} | ${ad} | ${i + 1} | ${q.family} | ${q.limitS} s | ${sec(q.firstS)} | ${sec(q.wallS)} | ${q.status} | ${q.firstObjective ?? '—'} → ${q.objective} | ${Math.round(q.peakMb)} MB |`,
+        `| ${x.name} | ${ad} | ${i + 1} | ${s(q.atMs)} | ${q.limitS} s | ${sec(q.firstS)} | ${sec(q.wallS)} | ${q.status} | ${q.firstObjective ?? '—'} → ${q.objective} | ${Math.round(q.peakMb)} MB |`,
       );
     });
   }

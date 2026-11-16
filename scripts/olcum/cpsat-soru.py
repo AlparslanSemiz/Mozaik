@@ -67,6 +67,9 @@ def affinity():
     mask = os.environ.get("MOZAIK_OLCUM_MASK", "")
     if mask:
         k32.SetProcessAffinityMask(me, int(mask, 0))
+    # BELOW_NORMAL_PRIORITY_CLASS, as cpsat.rs sets it while it solves.
+    k32.SetPriorityClass.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
+    k32.SetPriorityClass(me, 0x4000)
     p, s = ctypes.c_size_t(), ctypes.c_size_t()
     k32.GetProcessAffinityMask(me, ctypes.byref(p), ctypes.byref(s))
     return {"process": p.value, "system": s.value}
