@@ -122,3 +122,46 @@ export function uiaBas(adlar, { pencere = 'Mozaik', tam = false, sureMs = 30_000
     throw new Error(`UI Automation basamadı (${adlar.join(' | ')}):\n${cikti || e.message}`);
   }
 }
+
+const TUS = `
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName UIAutomationClient
+Add-Type -AssemblyName UIAutomationTypes
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type @'
+using System; using System.Runtime.InteropServices;
+public static class Pencere {
+  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+}
+'@
+$A = [System.Windows.Automation.AutomationElement]
+$T = [System.Windows.Automation.TreeScope]
+$kosul = New-Object System.Windows.Automation.PropertyCondition($A::NameProperty, $env:UIA_PENCERE)
+$p = $A::RootElement.FindFirst($T::Children, $kosul)
+if ($null -eq $p) { "pencere yok: $env:UIA_PENCERE"; exit 3 }
+[void][Pencere]::SetForegroundWindow([IntPtr]$p.Current.NativeWindowHandle)
+Start-Sleep -Milliseconds 300
+foreach ($t in @($env:UIA_TUSLAR -split "\`n" | Where-Object { $_ -ne '' })) {
+  [System.Windows.Forms.SendKeys]::SendWait($t)
+  Start-Sleep -Milliseconds 400
+}
+"basildi tuslar"
+`;
+
+/**
+ * Types into the program's window the way a person does: brought to the
+ * front, then each entry of `tuslar` through SendKeys (`^k` is Ctrl+K,
+ * `{ENTER}` Enter), with a pause between them for the page to answer.
+ */
+export function uiaTus(tuslar, { pencere = 'Mozaik' } = {}) {
+  try {
+    return execFileSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', TUS], {
+      encoding: 'utf8',
+      env: { ...process.env, UIA_TUSLAR: tuslar.join('\n'), UIA_PENCERE: pencere },
+      timeout: 60_000,
+    }).trim();
+  } catch (e) {
+    const cikti = `${e.stdout ?? ''}${e.stderr ?? ''}`.trim();
+    throw new Error(`UI Automation yazamadı (${tuslar.join(' ')}):\n${cikti || e.message}`);
+  }
+}
