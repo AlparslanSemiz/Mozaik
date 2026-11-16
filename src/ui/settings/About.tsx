@@ -134,13 +134,13 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
   const t = useT();
   const [entry, ...older] = SURUM_NOTLARI;
 
-  useEffect(() => {
+  // Seen when the folded notes are OPENED (since 2026-11-16 they are folded;
+  // marking them on mount would clear the dot with nothing read).
+  const seen = (open: boolean) => {
+    if (!open) return;
     if (entry !== undefined) markChangelogSeen(entry.version);
     onSeen();
-    // Only at mount: `onSeen` is a stable setter from App, and re-running
-    // this on every render would fight a dot that a DIFFERENT tab just lit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   if (entry === undefined) return null;
 
@@ -149,7 +149,7 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
       <h2>{t('Yenilikler')}</h2>
       {/* Collapsed since 2026-11-16 (Sadeleşme): the notes are read once,
           and open they were the longest text on the screen. */}
-      <details>
+      <details onToggle={(e) => seen(e.currentTarget.open)}>
         <summary>
           <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
         </summary>

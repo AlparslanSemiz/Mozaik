@@ -392,8 +392,9 @@ function LessonPool({
             </>
           ) : (
             <>
-              {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
-                  calling them two lessons would not add up against Kurulum. */}
+              {/* Counts BLOCKS: a 2+1 lesson leaves two here. Called "ders"
+                  on screen since K4b (2026-11-16, "kart" → "ders"); the count
+                  is the tray's, not Dersler's lesson count. */}
               <strong>{t('{n} ders bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
                 {/* Narrowed, the head says so with the number it is hiding.

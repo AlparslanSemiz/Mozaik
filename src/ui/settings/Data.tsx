@@ -168,7 +168,7 @@ export default function Data({
           ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
           : isPlan
             ? t(
-                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden "Dosyadan aç" ile açabilirsiniz.',
               )
             : [t('Bu dosya okunamadı') + '.', ...WRONG_FILE.map((k) => t(k))].join(' '),
       });

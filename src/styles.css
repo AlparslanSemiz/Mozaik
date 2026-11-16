@@ -1264,9 +1264,11 @@ textarea {
   font-weight: inherit;
 }
 
+/* Neutral since 2026-11-16: the accent tint is the PRESSED ground now, and a
+   hover in the same colour read as pressed. */
 .ribbon .btn:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--sec, var(--accent)) 12%, var(--paper));
-  border-color: color-mix(in oklab, var(--sec, var(--accent)) 45%, var(--line));
+  background: var(--paper-sunk);
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
 }
 
 .ribbon {

@@ -723,7 +723,7 @@ export function poolMenuFacts(
 export interface StripCounts {
   /** What the automatic run leaves out because rows are set aside. */
   exclusions: SolverExclusions;
-  /** "Otomatik diz (N)": blocks still in the tray, rows set aside excluded. */
+  /** "Programı yap"'s count: blocks still in the tray, rows set aside excluded. */
   pending: number;
   /** Placed hours that are NOT pinned: what "Yeniden yap" and "Programı boşalt" take away. */
   placed: number;

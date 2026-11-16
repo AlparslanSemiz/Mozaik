@@ -39,6 +39,7 @@ export function Help({
       <Popover.Portal>
         <Popover.Content
           className="help-pop"
+          aria-label={t('Açıklama: {konu}', { konu: t(topic) })}
           side="bottom"
           align="start"
           sideOffset={6}

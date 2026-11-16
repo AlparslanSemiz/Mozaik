@@ -4,7 +4,6 @@
 import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import { addRoom, deletionNotice, deleteRoom, updateRoom } from '../../pure/entities';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { moveFocusFromDeleted, type PanelProps, useT, useToast, useUndoIf } from '../common';
 import { parseRooms } from '../../pure/io';
@@ -155,7 +154,6 @@ export default function Rooms({ state, change }: PanelProps) {
                           title={t('Bilgileri ve haftalık programı')}
                           onClick={() => inspect('room', r.id)}
                         >
-                          <PanelRight size={16} strokeWidth={2} aria-hidden="true" />
                           {t('Ayrıntı')}
                           <span className="visually-hidden"> · {r.name}</span>
                         </button>

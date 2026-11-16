@@ -19,7 +19,6 @@ import {
   cleanEmail,
   looksLikeEmail,
 } from '../../leaf/model';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import { ColorPick, LimitBox, moveFocusFromDeleted, useT, useToast, useUndoIf } from '../common';
 import { GENDERS } from './genders';
@@ -252,7 +251,6 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
             title={t('Bilgileri ve haftalık programı')}
             onClick={() => inspect('teacher', teacher.id)}
           >
-            <PanelRight size={16} strokeWidth={2} aria-hidden="true" />
             {t('Ayrıntı')}
             <span className="visually-hidden"> · {teacher.short}</span>
           </button>

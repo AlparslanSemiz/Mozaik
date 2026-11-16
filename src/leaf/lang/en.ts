@@ -91,8 +91,6 @@ const EN: Sozluk = {
     "It replaces every plan on this computer, not a single one. Use the \"Open all from file\" button in Settings → Plans and backup.",
   "Açık olan planın yerine geçecek":
     "It will replace the plan that is open",
-  'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
-    'The plan on screen is replaced by the one in the file and the undo history is cleared. If you might change your mind, choose "Save to file" first.',
   "Planı aç": "Open the plan",
   "Bu dosya eksik":
     "This file is incomplete",
@@ -442,7 +440,6 @@ const EN: Sozluk = {
   "Arayüzün geri kalanı": "The rest of the interface",
   "Arayüz yoğunluğu": "Interface density",
   "Kaydırınca gizlenir": "Hides on scroll",
-  "Her zaman durur": "Always stays",
   Örnek: "Example",
   Saat: "Hour",
   Hareket: "Motion",
@@ -525,8 +522,6 @@ const EN: Sozluk = {
     "{yazilan} {yazilan:plan|plans} written to one file.",
   "Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.":
     "This file was written by a newer version of Mozaik. Update Mozaik.",
-  'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.':
-    'This is not a file containing every plan. You can open a single plan with "Open from file" in the top bar.',
   "Bu bilgisayardaki bütün planların yerine geçecek":
     "It will replace every plan on this computer",
   "Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.":
@@ -1861,6 +1856,9 @@ const EN: Sozluk = {
   "Yazdır": "Print",
   "Açık plan": "Open plan",
   "Seviye": "Level",
+  "{toplam} öğretmenin ilk {kac} tanesi.": "The first {kac} of {toplam} {toplam:teacher|teachers}.",
+  "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden \"Dosyadan aç\" ile açabilirsiniz.": "This is not a file with every plan in it. Open a single plan with “Open from file” in the File menu of the top bar.",
+  "Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "The plan on screen will be replaced by the one in the file and the undo history cleared. If you may change your mind, press “Save” first.",
 };
 
 registerSozluk("en", EN);

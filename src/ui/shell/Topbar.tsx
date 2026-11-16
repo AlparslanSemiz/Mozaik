@@ -152,8 +152,8 @@ export default function Topbar({
             <span className="tab-label">{t(dest.label)}</span>
             {/* An unread release note. Presence only, no count — "something
               changed" is the whole message, the panel says what. Clears
-              the moment Ayarlar → Hakkında is actually opened
-              (`Changelog`'s mount effect), not on a bare tab click. */}
+              the moment the folded notes in Ayarlar → Hakkında are opened
+              (`Changelog`'s onToggle), not on a bare tab click. */}
             {dest.id === 'settings' && changelogUnseen && (
               <span className="tab-dot" aria-hidden="true" />
             )}
@@ -248,7 +248,7 @@ export default function Topbar({
       />
 
       {/* "?": search, shortcuts and the first-run list behind one door. */}
-      <MoreMenu label="?" className="topbar-help" icon={null}>
+      <MoreMenu label="?" ariaLabel="Yardım ?" className="topbar-help" icon={null}>
         <MoreItem
           icon={<SearchIcon size={15} />}
           hint="Ctrl+K"

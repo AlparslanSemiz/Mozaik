@@ -259,7 +259,9 @@ export default function Appearance({
                 setRibbonAuto(!ribbonAuto);
               }}
             >
-              {ribbonAuto ? t('Kaydırınca gizlenir') : t('Her zaman durur')}
+              {/* One label, and the state is `aria-pressed`: a label that
+                  renamed itself read as a double negative when not pressed. */}
+              {t('Kaydırınca gizlenir')}
             </button>
           </div>
         </div>
@@ -347,6 +349,14 @@ export default function Appearance({
                 </tbody>
               </table>
             </div>
+          )}
+          {state.teachers.length > teachers.length && (
+            <p className="hint">
+              {t('{toplam} öğretmenin ilk {kac} tanesi.', {
+                toplam: state.teachers.length,
+                kac: teachers.length,
+              })}
+            </p>
           )}
         </div>
       </aside>

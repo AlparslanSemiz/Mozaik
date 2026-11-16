@@ -178,7 +178,11 @@ export default function Rules({ state, change }: PanelProps) {
               <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
             </p>
           </HelpHead>
-          {custom.length === 0 ? null : (
+          {custom.length === 0 ? (
+            <p className="hint">
+              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+            </p>
+          ) : (
             <table className="list">
               <thead>
                 <tr>
@@ -219,7 +223,11 @@ export default function Rules({ state, change }: PanelProps) {
               <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
             </p>
           </HelpHead>
-          {customClasses.length === 0 ? null : (
+          {customClasses.length === 0 ? (
+            <p className="hint">
+              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+            </p>
+          ) : (
             <table className="list">
               <thead>
                 <tr>

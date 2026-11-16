@@ -24,21 +24,25 @@ export function Folder({ folder }: { folder: FolderRun }) {
 
   return (
     <div className="panel">
-      <HelpHead topic="Nereye kaydedilsin">
-        <p>
-          {folder.fixed ? (
-            <T
-              k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
-              vars={{ gun: KEEP_DAILY }}
-            />
-          ) : (
-            <T
-              k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
-              vars={{ gun: KEEP_DAILY }}
-            />
-          )}
-        </p>
-      </HelpHead>
+      {s.kind === 'yok' ? (
+        <h2>{t('Nereye kaydedilsin')}</h2>
+      ) : (
+        <HelpHead topic="Nereye kaydedilsin">
+          <p>
+            {folder.fixed ? (
+              <T
+                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
+                vars={{ gun: KEEP_DAILY }}
+              />
+            ) : (
+              <T
+                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
+                vars={{ gun: KEEP_DAILY }}
+              />
+            )}
+          </p>
+        </HelpHead>
+      )}
 
       {s.kind === 'yok' ? (
         <>
@@ -46,7 +50,7 @@ export function Folder({ folder }: { folder: FolderRun }) {
             <T k="**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor." />
           </p>
           {/* The one-habit sentence is NOT repeated here: it already sits in
-              "Veriler nerede" two panels down, and saying it twice on one
+              Hakkında → Teknik bilgiler → "Veriler nerede", and saying it twice on one
               screen makes both copies read like boilerplate (and made a test
               ambiguous — pitfall 49). */}
           <p className="hint">

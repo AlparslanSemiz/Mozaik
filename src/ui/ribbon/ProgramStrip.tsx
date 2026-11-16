@@ -167,7 +167,10 @@ export function programStrip({
     manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
-  const busy = solver.running;
+  // The same condition that puts "Durdur" in Programı yap's place: a run, or
+  // the suggestion search after it. Nothing that starts or changes a run is
+  // offered meanwhile.
+  const busy = solver.running || solver.advice?.searching === true;
   const rebuild = () => {
     // No question since 2026-11-15 (TODO SD1): the run's answer lands as ONE
     // step of the history (useSolver's `finish`), so its notice can offer
@@ -340,6 +343,7 @@ export function programStrip({
               <MoreItem
                 key={`t-${id}`}
                 icon={<Eye size={15} />}
+                disabled={busy}
                 onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}
               >
                 {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} · {maskName(mode)}
@@ -349,6 +353,7 @@ export function programStrip({
               <MoreItem
                 key={`c-${id}`}
                 icon={<Eye size={15} />}
+                disabled={busy}
                 onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}
               >
                 {state.classes.find((group) => group.id === id)?.name ?? id} · {maskName(mode)}
@@ -358,6 +363,7 @@ export function programStrip({
               <MoreItem
                 key={`d-${name}`}
                 icon={<Eye size={15} />}
+                disabled={busy}
                 onSelect={() => setProgramMask((m) => setDayMask(m, name))}
               >
                 {name} · {maskName(mode)}
@@ -365,6 +371,7 @@ export function programStrip({
             ))}
             <MoreItem
               icon={<Eye size={15} />}
+              disabled={busy}
               onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
             >
               {t('Tümünü geri yükle')}

@@ -90,8 +90,6 @@ const DE: Sozluk = {
   "Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki \"Tümünü dosyadan aç\" düğmesini kullanın.":
     "Sie ersetzt nicht einen einzelnen Plan, sondern alle Pläne auf diesem Computer. Verwenden Sie „Alle aus Datei öffnen“ unter Einstellungen → Pläne und Sicherung.",
   "Açık olan planın yerine geçecek": "Sie ersetzt den geöffneten Plan",
-  'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
-    "Der Plan auf dem Bildschirm wird durch den aus der Datei ersetzt und der Rückgängig-Verlauf geleert. Wählen Sie vorher „In Datei speichern“, falls Sie es sich anders überlegen könnten.",
   "Planı aç": "Plan öffnen",
   "Bu dosya eksik":
     "Diese Datei ist unvollständig",
@@ -449,7 +447,6 @@ const DE: Sozluk = {
   "Arayüzün geri kalanı": "Der Rest der Oberfläche",
   "Arayüz yoğunluğu": "Dichte der Oberfläche",
   "Kaydırınca gizlenir": "Beim Scrollen ausblenden",
-  "Her zaman durur": "Bleibt immer",
   Örnek: "Beispiel",
   Saat: "Stunde",
   Hareket: "Bewegung",
@@ -532,8 +529,6 @@ const DE: Sozluk = {
     "{yazilan} {yazilan:Plan|Pläne} in eine Datei geschrieben.",
   "Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.":
     "Diese Datei wurde mit einer neueren Version von Mozaik geschrieben. Aktualisieren Sie Mozaik.",
-  'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.':
-    "Diese Datei enthält nicht alle Pläne. Einen einzelnen Plan öffnen Sie mit „Aus Datei öffnen“ in der oberen Leiste.",
   "Bu bilgisayardaki bütün planların yerine geçecek":
     "Es ersetzt alle Pläne auf diesem Computer",
   "Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.":
@@ -1878,6 +1873,9 @@ const DE: Sozluk = {
   "Yazdır": "Drucken",
   "Açık plan": "Offener Plan",
   "Seviye": "Stufe",
+  "{toplam} öğretmenin ilk {kac} tanesi.": "Die ersten {kac} von {toplam} {toplam:Lehrkraft|Lehrkräften}.",
+  "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden \"Dosyadan aç\" ile açabilirsiniz.": "Das ist keine Datei mit allen Plänen. Einen einzelnen Plan öffnen Sie im Menü Datei oben mit „Aus Datei öffnen“.",
+  "Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce \"Kaydet\" deyin.": "Der Plan auf dem Bildschirm wird durch den aus der Datei ersetzt und der Rückgängig-Verlauf geleert. Falls Sie es sich anders überlegen könnten, drücken Sie zuerst „Speichern“.",
 };
 
 registerSozluk("de", DE);

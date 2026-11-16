@@ -302,7 +302,8 @@ export default function Print({
               <T k="Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin." />
             </p>
           </HelpHead>
-          {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
+          {/* "Ne basılsın" moved to the tool strip and "Renkli bas" to its
+              Daha fazla; the
               button stayed, because the page COUNT comes from the tick lists
               right below it. */}
           <div className="form-row">

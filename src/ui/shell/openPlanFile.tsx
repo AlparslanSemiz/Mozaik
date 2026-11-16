@@ -137,7 +137,7 @@ export function openPlanFile({
             </p>
             <p>
               {t(
-                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Kaydet" deyin.',
               )}
             </p>
           </>

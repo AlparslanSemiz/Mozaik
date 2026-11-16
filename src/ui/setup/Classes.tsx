@@ -11,7 +11,6 @@ import {
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import {
   ColorPick,
@@ -257,7 +256,6 @@ export default function Classes({ state, change }: PanelProps) {
                           title={t('Bilgileri ve haftalık programı')}
                           onClick={() => inspect('class', c.id)}
                         >
-                          <PanelRight size={16} strokeWidth={2} aria-hidden="true" />
                           {t('Ayrıntı')}
                           <span className="visually-hidden"> · {c.name}</span>
                         </button>

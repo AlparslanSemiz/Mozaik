@@ -28,7 +28,10 @@ export function MoreMenu({
   icon = <MoreHorizontal size={18} aria-hidden="true" focusable="false" />,
   align = 'end',
   dot = false,
+  ariaLabel,
 }: {
+  /** The accessible name when the visible word alone ("?") says too little. */
+  ariaLabel?: string;
   children: React.ReactNode;
   /** An unread mark on the door (Ayarlar: a new release note behind it). */
   dot?: boolean;
@@ -46,6 +49,7 @@ export function MoreMenu({
           type="button"
           className={`btn more-menu${dot ? ' has-dot' : ''} ${className}`.trim()}
           disabled={disabled}
+          {...(ariaLabel === undefined ? {} : { 'aria-label': t(ariaLabel) })}
         >
           {icon}
           {t(label)}

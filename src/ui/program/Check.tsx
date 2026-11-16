@@ -352,7 +352,7 @@ export default function Check({ state, view, ui }: Props) {
                   <T k="Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir." />
                 </p>
               )}
-              {/* TODO RK2: with both of them pinned, Otomatik diz has no
+              {/* TODO RK2: with both of them pinned, Programı yap has no
                   suggestion to offer until one moves; said here as well as
                   in the panel, in one sentence. */}
               {pinnedBreaks > 0 && (
