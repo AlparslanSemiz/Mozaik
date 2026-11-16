@@ -19,98 +19,33 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-16 sabah (gece çalışması). Bu blok yeni bir oturumun başlangıç noktası;
-ayrıntı aşağıdaki tarihli girdilerde, kararlar DECISIONS'ta. `sade/asama-2` Sadeleşme aşama 2'yi,
-kişi sayfasını (K5) taşıyor, birleşmedi (PR #74). Aşama 3A (K6 tek ızgara düzeni, K7 toplu
-sabitleme ve geçici görünüm yok, K8 Eski hâline dön) `main`'de (b44b59a). `sade/asama-3b` aşama
-2'nin ve `main`'in üstünde beş görev sekmesini (K1), ikinci dizilişin bir plan olmasını (K2) ve
-Kontrol'ün çipin sorun listesine geçmesini (K3) taşıyor, birleşmedi (aşağıda tarihli girdi).
-`sade/inceleme` onun üstünde babanın gözüyle yapılan kullanılabilirlik turunun on bulgusunu
-düzeltiyor (ana düğme, Excel sütunları, adlar, yazı büyüklüğü, dar üst bar…), İkame ve
-Öğretmene gönder'den sonra birleşecek, birleşmedi.
+Son güncelleme: 2026-11-16 akşam. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
+tarihli girdilerde, kararlar DECISIONS'ta. Açık iş dalı yok: 2026-11-16 akşamı her şey `main`'e
+girdi ve Mozaik yeni işlere boş.
 
-**Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
-önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
-programı açar → CP-SAT kurulu DLL'lerle → kaldırma veriyi korur, hepsi Windows CI'da yeşil
-(`guncelleme-windows`, `kurulum-windows`, `exe-windows`). Etiket Alp'in (`npm run yayinla`).
+**2026-11-16 akşamı `main`'e giren (tek doğrusal zincir, sırayla):** #87 checkout yeri
+(`~/dev/Mozaik`), #86 Öğretmene gönder (kâğıdın üst satırı, PDF, WhatsApp, şema v19),
+`sade/inceleme` (babanın gözüyle kullanılabilirlik turu; kartta soyadı saat başına iki harf
+sığıyorsa), #85 ızgaranın DOM'u hafifledi, #78 öneri araması iki çekirdekte (brotli eşiği
+307 000 B, gerekçe aşağıda), bağımlılıklar: jsdom 31 (#60), libloading 0.9 (#57),
+vite-plugin-singlefile 2.3.4 (#58'in bir parçası).
 
-**2026-11-15/16'da `main`'e giren (PR #44–#70):** tek ad (SD3, #44); erişim ve kullanım (#45–#51:
-okunurluk, geri al, ekran okuyucu, Kontrol'de Göster, klavye ile ızgara ve Müsaitlik, tepki, ilk
-açılış); Mac sürümü (#52, imzasız, Windows'u engellemez); Windows geçişi (#53, #65: kurulum,
-bekleyici, `mainBinaryName: Mozaik`); veri koruması (#54: boş açılış klasörü ezmez, küçülme kurtarma
-dosyasına, silmeden önce kopya); web kalıcılık (#55) ve ayrı site işi (#64); güvenlik (#56, #66:
-`release` ortamı, CSP, SHA sabitleme zorunlu); boyut (#61: sözlük paketleme, −164 kB); çözücü (#62:
-iyileştirme geçişi, Başka bir dizilim, kapasite açığı); kararsız testler (#63, #69); inceleme
-bulguları (#68: yavaş hatta indirme, bekleyici, küçülme koruması, budama); Safari/iPad (#70);
-sadeleşme aşama 1 (#67: tek ana düğme, Daha fazla, Dosya menüsü, Başlarken 5 iş, K4 adları).
-
-**Sürüyor (dallarda):** sadeleşme aşama 2, kişi sayfası (`sade/asama-2`, K5); aşama 3B (`sade/asama-3b`,
-K1–K3, aşama 2'nin ve 3A'lı `main`'in üstünde); Linux paketi (`platform/linux`). Sonra: aşama 4 (öğretmene PDF gönder, ikame, hafta
-istisnası).
+**Sürüm.** 2.2.0 sahada; Unreleased'de çok iş var. Windows'ta sürümün önünde bilinen engel yok
+(gerçek 2.2.0 → yeni exe → kurulum → kaldırma, Windows CI). Etiket Alp'in (`npm run yayinla`).
 
 **Alp'te bekleyenler:**
-1. Web'in yeni adresi: yeni public depo `mozaik-site` açılsın mı (BUILD.md "Alan adına geçiş";
-   Mozaik deposuna özel alan adı VERİLMEZ, eski adres yönlenip tarayıcıdaki planlar taşınamaz).
-   DNS kaydı (`mozaik` CNAME) hazır. Eski `/ders-programi/` için public yönlendirme deposu.
-2. Sadeleşmeden sonra babayı bir oturum izlemek (hangi seçenek görünür kalsın).
-3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
-4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
+1. Dependabot #58'in kalan yedi paketi (react/react-dom 19.3 ≈ +7 kB brotli, radix dörtlüsü
+   ≈ +0,9 kB, lucide-react): birlikte 315,3 kB, eşik 307 kB. Eşik kararı ya da yer açmak.
+2. Dependabot #59 (TypeScript 7): uyumlu değil, typescript-eslint `<6.1.0` istiyor ve TS 7'nin
+   klasik programatik API'si yok. Öneri: PR'ı kapat, TS 7'yi şimdilik yoksay; peer aralığı
+   genişleyince yeniden bak.
+3. #78'in Windows ölçümünde `mixed` (öncesi 5, son ölçülen 7, hedef ≤ 5) CI günlüğünde okunmadı.
+4. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen;
+   sadeleşmeden sonra babayı bir oturum izlemek.
 
-**Dikkat.** 3A ve 3B birlikte 1 156 468 B, brotli 299 085 B, eşiğe 6,9 kB (aşama 2'nin 305 787'si 3A'da 302 162'ye,
-3B'de 302 530'a indi; iki dal ayrı ayrı). Tuzaklarda en büyük numara 179.
-
-**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
-kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
-budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
-ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
-
-**Daha iyi program (2026-11-16, `cozucu/iyilestirme`, birleşmedi):** bitmiş haftaya iyileştirme
-geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığı söyleyen tıkanma cümlesi
-(TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
-brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
-
-**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
-seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
-dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
-aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
-
-**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
-birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
-Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
-dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
-Gerçek Windows exe'de koşulmadı.
-
-**İkame ve hafta istisnası (2026-11-16, `ozellik/ikame`, `sade/asama-3a`'nın üstünde,
-birleşmedi; `sade/asama-3b` içinde):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
-şeridinde tarih çipi, tarih sayfası, İkame listesi, tek dersi yalnız o tarih boş geçirmek ya da
-aynı günün başka saatine taşımak, ızgarada o haftanın işaretli görünüşü (TODO SD9, DECISIONS).
-Brotli 3B'nin 299 085'i → 302 602 B (+3 517; bütçe 3,5 kB), ham 1 172 023 B.
-
-**Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
-kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
-`linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
-(DECISIONS "Linux sürümü", tuzak 177, 178). Mac'te yazıldı: hiç Linux'ta derlenmedi, hiç açılmadı.
-
----
-
-weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
-diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
-bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
-
-**Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
-kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
-için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
-birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
-
----
-
-**Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
-gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
-yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
-Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
-`npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
-worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
-birleşen worktree'leri bekletmemek yeter.
+**Açık notlar.** SD9 (Daha fazla menüsü Windows UIA'da Hakkında'yı açmıyor; NVDA/Narrator ile
+dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
+olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
 
 ## 2026-11-16 · Öneri araması iki çekirdekte (`olcum/iki-cekirdek`, PR #78)
 
