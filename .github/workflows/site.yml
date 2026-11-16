@@ -24,12 +24,6 @@ name: site
 
 on:
   workflow_call:
-    secrets:
-      # Write key of AlparslanSemiz/mozaik-site (BUILD.md, "Alan adına
-      # geçiş"). Optional: until it exists the new address is not published
-      # and nothing fails.
-      MOZAIK_SITE_DEPLOY_KEY:
-        required: false
 
 # The caller grants these to the job that calls this file; a called workflow
 # can keep or lower them, never raise them. One deploy at a time comes from
@@ -44,6 +38,8 @@ jobs:
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -105,10 +101,17 @@ jobs:
   # to the other repository.
   #
   # No GITHUB_TOKEN rights: the push goes over SSH with that repository's
-  # deploy key. Without the secret the job says so and stops green.
+  # deploy key. The key is a secret of the `mozaik-site` ENVIRONMENT, not of
+  # the repository, and that environment admits `main` only (BUILD.md,
+  # "Yayın güvenliği"): a workflow on any other branch cannot read it. A
+  # job-level environment is also the only way a called workflow sees an
+  # environment secret, so ci.yml passes nothing. Without the secret the job
+  # says so and stops green.
   yeni-adres:
     needs: build
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    environment: mozaik-site
     permissions: {}
     steps:
       - id: anahtar
@@ -137,11 +140,15 @@ jobs:
           set -euo pipefail
           umask 077
           mkdir -p ~/.ssh
-          printf '%s\n' "$KEY" > ~/.ssh/mozaik_site
+          anahtar="$HOME/.ssh/mozaik_site"
+          # Gone on every exit, the failed ones too. Never printed.
+          trap 'rm -f "$anahtar"' EXIT
+          printf '%s\n' "$KEY" > "$anahtar"
+          unset KEY
           # GitHub's published host key (docs.github.com, "GitHub's SSH key
           # fingerprints"), pinned rather than fetched with ssh-keyscan.
           echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > ~/.ssh/known_hosts
-          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/mozaik_site -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $anahtar -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
           cd dist-site
           test -s CNAME
           touch .nojekyll
@@ -151,4 +158,3 @@ jobs:
           # One commit, replaced each time: the branch is a published folder,
           # its history is this repository's.
           git push -q --force git@github.com:AlparslanSemiz/mozaik-site.git gh-pages
-          rm -f ~/.ssh/mozaik_site

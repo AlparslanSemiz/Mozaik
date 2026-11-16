@@ -302,7 +302,8 @@ eski kökendeki planları okuyabilen tek sayfa o. Bu yüzden yeni adres AYRI bir
 sitesidir: `AlparslanSemiz/mozaik-site` deposu, `gh-pages` dalından. `site.yml` aynı
 derlemeyi iki yere yayınlar: eski adrese bugünkü gibi `deploy-pages` ile, yeni adrese
 `yeni-adres` işiyle (`dist-site` + `CNAME` + `.nojekyll`, SSH ile, deploy anahtarıyla,
-`--force` tek commit). Anahtar sırrı yoksa iş bir notla yeşil biter.
+`--force` tek commit). İş yalnız `main`'de ve `mozaik-site` ortamında koşar; anahtar o
+ortamın sırrıdır. Sır yoksa iş bir notla yeşil biter.
 
 Taşıma: eski kökende açılan sayfa, yalnız site derlemesindeki bir betikle yeni adresin
 manifestini okur (`vite.site.config.ts`, `yeniAdresYoklamasi`); cevap gelirse bir şerit
@@ -320,8 +321,9 @@ Adımlar, bu sırayla (Alp):
 3. Yeni, herkese açık depo `AlparslanSemiz/mozaik-site` (boş; README gerekmez).
 4. Anahtar: `ssh-keygen -t ed25519 -N '' -C mozaik-site-deploy -f mozaik_site`.
    `mozaik-site` → Settings → Deploy keys → Add: `mozaik_site.pub`, **Allow write access**.
-   `Mozaik` → Settings → Secrets and variables → Actions → New repository secret:
-   `MOZAIK_SITE_DEPLOY_KEY`, değeri `mozaik_site` (özel yarı). Sonra iki dosya silinir.
+   Özel yarı `Mozaik`'in `mozaik-site` **ortamının** sırrı olur, depo sırrı değil; ortam
+   yalnız `main`'i kabul eder ("Yayın güvenliği", `gh api` komutları orada). Sonra iki
+   dosya silinir.
 5. `Mozaik`'in `ci.yml`'i `main`'de bir kez koşar (elle "Run workflow" ya da bir push):
    `yeni-adres` işi `gh-pages` dalını oluşturur.
 6. `mozaik-site` → Settings → Pages → Source: Deploy from a branch, `gh-pages`, `/ (root)`.
@@ -635,6 +637,17 @@ gh api -X POST repos/$R/rulesets --input - <<'JSON'
   "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]
 }
 JSON
+
+# 5b. Yeni adresin deploy anahtarı (site.yml, `yeni-adres`; "Alan adına geçiş"): kendi
+#     ortamında, yalnız `main` dalı girer. Depo sırrı olarak hiç tanımlanmaz.
+gh api -X PUT repos/$R/environments/mozaik-site \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api -X POST repos/$R/environments/mozaik-site/deployment-branch-policies \
+  -f name=main -f type=branch
+gh secret set MOZAIK_SITE_DEPLOY_KEY --env mozaik-site --repo $R < mozaik_site
+# Daha önce depo sırrı olarak eklendiyse:
+gh api -X DELETE repos/$R/actions/secrets/MOZAIK_SITE_DEPLOY_KEY || true
 
 # 6. SHA'ya sabitlenmemiş bir eylem hiçbir iş akışında koşmasın.
 gh api -X PUT repos/$R/actions/permissions \
