@@ -2196,12 +2196,13 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       istisnası", WORKLOG): şema v18 `dated` (gelmeyen öğretmen ya da sınıf, tarih aralığıyla;
       saat saat ikame ya da boş geçsin), kişi sayfasında `Gelmiyor…`, Program şeridinde tarih
       çipi, tarih sayfası ve İkame listesinin Yazdır'ı, öğretmen sayfasında ikame sayısı,
-      `Bu haftanın değişikliklerini sil`. Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
+      `Bu haftanın değişikliklerini sil`; tek bir dersi yalnız o tarih boş geçirmek ya da aynı günün
+      başka saatine taşımak (`Bir dersi değiştir…`, `N. saate taşı`), ve ızgarada o haftanın
+      işaretli görünüşü (`Programda göster`, `Temel haftaya dön`). Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
       v18) ve E2E (`e2e/ikame.spec.ts`, axe dahil) yeşil. **Kalan:** (1) tatil günü (bir tarihin
-      bütün dersleri) ve bir dersi yalnız o hafta başka saate taşımak, bütçe yüzünden yok;
-      (2) ızgara o haftayı göstermiyor, değişiklik yalnız çipte ve tarih sayfasında; (3) İkame
-      listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle; (4) 3B birleşince çip yeni
-      Program şeridine taşınır; (5) brotli +2,6 kB, bütçe 2 kB idi (WORKLOG).
+      bütün dersleri) yok; taşıma yalnız aynı günün başka saatine, ızgarada sürüklemeyle değil;
+      (2) İkame listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle (`DayDialog.tsx`'teki
+      TODO); (3) brotli 3B'nin üstüne +3,5 kB (WORKLOG).
 
 ## §9. Ham notlar
 

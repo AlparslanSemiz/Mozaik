@@ -45,9 +45,12 @@ aralığında gelmediğini, `covers` o tarihte bir sınıfın bir saatine kimin 
 geçince kayıt bir şey değiştirmez (kendiliğinden biter) ama silinmez, çünkü ikameler öğretmenin
 adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
 
-- **Hafta istisnası = gelmeyen sınıf.** Gezi ya da sınav haftası bir sınıfın o günlerde
-  gelmemesi: dersleri ikame istemez, öğretmenleri o saatlerde boş sayılır ve ikame önerisine
-  girer. Ayrı bir "dersi taşı" ya da "tatil günü" kavramı yok (aşağıda).
+- **Hafta istisnası.** Gezi ya da sınav haftası bir sınıfın o günlerde gelmemesi: dersleri ikame
+  istemez, öğretmenleri boş sayılır. Tek bir ders de yalnız o tarih boş geçer ya da aynı günün
+  boş bir saatine taşınır (`Cover.to`, koordinatörün kararı, aynı v18); taşıma başka güne değil,
+  çünkü o tarihin sayfası tek günün sayfası ve hedef saati sınıfı ve öğretmeni boş olan saatler.
+  Izgara o haftayı önerinin önizlemesiyle aynı yoldan, salt okunur ve işaretli çizer;
+  düzenlenen hep temel hafta (`Temel haftaya dön`).
 - **Öneri sırası:** o saatte ders vermeyen, başka bir saate ikame girmemiş, kendi saatlerinde
   müsait ve o gün gelmeyen olmayan öğretmenler; önce aynı branş (birinci ya da ikinci), sonra bu
   hafta en az ikameye girmiş, sonra o gün zaten okulda olan. Seçim babanındır; Mozaik kimseyi
@@ -59,9 +62,9 @@ adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
   dokunmadan: çip Program şeridine tek satırla giriyor, 3B onu yeni şeride taşır.
 - **Şema v18, ve eski kopya.** Alan sürüm artırılmadan eklenseydi eski kopya dosyayı açar ve ilk
   kayıtta alanı silerdi; artırıldığı için eski kopya "daha yeni bir sürüm" der ve dokunmaz.
-- **Bırakılan, bütçe yüzünden (brotli):** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı
-  ve çıkarıldı; bir dersi yalnız o hafta başka saate taşımak hiç yazılmadı, çünkü ızgaranın
-  sürüklemesini tarihli katmana bağlamak 3B'nin dosyalarına girer. İkisi TODO'da.
+- **Bırakılan:** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı ve bütçe yüzünden
+  çıkarıldı (koordinatör: şimdilik yok); dersi ızgarada sürükleyerek taşımak yok, taşıma tarih
+  sayfasının seçicisinden.
 - **Gönderme:** İkame listesi bugün yalnız basılıyor (Yazdır'dan PDF de). WhatsApp ve e-posta
   "gönder" işiyle (aşama 4).
 ### 2026-11-16 · Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan (Sadeleşme aşama 3B, K1–K3)
