@@ -127,7 +127,7 @@ async function diyalogKapat(page: Page): Promise<boolean> {
   return true;
 }
 
-const SEKMELER = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
+const SEKMELER = ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri'];
 
 test.describe('Devriye', () => {
   test('sistematik tur — her sekme, her adım, her bölüm, her şerit düğmesi', async ({ page }) => {
@@ -154,7 +154,10 @@ test.describe('Devriye', () => {
       // A modal <dialog> makes everything behind it `inert`, so the tab is not
       // clickable until whatever the last button opened is closed.
       await diyalogKapat(page);
-      await page.getByRole('button', { name: sekme, exact: true }).click({ timeout: TIK });
+      await page
+        .locator('.tabstrip')
+        .getByRole('button', { name: sekme, exact: true })
+        .click({ timeout: TIK });
       await ayaktaMi(page, sekme);
       gezilen.push(sekme);
 

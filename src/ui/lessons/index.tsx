@@ -244,7 +244,6 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             picking={picking}
             focused={focused}
             setFocus={setFocus}
-            modeNoun={modeNoun}
           />
         )}
       </aside>

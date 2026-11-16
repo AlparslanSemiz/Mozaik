@@ -15,7 +15,6 @@ export * from './theme';
 export * from './dock';
 export * from './ribbon';
 export * from './scale';
-export * from './availClock';
 export * from './motion';
 export * from './intro';
 export * from './checklist';

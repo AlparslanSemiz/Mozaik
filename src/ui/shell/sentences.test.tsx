@@ -139,6 +139,7 @@ function world(): State {
     activeProgramId: '1',
     answers: { accepted: [], refused: [] },
     relations: [],
+    dated: { absent: [], covers: [] },
   };
 }
 
@@ -322,7 +323,7 @@ describe('cümle · basılan sayfanın iskeleti', () => {
   it('bir A4 sayfası hep aynı kutulardan kuruluyor', () => {
     act(() => root.render(<AppRoot />));
     const cikti = [...container.querySelectorAll('button')].find((b) =>
-      (b.getAttribute('aria-label') ?? b.textContent ?? '').includes('Çıktı'),
+      (b.getAttribute('aria-label') ?? b.textContent ?? '').includes('Yazdır ve gönder'),
     );
     act(() => {
       cikti?.dispatchEvent(new MouseEvent('click', { bubbles: true }));

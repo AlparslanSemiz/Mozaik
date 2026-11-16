@@ -398,7 +398,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
   });
 
-  test('v16 biçimli yedek (öğretmen e-postası yokken) açılıyor, yazılan adres v17 olarak duruyor', async ({
+  test('v16 biçimli yedek (öğretmen e-postası yokken) açılıyor, yazılan adres bugünkü sürümle duruyor', async ({
     page,
   }) => {
     // The v16 -> v17 migration on the real path: the example file the schema
@@ -422,7 +422,7 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     await kutu.fill('  mehmet.celik@example.com ');
     await kutu.press('Tab');
-    // On the address itself: the load already wrote the plan as v17, before
+    // On the address itself: the load already wrote the plan as v18, before
     // the address was typed, and the store writes 400 ms after a change.
     const kayit = async () =>
       JSON.parse((await savedText(page)) || '{}') as {
@@ -432,7 +432,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect
       .poll(async () => (await kayit()).teachers?.map((t) => t.email))
       .toEqual(['mehmet.celik@example.com', '']);
-    expect((await kayit()).schemaVersion).toBe(17);
+    expect((await kayit()).schemaVersion).toBe(18);
 
     await reopen(page);
     await openSetup(page, 'Öğretmenler');
@@ -628,7 +628,7 @@ test.describe('29. Hata yolları', () => {
     // The answer is a button: "Güncellemeye bak" opens Ayarlar → Hakkında.
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Okul bilgileri',
     );
     // Hakkında is behind the strip's Daha fazla since 2026-11-16; the strip
     // reads the version there.

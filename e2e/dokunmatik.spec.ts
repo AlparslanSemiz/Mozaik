@@ -12,7 +12,7 @@
 
 import { type Locator } from '@playwright/test';
 import { expect, test } from './kapan';
-import { dragAndDrop, openWithSample } from './helpers';
+import { dragAndDrop, openPerson, openSetup, openWithSample } from './helpers';
 
 test.use({ hasTouch: true });
 
@@ -57,16 +57,18 @@ async function stroke(from: Locator, through: Locator[], holdMs = 0) {
 test.describe('Dokunmatik: Müsaitlik parmakla boyanıyor', () => {
   test('parmak dört hücreden geçince DÖRDÜ de kapanıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
-    const row = page.locator('table.availability:not(.heat) tbody tr').first();
+    // The grid is on the person's page since K1 (2026-11-16).
+    await openSetup(page, 'Öğretmenler');
+    const sheet = await openPerson(page, 0);
+    await sheet.getByRole('button', { name: 'Bütün haftayı aç' }).click();
+    const row = sheet.locator('table.availability tbody tr').first();
     await expect(row.locator('td.closed')).toHaveCount(0);
 
     const cell = (s: number) => row.locator('td').nth(s).locator('button');
     await stroke(cell(0), [cell(1), cell(2), cell(3)]);
 
     await expect(row.locator('td.closed')).toHaveCount(4);
-    await expect(page.locator('table.availability:not(.heat) td.closed')).toHaveCount(4);
+    await expect(sheet.locator('table.availability td.closed')).toHaveCount(4);
   });
 });
 

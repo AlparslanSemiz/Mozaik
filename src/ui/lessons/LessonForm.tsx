@@ -190,12 +190,12 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
         }
         description={<T k="Bir ders = bir sınıfın bir öğretmenden aldığı haftalık saat." />}
         more={t(
-          'Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.',
+          'Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Okul bilgileri → Kurallar’daki sayı geçerli olur.',
         )}
         notice={
           state.classes.length === 0 || state.teachers.length === 0 ? (
             <div className="warn-box">
-              <T k="Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin." />
+              <T k="Ders eklemek için önce en az bir öğretmen ve bir sınıf girin." />
               <NextStep state={state} />
             </div>
           ) : mode !== 'all' && focused === undefined ? (
@@ -338,7 +338,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
               <p key={line}>{line}</p>
             ))}
             <p className="hint">
-              {t('Bir dersin saatini azaltın ya da Müsaitlik sekmesinde kapalı saat açın.')}
+              {t('Bir dersin saatini azaltın ya da kişinin sayfasında kapalı saat açın.')}
             </p>
           </div>
         )}

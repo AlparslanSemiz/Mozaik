@@ -15,7 +15,6 @@ export const DOCK_KEY = 'ders-programi-havuz';
 export const DOCK_H_KEY = 'ders-programi-havuz-boy';
 export const RIBBON_KEY = 'ders-programi-serit';
 export const RIBBON_AUTO_KEY = 'ders-programi-serit-gizle';
-export const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
 export const MOTION_KEY = 'ders-programi-hareket';
 export const INTRO_KEY = 'ders-programi-tanitim';
 export const CHECKLIST_KEY = 'ders-programi-ilk-adimlar';
@@ -37,6 +36,12 @@ const SIDEBAR_KEY = 'ders-programi-kenar';
  */
 const DENSITY_KEY = 'ders-programi-yogunluk';
 const UI_DENSITY_KEY = 'ders-programi-arayuz-yogunluk';
+
+/**
+ * And Müsaitlik's clock switch, gone with its tab on 2026-11-16 (Sadeleşme
+ * K1): the person page's grid always shows the bell.
+ */
+const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
 
 export const PREFERENCE_ROWS: ReadonlyArray<{ key: string; label: string }> = [
   { key: THEME_KEY, label: 'tema tercihi' },

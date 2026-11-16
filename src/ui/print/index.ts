@@ -4,5 +4,5 @@
  * Gönder (`SendTeacher`). The page itself (`Sheet.tsx`) is not here.
  */
 export { default as Print, NOTHING_EXCLUDED, type Excluded } from './Print';
-export { PrintOne } from './PrintOne';
+export { PrintOne, usePrintNow } from './PrintOne';
 export { SendTeacher } from './MailPanel';

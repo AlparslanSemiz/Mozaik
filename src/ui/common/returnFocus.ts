@@ -31,6 +31,14 @@
 import { useCallback, useLayoutEffect, useRef } from 'react';
 
 let lastFocused: HTMLElement | null = null;
+/**
+ * The last element focused OUTSIDE every dialog: where the keyboard was
+ * before the first of a chain of dialogs opened. A dialog opened from inside
+ * another one that then closes (the problem list's "Sayfasını aç" opens a
+ * person's page) has an opener that is gone by the time it closes; this is
+ * the one still on the page — the status chip.
+ */
+let lastOutside: HTMLElement | null = null;
 let listening = false;
 
 function insideMenu(element: Element): boolean {
@@ -45,7 +53,10 @@ function listen() {
     'focusin',
     (event) => {
       const target = event.target;
-      if (target instanceof HTMLElement && !insideMenu(target)) lastFocused = target;
+      if (target instanceof HTMLElement && !insideMenu(target)) {
+        lastFocused = target;
+        if (target.closest('[role="dialog"], [role="alertdialog"]') === null) lastOutside = target;
+      }
     },
     true,
   );
@@ -69,6 +80,9 @@ function fallback(): HTMLElement | null {
  */
 export function useReturnFocus(open: boolean): (event: Event) => void {
   const opener = useRef<HTMLElement | null>(null);
+  // The outside element at the time this dialog opened, for an opener that
+  // was inside another dialog (see `lastOutside`).
+  const outside = useRef<HTMLElement | null>(null);
 
   // A LAYOUT effect: it runs before Radix's focus scope (a passive effect)
   // moves focus into the dialog, so `activeElement` is still the opener. It
@@ -78,6 +92,7 @@ export function useReturnFocus(open: boolean): (event: Event) => void {
   useLayoutEffect(() => {
     listen();
     if (!open) return;
+    outside.current = lastOutside;
     const active = document.activeElement;
     if (active instanceof HTMLElement && active !== document.body && !insideMenu(active)) {
       opener.current = active;
@@ -98,7 +113,7 @@ export function useReturnFocus(open: boolean): (event: Event) => void {
     // kept for a dialog that may open next (see above).
     if (now instanceof HTMLElement && now !== document.body && now.isConnected) return;
     opener.current = null;
-    const next = usable(target) ? target : fallback();
+    const next = usable(target) ? target : usable(outside.current) ? outside.current : fallback();
     // <main> is a scroll box the size of the screen: scrolling it into view
     // would only jump the page. It is also what a click on empty content
     // focuses, so it can be the opener itself.

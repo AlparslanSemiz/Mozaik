@@ -1,17 +1,10 @@
-// Setup: the three lists the school is built from.
+// The four lists the school is built from, and Başlarken.
 //
-// It used to be one 1132-line scroll: everything was on screen at once and
-// nothing said in which order to fill it in. The strip below is NOT a locked
-// wizard — every list is reachable at any time — it only shows where you are
-// and, through the counters, where something is still missing. The ordinals
-// that used to sit in front of the names came off on 2026-08-28 for exactly
-// that reason: nobody walks these in order, so numbering them was counting
-// something the reader never counts.
-//
-// Setup now holds ONLY the three lists that describe the school's people and
-// rooms. Everything that is a setting — the school's name, its days, the bell,
-// the rules, the subject list — moved to the Ayarlar tab, so this screen has
-// exactly one kind of thing on it and every step can be counted.
+// It used to be one 1132-line scroll, then a tab of its own (Okul) with a
+// strip of four steps. Since 2026-11-16 (Sadeleşme, K1) the four lists are
+// in the tasks they serve: Öğretmenler and Sınıflar are tabs of their own,
+// Derslikler and Branşlar are sections of Okul bilgileri beside the school's
+// name and bell. Each list still has its Özet on the right.
 
 import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
@@ -26,13 +19,7 @@ import Subjects from './Subjects';
 import { Checklist } from './Checklist';
 import { Summary } from '../lists';
 import { drafts as draftsOf } from '../../pure/io';
-import { STEPS } from '../program';
 
-/**
- * The three lists' label, count and symbol live in `components/steps.tsx` — one
- * definition read by this shell and by the ribbon. Only the
- * RENDERING of a step is this file's business, so only that is here.
- */
 const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
   rooms: (p) => <Rooms {...p} />,
   subjects: (p) => <Subjects {...p} />,
@@ -40,16 +27,25 @@ const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
   classes: (p) => <Classes {...p} />,
 };
 
-interface Props extends PanelProps {
-  plans: PlanControls;
-  /**
-   * Which of the four lists. Owned by App, and the tool strip above is the
-   * only thing that CHANGES it — so no setter comes down here any more.
-   */
-  step: StepId;
+/** One list on the left, and on the right what the list MEANS. */
+export default function Setup({ state, change, step }: PanelProps & { step: StepId }) {
+  return (
+    <div className="cols">
+      <div>{RENDER[step]({ state, change })}</div>
+      <aside>
+        <Summary state={state} change={change} step={step} />
+      </aside>
+    </div>
+  );
 }
 
-export default function Setup({ state, change, plans, step }: Props) {
+/**
+ * Başlarken and the first-run offers, above Okul bilgileri's school data: an
+ * empty project lands there, so this is where "what do I do first" has to be
+ * answered — and since 2026-11-15 also "what is left": the list ticks itself
+ * from the plan (Checklist.tsx).
+ */
+export function Start({ state, change, plans }: PanelProps & { plans: PlanControls }) {
   const t = useT();
   const notify = useToast();
   const loadSample = useLoadSample();
@@ -68,90 +64,59 @@ export default function Setup({ state, change, plans, step }: Props) {
       setIntroSeen(true);
     }
   }, [introSeen, state.teachers.length, state.classes.length, state.rooms.length]);
-  // A draft is last term's setup with the grid emptied. This screen is where an
-  // empty project lands, so it is the only place where offering one is useful:
-  // one click instead of retyping twenty classes.
+  // A draft is last term's setup with the grid emptied. An empty project
+  // lands here, so it is the only place where offering one is useful: one
+  // click instead of retyping twenty classes.
   const templates = draftsOf(plans.library).filter((p) => p.id !== plans.planId);
-
-  const index = Math.max(
-    0,
-    STEPS.findIndex((s) => s.id === step),
-  );
-  const current = STEPS[index] ?? STEPS[0]!;
   const empty = state.teachers.length === 0 && state.classes.length === 0;
 
   return (
-    <>
-      {/* The one screen an empty project lands on, so this is where "what do I
-          do first" has to be answered — and since 2026-11-15 also "what is
-          left": the list ticks itself from the plan (Checklist.tsx). */}
-      <Checklist state={state}>
-        {empty && (
-          <>
-            {/* Once, on a first run, and then never here again — its home is
-                Ayarlar → Hakkında. Seen is written when they ACT, not when the
-                screen is drawn: a line nobody has read yet must survive a
-                reload. */}
-            {!introSeen && (
-              <p className="hint intro-line">
-                <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
-                {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
-                <button
-                  className="btn"
-                  onClick={async () => {
-                    if (await loadSample(state, change)) setIntroSeen(true);
-                  }}
-                >
-                  {t('Örnek okulu yükle')}
-                </button>
-                <button
-                  className="btn quiet"
-                  title={t(
-                    'Bu satır bir daha çıkmaz; örnek okul Ayarlar → Hakkında’da durmaya devam eder',
-                  )}
-                  onClick={() => {
-                    markIntroSeen();
-                    setIntroSeen(true);
-                  }}
-                >
-                  {t('Bir daha gösterme')}
-                </button>
+    <Checklist state={state}>
+      {empty && (
+        <>
+          {/* Once, on a first run, and then never here again — its home is
+              Okul bilgileri → Hakkında. Seen is written when they ACT, not
+              when the screen is drawn: a line nobody has read yet must
+              survive a reload. */}
+          {!introSeen && (
+            <p className="hint intro-line">
+              <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
+              {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
+              <button
+                className="btn"
+                onClick={async () => {
+                  if (await loadSample(state, change)) setIntroSeen(true);
+                }}
+              >
+                {t('Örnek okulu yükle')}
+              </button>
+              <button
+                className="btn quiet"
+                onClick={() => {
+                  markIntroSeen();
+                  setIntroSeen(true);
+                }}
+              >
+                {t('Bir daha gösterme')}
+              </button>
+            </p>
+          )}
+
+          {templates.length > 0 && (
+            <>
+              <h3>{t('Taslaktan başla')}</h3>
+              <p className="hint">
+                <T k="Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez." />
               </p>
-            )}
-
-            {templates.length > 0 && (
-              <>
-                <h3>{t('Taslaktan başla')}</h3>
-                <p className="hint">
-                  <T k="Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez." />
-                </p>
-                <DraftStart
-                  plans={plans}
-                  label={(name) => t('{ad} ile başla', { ad: name })}
-                  notify={notify}
-                />
-              </>
-            )}
-          </>
-        )}
-      </Checklist>
-
-      {/* The list on the left, and on the right what the list MEANS: the same
-          capacity numbers Kontrol shows, but while you are typing rather than
-          one screen and one decision later.
-
-          ONE panel, not two. "Kurulum durumu" used to sit under this one and
-          repeat the four counters that are already in the strip above, plus a
-          door to a tab that is already in the tab bar — "çok fazla kaydırma
-          olmuş, gereksiz". The two sentences of its that said something
-          nothing else said moved into the Sınıflar branch of Özet. */}
-      <div className="cols">
-        <div>{RENDER[current.id]({ state, change })}</div>
-
-        <aside>
-          <Summary state={state} change={change} step={current.id} />
-        </aside>
-      </div>
-    </>
+              <DraftStart
+                plans={plans}
+                label={(name) => t('{ad} ile başla', { ad: name })}
+                notify={notify}
+              />
+            </>
+          )}
+        </>
+      )}
+    </Checklist>
   );
 }

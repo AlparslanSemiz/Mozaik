@@ -4,7 +4,6 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  normalizeAvailClock,
   normalizeRibbonAuto,
   normalizeMotion,
   normalizeScale,
@@ -165,28 +164,6 @@ describe('normalizeRibbonAuto', () => {
   it('boolean de kabul ediyor', () => {
     expect(normalizeRibbonAuto(true)).toBe(true);
     expect(normalizeRibbonAuto(false)).toBe(false);
-  });
-});
-
-describe('normalizeAvailClock', () => {
-  // The reader asked for this one to default OFF, so "absent" and "anything
-  // unreadable" both have to mean off — and only the exact stored string may
-  // turn it on.
-  it('yalnız "acik" açık demektir', () => {
-    expect(normalizeAvailClock('acik')).toBe(true);
-  });
-
-  it('okunamayan her şey KAPALI', () => {
-    for (const junk of [null, undefined, '', 'kapali', 'Acik', 'ACIK', 1, {}, []]) {
-      expect(normalizeAvailClock(junk)).toBe(false);
-    }
-  });
-
-  // The switch in Müsaitlik's strip hands over a boolean and storage hands over
-  // a string, and the factory normalizes both before it stores.
-  it('boolean de kabul ediyor', () => {
-    expect(normalizeAvailClock(true)).toBe(true);
-    expect(normalizeAvailClock(false)).toBe(false);
   });
 });
 

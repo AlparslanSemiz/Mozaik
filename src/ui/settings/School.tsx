@@ -72,7 +72,7 @@ export default function School({ state, change }: PanelProps) {
         ? t('Bunların {n} saati sabitli, sabitlemeleri de kalkacak.', { n: loss.pinned })
         : '',
       loss.elsewhere > 0
-        ? t('Öteki seçeneklerde de {n} saat kalkacak.', { n: loss.elsewhere })
+        ? t('Bu plandaki öteki programlarda da {n} saat kalkacak.', { n: loss.elsewhere })
         : '',
       t('Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.'),
     ].filter((x) => x !== '');

@@ -161,21 +161,6 @@ const CASES: Case[] = [
     painted: () => root().style.getPropertyValue('--ui-scale'),
   },
   {
-    ad: 'müsaitlikte saat',
-    key: 'ders-programi-musaitlik-saat',
-    pref: theme.availClockPreference,
-    read: theme.readAvailClock,
-    save: theme.applyAvailClock,
-    absent: false,
-    junk: ['', 'evet', 'true'],
-    stored: [['acik', true]],
-    values: [
-      [true, 'acik'],
-      [false, 'kapali'],
-    ],
-    painted: attribute('data-avail-clock'),
-  },
-  {
     ad: 'dil',
     key: 'ders-programi-dil',
     pref: i18n.dilPreference,

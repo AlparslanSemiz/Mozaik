@@ -83,9 +83,28 @@ export async function reopen(page: Page) {
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
 }
 
+/**
+ * One of the five tasks (Sadeleşme, K1, 2026-11-16), by its name in the top
+ * bar. Inside `.tabstrip`: Yazdır ve gönder's strip has "Öğretmenler" and
+ * "Sınıflar" buttons of its own (pitfall 49).
+ */
+export async function goTab(page: Page, name: string) {
+  await page.locator('.tabstrip').getByRole('button', { name, exact: true }).click();
+}
+
+/** The status chip's problem list, which is what the Kontrol tab became (K3). */
+export async function openProblems(page: Page) {
+  await page.locator('.topbar .health').click();
+  const list = page.getByRole('dialog', { name: 'Programın durumu' });
+  await expect(list).toBeVisible();
+  return list;
+}
+
 export async function open(page: Page) {
   await page.goto(FILE);
-  await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+  await expect(
+    page.locator('.tabstrip').getByRole('button', { name: 'Program', exact: true }),
+  ).toBeVisible();
   // The embedded face decides `ch`, and `ch` decides every column on the
   // width ladder. `font-display: block` means nothing is painted with the
   // fallback's metrics, so this wait is the moment the first glyph appears —
@@ -114,17 +133,18 @@ export async function openWithSample(page: Page) {
 }
 
 /**
- * Setup is a strip of steps now, so reaching a field means naming its step.
- * Every test that used to just click "Kurulum" goes through here.
+ * One of the four lists, by its name. Since K1 (2026-11-16) Öğretmenler and
+ * Sınıflar are tabs of their own (their strip's "Liste"), and Derslikler and
+ * Branşlar are sections of Okul bilgileri.
  */
 export async function openSetup(page: Page, step: string) {
-  await page.getByRole('button', { name: 'Okul', exact: true }).click();
+  const people = step === 'Öğretmenler' || step === 'Sınıflar';
+  await goTab(page, people ? step : 'Okul bilgileri');
   await revealRibbon(page);
-  // The four steps live in the tool strip now, and they are `.btn`s there, so
-  // "you are here" is `aria-pressed` — the button state — rather than
-  // `aria-current`, which marked a navigation link.
-  await page.locator('.ribbon .step', { hasText: step }).click();
-  await expect(page.locator('.step[aria-pressed="true"]')).toContainText(step);
+  await page.locator('.ribbon .step', { hasText: people ? 'Liste' : step }).click();
+  await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText(
+    people ? 'Liste' : step,
+  );
 }
 
 /**
@@ -155,12 +175,22 @@ export async function addSubjects(page: Page, ...names: string[]) {
   }
 }
 
+/**
+ * The lessons, entered from a class (Sınıflar → Dersler), from a teacher
+ * (Öğretmenler → Dersler), or all of them (Daha fazla → "Bütün dersler tek
+ * listede"). Dersler was a tab of its own until K1 (2026-11-16).
+ */
 export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' = 'all') {
-  await page.getByRole('button', { name: 'Dersler', exact: true }).click();
+  await goTab(page, mode === 'teacher' ? 'Öğretmenler' : 'Sınıflar');
   await revealRibbon(page);
-  const label = mode === 'class' ? 'Sınıftan' : mode === 'teacher' ? 'Öğretmenden' : 'Genel';
-  await page.getByRole('button', { name: label, exact: true }).click();
-  await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(label);
+  if (mode === 'all') {
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitem', { name: 'Bütün dersler tek listede' }).click();
+    await expect(page.locator('.panel.step-panel h2').first()).toContainText('Dersler ·');
+    return;
+  }
+  await page.locator('.ribbon').getByRole('button', { name: 'Dersler', exact: true }).click();
+  await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText('Dersler');
 }
 
 /**
@@ -198,13 +228,13 @@ export async function revealRibbon(page: Page) {
 }
 
 export async function openSettings(page: Page, section: string) {
-  await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
+  await goTab(page, 'Okul bilgileri');
   await revealRibbon(page);
   // The two rarely opened sections are behind the strip's Daha fazla since
   // 2026-11-16 (Sadeleşme); the strip then READS which one is open.
   if (section === 'Planlar ve yedek' || section === 'Hakkında') {
     await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitemradio', { name: section }).click();
+    await page.getByRole('menuitem', { name: section }).click();
     await expect(page.locator('.ribbon .ribbon-label').last()).toHaveText(
       section === 'Hakkında' ? /sürüm/i : /açık plan/i,
     );
@@ -409,7 +439,7 @@ export const FIXTURE = {
  * runs parseState() and sanitize(), which is what a backup file goes through in
  * the father's hands, and it does not race the 400 ms debounced auto-save.
  */
-export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
+export async function loadWorld(page: Page, state: unknown, tab: string | null = 'Program') {
   await open(page);
   await page.locator('input[type=file]').setInputFiles({
     name: 'ders-programi-2026-08-25-1200.json',
@@ -451,7 +481,7 @@ export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
     )
     .toEqual(shape);
 
-  await page.getByRole('button', { name: tab, exact: true }).click();
+  if (tab !== null) await goTab(page, tab);
 }
 
 /** The raw string the page has in localStorage right now, or '' if nothing. */
@@ -730,9 +760,18 @@ export function mainList(page: Page) {
   return page.locator('.cols > div table.list');
 }
 
+/**
+ * A teacher's or class's page by id, from its list: Müsaitlik's entity list
+ * went with the tab (K1, 2026-11-16) and the closed hours are on the page.
+ */
 export async function chooseEntity(page: Page, id: string) {
-  await page.locator(`.entity[data-id="${id}"]`).click();
-  await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute('data-id', id);
+  const row = page.locator(`table.list tr[data-person-id="${id}"] .person-open`);
+  await openSetup(page, 'Öğretmenler');
+  if ((await row.count()) === 0) await openSetup(page, 'Sınıflar');
+  await row.click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toBeVisible();
+  return sheet;
 }
 
 // --------------------------------------------------------------- scenes
@@ -756,18 +795,31 @@ export interface Scene {
 }
 
 const tab = (name: string) => async (page: Page) => {
-  await page.getByRole('button', { name, exact: true }).click();
+  await goTab(page, name);
 };
 
 export const SCENES: Scene[] = [
-  { name: '1-okul', go: tab('Okul') },
+  { name: '1-okul', go: tab('Okul bilgileri') },
   {
     name: '2-okul-ogretmenler',
     go: async (page) => {
       await openSetup(page, 'Öğretmenler');
     },
   },
-  { name: '3-musaitlik', go: tab('Müsaitlik') },
+  {
+    // Müsaitlik's grid, where it lives since K1: the person's page.
+    name: '3-musaitlik',
+    go: async (page) => {
+      await openSetup(page, 'Öğretmenler');
+      await page.locator('table.list .person-open').first().click();
+      await page.locator('.sheet').waitFor();
+      await page.waitForTimeout(400);
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
+      await page.locator('.sheet').waitFor({ state: 'hidden' });
+    },
+  },
   {
     // The tab this round created, in the mode it opens in. The picture worth
     // having is the shortening: the form has no class box, and the strip and
@@ -854,7 +906,16 @@ export const SCENES: Scene[] = [
       await page.locator('.palette').waitFor({ state: 'hidden' });
     },
   },
-  { name: '7-kontrol', go: tab('Kontrol') },
+  {
+    name: '7-kontrol',
+    go: async (page) => {
+      await openProblems(page);
+      await page.waitForTimeout(400);
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
+    },
+  },
   {
     // The program's own dialog. There used to be seventeen of these and every
     // one was the operating system's. A deletion no longer asks (SD1); a
@@ -875,7 +936,7 @@ export const SCENES: Scene[] = [
   {
     name: '8-cikti',
     go: async (page) => {
-      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+      await goTab(page, 'Yazdır ve gönder');
       await page.emulateMedia({ media: 'print' });
     },
     after: async (page) => {
@@ -889,16 +950,19 @@ export const SCENES: Scene[] = [
     // actually looks at while deciding what to print.
     name: '8b-cikti-onizleme',
     go: async (page) => {
-      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+      await goTab(page, 'Yazdır ve gönder');
       await page.locator('.print-page').first().waitFor();
     },
   },
   {
-    // Kontrol, which had no tool strip at all until 2026-08-27.
+    // The problem list's İpuçları, the other half of what Kontrol was.
     name: '8c-kontrol',
     go: async (page) => {
-      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-      await page.locator('.ribbon').waitFor();
+      const list = await openProblems(page);
+      await list.getByRole('button', { name: /^İpuçları/ }).click();
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
     },
   },
   {

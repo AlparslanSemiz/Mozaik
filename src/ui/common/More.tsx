@@ -13,6 +13,7 @@
 // `menuitemcheckbox`, so the suite and a screen reader find them by name.
 
 import type React from 'react';
+import { useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { Check, ChevronDown, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useT } from './T';
@@ -42,13 +43,28 @@ export function MoreMenu({
   align?: 'start' | 'end';
 }) {
   const t = useT();
+  // Radix opens the menu on pointerdown and on Enter, Space or ↓, never on a
+  // bare click; a click with no pointer before it is assistive technology
+  // pressing the button (Windows UI Automation's Invoke, a screen reader's
+  // default action), and it opened nothing (kurulum-windows, 2026-11-16).
+  // Such a click opens the menu; it never closes it, so a keyboard Enter that
+  // Radix already handled changes nothing.
+  const [open, setOpen] = useState(false);
+  const pointer = useRef(false);
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
           className={`btn more-menu${dot ? ' has-dot' : ''} ${className}`.trim()}
           disabled={disabled}
+          onPointerDown={() => {
+            pointer.current = true;
+          }}
+          onClick={() => {
+            if (pointer.current) pointer.current = false;
+            else setOpen(true);
+          }}
           {...(ariaLabel === undefined ? {} : { 'aria-label': t(ariaLabel) })}
         >
           {icon}

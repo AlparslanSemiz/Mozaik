@@ -38,7 +38,9 @@ test.describe('82. Dil', () => {
   test('varsayılan Türkçe ve <html lang> onu söylüyor', async ({ page }) => {
     await open(page);
     await expect(page.locator('html')).toHaveAttribute('lang', 'tr');
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
   });
 
   test('İngilizceye geçince sekmeler ÇEVRİLİYOR ve lang değişiyor', async ({ page }) => {
@@ -47,9 +49,9 @@ test.describe('82. Dil', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     for (const [tr, en] of [
-      ['Okul', 'School'],
+      ['Okul bilgileri', 'School details'],
       ['Program', 'Timetable'],
-      ['Ayarlar', 'Settings'],
+      ['Yazdır ve gönder', 'Print and send'],
     ] as const) {
       await expect(page.getByRole('button', { name: en, exact: true })).toBeVisible();
       await expect(page.getByRole('button', { name: tr, exact: true })).toHaveCount(0);
@@ -62,8 +64,9 @@ test.describe('82. Dil', () => {
   test('Dersler listesinin toplamı çevriliyor', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');
-    await page.getByRole('button', { name: 'Lessons', exact: true }).click();
-    await page.getByRole('button', { name: 'All', exact: true }).click();
+    await page.locator('.tabstrip').getByRole('button', { name: 'Classes', exact: true }).click();
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitem', { name: 'Every lesson in one list' }).click();
     await expect(page.locator('.panel.step-panel h2').first()).toContainText(
       '99 lessons · 433 hours',
     );
@@ -96,19 +99,23 @@ test.describe('82. Dil', () => {
   test('beş dilin beşi de sekmeleri KENDİ dilinde çiziyor', async ({ page }) => {
     await open(page);
     const beklenen: Array<[Dil, string, string, string]> = [
-      ['en', 'School', 'Timetable', 'Settings'],
-      ['de', 'Schule', 'Stundenplan', 'Einstellungen'],
-      ['es', 'Escuela', 'Horario', 'Ajustes'],
-      ['fr', 'École', 'Emploi du temps', 'Réglages'],
+      ['en', 'School details', 'Timetable', 'Print and send'],
+      ['de', 'Schulangaben', 'Stundenplan', 'Drucken und senden'],
+      ['es', 'Datos del centro', 'Horario', 'Imprimir y enviar'],
+      ['fr', 'Infos de l’école', 'Emploi du temps', 'Imprimer et envoyer'],
     ];
     for (const [dil, okul, program, ayarlar] of beklenen) {
       await chooseLang(page, dil);
       await expect(page.locator('html')).toHaveAttribute('lang', dil);
       for (const ad of [okul, program, ayarlar]) {
-        await expect(page.getByRole('button', { name: ad, exact: true })).toBeVisible();
+        await expect(
+          page.locator('.tabstrip').getByRole('button', { name: ad, exact: true }),
+        ).toBeVisible();
       }
       // and no Turkish left standing in the strip
-      await expect(page.getByRole('button', { name: 'Okul', exact: true })).toHaveCount(0);
+      await expect(
+        page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+      ).toHaveCount(0);
     }
   });
 
@@ -133,12 +140,13 @@ test.describe('82. Dil', () => {
   test('SAF modüllerin cümleleri de çevriliyor — kapasite raporu', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');
-    await page.getByRole('button', { name: 'Check', exact: true }).click();
-    // The capacity report is one panel at a time now, and its sentence — the
-    // one written by a PURE module — lives on the teachers view.
-    await page.locator('.ribbon .more-menu').click();
+    // The problem list (K3, 2026-11-16) is opened by the status chip; its
+    // capacity sentence, written by a PURE module, is on the teacher loads.
+    await page.locator('.topbar .health').click();
+    const list = page.getByRole('dialog');
+    await list.locator('.more-menu').click();
     await page.getByRole('menuitemradio', { name: 'Teacher loads' }).click();
-    const metin = await page.locator('.main').innerText();
+    const metin = await list.innerText();
     expect(metin).toContain('available');
     expect(metin).not.toContain('müsait');
   });
@@ -148,7 +156,7 @@ test.describe('82. Dil', () => {
   test('çoğul EKRANDA doğru biçimi seçiyor', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');
-    await page.getByRole('button', { name: 'School', exact: true }).click();
+    await page.locator('.tabstrip').getByRole('button', { name: 'Teachers', exact: true }).click();
     const metin = await page.locator('body').innerText();
     expect(metin).toMatch(/\b\d+ (rooms|classes|teachers|subjects)\b/);
   });
