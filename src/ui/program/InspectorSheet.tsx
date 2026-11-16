@@ -614,7 +614,9 @@ export function Inspector({
               <table className="sheet-week">
                 <thead>
                   <tr>
-                    <th />
+                    <th>
+                      <span className="visually-hidden">{t('Gün')}</span>
+                    </th>
                     {hours.map((label, h) => (
                       <th key={h}>{label}</th>
                     ))}

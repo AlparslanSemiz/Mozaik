@@ -121,7 +121,10 @@ export function AvailGrid({ state, change, entityId, teacher, label, clock = fal
       >
         <thead>
           <tr>
-            <th className="corner-head" />
+            {/* Named for a screen reader: an empty header cell names nothing (axe). */}
+            <th className="corner-head">
+              <span className="visually-hidden">{t('Gün')}</span>
+            </th>
             {state.settings.hours.map((hour, s) => (
               <th key={s}>
                 <button

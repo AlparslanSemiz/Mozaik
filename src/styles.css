@@ -4014,6 +4014,7 @@ input[type='checkbox'] {
 .step:focus-visible,
 table.availability button:focus-visible,
 .inspect:focus-visible,
+.person-open:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
@@ -7784,8 +7785,4 @@ table.sheet-lessons td.num input.num {
 table.person-list th,
 table.person-list td:not(.person-status) {
   white-space: nowrap;
-}
-
-table.person-list td.person-status {
-  width: 100%;
 }
