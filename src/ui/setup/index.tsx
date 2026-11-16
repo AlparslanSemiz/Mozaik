@@ -80,7 +80,7 @@ export function Start({
       {/* The sample school is open: the way to one's own is one line, and
           the sample stays as a plan (App.tsx, startOwnSchool). */}
       {isSampleSchool(state) && (
-        <p className="hint intro-line">
+        <p className="hint sample-line">
           <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
           {t('Bu örnek okul.')}
           <button className="btn" onClick={onOwn}>

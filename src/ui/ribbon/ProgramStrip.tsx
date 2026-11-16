@@ -67,23 +67,36 @@ function MainAction({
   t: StripContext['t'];
 }) {
   const refs = useRef<Record<string, HTMLElement | null>>({});
-  /** Set when a press came from the focused main control; cleared once the run has settled. */
-  const follow = useRef(false);
+  /**
+   * Until when focus follows the control: set by a press that came from the
+   * focused main control, open-ended while the run shows "Durdur", and a moment
+   * after it (the strip's counts settle a render later, so the control may change
+   * once more before it is final). 0: not following.
+   */
+  const following = useRef(0);
   /** A rebuild press this soon after focus arrived is a held or repeated Enter. */
   const guardUntil = useRef(0);
   useEffect(() => {
-    if (!follow.current) return;
+    if (following.current === 0) return;
+    const now = performance.now();
+    if (kind === 'stop') following.current = Number.POSITIVE_INFINITY;
+    else if (following.current === Number.POSITIVE_INFINITY) following.current = now + 1500;
+    if (now > following.current) {
+      following.current = 0;
+      return;
+    }
     const active = document.activeElement;
     // Only when focus really fell off: never steal it from somewhere else.
     if (active === null || active === document.body) {
-      const el = refs.current[kind];
-      el?.focus();
-      if (kind === 'fix') guardUntil.current = performance.now() + 700;
+      refs.current[kind]?.focus();
+      if (kind === 'fix') guardUntil.current = now + 700;
+    } else if (!Object.values(refs.current).includes(active as HTMLElement)) {
+      following.current = 0;
     }
-    if (kind !== 'stop') follow.current = false;
+    if (kind === 'done') following.current = 0;
   }, [kind]);
   const press = (e: React.MouseEvent<HTMLElement>, run: () => void) => {
-    follow.current = document.activeElement === e.currentTarget;
+    following.current = document.activeElement === e.currentTarget ? performance.now() + 1500 : 0;
     run();
   };
   const set = (k: MainKind) => (el: HTMLElement | null) => {

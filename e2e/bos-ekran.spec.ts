@@ -63,6 +63,29 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await expect(page.locator('.intro-line')).toHaveCount(0);
     });
 
+    test('örnek okul açıkken Kendi okulumla başla boş plan açıyor, örnek ayrı plan kalıyor, Geri al döndürüyor', async ({
+      page,
+    }) => {
+      await open(page);
+      await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+      await answerDialog(page);
+      await openSetup(page, 'Derslikler');
+      const line = page.locator('.sample-line');
+      await expect(line).toContainText('Bu örnek okul.');
+      await line.getByRole('button', { name: 'Kendi okulumla başla' }).click();
+
+      // An empty plan is open, the sample is a plan of its own in the picker.
+      await expect(page.locator('.sample-line')).toHaveCount(0);
+      const picker = page.getByRole('combobox', { name: 'Plan', exact: true });
+      await expect(picker.locator('option')).toHaveCount(2);
+      await expect(page.locator('.toast', { hasText: 'Boş bir plan açıldı' })).toBeVisible();
+
+      await page.locator('.toast').getByRole('button', { name: 'Geri al' }).click();
+      await expect(page.locator('.sample-line')).toBeVisible();
+      // The empty plan is dropped again, nothing of the sample was touched.
+      await expect(picker).toHaveCount(0);
+    });
+
     test('kendi verisini girmeye başlayan da bir daha görmüyor', async ({ page }) => {
       await open(page);
       await expect(page.locator('.intro-line')).toBeVisible();
@@ -111,8 +134,9 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await expect(list.locator('li[data-step]')).toHaveCount(5);
     await expect(list.locator('li.done')).toHaveCount(0);
     await expect(list).toContainText('0 / 5 adım');
-    // The first step names the default week, so a wrong one is seen.
-    await expect(list.locator('li[data-step="school"]')).toContainText('Salı–Pazar, günde 12 saat');
+    await expect(list.locator('li[data-step="school"]')).toContainText(
+      'Okulun adı, zili, öğretmenleri ve sınıfları.',
+    );
 
     await list.getByRole('button', { name: 'Okul adını ve zili gir' }).click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
@@ -120,7 +144,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       'Okul bilgileri',
     );
     await expect(
-      page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
+      page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-current="true"]'),
     ).toContainText('Zil ve günler');
     await page.getByPlaceholder('örn. Semiz Kurs').fill('Deneme Kurs');
 

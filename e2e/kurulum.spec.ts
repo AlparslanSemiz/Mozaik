@@ -521,7 +521,7 @@ test.describe('30. Kurulum — düzenleme', () => {
     await expect(rows).toHaveCount(before - 1);
   });
 
-  test('arada başka bir düzenleme varsa Geri al bunu söylüyor, sessizce kapanmıyor', async ({
+  test('arada başka bir düzenleme olunca eski bildirimin Geri al düğmesi kalkıyor, yanlış şeyi geri almıyor', async ({
     page,
   }) => {
     await openWithSample(page);
@@ -534,9 +534,11 @@ test.describe('30. Kurulum — düzenleme', () => {
     const hours = rows.first().locator('input[type=number]').first();
     await hours.fill('9');
     await hours.blur();
-    await notice.getByRole('button', { name: 'Geri al' }).click();
+    // The notice stays and tells what happened; its button, which would
+    // answer "Arada başka bir değişiklik oldu" when pressed, is gone.
+    await expect(notice).toBeVisible();
+    await expect(notice.getByRole('button', { name: 'Geri al' })).toHaveCount(0);
     await expect(rows).toHaveCount(before - 1);
-    await expect(page.locator('.toast.warn')).toContainText('Ctrl+Z ile adım adım');
   });
 });
 
