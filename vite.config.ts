@@ -4,6 +4,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 import { visualizer } from 'rollup-plugin-visualizer';
 import type { PluginOption } from 'vite';
 import { surumBilgisi } from './scripts/surum.mjs';
+import { sozlukPaketi } from './scripts/sozluk-paket.mjs';
 
 // The size report, and it is OFF unless asked for (`npm run analiz`). A plugin
 // that runs in every build is a plugin that can change what every build
@@ -39,6 +40,8 @@ export default defineConfig({
   // build is ONE file and the claim has to stay checkable with ls.
   publicDir: false,
   plugins: [
+    // Build only: the four dictionaries' Turkish keys written once (scripts/sozluk-paket.mjs).
+    sozlukPaketi(),
     react(),
     viteSingleFile(),
     ...(ANALIZ

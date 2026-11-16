@@ -36,6 +36,35 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Sözlükler derlemede paketleniyor, sıkıştırılmış saklama bırakıldı (`boyut/kucult`)
+
+**Ölçülen.** Kaynak haritasıyla sayıldı: `dist/index.html`'in betiği 1 186 kB, bunun 425 kB'ı
+dört sözlük, 178 kB'ı react-dom. Her sözlük bütün Türkçe cümleyle anahtarlandığı için aynı
+1 221 cümle dosyada dört kez duruyordu. Öneri worker'ı çift gömülü değil: sayfanın kendi
+betiğinden bir `blob:` (2026-09-25 kaydı). Font 32,5 kB'lık tek bir woff2 (`npm run font`'un
+reçetesi zaten dar), CSS'te kullanılmayan sınıf üç tane, knip'in bulgusu yok.
+
+**Karar.** Derlemenin eklentisi (`scripts/sozluk-paket.mjs`, iki vite yapılandırmasında da)
+`lang/{en,de,es,fr}.ts`'in yerine birer `registerPaket` çağrısı yazıyor: anahtarlar paylaşılan
+tek bir dizge, her dilin çevirileri aynı sırada `~` ile birleşmiş bir dizge. `sozlukOf` dili
+ilk istendiğinde nesneye açıyor, yani Türkçe bir açılış ve her öneri worker'ı dört 1 221
+anahtarlı nesneyi hiç kurmuyor. Ham boy −164 kB, brotli −9,7 kB, açılış ölçüldüğü kadarıyla
+kötüleşmedi (WORKLOG). Kaynak dosyalar, geliştirme sunucusu ve vitest değişmedi;
+`paket.test.ts` paketin kaynakla anahtar anahtar aynı olduğunu ölçüyor.
+
+**Denendi, bırakıldı: çevirileri sıkıştırılmış saklamak.** Dört dilin çevirileri
+deflate'lenip base64 olarak gömülünce (açılışı `DecompressionStream` yapacaktı) ham boy 124 kB
+daha inerdi, ama brotli hâli 9,2 kB büyürdü (paketli dosyada 292,3 → 301,5 kB, bugünkü
+`main` birleşmeden önce ölçüldü): sıkıştırılmış veriyi brotli
+sıkıştıramaz, base64 da bedelini ekler. Bugün bağlayıcı olan eşik brotli olduğu için
+yanlış yöne bir takas, üstelik `t()` eşzamanlı ve dil değişimi beklemeye dönerdi.
+
+**Denendi, bırakıldı: anahtarların sırası.** Anahtarları sıralamak ya da dört çeviriyi anahtar
+başına yan yana koymak brotli'de ±2 kB içinde kaldı (sıralı −0,3 kB, iç içe +2,5 kB).
+
+**Kalan.** Brotli hâlinin büyük parçaları çevirilerin kendisi (~56 kB) ve react-dom (~46 kB).
+İkisini küçültmek bir özellik kaybı ya da bir kütüphane değişimi; bu dalda yapılmadı.
+
 ### 2026-11-16 · İmza anahtarı `release` ortamında, exe'nin sayfası CSP altında (`guvenlik/sertlestirme`)
 
 **Karar (Alp, 2026-11-16).** İkinci güvenlik denetiminin en ağır bulgusu: imza anahtarı bir depo
