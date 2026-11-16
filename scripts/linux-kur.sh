@@ -23,7 +23,9 @@
 # and the next start opens the new build.
 #
 # Exit codes: 3 no usable checkout, 4 not on main, 5 uncommitted changes,
-# 6 the build failed, 7 main moved during the build.
+# 6 the build failed, 7 main moved during the build, 8 the installed build is
+# newer than this checkout's main (an old clone would downgrade it below the
+# schema the plans already use).
 
 set -eu
 
@@ -35,11 +37,11 @@ dur() {
   exit "$1"
 }
 
-# The checkout this script belongs to: scripts/.. of wherever it was run from.
-kaynak="$(cd -P -- "$(dirname -- "$0")/.." && pwd)" ||
+# The checkout this script belongs to: scripts/.. of the real file, links
+# followed.
+kaynak="$(cd -P -- "$(dirname -- "$(readlink -f -- "$0")")/.." && pwd)" ||
   dur 3 "betiğin deposu bulunamadı ($0)."
 
-[ -d "$kaynak" ] || dur 3 "$kaynak yok."
 ust="$(git -C "$kaynak" rev-parse --show-toplevel 2>/dev/null)" ||
   dur 3 "$kaynak bir git deposu değil."
 [ "$(realpath "$ust")" = "$(realpath "$kaynak")" ] ||
@@ -54,6 +56,14 @@ dal="$(git -C "$kaynak" branch --show-current)"
   dur 5 "$kaynak'ta işlenmemiş değişiklik var; git status temiz olmalı."
 
 commit="$(git -C "$kaynak" rev-parse HEAD)"
+
+# Never step back: if the installed commit is a descendant of this one, this
+# clone's main is behind. A commit this clone does not know is let through.
+kurulu="$(sed -n 's/^commit //p' "$app/kaynak.txt" 2>/dev/null || true)"
+if [ -n "$kurulu" ] && [ "$kurulu" != "$commit" ] &&
+  git -C "$kaynak" merge-base --is-ancestor "$commit" "$kurulu" 2>/dev/null; then
+  dur 8 "kurulu sürüm (${kurulu:0:7}) bu checkout'un main'inden daha yeni; önce git pull."
+fi
 
 (
   cd "$kaynak" || exit 1

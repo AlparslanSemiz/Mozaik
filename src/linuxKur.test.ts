@@ -19,6 +19,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   utimesSync,
@@ -201,13 +202,25 @@ describe.skipIf(process.platform === 'win32')('Linux kurulum betiği', () => {
     const d = depo(ev);
     const baska = join(ev, 'baska', 'yer');
     mkdirSync(join(ev, 'baska'), { recursive: true });
-    git(ev, 'clone', '-q', d, baska);
-    rmSync(d, { recursive: true, force: true });
+    renameSync(d, baska);
     const r = kur(ev, baska);
     expect(r.status, r.stderr).toBe(0);
     expect(readFileSync(join(appDir(ev), 'kaynak.txt'), 'utf8')).toContain(
       `commit ${git(baska, 'rev-parse', 'HEAD')}`,
     );
+  });
+
+  it('kurulu olandan eski bir main’i kurmuyor', () => {
+    const ev = yeniEv();
+    const d = depo(ev);
+    writeFileSync(join(d, 'package.json'), paket('<!doctype html>v2'));
+    git(d, 'commit', '-q', '-am', 'iki');
+    expect(kur(ev).status).toBe(0);
+    git(d, 'reset', '-q', '--hard', 'HEAD~1');
+    const r = kur(ev);
+    expect(r.status).toBe(8);
+    expect(r.stderr).toContain('daha yeni');
+    expect(readFileSync(join(appDir(ev), 'index.html'), 'utf8')).toBe('<!doctype html>v2');
   });
 
   it('bir git deposunun içinde değilse reddediyor', () => {
