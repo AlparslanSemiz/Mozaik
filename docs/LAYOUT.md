@@ -114,7 +114,7 @@ kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydı
 ### Sekmelerin şeritleri
 
 - **Öğretmenler** ve **Sınıflar** (bir şerit, iki sekme). `Göster`: `Liste` (sayısıyla; bu ekranda sayı yalnız burada) ve `Dersler`. `Dersler`'de `Açık olan`: sağdaki listeden seçilen kişi. Daha fazla: Bütün dersler tek listede (eski Genel), Kurallar. Düğmenin adı `Liste`, sekmenin adı değil (tuzak 49).
-- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Programı yap`, ekranın tek ana düğmesi; koşarken yerinde `Durdur`; bekleyen ders yokken sorun varsa yerinde `Yeniden yap`, 2026-11-16), Daha fazla: Yeniden yap; Başka bir dizilim; Bu programın kopyası (yeni bir plan, K2; eski bir dosyada birden çok program varsa adı `Ayrı plan yap`, açık programı kendi adını taşıyan bir plan yapar, yanında açık olanı silmek de); Renk ▸ (öğretmene, sınıfa, dersliğe ya da branşa göre); tüm programı sabitle ya da sabitlemeleri kaldır; programı boşalt. Yoğunluk ve geçici görünüm 2026-11-16'da kalktı (Sadeleşme K6, K7). Görünüm en solda, çünkü orası onun eski yeri. `Yeniden yap` gündelik düğmenin yanında durmuyor: yerleşmiş bir haftayı tek tıkla boşaltıp yeniden yapmak yanlışlıkla basılacak bir düğme değil.
+- **Program.** Solda `Görünüm` (Öğretmen, Sınıf), `Diz` (`Programı yap`, ekranın tek ana düğmesi; koşarken yerinde `Durdur`; bekleyen ders yokken kapalı saatte ders ya da kesin kural ihlali varsa yerinde `Yeniden yap`, 2026-11-16), Daha fazla: Yeniden yap; Başka bir dizilim; Bu programın kopyası (yeni bir plan, K2; eski bir dosyada birden çok program varsa adı `Ayrı plan yap`, açık programı kendi adını taşıyan bir plan yapar, yanında açık olanı silmek de); Renk ▸ (öğretmene, sınıfa, dersliğe ya da branşa göre); tüm programı sabitle ya da sabitlemeleri kaldır; programı boşalt. Yoğunluk ve geçici görünüm 2026-11-16'da kalktı (Sadeleşme K6, K7). Görünüm en solda, çünkü orası onun eski yeri. `Yeniden yap` gündelik düğmenin yanında durmuyor: yerleşmiş bir haftayı tek tıkla boşaltıp yeniden yapmak yanlışlıkla basılacak bir düğme değil.
 - **Yazdır ve gönder.** `İçerik`: Öğretmenler, Sınıflar, İkisi de. Daha fazla: Renkli bas.
 - **Okul bilgileri.** `Bölüm`: Zil ve günler, Derslikler, Branşlar (ikisi sayısıyla), Kurallar, Görünüm; Planlar ve yedek ile Hakkında Daha fazla'da (ikisine de üst çubuktan da gidilir: Dosya ▾ ve ?), yeni bir sürüm notu varsa Daha fazla düğmesi nokta taşır. Sağda bir okuma: Kurallar'da kesin, tercih ve kapalı sayıları, Planlar ve yedek'te açık plan, Hakkında'da sürüm.
 
@@ -230,7 +230,7 @@ Dersi buraya sabitle  (ya da Sabitlemeyi kaldır)
 
 Şeritte `Programı yap` bekleyen dersleri dizer, Daha fazla'daki `Yeniden yap`
 (sormadan, bildirimi `Önceki programa dön` taşır, sabitlenen yerinde kalır) ızgarayı boşaltıp
-yeniden dizer. Bekleyen ders yokken sorun varsa (kapalı saatte kalan ders gibi) ana düğmenin
+yeniden dizer. Bekleyen ders yokken kapalı saatte kalan ders ya da kesin kural ihlali varsa ana düğmenin
 yerinde `Yeniden yap` durur; havuzun başı o zaman "Hepsi yerleşti" değil çipin "N sorun"unu
 söyler. Bir ayarı yok: "sabaha yay" gibi tercihler
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de

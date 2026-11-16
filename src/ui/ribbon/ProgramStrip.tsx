@@ -147,7 +147,7 @@ export function programStrip({
     // happens and the notice offers that click. The pinned cells stay, and so
     // do their pins: nothing takes a pinned block down but unpinning it.
     const next = keepPinnedOnly(state);
-    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }), true);
+    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
     change((d) => (d === state ? next : keepPinnedOnly(d)));
     notify(
       pinnedHours === 0
@@ -187,17 +187,20 @@ export function programStrip({
           the old "Otomatik diz (N kart)" beside an equally loud "Baştan diz". The
           count lives in the pool and in the status chip; "Yeniden yap" is
           behind Daha fazla, because emptying a laid-out week in one click is
-          not the click that should be next to the everyday one. */}
+          not the click that should be next to the everyday one, unless the
+          week is broken in a way a rebuild mends (below). */}
       <Group label="Diz">
         {solver.running || solver.advice?.searching === true ? (
           <button className="btn danger" onClick={solver.stop}>
             <Square {...ICON} />
             {t('Durdur')}
           </button>
-        ) : pending === 0 && placed > 0 && status.problems > 0 ? (
-          // Nothing waits, yet the week has problems (a lesson on an hour
-          // closed since): "Programı yap" had nothing to do and the way out
-          // was behind Daha fazla (usability walkthrough, 2026-11-16).
+        ) : pending === 0 && placed > 0 && status.stranded + status.blocked > 0 ? (
+          // Nothing waits, yet the week is broken (a lesson on an hour closed
+          // since, a hard rule broken): "Programı yap" had nothing to do and
+          // the way out was behind Daha fazla (walkthrough, 2026-11-16). Not
+          // for a "Tercih" warning: a rebuild need not mend that, and it would
+          // take every unpinned hand placement with it.
           <button className="btn primary" onClick={rebuild}>
             <RotateCcw {...ICON} />
             {t('Yeniden yap')}

@@ -390,12 +390,14 @@ test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
 
   // A relaid or emptied week is no deletion: the strip read "Son silmeyi geri
   // almak için" after a reload when nothing had been deleted (walkthrough, 2026-11-16).
-  test('“Programı boşalt”tan sonra yenilemede silme önerilmiyor', async ({ page }) => {
+  test('“Yeniden yap”tan sonra yenilemede silme önerilmiyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     await openGridMenu(page);
-    await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
+    await expect(page.locator('.toast', { hasText: 'Program yeniden yapıldı' })).toBeVisible({
+      timeout: 60_000,
+    });
     await page.waitForTimeout(700); // the 400 ms autosave
     await reopen(page);
     await page.waitForTimeout(500);

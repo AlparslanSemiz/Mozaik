@@ -134,6 +134,12 @@ describe('teacherColumns', () => {
     });
   });
 
+  it('bilinmeyen başlıklı sütun da başlık satırını başlık yapıyor, o sütun yok sayılıyor', () => {
+    const text = 'Ad Soyad\tBranş\tTelefon\nAyşe Demir\tFizik\t555 12 12';
+    expect(teacherColumns(splitGrid(text), []).cols).toEqual(['name', 'subject', 'skip']);
+    expect(parseTeachers(text).accepted.map((x) => x.name)).toEqual(['Ayşe Demir']);
+  });
+
   it('kısa büyük harfli sütun kısa ad, seçilen sütunlar tahmini geçersiz kılıyor', () => {
     const text = 'Ayşe Demir\tFİZ\tAD';
     expect(teacherColumns(splitGrid(text), []).cols).toEqual(['name', 'short', 'subject']);

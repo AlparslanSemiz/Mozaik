@@ -40,11 +40,11 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 Baba gibi tıklanan bir turun bulguları, Alp hepsini onayladı. Ters çevirdikleri ve seçilen yol:
 
-- **Ana düğme hep işe yarar.** Bekleyen ders yokken sorun varsa `Programı yap` sönük durmuyor,
+- **Ana düğme hep işe yarar.** Bekleyen ders yokken hafta bozuksa (kapalı saatte ders, kesin kural ihlali) `Programı yap` sönük durmuyor,
   yerinde `Yeniden yap` (sabitlenen yerinde kalır); havuzun başı çipin sorun sayısını söyler.
   Durum çipi bekleyen saat varken sarı (2026-11-15'ten beri "sorun değil" diye yeşildi).
-- **Yeniden dizmek bir silme değil.** `Yeniden yap`, `Başka bir dizilim`, yer değiştiren
-  `Programı yap` ve `Programı boşalt` silmeden-önce yuvasına yine yazar ama yuva sonraki açılışta
+- **Yeniden dizmek bir silme değil.** `Yeniden yap`, `Başka bir dizilim` ve yer değiştiren
+  `Programı yap` silmeden-önce yuvasına yine yazar ama yuva sonraki açılışta
   önerilmez (`quiet`); bildirimleri `Önceki programa dön` der. Gerçek silmenin şeridi nötr renkte.
 - **Excel yapıştırmada sütunlar tanınır.** Başlık satırı ya da hücreler (bilinen branş, ≤ 4 harf
   büyük harf kısa ad, E/K, adres); hücrelerin söylemediği eski sıraya düşer ama hiçbir zaman

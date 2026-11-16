@@ -22,8 +22,9 @@ interface Columns<T> {
   choices: Array<[string, string]>;
   detect: (text: string) => string[];
   value: (x: T, col: string) => string;
-  /** Shown even when no column holds it: the short form made from the name. */
-  always: string;
+  /** Shown when no column holds them but the rows do: the short form made
+      from the name, an address found in another column. */
+  always: string[];
 }
 
 /** The Excel paste box: preview, then add. It never adds directly. */
@@ -51,6 +52,9 @@ export default function Paste<T>({
   const [result, setResult] = useState<ParseResult<T> | null>(null);
   const [cols, setCols] = useState<string[]>([]);
   const label = (id: string) => columns?.choices.find((c) => c[0] === id)?.[1] ?? '';
+  const extra = (columns?.always ?? []).filter(
+    (id) => !cols.includes(id) && result?.accepted.some((x) => columns?.value(x, id) !== ''),
+  );
 
   if (!open) return null;
 
@@ -146,7 +150,9 @@ export default function Paste<T>({
                         </select>
                       </th>
                     ))}
-                    {!cols.includes(columns.always) && <th>{label(columns.always)}</th>}
+                    {extra.map((id) => (
+                      <th key={id}>{label(id)}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -158,9 +164,9 @@ export default function Paste<T>({
                           {cols.indexOf(c) === k && c !== 'skip' ? columns.value(x, c) : ''}
                         </td>
                       ))}
-                      {!cols.includes(columns.always) && (
-                        <td>{columns.value(x, columns.always)}</td>
-                      )}
+                      {extra.map((id) => (
+                        <td key={id}>{columns.value(x, id)}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>

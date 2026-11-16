@@ -120,7 +120,10 @@ export function teacherColumns(
   const width = Math.max(0, ...grid.map((r) => r.length));
   const first = grid[0] ?? [];
   const named = first.map(headColumn);
-  if (first.some((c) => c !== '') && first.every((c, k) => c === '' || named[k] !== null)) {
+  const filled = first.filter((c) => c !== '').length;
+  // A header by its first cell or by most of its cells: "Ad Soyad · Branş ·
+  // Telefon" is one, and its unknown column is skipped.
+  if (named[0] === 'name' || named.filter((c) => c !== null).length * 2 > filled) {
     return { cols: Array.from({ length: width }, (_, k) => named[k] ?? 'skip'), header: true };
   }
   const subjects = new Set(known.map((x) => x.toLocaleLowerCase('tr')));

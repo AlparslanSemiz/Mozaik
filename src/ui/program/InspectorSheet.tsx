@@ -804,12 +804,6 @@ export function Inspector({
   );
 }
 
-/**
- * "Başka öğretmene aktar…" on one lesson. Its options are drawn the first time
- * the pointer or the keyboard reaches it: eleven lessons times eighteen
- * teachers was a fifth of the page's opening time at 4x, for lists nobody had
- * looked at yet. Its width is fixed so that drawing them moves nothing.
- */
 /** The other side and the hours: a lesson added without leaving the page. */
 function AddLesson({
   state,
@@ -825,10 +819,12 @@ function AddLesson({
   const t = useT();
   const [other, setOther] = useState('');
   const [hours, setHours] = useState(DEFAULT_LESSON_HOURS);
+  const pick = useRef<HTMLSelectElement>(null);
   const teacher = kind === 'teacher';
   return (
     <div className="form-row">
       <select
+        ref={pick}
         aria-label={teacher ? t('Sınıf') : t('Öğretmen')}
         value={other}
         onChange={(e) => setOther(e.target.value)}
@@ -867,7 +863,11 @@ function AddLesson({
               blocks: [],
             }),
           );
+          // Ready for the next one, the keyboard included: the button it
+          // was on is disabled now.
           setOther('');
+          setHours(DEFAULT_LESSON_HOURS);
+          pick.current?.focus();
         }}
       >
         {t('Ekle')}
@@ -876,6 +876,12 @@ function AddLesson({
   );
 }
 
+/**
+ * "Başka öğretmene aktar…" on one lesson. Its options are drawn the first time
+ * the pointer or the keyboard reaches it: eleven lessons times eighteen
+ * teachers was a fifth of the page's opening time at 4x, for lists nobody had
+ * looked at yet. Its width is fixed so that drawing them moves nothing.
+ */
 function TransferPick({
   state,
   from,

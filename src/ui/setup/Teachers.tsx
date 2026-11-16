@@ -104,7 +104,7 @@ export default function Teachers({ state, change }: PanelProps) {
               : c === 'gender'
                 ? genderCell(x.gender)
                 : x[c as 'name'],
-          always: 'short',
+          always: ['short', 'email'],
         }}
         onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
       />

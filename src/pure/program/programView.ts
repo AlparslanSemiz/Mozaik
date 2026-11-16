@@ -186,6 +186,13 @@ export function buildRows(
     });
   }
 
+  // A surname two teachers share would name neither: those cells keep the short form.
+  const seen = new Set<string>();
+  const shared = new Set<string>();
+  for (const x of d.teachers) {
+    const last = surname(x.name);
+    (seen.has(last) ? shared : seen).add(last);
+  }
   return d.classes.map((group) => {
     const cells: Array<GridCell | null> = new Array(n).fill(null);
     const closed: boolean[] = new Array(n).fill(false);
@@ -204,7 +211,7 @@ export function buildRows(
         cells[i] = {
           lessonId,
           top: teacher?.short ?? '?',
-          full: surname(teacher?.name ?? ''),
+          full: shared.has(surname(teacher?.name ?? '')) ? '' : surname(teacher?.name ?? ''),
           // The LESSON's subject, not the teacher's first one: a teacher who
           // holds two is in this class for exactly one of them.
           bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
