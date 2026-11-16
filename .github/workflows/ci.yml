@@ -230,3 +230,7 @@ jobs:
       pages: write
       id-token: write
     uses: ./.github/workflows/site.yml
+    # Only this one secret, by name: the new address's deploy key
+    # (site.yml, `yeni-adres`). Absent, that job skips itself.
+    secrets:
+      MOZAIK_SITE_DEPLOY_KEY: ${{ secrets.MOZAIK_SITE_DEPLOY_KEY }}

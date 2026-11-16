@@ -72,9 +72,10 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni exe → kurulum, 2026-11-16'dan beri aynı sürümde önerilen), antivirüs/SmartScreen
    davranışı; bekleyici exe'nin geçici klasörden çalışması bir tarayıcıya takılır mı.
-5. Sitenin alt alan adı (2026-11-16, `web/kalicilik`, birleşmedi): DNS kaydı, Pages'in özel
-   alan adı, `ders-programi` deposunda eski adres sayfası ve sonra `yeniAdresAcik`; sıra
-   [BUILD.md](BUILD.md) "Alan adına geçiş"te.
+5. Sitenin alt alan adı (2026-11-16): `web/kalicilik` `main`'de, DNS kaydı kuruldu. Kalan:
+   `AlparslanSemiz/mozaik-site` deposu, deploy anahtarı ve `MOZAIK_SITE_DEPLOY_KEY` sırrı,
+   o deponun Pages'i (`gh-pages`), sonra `yeniAdresAcik` (`web/ayri-site`). `Mozaik`'e özel
+   alan adı KONMAZ; sıra [BUILD.md](BUILD.md) "Alan adına geçiş"te.
 5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
    imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
 
@@ -347,6 +348,19 @@ eslint, prettier, `kontrat`/`docs`/sözlük testleri yeşil; `npm run hizli` yü
 akışında temiz. **Koşulmayan:** iki Windows iş akışı (Windows makinesi yok, dal itilmedi),
 Playwright, iki işçide CP-SAT ölçümü (babanın verisi bu oturumda yok; örnek okulla ölçmek
 kanıt sorusunu cevaplamazdı).
+## 2026-11-16 · Yeni adres ayrı bir Pages sitesinden (`web/ayri-site`)
+
+Bir proje sitesine özel alan adı konunca GitHub eski adresi 301'le yeni adrese
+yönlendiriyor; `web/kalicilik`'in planı (özel alan adı `Mozaik`'te) eski kökende service
+worker'ı olmayan herkesin planlarını erişilemez bırakırdı. Yeni adres ayrı bir depodan
+(`AlparslanSemiz/mozaik-site`, `gh-pages`): `site.yml`'e `yeni-adres` işi (aynı `dist-site`,
+`CNAME`, `.nojekyll`, SSH deploy anahtarı, bilinen GitHub host anahtarı sabit, izinsiz
+`GITHUB_TOKEN`, sır yoksa notla yeşil); eski adresin yayını aynen sürüyor ve CNAME'siz.
+`ci.yml` yalnız bu sırrı geçiriyor. BUILD.md "Alan adına geçiş" yeni sırayla, DECISIONS'a not.
+Taşıma şeridinin yedi çevirisi geri geldi (sözlük paketlemesinden sonra yer var).
+Koşulanlar aşağıdaki rapor satırında; `actionlint` temiz. İş akışı gerçek depoda koşmadı
+(depo ve anahtar sabah).
+
 ## 2026-11-16 · Web kalıcılığı ve alt alan adına geçiş (`web/kalicilik`)
 
 Web denetiminin (Chromium'da doğrulanmış) beş bulgusu ve Alp'in kararı: site

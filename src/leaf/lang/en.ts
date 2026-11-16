@@ -1906,8 +1906,7 @@ const EN: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan with a missing or repeated id: {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Nothing is written to the folder until you choose.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
-  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
-  // new address is left in Turkish: it only ever shows at the old address.
+  // The plan-file reminder and the move to the new address (2026-11-16).
   "son plan dosyasının tarihi":
     "date of the last plan file",
   "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
@@ -1916,6 +1915,20 @@ const EN: Sozluk = {
     "**The last plan file is from {tarih}.** What you have done since then is only in this browser.",
   "Son plan dosyası: {tarih}.":
     "Last plan file: {tarih}.",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "Bring the plans from the old address here?",
+  "**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın.":
+    "**The plans were written to a plan file** (Downloads). At the new address, open it with **Open all from file**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:":
+    "**The plans have moved to the new address.** From now on, use it:",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "The new address has opened. Answer the question there.",
+  "**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır.":
+    "**Mozaik has moved to a new address.** Your plans also stay here.",
+  "Hiçbir plan taşınmadı.":
+    "No plan was moved.",
+  "Planları taşı":
+    "Move plans",
 };
 
 registerSozluk("en", EN);
