@@ -3,7 +3,8 @@
  * The translator and its provider (`T.tsx`), the program's own questions
  * (`Dialogs.tsx`) and short lines (`Toasts.tsx`), a labelled control
  * (`Field.tsx`), the limit box that shows the layer above when empty
- * (`LimitBox.tsx`), the colour picker (`ColorPick.tsx`), the block pattern
+ * (`LimitBox.tsx`), the colour picker (`ColorPick.tsx`), one entity's paintable week of closed
+ * hours (`AvailGrid.tsx`), the block pattern
  * picker (`BlockCounts.tsx`), the panels' shared props (`props.ts`), where
  * focus goes when a dialog closes (`returnFocus.ts`), and putting an
  * all-plans file in place of the plans here (`openBundle.ts`).
@@ -23,5 +24,6 @@ export * from './deleteFocus';
 export { default as Field } from './Field';
 export { default as LimitBox } from './LimitBox';
 export { default as ColorPick } from './ColorPick';
+export { AvailGrid } from './AvailGrid';
 export { default as BlockPatternPicker, blockCeiling } from './BlockCounts';
 export type * from './props';

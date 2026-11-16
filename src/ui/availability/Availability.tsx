@@ -8,28 +8,25 @@
 // The three kinds share ONE grid and one dictionary: ids are unique across
 // teachers, classes and rooms, so only the entity list at the top changes.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import type React from 'react';
 import {
-  sharedPeriods,
   openHours,
   dayLabel,
-  setAvailability,
   setWholeWeek,
   shortDay,
   subjectShort,
   teacherSubjects,
   weeklyLoad,
 } from '../../pure/entities';
-import { paletteColor, cellKey, parseCellKey, type Id, type State } from '../../leaf/model';
-import { KIND_ICON } from '../program';
+import { paletteColor, type Id, type State } from '../../leaf/model';
+import { KIND_ICON, useInspect } from '../program';
 import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../../leaf/i18n';
 import type { Kind, StepId } from '../../platform/prefs';
-import { attachRoving } from '../../platform/dom';
-import { GoButton, HelpHead, T } from '../common';
+import { AvailGrid, GoButton, HelpHead, T } from '../common';
 
 interface Props {
   state: State;
@@ -133,55 +130,13 @@ const HINT: Record<Kind, string> = {
 };
 
 export default function Availability({ state, change, kind, chosen, setChosen, showHeat }: Props) {
-  // Nothing is applied until the drag ends: painting 40 cells must not create
-  // 40 separate undo steps.
-  const [pending, setPending] = useState<Set<string> | null>(null);
-  const paintMode = useRef(false);
-
+  const inspect = useInspect();
   const list = entitiesOf(state, kind);
   const selected = list.find((x) => x.id === chosen) ?? list[0];
 
   // Every hook sits above the empty-list return: a list that fills up while
   // the tab stays open (Ctrl+Z, "Dosyadan aç") must not change the hook count.
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
-
-  // The sheet from the keyboard (DENETIM KS19): one Tab stop, the arrows walk
-  // the headers and the hours, Space or Enter flips the one under focus. The
-  // cells were plain <td>s with a pointerdown and nothing could reach them.
-  const sheet = useRef<HTMLDivElement>(null);
-  const empty = selected === undefined;
-  useEffect(() => {
-    const box = sheet.current;
-    if (box === null) return undefined;
-    const buttonIn = (cell: HTMLTableCellElement | undefined) =>
-      cell?.querySelector<HTMLElement>('button') ?? null;
-    return attachRoving(box, {
-      item: (from) => from.closest<HTMLElement>('table.availability button'),
-      first: () => box.querySelector<HTMLElement>('tbody td button'),
-      move: (from, e) => {
-        const cell = from.closest<HTMLTableCellElement>('th, td');
-        const table = from.closest('table');
-        const row = cell?.parentElement as HTMLTableRowElement | null;
-        if (cell == null || table === null || row == null) return null;
-        let r = row.rowIndex;
-        let c = cell.cellIndex;
-        if (e.key === 'ArrowRight') c++;
-        else if (e.key === 'ArrowLeft') c--;
-        else if (e.key === 'ArrowDown') r++;
-        else if (e.key === 'ArrowUp') r--;
-        else if (e.key === 'Home') c = 1;
-        else if (e.key === 'End') c = row.cells.length - 1;
-        else return null;
-        return buttonIn(table.rows[r]?.cells[c]) ?? from;
-      },
-    });
-  }, [empty]);
-
-  // A column header carries one time; where the days disagree it stays empty.
-  const clocks = useMemo(
-    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
-    [state.settings],
-  );
 
   if (selected === undefined) {
     return (
@@ -208,70 +163,6 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
   // `selected` widens again inside the hoisted functions below; pin the id here.
   const entityId = selected.id;
 
-  const isClosed = (g: number, s: number): boolean =>
-    state.unavailable[closedKey(entityId, g, s)] !== undefined;
-
-  const shownClosed = (g: number, s: number): boolean => {
-    if (pending !== null && pending.has(cellKey(g, s))) return paintMode.current;
-    return isClosed(g, s);
-  };
-
-  function startPaint(g: number, s: number) {
-    paintMode.current = !isClosed(g, s); // invert the first cell, apply that to the rest
-    setPending(new Set([cellKey(g, s)]));
-  }
-
-  function continuePaint(g: number, s: number) {
-    setPending((previous) => {
-      if (previous === null) return null;
-      if (previous.has(cellKey(g, s))) return previous;
-      const next = new Set(previous);
-      next.add(cellKey(g, s));
-      return next;
-    });
-  }
-
-  function endPaint() {
-    const set = pending;
-    setPending(null);
-    if (set === null || set.size === 0) return;
-
-    const cells = [...set].map((k) => parseCellKey(k));
-    change((d) => setAvailability(d, entityId, cells, paintMode.current));
-  }
-
-  /** Row header: the whole of one day. */
-  function toggleDay(day: number) {
-    const allClosed = state.settings.hours.every((_, s) => isClosed(day, s));
-    const cells = state.settings.hours.map((_, s) => ({ day, hour: s }));
-    change((d) => setAvailability(d, entityId, cells, !allClosed));
-  }
-
-  /** One cell from the keyboard: Space or Enter on its button. */
-  function toggleCell(day: number, hour: number) {
-    const closed = isClosed(day, hour);
-    change((d) => setAvailability(d, entityId, [{ day, hour }], !closed));
-  }
-
-  /** What a cell is called: the hour, and the state in this kind's own word. */
-  const cellName = (day: string, hour: number, closed: boolean) =>
-    t('{gun} {n}. saat', { gun: dayLabel(day), n: hour + 1 }) +
-    ', ' +
-    (kind === 'teacher'
-      ? closed
-        ? t('müsait değil')
-        : t('müsait')
-      : closed
-        ? t('kapalı')
-        : t('açık'));
-
-  /** Column header: that lesson across the whole week. */
-  function toggleHour(hour: number) {
-    const allClosed = state.settings.days.every((_, g) => isClosed(g, hour));
-    const cells = state.settings.days.map((_, g) => ({ day: g, hour }));
-    change((d) => setAvailability(d, entityId, cells, !allClosed));
-  }
-
   const open = selected.open;
 
   const mine = conflicts.filter((c) => c.teacherId === entityId || c.classId === entityId).length;
@@ -280,7 +171,15 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>{t('{kim} · müsait olmayan saatler', { kim: selected.full })}</h2>
+          {/* The person page is the primary place for this since 2026-11-16
+              (Sadeleşme, K5); this screen stays until phase 3 and says where
+              the rest of the person is. */}
+          <div className="panel-head">
+            <h2>{t('{kim} · müsait olmayan saatler', { kim: selected.full })}</h2>
+            <button className="btn" onClick={() => inspect(kind, entityId)}>
+              {t('Sayfasını aç')}
+            </button>
+          </div>
 
           {/* One line. The long version — drag to paint, click a day name for
               the whole day, click an hour number for the whole week — is on the
@@ -295,94 +194,14 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
             {t(HINT[kind])}
           </p>
 
-          <div className="scroll-x" ref={sheet}>
-            <table
-              className="availability"
-              role="grid"
-              aria-label={t('{kim} · müsait olmayan saatler', { kim: selected.full })}
-              onPointerUp={endPaint}
-              onPointerLeave={endPaint}
-            >
-              <thead>
-                <tr>
-                  <th className="corner-head" />
-                  {state.settings.hours.map((hour, s) => (
-                    <th key={s}>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        className="av-head"
-                        onClick={() => toggleHour(s)}
-                        // Named by its own number (label in name, WCAG 2.5.3), the
-                        // sentence is the description, as on the day headings.
-                        title={t('Haftanın bu saatini değiştir')}
-                      >
-                        {hour}
-                        <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
-                      </button>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {state.settings.days.map((day, g) => (
-                  <tr key={g}>
-                    <th scope="row">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        className="av-head"
-                        onClick={() => toggleDay(g)}
-                        // Named "Sal", as it reads; the sentence is the
-                        // description (label in name, WCAG 2.5.3).
-                        title={t('{gun}: bütün günü değiştir', { gun: dayLabel(day.name) })}
-                      >
-                        {shortDay(day.name)}
-                      </button>
-                    </th>
-                    {state.settings.hours.map((_, s) => (
-                      <td
-                        key={s}
-                        className={[
-                          shownClosed(g, s) ? 'closed' : '',
-                          // The break sits at a different lesson on each row, so it
-                          // cannot be a column: it is a thick edge on THIS cell.
-                          day.longBreakAfter === s + 1 ? 'break-after' : '',
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                        onPointerDown={(e) => {
-                          e.preventDefault();
-                          startPaint(g, s);
-                        }}
-                        onPointerEnter={() => {
-                          if (pending !== null) continuePaint(g, s);
-                        }}
-                      >
-                        {/* A real control: aria-pressed is the state, the name
-                            says it in words. The pointer still paints through
-                            the cell's own handlers; a mouse click (detail > 0)
-                            is that paint, so only the keyboard's click toggles
-                            here, or one click would flip the hour twice. */}
-                        <button
-                          type="button"
-                          tabIndex={-1}
-                          className="av-cell"
-                          aria-pressed={shownClosed(g, s)}
-                          aria-label={cellName(day.name, s, shownClosed(g, s))}
-                          onClick={(e) => {
-                            if (e.detail === 0) toggleCell(g, s);
-                          }}
-                        >
-                          {shownClosed(g, s) ? '×' : ''}
-                        </button>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AvailGrid
+            key={entityId}
+            state={state}
+            change={change}
+            entityId={entityId}
+            teacher={kind === 'teacher'}
+            label={t('{kim} · müsait olmayan saatler', { kim: selected.full })}
+          />
         </div>
 
         {/* Under the grid, the week READ ACROSS everyone: which hours the whole
