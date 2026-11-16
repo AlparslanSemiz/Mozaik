@@ -37,6 +37,7 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- The program file is about 160 kB smaller (1.32 MB to 1.15 MB): the English, German, Spanish and French texts no longer each carry their own copy of the Turkish sentences, and a language is only unpacked when it is chosen.
 - Windows app: a copy that is not installed (the single Mozaik.exe) is now offered the installer of its own version in Settings → About ("Install Mozaik on this computer": the suggestion search's CP-SAT comes only with it), and once in a strip right after it has been updated. The installer runs with a progress bar instead of silently, and if it does not finish Mozaik opens again with a message that gives the code. The old Mozaik.exe is no longer deleted: it opens the installed program, so desktop icons and taskbar pins keep working.
 - Windows app: the suggestion search runs at a lower priority while CP-SAT works, so the window stays usable on a two-core computer.
 

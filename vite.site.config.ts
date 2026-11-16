@@ -19,6 +19,7 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { surumBilgisi, surumEki } from './scripts/surum.mjs';
+import { sozlukPaketi } from './scripts/sozluk-paket.mjs';
 
 /** Registration is guarded twice: no service worker API, or not http(s). */
 const REGISTER = `
@@ -159,7 +160,14 @@ function dropUnserved(): Plugin {
 export default defineConfig({
   base: './',
   publicDir: 'site',
-  plugins: [react(), viteSingleFile(), siteShell(), dropUnserved(), stampServiceWorker()],
+  plugins: [
+    sozlukPaketi(),
+    react(),
+    viteSingleFile(),
+    siteShell(),
+    dropUnserved(),
+    stampServiceWorker(),
+  ],
   // Same record as vite.config.ts: the site and the double-clicked file are
   // the same app and have to say the same thing about which build they are.
   define: { __SURUM__: JSON.stringify(surumBilgisi()) },

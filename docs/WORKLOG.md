@@ -101,6 +101,39 @@ kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
 
+## 2026-11-16 · Tek dosyanın küçültülmesi: sözlükler paketli (`boyut/kucult`)
+
+**Neyin yer tuttuğu** (kaynak haritasıyla, `main` f5d4417'ye birleşmeden önce): betik 1 186 kB, dört
+sözlük 425 kB (fr 110, de 108, es 105, en 100), react-dom 178 kB, `ui/program` 68 kB,
+`pure/relax` 56 kB; CSS 112 kB, bunun 32,5 kB'ı tek woff2 data: URI'si. Öneri worker'ı çift
+gömülü değil (sayfanın kendi betiğinden `blob:`). knip temiz, CSS'te üç kullanılmayan sınıf.
+Brotli payları (modül grubu çıkarılınca kazanılan): sözlükler ~60 kB, react-dom ~46 kB, Radix ~15 kB.
+
+**Yapılan.** `scripts/sozluk-paket.mjs` (derlemeye özel eklenti, iki yapılandırmada) 1 221 Türkçe
+anahtarı bir kez, her dilin çevirilerini aynı sırada tek dizge yazıyor; `sozlukOf` dili ilk
+istenince açıyor. Deflate + base64 saklama denendi, brotli'yi 9,2 kB büyüttüğü için bırakıldı
+(DECISIONS aynı gün).
+
+| | `main` (f5d4417) | bu dal | fark |
+|---|---|---|---|
+| ham `dist/index.html` | 1 319 045 B | 1 154 736 B | −164 309 B (−%12,5) |
+| brotli | 305,14 kB | 295,48 kB | −9,66 kB |
+| site `dist-site/index.html` | — | 1 155 058 B | |
+| `file://` açılış, tr, `loadEventEnd` medyanı | 280 ms | 248 ms | −32 ms |
+| aynı, FCP medyanı | 488 ms | 456 ms | −32 ms |
+| `file://` açılış, en, `loadEventEnd` medyanı | 283 ms | 255 ms | −28 ms |
+
+Açılış: Chromium, işlemci 4× yavaş (CDP), 1920×1080, 9 koşu dönüşümlü, her koşu taze bağlam;
+makine yüklü (yük 65–200), yani kirli. Betik oturumun `scratch/olcum/ac.cjs`'inde. Eşik: ham
+1 320 000 → 1 200 000 (45 kB pay), brotli 306 000'de (10,5 kB pay); bağlayıcı olan artık brotli.
+
+**Koşulan.** `npm run tipler` 0, `eslint src` 0, prettier, knip temiz, `npm run hizli` (yükten altı
+zaman aşımı; o dört dosya tek başına 61/61 yeşil), `npx vite build`, `npm run boyut`, E2E `dil`
+12/12, `otomatik` (@arama-heavy dışı) 15/15, `temel`+`program`+`yazdir` 151/151, site süiti
+24/24. Taze bağlamlı inceleme: veri riski yok; belge bulguları düzeltildi.
+
+---
+
 
 ## 2026-11-16 · Boyut eşiği geçici olarak 1 340 000 B ve brotli 310 000 B (`guvenlik/sertlestirme`, zincirin ucu)
 

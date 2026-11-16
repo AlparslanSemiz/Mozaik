@@ -172,6 +172,13 @@ sabitli, ve Türkçede `t()`'den geçmiş bir cümle ile geçmemiş bir cümle a
 görünür. Onu gören şey başka bir dilde açılmış sayfanın taranması ve ekran
 görüntülerine bakmak (tuzak 89). Sözlüklerin ölçülen boyut maliyeti WORKLOG'da.
 
+**Derlenmiş dosya sözlükleri paketli taşır.** Derlemede `scripts/sozluk-paket.mjs`
+dört dosyayı okuyup Türkçe anahtarları bir kez, her dilin çevirilerini aynı sırada tek bir
+dizge olarak yazar; dil ilk istendiğinde `sozlukOf` onu nesneye açar. Geliştirme sunucusu ve
+vitest `lang/*.ts`'i yazıldığı gibi yükler, yani sözlük her zamanki gibi elle düzenlenir.
+Ayırıcı `~`: hiçbir cümlede yok, ve olursa paketleyici derlemeyi durdurur; `paket.test.ts`
+paketin kaynakla aynı sözlük olduğunu ölçer.
+
 ## Vitrin İngilizce
 
 Depoya dışarıdan bakan her şey İngilizce (2026-08-30, kullanıcı kararı):
