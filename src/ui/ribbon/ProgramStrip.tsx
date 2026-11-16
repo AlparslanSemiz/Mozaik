@@ -2,21 +2,20 @@
 
 import type React from 'react';
 import {
-  Copy,
+  Check,
   Eraser,
   Palette as PaletteIcon,
   Pin,
   PinOff,
   Play,
   RotateCcw,
-  Shuffle,
   Square,
   Trash2,
 } from 'lucide-react';
 import type { ProgramColorMode, View } from '../../platform/prefs';
-import { activePlacements, activeProgram, keepPinnedOnly, removeProgram } from '../../pure/grid';
+import { activeProgram, keepPinnedOnly, removeProgram } from '../../pure/grid';
 import { sanitize, togglePinAll } from '../../pure/constraints';
-import { describeStrip } from '../../pure/program';
+import { describeStrip, movedNotice } from '../../pure/program';
 import { classIcon, teacherIcon } from '../program';
 import { DateChip } from '../dated';
 import { MoreItem, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
@@ -45,14 +44,15 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
 ];
 
 /**
- * Which "Başka bir program yap" this is: every press asks the search for the next
- * seed, so the same data gives a new week each time, and the same sequence of
- * weeks after a reload. Module-level and not a hook: `programStrip` is called
- * as a function, once per render of whichever strip is open.
+ * Which "Yeniden yap" this is: every press asks the search for the next seed,
+ * so the same data gives a new week each time, and the same sequence of weeks
+ * after a reload (denetim, 2026-11-16: it was a second button, "Başka bir
+ * dizilim"). Module-level and not a hook: `programStrip` is called as a
+ * function, once per render of whichever strip is open.
  */
-let anotherSeed = 0;
-/** The week the last "Başka bir program yap" put on the grid. */
-let anotherMade: State | null = null;
+let rebuildSeed = 0;
+/** The week the last "Yeniden yap" put on the grid. */
+let rebuilt: State | null = null;
 
 export function programStrip({
   ui,
@@ -63,7 +63,6 @@ export function programStrip({
   programColor,
   setProgramColor,
   t,
-  copyPlan,
   notify,
   undoIf,
   keepBefore,
@@ -72,7 +71,7 @@ export function programStrip({
 }: StripContext): React.ReactElement {
   const { pending, placed, pinnedHours, gridEmpty, allPinned } = strip ?? describeStrip(state);
   const currentProgram = activeProgram(state);
-  /** "Yeniden yap" and "Başka bir program yap" say the same thing when they land. */
+  /** What "Yeniden yap" says when it lands. */
   const relaidNotice = (next: State) => {
     const said =
       pinnedHours === 0
@@ -109,37 +108,32 @@ export function programStrip({
     // No question since 2026-11-15 (TODO SD1): the run's answer lands as ONE
     // step of the history (useSolver's `finish`), so its notice can offer
     // "Geri al" for the whole of it. Nothing on the grid moves until the run
-    // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
+    // ends, and "Durdur" stands in the main button's place while it runs.
     // Kept QUIETLY: a relaid week is no deletion, and the next start's strip
     // offering "Son silmeyi geri al" for it was alarming (walkthrough, 2026-11-16).
-    keepBefore(state, t('Program yeniden yapıldı.'), true);
-    solver.start(state, { keepPlaced: false }, relaidNotice);
-  };
-  // "Başka bir program yap" (2026-11-16, main): the same rules, another of the
-  // many weeks they allow, a different one on every press. Behind Daha fazla
-  // beside Yeniden yap: the screen's one primary is "Programı yap".
-  const another = () => {
-    anotherSeed++;
-    // The week before the FIRST press is the one worth keeping: a second press
-    // would push the hand-made week out of the one slot with a week this button
-    // made (review, 2026-11-16).
-    if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'), true);
-    solver.start(state, { keepPlaced: false, seed: anotherSeed }, (next) => {
-      anotherMade = next;
+    //
+    // Another of the many weeks the rules allow on EVERY press (the seed), so
+    // one button is both "mend it" and "give me another": "Başka bir dizilim"
+    // went on 2026-11-16. The week before the FIRST press is the one worth
+    // keeping: a second press would push the hand-made week out of the one
+    // slot with a week this button made (review, 2026-11-16).
+    rebuildSeed++;
+    if (state !== rebuilt) keepBefore(state, t('Program yeniden yapıldı.'), true);
+    solver.start(state, { keepPlaced: false, seed: rebuildSeed }, (next) => {
+      rebuilt = next;
       relaidNotice(next);
     });
   };
-  // `relay`: when the kept week leaves a lesson nowhere to go, the unpinned
-  // week is laid out again close to itself. Whatever moved is said, with the
-  // undo for it, and the week before is kept where a reload finds it.
+  // "Kalanı diz": whatever stands on the grid stays (a hand placement is
+  // pinned, A1) and the rest is laid out around it. `relay`: when the kept
+  // week leaves a lesson nowhere to go, the UNPINNED week is laid out again
+  // close to itself; a pinned block never moves (`preservedPlacements`).
+  // Whatever moved is said by name, with the undo for it, and the week before
+  // is kept where a reload finds it.
   const make = () =>
     solver.start(state, { keepPlaced: true, relay: true }, (next) => {
-      const before = activePlacements(state);
-      const after = activePlacements(next);
-      let moved = 0;
-      for (const key in before) if (after[key] !== before[key]) moved++;
-      if (moved === 0) return;
-      const said = t('Program yapıldı, {n} saat yer değiştirdi.', { n: moved });
+      const said = movedNotice(state, next);
+      if (said === '') return;
       keepBefore(state, said, true);
       notify(said, 'info', { label: t('Önceki programa dön'), run: () => undoIf(next) });
     });
@@ -198,7 +192,7 @@ export function programStrip({
           </button>
         ) : pending === 0 && placed > 0 && status.stranded + status.blocked > 0 ? (
           // Nothing waits, yet the week is broken (a lesson on an hour closed
-          // since, a hard rule broken): "Programı yap" had nothing to do and
+          // since, a hard rule broken): "Kalanı diz" had nothing to do and
           // the way out was behind Daha fazla (walkthrough, 2026-11-16). Not
           // for a "Tercih" warning: a rebuild need not mend that, and it would
           // take every unpinned hand placement with it.
@@ -206,19 +200,24 @@ export function programStrip({
             <RotateCcw {...ICON} />
             {t('Yeniden yap')}
           </button>
+        ) : state.lessons.length === 0 ? null : pending === 0 ? (
+          // Nothing waits and the week is sound: a READING and not a dimmed
+          // button (denetim, 2026-11-16). A disabled primary asked "why can't
+          // I?" and the pool, which used to say this, is hidden now.
+          <span className="strip-done" role="status">
+            <Check {...ICON} />
+            {t('Hepsi yerleşti')}
+          </span>
         ) : (
           <button
             className="btn primary"
-            disabled={pending === 0}
-            title={
-              pending === 0
-                ? t('Yerleşmeyi bekleyen ders yok')
-                : t('Yerleşmeyen dersleri kurallara uyarak yerleştirir')
-            }
+            title={t(
+              'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz',
+            )}
             onClick={make}
           >
             <Play {...ICON} />
-            {t('Programı yap')}
+            {t('Kalanı diz')}
           </button>
         )}
       </Group>
@@ -238,21 +237,7 @@ export function programStrip({
         <MoreItem icon={<RotateCcw size={15} />} disabled={placed === 0 || busy} onSelect={rebuild}>
           {t('Yeniden yap')}
         </MoreItem>
-        <MoreItem
-          icon={<Shuffle size={15} />}
-          disabled={(placed === 0 && pending === 0) || busy}
-          onSelect={another}
-        >
-          {t('Başka bir program yap')}
-        </MoreItem>
         <MoreSep />
-        {/* A second arrangement is a second PLAN (K2, 2026-11-16): one word
-            for one thing, and the switcher in the top bar appears with it. */}
-        <MoreItem icon={<Copy size={15} />} disabled={busy} onSelect={copyPlan}>
-          {/* In an old file with several programs the same copy is how one
-              of them becomes its own plan, and then renames like any plan. */}
-          {state.programs.length > 1 ? t('Ayrı plan yap') : t('Bu programın kopyası')}
-        </MoreItem>
         {state.programs.length > 1 && (
           <MoreItem icon={<Trash2 size={15} />} danger disabled={busy} onSelect={deleteCurrent}>
             {currentProgram.name} · {t('Sil')}

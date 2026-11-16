@@ -66,9 +66,9 @@ export function usePaletteActions({
     return [
       {
         id: 'auto',
-        label: t('Programı yap'),
+        label: t('Kalanı diz'),
         hint: t('Program'),
-        extra: 'diz otomatik dağıt yerleştir',
+        extra: 'program yap diz otomatik dağıt yerleştir kalan',
         run: () => {
           goTo({ tab: 'program' });
           solver.start(state, { keepPlaced: true });

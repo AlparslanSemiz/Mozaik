@@ -27,8 +27,6 @@ export interface RibbonProps {
   /** An old file's second program, deleted: a step of the history since
       2026-11-15; `label` names it for the undo's announcement. */
   manageProgram: (fn: (d: State) => State, label?: string) => void;
-  /** "Bu programın kopyası": a new plan holding this one (K2). */
-  copyPlan: () => void;
   solver: SolverRun;
   programColor: ProgramColorMode;
   setProgramColor: (next: ProgramColorMode) => void;

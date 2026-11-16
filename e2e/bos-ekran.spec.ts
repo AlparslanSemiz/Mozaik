@@ -173,7 +173,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     const list = page.locator('section.checklist');
     // The sample has everything up to the timetable itself.
     await expect(list).toContainText('3 / 5 adım');
-    await expect(list).toContainText('Sıradaki: Programı yap');
+    await expect(list).toContainText('Sıradaki: Kalanı diz');
     await expect(list.locator('li[data-step]')).toHaveCount(0);
   });
 

@@ -35,7 +35,7 @@ import {
   type Index,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { Help, NextStep, useGoTo, useToast, T, useT } from '../common';
+import { Help, NextStep, useGoTo, useToast, useUndoIf, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -173,32 +173,55 @@ function Program({
   // card's "Neden yerleşmedi?" (K3).
   const goTo = useGoTo();
 
+  const undoIf = useUndoIf();
+  // The sentence of the keyboard's move in progress ("Salı 3. saat"), so the
+  // one notice of the drop can carry it: the notice with "Geri al" must be the
+  // NEWEST one, and a second one after it would take the button away.
+  const keyPlace = useRef<((day: number, hour: number) => string) | null>(null);
+
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
       // Read out of the map BEFORE change(): React runs a reducer callback
       // late, and reading a ref or a closure variable inside one is how the
       // solver's whole result once went missing (pitfall 20).
       const verdict = data.map.get(cellKey(day, hour));
+      if (verdict === undefined) return;
       const told = dropNotice(ix, data.lessonId, data.source, verdict);
+      const request = {
+        lessonId: data.lessonId,
+        size: data.blockSize,
+        source: data.source,
+        day,
+        hour,
+        action: verdict.action,
+      };
+      // Computed here too, for the notice's "Geri al": the drop and its pin
+      // are ONE step of the history, and the button names exactly that step.
+      const next = applyDrop(state, request);
+      if (next === state) return;
+      change((d) => (d === state ? next : applyDrop(d, request)));
 
-      change((d) => {
-        if (verdict === undefined) return d;
-        return applyDrop(d, {
-          lessonId: data.lessonId,
-          size: data.blockSize,
-          source: data.source,
-          day,
-          hour,
-          action: verdict.action,
-        });
-      });
-
-      if (told !== '') notify(told);
+      // A block put down by hand is pinned where it lands (A1, 2026-11-16),
+      // so the next "Kalanı diz" leaves it where the hand put it. Said, with
+      // the way back.
+      const name = lessonName(ix, data.lessonId);
+      const where = keyPlace.current?.(day, hour);
+      const placed =
+        where === undefined
+          ? t('{ders} yerleşti ve sabitlendi.', { ders: name })
+          : t('{ders} yerleşti ve sabitlendi: {yer}.', { ders: name, yer: where });
+      const said =
+        told === ''
+          ? placed
+          : verdict.action.kind === 'swap'
+            ? t('{olay}, yerlerinde sabitlendi.', { olay: told })
+            : t('{ders} yerleşti ve sabitlendi; {olay}.', { ders: name, olay: told });
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
     },
-    [change, ix, notify],
+    [change, ix, notify, state, undoIf, t],
   );
 
-  const { start, startKeys } = useDrag(drop);
+  const { start, startKeys } = useDrag(drop, notify);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -452,13 +475,15 @@ function Program({
           }),
           onRefuse: notify,
           onCancel: (byTab) => {
+            keyPlace.current = null;
             notify(t('Taşımadan vazgeçildi.'));
             if (byTab) return;
             if (origin?.isConnected === true && origin !== document.body) origin.focus();
             else if (source !== null) focusCellSoon(rowId, source.day, source.hour);
           },
           onDrop: (day, hour) => {
-            notify(t('{ders} yerleşti: {yer}.', { ders: name, yer: place(day, hour) }));
+            // `drop` has said it, with the place (`keyPlace`).
+            keyPlace.current = null;
             // A moved block is followed to where it went. A card from the
             // tray leaves focus on the tray, where the next one waits, unless
             // that was the last of its pile.
@@ -467,6 +492,7 @@ function Program({
             });
           },
         };
+        keyPlace.current = place;
         startKeys(data, keys);
         return;
       }

@@ -17,7 +17,7 @@ test.describe('48. Varlık paneli', () => {
   test('ızgarada satır başına tıklamak o öğretmenin haftasını açıyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     // The row head IS the entity.
@@ -96,7 +96,7 @@ test.describe('48. Varlık paneli', () => {
   test('kapatılan saatte kalmış ders panelde de KIRMIZI (tuzak 16)', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     // Find a teacher who really has something placed, then close their week.
@@ -239,7 +239,7 @@ test.describe('83. Panelden ders aktarma', () => {
   test('aktarma yeni hocayı ÇİFT REZERVE ETMİYOR', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await openSetup(page, 'Öğretmenler');
@@ -295,7 +295,7 @@ test.describe('87. Panelden düzenleme', () => {
   async function laidOut(page: import('@playwright/test').Page) {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
   }
 

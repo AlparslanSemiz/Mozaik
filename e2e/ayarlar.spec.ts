@@ -434,7 +434,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   async function laidOutSample(page: Page) {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     const before = await placedHours(page);
     expect(before, 'örnek okul dizilemedi').toBeGreaterThan(0);

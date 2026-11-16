@@ -68,7 +68,6 @@ const DE: Sozluk = {
   "plan dosyası": "Plandatei",
   "Plan dosyaya yazıldı. İndirilenler klasörüne bakın.":
     "Plan in eine Datei geschrieben. Schauen Sie im Ordner Downloads nach.",
-  "Programı yap": "Stundenplan erstellen",
   Program: "Stundenplan",
   "Düğme satırını gizle": "Schaltflächenleiste ausblenden",
   "Düğme satırını göster": "Schaltflächenleiste einblenden",
@@ -177,8 +176,8 @@ const DE: Sozluk = {
     "**Es gibt Punkte, die Aufmerksamkeit brauchen.** In den Listen unten verhindern Zeilen mit",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "verhindern das Legen des Stundenplans. Lösen Sie diese zuerst.",
-  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz.":
-    "Die restlichen **{n}** Stunden sind nicht gelegt. **Stundenplan erstellen** im Reiter **Stundenplan** legt sie.",
+  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz.":
+    "Die restlichen **{n}** Stunden sind nicht gelegt. **Rest legen** im Reiter **Stundenplan** legt sie.",
   "İpuçları ({n})": "Hinweise ({n})",
   "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
     "Diese blockieren den Stundenplan nicht; es sind Punkte, die bei der Dateneingabe übersehen worden sein könnten.",
@@ -214,7 +213,6 @@ const DE: Sozluk = {
   "Havuza kaldır": "Ins Ablagefach",
   sabitlenmiş: "angeheftet",
   "Dersi düzenle": "Stunde bearbeiten",
-  "Dersi buraya sabitle": "Stunde hier anheften",
   "Sabitlemeyi kaldır": "Anheftung lösen",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "Diese Stunde ist angeheftet. Lösen Sie zuerst die Anheftung.",
@@ -788,8 +786,8 @@ const DE: Sozluk = {
     "Liegen zwei Unterrichte, die nicht auf denselben Tag dürfen, am selben Tag, zeigt die Zeile **Nicht am selben Tag** auf der Seite des Unterrichts sie an.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} und {iki} sind am {gun} beide angeheftet; sie dürfen nicht am selben Tag liegen, also gibt es keinen Weg, bis eines verschoben wird.",
-  "İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "Sind beide **angeheftet**, kann **Stundenplan erstellen** keine Vorschläge suchen; lösen Sie eines oder verschieben Sie es auf einen anderen Tag.",
+  "İkisi de **sabitlenmişse** **Kalanı diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "Sind beide **angeheftet**, kann **Rest legen** keine Vorschläge suchen; lösen Sie eines oder verschieben Sie es auf einen anderen Tag.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} darf am {gun} höchstens {sinir} Stunden unterrichten; hier wären es {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -933,8 +931,8 @@ const DE: Sozluk = {
     "{ders}: {yeni} statt {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders}: {yeni} statt {eski} Wochenstunden",
-  "Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.":
-    "Der Stundenplan hat sich inzwischen geändert. Drücken Sie Stundenplan erstellen, um wieder einen Vorschlag zu sehen.",
+  "Program o arada değişti. Öneriyi yeniden görmek için Kalanı diz düğmesine basın.":
+    "Der Stundenplan hat sich inzwischen geändert. Drücken Sie Rest legen, um wieder einen Vorschlag zu sehen.",
   "Program değişiklik gerekmeden kuruluyor":
     "Der Stundenplan lässt sich ohne Änderung aufbauen",
   "İlk arama bu programı bulamadı; ikinci arama buldu ve denetledi.":
@@ -1519,7 +1517,6 @@ const DE: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} ist zurück in der Ablage.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} aufgenommen. Zielzelle mit den Pfeiltasten wählen; Enter legt ab, Esc bricht ab.",
   "Taşımadan vazgeçildi.": "Verschieben abgebrochen.",
-  "{ders} yerleşti: {yer}.": "{ders} gesetzt: {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:Stunde|Stunden} offen, {yuk} {yuk:Stunde|Stunden} Unterricht geplant",
   "Izgaraya gir, bir daha basınca çık": "In das Raster wechseln, erneut drücken zum Verlassen",
   "Hücreden hücreye git": "Von Zelle zu Zelle gehen",
@@ -1600,8 +1597,6 @@ const DE: Sozluk = {
   "Yeni dönem için bir kopya açıldı: dersler duruyor, program boş. Eski plan Dosya → Planlar ve yedek’te.": "Eine Kopie für das neue Halbjahr ist offen: der Unterricht ist da, der Stundenplan ist leer. Der alte Plan ist unter Datei → Pläne und Sicherung.",
   "Gizlensin": "Ausgeblendet",
   "Yerleşmiş dersi sürükleyerek taşıyın.": "Ziehen Sie eine gelegte Stunde, um sie zu verschieben.",
-  "Yerleşmeyi bekleyen ders yok": "Keine Stunde wartet darauf, gelegt zu werden",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir": "Legt die noch nicht gelegten Stunden nach den Regeln",
   "Dersleri gir": "Unterricht eintragen",
   "Kapalı saatleri işaretle": "Gesperrte Stunden markieren",
   "{d} derslik · {b} branş · {o} öğretmen · {s} sınıf": "{d} {d:Raum|Räume} · {b} {b:Fachbereich|Fachbereiche} · {o} {o:Lehrkraft|Lehrkräfte} · {s} {s:Klasse|Klassen}",
@@ -1628,8 +1623,6 @@ const DE: Sozluk = {
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Dieser kleinere Plan ersetzt die letzte Plandatei im Ordner. Der alte Stand bleibt in den täglichen Sicherungen.",
 
   // src/pure/solver (2026-11-16)
-  "Başka bir program yap": "Anderen Stundenplan erstellen",
-  "Program yapıldı, {n} saat yer değiştirdi.": "Der Stundenplan ist erstellt; {n} {n:Stunde|Stunden} verschoben.",
   "{kim}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{kim}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} müssen geöffnet werden",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} müssen geöffnet werden",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Raum {derslik}: {yuk} Unterrichtsstunden, {acik} offen; {fazla} öffnen oder eine Klasse in einen anderen Raum legen",
@@ -1706,8 +1699,6 @@ const DE: Sozluk = {
     "Schulangaben",
   "Yazdır ve gönder":
     "Drucken und senden",
-  "Bu programın kopyası":
-    "Kopie dieses Stundenplans",
   "Neden yerleşmedi?":
     "Warum nicht eingeplant?",
   "Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.":
@@ -1819,6 +1810,17 @@ const DE: Sozluk = {
   "Hepsi": "Alle",
   "Diğer bilgiler": "Weitere Angaben",
   "{ne} dersi için işlemler": "Aktionen für die Stunde {ne}",
+  "Kalanı diz": "Rest legen",
+  "Sabitle": "Anheften",
+  "{ders} yerleşti ve sabitlendi.": "{ders} gesetzt und angeheftet.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} gesetzt und angeheftet: {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay}; an ihren Plätzen angeheftet.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} gesetzt und angeheftet; {olay}.",
+  "Kalan dizildi, {adlar} yer değiştirdi.": "Der Rest ist gelegt; {adlar} verschoben.",
+  "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "Der Rest ist gelegt; {adlar} und {n} weitere {n:Stunde|Stunden} verschoben.",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Legt die noch nicht gelegten Stunden nach den Regeln; angeheftete und von Hand gesetzte bleiben",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Macht die Stunde wieder beweglich: Rest legen oder Neu erstellen kann sie verschieben.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Hält die Stunde an ihrem Platz: Rest legen und Neu erstellen lassen sie in Ruhe.",
 };
 
 registerSozluk("de", DE);

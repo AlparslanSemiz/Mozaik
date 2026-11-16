@@ -334,10 +334,19 @@ function LessonPool({
 
   return (
     <aside
-      // Nothing left to place: the drawer keeps its head (which is now the
-      // sentence saying so) and gives the height back to the grid. A 176px
-      // tray of nothing is 176px that was carrying five teachers.
-      className={open && cards.length > 0 ? 'pool' : 'pool pool-closed'}
+      // Nothing waits at all: the whole drawer goes (2026-11-16) and the grid
+      // keeps the room; the strip says "Hepsi yerleşti" in its place. It stays
+      // MOUNTED, hidden, so its splitter and its roving group are attached
+      // when a lesson comes back (Delete, a drag onto it). Narrowed by a
+      // branch filter to nothing it keeps its head, which says what it holds
+      // back. A 176px tray of nothing is 176px that was carrying five teachers.
+      className={
+        cards.length === 0 && total === 0
+          ? 'pool pool-closed pool-empty'
+          : open && cards.length > 0
+            ? 'pool'
+            : 'pool pool-closed'
+      }
       aria-label={t('Yerleşmeyi bekleyen dersler')}
     >
       {/* The pool's place in the outline: the screen's h1 is the school, the

@@ -21,7 +21,7 @@ import { expect, test } from './kapan';
 import {
   answerDialog,
   deletePerson,
-  dragAndDrop,
+  dragAndDropLoose,
   open,
   openGridMenu,
   openSettings,
@@ -392,7 +392,7 @@ test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
   // almak için" after a reload when nothing had been deleted (walkthrough, 2026-11-16).
   test('“Yeniden yap”tan sonra yenilemede silme önerilmiyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     await openGridMenu(page);
     await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
     await expect(page.locator('.toast', { hasText: 'Program yeniden yapıldı' })).toBeVisible({

@@ -386,6 +386,31 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
 }
 
 /**
+ * `dragAndDrop`, then the pin the drop put on the block taken off again.
+ *
+ * A block put down by hand is pinned where it lands (A1, 2026-11-16), and a
+ * pinned block is not dragged, moved or sent back by Delete. Most tests that
+ * need "a card on the grid" go on to do exactly those things to it, and this is
+ * how they say they want a card that is free. The pin itself has its own test.
+ */
+export async function dragAndDropLoose(
+  page: Page,
+): Promise<{ day: string; hour: string; row: string }> {
+  const spot = await dragAndDrop(page);
+  const pin = page.locator(
+    `td[data-row="${spot.row}"][data-day="${spot.day}"][data-hour="${spot.hour}"] .card-pin`,
+  );
+  await expect(pin).toHaveAttribute('aria-pressed', 'true');
+  await pin.click();
+  await expect(pin).toHaveAttribute('aria-pressed', 'false');
+  // The click left focus on the pin, which keeps it drawn; a test that reads
+  // the dormant pin starts from a card nobody touched.
+  await pin.evaluate((el) => (el as HTMLElement).blur());
+  await page.mouse.move(4, 4);
+  return spot;
+}
+
+/**
  * A hand-built world loaded through the real "Planı aç" dialog: 2 days x 4
  * hours, one teacher, one class. Everything fits on screen, so the rule tests
  * below do not depend on where the sample data happens to leave a free cell.
@@ -862,8 +887,9 @@ export const SCENES: Scene[] = [
     name: '6-otomatik',
     go: async (page) => {
       await page.getByRole('button', { name: 'Program', exact: true }).click();
-      const run = page.getByRole('button', { name: 'Programı yap', exact: true });
-      if (await run.isEnabled()) {
+      const run = page.getByRole('button', { name: 'Kalanı diz', exact: true });
+      // Nothing waiting draws no button at all ("Hepsi yerleşti").
+      if ((await run.count()) > 0 && (await run.isEnabled())) {
         await run.click();
         await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 30_000 });
       }

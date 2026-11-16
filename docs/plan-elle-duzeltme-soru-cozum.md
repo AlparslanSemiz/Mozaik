@@ -1,6 +1,6 @@
 # Plan · Elle düzeltme ve soru çözüm saatleri
 
-Tarih: 2026-11-16. Durum: **plan, kod yok; açık sorular cevaplandı (Alp, 2026-11-16).** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
+Tarih: 2026-11-16. Durum: **A1 ve A2 yapıldı (`denetim/program` dalında); B bölümü plan, kod yok; açık sorular cevaplandı (Alp, 2026-11-16).** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
 Bu dosya işin niçinini ve önerilen yolu tutar; uygulamaya geçerken maddeler [TODO.md](TODO.md)'ye
 numaralı olarak taşınır, verilen kararlar [DECISIONS.md](DECISIONS.md)'ye yazılır.
 
@@ -56,6 +56,14 @@ taşıma reddedildiğinde (öğretmen o saatte başka sınıfta) ne yapacağın�
   eksikliği: düzeltme yerine çözücü bunu baştan doğru yapar. Bu madde ölçüm, kod değil.
 
 K7'ye dokunulmaz: toplu sabitleme ve geçici görünüm geri gelmez.
+
+**Yapıldı: A1 ve A2** (`denetim/program`, 2026-11-16). A1: elle bırakılan ve takasta yer
+değiştiren her blok `applyDrop`'ta sabitlenir, bildirim `Geri al` taşır (tek adım); klavyeyle
+taşıma aynı yoldan geçer. A2: ana düğme `Kalanı diz` (sabit ve elle konana dokunmaz,
+yer değiştirenleri adlarıyla söyler), tek `Yeniden yap` her basışta yeni bir hafta; "her
+şeyi silen yol" `Programı boşalt` olarak Daha fazla'da, geri alınabilir. Test: diz, elle
+taşı, Kalanı diz, taşınan yerinde (`e2e/otomatik.spec.ts`). Bedeli: sabit kart sürüklenmez,
+ikinci elle taşıma önce raptiyeye basmayı ister.
 
 ---
 
@@ -120,6 +128,15 @@ Gelmeyen öğretmenin soru çözümü "Bugün kim yok?" listesinde ayrı satır 
 istemez (boş geçebilir). İlk sürümde yalnız görünür, atama yok.
 
 ---
+
+### Giriş yolu (Alp, 2026-11-16)
+
+- **B5 değişti:** Öğretmen görünümünde boş hücreye **tık** tek maddelik küçük bir menü açar:
+  `Soru çözüm saati`. İki tık, bu yüzden kazayla eklenmez. Konan hücrede tık `Kaldır`
+  gösterir. Geri alınabilir.
+- LAYOUT'taki "boş hücrede menü açılmaz" cümlesi soru çözümü kodlanınca değişir (şimdi
+  değiştirilmedi; boş hücrede menü bugün gerçekten açılmıyor): o cümle sağ tık menüsü için
+  geçerli kalır, tık menüsü ayrı bir şeydir ve LAYOUT'a o iş yapılırken yazılır.
 
 ## Cevaplanan sorular (Alp, babadan, 2026-11-16)
 

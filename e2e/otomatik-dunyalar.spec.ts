@@ -19,7 +19,7 @@ import { loadWorld, savedState, settledText, openProblems } from './helpers';
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page): Promise<string> {
   const before = await settledText(page);
-  await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+  await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
   await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 25_000 });
   return before;
 }
@@ -90,9 +90,11 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
     const world = SMALL_WORLDS.find((w) => w.name === 'bos-dunya')!;
     await loadWorld(page, world.state);
     await expect(page.locator('.empty-screen')).toContainText('Henüz dizilecek ders yok');
-    const auto = page.getByRole('button', { name: 'Programı yap', exact: true });
-    // No count on the button since 2026-11-16 ("Programı yap"); disabled says it.
-    await expect(auto).toBeDisabled();
+    const auto = page.getByRole('button', { name: 'Kalanı diz', exact: true });
+    // No lessons, nothing to say "Hepsi yerleşti" about either: the strip
+    // draws neither the button nor the reading.
+    await expect(auto).toHaveCount(0);
+    await expect(page.locator('.strip-done')).toHaveCount(0);
   });
 });
 

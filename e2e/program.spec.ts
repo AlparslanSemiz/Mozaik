@@ -5,11 +5,13 @@ import { expect, test } from './kapan';
 import {
   answerDialog,
   dragAndDrop,
+  dragAndDropLoose,
   hover,
   loadWorld,
   mainList,
   onScreen,
   openGridMenu,
+  openFileMenu,
   openMore,
   openSettings,
   openSetup,
@@ -131,6 +133,14 @@ test.describe('2. Sürükle-bırak', () => {
       `tbody td[data-row="${row}"][data-day="${day}"][data-hour="${hour}"]`,
     );
     await expect(cell.locator('.card')).toHaveCount(1);
+    // A hand placement is pinned where it lands (A1, 2026-11-16), and the
+    // notice says so and offers the way back, which undoes the move and the
+    // pin as one step.
+    await expect(cell.locator('.card-pin')).toHaveAttribute('aria-pressed', 'true');
+    const notice = page.locator('.toast').last();
+    await expect(notice).toContainText('yerleşti ve sabitlendi');
+    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
   });
 
   test('hedef satır ekran dışındaysa sürükleme başlayınca görünür oluyor', async ({ page }) => {
@@ -317,13 +327,21 @@ test.describe('2. Sürükle-bırak', () => {
       const closed = page.locator('tr.target-row td.unavailable').nth(point.index);
       await expect(closed).toHaveClass(/drop-blocked/);
 
-      const reason = await page.locator('.reason-bar').textContent();
+      // The sentence itself: the bar's first span (its "?" help is a sibling).
+      const reason = await page.locator('.reason-bar > span').first().textContent();
       expect(reason).toContain('kapalı');
       // The message must be concrete, not an empty "there is a clash"
       expect(reason).not.toContain('Çakışma var');
 
       await page.mouse.up();
       await expect(page.locator('table.grid .card')).toHaveCount(0); // not dropped
+      // Not in silence (denetim, 2026-11-16): the reason is said as a notice,
+      // the very sentence the bar showed, and it stays on the bar a few seconds
+      // after the hand let go (the keyboard says the same through `onRefuse`).
+      const said = reason!.trim();
+      await expect(page.locator('.toast').last()).toContainText(said);
+      await expect(page.locator('.reason-bar')).toHaveClass(/\bbad\b/);
+      await expect(page.locator('.reason-bar')).toContainText(said);
       tried = true;
     }
 
@@ -591,7 +609,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
   // kaldır, dersi düzenle, dersi oraya sabitle".
   test('sağ tık MENÜ açıyor, "Havuza kaldır" siliyor, Ctrl+Z geri getiriyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cards = page.locator('table.grid .card');
     const before = await cards.count();
@@ -608,13 +626,19 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // 2026-11-16 (Sadeleşme K7). "Taşı" leads: it is the keyboard's way
     // to move the block (2026-11-15, KS8).
     await expect(menu.getByRole('menuitem')).toHaveText([
+      // The pin leads since 2026-11-16: a hand placement pins itself, so the
+      // hand's first question about a card is the pin.
+      'Sabitle',
       /^Taşı/,
       /^Havuza kaldır/,
       'Dersi düzenle',
       'Öğretmeni düzenle',
       'Sınıfı düzenle',
-      'Dersi buraya sabitle',
     ]);
+    await expect(menu.getByRole('menuitem').first()).toHaveAttribute(
+      'title',
+      /Kalanı diz ve Yeniden yap ona dokunmaz/,
+    );
 
     await menu.getByRole('menuitem', { name: 'Havuza kaldır' }).click();
     await expect(cards).toHaveCount(0); // if it was a block, all of it went
@@ -639,9 +663,9 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
       'Dersi düzenle',
       'Öğretmeni düzenle',
       'Sınıfı düzenle',
-      'Dersi buraya sabitle',
+      'Sabitle',
     ]);
-    for (const name of ['Havuza kaldır', 'Dersi buraya sabitle']) {
+    for (const name of ['Havuza kaldır', 'Sabitle']) {
       await expect(menu.getByRole('menuitem', { name })).toHaveAttribute('data-disabled');
     }
     await expect(page.locator('.ghost')).toHaveCount(0);
@@ -665,7 +689,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
   // own menu must not appear either, because the page has taken the gesture.
   test('BOŞ hücrede sağ tık hiçbir menü açmıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cancelled = await page.evaluate(() => {
       const empty = document.querySelector('table.grid tbody td[data-day]:not(:has(.card))');
@@ -683,7 +707,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('menü Escape ile kapanıyor ve ızgara çalışır kalıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cards = page.locator('table.grid .card');
     const before = await cards.count();
@@ -697,7 +721,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('"Dersi düzenle" yerinde pencere açıyor, saat oradan değişiyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     await page.locator('table.grid .card').first().click({ button: 'right' });
     await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
@@ -723,7 +747,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('ders düzenleme panelindeki dağılım seçicisi bütün seçenekleri açıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const gridCards = page.locator('table.grid .card');
     // `dragAndDrop` returns once the tray has let go of the dropped card, so
@@ -756,7 +780,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('ders düzenleme penceresi dersi başka öğretmene aktarabiliyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     await page.locator('table.grid .card').first().click({ button: 'right' });
     await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
@@ -824,7 +848,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await page.mouse.up();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     await page.locator('table.grid .card').first().click({ button: 'right' });
     await expect(page.locator('.menu')).toBeVisible();
     await page.keyboard.press('Alt+5');
@@ -835,7 +859,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('SOL tık silmiyor — ders yerinde kalıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cards = page.locator('table.grid .card');
     const before = await cards.count();
@@ -846,7 +870,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('odaklı kartta Delete kaldırıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cards = page.locator('table.grid .card');
     const before = await cards.count();
@@ -866,7 +890,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
   for (const key of ['Enter', 'Space']) {
     test(`odaklı kartta ${key} menüyü açıyor, dersi kaldırmıyor`, async ({ page }) => {
       await openWithSample(page);
-      await dragAndDrop(page);
+      await dragAndDropLoose(page);
 
       const cards = page.locator('table.grid .card');
       const before = await cards.count();
@@ -888,7 +912,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('yerleşmiş ders sürüklenerek taşınıyor; havuz sayacı değişmiyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const poolBefore = await page.locator('.pool-card').count();
     const cards = page.locator('table.grid .card');
@@ -935,7 +959,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('kaynak hücrenin KENDİSİ yeşil — ders kendini engellemiyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const from = placedCell(page);
     const day = await from.getAttribute('data-day');
@@ -959,7 +983,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('ızgaradan kart alınınca ızgara zıplamıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const wrap = page.locator('.grid-wrap');
     const before = await wrap.evaluate((el) => ({
@@ -983,7 +1007,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
   test('Escape ile taşıma iptal edilince ders yerinde kalıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const cards = page.locator('table.grid .card');
     const count = await cards.count();
@@ -1034,7 +1058,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
 
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     await expect(page.locator('table.grid .card')).not.toHaveCount(0);
   });
 
@@ -1654,7 +1678,7 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
       if (sabitle) {
         const card = page.locator('table.grid .card').first();
         await card.click({ button: 'right' });
-        await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+        await page.locator('.menu').getByRole('menuitem', { name: 'Sabitle' }).click();
         await expect(card).toHaveClass(/pinned/);
       }
       // MÇ's own row already holds MÇ's other hour, so the filled cell is ON the
@@ -2069,10 +2093,10 @@ test.describe('86. Sabitleme', () => {
   /** Puts one lesson down and pins it. Returns that cell. */
   async function pinFirst(page: Page) {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const card = page.locator('table.grid .card').first();
     await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Sabitle' }).click();
     await expect(card).toHaveClass(/pinned/);
     return card;
   }
@@ -2087,13 +2111,13 @@ test.describe('86. Sabitleme', () => {
    */
   async function filledWithOnePin(page: Page) {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 30_000,
     });
     const card = page.locator('table.grid .card').first();
     await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    await page.locator('.menu').getByRole('menuitem', { name: 'Sabitle' }).click();
     await expect(card).toHaveClass(/pinned/);
     return card;
   }
@@ -2106,7 +2130,7 @@ test.describe('86. Sabitleme', () => {
   // Pressing it must still not pick the draggable card underneath up.
   test('karttaki raptiye hoverda beliriyor, sabitlenince kalıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
 
     const card = page.locator('table.grid .card').first();
     const pin = firstPin(page);
@@ -2161,7 +2185,7 @@ test.describe('86. Sabitleme', () => {
   // are gone. One block is pinned on its card, the week from Daha fazla.
   test('satır, gün ve sütun başlığına sağ tık menü açmıyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const cell = page.locator('table.grid td:has(.card)').first();
     const row = cell.locator('xpath=ancestor::tr');
     const day = Number(await cell.getAttribute('data-day'));
@@ -2176,12 +2200,12 @@ test.describe('86. Sabitleme', () => {
     }
     // ...and the card still has its own.
     await cell.click({ button: 'right' });
-    await expect(page.locator('.menu').getByRole('menuitem', { name: /sabitle/ })).toHaveCount(1);
+    await expect(page.locator('.menu').getByRole('menuitem', { name: /sabitle/i })).toHaveCount(1);
   });
 
   test('ızgara menüsü bütün programı tek seferde sabitliyor', async ({ page }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const cards = page.locator('table.grid .card');
     const count = await cards.count();
     await openGridMenu(page);
@@ -2196,20 +2220,25 @@ test.describe('86. Sabitleme', () => {
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(0);
   });
 
-  // K2 (2026-11-16): a second arrangement is a second PLAN. "Bu programın
-  // kopyası" opens one, and the top bar's plan picker comes with it.
-  test('Bu programın kopyası yeni bir plan açıyor, ikisi bağımsız ve seçiciyle geçiliyor', async ({
+  // K2 (2026-11-16): a second arrangement is a second PLAN. "Bu planın
+  // kopyası" (Dosya ▾ since 2026-11-16, Program's Daha fazla before) opens
+  // one, and the top bar's plan picker comes with it.
+  test('Bu planın kopyası yeni bir plan açıyor, ikisi bağımsız ve seçiciyle geçiliyor', async ({
     page,
   }) => {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     const cards = page.locator('table.grid .card');
     await expect(cards).toHaveCount(1);
     const picker = page.locator('.topbar .plan-picker');
     await expect(picker).toHaveCount(0);
 
+    // Not in Program's Daha fazla any more.
     await openMore(page);
-    await page.getByRole('menuitem', { name: 'Bu programın kopyası' }).click();
+    await expect(page.getByRole('menuitem', { name: /kopyası/ })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await openFileMenu(page);
+    await page.getByRole('menuitem', { name: 'Bu planın kopyası' }).click();
     await expect(picker.locator('option')).toHaveCount(2);
     await expect(cards).toHaveCount(1);
 
@@ -2229,7 +2258,7 @@ test.describe('86. Sabitleme', () => {
   /** A file from before K2 with two programs ("seçenek") in one plan. */
   async function twoPrograms(page: Page) {
     await openWithSample(page);
-    await dragAndDrop(page);
+    await dragAndDropLoose(page);
     type Saved = {
       programs: Array<{ id: string; name: string; placements: object; pinned: object }>;
     };
@@ -2253,13 +2282,13 @@ test.describe('86. Sabitleme', () => {
   }) => {
     const picker = await twoPrograms(page);
     await picker.selectOption({ index: 1 });
-    await openMore(page);
+    await openFileMenu(page);
     await page.getByRole('menuitem', { name: 'Ayrı plan yap' }).click();
     // Two plans now; the open one is the new one, named after the program.
     await expect(picker.locator('option')).toHaveCount(2);
     await expect(picker.locator('option:checked')).toHaveText(/· Seçenek 2$/);
-    await openMore(page);
-    await expect(page.getByRole('menuitem', { name: 'Bu programın kopyası' })).toBeVisible();
+    await openFileMenu(page);
+    await expect(page.getByRole('menuitem', { name: 'Bu planın kopyası' })).toBeVisible();
     await page.keyboard.press('Escape');
   });
 
@@ -2324,7 +2353,7 @@ test.describe('86. Sabitleme', () => {
     await card.click({ button: 'right' });
     const menu = page.locator('.menu');
     await expect(menu.getByRole('menuitem', { name: 'Sabitlemeyi kaldır' })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: 'Dersi buraya sabitle' })).toHaveCount(0);
+    await expect(menu.getByRole('menuitem', { name: 'Sabitle', exact: true })).toHaveCount(0);
   });
 
   test('sabitlenmiş kartta "Havuza kaldır" KAPALI ve sebebi yazıyor', async ({ page }) => {

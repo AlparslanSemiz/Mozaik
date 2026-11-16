@@ -25,6 +25,7 @@ import {
   dropNotice,
   keepSameRows,
   markPreview,
+  movedNotice,
   roomLetter,
   waitingSubjects,
   type BarRun,
@@ -278,5 +279,60 @@ describe('sağ tık menüsü ve sürükleme', () => {
     const onTop = map.get('0|0');
     expect(onTop?.evicts.length ?? 0).toBeGreaterThan(0);
     expect(dropNotice(ix, 'L1', null, onTop)).not.toBe('');
+  });
+});
+
+describe('movedNotice', () => {
+  // "Kalanı diz" names what it moved (denetim, 2026-11-16): up to three by
+  // name, then "ve N ders daha". Six one-hour lessons in six classes, each
+  // placed on its own cell; `after` moves the first k of them one hour on.
+  function laid(k: number): { before: State; after: State } {
+    const names = ['501', '502', '503', '504', '505', '506'];
+    const base = makeWorld({
+      days: 1,
+      hours: 4,
+      teachers: [{ id: 'oMC', short: 'MÇ' }],
+      classes: names.map((n) => ({ id: `s${n}`, name: n, roomId: 'dA' })),
+      lessons: names.map((n) => ({
+        id: `L${n}`,
+        classId: `s${n}`,
+        teacherId: 'oMC',
+        weeklyHours: 1,
+      })),
+    });
+    // One teacher, one hour each: spread over the 4 hours is impossible for 6,
+    // so the cells are written straight, the way `withLesson` does.
+    const placements: Record<string, string> = {};
+    const moved: Record<string, string> = {};
+    names.forEach((n, i) => {
+      placements[placementKey(`s${n}`, 0, 0)] = `L${n}`;
+      moved[placementKey(`s${n}`, 0, i < k ? 1 : 0)] = `L${n}`;
+    });
+    return {
+      before: replaceActiveGrid(base, { placements }),
+      after: replaceActiveGrid(base, { placements: moved }),
+    };
+  }
+
+  it('hiçbir şey oynamadıysa susar', () => {
+    const { before } = laid(0);
+    expect(movedNotice(before, before)).toBe('');
+  });
+
+  it('üç dersi adıyla söyler', () => {
+    const { before, after } = laid(3);
+    const said = movedNotice(before, after);
+    expect(said).toContain('501 · MÇ');
+    expect(said).toContain('503 · MÇ');
+    expect(said).not.toContain('504');
+    expect(said).not.toContain('daha');
+  });
+
+  it('dördüncüden sonrasını sayar', () => {
+    const { before, after } = laid(5);
+    const said = movedNotice(before, after);
+    expect(said).toContain('503 · MÇ');
+    expect(said).not.toContain('504');
+    expect(said).toContain('ve 2 ders daha');
   });
 });

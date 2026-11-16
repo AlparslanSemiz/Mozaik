@@ -68,7 +68,6 @@ const EN: Sozluk = {
   "plan dosyası": "plan file",
   "Plan dosyaya yazıldı. İndirilenler klasörüne bakın.":
     "Plan written to a file. Look in your Downloads folder.",
-  "Programı yap": "Make the timetable",
   Program: "Timetable",
   "Düğme satırını gizle": "Hide the button row",
   "Düğme satırını göster": "Show the button row",
@@ -176,8 +175,8 @@ const EN: Sozluk = {
     "**There are things worth looking at.** In the lists below, rows marked",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "stop the timetable from being laid out. Resolve those first.",
-  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Programı yap** ile yerleştirebilirsiniz.":
-    "The remaining **{n}** hours are not placed. **Make the timetable** in the **Timetable** tab places them.",
+  "Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz.":
+    "The remaining **{n}** hours are not placed. **Place the rest** in the **Timetable** tab places them.",
   "İpuçları ({n})": "Tips ({n})",
   "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
     "These do not block the timetable; they are points that may have been overlooked while entering data.",
@@ -212,7 +211,6 @@ const EN: Sozluk = {
   "Havuza kaldır": "Send to tray",
   sabitlenmiş: "pinned",
   "Dersi düzenle": "Edit lesson",
-  "Dersi buraya sabitle": "Pin lesson here",
   "Sabitlemeyi kaldır": "Unpin",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "This lesson is pinned. Unpin it first.",
@@ -777,8 +775,8 @@ const EN: Sozluk = {
     "When two lessons that must not share a day are on the same day, the **Not on the same day** row on the lesson's sheet shows them.",
   "{bir} ile {iki} {gun} günü sabitlenmiş; aynı gün olmamaları istendiği için biri yerinden oynamadan bir yol bulunamaz.":
     "{bir} and {iki} are both pinned on {gun}; they must not share a day, so no way can be found until one of them moves.",
-  "İkisi de **sabitlenmişse** **Programı yap** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
-    "If both are **pinned**, **Make the timetable** cannot look for suggestions; unpin one or move it to another day.",
+  "İkisi de **sabitlenmişse** **Kalanı diz** öneri arayamaz; birinin sabitlemesini kaldırın ya da başka güne taşıyın.":
+    "If both are **pinned**, **Place the rest** cannot look for suggestions; unpin one or move it to another day.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} may teach at most {sinir} hours on {gun}; this would make {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
@@ -920,8 +918,8 @@ const EN: Sozluk = {
     "{ders}: {yeni} instead of {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders}: {yeni} hours a week instead of {eski}",
-  "Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.":
-    "The timetable has changed since. Press Make the timetable to see a suggestion again.",
+  "Program o arada değişti. Öneriyi yeniden görmek için Kalanı diz düğmesine basın.":
+    "The timetable has changed since. Press Place the rest to see a suggestion again.",
   "Program değişiklik gerekmeden kuruluyor":
     "The timetable can be built without any change",
   "İlk arama bu programı bulamadı; ikinci arama buldu ve denetledi.":
@@ -1506,7 +1504,6 @@ const EN: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} went back to the tray.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} picked up. Choose the target cell with the arrow keys; Enter drops it, Esc cancels.",
   "Taşımadan vazgeçildi.": "Move cancelled.",
-  "{ders} yerleşti: {yer}.": "{ders} placed: {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} open, {yuk} {yuk:hour|hours} of lessons loaded",
   "Izgaraya gir, bir daha basınca çık": "Enter the grid; press again to leave it",
   "Hücreden hücreye git": "Move from cell to cell",
@@ -1587,8 +1584,6 @@ const EN: Sozluk = {
   "Yeni dönem için bir kopya açıldı: dersler duruyor, program boş. Eski plan Dosya → Planlar ve yedek’te.": "A copy for the new term is open: the lessons are there, the timetable is empty. The old plan is in File → Plans and backup.",
   "Gizlensin": "Hidden",
   "Yerleşmiş dersi sürükleyerek taşıyın.": "Drag a placed lesson to move it.",
-  "Yerleşmeyi bekleyen ders yok": "No lesson is waiting to be placed",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir": "Places the lessons not yet placed, keeping to the rules",
   "Dersleri gir": "Enter the lessons",
   "Kapalı saatleri işaretle": "Mark the closed hours",
   "{d} derslik · {b} branş · {o} öğretmen · {s} sınıf": "{d} {d:room|rooms} · {b} {b:subject|subjects} · {o} {o:teacher|teachers} · {s} {s:class|classes}",
@@ -1615,8 +1610,6 @@ const EN: Sozluk = {
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "This smaller plan is written over the last plan file in the folder. The old state stays in the daily backups.",
 
   // src/pure/solver (2026-11-16)
-  "Başka bir program yap": "Make another timetable",
-  "Program yapıldı, {n} saat yer değiştirdi.": "The timetable is made; {n} {n:hour|hours} moved.",
   "{kim}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{kim}: {yuk} hours of lessons, {acik} open; {fazla} more must be opened",
   "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} hours of lessons, {acik} open; {fazla} more must be opened",
   "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Room {derslik}: {yuk} hours of lessons, {acik} open; open {fazla} more or move a class to another room",
@@ -1693,8 +1686,6 @@ const EN: Sozluk = {
     "School details",
   "Yazdır ve gönder":
     "Print and send",
-  "Bu programın kopyası":
-    "Copy of this timetable",
   "Neden yerleşmedi?":
     "Why is it not placed?",
   "Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.":
@@ -1806,6 +1797,17 @@ const EN: Sozluk = {
   "Hepsi": "All",
   "Diğer bilgiler": "More details",
   "{ne} dersi için işlemler": "Actions for the {ne} lesson",
+  "Kalanı diz": "Place the rest",
+  "Sabitle": "Pin",
+  "{ders} yerleşti ve sabitlendi.": "{ders} placed and pinned.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} placed and pinned: {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay}; pinned where they are.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placed and pinned; {olay}.",
+  "Kalan dizildi, {adlar} yer değiştirdi.": "The rest is placed; {adlar} moved.",
+  "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "The rest is placed; {adlar} and {n} more {n:lesson|lessons} moved.",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Places the lessons not yet placed, keeping to the rules; pinned and hand-placed lessons stay",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Lets the lesson move again: Place the rest or Make it again may move it.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Keeps the lesson where it is: Place the rest and Make it again leave it alone.",
 };
 
 registerSozluk("en", EN);

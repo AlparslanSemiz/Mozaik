@@ -37,11 +37,12 @@ import {
   surname,
   teacherSubjects,
 } from '../entities';
+import { lessonName } from '../feasibility';
 import { compareTr } from '../listview';
 import { activePinned, activePlacements } from '../grid';
 import type { SuggestionDiff } from '../relax';
 import type { SolverProgress, SolverResult } from '../solver';
-import type { Vars } from '../../leaf/i18n';
+import { t, type Vars } from '../../leaf/i18n';
 import { type Id, type Lesson, type PoolSort, type State, type View } from '../../leaf/model';
 
 /** The `t()` the screen hands down, so a language switch rebuilds what it reads. */
@@ -623,7 +624,7 @@ export function describeMenu(
 
 /** What the Program strip's buttons count and whether they are enabled. */
 export interface StripCounts {
-  /** "Programı yap"'s count: blocks still in the tray. */
+  /** "Kalanı diz"'s count: blocks still in the tray. */
   pending: number;
   /** Placed hours that are NOT pinned: what "Yeniden yap" and "Programı boşalt" take away. */
   placed: number;
@@ -632,6 +633,32 @@ export interface StripCounts {
   gridEmpty: boolean;
   /** Every placed cell is pinned, so the pin item offers to unpin them all. */
   allPinned: boolean;
+}
+
+/** How many lessons the notice of a run names; the rest are counted. */
+const NAMED_MOVED = 3;
+
+/**
+ * What "Kalanı diz" says when it had to move lessons that were already on the
+ * grid: their NAMES, up to three and then "ve N ders daha", because a count of
+ * hours does not tell a reader whether the change touches the lesson they just
+ * placed (denetim, 2026-11-16). '' when nothing moved.
+ */
+export function movedNotice(before: State, after: State): string {
+  const was = activePlacements(before);
+  const now = activePlacements(after);
+  const moved = new Set<Id>();
+  for (const key in was) if (now[key] !== was[key]) moved.add(was[key]!);
+  if (moved.size === 0) return '';
+  const ix = buildIndex(before);
+  const names = [...moved].map((id) => lessonName(ix, id));
+  const adlar = names.slice(0, NAMED_MOVED).join(', ');
+  return names.length <= NAMED_MOVED
+    ? t('Kalan dizildi, {adlar} yer değiştirdi.', { adlar })
+    : t('Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.', {
+        adlar,
+        n: names.length - NAMED_MOVED,
+      });
 }
 
 export function describeStrip(state: State): StripCounts {

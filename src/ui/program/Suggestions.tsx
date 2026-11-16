@@ -134,7 +134,7 @@ export default function Suggestions({
 
   const staleNote = stale && (
     <p className="hint">
-      {t('Program o arada değişti. Öneriyi yeniden görmek için Programı yap’a basın.')}
+      {t('Program o arada değişti. Öneriyi yeniden görmek için Kalanı diz düğmesine basın.')}
     </p>
   );
 

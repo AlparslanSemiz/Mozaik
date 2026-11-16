@@ -106,7 +106,7 @@ test.describe('exe’nin CSP’si', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page
@@ -136,7 +136,7 @@ test.describe('exe’nin CSP’si', () => {
     });
     await fileOpened(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
+    await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();
     await expect(page.locator('.panel.suggestions .btn.primary').first()).toBeVisible({
       timeout: 60_000,
     });

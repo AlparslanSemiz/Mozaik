@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import {
+  Copy,
   CopyPlus,
   FileText,
   FolderOpen,
@@ -51,6 +52,10 @@ interface Props {
   openChecklist: () => void;
   /** Dosya ▾ → Yeni dönem için kopyala. */
   copyForNewTerm: () => void;
+  /** Dosya ▾ → Bu planın kopyası (2026-11-16: it was in Program's Daha fazla). */
+  copyPlan: () => void;
+  /** A run or the suggestion search is going: the copy would be of a week still moving. */
+  copyBusy: boolean;
   /** The status chip: the problem list. */
   openProblems: () => void;
   /** The open plan's own programs, when an old file holds more than one. */
@@ -84,6 +89,8 @@ export default function Topbar({
   openAbout,
   openChecklist,
   copyForNewTerm,
+  copyPlan,
+  copyBusy,
   openProblems,
   switchProgram,
   openOldCopies,
@@ -130,6 +137,12 @@ export default function Topbar({
         </MoreItem>
         <MoreItem icon={<CopyPlus size={15} />} onSelect={copyForNewTerm}>
           {t('Yeni dönem için kopyala')}
+        </MoreItem>
+        {/* The same plan with its laid-out week, to try another arrangement
+            in (K2). In an old file with several programs the same item is
+            how one of them becomes a plan of its own. */}
+        <MoreItem icon={<Copy size={15} />} disabled={copyBusy} onSelect={copyPlan}>
+          {state.programs.length > 1 ? t('Ayrı plan yap') : t('Bu planın kopyası')}
         </MoreItem>
         {/* Two ways back, told apart where they are chosen (walkthrough,
             2026-11-16): this plan's own days, or every plan and its files. */}

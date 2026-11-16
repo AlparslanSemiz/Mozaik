@@ -267,7 +267,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Programı yap');
+    await exe.oturum.tikla('metin:Kalanı diz');
 
     await expect
       .poll(
@@ -331,7 +331,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Programı yap');
+    await exe.oturum.tikla('metin:Kalanı diz');
     await expect
       .poll(
         () =>
@@ -347,7 +347,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
       const r = card.getBoundingClientRect();
       card.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: r.x + 5, clientY: r.y + 5, button: 2 }));`,
     );
-    await exe.oturum.tikla('metin:Dersi buraya sabitle');
+    await exe.oturum.tikla('metin:Sabitle');
 
     await expect
       .poll(
@@ -419,7 +419,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     );
     await dosyaAcildi(exe);
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Programı yap');
+    await exe.oturum.tikla('metin:Kalanı diz');
 
     const satirlar = () =>
       exe.oturum.js<string[]>(

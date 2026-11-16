@@ -80,6 +80,19 @@ export function setBlockPinned(
 }
 
 /**
+ * Pins exactly the cells a block of `size` hours covers from this start. A
+ * hand placement pins itself (A1, 2026-11-16): the cells are named outright
+ * and not read back through `blockAt`, because a dropped single that lands
+ * beside another block of the same lesson reads back as one longer block, and
+ * the neighbour would be pinned with it.
+ */
+export function pinCells(d: State, classId: Id, day: number, hour: number, size: number): State {
+  const pinned = { ...activePinned(d) };
+  for (let i = 0; i < size; i++) pinned[placementKey(classId, day, hour + i)] = 1;
+  return replaceActiveGrid(d, { pinned });
+}
+
+/**
  * Takes the WHOLE block containing this cell off the grid. MECHANICAL: it does
  * not ask whether the reader is allowed to.
  *

@@ -55,6 +55,38 @@ al`lı 20 s. **Denenmedi, bırakıldı:** Okul bilgileri'nin Daha fazla'sına `B
 ve `Örnek okulu yükle` koymak; ikisi bugün Başlarken ve Hakkında'da duruyor, taşımak onların onay
 sorusunu da taşımak demek.
 
+### 2026-11-16 · Program ve ızgara: elle konan sabit, Kalanı diz, tek Yeniden yap (`denetim/program`)
+
+Denetimden çıkan ve Alp'in onayladığı (2026-11-16 22:35) sekiz değişiklik. Karar ve gerekçeler:
+
+- **Elle konan ders kendiliğinden sabitlenir** (plan A1, S2). Sürükleyip ya da klavyeyle bırakılan
+  her blok ve takasta yer değiştiren her blok, bırakıldığı yerde sabitlenir; şema aynı, var olan
+  `pinned`. Bildirim `Geri al` taşır ve taşıma ile sabitleme tek adım. **Gerekçe.** Baba elle
+  düzelttiğini bir sonraki dizmede kaybederse güveni gider ve "sabitlemeyi hatırla" diye ayrı bir
+  iş babaya yeni bir şey öğretmek demek. **Bedeli.** Sabit kart sürüklenmez, yani bir dersi iki kez
+  elle taşımak için önce raptiyeye basmak gerekir; sağ tık menüsünde `Sabitle`/`Sabitlemeyi kaldır`
+  bu yüzden ilk madde.
+- **Ana düğmenin tek adı `Kalanı diz`**, her durumda: boş haftada "kalan" bütün derslerdir, ilk
+  dizme için ayrı bir ad (`Programı yap`) yok (SD3: bir kavram, bir ad). Sabitlenenlere ve elle
+  konanlara dokunmaz. Yer değiştiren dersler sayı yerine adlarıyla söylenir (en çok üç ad ve "ve N
+  ders daha"). Bekleyen ders yokken ve hafta sağlamken düğme yok, yerinde `Hepsi yerleşti` okuması:
+  sönük bir ana düğme "neden basamıyorum" diye soruyordu; hafta bozuksa `Yeniden yap` (bugünkü kural).
+- **Tek `Yeniden yap`.** `Başka bir dizilim` (sonra `Başka bir program yap`) düğmesi kalktı; `Yeniden
+  yap` her basışta sabitlenmemişleri bir sonraki tohumla başka bir haftaya dizer. **Gerekçe.** İki
+  düğme babaya "ikisi ne farklı" diye bir soru bırakıyordu ve ikisi de sabitleneni korur, sabitlenmemişi
+  yeniden dizer.
+- **Dizili haftada havuz gizli.** Bekleyen ders yokken çekmecenin tamamı gizlenir, ızgara yer
+  kazanır; bir ders havuza dönünce geri gelir. "Hepsi yerleşti" okuması şeride taşındı.
+- **Reddedilen bırakma susmaz.** Fare ile engelli bir hücreye bırakınca sebep, klavye yolunun
+  `onRefuse`'uyla aynı metinle bildirim olur ve şerit çubuğunda 5,5 sn kalır.
+- **Kart sağ tık menüsünün ilk maddesi `Sabitle`/`Sabitlemeyi kaldır`**, `title`'ı ne yaptığını söyler.
+- **Plan kopyası Dosya ▾'da** (`Bu planın kopyası`, `Yeni dönem için kopyala`'nın yanında); Program'ın
+  Daha fazla'sından kalktı. Birden çok program taşıyan eski bir dosyada aynı madde `Ayrı plan yap`
+  (davranış aynı), açık programı silmek Program'ın Daha fazla'sında kaldı.
+- **Soru çözüm girişi** (Alp, 2026-11-16): Öğretmen görünümünde boş hücreye tık tek maddelik küçük
+  bir menü açar, `Soru çözüm saati` (iki tık, kazayla eklenmez); konan hücrede tık `Kaldır`. Kod
+  sonra, plan belgesinde.
+
 ---
 
 ### 2026-11-16 · Denetim turu: tek adlar (`denetim/metin`)
@@ -102,11 +134,11 @@ olduğu için şimdi sökülmedi, koruma bir dahaki sefere elden geçerken çık
 
 Baba gibi tıklanan bir turun bulguları, Alp hepsini onayladı. Ters çevirdikleri ve seçilen yol:
 
-- **Ana düğme hep işe yarar.** Bekleyen ders yokken hafta bozuksa (kapalı saatte ders, kesin kural ihlali) `Programı yap` sönük durmuyor,
-  yerinde `Yeniden yap` (sabitlenen yerinde kalır); havuzun başı çipin sorun sayısını söyler.
+- **Ana düğme hep işe yarar.** Bekleyen ders yokken hafta bozuksa (kapalı saatte ders, kesin kural ihlali) ana düğmenin yerinde
+  `Yeniden yap` durur (sabitlenen yerinde kalır); hafta sağlamsa yerinde düğme değil `Hepsi yerleşti` okuması.
   Durum çipi bekleyen saat varken sarı (2026-11-15'ten beri "sorun değil" diye yeşildi).
-- **Yeniden dizmek bir silme değil.** `Yeniden yap`, `Başka bir dizilim` ve yer değiştiren
-  `Programı yap` silmeden-önce yuvasına yine yazar ama yuva sonraki açılışta
+- **Yeniden dizmek bir silme değil.** `Yeniden yap` ve yer değiştiren
+  `Kalanı diz` silmeden-önce yuvasına yine yazar ama yuva sonraki açılışta
   önerilmez (`quiet`); bildirimleri `Önceki programa dön` der. Gerçek silmenin şeridi nötr renkte.
 - **Excel yapıştırmada sütunlar tanınır.** Başlık satırı ya da hücreler (bilinen branş, ≤ 4 harf
   büyük harf kısa ad, E/K, adres); hücrelerin söylemediği eski sıraya düşer ama hiçbir zaman
@@ -213,12 +245,12 @@ işi dört sekmeye dağılıyordu.
   bilgileri). Taşınacak kayıtlı bir sekme yok; eski yedi kimliğin yeni yeri `toolState.ts`'teki
   `OLD_TAB`'ta.
 
-**Değişen (K2).** Program → Daha fazla → `Bu programın kopyası` yeni bir **plan** açar (açık
+**Değişen (K2).** Dosya ▾ → `Bu planın kopyası` yeni bir **plan** açar (açık
 planın verisi ve haftası) ve üst çubuğun plan seçicisi onunla görünür. Seçenek menüsü (seçim,
 kopya, boş seçenek, yeniden adlandır, sil) ve şeritteki `Seçenek` okuması kalktı; ekranda yalnız
 "plan" var. Veri modeli değişmedi (`programs[]`). Birden çok seçenek taşıyan eski bir dosya
 açılır: her seçeneği üst çubuk seçicisinde planın adının altında bir satır ("Plan 1 · Seçenek
-2"); açık olan Daha fazla'da `Ayrı plan yap` ile kendi adını taşıyan bir plan olur (bir kopya,
+2"); açık olan Dosya ▾'da `Ayrı plan yap` ile kendi adını taşıyan bir plan olur (bir kopya,
 eskisi yerinde kalır; sonra her plan gibi Planlar ve yedek'te adlandırılır) ya da silinir. **Bilerek kabul edilen.** Kopya ayrı bir plan olduğu için
 sonradan eklenen bir öğretmen öbürüne geçmez; iki dizilişi karşılaştırmak veri girildikten sonra
 yapılan bir iş.
@@ -384,7 +416,7 @@ bir ana düğme, az kullanılan her şey her ekranda aynı köşedeki tek bir "D
 - **K3 · Kontrol sekmesi kalkar:** sorunlar durum çipinin açtığı listede, yerleşmeyen derse
   tıklayınca neden ve çözüm. Ters çevirdiği: LAYOUT "Kontrol" ve "Durum çipi … Kontrol'e götürür".
   Aşama 3B'de yapıldı.
-- **K4a · Yeni adlar:** "Otomatik diz (N kart)" → "Programı yap", "Baştan diz" → "Yeniden yap",
+- **K4a · Yeni adlar:** "Otomatik diz (N kart)" → "Kalanı diz", "Baştan diz" → "Yeniden yap",
   "Danışman" → "İpuçları", kural seviyesi "Engel / Uyarı" → "Kesin / Tercih", "N saat havuzda" →
   "N saat yerleşmedi". **K4b · ekranda "kart" yerine "ders"**: iç adlar, veri ve dosya adları
   "kart" kalır, yalnız görünen söz değişir. Ters çevirdiği: TODO SD3'ün haritasında **kart**,
@@ -432,14 +464,14 @@ bir kapalı hücreyi söylüyor. Dört karar:
 - **Denendi, bırakıldı: tekmeli yerel arama** (iterated local search, en iyi haftaya geri dönen
   30 tekme). Babanın haftasında 118 yerine 114 boşluk, ama geçişi bu makinede ~30 ms'den ~400 ms'ye
   çıkarıyordu ve brotli eşiğini 120 B aşıyordu. Kod oturumun scratch'inde.
-- **`Başka bir dizilim`** düğmesi (tek yeni denetim): her basış bir sonraki tohum. Tohum 0 eskisi
+- **Tohum:** `Yeniden yap`ın her basışı bir sonraki tohum. Tohum 0 eskisi
   gibi; başka tohum aramanın eşit aday sırasını ve gün sırasını karıştırır.
 - **Otomatik diz yerleşmişi önce tutar, sığmazsa yakınında yeniden dizer** (`relay`): tutulan
   hafta bir kartı yersiz bırakırsa sabitlenmemiş hafta, kendisi ipucu olarak, yeniden dizilir ve
   ancak her kart yerleşirse alınır; ipucu sıralamanın ilk anahtarı, onarımda eşitlik bozan ve
   geçişte kurallardan hemen sonra gelen katman. İkinci koşunun onarım sabrı 50/blok (ilki 500):
   yakın hafta erken bulunur ya da hiç; babanın kurulamayan haftası önerileri 0,7 s geç görür.
-  Bir şey yer değiştirdiyse bildirim kaç saat olduğunu söyler, `Geri al` ile.
+  Bir şey yer değiştirdiyse bildirim hangi derslerin yer değiştirdiğini adlarıyla söyler, `Geri al` ile.
 - **Tıkanma cümlesi önce açığı söyler** (`shortfall.ts`): "AY: 18 saat ders, 15 müsait saat; 3
   saat açılmalı", sınıf ve paylaşılan derslik için de; açık yoksa bağlayan "aynı gün olmasın"
   çifti. Bunlar listenin başına geçer. Derslik değiştirme önerisi ayrı bir iş (TODO B5.14).

@@ -14,7 +14,7 @@ import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
 import { type PlacedBlock, blockSizeFor, placedBlocks } from './blocks';
 import { type Verdict, blockerDetail, check, verdictAfterBlocker } from './engine';
 import { type Index, buildIndex, occupy, vacate } from './occupancy';
-import { blockAt, blockPinned, liftBlock, place } from './placing';
+import { blockAt, blockPinned, liftBlock, pinCells, place } from './placing';
 
 /**
  * THE DROP MAP: what every cell on the grid would do if the lesson were let go
@@ -206,6 +206,7 @@ function swapBlocks(
   }
   verdicts.push(firstCheck);
   work = place(work, source.lessonId, first.day, first.hour, source.size);
+  work = pinCells(work, source.classId, first.day, first.hour, source.size);
 
   for (const { ref, hour } of moves) {
     const verdict = check(work, buildIndex(work), ref.lessonId, source.day, hour, ref.size);
@@ -219,6 +220,8 @@ function swapBlocks(
     }
     verdicts.push(verdict);
     work = place(work, ref.lessonId, source.day, hour, ref.size);
+    // Every block a swap moved stays where it went (A1).
+    work = pinCells(work, ref.classId, source.day, hour, ref.size);
   }
 
   const notice = t('{bir} ile {iki} yer değiştirecek', {
@@ -489,7 +492,18 @@ export function applyDrop(d: State, request: DropRequest): State {
     request.hour,
     request.size,
   );
-  return verdict.blocked === null
-    ? place(next, request.lessonId, request.day, request.hour, request.size)
-    : d;
+  if (verdict.blocked !== null) return d;
+  // A block put down by hand stays where it was put (A1, 2026-11-16): the
+  // pin is the existing one, so the next "Kalanı diz" leaves it alone.
+  const lesson = next.lessons.find((x) => x.id === request.lessonId);
+  const placed = place(next, request.lessonId, request.day, request.hour, request.size);
+  return lesson === undefined
+    ? placed
+    : pinCells(
+        placed,
+        lesson.classId,
+        request.day,
+        request.hour,
+        blockSizeFor(placed, lesson, request.size),
+      );
 }
