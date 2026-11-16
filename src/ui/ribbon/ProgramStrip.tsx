@@ -19,12 +19,14 @@ import {
   Plus,
   RotateCcw,
   Rows3,
+  Shuffle,
   Square,
   Trash2,
 } from 'lucide-react';
 import { applyDensity, type Density, type ProgramColorMode, type View } from '../../platform/prefs';
 import { setDayMask, setRowMask } from '../../pure/program';
 import {
+  activePlacements,
   activeProgram,
   addProgram,
   blankProgram,
@@ -40,6 +42,7 @@ import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
+import type { State } from '../../leaf/model';
 
 /**
  * The two views. `short` is what the button shows, `label` what it is called.
@@ -84,6 +87,16 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
   },
 ];
 
+/**
+ * Which "Başka bir dizilim" this is: every press asks the search for the next
+ * seed, so the same data gives a new week each time, and the same sequence of
+ * weeks after a reload. Module-level and not a hook: `programStrip` is called
+ * as a function, once per render of whichever strip is open.
+ */
+let anotherSeed = 0;
+/** The week the last "Başka bir dizilim" put on the grid. */
+let anotherMade: State | null = null;
+
 export function programStrip({
   ui,
   state,
@@ -107,6 +120,16 @@ export function programStrip({
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
     strip ?? describeStrip(state, programMask);
   const currentProgram = activeProgram(state);
+  /** "Baştan diz" and "Başka bir dizilim" say the same thing when they land. */
+  const relaidNotice = (next: State) => {
+    const said =
+      pinnedHours === 0
+        ? t('Program baştan dizildi.')
+        : t('Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.', {
+            n: pinnedHours,
+          });
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+  };
 
   const askProgramName = async (initial: string, exceptId?: string) => {
     const name = await prompt({
@@ -199,7 +222,7 @@ export function programStrip({
 
       <Sep />
 
-      {/* Two buttons and no settings. What "spread over the week" or "prefer
+      {/* Three buttons and no settings. What "spread over the week" or "prefer
           mornings" should mean is not knowable before a term has been laid
           out with this (the former rule against guessed features). */}
       <Group label="Diz">
@@ -218,7 +241,32 @@ export function programStrip({
                   ? t('Havuzda bekleyen kart yok')
                   : t('Havuzdaki kartları kurallara uyarak dizer')
               }
-              onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
+              onClick={() =>
+                // `relay`: when the kept week leaves a card nowhere to go, the
+                // unpinned week is laid out again close to itself. Whatever
+                // moved is said, with the undo for it.
+                solver.start(state, { keepPlaced: true, exclusions, relay: true }, (next) => {
+                  const before = activePlacements(state);
+                  const after = activePlacements(next);
+                  let moved = 0;
+                  for (const key in before) if (after[key] !== before[key]) moved++;
+                  if (moved === 0) return;
+                  // Cards the reader had placed moved: the week before is kept
+                  // where a reload finds it, as before "Baştan diz".
+                  keepBefore(
+                    state,
+                    t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
+                  );
+                  notify(
+                    t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
+                    'info',
+                    {
+                      label: t('Geri al'),
+                      run: () => undoIf(next),
+                    },
+                  );
+                })
+              }
             >
               <Play {...ICON} />
               {t('Otomatik diz ({n} kart)', { n: pending })}
@@ -234,19 +282,36 @@ export function programStrip({
                 // on the grid moves until the run ends, and "Durdur" is on
                 // this same spot while it runs.
                 keepBefore(state, t('Program baştan dizildi.'));
-                solver.start(state, { keepPlaced: false, exclusions }, (next) => {
-                  const said =
-                    pinnedHours === 0
-                      ? t('Program baştan dizildi.')
-                      : t('Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.', {
-                          n: pinnedHours,
-                        });
-                  notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
-                });
+                solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
               }}
             >
               <RotateCcw {...ICON} />
               {t('Baştan diz')}
+            </button>
+            {/* The one new control of 2026-11-16: the same rules, another of
+                the many weeks they allow. "Baştan diz" gives the same week
+                for the same data; this one a different one on every press. */}
+            <button
+              className="btn"
+              disabled={placed === 0 && pending === 0}
+              onClick={() => {
+                anotherSeed++;
+                // The week before the FIRST press is the one worth keeping: a
+                // second press would push the hand-made week out of the one
+                // slot with a week this button made (review, 2026-11-16).
+                if (state !== anotherMade) keepBefore(state, t('Program baştan dizildi.'));
+                solver.start(
+                  state,
+                  { keepPlaced: false, exclusions, seed: anotherSeed },
+                  (next) => {
+                    anotherMade = next;
+                    relaidNotice(next);
+                  },
+                );
+              }}
+            >
+              <Shuffle {...ICON} />
+              {t('Başka bir dizilim')}
             </button>
           </>
         )}
