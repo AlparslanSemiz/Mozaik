@@ -1,11 +1,12 @@
 // Dersler: whose lesson list this is, which one is open, and the totals.
 
 import type React from 'react';
-import { List } from 'lucide-react';
+import { CalendarX, List, Scale } from 'lucide-react';
+import { MoreItem, MoreMenu } from '../common';
 import type { LessonMode } from '../../platform/prefs';
 import { paletteColor } from '../../leaf/model';
 import { KIND_ICON } from '../program';
-import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
+import { Group, ICON, Sep, type StripContext } from './parts';
 
 /**
  * The three ways to walk the lesson list.
@@ -100,18 +101,23 @@ export function lessonsStrip({ ui, state, t }: StripContext): React.ReactElement
         </>
       )}
 
-      <Spacer />
-
-      <Group label="Toplam">
-        {/* Through t() like the heading under it: raw JSX here read "99
-            ders · 433 saat" in every language (DENETIM DK13). */}
-        <span className="ribbon-value">
-          {t('{ders} ders · {saat} saat', {
-            ders: state.lessons.length,
-            saat: state.lessons.reduce((n, l) => n + l.weeklyHours, 0),
-          })}
-        </span>
-      </Group>
+      {/* The total that stood here ("Toplam") is the list's own heading's
+          number; one count per screen since 2026-11-16. The door holds the
+          two places a lesson's limits are set. */}
+      <MoreMenu>
+        <MoreItem icon={<CalendarX size={15} />} onSelect={() => ui.setTab('availability')}>
+          {t('Kapalı saat işaretle')}
+        </MoreItem>
+        <MoreItem
+          icon={<Scale size={15} />}
+          onSelect={() => {
+            ui.setSection('rules');
+            ui.setTab('settings');
+          }}
+        >
+          {t('Kurallar')}
+        </MoreItem>
+      </MoreMenu>
     </div>
   );
 }

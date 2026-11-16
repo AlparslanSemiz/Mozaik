@@ -5,7 +5,7 @@ import { useDeferredValue, useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import { duplicateShorts, subjectOptions } from '../../pure/entities';
 import type { Id } from '../../leaf/model';
-import { type PanelProps, T, useT } from '../common';
+import { Help, type PanelProps, T, useT } from '../common';
 import { ListTools, useRowOrder } from '../lists';
 import { teacherListConfig } from '../../pure/lists';
 import { TeacherForm } from './TeacherForm';
@@ -65,7 +65,8 @@ export default function Teachers({ state, change }: PanelProps) {
       <TeacherForm state={state} change={change} />
 
       <div className="panel step-panel">
-        <h2>{t('Öğretmenler ({n})', { n: state.teachers.length })}</h2>
+        {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+        <h2>{t('Öğretmenler')}</h2>
 
         {/* About the ROWS, not about adding: two teachers already on the list
             wearing one short form. It belongs over the list it is describing. */}
@@ -153,10 +154,15 @@ export default function Teachers({ state, change }: PanelProps) {
           </div>
         )}
         {/* The three rule headings are short so the table fits; what they
-            mean is said once, under it, not only in a tooltip. */}
+            mean is behind a "?" under it since 2026-11-16 (Sadeleşme). */}
         {shown.length > 0 && (
           <p className="hint">
-            <T k="**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli." />
+            {t('Art arda, Günde ↑, Günde ↓')}
+            <Help topic="Art arda, Günde ↑, Günde ↓">
+              <p>
+                <T k="**Art arda**: üst üste en çok kaç saat. **Günde ↑**: günde en çok, **Günde ↓**: geldiği gün en az. Boşsa Kurallar’daki sayı geçerli." />
+              </p>
+            </Help>
           </p>
         )}
       </div>

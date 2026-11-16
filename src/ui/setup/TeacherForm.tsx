@@ -249,7 +249,7 @@ export function TeacherForm({ state, change }: PanelProps) {
           {/* Not `disabled` for a missing branch: a grey button says no and
               not why. Pressed, it says what is missing; the name is the one
               thing that still locks it, because nothing at all is typed. */}
-          <button className="btn" disabled={newTeacher.name.trim() === ''} onClick={addNew}>
+          <button className="btn primary" disabled={newTeacher.name.trim() === ''} onClick={addNew}>
             {t('Ekle')}
           </button>
         </div>
