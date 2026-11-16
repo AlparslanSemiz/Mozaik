@@ -16,6 +16,7 @@ import {
   prunable,
   shrinkName,
   shrinks,
+  sparePrunable,
   workOf,
 } from './folder';
 
@@ -216,5 +217,38 @@ describe('yeni dosya adları', () => {
     expect(shrinkName(now)).toBe('ders-programi-kurtarma-2026-11-16.json');
     expect(beforeDeleteName(now)).toBe('ders-programi-silmeden-once-2026-11-16.json');
     expect(prunable([shrinkName(now), beforeDeleteName(now)], 0)).toEqual([]);
+  });
+});
+
+describe('sparePrunable', () => {
+  const gun = (d: number) => `2026-10-${String(d).padStart(2, '0')}`;
+  const kurtarma = (d: number) => `ders-programi-kurtarma-${gun(d)}.json`;
+  const oturum = (d: number) => `ders-programi-kurtarma-${gun(d)}-101010.json`;
+  const once = (d: number) => `ders-programi-silmeden-once-${gun(d)}.json`;
+
+  it('her türün en yeni onu kalıyor, gerisi en eskiden', () => {
+    const names = [12, 3, 5, 1, 7, 9, 2, 11, 4, 8, 6, 10].map(once);
+    expect(sparePrunable(names)).toEqual([once(1), once(2)]);
+    // Rescue copies, one-a-day and per-session, count as one kind.
+    const k = [...[1, 2, 3, 4, 5, 6].map(kurtarma), ...[1, 2, 3, 4, 5, 6].map(oturum)];
+    expect(sparePrunable(k)).toEqual([oturum(1), kurtarma(1)]);
+    expect(sparePrunable([...names, ...k]).length).toBe(4);
+  });
+
+  it('en yenisi hiç silinmiyor, sınırın altında hiçbir şey', () => {
+    expect(sparePrunable([once(1), once(2)], 0)).toEqual([once(1)]);
+    expect(sparePrunable([1, 2, 3].map(kurtarma))).toEqual([]);
+  });
+
+  it('başkasının dosyalarına, günlüğe ve canlı dosyaya dokunmuyor', () => {
+    const names = [
+      MAIN_NAME,
+      'ders-programi-2026-10-01.json',
+      'ders-programi-kurtarma-2026-10-01-1010.json',
+      'ders-programi-silmeden-once-2026-10-01.json.tmp',
+      'babamin-kurtarma-2026-10-01.json',
+      'ders-programi-kurtarma-notlar.json',
+    ];
+    expect(sparePrunable(names, 0)).toEqual([]);
   });
 });

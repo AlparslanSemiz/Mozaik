@@ -424,6 +424,23 @@ describe('exe klasörü · silinmiş profil (denetim 2026-11-16)', () => {
     expect(disk.files.get('ders-programi-tumu.json')).toBe(FULL_BUNDLE);
   });
 
+  it('kurtarma ve silmeden-önce dosyalarının her türünden en yeni on kalıyor', async () => {
+    const seed = realFolder();
+    for (let b = 1; b <= 12; b++) {
+      const d = day(b).replace('ders-programi-', '');
+      seed[`ders-programi-kurtarma-${d}`] = FULL_BUNDLE;
+      seed[`ders-programi-silmeden-once-${d}`] = '{}';
+    }
+    const disk = fakeDisk(seed);
+    localStorage.setItem(BASE_KEY, FULL);
+    await launch(disk);
+    const kalan = (kind: string) =>
+      [...disk.files.keys()].filter((n) => n.startsWith(`ders-programi-${kind}-`)).sort();
+    expect(kalan('kurtarma')).toHaveLength(10);
+    expect(kalan('silmeden-once')).toHaveLength(10);
+    expect(kalan('kurtarma')[0]).toBe(day(10).replace('ders-programi-', 'ders-programi-kurtarma-'));
+  });
+
   it('küçük hâli kabul edilse de en dolu günlük budanmıyor', async () => {
     const disk = fakeDisk(realFolder());
     localStorage.setItem(BASE_KEY, JSON.stringify(ONE_TEACHER));

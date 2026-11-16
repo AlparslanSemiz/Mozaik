@@ -66,6 +66,17 @@ export const KEEP_DAILY = 10;
 
 const DAILY = /^ders-programi-(\d{4})-(\d{2})-(\d{2})\.json$/;
 
+/** How many rescue and before-deletion files are kept, of each kind. */
+export const KEEP_SPARE = 10;
+
+/** The two other dated kinds this program writes (`rescueName` and
+    `shrinkName`, `beforeDeleteName`). The same shapes as `yedek_mi` in
+    src-tauri/src/lib.rs, which deletes nothing else. */
+const SPARES = [
+  /^ders-programi-kurtarma-\d{4}-\d{2}-\d{2}(-\d{6})?\.json$/,
+  /^ders-programi-silmeden-once-\d{4}-\d{2}-\d{2}\.json$/,
+];
+
 /**
  * The backup for a given day: `ders-programi-2026-08-26.json`. The date is the
  * local one (dateStamp.ts), and `DAILY` above has to keep matching it, because
@@ -84,7 +95,8 @@ export function dailyName(now: Date): string {
  * the state from before the refusal. Measured in the exe by the test session:
  * the new work was in both files and the next start wrote the old state over
  * both within two seconds. This name is never reused and `DAILY` does not
- * match it, so neither the next session nor the prune can touch it.
+ * match it, so neither the next session nor the daily prune can touch it;
+ * only the ten newest of these are kept (`sparePrunable`).
  */
 export function rescueName(now: Date): string {
   const iki = (n: number) => String(n).padStart(2, '0');
@@ -97,7 +109,7 @@ export function rescueName(now: Date): string {
  * live file: `ders-programi-kurtarma-2026-11-16.json` (`saveInto`, `SHRINK`).
  * One per day, rewritten through the day: the state it holds is the newest,
  * and the live file it stands beside keeps the larger one. `DAILY` does not
- * match it, so the prune never touches it.
+ * match it; it counts with the rescue copies (`sparePrunable`).
  */
 export function shrinkName(now: Date): string {
   return `ders-programi-kurtarma-${dayStamp(now)}.json`;
@@ -108,8 +120,8 @@ export function shrinkName(now: Date): string {
  * (`ders-programi-silmeden-once-2026-11-16.json`): "Dosyadan aç" opens it.
  * Written before every deletion that asks no question (TODO SD1). One a day
  * and rewritten through it, because the exe removes nothing but a daily
- * backup (`remove_in`, src-tauri/src/lib.rs), so a new name per deletion would
- * pile up in Belgelerim for good.
+ * backup and these dated kinds (`remove_in`, src-tauri/src/lib.rs), and only
+ * the ten newest days stay (`sparePrunable`).
  */
 export function beforeDeleteName(now: Date): string {
   return `ders-programi-silmeden-once-${dayStamp(now)}.json`;
@@ -145,6 +157,18 @@ export function prunable(
     } else if (full(name)) kept++;
   }
   return old;
+}
+
+/**
+ * Which rescue and before-deletion files to delete: of each kind (`SPARES`),
+ * all but the `keep` newest, and never the newest one. They used to stay for
+ * good and piled up in Belgelerim.
+ */
+export function sparePrunable(names: string[], keep: number = KEEP_SPARE): string[] {
+  return SPARES.flatMap((kind) => {
+    const ours = names.filter((name) => kind.test(name)).sort(); // ISO-shaped: by date
+    return ours.slice(0, Math.max(0, ours.length - Math.max(1, keep)));
+  });
 }
 
 /**
@@ -401,7 +425,7 @@ async function writeText(
 export interface WriteResult {
   /** Names actually written, in the order they were written. */
   written: string[];
-  /** Daily backups deleted this time. */
+  /** Daily backups, rescue and before-deletion files deleted this time. */
   pruned: string[];
   /** Set when the write would have shrunk the work sharply (`shrinks`): the
       live file and today's backup were kept, and the bundle went to `file`. */
@@ -431,7 +455,8 @@ export interface WriteResult {
  * a wiped profile used to go over the whole school in the live file (the
  * audit of 2026-11-16).
  *
- * The prune never deletes the daily with the most work in it (`largest`).
+ * The prune never deletes the daily with the most work in it (`largest`), and
+ * keeps the ten newest rescue and before-deletion files of each kind.
  */
 export async function saveInto(
   dir: FileSystemDirectoryHandle,
@@ -482,7 +507,10 @@ export async function saveInto(
     if (there !== null && there.lists > 0) full.add(name);
     sizes.set(name, there === null ? 0 : there.lists + there.placed);
   }
-  for (const old of prunable(names, KEEP_DAILY, (name) => full.has(name), largest(sizes))) {
+  for (const old of [
+    ...prunable(names, KEEP_DAILY, (name) => full.has(name), largest(sizes)),
+    ...sparePrunable(names),
+  ]) {
     try {
       await dir.removeEntry(old);
       result.pruned.push(old);
