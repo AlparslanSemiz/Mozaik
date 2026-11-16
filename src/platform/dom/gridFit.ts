@@ -67,18 +67,46 @@ function floorOf(table: HTMLElement, lines: string): number {
 /** Attaches the floor and the box's width to a `.grid-wrap`. Returns the detach function. */
 export function attachGridFit(wrap: HTMLElement): () => void {
   let frame = 0;
+  // THE FIRST FLOOR IS WRITTEN AFTER THE FIRST PAINT, with the table hidden
+  // until then (`data-fitting`, styles.css). Written in the first frame, the
+  // same two properties cost a style pass over the whole grid and a table
+  // layout of ~270 ms at 4x CPU on the father's week; one frame later, 35 ms
+  // (2026-11-16, measured both ways, pitfall 221). The table keeps its place
+  // while hidden, so nothing around it moves, and it is never drawn without
+  // its floor.
+  wrap.dataset.fitting = '';
+  let painted = false;
+  let wait = 0;
+  let first = requestAnimationFrame(() => {
+    first = 0;
+    wait = window.setTimeout(() => {
+      painted = true;
+      schedule();
+      // Here and not at attach: asking `document.fonts` brings the page's
+      // style and layout up to date, and at attach that was the first layout,
+      // run before the drawer had written its height.
+      void document.fonts?.ready.then(schedule);
+    }, 0);
+  });
   const run = () => {
     const table = wrap.querySelector<HTMLElement>('table.grid');
     // A hidden tab has no widths; the ResizeObserver brings it back here.
     if (table === null || table.getClientRects().length === 0) return;
+    // Both are read before either is written. A write between the two reads
+    // made the second one lay the whole table out again: on the father's week
+    // at 4x CPU that was a style pass over 3348 elements and a table layout,
+    // ~250 ms of the first frame (2026-11-16). Neither depends on the other:
+    // the row head's text and padding do not move with --cell-min, nor a card
+    // line's with --head-min.
     const floor = floorOf(table, LINES);
-    if (floor > 0) table.style.setProperty('--cell-min', `${floor}px`);
     // The row head the same way: "Mat1 · Mat2" and "derslik yok" whole.
     const head = floorOf(table, HEADS);
+    if (floor > 0) table.style.setProperty('--cell-min', `${floor}px`);
     if (head > 0) table.style.setProperty('--head-min', `${head}px`);
+    delete wrap.dataset.fitting;
   };
   const schedule = () => {
-    if (frame !== 0) return;
+    if (!painted || frame !== 0) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
       run();
@@ -103,11 +131,12 @@ export function attachGridFit(wrap: HTMLElement): () => void {
   content.observe(wrap, { childList: true, subtree: true, characterData: true });
   const prefs = new MutationObserver(schedule);
   prefs.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-  void document.fonts?.ready.then(schedule);
-  schedule();
 
   return () => {
+    cancelAnimationFrame(first);
+    clearTimeout(wait);
     cancelAnimationFrame(frame);
+    delete wrap.dataset.fitting;
     resize.disconnect();
     content.disconnect();
     prefs.disconnect();
