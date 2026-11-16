@@ -19,109 +19,45 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-15 akşam. 2026-11-16: `sade/asama-1` dalında Sadeleşme aşama 1 yazıldı,
-birleşmedi (aşağıda tarihli girdi, TODO SD8); onun üstünde `sade/asama-2` aşama 2'yi, kişi
-sayfasını (K5) taşıyor, birleşmedi. Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
-olduğu gibi aşağıda, "2026-11-15 · Önceki 'Şu an'" girdisinde.
+Son güncelleme: 2026-11-16 sabah (gece çalışması). Bu blok yeni bir oturumun başlangıç noktası;
+ayrıntı aşağıdaki tarihli girdilerde, kararlar DECISIONS'ta. `sade/asama-2` Sadeleşme aşama 2'yi,
+kişi sayfasını (K5) taşıyor, birleşmedi (aşağıda tarihli girdi).
 
-**Sürüm.** 2.2.0 sahada (2026-09-26). Üstüne çok iş birikti ve yayınlanmadı (CHANGELOG
-Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunamayan plan düzeltmesini
-(A1/A2, TB1, TB8) taşıyor, ayrı bir köprü gerekmiyor ama yayın sırası bu.
+**Sürüm.** 2.2.0 sahada. Yayınlanmamış çok iş var (CHANGELOG Unreleased); **Windows'ta sürümün
+önünde engel yok**: gerçek 2.2.0 → yeni exe → kurulum → `Mozaik.exe` açılır → eski dosya kurulu
+programı açar → CP-SAT kurulu DLL'lerle → kaldırma veriyi korur, hepsi Windows CI'da yeşil
+(`guncelleme-windows`, `kurulum-windows`, `exe-windows`). Etiket Alp'in (`npm run yayinla`).
 
-**2026-11-15'te `main`'e giren (PR #16–#39, ayrıntı aşağıdaki tarihli girdiler, DECISIONS):**
-- Hız: çözücünün onarımı tamsayı dizileriyle (babanın haftası 10,8 → 1,4 s), SAT yayılımı
-  tamponlarla (öneri araması 2,2×), Sığdır'ın ilk açılışı (`gridFit`), Çıktı'nın ilk açılışı
-  (`printStamp`), vite 8.
-- CP-SAT: kurulumda OR-Tools v9.15 (9 DLL + VC++), Rust C API (`cpsat.rs`), CP-SAT'a kendi modeli
-  (`pure/relax/cpModel.ts`); exe'de bizim aramanın ARDINDAN ikinci bakış (`relaxPool.ts`,
-  `CP_SECOND_LOOK = true`), yalnız teacherHours, teacherDays, fewTeachers, rules. Babanın verisinde
-  18/18 kanıt, 4 işçide 10–16 s. Tarayıcı ve tek dosya bugünkü aramada.
-- Teslim: NSIS kurulum (`Mozaik-Kurulum.exe`, kullanıcı başına, `%LOCALAPPDATA%\Programs\Mozaik`),
-  kaldırıcının "verileri sil" kutusu kancayla kapalı (`src-tauri/nsis/kancalar.nsh`); 2.2.0'dan köprü
-  (manifestte isteğe bağlı `kurulum*` alanları).
-- Güvenlik: güncellemeler minisign imzalı, imza sürüm + dosyaya bağlı (`imza_yorumu`), adres
-  normalleştirilip denetleniyor, `.yeni` takastan önce yeniden doğrulanıyor, `write_in` fsync,
-  `remove_file` yalnız günlük yedek, yayın akışı en az yetki, action'lar SHA ile.
-- Veri: PR'sız kalmış 11 dallık zincir (TB1, TB7, TB8, B7.32, e-posta, güncelleme kapısı) `main`'de;
-  açılışta boş okunan plan dizini artık ötekileri gizlemiyor (`adoptOrphans`).
-- Kullanım: öneri paneli tek yol + "Başka yollar"; koyu temada Çıktı okunur; 146 etiketsiz kutu;
-  sınıfta sahte "Sıkışık" yok (SD2); ders/öğretmen silme ve "Programı boşalt" sormuyor, "Geri al"
-  bildirimi (`undo-if`, SD1).
-- Dalda, birleşmedi: `erisim/geri-al` (`metin/tek-ad`'ın üstünde) SD1'in kalanını yapıyor: sınıf,
-  derslik, branş, seçenek silme ve `Baştan diz` sormuyor, `Her şeyi sil` tek soru; bildirim 10 s
-  ve fare ya da odakta duruyor; seçenek değiştirmek geri al geçmişini silmiyor (aşağıdaki girdi).
-- Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
-  Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
-  2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
-- Dalda, birleşmedi: `tarayici/safari-ipad` (2026-11-16): WebKit'te Program'ın kaydırması sekme
-  dönüşünde korunuyor (tuzak 174), iPad'de Müsaitlik parmakla boyanıyor (175) ve karta basılı
-  tutmak menüyü açıyor (176); `npm run test:firefox`; Firefox/WebKit'te dürüst süit (aşağıdaki girdi).
-- Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
-  (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
+**2026-11-15/16'da `main`'e giren (PR #44–#70):** tek ad (SD3, #44); erişim ve kullanım (#45–#51:
+okunurluk, geri al, ekran okuyucu, Kontrol'de Göster, klavye ile ızgara ve Müsaitlik, tepki, ilk
+açılış); Mac sürümü (#52, imzasız, Windows'u engellemez); Windows geçişi (#53, #65: kurulum,
+bekleyici, `mainBinaryName: Mozaik`); veri koruması (#54: boş açılış klasörü ezmez, küçülme kurtarma
+dosyasına, silmeden önce kopya); web kalıcılık (#55) ve ayrı site işi (#64); güvenlik (#56, #66:
+`release` ortamı, CSP, SHA sabitleme zorunlu); boyut (#61: sözlük paketleme, −164 kB); çözücü (#62:
+iyileştirme geçişi, Başka bir dizilim, kapasite açığı); kararsız testler (#63, #69); inceleme
+bulguları (#68: yavaş hatta indirme, bekleyici, küçülme koruması, budama); Safari/iPad (#70);
+sadeleşme aşama 1 (#67: tek ana düğme, Daha fazla, Dosya menüsü, Başlarken 5 iş, K4 adları).
 
-**Alp'te bekleyenler (yeni oturum bunları sormalı):**
-1. İmza: `MOZAIK_IMZA_ANAHTARI` depo sırrı tanımlı (2026-11-15 21:25). `guvenlik/sertlestirme`
-   (2026-11-16) onu `release` ortamına taşıyan iş akışını getiriyor; ayarlar Alp'te, komutları
-   BUILD.md "Yayın güvenliği"nde, ve dal birleşmeden ÖNCE uygulanmalı (yoksa `sign` depo sırrıyla
-   koşar, korumasız). Bu Mac'te gerçek
-   anahtarla `minisign -S` (şifresiz, `surum.yml`'in komutuyla) ve `-V` denendi, imza ve
-   güvenilen yorum doğrulandı; `cargo test` 59/59. Kalan: `~/.config/mozaik-imza/mozaik.key`'in
-   yedeği (parola yöneticisi ya da şifreli USB); kaybolursa dağıtılmış kopyalar yeni sürümü
-   reddeder. Açık yarısı `update.rs` `IMZA_ANAHTARI`.
-2. SD3 (Alp, 2026-11-15): her kavramın ekranda tek adı olur, bir ad iki kavramı taşımaz.
-   Harita uygulandı, `metin/tek-ad` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO SD3).
-   `kullanim/kontrol` onun üstünde: Kontrol'ün `Göster`i ve SD4 (tarihli girdi), birleşmedi;
-   ham boyut eşiğini 1 245 000 B'a çıkarıyor.
-   Kalan adlar (Görünüm, Açık/Kapalı tema, yoğunluk adları, "Izgara" grubu…) Alp'in kararı.
-3. `ruflo/kurulum` (Alp, 2026-11-15): dal kalır, kurulmaz ve birleşmez.
-4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
-   (2.2.0 → yeni exe → kurulum, 2026-11-16'dan beri aynı sürümde önerilen), antivirüs/SmartScreen
-   davranışı; bekleyici exe'nin geçici klasörden çalışması bir tarayıcıya takılır mı.
-5. Sitenin alt alan adı (2026-11-16): `web/kalicilik` `main`'de, DNS kaydı kuruldu. Kalan:
-   `AlparslanSemiz/mozaik-site` deposu, deploy anahtarı ve `MOZAIK_SITE_DEPLOY_KEY` sırrı,
-   o deponun Pages'i (`gh-pages`), sonra `yeniAdresAcik` (`web/ayri-site`). `Mozaik`'e özel
-   alan adı KONMAZ; sıra [BUILD.md](BUILD.md) "Alan adına geçiş"te.
-5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
-   imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
+**Sürüyor (dallarda):** sadeleşme aşama 2, kişi sayfası (`sade/asama-2`, K5); Linux paketi
+(`platform/linux`). Sonra: aşama 3 (beş sekme K1, Plan+Seçenek K2, Kontrol çipe K3, Sığdır ve
+Geçici görünüm kalkar K6/K7, Eski hâline dön K8), aşama 4 (öğretmene PDF gönder, ikame, hafta
+istisnası).
 
-**Açık teknik işler (TODO):** capability daraltma gerçek exe'de denenmeli, CSP
-(`guvenlik/sertlestirme`) gerçek WebView2'de doğrulanmalı (B7.39); KS26 (30 adımlık geri al tavanı); `guncelleme-exe.spec.ts:185`
-`.eski` 15 s'de gitmedi bir kez (B7.39, izleniyor); B7.41 `otomatik.spec.ts:254` süresi izleniyor;
-LessonPool'un ilk yerleşimi (B4.9 kalanı); CP-SAT öteki aileler (mixed, hand, reassign, blockShape,
-weeklyHours) eski formülle ve ikinci bakışa girmiyor; `hiz/tepki`'den sonra bırakma 4×'te hâlâ
-~156 ms (hedef 100) ve öneri aramasında iki işçi iki gerçek çekirdekte ölçülmedi.
+**Alp'te bekleyenler:**
+1. Web'in yeni adresi: yeni public depo `mozaik-site` açılsın mı (BUILD.md "Alan adına geçiş";
+   Mozaik deposuna özel alan adı VERİLMEZ, eski adres yönlenip tarayıcıdaki planlar taşınamaz).
+   DNS kaydı (`mozaik` CNAME) hazır. Eski `/ders-programi/` için public yönlendirme deposu.
+2. Sadeleşmeden sonra babayı bir oturum izlemek (hangi seçenek görünür kalsın).
+3. Babanın makinesi: çekirdek sayısı, CP-SAT süresi, ilk gerçek güncelleme, antivirüs/SmartScreen.
+4. `ruflo/kurulum`: kalır, kurulmaz (karar verildi).
 
-**Veri koruması (2026-11-16, `veri/koruma`, birleşmedi):** silinmiş exe profili Belgelerim'deki
-kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtarma dosyasına gidiyor,
-budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
-ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
-
-**Daha iyi program (2026-11-16, `cozucu/iyilestirme`, birleşmedi):** bitmiş haftaya iyileştirme
-geçişi, `Başka bir dizilim`, Otomatik diz'in yakın yeniden dizmesi, açığı söyleyen tıkanma cümlesi
-(TODO B5.12, aşağıdaki tarihli girdi). **Boyut kararı bekliyor:** `main` ile birleşince 1 335 kB,
-brotli 309,4 kB, eşikler 1 320 000 B / 306 000 B; eşik yükseltilmedi.
-
-**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
-seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
-dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
-aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
-
-**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
-birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
-Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
-dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
-Gerçek Windows exe'de koşulmadı.
-
----
-
-weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
-diyalog odağı, "İçeriğe geç"; §8e, SD6, KS27) `metin/tek-ad`'ın üstünde, birleşmedi; kalan axe
-bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
-
-**Çalışma notları.** Bu makine macOS: `scripts/agir.sh` çalışmıyor (`flock` yok), ağır komutlar
-kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
-için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
-birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+**Dikkat.** Brotli boyut payı ~1 kB (eşik 306 000 B): aşama 2 girince açılış ölçülüp eşik
+gerekçeyle yükseltilecek. Bu Mac'te `scripts/agir.sh` yok (`flock`), makine yükü gece 100+'ya çıktı:
+yerel zaman aşımları gürültü, CI hakem. Tuzaklarda en büyük numara 176 (173 boş).
+Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules` bağıyla) dururken
+`npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
+worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
+birleşen worktree'leri bekletmemek yeter.
 
 ## 2026-11-16 · Sadeleşme aşama 2: kişi sayfası (`sade/asama-2`, TODO SD8, K5)
 
