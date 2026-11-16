@@ -42,7 +42,7 @@ export default function PreviewBar({ previewed, preview, setPreview, diff, stale
         {t('{n} ders yer değiştiriyor', { n: diff.movedBlocks })}
       </span>
       <button className="btn primary" disabled={stale} onClick={() => apply(previewed)}>
-        {previewed.relaid ? t('Uygula, baştan diz') : t('Uygula')}
+        {previewed.relaid ? t('Uygula, yeniden yap') : t('Uygula')}
       </button>
       <button className="btn" onClick={() => setPreview(null)}>
         {t('Önizlemeyi kapat')}

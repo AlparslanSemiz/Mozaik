@@ -7,18 +7,21 @@ import { Script } from 'node:vm';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import {
-  reopen,
   FILE,
   FIXTURE,
+  answerDialog,
+  dragAndDrop,
+  mainList,
   open,
+  openFileMenu,
   openSettings,
   openSetup,
   openWithSample,
-  dragAndDrop,
-  mainList,
-  answerDialog,
   openedWithoutQuestion,
+  reopen,
   savedText,
+  KLASOR_YALNIZ_CHROMIUM,
+  SAYDAM_GORUNTU_FIREFOX_YOK,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -50,18 +53,22 @@ test.describe('5. Yedek ve şema göçü', () => {
     await openWithSample(page);
 
     // The old names said what the file format was, not what the button does
-    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Dosyadan aç', exact: true })).toBeVisible();
+    // Kaydet on the bar, Dosyadan aç in Dosya ▾ (Sadeleşme, 2026-11-16).
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
+    ).toBeVisible();
+    await openFileMenu(page);
+    await expect(page.getByRole('menuitem', { name: 'Dosyadan aç', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
 
     // Where the teaching went. The sentence used to be 400px of explanation on
     // the top bar; C9 moved it to Ayarlar → Hakkında, beside the report that says
     // where the data actually IS, and left a short version on the save
     // button's own tooltip — which is where somebody about to click it looks.
-    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toHaveAttribute(
-      'title',
-      /kendiliğinden saklıyor/,
-    );
+    await expect(
+      page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }),
+    ).toHaveAttribute('title', /kendiliğinden saklıyor/);
 
     // In HAKKINDA, which is where "Veriler nerede" is — the comment above
     // already said so, and the assertion had been reading Planlar ve yedek,
@@ -81,7 +88,7 @@ test.describe('5. Yedek ve şema göçü', () => {
   test('yedek indirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^ders-programi-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
   });
@@ -104,7 +111,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       };
     });
     await openWithSample(page);
-    const kaydet = page.getByRole('button', { name: 'Dosyaya kaydet', exact: true });
+    const kaydet = page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true });
     await expect(kaydet).not.toHaveAttribute('title', /Son plan dosyası/);
     const download = page.waitForEvent('download');
     await kaydet.click();
@@ -433,12 +440,26 @@ test.describe('5. Yedek ve şema göçü', () => {
 // function rather than a nicety — and until now exactly one Ctrl+Z was tested.
 
 test.describe('28. Geri al / ileri al', () => {
+  // "İleri al" is an item of Dosya ▾ since 2026-11-16 (Sadeleşme): Ctrl+Y and
+  // the menu, the bar keeps Geri al alone.
+  const redoEnabled = async (page: import('@playwright/test').Page) => {
+    await openFileMenu(page);
+    const item = page.getByRole('menuitem', { name: /İleri al/ });
+    const on = (await item.getAttribute('data-disabled')) === null;
+    await page.keyboard.press('Escape');
+    return on;
+  };
+  const redo = async (page: import('@playwright/test').Page) => {
+    await openFileMenu(page);
+    await page.getByRole('menuitem', { name: /İleri al/ }).click();
+  };
+
   test('açılışta ikisi de kapalı', async ({ page }) => {
     await open(page);
     await expect(
       page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
     ).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
+    expect(await redoEnabled(page)).toBe(false);
   });
 
   test('düğmelerle üç adım geri, üç adım ileri', async ({ page }) => {
@@ -452,7 +473,6 @@ test.describe('28. Geri al / ileri al', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(3);
 
     const back = page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true });
-    const forward = page.getByRole('button', { name: 'İleri al', exact: true });
     for (const expected of [2, 1, 0]) {
       await back.click();
       await expect(mainList(page).locator('tbody tr')).toHaveCount(expected);
@@ -460,10 +480,10 @@ test.describe('28. Geri al / ileri al', () => {
     await expect(back).toBeDisabled();
 
     for (const expected of [1, 2, 3]) {
-      await forward.click();
+      await redo(page);
       await expect(mainList(page).locator('tbody tr')).toHaveCount(expected);
     }
-    await expect(forward).toBeDisabled();
+    expect(await redoEnabled(page)).toBe(false);
   });
 
   test('geri aldıktan sonra yeni bir değişiklik ileriyi siliyor', async ({ page }) => {
@@ -476,11 +496,11 @@ test.describe('28. Geri al / ileri al', () => {
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
     await page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeEnabled();
+    expect(await redoEnabled(page)).toBe(true);
 
     await box.fill('C');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
+    expect(await redoEnabled(page)).toBe(false);
     await expect(mainList(page).locator('tbody tr')).toHaveCount(2);
   });
 
@@ -541,7 +561,7 @@ test.describe('29. Hata yolları', () => {
     expect(said).toContain('Bu dosya okunamadı');
     // What to pick instead, in the words of the button he saved it with.
     expect(said).toContain("Bu, Mozaik'in kaydettiği bir dosya değil.");
-    expect(said).toContain('Dosyaya kaydet');
+    expect(said).toContain('Kaydet');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
   });
@@ -603,9 +623,9 @@ test.describe('29. Hata yolları', () => {
       'aria-label',
       'Ayarlar',
     );
-    await expect(
-      page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
-    ).toContainText('Hakkında');
+    // Hakkında is behind the strip's Daha fazla since 2026-11-16; the strip
+    // reads the version there.
+    await expect(page.locator('.ribbon')).toContainText('Sürüm');
   });
 
   // DK11: a file with no teachers and no lessons at all used to be taken as a
@@ -713,7 +733,7 @@ test.describe('29. Hata yolları', () => {
     const warning = page.locator('.save-warning').filter({ hasText: 'otomatik kayıt çalışmıyor' });
     await expect(warning).toBeVisible();
     await expect(warning).toContainText('otomatik kayıt çalışmıyor');
-    await expect(warning).toContainText('Dosyaya kaydet');
+    await expect(warning).toContainText('Kaydet');
   });
 });
 
@@ -906,7 +926,8 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
   // old claim has to make these go red first. The numbers are Chromium's, and
   // a change in them is worth knowing about either way.
 
-  test('GÜVENLİ BAĞLAM ve klasör API’si file:// altında VAR', async ({ page }) => {
+  test('GÜVENLİ BAĞLAM ve klasör API’si file:// altında VAR', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     await open(page);
     const facts = await page.evaluate(() => ({
       secure: window.isSecureContext,
@@ -925,7 +946,8 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
     expect(facts.idb).toBe('object');
   });
 
-  test('...ama gerçek bir KÖKEN yok, ve fark bu', async ({ page }) => {
+  test('...ama gerçek bir KÖKEN yok, ve fark bu', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     await open(page);
     const facts = await page.evaluate(async () => {
       const out: Record<string, unknown> = { origin: location.origin };
@@ -1045,7 +1067,8 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
     for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
   });
 
-  test('32 ve üstü AYRINTILI çizim, 16, 20 ve 24 sade', async ({ page }) => {
+  test('32 ve üstü AYRINTILI çizim, 16, 20 ve 24 sade', async ({ page, browserName }) => {
+    test.skip(browserName === 'firefox', SAYDAM_GORUNTU_FIREFOX_YOK);
     // Compared by pixels, because the .ico holds PNGs and the .svg files hold
     // rectangles: the only thing the two have in common is what they look
     // like. Each entry is decoded and put next to a fresh render of both

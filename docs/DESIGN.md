@@ -32,7 +32,9 @@ duruyor, orada ret yok (DECISIONS). Kimlik paletinin renkleri bu
 anlamlara yaklaşmaz, `palette.test.ts` ve `e2e/renk.spec.ts` bunu her koşuda yeniden
 ölçer.
 
-Bölüm renkleri de bu kanala tabi ve tekerlek dolu. Yedinci sekme yedinci rengi
+Bölüm renkleri 2026-11-16'dan beri çizilmiyor (Sadeleşme): seçili sekme tek ve nötr, `--sec`
+her yerde `--accent`'e bağlı, renk yalnız veri ve durum için. Yedi token ve aşağıdaki ölçüm bir
+gün yeniden açılırsa diye duruyor. Bölüm renkleri de bu kanala tabi ve tekerlek dolu. Yedinci sekme yedinci rengi
 isteyince (2026-08-27) çember iki temada birden tarandı, ve serbest kalan her yayın
 ya işlevsel bir rengin ya komşu bir sekmenin ailesine düştüğü ölçüldü. Sekizinci
 bir renk aranırsa aynı ölçüm tekrarlanır. `var(--sec, …)`'in fallback'ine düşmek
@@ -42,7 +44,7 @@ bir karar değil, tuzak 52.
 
 Liste satırında yazı her zeminde (iki şerit) ve her durumda (üstüne gelme, seçili satır, odak) en az 7:1, çünkü babanın en çok okuduğu yer satırlar. `e2e/zebra.spec.ts` 94 bunu iki temada, her listede, boyanan renkten ölçer. Bugün bunu tutmayan tek mürekkep adıyla istisna ve [TODO.md](TODO.md) E1'de: açık temada tehlikeli "Sil". İşlevsel rozetler, sağlık çipi ve sebep çubuğu 2026-11-15'ten beri kendi zeminlerinde kendi mürekkepleriyle yazılır (`--ok-ink`, `--warn-ink`, `--bad-ink`: aynı renk Oklab'da siyaha doğru itilmiş, açık temada 7,47 · 7,63 · 7,20; koyu temada `--ok` ve kardeşleri zaten 7'nin üstünde). O iş bitene kadar öteki yüzeylerin ölçülen eşiği 4,5:1 (`e2e/renk.spec.ts`).
 
-Program ızgarasındaki kartın iki satırı da `--on-color` (36 renkte en kötü 7,3:1); alt satır eskiden `--on-color-sub`'dı ve 4,71'e iniyordu. Seçili sekme düz bir dolgu, gradyan değil: bölüm rengi açık temada %15 siyaha, koyu temada %25 beyaza itilmiş, etiketle en kötü 7,76 ve 7,18 (eski gradyanın durakları 4,51 ve 3,76'ydı).
+Program ızgarasındaki kartın iki satırı da `--on-color` (36 renkte en kötü 7,3:1); alt satır eskiden `--on-color-sub`'dı ve 4,71'e iniyordu. Seçili sekme 2026-11-16'dan beri kâğıt zeminli, `--text` yazılı, `--border-strong` kenarlı ve 3 px accent alt çizgili; dolu bölüm rengi kalktı.
 
 Bir kontrolün kenarı (girdi, seçici, düğme) `--border-strong` ve oturduğu her zeminde 3:1'in üstünde (WCAG 1.4.11); kıl çizgi ve `--line` 1,1 ile 1,4 arasındaydı. Boş bir kutunun ipucu `--muted` (açık 7,79, koyu 10,31 gömük zeminde), tarayıcının #757575'i değil. Tıklama hedefleri en az 24 px (WCAG 2.5.8): onay kutusu, bildirimin kapatma düğmesi, satır tutamacı, satır başındaki ad, havuzun seçicileri.
 
@@ -101,7 +103,7 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 - **Hücreyi hangi renk boyar.** Program ızgarasında öntanımlı olarak öğretmen rengi, şeritteki Renk menüsünden sınıf, derslik ya da branş rengi. Kâğıtta öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar ([LAYOUT.md](LAYOUT.md)).
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.
 - **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin çizgisi, `--border-strong` bir kontrolün kenarı. Girdiler bir dönem kıl çizgiye inmişti (karşılığında gömük bir yüzey, `--paper-sunk`, kazanmışlardı) ve düğme `--line`'daydı; ikisi de kendi zemininde 1,1 ile 1,4 arasıydı, yani az gören biri için kenarsızdı. 2026-11-15'ten beri girdi, seçici, arama kutusu ve düğme `--border-strong` kenarlı: oturdukları her zeminde 3:1'in üstünde (WCAG 1.4.11) ve `--muted`'ın çok altında, yazı gibi okunmaz. Listede girdi gömük yüzeyi bırakır, çünkü zebra satırı açık temada gömük yüzeyle neredeyse aynı: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli, düğme gibi.
-- **Düğme durumları:** birincil, sade, tehlikeli, basılı. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
+- **Düğme durumları:** birincil, sade, tehlikeli, basılı. Birincil (`.btn.primary`) tek dolu düğme ve bir ekranda bir tane: o ekranın ana işi (2026-11-16). Basılı bir seçim düğmesi dolu değil, bir segment: `--accent-bg` zemin, accent kenar ve 3 px accent alt çizgi, yazı `--text`. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
 - **Listelerde zebra.** Liste, aynı biçimde kayıtların satır satır okunan yığını, ve her listenin çift satırı `--zebra` zeminli: `table.list`, `table.stat`, varlık panelinin ders satırları (`table.sheet-lessons`), Müsaitlik'in ve Dersler'in seçme listesi (`.entity-list`) ve Excel'den yapıştırma önizlemesi. Zebra açık temada kâğıttan bir adım koyu, koyu temada bir adım açık, ikisinde de aynı yükte. Bir durum gibi okunmayacak kadar hafif, ilk bakışta seçilecek kadar belirgin: ölçüsü tokenin yanında yazılı ve `e2e/renk.spec.ts` 93 her koşuda yeniden ölçüyor. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural `:where()` ile olabilecek en düşük özgüllükte, yani her durum (üstüne gelme, seçili satır, bırakma işareti) onu nerede yazılmış olursa olsun ezer (tuzak 40). `:nth-child` DOM'u sayar, yani arama, sıralama, grup çipi ya da silme satırı DOM'dan çıkarınca şerit görüneni izler. Menü, palet ve seçiciler liste değil: orada tek vurgu klavyenin. Üstüne gelinen satır bir zemin değil bir halka alır (2 px `--muted`, satırın içinde): satırın kontrastı iki şeritte neyse o kalır, halka `forced-colors`'ta da kalır, ve klavyenin odak halkasıyla karışmaz, çünkü o accent, kontrolün dışında ve kâğıt boşluklu. Seçili satır `--accent-bg` zeminli ve accent kenarlı, yazısı `--text`. Açık plan satırın başında accent bir kenarla söylenir. Satırdaki yazı iki zeminde ve her durumda 7:1 tutar (Erişilebilirlik): `e2e/zebra.spec.ts` 94 bunu ve şeridin görünen sırayı izlediğini, `e2e/renk.spec.ts` 93 tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
 - **Gün bandı** tek indeksli günlere çok hafif bir zemin verir. Bir durum gibi okunmadığı ve iki temada aynı yükte olduğu ölçülür, ve altındaki kapalı saat taramasını ezmemesi gerekir (tuzak 40).
 - **Nötr rampa türetilmiş:** tek bir ton (258), seçilen OKLCH açıklığı ve chroma'sı, çevrimdışı sRGB'ye çevrilmiş. Dosyaya hex yazılıyor, çünkü `getComputedStyle` bir `oklch()` rengini `oklch()` olarak döndürür ve süitteki ölçümler `rgb()` ayrıştırır (tuzak 81).
@@ -236,10 +238,10 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.app` `.workspace` `.main` | kök sütun · içerik alanı · kaydırma kutusu. `data-section` kökte (tuzak 52), `.main`'de `key={tab}` var, geçiş `@starting-style` |
 | `.scroll-fade` + `.faded-top` `.faded-bot` | kayan kutunun üstünde ya da altında içerik olduğunu söyler (`scrollFade.ts`). `.grid-wrap`'e uygulanmaz (tuzak 54) |
 | `.topbar` | tek satır. Üstünde ince bir bölüm rengi şeridi, içinde o rengin hafif bir washı |
-| `.tabstrip` `.tab` `.tab-label` | seçili sekme bölüm rengiyle dolu. `flex: 0 0`, daralan çubukta feda edilmez (tuzak 48) |
+| `.tabstrip` `.tab` `.tab-label` | seçili sekme kâğıt zeminli ve accent alt çizgili, tek ve nötr. `flex: 0 0`, daralan çubukta feda edilmez (tuzak 48) |
 | `.health` `.health-dot` `.health-text` | durum çipi: her sekmede, sorunu adlandırır. Yer daralınca noktasına iner |
 | `.panel-head` | başlık ve tek bir kontrol (Okul listelerinde ve Dersler'de "Excel'den yapıştır"). `baseline` hizalı, sarabilir |
-| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, yedi sekmede de. Basılı kontrol `--sec` giyer. `-label` bir grubun başlığı (büyük harf, soluk), `-value` bir grubun değeri (normal, tam mürekkep) |
+| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, yedi sekmede de. Basılı kontrol bir segment (zemin ve alt çizgi). Sağ ucunda `.more-menu` (Daha fazla ▾, `common/More.tsx`). `-label` bir grubun başlığı (büyük harf, soluk), `-value` bir grubun değeri (normal, tam mürekkep) |
 | `.topbar-doc` `.app-title` `.plan-picker` | hangi belge açık |
 | `.btn-group` `.topbar-sep` `.spacer` | bitişik düğme kümesi · ayraç · itici |
 
@@ -258,6 +260,8 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 ### Katmanlar
 | Sınıf | İş |
 |---|---|
+| `.help-btn` `.help-pop` `.help-body` `.panel-head.with-help` | "?": bir panelin açıklaması, Radix Popover (`common/Help.tsx`, `HelpHead`) |
+| `.more-menu` + `.menu` `.menu-item` | Daha fazla ▾ ve üst çubuğun Dosya ▾ ile ? menüleri (`common/More.tsx`) |
 | `.dlg` `.dlg-overlay` `.dlg-head` `.dlg-icon` `.dlg-title` `.dlg-body` `.dlg-actions` | her soru: `useDialogs()` ile `confirm` ya da `alert` |
 | `.sheet` `.sheet-mark` `.sheet-title` `.sheet-facts` `.sheet-week` | varlık paneli: bir öğretmenin, sınıfın ya da dersliğin kendi haftası. Sağdan kayar, solmaz, çünkü altından iki bin hücre geçiyor |
 | `.palette` `.palette-row` `.palette-group` `.palette-hint` `kbd` | Ctrl+K |

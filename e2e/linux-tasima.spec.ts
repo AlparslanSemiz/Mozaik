@@ -77,7 +77,8 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     const p2 = yeni.page;
     // The reason the move is needed at all: the new copy sees nothing of the old one.
     expect(await savedText(p2)).not.toContain('Örnek Kurs');
-    await expect(picker(p2).locator('option')).toHaveCount(1);
+    // One plan: no picker in the bar (since 2026-11-16).
+    await expect(picker(p2)).toHaveCount(0);
 
     await openPlans(p2);
     await p2.getByLabel('Bütün planları içeren dosya').setInputFiles({

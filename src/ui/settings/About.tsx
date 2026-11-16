@@ -53,9 +53,33 @@ function searchLine(t: Translate): string {
     : t('Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn', { ilk, sure });
 }
 
-export function Build({ update }: { update: UpdateRun }) {
+/** The search's threads and the storage address: under "Teknik bilgiler"
+ *  since 2026-11-16, not in the version panel he reads. */
+export function TechRows() {
   const t = useT();
   const adres = storageAddress();
+  return (
+    <table className="stat">
+      <tbody>
+        <tr>
+          <td>{t('Öneri araması')}</td>
+          <td>{searchLine(t)}</td>
+        </tr>
+        {adres !== '' && (
+          <tr>
+            <td>{t('Adres')}</td>
+            <td>
+              <code>{adres}</code>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
+export function Build({ update }: { update: UpdateRun }) {
+  const t = useT();
 
   return (
     <div className="panel">
@@ -72,18 +96,6 @@ export function Build({ update }: { update: UpdateRun }) {
             <td>{t('Nasıl açıldı')}</td>
             <td>{routeName()}</td>
           </tr>
-          <tr>
-            <td>{t('Öneri araması')}</td>
-            <td>{searchLine(t)}</td>
-          </tr>
-          {adres !== '' && (
-            <tr>
-              <td>{t('Adres')}</td>
-              <td>
-                <code>{adres}</code>
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
 
@@ -122,27 +134,31 @@ export function Changelog({ onSeen }: { onSeen: () => void }) {
   const t = useT();
   const [entry, ...older] = SURUM_NOTLARI;
 
-  useEffect(() => {
+  // Seen when the folded notes are OPENED (since 2026-11-16 they are folded;
+  // marking them on mount would clear the dot with nothing read).
+  const seen = (open: boolean) => {
+    if (!open) return;
     if (entry !== undefined) markChangelogSeen(entry.version);
     onSeen();
-    // Only at mount: `onSeen` is a stable setter from App, and re-running
-    // this on every render would fight a dot that a DIFFERENT tab just lit.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   if (entry === undefined) return null;
 
   return (
     <div className="panel">
       <h2>{t('Yenilikler')}</h2>
-      <p className="hint">
-        <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
-      </p>
-      <ul>
-        {entry.items.map((line) => (
-          <li key={line}>{t(line)}</li>
-        ))}
-      </ul>
+      {/* Collapsed since 2026-11-16 (Sadeleşme): the notes are read once,
+          and open they were the longest text on the screen. */}
+      <details onToggle={(e) => seen(e.currentTarget.open)}>
+        <summary>
+          <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
+        </summary>
+        <ul>
+          {entry.items.map((line) => (
+            <li key={line}>{t(line)}</li>
+          ))}
+        </ul>
+      </details>
 
       {older.length > 0 && (
         <details>
@@ -269,7 +285,8 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
               }}
             />
           )}
-          {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
+          {d.ad === 'indiriliyor' &&
+            t('Yeni sürüm iniyor…') + (d.yuzde === undefined ? '' : ` %${d.yuzde}`)}
           {d.ad === 'hazir' && d.kurulum && (
             <T k="**Kurulum indi.** **Şimdi kur** deyince Mozaik kapanır, kurulum bir ilerleme çubuğuyla çalışır ve Mozaik kendiliğinden yeniden açılır. Planlarınız kayıtlı, hiçbir şey kaybolmaz. Masaüstündeki ya da görev çubuğundaki eski Mozaik simgesi de kurulan programı açar." />
           )}

@@ -4,7 +4,7 @@ import { useId, useMemo } from 'react';
 import { type RuleLevel, type RuleName, paletteColor } from '../../leaf/model';
 import { buildIndex, findViolations, type Violation } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
-import { type PanelProps, T, useT } from '../common';
+import { HelpHead, type PanelProps, T, useT } from '../common';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -48,8 +48,8 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
 
 const LEVEL_LABEL: Record<RuleLevel, string> = {
   off: 'Kapalı',
-  warn: 'Uyarı',
-  block: 'Engel',
+  warn: 'Tercih',
+  block: 'Kesin',
 };
 
 export default function Rules({ state, change }: PanelProps) {
@@ -83,7 +83,17 @@ export default function Rules({ state, change }: PanelProps) {
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>{t('Kurallar')}</h2>
+          {/* What each rule means is behind the "?" since 2026-11-16: six
+              rows each carried a sentence under the name (Sadeleşme). */}
+          <HelpHead topic="Kurallar">
+            <ul>
+              {RULE_ROWS.map((rule) => (
+                <li key={rule.name}>
+                  <strong>{t(rule.label)}.</strong> {t(rule.hint)}
+                </li>
+              ))}
+            </ul>
+          </HelpHead>
           <p className="hint">
             <T k="Bu sayılar **bütün okul** için; **0** yazmak “sınır yok” demektir." />
           </p>
@@ -103,16 +113,11 @@ export default function Rules({ state, change }: PanelProps) {
                     {/* The number box has no label of its own: the rule's name
                         in this cell IS its label, so the box points here. */}
                     <span id={`${idBase}-${rule.name}`}>{t(rule.label)}</span>
-                    <br />
-                    <span className="hint" id={`${idBase}-${rule.name}-ipucu`}>
-                      {t(rule.hint)}
-                    </span>
                   </td>
                   <td>
                     <input
                       type="number"
                       aria-labelledby={`${idBase}-${rule.name}`}
-                      aria-describedby={`${idBase}-${rule.name}-ipucu`}
                       min={0}
                       max={16}
                       className="num"
@@ -168,10 +173,14 @@ export default function Rules({ state, change }: PanelProps) {
             done that used to be visible only by scrolling the Kurulum table
             and looking for filled-in boxes. */}
         <div className="panel">
-          <h2>{t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}</h2>
+          <HelpHead topic={t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}>
+            <p>
+              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+            </p>
+          </HelpHead>
           {custom.length === 0 ? (
             <p className="hint">
-              <T k="Herkes okul sınırlarını kullanıyor. Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
             </p>
           ) : (
             <table className="list">
@@ -209,10 +218,14 @@ export default function Rules({ state, change }: PanelProps) {
             a filled-in box — the same gap the teacher panel above was written
             to close. */}
         <div className="panel">
-          <h2>{t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}</h2>
+          <HelpHead topic={t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}>
+            <p>
+              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+            </p>
+          </HelpHead>
           {customClasses.length === 0 ? (
             <p className="hint">
-              <T k="Her sınıf okul sayısını kullanıyor. Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
             </p>
           ) : (
             <table className="list">
@@ -246,7 +259,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
           <p className="hint">
-            <T k="**Uyarı** yalnız sayar, **Engel** kartı o hücreye hiç bıraktırmaz." />
+            <T k="**Tercih** yalnız sayar, **Kesin** dersi o hücreye hiç bıraktırmaz." />
           </p>
           {/* A row per breach and no ceiling on how many there can be, so this
               is the box in this panel that gives ground: in a right rail the
@@ -269,7 +282,7 @@ export default function Rules({ state, change }: PanelProps) {
                     <tr key={v.key}>
                       <td>
                         <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                          {v.level === 'block' ? t('Engel') : t('Uyarı')}
+                          {v.level === 'block' ? t('Kesin') : t('Tercih')}
                         </span>
                       </td>
                       <td>{v.message}</td>

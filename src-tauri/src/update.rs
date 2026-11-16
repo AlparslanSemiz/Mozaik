@@ -643,10 +643,26 @@ pub fn kurulu_program(yerel: &Path, simdiki: &Path, surum: &str) -> Option<PathB
 pub const KURULUM_BEKLE: &str = "--kurulum-bekle";
 /// The flag the old copy is started again with when the installer did not finish.
 pub const KURULUM_OLMADI: &str = "--kurulum-olmadi";
-/// The waiter's file, in the temporary folder: a copy of this program under a
-/// name the installer does not close. Tauri's installer closes every running
-/// `Mozaik.exe` before it copies, and the waiter has to outlive that.
+/// The waiter's file: a copy of this program under a name the installer does
+/// not close, in the installer's own fresh folder (`bekleyici_yolu`). The
+/// installer closes every running `Mozaik.exe` (the `mainBinaryName`) before
+/// it copies, and the waiter has to outlive that.
 pub const BEKLEYICI_ADI: &str = "Mozaik-kurulum-bekleyici.exe";
+
+/// Where the waiter is copied to: beside the installer, in the folder
+/// `yeni_gecici_klasor` made for it, so it is removed with that folder. Until
+/// 2026-11-16 it went to a fixed `%TEMP%\Mozaik-kurulum-bekleyici.exe`, a name
+/// anything else of this user could sit on between the copy and the start,
+/// and a shared folder Windows searches for the DLLs a program loads (review
+/// 2026-11-16). `None` with no folder of its own: the installer then runs alone.
+pub fn bekleyici_yolu(kurulum: &Path) -> Option<PathBuf> {
+    let klasor = kurulum.parent()?;
+    let bizim = klasor
+        .file_name()
+        .and_then(|a| a.to_str())
+        .is_some_and(|a| a.starts_with(GECICI_ONEK));
+    bizim.then(|| klasor.join(BEKLEYICI_ADI))
+}
 
 /// What the waiter was told.
 #[derive(Debug, PartialEq, Eq)]
@@ -1130,10 +1146,31 @@ pub fn eskisi_gitsin<R: std::io::Read + Send + 'static>(mut boru: R, sure: Durat
 
 // ------------------------------------------------------------------ the wire
 
+/// For the manifest: a few hundred bytes, so one total deadline.
 fn istemci(saniye: u64) -> Result<reqwest::Client, String> {
     reqwest::Client::builder()
         .user_agent("Mozaik")
+        .connect_timeout(BAGLANTI_SURESI)
         .timeout(Duration::from_secs(saniye))
+        .build()
+        .map_err(|e| format!("Ağ hazırlanamadı: {e}"))
+}
+
+/// How long a connection may take to open.
+const BAGLANTI_SURESI: Duration = Duration::from_secs(20);
+/// How long a download may go without a single byte.
+const SESSIZLIK_SURESI: Duration = Duration::from_secs(60);
+
+/// For a download: no total deadline, only a connect one and one for silence.
+/// Until 2026-11-16 a download had 300 s in all, and the 31 MB installer
+/// cannot arrive in that on a line under about 0.85 Mbit/s: a slow line got
+/// "İnternet yanıt vermedi" on every try (review 2026-11-16). A line that
+/// keeps sending is waited for; a line that stops is not.
+fn indirme_istemcisi(baglanti: Duration, sessizlik: Duration) -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .user_agent("Mozaik")
+        .connect_timeout(baglanti)
+        .read_timeout(sessizlik)
         .build()
         .map_err(|e| format!("Ağ hazırlanamadı: {e}"))
 }
@@ -1175,10 +1212,27 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
     Ok(cevap)
 }
 
+/// The event the page draws the download's progress from: `[inen, toplam]`.
+pub const INDIRME_OLAYI: &str = "guncelleme-indirme";
+
+/// Calls `haber` with the bytes in hand each time the whole percent changes,
+/// so a 31 MB download sends a hundred events, not thousands.
+fn yuzde_haberi(boyut: u64, mut haber: impl FnMut(u64)) -> impl FnMut(u64) {
+    let mut son = None;
+    move |inen| {
+        let yuzde = inen.saturating_mul(100) / boyut.max(1);
+        if son != Some(yuzde) {
+            son = Some(yuzde);
+            haber(inen);
+        }
+    }
+}
+
 /// Downloads next to the running program and stops there. Nothing is replaced
 /// until `apply_update`, which is a second button.
 #[tauri::command]
 pub async fn download_update(
+    app: tauri::AppHandle,
     url: String,
     boyut: u64,
     sha256: String,
@@ -1187,16 +1241,31 @@ pub async fn download_update(
     self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
+    let ilerleme = yuzde_haberi(boyut, |inen| {
+        use tauri::Emitter;
+        let _ = app.emit(INDIRME_OLAYI, (inen, boyut));
+    });
     match bu_hedef() {
         Hedef::Mac(mimari) => {
-            return mac_indir(&exe, mimari, &url, boyut, &sha256, imza.as_deref()).await;
+            return mac_indir(
+                &exe,
+                mimari,
+                &url,
+                boyut,
+                &sha256,
+                imza.as_deref(),
+                ilerleme,
+            )
+            .await;
         }
-        Hedef::Linux => return linux_indir(&url, boyut, &sha256, imza.as_deref()).await,
+        Hedef::Linux => {
+            return linux_indir(&url, boyut, &sha256, imza.as_deref(), ilerleme).await;
+        }
         Hedef::Windows | Hedef::Diger => {}
     }
     let kurulum = kurulum_mu(&url);
 
-    let bytes = getir(&url, boyut).await?;
+    let bytes = getir(&url, boyut, ilerleme).await?;
 
     verify(&bytes, boyut, &sha256)?;
     let surum = onerilen()?;
@@ -1212,6 +1281,8 @@ pub async fn download_update(
         // The folders earlier downloads left are removed first: each holds a
         // 31 MB installer that has already run, or never will.
         eski_gecici_klasorleri_sil(&std::env::temp_dir());
+        // Where the waiter used to be copied, before it moved into the folder.
+        let _ = fs::remove_file(std::env::temp_dir().join(BEKLEYICI_ADI));
         let hedef = yeni_gecici_klasor(&std::env::temp_dir())
             .map_err(|e| format!("Kurulum için geçici klasör açılamadı: {e}"))?
             .join(KURULUM_ADI);
@@ -1235,9 +1306,21 @@ pub async fn download_update(
 
 /// The whole file at `url`, or a sentence. Read in pieces against the
 /// expected size, not with `.bytes()`: a server that keeps sending stops being
-/// read at `boyut` (`sinirli_ekle`), not when memory runs out.
-async fn getir(url: &str, boyut: u64) -> Result<Vec<u8>, String> {
-    let mut yanit = istemci(300)?
+/// read at `boyut` (`sinirli_ekle`), not when memory runs out. `ilerleme`
+/// hears the bytes in hand after every piece.
+async fn getir(url: &str, boyut: u64, ilerleme: impl FnMut(u64)) -> Result<Vec<u8>, String> {
+    let istemci = indirme_istemcisi(BAGLANTI_SURESI, SESSIZLIK_SURESI)?;
+    getir_ile(&istemci, url, boyut, ilerleme).await
+}
+
+/// `getir` with a given client, so `cargo test` can give it short timeouts.
+async fn getir_ile(
+    istemci: &reqwest::Client,
+    url: &str,
+    boyut: u64,
+    mut ilerleme: impl FnMut(u64),
+) -> Result<Vec<u8>, String> {
+    let mut yanit = istemci
         .get(url)
         .send()
         .await
@@ -1247,6 +1330,7 @@ async fn getir(url: &str, boyut: u64) -> Result<Vec<u8>, String> {
     let mut bytes = Vec::new();
     while let Some(parca) = yanit.chunk().await.map_err(|e| ag_hatasi(&e))? {
         sinirli_ekle(&mut bytes, &parca, boyut)?;
+        ilerleme(bytes.len() as u64);
     }
     Ok(bytes)
 }
@@ -1270,6 +1354,7 @@ async fn mac_indir(
     boyut: u64,
     sha256: &str,
     imza: Option<&str>,
+    ilerleme: impl FnMut(u64),
 ) -> Result<u64, String> {
     let dosya = url.rsplit('/').next().unwrap_or_default();
     if dosya != mimari.paket_adi() {
@@ -1278,7 +1363,7 @@ async fn mac_indir(
     let paket = update_mac::uygulama_paketi(exe)
         .ok_or("Mozaik bir .app paketinden çalışmıyor; kendini güncelleyemez.")?;
     update_mac::yazilabilir_mi(&paket)?;
-    let bytes = getir(url, boyut).await?;
+    let bytes = getir(url, boyut, ilerleme).await?;
     update_mac::verify(&bytes, boyut, sha256)?;
     imza_dogru(&bytes, imza, &imza_yorumu(&onerilen()?, dosya))?;
     let hazirlik = update_mac::hazirlik(&paket);
@@ -1334,6 +1419,7 @@ async fn linux_indir(
     boyut: u64,
     sha256: &str,
     imza: Option<&str>,
+    ilerleme: impl FnMut(u64),
 ) -> Result<u64, String> {
     let dosya_adi = url.rsplit('/').next().unwrap_or_default();
     if dosya_adi != update_linux::PAKET_ADI {
@@ -1342,7 +1428,7 @@ async fn linux_indir(
     let dosya = update_linux::bu_appimage()
         .ok_or("Mozaik bir AppImage'dan çalışmıyor; kendini güncelleyemez.")?;
     update_linux::yazilabilir_mi(&dosya)?;
-    let bytes = getir(url, boyut).await?;
+    let bytes = getir(url, boyut, ilerleme).await?;
     update_linux::verify(&bytes, boyut, sha256)?;
     imza_dogru(&bytes, imza, &imza_yorumu(&onerilen()?, dosya_adi))?;
     let yeni = yan(&dosya, YENI);
@@ -1459,10 +1545,11 @@ fn kurulumu_baslat(
     ozet: &str,
 ) -> Result<(), String> {
     let kurulu = kurulu_mu(exe);
-    let bekleyici = std::env::temp_dir().join(BEKLEYICI_ADI);
-    let _ = fs::remove_file(&bekleyici);
-    let mut komut = match fs::copy(exe, &bekleyici) {
-        Ok(_) => {
+    let bekleyici = bekleyici_yolu(kurulum)
+        .ok_or_else(|| std::io::Error::other("kurulumun kendi klasörü yok"))
+        .and_then(|b| fs::copy(exe, &b).map(|_| b));
+    let mut komut = match bekleyici {
+        Ok(bekleyici) => {
             let mut k = std::process::Command::new(&bekleyici);
             k.arg(KURULUM_BEKLE).arg(kurulum).arg(exe).arg(ozet);
             if kurulu {
@@ -1552,6 +1639,115 @@ mod tests {
         assert!(!eski.exists());
         assert!(kok.0.join("baska").is_dir());
         assert!(kok.0.join("Mozaik-kurulum-dosya").is_file());
+    }
+
+    #[test]
+    fn the_waiter_goes_into_the_installers_own_folder() {
+        let kok = Scratch::new("bekleyici");
+        let klasor = yeni_gecici_klasor(&kok.0).unwrap();
+        let kurulum = klasor.join(KURULUM_ADI);
+        assert_eq!(bekleyici_yolu(&kurulum), Some(klasor.join(BEKLEYICI_ADI)));
+        // So the next download's sweep removes it with the installer.
+        fs::write(klasor.join(BEKLEYICI_ADI), b"MZ").unwrap();
+        eski_gecici_klasorleri_sil(&kok.0);
+        assert!(!klasor.exists());
+        // Never the shared temporary folder itself.
+        assert_eq!(bekleyici_yolu(&kok.0.join(KURULUM_ADI)), None);
+        assert_eq!(bekleyici_yolu(Path::new(KURULUM_ADI)), None);
+    }
+
+    /// A server on this machine that promises `toplam` bytes, answers one
+    /// request with `parcalar` pieces of `parca` bytes, `ara` apart, and then
+    /// waits `sonra`.
+    fn yavas_sunucu(
+        toplam: usize,
+        parcalar: usize,
+        parca: usize,
+        ara: Duration,
+        sonra: Duration,
+    ) -> String {
+        use std::io::{Read, Write};
+        let dinle = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let adres = format!("http://{}/Mozaik-Kurulum.exe", dinle.local_addr().unwrap());
+        std::thread::spawn(move || {
+            let (mut baglanti, _) = dinle.accept().unwrap();
+            let mut istek = [0u8; 4096];
+            let _ = baglanti.read(&mut istek);
+            let _ = write!(
+                baglanti,
+                "HTTP/1.1 200 OK\r\nContent-Length: {toplam}\r\nConnection: close\r\n\r\n"
+            );
+            for _ in 0..parcalar {
+                std::thread::sleep(ara);
+                if baglanti.write_all(&vec![b'M'; parca]).is_err() {
+                    return;
+                }
+                let _ = baglanti.flush();
+            }
+            std::thread::sleep(sonra);
+        });
+        adres
+    }
+
+    #[test]
+    fn a_slow_line_that_keeps_sending_finishes_and_says_how_far() {
+        // 1.5 s in all, never 2 s of silence: a total deadline shorter than
+        // the whole (the old 300 s, here 600 ms) fails it, the silence one does not.
+        let ara = Duration::from_millis(150);
+        let url = yavas_sunucu(100, 10, 10, ara, Duration::ZERO);
+        let istemci = indirme_istemcisi(Duration::from_secs(5), Duration::from_secs(2)).unwrap();
+        let mut gorulen = Vec::new();
+        let bytes =
+            tauri::async_runtime::block_on(getir_ile(&istemci, &url, 100, |n| gorulen.push(n)))
+                .unwrap();
+        assert_eq!(bytes.len(), 100);
+        assert_eq!(gorulen.last(), Some(&100));
+        assert!(gorulen.windows(2).all(|w| w[0] < w[1]), "{gorulen:?}");
+
+        let url = yavas_sunucu(100, 10, 10, ara, Duration::ZERO);
+        let toplam_sinirli = reqwest::Client::builder()
+            .timeout(Duration::from_millis(600))
+            .build()
+            .unwrap();
+        let eski = tauri::async_runtime::block_on(getir_ile(&toplam_sinirli, &url, 100, |_| ()));
+        assert!(
+            eski.is_err(),
+            "toplam süre sınırı yavaş hattı bitirmemeliydi"
+        );
+    }
+
+    #[test]
+    fn a_line_that_goes_silent_is_given_up_on() {
+        let url = yavas_sunucu(100, 1, 10, Duration::ZERO, Duration::from_secs(20));
+        let istemci =
+            indirme_istemcisi(Duration::from_secs(5), Duration::from_millis(500)).unwrap();
+        let basla = std::time::Instant::now();
+        let sonuc = tauri::async_runtime::block_on(getir_ile(&istemci, &url, 100, |_| ()));
+        assert!(
+            sonuc
+                .as_ref()
+                .is_err_and(|e| e.starts_with("İnternet yanıt vermedi")),
+            "{sonuc:?}"
+        );
+        assert!(
+            basla.elapsed() < Duration::from_secs(15),
+            "{:?}",
+            basla.elapsed()
+        );
+    }
+
+    #[test]
+    fn progress_is_told_once_per_percent() {
+        let mut duyulan = Vec::new();
+        {
+            let mut haber = yuzde_haberi(1000, |n| duyulan.push(n));
+            for n in [1, 5, 9, 10, 11, 500, 505, 1000] {
+                haber(n);
+            }
+        }
+        assert_eq!(duyulan, [1, 10, 500, 1000]);
+        // A size of 0 (refused later by `verify`) does not divide by zero.
+        yuzde_haberi(0, |_| ())(5);
     }
 
     #[test]

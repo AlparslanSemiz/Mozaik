@@ -104,7 +104,7 @@ test.describe('exe’nin CSP’si', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
@@ -114,7 +114,7 @@ test.describe('exe’nin CSP’si', () => {
     await page.emulateMedia({ media: 'screen' });
 
     const indirme = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }).click();
+    await page.locator('.topbar').getByRole('button', { name: 'Kaydet', exact: true }).click();
     const dosya = await indirme;
     expect(dosya.suggestedFilename()).toMatch(/\.json$/);
 
@@ -131,7 +131,7 @@ test.describe('exe’nin CSP’si', () => {
     });
     await fileOpened(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.panel.suggestions .btn.primary').first()).toBeVisible({
       timeout: 60_000,
     });

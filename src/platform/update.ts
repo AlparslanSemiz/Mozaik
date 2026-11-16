@@ -40,6 +40,7 @@ import {
   desktopDownload,
   desktopGuncellemeDurumu,
   isDesktop,
+  onDesktopDownload,
 } from './exe';
 import { ESKI_SITE, SURUM, tarihYazisi, YENI_ADRES_ACIK, YENI_SITE } from '../leaf/app';
 
@@ -95,7 +96,7 @@ export type ExeDurum =
       /** The same version as the installer, for the standalone exe (`gecis`). */
       gecis: boolean;
     }
-  | { ad: 'indiriliyor' }
+  | { ad: 'indiriliyor'; yuzde?: number }
   | { ad: 'hazir'; surum: string; kurulum: boolean }
   | { ad: 'hata'; mesaj: string };
 
@@ -221,9 +222,19 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
     const su = sonuc.current;
     if (su.ad !== 'var') return;
     setDurum({ ad: 'indiriliyor' });
+    // Unsubscribed before the answer is drawn: a late event must not draw over it.
+    const off = onDesktopDownload((inen, toplam) =>
+      setDurum({ ad: 'indiriliyor', yuzde: Math.floor((inen * 100) / Math.max(1, toplam)) }),
+    );
     desktopDownload(su.adres, su.boyut, su.ozet, su.imza).then(
-      () => setDurum({ ad: 'hazir', surum: su.surum, kurulum: su.kurulum }),
-      (e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }),
+      () => {
+        off();
+        setDurum({ ad: 'hazir', surum: su.surum, kurulum: su.kurulum });
+      },
+      (e: unknown) => {
+        off();
+        setDurum({ ad: 'hata', mesaj: hataMetni(e) });
+      },
     );
   }, []);
 

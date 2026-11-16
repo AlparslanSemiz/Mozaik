@@ -1,4 +1,4 @@
-// "Başlarken": the nine steps from an empty plan to a printed week, each
+// "Başlarken": the five tasks from an empty plan to a printed week, each
 // ticked from the plan itself and each with a button that goes there.
 //
 // It replaced one sentence ("Sırayla: derslikler, branşlar, öğretmenler,
@@ -9,15 +9,21 @@
 // did yesterday.
 //
 // Nothing here is a gate: every step is reachable from its tab at any time,
-// the list only says where things stand. It goes away when every step is done
-// or when he closes it; folding keeps one line with the next step's button.
+// the list only says where things stand. When every task is done, or when he
+// closes it, it becomes one link that brings it back; folding keeps one line
+// with the next task's button.
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, CircleCheck, Circle, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, CircleCheck, Circle, ListChecks, X } from 'lucide-react';
 import { dayLabel } from '../../leaf/lang';
 import type { State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
-import { readChecklist, writeChecklist, type ChecklistPref } from '../../platform/prefs';
+import {
+  CHECKLIST_REOPEN,
+  readChecklist,
+  writeChecklist,
+  type ChecklistPref,
+} from '../../platform/prefs';
 import { GoButton, useT, type Place } from '../common';
 
 interface Step {
@@ -31,7 +37,12 @@ interface Step {
   action: string;
 }
 
-/** The nine steps, read from the plan. Exported for the unit test. */
+/** The five tasks, read from the plan. Exported for the unit test.
+ *
+ * Nine steps until 2026-11-16 (Sadeleşme, phase 1): the four lists and the
+ * bell were five "steps" of one job, introducing the school, and nine cards
+ * were nine things to read before the first click. A task is done when all of
+ * it is; its button goes to the first part that is not. */
 export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof useT>): Step[] {
   const days = d.settings.days;
   const first = days[0]?.name ?? '';
@@ -47,53 +58,53 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
     saat: hours,
   });
 
+  // The school's first missing part, in the order the lists depend on each
+  // other: a class names a room, a teacher picks a subject.
+  const missing: Array<{ to: Place; action: string }> = [];
+  if (name === '') {
+    missing.push({
+      to: { tab: 'settings', section: 'school' },
+      action: t('Okul adını ve zili gir'),
+    });
+  }
+  if (d.rooms.length === 0) {
+    missing.push({ to: { tab: 'setup', step: 'rooms' }, action: t('Derslik ekle') });
+  }
+  if (d.settings.subjects.length === 0) {
+    missing.push({ to: { tab: 'setup', step: 'subjects' }, action: t('Branş ekle') });
+  }
+  if (d.teachers.length === 0) {
+    missing.push({ to: { tab: 'setup', step: 'teachers' }, action: t('Öğretmen ekle') });
+  }
+  if (d.classes.length === 0) {
+    missing.push({ to: { tab: 'setup', step: 'classes' }, action: t('Sınıf ekle') });
+  }
+  const lists = t('{d} derslik · {b} branş · {o} öğretmen · {s} sınıf', {
+    d: d.rooms.length,
+    b: d.settings.subjects.length,
+    o: d.teachers.length,
+    s: d.classes.length,
+  });
+  const school = missing[0] ?? {
+    to: { tab: 'settings', section: 'school' },
+    action: t('Okul adını ve zili gir'),
+  };
+
   return [
     {
       id: 'school',
-      name: t('Okul adı ve saatler'),
-      done: name !== '',
+      name: t('Okulu tanıt'),
+      done: missing.length === 0,
       detail:
-        name !== ''
-          ? `${name} · ${week}`
-          : t('Okul adı boş. Şu an: {hafta}. Doğru değilse değiştirin.', { hafta: week }),
-      to: { tab: 'settings', section: 'school' },
-      action: t('Okul adını ve zili gir'),
-    },
-    {
-      id: 'rooms',
-      name: t('Derslikler'),
-      done: d.rooms.length > 0,
-      detail: t('{n} derslik', { n: d.rooms.length }),
-      to: { tab: 'setup', step: 'rooms' },
-      action: t('Derslik ekle'),
-    },
-    {
-      id: 'subjects',
-      name: t('Branşlar'),
-      done: d.settings.subjects.length > 0,
-      detail: t('{n} branş', { n: d.settings.subjects.length }),
-      to: { tab: 'setup', step: 'subjects' },
-      action: t('Branş ekle'),
-    },
-    {
-      id: 'teachers',
-      name: t('Öğretmenler'),
-      done: d.teachers.length > 0,
-      detail: t('{n} öğretmen', { n: d.teachers.length }),
-      to: { tab: 'setup', step: 'teachers' },
-      action: t('Öğretmen ekle'),
-    },
-    {
-      id: 'classes',
-      name: t('Sınıflar'),
-      done: d.classes.length > 0,
-      detail: t('{n} sınıf', { n: d.classes.length }),
-      to: { tab: 'setup', step: 'classes' },
-      action: t('Sınıf ekle'),
+        name === ''
+          ? t('Okul adı boş. Şu an: {hafta}. Doğru değilse değiştirin.', { hafta: week })
+          : `${name} · ${week} · ${lists}`,
+      to: school.to,
+      action: school.action,
     },
     {
       id: 'lessons',
-      name: t('Dersler'),
+      name: t('Dersleri gir'),
       done: d.lessons.length > 0,
       detail: t('{ders} ders · {saat} saat', { ders: d.lessons.length, saat: lessonHours }),
       to: { tab: 'lessons' },
@@ -101,24 +112,24 @@ export function checklistSteps(d: State, printed: boolean, t: ReturnType<typeof 
     },
     {
       // Optional: a school where everyone can come every hour has nothing to
-      // close. Placing the first card is taken as having passed it.
+      // close. Placing the first lesson is taken as having passed it.
       id: 'availability',
-      name: t('Müsaitlik'),
+      name: t('Gelemediği saatleri işaretle'),
       done: closed > 0 || placed > 0,
       detail:
         closed > 0
           ? t('{n} kapalı saat', { n: closed })
-          : t('Gelemeyen öğretmenin saatlerini kapatın. Herkes her saat gelebiliyorsa geçin.'),
+          : t('Herkes her saat gelebiliyorsa geçin.'),
       to: { tab: 'availability' },
       action: t('Kapalı saat işaretle'),
     },
     {
       id: 'solve',
-      name: t('Otomatik diz'),
+      name: t('Programı yap'),
       done: placed > 0,
       detail: t('{yer} / {toplam} saat yerleşmiş', { yer: placed, toplam: lessonHours }),
       to: { tab: 'program' },
-      action: t('Programı diz'),
+      action: t('Programı yap'),
     },
     {
       id: 'print',
@@ -139,17 +150,43 @@ export function Checklist({ state, children }: { state: State; children?: React.
   // below and Çıktı's Yazdır, which is on another tab, so this mounts fresh
   // after it.
   const [pref, setPref] = useState<ChecklistPref>(readChecklist);
+  useEffect(() => {
+    const reopen = () => setPref(readChecklist());
+    window.addEventListener(CHECKLIST_REOPEN, reopen);
+    return () => window.removeEventListener(CHECKLIST_REOPEN, reopen);
+  }, []);
   const steps = checklistSteps(state, pref.printed, t);
   const doneCount = steps.filter((s) => s.done).length;
   const next = steps.find((s) => !s.done);
 
+  // Done, or closed: ONE line with the way back (it had none, TODO SD7). Asked
+  // for again ("acik"), the whole list shows even when every task is done.
   // The first-run offers (`children`) outlive the list: closing it is not
   // declining the sample school.
-  if (next === undefined || pref.show === 'kapali') {
-    return children === undefined || children === false ? null : (
-      <div className="panel">{children}</div>
+  if ((next === undefined && pref.show !== 'acik') || pref.show === 'kapali') {
+    return (
+      <>
+        <div className="checklist-link">
+          <button
+            type="button"
+            className="btn quiet"
+            onClick={() => {
+              const value = { ...pref, show: 'acik' as const };
+              setPref(value);
+              writeChecklist(value);
+            }}
+          >
+            <ListChecks size={16} aria-hidden="true" focusable="false" />
+            {t('Başlarken listesini göster')}
+          </button>
+        </div>
+        {children === undefined || children === false ? null : (
+          <div className="panel">{children}</div>
+        )}
+      </>
     );
   }
+  const step = next ?? steps[steps.length - 1]!;
 
   // Nobody has chosen yet: open on an empty plan, one line once lessons exist.
   const folded = pref.show === 'dar' || (pref.show === 'auto' && state.lessons.length > 0);
@@ -163,7 +200,7 @@ export function Checklist({ state, children }: { state: State; children?: React.
     <button
       type="button"
       className="btn quiet"
-      title={t('Liste bir daha çıkmaz. Her adım kendi sekmesinde durmaya devam eder.')}
+      title={t('Liste tek satıra iner; ? menüsündeki Başlarken onu geri getirir.')}
       onClick={() => save('kapali')}
     >
       <X size={16} aria-hidden="true" focusable="false" />
@@ -180,10 +217,8 @@ export function Checklist({ state, children }: { state: State; children?: React.
         </span>
         {folded && (
           <span className="checklist-next">
-            {t('Sıradaki: {adim}', { adim: next.name })}
-            <GoButton to={next.to} primary>
-              {next.action}
-            </GoButton>
+            {t('Sıradaki: {adim}', { adim: step.name })}
+            <GoButton to={step.to}>{step.action}</GoButton>
           </span>
         )}
         <span className="checklist-acts">
@@ -226,9 +261,7 @@ export function Checklist({ state, children }: { state: State; children?: React.
                 <strong>{s.name}</strong>
                 <span className="checklist-detail">{s.detail}</span>
               </span>
-              <GoButton to={s.to} primary={s === next}>
-                {s.action}
-              </GoButton>
+              <GoButton to={s.to}>{s.action}</GoButton>
             </li>
           ))}
         </ol>

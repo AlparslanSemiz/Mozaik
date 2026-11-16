@@ -1,61 +1,70 @@
-// The frequent actions the command palette offers beside the destinations.
+// The actions the command palette offers beside the destinations.
+//
+// Since Sadeleşme phase 1 (2026-11-16) the palette finds WORK, not only
+// places: "yazdır", "kaydet", "aç", "kopya", "yedek", "okul adı", "tema",
+// "yazı boyu", "programı yap". Each action carries the words somebody would
+// type for it (`extra`), because he types what he wants done, not the name
+// of the screen it is on. An action either does the thing (Kaydet, Programı
+// yap) or opens the one place it is done (tema → Ayarlar → Görünüm: the theme
+// is in exactly one place).
 
 import { useMemo } from 'react';
 import type { State } from '../../leaf/model';
-import type { Motion, Tab, Theme } from '../../platform/prefs';
+import type { Motion } from '../../platform/prefs';
 import type { SolverRun } from '../../platform/search';
 import { downloadBackup } from '../../platform/storage';
 import { solverExclusions, type ProgramMask } from '../../pure/program';
-import type { useT } from '../common';
+import type { Place, useT } from '../common';
+
+export interface PaletteAction {
+  id: string;
+  label: string;
+  hint?: string;
+  /** Other words this action is found by. */
+  extra?: string;
+  run: () => void;
+}
 
 interface PaletteInputs {
   state: State;
-  theme: Theme;
   ribbon: boolean;
   motion: Motion;
   solver: SolverRun;
-  goTab: (tab: Tab) => void;
+  goTo: (place: Place) => void;
   notify: (text: string) => void;
   t: ReturnType<typeof useT>;
   programMask: ProgramMask;
   openShortcuts: () => void;
-  toggleTheme: () => void;
+  openFile: () => void;
+  copyForNewTerm: () => void;
   toggleRibbon: () => void;
   toggleMotion: () => void;
 }
 
 export function usePaletteActions({
   state,
-  theme,
   ribbon,
   motion,
   solver,
-  goTab,
+  goTo,
   notify,
   t,
   programMask,
   openShortcuts,
-  toggleTheme,
+  openFile,
+  copyForNewTerm,
   toggleRibbon,
   toggleMotion,
-}: PaletteInputs) {
+}: PaletteInputs): PaletteAction[] {
   return useMemo(
     () => [
       {
-        id: 'save',
-        label: t('Dosyaya kaydet'),
-        hint: t('plan dosyası'),
-        run: () => {
-          downloadBackup(state);
-          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
-        },
-      },
-      {
         id: 'auto',
-        label: t('Otomatik diz'),
+        label: t('Programı yap'),
         hint: t('Program'),
+        extra: 'diz otomatik dağıt yerleştir',
         run: () => {
-          goTab('program');
+          goTo({ tab: 'program' });
           solver.start(state, {
             keepPlaced: true,
             exclusions: solverExclusions(programMask),
@@ -63,9 +72,76 @@ export function usePaletteActions({
         },
       },
       {
+        id: 'print',
+        label: t('Yazdır'),
+        hint: t('Çıktı'),
+        extra: 'çıktı kâğıt baskı yazıcı pdf e-posta gönder',
+        run: () => goTo({ tab: 'print' }),
+      },
+      {
+        id: 'save',
+        label: t('Kaydet'),
+        hint: t('plan dosyası'),
+        extra: 'dosyaya kaydet indir yedek',
+        run: () => {
+          downloadBackup(state);
+          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+        },
+      },
+      {
+        id: 'open',
+        label: t('Dosyadan aç'),
+        hint: t('plan dosyası'),
+        extra: 'aç yükle json dosya',
+        run: openFile,
+      },
+      {
+        id: 'copy',
+        label: t('Yeni dönem için kopyala'),
+        extra: 'kopya kopyala yeni dönem plan',
+        run: copyForNewTerm,
+      },
+      {
+        id: 'backup',
+        label: t('Planlar ve yedek'),
+        hint: t('Ayarlar'),
+        extra: 'yedek klasör plan otomatik yedekler tümünü',
+        run: () => goTo({ tab: 'settings', section: 'plans' }),
+      },
+      {
+        id: 'school',
+        label: t('Okul adını ve zili gir'),
+        hint: t('Ayarlar'),
+        extra: 'okul adı zil günler saat teneffüs öğle',
+        run: () => goTo({ tab: 'settings', section: 'school' }),
+      },
+      {
+        id: 'rules',
+        label: t('Kurallar'),
+        hint: t('Ayarlar'),
+        extra: 'günde en fazla art arda boşluk sınır',
+        run: () => goTo({ tab: 'settings', section: 'rules' }),
+      },
+      {
+        id: 'closed',
+        label: t('Kapalı saat işaretle'),
+        hint: t('Müsaitlik'),
+        extra: 'gelemediği saatler müsait değil kapalı izin',
+        run: () => goTo({ tab: 'availability' }),
+      },
+      {
         id: 'theme',
-        label: theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç'),
-        run: toggleTheme,
+        label: t('Tema'),
+        hint: t('Ayarlar → Görünüm'),
+        extra: 'koyu açık karanlık gece',
+        run: () => goTo({ tab: 'settings', section: 'appearance' }),
+      },
+      {
+        id: 'scale',
+        label: t('Yazı büyüklüğü'),
+        hint: t('Ayarlar → Görünüm'),
+        extra: 'yazı boyu büyüt küçült ölçek',
+        run: () => goTo({ tab: 'settings', section: 'appearance' }),
       },
       {
         id: 'ribbon',
@@ -87,16 +163,16 @@ export function usePaletteActions({
     ],
     [
       state,
-      theme,
       ribbon,
       motion,
       solver,
-      goTab,
+      goTo,
       notify,
       t,
       programMask,
       openShortcuts,
-      toggleTheme,
+      openFile,
+      copyForNewTerm,
       toggleRibbon,
       toggleMotion,
     ],

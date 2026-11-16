@@ -47,11 +47,13 @@ import { TABS } from './tabs';
 import Topbar from './Topbar';
 import Notices from './Notices';
 import { useMachinePrefs } from './useMachinePrefs';
-import { useMainScroll } from './useMainScroll';
+import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
 import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/grid';
+import { openChecklist } from '../../platform/prefs';
 import { useMoveIn, useMoveOut } from './useMove';
 import { parseBundle } from '../../pure/io';
 import type { State } from '../../leaf/model';
@@ -120,7 +122,6 @@ export default function App() {
     ribbon,
     toggleRibbon,
     toggleMotion,
-    toggleTheme,
   } = useMachinePrefs();
 
   /**
@@ -157,6 +158,7 @@ export default function App() {
   );
 
   useMainScroll(mainRef, appRef, tab, ribbonAuto);
+  useProgramScrollKeep(mainRef, tab);
 
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
@@ -266,18 +268,36 @@ export default function App() {
 
   useShortcuts(setPaletteOpen, goTab, openShortcuts);
 
+  // Dosya ▾ → Yeni dönem için kopyala, and Ctrl+K's "kopya". A new plan with
+  // everything in it but the laid-out week; the old plan stays as it was, so
+  // nothing can be lost by it (it is not a step of the undo history: the old
+  // plan is the way back).
+  const copyForNewTerm = useCallback(() => {
+    const name = plans.library.plans.find((p) => p.id === plans.planId)?.name ?? 'Plan';
+    plans.createPlan(`${name} (yeni dönem)`, {
+      ...state,
+      programs: [blankProgram()],
+      activeProgramId: DEFAULT_PROGRAM_ID,
+    });
+    notify(
+      t(
+        'Yeni dönem için bir kopya açıldı: dersler duruyor, program boş. Eski plan Dosya → Planlar ve yedek’te.',
+      ),
+    );
+  }, [plans, state, notify, t]);
+
   const paletteActions = usePaletteActions({
     state,
-    theme,
     ribbon,
     motion,
     solver,
-    goTab,
+    goTo,
     notify,
     t,
     programMask,
     openShortcuts,
-    toggleTheme,
+    openFile: () => fileInput.current?.click(),
+    copyForNewTerm,
     toggleRibbon,
     toggleMotion,
   });
@@ -403,10 +423,13 @@ export default function App() {
               fileChosen={fileChosen}
               setPaletteOpen={setPaletteOpen}
               openShortcuts={openShortcuts}
-              ribbon={ribbon}
-              toggleRibbon={toggleRibbon}
-              theme={theme}
-              toggleTheme={toggleTheme}
+              openPlans={() => goTo({ tab: 'settings', section: 'plans' })}
+              openAbout={() => goTo({ tab: 'settings', section: 'about' })}
+              openChecklist={() => {
+                openChecklist();
+                goTo({ tab: 'setup' });
+              }}
+              copyForNewTerm={copyForNewTerm}
               lastFileDay={reminder.savedDay}
             />
 
@@ -418,7 +441,10 @@ export default function App() {
             <section className="ribbon-band" aria-label={t('Araç şeridi')}>
               <Ribbon
                 ui={ui}
-                open={ribbon}
+                /* Ayarlar chooses its sections in the strip, and the way to
+                   unfold it is in Ayarlar → Görünüm: folded there, the strip
+                   would hide its own way back. */
+                open={ribbon || tab === 'settings'}
                 state={state}
                 change={change}
                 manageProgram={manageProgram}
@@ -566,6 +592,8 @@ export default function App() {
                         setUiDensity={setUiDensity}
                         ribbonAuto={ribbonAuto}
                         setRibbonAuto={setRibbonAuto}
+                        ribbon={ribbon}
+                        toggleRibbon={toggleRibbon}
                         theme={theme}
                         setTheme={setTheme}
                         motion={motion}

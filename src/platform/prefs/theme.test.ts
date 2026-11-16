@@ -174,21 +174,19 @@ describe('normalizeDockHeight', () => {
 });
 
 describe('normalizeRibbonAuto', () => {
-  // The OPPOSITE default to normalizeAvailClock, and on purpose: this gesture
-  // already existed before it had a key, so a reader who has never opened the
-  // setting must keep what they have. That makes "absent" mean ON, which is
-  // the case worth pinning — `null` must not fall through the same door as
-  // `'kapali'`: "not stored" and "stored as off" are two facts.
-  it('kaydı olmayan makinede AÇIK', () => {
-    expect(normalizeRibbonAuto(null)).toBe(true);
-    expect(normalizeRibbonAuto(undefined)).toBe(true);
-    expect(normalizeRibbonAuto('')).toBe(true);
+  // Default OFF since Sadeleşme phase 1 (2026-11-16): the strip slipping away
+  // while he reads took its buttons with it. An explicit choice stays what it
+  // was: "stored as on" and "not stored" are two facts.
+  it('kaydı olmayan makinede KAPALI', () => {
+    expect(normalizeRibbonAuto(null)).toBe(false);
+    expect(normalizeRibbonAuto(undefined)).toBe(false);
+    expect(normalizeRibbonAuto('')).toBe(false);
   });
 
-  it('yalnız "kapali" kapatır', () => {
+  it('yalnız "acik" açar, açıkça seçilmiş "acik" korunuyor', () => {
     expect(normalizeRibbonAuto('kapali')).toBe(false);
     expect(normalizeRibbonAuto('acik')).toBe(true);
-    expect(normalizeRibbonAuto('saçma')).toBe(true);
+    expect(normalizeRibbonAuto('saçma')).toBe(false);
   });
 
   // Called from two directions — a string out of localStorage and a boolean

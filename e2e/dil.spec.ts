@@ -16,7 +16,7 @@
 // is the one that deliberately unpins itself.
 
 import { expect, test } from './kapan';
-import { reopen, open, openSettings, openWithSample, FILE } from './helpers';
+import { FILE, open, openSettings, openTechnical, openWithSample, reopen } from './helpers';
 
 type Dil = 'tr' | 'en' | 'de' | 'es' | 'fr';
 
@@ -58,12 +58,15 @@ test.describe('82. Dil', () => {
 
   // DK13: the strip's total was raw JSX, "TOTAL 99 ders · 433 saat" in
   // English — one of the t()-less texts §8d suspected.
-  test('Dersler şeridinin toplamı çevriliyor', async ({ page }) => {
+  // The total moved from the strip to the list's heading on 2026-11-16.
+  test('Dersler listesinin toplamı çevriliyor', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');
     await page.getByRole('button', { name: 'Lessons', exact: true }).click();
-    const total = page.locator('.ribbon .ribbon-value', { hasText: 'lessons' });
-    await expect(total).toHaveText('99 lessons · 433 hours');
+    await page.getByRole('button', { name: 'All', exact: true }).click();
+    await expect(page.locator('.panel.step-panel h2').first()).toContainText(
+      '99 lessons · 433 hours',
+    );
   });
 
   test('Türkçe geri gelince ekran BİREBİR eskisi', async ({ page }) => {
@@ -133,7 +136,8 @@ test.describe('82. Dil', () => {
     await page.getByRole('button', { name: 'Check', exact: true }).click();
     // The capacity report is one panel at a time now, and its sentence — the
     // one written by a PURE module — lives on the teachers view.
-    await page.locator('.ribbon').getByRole('button', { name: 'Teachers', exact: true }).click();
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitemradio', { name: 'Teacher loads' }).click();
     const metin = await page.locator('.main').innerText();
     expect(metin).toContain('available');
     expect(metin).not.toContain('müsait');
@@ -168,6 +172,7 @@ test.describe('82. Dil', () => {
     // there for real is the stronger check.
     await page.evaluate(() => localStorage.setItem('ders-programi-dil', 'tr'));
     await openSettings(page, 'Hakkında');
+    await openTechnical(page);
     await expect(page.locator('table').filter({ hasText: 'ders-programi-dil' })).toBeVisible();
   });
 

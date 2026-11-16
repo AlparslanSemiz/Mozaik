@@ -413,7 +413,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
   async function laidOutSample(page: Page) {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     const before = await placedHours(page);
     expect(before, 'örnek okul dizilemedi').toBeGreaterThan(0);
@@ -591,7 +591,7 @@ test.describe('33. Ayarlar — kurallar', () => {
 
     const min = page.locator('table.list tr', { hasText: 'Öğretmen günde en az' });
     await expect(min.locator('select option')).toHaveCount(2);
-    await expect(min.locator('select')).not.toContainText('Engel');
+    await expect(min.locator('select')).not.toContainText('Kesin');
 
     const max = page.locator('table.list tr', { hasText: 'Öğretmen günde en fazla' });
     await expect(max.locator('select option')).toHaveCount(3);
@@ -610,7 +610,7 @@ test.describe('33. Ayarlar — kurallar', () => {
     ]) {
       const row = page.locator('table.list tr', { hasText: label });
       await expect(row.locator('select option')).toHaveCount(2);
-      await expect(row.locator('select')).not.toContainText('Engel');
+      await expect(row.locator('select')).not.toContainText('Kesin');
     }
   });
 

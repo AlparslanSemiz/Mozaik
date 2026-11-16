@@ -127,6 +127,9 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
   });
 
   test('taşan bölümle taşmayan bölüm AYNI genişlikte', async ({ page }) => {
+    // A shorter window: since 2026-11-16 Görünüm's sentences are behind "?",
+    // and at 1080 it no longer scrolls.
+    await page.setViewportSize({ width: 1920, height: 900 });
     await openWithSample(page);
 
     await go(page, 'Ayarlar');

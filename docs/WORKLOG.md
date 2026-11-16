@@ -19,7 +19,8 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-15 akşam. Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
+Son güncelleme: 2026-11-15 akşam. 2026-11-16: `sade/asama-1` dalında Sadeleşme aşama 1 yazıldı,
+birleşmedi (aşağıda tarihli girdi, TODO SD8). Bu blok yeni bir oturumun başlangıç noktası; dünkü "Şu an"
 olduğu gibi aşağıda, "2026-11-15 · Önceki 'Şu an'" girdisinde.
 
 **Sürüm.** 2.2.0 sahada (2026-09-26). Üstüne çok iş birikti ve yayınlanmadı (CHANGELOG
@@ -51,6 +52,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 - Dalda, birleşmedi: `guncelleme/windows-yolu` (`platform/mac`'in birleştiği `main`'le birleşik; `update.rs`'te
   Mac yoluna dokunmuyor): 2.2.0 → kurulum yolu düzeltildi (aşağıdaki girdi, DECISIONS
   2026-11-16, tuzak 161–164). İki yeni Windows iş akışı adımı henüz hiç koşmadı.
+- Dalda, birleşmedi: `tarayici/safari-ipad` (2026-11-16): WebKit'te Program'ın kaydırması sekme
+  dönüşünde korunuyor (tuzak 174), iPad'de Müsaitlik parmakla boyanıyor (175) ve karta basılı
+  tutmak menüyü açıyor (176); `npm run test:firefox`; Firefox/WebKit'te dürüst süit (aşağıdaki girdi).
 - Kod/test: RF24, RF25, RF26, RO1, RO2; vitest 4; Node 25+ için `--no-experimental-webstorage`
   (macOS'ta `npm run hizli` yeşil); `agir.test.ts` Linux dışında atlanıyor.
 
@@ -101,6 +105,12 @@ seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'
 dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
 aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
 
+**İnceleme düzeltmeleri (2026-11-16, `duzeltme/inceleme`, `ci/kurulum-durdur`'un üstünde,
+birleşmedi):** güncelleme indirmesinde toplam süre sınırı yok (bağlantı 20 s, sessizlik 60 s,
+Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe, "Yeni hâlini asıl
+dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
+Gerçek Windows exe'de koşulmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -111,6 +121,134 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Sadeleşme aşama 1: sakinleştirme (`sade/asama-1`, TODO SD8)
+
+Alp önerinin sekiz kararını da onayladı (DECISIONS "Sadeleşme (Alp onayladı, K1–K8)"). Bu
+dal yalnız aşama 1: kararlardan bağımsız sakinleştirme ve K4'ün yeni adları. Aşama 2 (kişi
+sayfası) ve 3 (beş sekme, Plan + Seçenek, Kontrol çipe, Sığdır ve Geçici görünüm, Eski hâline
+dön) bunun üstüne gelir; `common/More.tsx` (Daha fazla), `common/Help.tsx` (`Help`,
+`HelpHead`) ve "dolu yalnız `.btn.primary`" kuralı yeni sekmelerde aynen kullanılsın diye
+ortak yazıldı.
+
+**Yapılan.** Her ekranda tek dolu düğme (Programı yap, Ekle, Yazdır); basılı seçim bir
+segment. Her şeridin sağ ucunda Daha fazla (Program: Yeniden yap, Seçenek, Renk, Yoğunluk,
+toplu sabitleme, geçici görünüm, Programı boşalt; Kontrol: üç yük tablosu; Müsaitlik:
+darlık ve saatler; Çıktı: Renkli bas; Ayarlar: Planlar ve yedek, Hakkında; Okul ve Dersler:
+oraya giden kısayollar). Üst çubukta yalnız Dosya ▾, sekmeler, çip, okulun adı (ikinci plan
+olunca seçici), Geri al, Kaydet ve ?; tema yalnız Görünüm'de, şerit katlama Görünüm'de ve
+Ctrl+K'de, Ayarlar'da şerit katlı da çizilir. Kaydırınca gizlenme varsayılanı kapalı; açıkça
+"acik" yazılmış makine korunuyor. Yardım cümleleri panel başlığının ?'inde. Tekrarlanan
+sayılar, Haftanın doluluğu, Boş kalan sınıf saati ve "çözücü" sözü kalktı; Teknik bilgiler ve
+Yenilikler katlı (nokta notlar açılınca söner). Kontrol tam dizili haftada "Program tamam"
+diyor. Yeni adlar beş dilde (K4a, K4b; sürüm notları tarihsel kaldı). Başlarken beş iş, bitince
+tek bağlantı. Ctrl+K işleri buluyor. Liste satırının simge düğmesi "Ayrıntı" yazıyor. Seçili
+sekme tek ve nötr.
+
+**Ölçüm (önce `origin/main` 78f1062 → sonra bu dal, örnek okul, 1920×1080, Playwright
+Chromium).** Betikler `denetim3/yuk/olc.mjs` ve `denetim3/envanter/crawl.cjs`'nin kopyaları
+(oturumun scratch klasörü, `asama1/`); "sonra"da Ayarlar'ın iki seyrek bölümü Daha fazla'dan
+açılıyor, Kontrol'ün yük görünümleri ölçülmedi. Görünen kontrol: ekranda görünen düğme, girdi
+ve seçiciler (ızgara ve müsaitlik hücreleri hariç). Kelime ve yardım cümlesi `olc.mjs`'in
+saydığı; Okul'dan Çıktı'ya kadar iki cümle örnek okulun "yüklendi" bildirimi, iki ölçümde de.
+
+| Ekran | Görünen kontrol | Kelime | Yardım cümlesi |
+|---|---|---|---|
+| Okul / Derslikler 8 | 63 → 60 | 168 → 163 | 6 → 5 |
+| Okul / Branşlar 21 | 80 → 81 | 173 → 166 | 7 → 6 |
+| Okul / Öğretmenler 25 | 194 → 204 | 280 → 278 | 10 → 7 |
+| Okul / Sınıflar 20 | 117 → 121 | 209 → 219 | 7 → 6 |
+| Müsaitlik | 51 → 47 | 203 → 181 | 8 → 6 |
+| Dersler / Sınıftan | 90 → 87 | 152 → 138 | 7 → 6 |
+| Dersler / Öğretmenden | 77 → 74 | 129 → 115 | 7 → 6 |
+| Dersler / Genel | 146 → 148 | 807 → 793 | 6 → 5 |
+| Program | 31 → 21 | 79 → 46 | 7 → 5 |
+| Kontrol | 22 → 15 | 84 → 77 | 7 → 7 |
+| Çıktı | 44 → 40 | 273 → 238 | 10 → 7 |
+| Ayarlar / Zil ve günler | 43 → 39 | 202 → 170 | 5 → 2 |
+| Ayarlar / Kurallar | 34 → 31 | 230 → 168 | 13 → 3 |
+| Ayarlar / Görünüm | 48 → 56 | 291 → 124 | 21 → 2 |
+| Ayarlar / Planlar ve yedek | 32 → 30 | 157 → 97 | 8 → 3 |
+| Ayarlar / Hakkında | 26 → 23 | 259 → 69 | 12 → 2 |
+
+Üst çubuk her ekranda 17 kontrolden 12'ye indi, Program şeridi 10'dan 4'e. Okul listelerinde
+görünen kontrol azalmadı, arttı: ekleme panelinin açıklama rayı kalkınca ekrana daha çok satır
+giriyor ve satır başına 12 kontrol duruyor; bu aşama 2'nin işi (K5). Görünüm'de de açıklamalar
+gidince paneller ekrana sığdı, görünen kontrol 48'den 56'ya çıktı ama toplam aynı (57).
+
+**Boyut.** `dist/index.html` 1 301 720 → 1 302 495 bayt, brotli 301 794 → 302 399 bayt (sınırlar
+1 320 000 ve 306 000). `main` ile birleştikten sonra (sözlükler küçüldü) 1 172 689 bayt, brotli 299 670; sınırlar 1 200 000 ve 306 000. Yeni paket yok; `@radix-ui/react-popover` zaten demetteydi.
+
+**Koşulanlar.** `tsc` (uygulama ve e2e), `eslint`, `prettier --check`, `npm run hizli`
+(yalnız `linuxKur.test.ts`'in iki testi yükten zaman aşımı, tek başına yeşil), `npx vite
+build`, `npm run boyut`. Bütün E2E süiti `--workers=2 --retries=0` ile: 765 testin 763'ü
+yeşil; zebra'nın grup çipi testi bir yarış yüzünden düşüyordu, düzeltildi ve tek başına yeşil,
+`kayma.spec.ts` aşağıda. `main` ile birleştikten sonra yeniden: 776 testin 774'ü yeşil;
+raptiye testi yükten zaman aşımı, tek başına yeşil. `scripts/agir.sh` bu makinede
+çalışmadı (`flock` yok), Playwright doğrudan koşuldu. Tıklama testi 1920×1080 ve 1366×768'de;
+1366'da üst çubuk tek satır.
+
+**Bilinen.** `kayma.spec.ts`'in "taşan bölümle taşmayan bölüm" testi Görünüm artık 1080'de
+taşmadığı için 900 piksel yüksekliğe alındı; macOS'ta kaydırma çubuğu yer kaplamadığı için
+burada doğrulanamadı, CI'da (Linux) bakılmalı.
+
+---
+
+## 2026-11-16 · Safari ve iPad (`tarayici/safari-ipad`)
+
+Tarayıcı denetiminin (Firefox ve WebKit koşusu, `scratchpad/denetim4/tarayici/hatalar.txt`)
+bulguları. Bu makine macOS, `agir.sh` çalışmıyor; Playwright kilitsiz ve `--workers=2`.
+
+- **WebKit kaydırması** (tuzak 174): `display: none` olan `<Activity>` dalında WebKit
+  `.grid-wrap`'in kaydırmasını sıfırlıyordu (repro: 600/200 → 0/0, Chromium 600/200).
+  `useProgramScrollKeep` (`ui/shell/useMainScroll.ts`) not edip geri yazıyor; repro sonra 600/200.
+  `program.spec.ts`'in "kaydırmayı korurken" testi iki eksende, WebKit'te yeşil.
+- **iPad boyama** (tuzak 175): `pointermove` + `elementFromPoint`, boyanan hücrelerde
+  `touch-action: none`. Çare geri alınınca `dokunmatik.spec.ts` WebKit'te 4 yerine 1 hücre.
+- **iPad menü** (tuzak 176): `platform/dom/longPress.ts`, 500 ms, 8 px; önce `pointercancel`, sonra
+  `contextmenu`. Çare geri alınınca iki menü testi kırmızı; `pointercancel` çıkarılınca boş hücre
+  testi kırmızı. Gerçek bir iPad'de denenmedi. Dokunmatik Windows'ta Chromium kendi `contextmenu`'sünü
+  de gönderir, menü iki kez istenir (aynı hedef, zararsız sanılıyor, ölçülmedi).
+- **Yalnız test:** `KLASOR_YALNIZ_CHROMIUM` (temel 75'in iki testi, exe 76'nın tarayıcı testi),
+  `SAYDAM_GORUNTU_FIREFOX_YOK` (temel 79), Çıktı rayının kaydırıcısı hesaplanmış `overflow-y` ile.
+  Kurulum 65'in sayı kutusu: Firefox'un boş `input[type=number]`'ı 65 px istiyor, kutu 7ch = 63;
+  3× ekran görüntüsünde "16", "88", "10" spinnerın yanında tam okunuyor, CSS değişmedi, Firefox'ta
+  o kutu karşılaştırmadan çıktı. `playwright.firefox.config.ts` ve `npm run test:firefox`, CI'da değil.
+- **Koşulanlar:** Chromium program, musaitlik, temel, yazdir, kurulum, exe, dokunmatik 255/255;
+  WebKit program, musaitlik, dokunmatik 95/95; Firefox temel, yazdir, exe, dokunmatik 80 geçti
+  10 atlandı, kurulum 65 14/14. `tsc`, eslint, prettier, `vite build`, `boyut` (ham 1,17 MB,
+  brotli 299,88 kB, 6,12 kB pay). Tam süit Firefox ve WebKit'te koşulmadı.
+
+---
+
+## 2026-11-16 · İncelemenin dört küçük bulgusu (`duzeltme/inceleme`)
+
+`ci/kurulum-durdur`'dan (PR #65) açıldı.
+
+- **İndirme süresi (tuzak 172).** `getir` `istemci(300)` ile indiriyordu: 300 s bütün gövdeyi
+  kapsıyordu, 31 MB'lık kurulum 0,85 Mbit/s'nin altında hiç inemezdi. Şimdi `connect_timeout`
+  20 s ve `read_timeout` 60 s, boy sınırı yine akışta; manifest toplam 20 s'de. İndirme
+  `guncelleme-indirme` olayıyla yüzde başına bir kez `[inen, toplam]` yolluyor, Ayarlar "Yeni
+  sürüm iniyor… %N" yazıyor. `cargo test`'te yerel yavaş sunucu: 1,5 s süren ama 2 s susmayan hat
+  bitiyor, aynı hatta 600 ms'lik toplam sınırlı istemci bitiremiyor; 20 s susan hat 500 ms'lik
+  sessizlik sınırında "İnternet yanıt vermedi".
+- **Bekleyici.** `Mozaik-kurulum-bekleyici.exe` sabit `%TEMP%` yolundan kurulumun kendi taze
+  klasörüne (`bekleyici_yolu`); sonraki indirmenin süpürmesi klasörle birlikte siliyor, eski sabit
+  dosya da siliniyor. `BEKLEYICI_ADI`'nın yorumu `mainBinaryName`'i söylüyor.
+- **Küçülme kabulü.** `acceptShrink` bayrağı yalnız başlattığı yazım için açık (`finally`'de
+  kapanıyor); önce oturum boyu, exe'de hiç kapanmıyordu. Gerileme testi düzeltmesiz kırmızıydı.
+- **Kurtarma budaması.** `sparePrunable`: oturumluk kurtarma kopyaları, günlük kurtarma
+  dosyaları ve silmeden-önce dosyalarının her türünden en yeni on, en yenisi hiç; günlük budamayla
+  aynı anda. Rust `remove_in` artık `yedek_mi`'ye bakıyor (aynı üç kalıp, saatli üst çubuk yedeği ve
+  başka adlar yine reddediliyor). İnceleme alt ajanı iki türün tek sayılmasını buldu: on oturum
+  günün küçülme dosyasını itebilirdi, ayrıldı.
+
+Koşulan: `cargo test` 97/97, `cargo clippy` (yalnız eski iki uyarı), `tsc`, `eslint`, `prettier`
+(değişen dosyalar), `npm run hizli` 1712 geçti, `vite build`, `npm run boyut` (1,17 MB, brotli
+299,05 kB), E2E `klasor` (site, 1 işçi) 9/9, `okunamayan` + `exe` (2 işçi) 26/26. Koşulamayan:
+`cargo check --target x86_64-pc-windows-msvc` (bu Mac'te `llvm-rc` yok, `tauri-winres` duruyor);
+değişen kodun hiçbiri `cfg(windows)` altında değil. Tıklama testi yapılmadı: yüzde yalnız
+gerçek exe'nin indirmesinde görünüyor.
 
 ## 2026-11-16 · Daha iyi program: iyileştirme geçişi, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
 

@@ -106,8 +106,7 @@ test.describe('94. Okunamayan kayıt üzerine yazılmıyor', () => {
 
   test('madde 7: okunamayan yedek Ayarlar → Planlar ve yedek’te görünüyor', async ({ page }) => {
     await seedAndReload(page, { 'ders-programi-yedek-0': YENI });
-    await page.getByRole('button', { name: 'Ayarlar' }).click();
-    await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
+    await openSettings(page, 'Planlar ve yedek');
     const panel = page.locator('.panel', { hasText: 'Bu bilgisayardaki otomatik yedekler' });
     await expect(panel).toContainText('bir önceki açılış');
     await expect(panel).toContainText('daha yeni bir sürümle yazılmış');

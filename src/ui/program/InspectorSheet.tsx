@@ -111,7 +111,7 @@ export function Inspector({
           placed === 0
             ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
             : t(
-                'Programdaki {n} kartı yeni öğretmenin müsait saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
+                'Programdaki {n} ders yeni öğretmenin müsait saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
                 { n: placed },
               ),
         confirmLabel: t('Aktar'),
@@ -129,7 +129,7 @@ export function Inspector({
     toast(
       returned === 0
         ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.short })
-        : t('{ne} dersi {kim} öğretmenine geçti. {n} kart havuza döndü.', {
+        : t('{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.', {
             ne: other,
             kim: to.short,
             n: returned,

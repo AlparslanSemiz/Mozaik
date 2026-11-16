@@ -167,7 +167,7 @@ describe('health.short', () => {
     const pending = makeWorld({
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
     });
-    expect(health(pending).short).toBe('2 saat havuzda');
+    expect(health(pending).short).toBe('2 saat yerleşmedi');
     const stuck = makeWorld({
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
       unavailable: { 'oMC|0|0': 1, 'oMC|0|1': 1, 'oMC|0|2': 1, 'oMC|0|3': 1 },

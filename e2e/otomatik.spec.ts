@@ -11,6 +11,7 @@ import { expect, test } from './kapan';
 import {
   chooseEntity,
   loadWorld,
+  openMore,
   openSettings,
   openWithSample,
   placedHours,
@@ -22,7 +23,7 @@ import { SMALL_WORLDS } from '../src/pure/worlds';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page) {
-  await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+  await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
   await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 }
 
@@ -35,7 +36,7 @@ test.describe('22. Otomatik dizme', () => {
 
     await autoFill(page);
 
-    await expect(page.locator('.reason-bar')).toContainText('Program dizildi');
+    await expect(page.locator('.reason-bar')).toContainText('Program yapıldı');
     await expect(page.locator('.pool-card')).toHaveCount(0);
     expect(await placedHours(page)).toBeGreaterThan(400);
   });
@@ -69,7 +70,7 @@ test.describe('22. Otomatik dizme', () => {
     await expect(cell).toHaveText(before!);
   });
 
-  test('"Baştan diz" sormadan baştan diziyor ve bildirimi Geri al sunuyor', async ({ page }) => {
+  test('"Yeniden yap" sormadan baştan diziyor ve bildirimi Geri al sunuyor', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
     const cards = page.locator('table.grid .card');
@@ -82,22 +83,24 @@ test.describe('22. Otomatik dizme', () => {
 
     // No question since SD1: the run's answer lands as one step of the
     // history, and its notice offers "Geri al" for the whole of it.
-    await page.getByRole('button', { name: 'Baştan diz' }).click();
+    // In the strip's Daha fazla since 2026-11-16.
+    await openMore(page);
+    await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
     await expect(page.locator('.dlg')).toHaveCount(0);
-    const notice = page.locator('.toast', { hasText: 'baştan dizildi' });
+    const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
     await expect(cards).toHaveCount(first);
     await notice.getByRole('button', { name: 'Geri al' }).click();
     await expect(cards).toHaveCount(first - 1);
   });
 
-  test('"Başka bir dizilim" aynı kartlarla başka bir hafta diziyor', async ({ page }) => {
+  test('"Başka bir dizilim" aynı derslerle başka bir hafta diziyor', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
-    // "N kart yerleşti": the count of cards, not of drawn pieces (a double
+    // "N ders yerleşti": the count of blocks, not of drawn pieces (a double
     // over the long break is drawn in two).
-    const placed = /\d+ kart yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
+    const placed = /\d+ ders yerleşti/.exec((await bar.textContent()) ?? '')?.[0];
     expect(placed).toBeDefined();
     const week = () =>
       page
@@ -105,20 +108,22 @@ test.describe('22. Otomatik dizme', () => {
         .evaluateAll((tds) => tds.map((td) => td.textContent ?? '').join('|'));
     const before = await week();
 
-    await page.getByRole('button', { name: 'Başka bir dizilim' }).click();
-    const notice = page.locator('.toast', { hasText: 'baştan dizildi' });
+    // In the strip's Daha fazla, beside Yeniden yap (Sadeleşme, 2026-11-16).
+    await openMore(page);
+    await page.getByRole('menuitem', { name: 'Başka bir dizilim' }).click();
+    const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(`Program dizildi. ${placed!}`);
+    await expect(bar).toContainText(`Program yapıldı. ${placed!}`);
     expect(await week()).not.toBe(before);
     // One undo step brings the week before back.
     await notice.getByRole('button', { name: 'Geri al' }).click();
     await expect.poll(week).toBe(before);
   });
 
-  test('havuz boşken "Otomatik diz" kapalı', async ({ page }) => {
+  test('havuz boşken "Programı yap" kapalı', async ({ page }) => {
     await openWithSample(page);
     await autoFill(page);
-    await expect(page.getByRole('button', { name: /^Otomatik diz/ })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Programı yap', exact: true })).toBeDisabled();
   });
 
   test('yerleşemeyen dersin sebebini öğretmenin açığıyla söylüyor', async ({ page }) => {
@@ -165,7 +170,7 @@ test.describe('22. Otomatik dizme', () => {
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.locator('.badge', { hasText: /^Engel$/ })).toHaveCount(0);
+    await expect(page.locator('.badge', { hasText: /^Kesin$/ })).toHaveCount(0);
   });
 
   test('sonuç çubuğu "Tamam" ile kapanıyor', async ({ page }) => {
@@ -175,7 +180,9 @@ test.describe('22. Otomatik dizme', () => {
     // The bar does not go BLANK: it falls back to what it says at rest, which
     // is how to read the grid. What must go is the verdict and its button.
     await expect(page.getByRole('button', { name: 'Tamam' })).toHaveCount(0);
-    await expect(page.locator('.reason-bar')).toContainText('Satırlar öğretmen');
+    // At rest the bar says one sentence; how to read the grid is behind its
+    // "?" since 2026-11-16.
+    await expect(page.locator('.reason-bar')).toContainText('Yerleşmiş dersi sürükleyerek taşıyın');
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toHaveCount(0);
   });
 
@@ -190,7 +197,7 @@ test.describe('22. Otomatik dizme', () => {
 
   test('sayfa donmuyor — dizim sırasında da sonrasında da tıklanabiliyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     // If the main thread were blocked this would time out rather than answer.
     await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
@@ -201,12 +208,20 @@ test.describe('22. Otomatik dizme', () => {
   // DK4: the bar kept saying what the last run or the last suggestion did
   // after Ctrl+Z had taken it back — a green "Öneri uygulandı" beside a chip
   // counting the lessons that did not fit again.
-  test('geri alınan önerinin başarı cümlesi kalmıyor', async ({ page }) => {
+  //
+  // The click waits for the search to END. In this world the search often
+  // finds `teacherHours` first and `teacherDays`, earlier in the order, a few
+  // dozen ms later; the panel then folds the first row under "Başka yollar"
+  // by `hidden`, without redrawing it. A click resolved in that window keeps
+  // retrying on the hidden button until the test's limit (CI 2026-11-16,
+  // 43791760095: "element is not visible" for 28 s; 4 of 40 locally).
+  test('geri alınan önerinin başarı cümlesi kalmıyor', { tag: '@arama' }, async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
     await loadWorld(page, world.state);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     const apply = page.locator('.panel.suggestions .btn.primary').first();
     await expect(apply).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 60_000 });
     await apply.click();
     const bar = page.locator('.reason-bar');
     await expect(bar).toContainText('Öneri uygulandı');
@@ -229,7 +244,7 @@ test.describe('22. Otomatik dizme', () => {
   test('öneri araması Chromium’da worker’larda koşuyor', { tag: '@arama' }, async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
     await loadWorld(page, world.state);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.panel.suggestions .btn.primary').first()).toBeVisible({
       timeout: 60_000,
     });
@@ -244,9 +259,9 @@ test.describe('22. Otomatik dizme', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
-    await expect(bar).toContainText('Program dizildi');
+    await expect(bar).toContainText('Program yapıldı');
     await page.keyboard.press('Control+z');
-    await expect(bar).not.toContainText('Program dizildi');
+    await expect(bar).not.toContainText('Program yapıldı');
   });
 
   // DK5: Durdur during the suggestion search used to leave "Sınıfların
@@ -260,7 +275,7 @@ test.describe('22. Otomatik dizme', () => {
       test.setTimeout(120_000);
       const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
       await loadWorld(page, kurs);
-      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
       const panel = page.locator('.panel.suggestions');
       await expect(panel).toContainText('Nasıl kurulacağı aranıyor', { timeout: 60_000 });
 
@@ -287,7 +302,7 @@ test.describe('22. Otomatik dizme', () => {
       test.setTimeout(420_000);
       const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
       await loadWorld(page, kurs);
-      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
 
       // The bar still says what happened; the panel says what to do about it.
       const bar = page.locator('.reason-bar.bad');

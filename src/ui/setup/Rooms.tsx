@@ -4,7 +4,6 @@
 import { useMemo, useState } from 'react';
 import { applyList, EMPTY_QUERY, type ListQuery } from '../../pure/listview';
 import { addRoom, deletionNotice, deleteRoom, updateRoom } from '../../pure/entities';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import {
   moveFocusFromDeleted,
@@ -79,7 +78,7 @@ export default function Rooms({ state, change }: PanelProps) {
             }}
           />
           <button
-            className="btn"
+            className="btn primary"
             disabled={newRoom.trim() === ''}
             onClick={() => {
               change((d) => addRoom(d, newRoom));
@@ -102,7 +101,8 @@ export default function Rooms({ state, change }: PanelProps) {
       </AddPanel>
 
       <div className="panel step-panel">
-        <h2>{t('Derslikler ({n})', { n: state.rooms.length })}</h2>
+        {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+        <h2>{t('Derslikler')}</h2>
 
         {state.rooms.length > 0 && (
           <ListTools
@@ -158,12 +158,12 @@ export default function Rooms({ state, change }: PanelProps) {
                         leaving the list. The information was always there; it
                         was spread over four tabs. */}
                         <button
-                          className="btn icon"
-                          aria-label={`${r.name} bilgileri`}
+                          className="btn row-detail"
                           title={t('Bilgileri ve haftalık programı')}
                           onClick={() => inspect('room', r.id)}
                         >
-                          <PanelRight size={16} strokeWidth={2} />
+                          {t('Ayrıntı')}
+                          <span className="visually-hidden"> · {r.name}</span>
                         </button>
                         <button
                           className="btn danger"

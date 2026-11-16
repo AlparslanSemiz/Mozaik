@@ -96,7 +96,7 @@ export function buildAdvice(d: State, ix: Index): Advice[] {
       code: 'lessonManyBlocks',
       who,
       message: t(
-        '{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.',
+        "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; Mozaik'in deneyebileceği tek şekil bu.",
         { ders: who, n: lesson.blocks.length },
       ),
     });

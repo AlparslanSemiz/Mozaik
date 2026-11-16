@@ -36,6 +36,54 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Sadeleşme (Alp onayladı, K1–K8)
+
+**Karar (Alp, 2026-11-16).** Babanın şikâyeti "çok seçenek var, karışık, neyin nerede olduğunu
+anlayamıyorum". Beş araştırma (236 kontrol türünün envanteri, 20 işlik bulunurluk testi, 152 ekran
+görüntüsü, kelime yükü, yaşlı kullanıcı ilkeleri) aynı yere çıktı: sorun okunurluk değil miktar.
+Önerinin sekiz kararının sekizi de onaylandı. İlke: tek sade düzen, mod düğmesi yok; her ekranda
+bir ana düğme, az kullanılan her şey her ekranda aynı köşedeki tek bir "Daha fazla"da, yardım
+"?" arkasında, ekranda en çok iki yardım cümlesi.
+
+- **K1 · Beş görev sekmesi:** Program · Öğretmenler · Sınıflar · Yazdır ve gönder · Okul bilgileri,
+  bugünkü yedi sekmenin (Okul, Müsaitlik, Dersler, Program, Kontrol, Çıktı, Ayarlar) yerine.
+  Ters çevirdiği: LAYOUT "Sekmeler" (yedi sekme, "Okul yalnız listeleri, Ayarlar yalnız ayarları
+  tutar"), DECISIONS 2026-08-27 "Dersler kendi sekmesi", 2026-08-28 "İki sekme ve bir bölüm yeniden
+  adlandırıldı". Aşama 3.
+- **K2 · Plan ve Seçenek tek kavram:** gündelik ekranda yalnız "plan"; ikinci diziliş "Bu programın
+  kopyası" ile açılır ve ancak o zaman görünür. Ters çevirdiği: TODO SD3'ün terim haritasındaki
+  ayrı **seçenek** kavramı, LAYOUT "Program" şeridinin `Seçenek` grubu. Aşama 3.
+- **K3 · Kontrol sekmesi kalkar:** sorunlar durum çipinin açtığı listede, yerleşmeyen derse
+  tıklayınca neden ve çözüm. Ters çevirdiği: LAYOUT "Kontrol" ve "Durum çipi … Kontrol'e götürür".
+  Aşama 3.
+- **K4a · Yeni adlar:** "Otomatik diz (N kart)" → "Programı yap", "Baştan diz" → "Yeniden yap",
+  "Danışman" → "İpuçları", kural seviyesi "Engel / Uyarı" → "Kesin / Tercih", "N saat havuzda" →
+  "N saat yerleşmedi". **K4b · ekranda "kart" yerine "ders"**: iç adlar, veri ve dosya adları
+  "kart" kalır, yalnız görünen söz değişir. Ters çevirdiği: TODO SD3'ün haritasında **kart**,
+  **diz** fiili, **Engel/Uyarı**, Danışman **notları**. Aşama 1'de yapıldı.
+- **K5 · Listeler düz yazı, düzenleme kişi sayfasında:** öğretmen ve sınıf satırı kutu değil yazı,
+  tıklayınca sağda sayfası açılır. Ters çevirdiği: DECISIONS 2026-08-30 "Varlık paneli düzenliyor"
+  ile Okul satırının yan yana düzenlemesi (iki yerde düzenleme), LAYOUT "Okul" satır kutuları.
+  Aşama 2.
+- **K6 · Sığdır / Ferah / Rahat kalkar:** ızgara ekrana kendiliğinden sığar, yazı boyu Ayarlar'da.
+  Ters çevirdiği: LAYOUT "Izgara · Yoğunluk", DESIGN "Tek istisna Sığdır" (DECISIONS 2026-09-26
+  "Sığdır kesmiyor, küçültüyor"). Aşama 3; aşama 1 yoğunluğu yalnız Daha fazla'ya taşıdı.
+- **K7 · Geçici görünüm ve toplu sabitleme kalkar:** kart üstündeki sabitleme ve "Tüm programı
+  sabitle" kalır. Ters çevirdiği: LAYOUT "Geçici görünüm" ve sağ tık menüsünün `Toplu sabitle` ve
+  `Geçici görünüm` kapıları. Aşama 3.
+- **K8 · Yeni: "Eski hâline dön":** Dosya menüsünde tarihli günlük kopyalar. Aşama 3, veri koruma
+  işiyle birlikte; Dosya menüsünde yeri bir TODO notuyla ayrıldı.
+
+**Aşama 1'in (Sakinleştirme) bu dalda ters çevirdikleri**, kararlardan bağımsız olarak önerinin
+"hemen yapılabilir" kısmı: LAYOUT "Üst çubuk"un plan seçicisi tek planda da görünür kuralı (artık
+yalnız ikinci plan olunca), "Dosyaya kaydet ve dosyadan aç üst çubukta" (artık sade bir **Kaydet**
+ve **Dosya ▾**), "Temanın düğmesi üst çubukta da var" ve 2026-08-30'un Görünüm şeridindeki tema
+kopyası (tema artık yalnız Ayarlar → Görünüm'de), "Katlama düğmesi üst çubukta" (artık Ayarlar →
+Görünüm ve Ctrl+K), "Şerit okurken kendiliğinden de çekilir" (artık seçilmedikçe kapalı; açıkça
+seçmiş makine seçimini korur), DESIGN'ın bölüm renkleri ve "Seçili sekme düz bir dolgu" (artık tek
+nötr seçili sekme; renk yalnız veri ve durum için), şeritte basılı düğmenin dolu bölüm rengi
+(artık bir segment: açık zemin ve alt çizgi, dolu yalnız ana düğme), Başlarken'in dokuz adımı
+(2026-11-15; artık beş iş).
 ### 2026-11-16 · Çözücü ilk yasal haftada durmuyor: iyileştirme, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
 
 Alp'in kararı (2026-11-16): "daha iyi program" öncelik. Denetim ölçtü: arama ilk yasal haftada

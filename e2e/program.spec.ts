@@ -4,21 +4,23 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
   answerDialog,
+  dragAndDrop,
+  hover,
+  loadWorld,
   mainList,
+  onScreen,
+  openGridMenu,
+  openMore,
+  openMoreSub,
+  openSettings,
   openSetup,
   openWithSample,
-  openSettings,
-  startDrag,
-  visibleCells,
-  dragAndDrop,
   poolHours,
-  loadWorld,
-  hover,
-  tokens,
-  settledMotion,
-  openGridMenu,
-  onScreen,
   reopen,
+  settledMotion,
+  startDrag,
+  tokens,
+  visibleCells,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -361,8 +363,8 @@ test.describe('2. Sürükle-bırak', () => {
     // block is this" on screen is now the width (`[data-size='2']` is twice
     // `[data-size='1']`, asserted below) and the tooltip, which is where a
     // number the eye does not need but a reader might still lives.
-    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik kart/);
-    await expect(singles.first()).toHaveAttribute('title', /1 saatlik kart/);
+    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik ders/);
+    await expect(singles.first()).toHaveAttribute('title', /1 saatlik ders/);
     const widths = await page.evaluate(() => {
       const one = document.querySelector('.pool-card[data-size="1"]')!;
       const two = document.querySelector('.pool-card[data-size="2"]')!;
@@ -803,10 +805,14 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     const wrap = page.locator('.grid-wrap');
     await wrap.evaluate((el) => {
       el.scrollLeft = 600;
+      el.scrollTop = 40;
       (window as unknown as { __keptGrid?: Element }).__keptGrid = el;
     });
-    const before = await wrap.evaluate((el) => el.scrollLeft);
-    expect(before).toBeGreaterThan(0);
+    // Both axes: WebKit drops a `display: none` box's offset on BOTH, and
+    // `useProgramScrollKeep` writes them back (pitfall 174).
+    const before = await wrap.evaluate((el) => [el.scrollLeft, el.scrollTop]);
+    expect(before[0]).toBeGreaterThan(0);
+    expect(before[1]).toBeGreaterThan(0);
 
     await openSetup(page, 'Öğretmenler');
     const first = mainList(page).locator('tbody tr').first();
@@ -820,7 +826,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
         (el) => (window as unknown as { __keptGrid?: Element }).__keptGrid === el,
       ),
     ).toBe(true);
-    expect(await wrap.evaluate((el) => el.scrollLeft)).toBe(before);
+    expect(await wrap.evaluate((el) => [el.scrollLeft, el.scrollTop])).toEqual(before);
     await expect(page.locator('table.grid .row-head', { hasText: 'ZZ' })).toBeVisible();
   });
 
@@ -1099,9 +1105,11 @@ test.describe('13. Görünüm simgeleri', () => {
     await expect(page.locator('table.grid .corner')).toHaveText('Sınıf');
     await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
 
-    // The sentence stays — an icon alone is a guess the first time — but it
-    // moved into the reason bar when the view switch went up into the ribbon.
-    await expect(page.locator('.reason-bar')).toContainText('Satırlar sınıf');
+    // The sentence stays — an icon alone is a guess the first time — behind
+    // the reason bar's "?" since 2026-11-16 (Sadeleşme).
+    await page.locator('.reason-bar .help-btn').click();
+    await expect(page.locator('.help-pop')).toContainText('Satırlar sınıf');
+    await page.keyboard.press('Escape');
   });
 });
 
@@ -1182,7 +1190,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
     const before = await blocks();
     expect(before).toBeGreaterThan(10);
-    await expect(page.locator('.pool-count strong')).toContainText(`${before} kart`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${before} ders`);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
@@ -1260,8 +1268,8 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // A tray that quietly showed a twelfth of what is left would make the head
     // count a lie, so the head says what it holds AND what it holds back, and
     // the two add up to the whole tray. The number held back was never checked.
-    await expect(page.locator('.pool-count strong')).toContainText(`${shown} kart`);
-    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} kart süzgeç dışında`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${shown} ders`);
+    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} ders süzgeç dışında`);
 
     await filter.selectOption('');
     await expect.poll(blocks).toBe(all);
@@ -1325,7 +1333,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     const blocks = piles.reduce((n, p) => n + p.count, 0);
     expect(piles.length, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
     expect(piles.length, 'hiçbir blok desteye girmemiş').toBeLessThan(blocks);
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} kart`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} ders`);
     await expect(page.locator('.pool-card')).toHaveCount(piles.length);
 
     for (const p of piles) {
@@ -1375,7 +1383,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       ),
     });
     await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
-    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} kart`);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} ders`);
   });
 
   // THE TRAY OPENS INTO THE ROOM THE GRID IS NOT USING, AND SAYS WHEN THERE IS
@@ -1820,12 +1828,12 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await page.waitForTimeout(150);
     await hover(page, 0, 2);
     await expect(page.locator('.reason-bar')).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirecek',
+      '510 · MÇ ile 511 · MÇ (2 ders) yer değiştirecek',
     );
     await page.mouse.up();
 
     await expect(page.locator('.toast').last()).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 kart) yer değiştirdi',
+      '510 · MÇ ile 511 · MÇ (2 ders) yer değiştirdi',
     );
     // The 2-hour block is one cell two columns wide.
     await expect(cell(2)).toContainText('510');
@@ -2118,7 +2126,7 @@ test.describe('86. Sabitleme', () => {
    */
   async function filledWithOnePin(page: Page) {
     await openWithSample(page);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 30_000,
     });
@@ -2264,8 +2272,10 @@ test.describe('86. Sabitleme', () => {
     const cards = page.locator('table.grid .card');
     await expect(cards).toHaveCount(1);
 
-    const programs = page.getByTitle('Seçenek seç ve yönet');
-    await programs.click();
+    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
+    // strip READS the open one's name once there are two.
+    const programs = page.locator('.ribbon');
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
     await answerDialog(page);
     await expect(programs).toContainText('Seçenek 2');
@@ -2274,10 +2284,10 @@ test.describe('86. Sabitleme', () => {
     await page.keyboard.press('Delete');
     await expect(cards).toHaveCount(0);
 
-    await programs.click();
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
     await expect(cards).toHaveCount(1);
-    await programs.click();
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 2' }).click();
     await expect(cards).toHaveCount(0);
   });
@@ -2286,17 +2296,19 @@ test.describe('86. Sabitleme', () => {
     await openWithSample(page);
     await dragAndDrop(page);
     const cards = page.locator('table.grid .card');
-    const programs = page.getByTitle('Seçenek seç ve yönet');
-    await programs.click();
+    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
+    // strip READS the open one's name once there are two.
+    const programs = page.locator('.ribbon');
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
     await answerDialog(page);
     await expect(programs).toContainText('Seçenek 2');
 
     // SD1: no question. The notice counts the hours and never the pins.
-    await programs.click();
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitem', { name: 'Seçeneği sil' }).click();
     await expect(page.locator('.dlg')).toHaveCount(0);
-    await expect(programs).toContainText('Seçenek 1');
+    await expect(programs).not.toContainText('Seçenek 2');
     const notice = page.locator('.toast', { hasText: 'seçeneği silindi' });
     await expect(notice).toContainText(/yerleşmiş \d+ saati de gitti/);
     await expect(notice).not.toContainText('sabitleme');
@@ -2312,8 +2324,10 @@ test.describe('86. Sabitleme', () => {
     await openWithSample(page);
     await dragAndDrop(page);
     const cards = page.locator('table.grid .card');
-    const programs = page.getByTitle('Seçenek seç ve yönet');
-    await programs.click();
+    // The seçenek list is behind Daha fazla → Seçenek since 2026-11-16; the
+    // strip READS the open one's name once there are two.
+    const programs = page.locator('.ribbon');
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitem', { name: 'Bu seçeneğin kopyası' }).click();
     await answerDialog(page);
 
@@ -2321,7 +2335,7 @@ test.describe('86. Sabitleme', () => {
     await cards.first().focus();
     await page.keyboard.press('Delete');
     await expect(cards).toHaveCount(0);
-    await programs.click();
+    await openMoreSub(page, /^Seçenek/);
     await page.locator('.menu').getByRole('menuitemradio', { name: 'Seçenek 1' }).click();
     await expect(cards).toHaveCount(1);
 
@@ -2397,14 +2411,16 @@ test.describe('86. Sabitleme', () => {
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
   });
 
-  test('"Baştan diz" sormadan sabitlenmişi YERİNDE bırakıyor', async ({ page }) => {
+  test('"Yeniden yap" sormadan sabitlenmişi YERİNDE bırakıyor', async ({ page }) => {
     const card = await filledWithOnePin(page);
     const where = (await card.boundingBox())!;
     const text = (await card.textContent())!;
 
     // No question since SD1. The run may land on the week it started from,
     // and then nothing changes and no notice comes: the bar is the sign.
-    await page.getByRole('button', { name: 'Baştan diz' }).click();
+    // In the strip's Daha fazla since 2026-11-16.
+    await openMore(page);
+    await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
     await expect(page.locator('.dlg')).toHaveCount(0);
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 30_000,

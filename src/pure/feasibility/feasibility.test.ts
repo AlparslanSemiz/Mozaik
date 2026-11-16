@@ -317,7 +317,7 @@ describe('holeReason', () => {
     d.unavailable['s510|0|3'] = 1;
 
     expect(holeReason(d, buildIndex(d), 'x1')).toBe(
-      'Boş kalan saatler bu dersin 2 saatlik kartına uymuyor',
+      'Boş kalan saatler bu dersin 2 saatlik bloğuna uymuyor',
     );
   });
 
@@ -551,7 +551,7 @@ describe('health', () => {
 
     const h = health(d);
     expect(h.pending).toBe(4);
-    expect(h.message).toContain('4 saat havuzda');
+    expect(h.message).toContain('4 saat yerleşmedi');
     // Nothing is WRONG with a timetable that has not been laid out yet.
     expect(h.level).toBe('ok');
   });
@@ -632,7 +632,7 @@ describe('health', () => {
       weeklyHours: 3,
       blocks: [],
     });
-    expect(health(d).message).toMatch(/^\d+ saat havuzda$/);
+    expect(health(d).message).toMatch(/^\d+ saat yerleşmedi$/);
   });
 
   // Pitfall 22, in its third home: one teacher away all week produces sixty

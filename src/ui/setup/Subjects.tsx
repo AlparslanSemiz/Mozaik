@@ -283,7 +283,7 @@ export default function Subjects({ state, change }: PanelProps) {
               if (e.key === 'Enter') add();
             }}
           />
-          <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>
+          <button className="btn primary" disabled={fresh.trim() === '' || clash} onClick={add}>
             {t('Ekle')}
           </button>
           {clash && <span className="hint">{t('Bu branş listede zaten var.')}</span>}
@@ -291,7 +291,8 @@ export default function Subjects({ state, change }: PanelProps) {
       </AddPanel>
 
       <div className="panel step-panel">
-        <h2>{t('Branşlar ({n})', { n: options.length })}</h2>
+        {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+        <h2>{t('Branşlar')}</h2>
 
         {/* Said out loud, because a keyboard move happens somewhere the eye
             is not necessarily following. Same markup ListTools uses. */}

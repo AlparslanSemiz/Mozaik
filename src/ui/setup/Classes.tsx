@@ -11,7 +11,6 @@ import {
   updateClass,
   weeklyLoad,
 } from '../../pure/entities';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import {
   ColorPick,
@@ -110,7 +109,7 @@ export default function Classes({ state, change }: PanelProps) {
               </option>
             ))}
           </select>
-          <button className="btn" disabled={newClass.name.trim() === ''} onClick={addNew}>
+          <button className="btn primary" disabled={newClass.name.trim() === ''} onClick={addNew}>
             {t('Ekle')}
           </button>
         </div>
@@ -134,7 +133,8 @@ export default function Classes({ state, change }: PanelProps) {
       </AddPanel>
 
       <div className="panel step-panel">
-        <h2>{t('Sınıflar ({n})', { n: state.classes.length })}</h2>
+        {/* No count: Okul's strip says it, once per screen (Sadeleşme). */}
+        <h2>{t('Sınıflar')}</h2>
 
         {state.classes.length > 0 && (
           <ListTools
@@ -254,12 +254,12 @@ export default function Classes({ state, change }: PanelProps) {
                         leaving the list. The information was always there; it
                         was spread over four tabs. */}
                         <button
-                          className="btn icon"
-                          aria-label={`${c.name} bilgileri`}
+                          className="btn row-detail"
                           title={t('Bilgileri ve haftalık programı')}
                           onClick={() => inspect('class', c.id)}
                         >
-                          <PanelRight size={16} strokeWidth={2} />
+                          {t('Ayrıntı')}
+                          <span className="visually-hidden"> · {c.name}</span>
                         </button>
                         <button
                           className="btn danger"

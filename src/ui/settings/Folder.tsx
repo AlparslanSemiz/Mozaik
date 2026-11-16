@@ -2,7 +2,7 @@
 // plan is written from then on.
 
 import { type FolderRun, KEEP_DAILY, MAIN_NAME, storageKind } from '../../platform/storage';
-import { T, useT } from '../common';
+import { HelpHead, T, useT } from '../common';
 
 /**
  * "Nereye kaydedilsin" (task B4).
@@ -24,7 +24,29 @@ export function Folder({ folder }: { folder: FolderRun }) {
 
   return (
     <div className="panel">
-      <h2>{t('Nereye kaydedilsin')}</h2>
+      {/* In the exe the sentence is not help but the answer to "where is
+          my work", so it stays on view; in a browser the offer's
+          explanation is behind the "?" (Sadeleşme, 2026-11-16). */}
+      {s.kind === 'yok' || folder.fixed ? (
+        <h2>{t('Nereye kaydedilsin')}</h2>
+      ) : (
+        <HelpHead topic="Nereye kaydedilsin">
+          <p>
+            <T
+              k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
+              vars={{ gun: KEEP_DAILY }}
+            />
+          </p>
+        </HelpHead>
+      )}
+      {folder.fixed && s.kind !== 'yok' && (
+        <p className="hint">
+          <T
+            k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
+            vars={{ gun: KEEP_DAILY }}
+          />
+        </p>
+      )}
 
       {s.kind === 'yok' ? (
         <>
@@ -32,11 +54,11 @@ export function Folder({ folder }: { folder: FolderRun }) {
             <T k="**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor." />
           </p>
           {/* The one-habit sentence is NOT repeated here: it already sits in
-              "Veriler nerede" two panels down, and saying it twice on one
+              Hakkında → Teknik bilgiler → "Veriler nerede", and saying it twice on one
               screen makes both copies read like boilerplate (and made a test
               ambiguous — pitfall 49). */}
           <p className="hint">
-            <T k="O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare." />
+            <T k="O zamana kadar üst çubuktaki **Kaydet** tek çare." />
           </p>
         </>
       ) : (
@@ -46,19 +68,6 @@ export function Folder({ folder }: { folder: FolderRun }) {
               that costs a click and a permission; in the exe it has already
               happened, and a "Klasör seç…" button there would be three
               controls that cannot mean anything. */}
-          <p className="hint">
-            {folder.fixed ? (
-              <T
-                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            ) : (
-              <T
-                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
-                vars={{ gun: KEEP_DAILY }}
-              />
-            )}
-          </p>
 
           {!folder.fixed && (
             <div className="form-row">

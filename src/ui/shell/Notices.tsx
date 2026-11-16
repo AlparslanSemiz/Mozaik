@@ -116,7 +116,7 @@ export default function Notices({
       {!canSave && (
         <div className="save-warning">
           ⚠{' '}
-          <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Mozaik kapanınca yaptığınız her şey kaybolur. Çalışırken ve bilgisayarı kapatmadan önce sık sık **Dosyaya kaydet** düğmesine basın." />
+          <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Mozaik kapanınca yaptığınız her şey kaybolur. Çalışırken ve bilgisayarı kapatmadan önce sık sık **Kaydet** düğmesine basın." />
         </div>
       )}
 
@@ -126,7 +126,7 @@ export default function Notices({
       {saveTrouble === 'dolu' && (
         <div className="save-warning" role="alert">
           ⚠{' '}
-          <T k="**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın." />
+          <T k="**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Kaydet** düğmesine basın." />
         </div>
       )}
 
@@ -346,7 +346,7 @@ export default function Notices({
           </span>
           <span className="update-acts">
             <button className="btn primary" onClick={reminder.save}>
-              {t('Dosyaya kaydet')}
+              {t('Kaydet')}
             </button>
             <button className="btn" onClick={reminder.hide}>
               {t('Sonra')}

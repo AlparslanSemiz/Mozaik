@@ -267,7 +267,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Otomatik diz');
+    await exe.oturum.tikla('metin:Programı yap');
 
     await expect
       .poll(
@@ -277,7 +277,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           timeout: 20_000,
         },
       )
-      .toContain('Program dizildi');
+      .toContain('Program yapıldı');
   });
 
   test('Linux’taki kopya kendini güncellemiyor', async ({ exe }) => {
@@ -331,7 +331,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     await exe.oturum.bekle('[role="dialog"]');
     await exe.oturum.tikla('metin:Yükle');
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Otomatik diz');
+    await exe.oturum.tikla('metin:Programı yap');
     await expect
       .poll(
         () =>
@@ -340,7 +340,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           timeout: 20_000,
         },
       )
-      .toContain('Program dizildi');
+      .toContain('Program yapıldı');
 
     await exe.oturum.js(
       `const card = document.querySelector('table.grid td .card');
@@ -367,7 +367,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     // WebKitGTK puts a download in the folder user-dirs.dirs names; with none
     // named it wrote into the working directory, the repository (tuzak 132).
     const once = Date.now();
-    await exe.oturum.tikla('metin:Dosyaya kaydet');
+    await exe.oturum.tikla('metin:Kaydet');
     const indirilen = exe.indirilenler;
     await expect
       .poll(() => readdirSync(indirilen).filter((n) => n.endsWith('.json')), { timeout: 10_000 })
@@ -417,7 +417,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
     );
     await dosyaAcildi(exe);
     await exe.oturum.tikla('metin:Program');
-    await exe.oturum.tikla('metin:Otomatik diz');
+    await exe.oturum.tikla('metin:Programı yap');
 
     const satirlar = () =>
       exe.oturum.js<string[]>(

@@ -24,6 +24,21 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
  */
 export const PDF_YALNIZ_CHROMIUM = "page.pdf() yalnız Chromium'da var";
 
+/**
+ * Why a test is skipped outside Chromium: it measures the File System Access
+ * API (`showDirectoryPicker`, the folder panel's "Klasör seç") or what
+ * Chromium answers for `file://`'s origin. Firefox and WebKit have no folder
+ * picker, and Firefox calls the origin `null`. The exe and the father's Edge
+ * are Chromium; the claim is about them.
+ */
+export const KLASOR_YALNIZ_CHROMIUM = "klasör API'si ve file:// kökeni Chromium'un ölçüsü";
+
+/**
+ * Why a test is skipped in Firefox: Playwright's Firefox answers
+ * `locator.screenshot({ omitBackground: true })` with "Not implemented".
+ */
+export const SAYDAM_GORUNTU_FIREFOX_YOK = "Firefox'ta saydam zeminli öğe görüntüsü yok";
+
 // The language is pinned in `kapan.ts`, for every test in every config at
 // once — see the note there.
 /**
@@ -183,8 +198,18 @@ export async function revealRibbon(page: Page) {
 }
 
 export async function openSettings(page: Page, section: string) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
+  await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
   await revealRibbon(page);
+  // The two rarely opened sections are behind the strip's Daha fazla since
+  // 2026-11-16 (Sadeleşme); the strip then READS which one is open.
+  if (section === 'Planlar ve yedek' || section === 'Hakkında') {
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitemradio', { name: section }).click();
+    await expect(page.locator('.ribbon .ribbon-label').last()).toHaveText(
+      section === 'Hakkında' ? /sürüm/i : /açık plan/i,
+    );
+    return;
+  }
   // Sections are plain `.btn`s in the strip; they never had step numbers.
   await page.locator('.ribbon .btn', { hasText: section }).first().click();
   // THE FIRST GROUP, not the whole strip. Since 2026-08-30 the right-hand end
@@ -790,7 +815,7 @@ export const SCENES: Scene[] = [
     name: '6-otomatik',
     go: async (page) => {
       await page.getByRole('button', { name: 'Program', exact: true }).click();
-      const run = page.getByRole('button', { name: /^Otomatik diz/ });
+      const run = page.getByRole('button', { name: 'Programı yap', exact: true });
       if (await run.isEnabled()) {
         await run.click();
         await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 30_000 });
@@ -1045,6 +1070,60 @@ export async function settledMotion(page: Page): Promise<void> {
  * Everything they used to do is a `menuitem` now.
  */
 export async function openGridMenu(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'İşlemler', exact: true }).click();
-  await expect(page.locator('.menu')).toBeVisible();
+  await openMore(page);
+}
+
+/**
+ * Opens the strip's "Daha fazla" menu (Sadeleşme phase 1, 2026-11-16): every
+ * strip has one, at its right-hand end, and what is rarely used is in it.
+ */
+export async function openMore(page: Page): Promise<void> {
+  await page.locator('.ribbon .more-menu').click();
+  await expect(page.locator('.menu').first()).toBeVisible();
+}
+
+/** Opens a submenu of Daha fazla by the start of its label ("Seçenek", "Renk", "Yoğunluk"). */
+export async function openMoreSub(page: Page, label: RegExp): Promise<void> {
+  await openMore(page);
+  // From the keyboard: a pointer click on a submenu trigger races Radix's
+  // hover intent and the submenu keeps moving under it.
+  await page.getByRole('menuitem', { name: label }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.menu')).toHaveCount(2);
+}
+
+/** Opens the top bar's "Dosya ▾" menu. */
+export async function openFileMenu(page: Page): Promise<void> {
+  await page.locator('.topbar .topbar-file').click();
+  await expect(page.locator('.menu').first()).toBeVisible();
+}
+
+/**
+ * Sets the theme. Since 2026-11-16 it lives in one place, Ayarlar → Görünüm,
+ * so a test that wants the dark grid goes there and comes back to the tab it
+ * was on.
+ */
+export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
+  const back = await page.locator('.tabstrip .tab[aria-current="true"]').getAttribute('aria-label');
+  await openSettings(page, 'Görünüm');
+  await page
+    .getByRole('group', { name: 'Tema', exact: true })
+    .getByRole('button', { name: theme === 'dark' ? 'Koyu' : 'Açık', exact: true })
+    .click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+  if (back !== null && back !== 'Ayarlar') {
+    await page.getByRole('button', { name: back, exact: true }).click();
+  }
+}
+
+/** Hakkında → "Teknik bilgiler", closed by default since 2026-11-16. */
+export async function openTechnical(page: Page): Promise<void> {
+  const box = page.locator('details.tech-details');
+  if ((await box.getAttribute('open')) === null) await box.locator('summary').click();
+  await expect(box).toHaveAttribute('open', '');
+}
+
+/** The usual case of `setTheme`. */
+export async function darkTheme(page: Page): Promise<void> {
+  await setTheme(page, 'dark');
 }

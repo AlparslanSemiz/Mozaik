@@ -23,9 +23,31 @@ test.describe('52. Komut paleti', () => {
     await page.keyboard.press('Escape');
     await expect(palette).toBeHidden();
 
-    // ...and there is a way in that nobody has to be told about.
-    await page.getByRole('button', { name: 'Ara ve git' }).click();
+    // ...and there is a way in that nobody has to be told about: the top
+    // bar's "?" menu (since 2026-11-16; it was a magnifier icon alone).
+    await page.locator('.topbar .topbar-help').click();
+    await page.getByRole('menuitem', { name: /Ara ve yap/ }).click();
     await expect(palette).toBeVisible();
+  });
+
+  // It finds JOBS, not only places (Sadeleşme, 2026-11-16): he types what he
+  // wants done, not the name of the screen it is on.
+  test('işleri de buluyor: "yazdır" Çıktı\'yı, "tema" Görünüm\'ü açıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('baskı');
+    await expect(page.locator('.palette')).toContainText('Yazdır');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Çıktı');
+
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('koyu');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Ayarlar',
+    );
+    await expect(page.getByRole('group', { name: 'Tema', exact: true })).toBeVisible();
   });
 
   test('sekmeye gidiyor', async ({ page }) => {
@@ -94,10 +116,10 @@ test.describe('53. Durum çipi', () => {
     await expect(chip).toBeVisible();
     // Nothing laid out yet: not a problem, but it says what is waiting.
     await expect(chip).toHaveClass(/ok/);
-    await expect(chip).toContainText('saat havuzda');
+    await expect(chip).toContainText('saat yerleşmedi');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await expect(chip).toContainText('Sorun yok');
 
@@ -196,7 +218,8 @@ test.describe('54. Klavye kısayolları', () => {
     const dlg = page.locator('.sheet', { hasText: 'Klavye kısayolları' });
     await expect(dlg).toBeHidden();
 
-    await page.getByRole('button', { name: 'Klavye kısayolları', exact: true }).click();
+    await page.locator('.topbar .topbar-help').click();
+    await page.getByRole('menuitem', { name: /Klavye kısayolları/ }).click();
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('Ctrl+K');
     await expect(dlg).toContainText('Alt+1..7');

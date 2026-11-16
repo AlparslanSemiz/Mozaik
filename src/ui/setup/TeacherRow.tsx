@@ -19,7 +19,6 @@ import {
   cleanEmail,
   looksLikeEmail,
 } from '../../leaf/model';
-import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
 import {
   ColorPick,
@@ -257,12 +256,12 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
                         leaving the list. The information was always there; it
                         was spread over four tabs. */}
           <button
-            className="btn icon"
-            aria-label={`${teacher.short} bilgileri`}
+            className="btn row-detail"
             title={t('Bilgileri ve haftalık programı')}
             onClick={() => inspect('teacher', teacher.id)}
           >
-            <PanelRight size={16} strokeWidth={2} />
+            {t('Ayrıntı')}
+            <span className="visually-hidden"> · {teacher.short}</span>
           </button>
           <button
             className="btn danger"

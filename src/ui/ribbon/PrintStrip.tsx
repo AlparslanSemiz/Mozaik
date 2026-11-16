@@ -1,9 +1,10 @@
 // Çıktı: which sheets, and whether they print in colour.
 
 import type React from 'react';
-import { Layers, Palette as PaletteIcon } from 'lucide-react';
+import { Layers } from 'lucide-react';
+import { MoreCheck, MoreMenu } from '../common';
 import { KIND_ICON } from '../program';
-import { Group, ICON, Sep, type StripContext } from './parts';
+import { Group, ICON, type StripContext } from './parts';
 
 export function printStrip({ ui, t }: StripContext): React.ReactElement {
   return (
@@ -36,18 +37,12 @@ export function printStrip({ ui, t }: StripContext): React.ReactElement {
           {t('İkisi de')}
         </button>
       </Group>
-      <Sep />
-      <Group label="Renk">
-        <button
-          className="btn"
-          aria-pressed={ui.colored}
-          title={t('Öğretmen renkleri kâğıda basılır')}
-          onClick={() => ui.setColored(!ui.colored)}
-        >
-          <PaletteIcon {...ICON} />
+      {/* Colour on paper is chosen once (envanter: "bir kez"). */}
+      <MoreMenu>
+        <MoreCheck checked={ui.colored} onChange={ui.setColored}>
           {t('Renkli bas')}
-        </button>
-      </Group>
+        </MoreCheck>
+      </MoreMenu>
       {/* "Yazdır (N sayfa)" is NOT here: the N comes from the tick lists in
           the panel, and a button that says how many pages belongs next to the
           list that decides it. The strip carries what you are looking at. */}

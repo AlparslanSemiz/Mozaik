@@ -327,7 +327,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
               onPick={setNewSplit}
             />
           </Field>
-          <button className="btn" disabled={!canAdd} onClick={add}>
+          <button className="btn primary" disabled={!canAdd} onClick={add}>
             {t('Ekle')}
           </button>
         </div>

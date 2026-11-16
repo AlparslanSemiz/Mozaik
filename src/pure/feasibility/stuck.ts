@@ -116,11 +116,11 @@ export function stuckReason(
   const open = holes - away - elsewhere - room - rule;
   const size = pendingBlocks(d, lesson)[0] ?? 1;
   if (open > 0 && parts.length > 0 && size > 1) {
-    parts.push(t('{n} saatine {boy} saatlik kart sığmıyor', { n: open, boy: size }));
+    parts.push(t('{n} saatine {boy} saatlik ders sığmıyor', { n: open, boy: size }));
   }
   if (parts.length === 0) {
     return {
-      message: t('{sinif} sınıfının {n} boş saati var ama bu dersin kartı onlara sığmıyor.', {
+      message: t('{sinif} sınıfının {n} boş saati var ama bu dersin blokları onlara sığmıyor.', {
         sinif: group.name,
         n: holes,
       }),

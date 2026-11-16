@@ -57,7 +57,7 @@ export function openPlanFile({
         title: t('Bu dosya eksik'),
         tone: 'warn',
         body: t(
-          "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. 'Dosyaya kaydet' ile kaydettiğiniz dosyayı seçin.",
+          "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. 'Kaydet' ile kaydettiğiniz dosyayı seçin.",
         ),
       });
       return;
@@ -137,7 +137,7 @@ export function openPlanFile({
             </p>
             <p>
               {t(
-                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Kaydet" deyin.',
               )}
             </p>
           </>

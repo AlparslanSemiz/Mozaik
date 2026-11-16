@@ -957,9 +957,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       yapıyor, planın adıyla; boş ya da okunamayan açılış klasördeki daha dolu kaydı şeritle
       öneriyor ("Belgelerim'deki son kaydı aç" / "Boş başla") ve seçilene kadar klasöre yazmıyor;
       yarının altına küçülten yazım günün kurtarma dosyasına gidiyor ve şerit söylüyor; budama en
-      dolu günlüğü silmiyor (DATA "Dosya biçimleri", tuzak 159). Kalan: kurtarma ve silmeden-önce
-      dosyaları exe'de budanmıyor (`remove_in` yalnız günlüğü siliyor), gün başına bir dosya
-      birikiyor; yeni şeritlerin dört dilde çevirisi.
+      dolu günlüğü silmiyor (DATA "Dosya biçimleri", tuzak 159). Kalan: yeni şeritlerin dört
+      dilde çevirisi. (Kurtarma ve silmeden-önce dosyalarının budaması 2026-11-16'da
+      `duzeltme/inceleme`'de yazıldı: her türün en yeni onu, exe'de `yedek_mi`.)
       **Birleşmede:** `tb7-sekme-kapanis`'in yeni gerçek exe testi ("X ile hemen kapanan
       pencere…") taze profilde klasörün kendiliğinden yazılmasını bekleyerek başlıyor; o satır
       1,5 s beklemeyle değişir (ölçüldü: birleşik kopyada gerçek Linux exe'de yeşil).
@@ -2102,11 +2102,14 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       **plan** bütün okul verisi (ilk plan "Plan 1"); **program** yalnız dizilmiş haftalık
       program; **seçenek** plan içindeki diziliş ("Seçenek 1", "Bu seçeneğin kopyası", "Boş
       seçenek"); **Mozaik** uygulamanın kendisi; **saat** günün bir saati ("3. saat",
-      "Günlük saat sayısı"), **ders** yalnız ders; **kart** ızgarada ve havuzda taşınan parça,
-      **blok** yalnız dağılımdaki 2-3 saatlik parça; **derslik**, **öğretmen**, **hücre**,
-      **araç şeridi**; öğretmende **Kısa ad**, branşta **kısaltma**; fiil **diz**;
-      öğretmen **müsait / müsait değil**, sınıf ve derslik **kapalı**; kural seviyesi
-      **Engel** ve **Uyarı**, aşılması **ihlal**; Danışman **notları**; **plan dosyası**,
+      "Günlük saat sayısı"), **ders** hem ders hem ızgarada ve havuzda taşınan parça
+      (K4b, 2026-11-16: ekranda "kart" yerine "ders"; iç adlar, veri ve dosya adları "kart"
+      kaldı), **blok** yalnız dağılımdaki 2-3 saatlik parça; **derslik**, **öğretmen**, **hücre**,
+      **araç şeridi**; öğretmende **Kısa ad**, branşta **kısaltma**; düğmede **Programı yap**
+      ve **Yeniden yap** (K4a, 2026-11-16; eskiden fiil **diz**: "Otomatik diz", "Baştan
+      diz"); öğretmen **müsait / müsait değil**, sınıf ve derslik **kapalı**; kural seviyesi
+      **Kesin** ve **Tercih** (K4a; eskiden Engel ve Uyarı), aşılması **ihlal**; **İpuçları**
+      (K4a; eskiden Danışman notları); havuzdaki saat **yerleşmedi** (K4a; eskiden "havuzda"); **plan dosyası**,
       **otomatik yedek**; **Örnek okulu yükle**; **Okul adı**; araç şeridinin adı sekmenin
       adı. Dört dil aynı kurala uyar. Kayıt anahtarları, dosya adları ve kayıtlı adlar
       değişmedi. Kalanlar (karar sende): Ayarlar "Görünüm" ile Program'daki "Görünüm"
@@ -2161,6 +2164,14 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki ad, kısa ad ve
       e-posta kutuları hâlâ yalnız sütun başlığından okunuyor (tam dolu kursta Öğretmenler'de
       36, Sınıflar'da 20 düğüm, §8e'nin `label` maddesi).
+- [~] **SD8 · Sadeleşme (Alp onayladı, K1–K8, 2026-11-16, DECISIONS).** Aşama 1
+      "Sakinleştirme" yazıldı (`sade/asama-1`, birleşmedi): tek ana düğme, her şeridin sağ
+      ucunda Daha fazla, sade üst çubuk (Dosya ▾, Kaydet, ?), yardım "?" arkasında, tek
+      sayım, yeni adlar (K4a, K4b), Başlarken beş iş, Ctrl+K işleri buluyor, nötr sekme.
+      Sırada: **aşama 2** kişi sayfası (K5: öğretmen ve sınıfın tek sayfası, sayfadan Yazdır,
+      sınırlar tek yerde), **aşama 3** beş sekme (K1), Plan + Seçenek (K2), Kontrol çipe (K3),
+      Sığdır/Ferah/Rahat (K6) ile Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline
+      dön (K8, Dosya menüsünde yeri ayrıldı). 2. aşamadan sonra babanın bir oturumu izlenir.
 
 ## §9. Ham notlar
 

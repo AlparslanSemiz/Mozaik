@@ -111,7 +111,12 @@ test.describe('10. Müsaitlik çizelgesi', () => {
       );
     // Both states of the strip's "Saatler": the clock hidden, and shown.
     for (const state of ['kapalı', 'açık']) {
-      if (state === 'açık') await page.getByRole('button', { name: 'Saatler' }).click();
+      if (state === 'açık') {
+        // In the strip's Daha fazla since 2026-11-16 (Sadeleşme).
+        await page.locator('.ribbon .more-menu').click();
+        await page.getByRole('menuitemcheckbox', { name: 'Saatler' }).click();
+        await page.keyboard.press('Escape');
+      }
       const measured = await tops();
       for (const [i, top] of measured.entries()) {
         expect(Math.abs(top - measured[0]!), `${state}, ${i + 1}. sütun`).toBeLessThanOrEqual(0.5);

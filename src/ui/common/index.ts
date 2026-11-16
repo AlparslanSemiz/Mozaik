@@ -15,6 +15,8 @@ export * from './Undo';
 export * from './GoTo';
 export * from './NextStep';
 export * from './wrongFile';
+export * from './More';
+export * from './Help';
 export * from './openBundle';
 export { useReturnFocus } from './returnFocus';
 export * from './deleteFocus';

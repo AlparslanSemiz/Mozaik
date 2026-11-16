@@ -29,7 +29,7 @@ import { buildIndex, closedConflicts, closedKey } from '../../pure/constraints';
 import { t } from '../../leaf/i18n';
 import type { Kind, StepId } from '../../platform/prefs';
 import { attachRoving } from '../../platform/dom';
-import { GoButton, T } from '../common';
+import { GoButton, HelpHead, T } from '../common';
 
 interface Props {
   state: State;
@@ -302,6 +302,19 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
               aria-label={t('{kim} · müsait olmayan saatler', { kim: selected.full })}
               onPointerUp={endPaint}
               onPointerLeave={endPaint}
+              onPointerCancel={endPaint}
+              // A touch pointer is captured by the cell it went down on, so no
+              // other cell hears `pointerenter`: the finger's cell is asked for
+              // by position instead (pitfall 175). A mouse paints by enter.
+              onPointerMove={(e) => {
+                if (pending === null || e.pointerType === 'mouse') return;
+                const key = document
+                  .elementFromPoint(e.clientX, e.clientY)
+                  ?.closest<HTMLElement>('td[data-cell]')?.dataset.cell;
+                if (key === undefined) return;
+                const { day, hour } = parseCellKey(key);
+                continuePaint(day, hour);
+              }}
             >
               <thead>
                 <tr>
@@ -343,6 +356,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                     {state.settings.hours.map((_, s) => (
                       <td
                         key={s}
+                        data-cell={cellKey(g, s)}
                         className={[
                           shownClosed(g, s) ? 'closed' : '',
                           // The break sits at a different lesson on each row, so it
@@ -396,13 +410,14 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
             hours does not need the school-wide reading under it. */}
         {showHeat && (
           <div className="panel">
-            <h2>{t('Haftanın darlığı')}</h2>
-            <p className="hint">
-              <T
-                k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
-                vars={{ ne: t(KIND_WORD[kind]) }}
-              />
-            </p>
+            <HelpHead topic="Haftanın darlığı">
+              <p>
+                <T
+                  k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
+                  vars={{ ne: t(KIND_WORD[kind]) }}
+                />
+              </p>
+            </HelpHead>
             <div className="scroll-x">
               <table className="availability heat">
                 <thead>
@@ -465,8 +480,9 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
           somebody. Here every row carries it. */}
       <aside>
         <div className="panel">
-          <h2>{t('Kimin saatleri')}</h2>
-          <p className="hint">{t('Sağdaki sayılar: açık saat / ders saati.')}</p>
+          <HelpHead topic="Kimin saatleri">
+            <p>{t('Sağdaki sayılar: açık saat / ders saati.')}</p>
+          </HelpHead>
 
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more

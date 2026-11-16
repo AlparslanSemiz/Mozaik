@@ -19,7 +19,7 @@ import { loadWorld, savedState, settledText } from './helpers';
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page): Promise<string> {
   const before = await settledText(page);
-  await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+  await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
   await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 25_000 });
   return before;
 }
@@ -69,7 +69,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
       // 4. The bar says something a person can act on.
       const bar = page.locator('.reason-bar');
       if (world.want.solved) {
-        await expect(bar).toContainText('Program dizildi');
+        await expect(bar).toContainText('Program yapıldı');
         await expect(page.locator('.pool-card')).toHaveCount(0);
         for (const lesson of world.state.lessons) {
           expect(hoursOf(saved, lesson.id), `${world.name}: ${lesson.id}`).toBe(lesson.weeklyHours);
@@ -90,8 +90,8 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
     const world = SMALL_WORLDS.find((w) => w.name === 'bos-dunya')!;
     await loadWorld(page, world.state);
     await expect(page.locator('.empty-screen')).toContainText('Henüz dizilecek ders yok');
-    const auto = page.getByRole('button', { name: /^Otomatik diz/ });
-    await expect(auto).toContainText('(0 kart)');
+    const auto = page.getByRole('button', { name: 'Programı yap', exact: true });
+    // No count on the button since 2026-11-16 ("Programı yap"); disabled says it.
     await expect(auto).toBeDisabled();
   });
 });
@@ -146,7 +146,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       await loadWorld(page, world.state);
       await autoFill(page);
       await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-      await expect(page.locator('.badge', { hasText: /^Engel$/ })).toHaveCount(0);
+      await expect(page.locator('.badge', { hasText: /^Kesin$/ })).toHaveCount(0);
     }
   });
 

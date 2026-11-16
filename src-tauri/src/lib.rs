@@ -164,18 +164,8 @@ fn read_in(dir: &Path, name: &str) -> Result<Option<String>, String> {
     }
 }
 
-/// Is this the name of a daily backup: `ders-programi-YYYY-MM-DD.json`?
-///
-/// The same shape as `DAILY` in `src/platform/storage/folder.ts`, the only
-/// names `prunable()` ever hands to `removeEntry`.
-fn gunluk_yedek_mi(name: &str) -> bool {
-    let Some(tarih) = name
-        .strip_prefix("ders-programi-")
-        .and_then(|n| n.strip_suffix(".json"))
-    else {
-        return false;
-    };
-    let b = tarih.as_bytes();
+/// Is this exactly `YYYY-MM-DD`?
+fn tarih_mi(b: &[u8]) -> bool {
     b.len() == 10
         && b.iter().enumerate().all(|(i, c)| match i {
             4 | 7 => *c == b'-',
@@ -183,17 +173,51 @@ fn gunluk_yedek_mi(name: &str) -> bool {
         })
 }
 
-/// Deletes one daily backup. Missing is not an error: the caller is pruning.
+/// Is this the name of a daily backup: `ders-programi-YYYY-MM-DD.json`?
 ///
-/// ONLY a daily backup. The page decides WHICH ones go (`prunable()`), but
+/// The same shape as `DAILY` in `src/platform/storage/folder.ts`.
+fn gunluk_yedek_mi(name: &str) -> bool {
+    name.strip_prefix("ders-programi-")
+        .and_then(|n| n.strip_suffix(".json"))
+        .is_some_and(|t| tarih_mi(t.as_bytes()))
+}
+
+/// Is this a name the page's prune may delete: a daily backup, a rescue copy
+/// (`ders-programi-kurtarma-YYYY-MM-DD[-HHMMSS].json`) or a before-deletion
+/// file (`ders-programi-silmeden-once-YYYY-MM-DD.json`)? The same shapes as
+/// `DAILY` and `SPARES` in folder.ts, and nothing looser.
+fn yedek_mi(name: &str) -> bool {
+    if gunluk_yedek_mi(name) {
+        return true;
+    }
+    let Some(govde) = name.strip_suffix(".json") else {
+        return false;
+    };
+    if let Some(t) = govde.strip_prefix("ders-programi-silmeden-once-") {
+        return tarih_mi(t.as_bytes());
+    }
+    let Some(t) = govde.strip_prefix("ders-programi-kurtarma-") else {
+        return false;
+    };
+    let b = t.as_bytes();
+    tarih_mi(b)
+        || (b.len() == 17
+            && tarih_mi(&b[..10])
+            && b[10] == b'-'
+            && b[11..].iter().all(u8::is_ascii_digit))
+}
+
+/// Deletes one backup. Missing is not an error: the caller is pruning.
+///
+/// ONLY a dated backup this program writes (`yedek_mi`). The page decides WHICH ones go (`prunable()`), but
 /// what may go at all is decided here too: a bug or a script in the page
 /// could otherwise delete any `.json` in the folder, my father's own files
 /// among them (security review 2026-11-15, G7). Listing still shows
 /// everything; deleting does not reach everything.
 fn remove_in(dir: &Path, name: &str) -> Result<(), String> {
     safe_name(name)?;
-    if !gunluk_yedek_mi(name) {
-        return Err(format!("Yalnız günlük yedek silinir: {name}"));
+    if !yedek_mi(name) {
+        return Err(format!("Yalnız tarihli yedek silinir: {name}"));
     }
     match fs::remove_file(dir.join(name)) {
         Ok(()) => Ok(()),
@@ -512,7 +536,7 @@ mod linux_tests {
 
 #[cfg(test)]
 mod tests {
-    use super::{gunluk_yedek_mi, list_in, read_in, remove_in, safe_name, write_in};
+    use super::{gunluk_yedek_mi, list_in, read_in, remove_in, safe_name, write_in, yedek_mi};
     use std::fs;
     use std::path::PathBuf;
 
@@ -659,13 +683,17 @@ mod tests {
     }
 
     #[test]
-    fn only_a_daily_backup_can_be_removed() {
-        // The live bundle, a rescue file and my father's own `.json` all pass
-        // `safe_name`; none of them may be deleted through `remove_file`.
+    fn only_a_dated_backup_can_be_removed() {
+        // The live bundle, the top bar's hourly backup and my father's own
+        // `.json` all pass `safe_name`; none of them may be deleted through
+        // `remove_file`.
         let s = Scratch::new("remove-gate");
         for ad in [
             "ders-programi-tumu.json",
-            "ders-programi-kurtarma-2026-11-15-101010.json",
+            "ders-programi-2026-08-26-1430.json",
+            "ders-programi-kurtarma-2026-11-15-1010.json",
+            "ders-programi-kurtarma-notlar.json",
+            "ders-programi-silmeden-once-2026-11-15-101010.json",
             "vergi-beyani.json",
         ] {
             fs::write(s.0.join(ad), "x").unwrap();
@@ -681,6 +709,28 @@ mod tests {
             "xders-programi-2026-08-27.json",
         ] {
             assert!(!gunluk_yedek_mi(kotu), "kabul edildi: {kotu}");
+            assert!(!yedek_mi(kotu), "kabul edildi: {kotu}");
+        }
+        // The rescue and before-deletion files the prune keeps ten of.
+        for ad in [
+            "ders-programi-2026-08-27.json",
+            "ders-programi-kurtarma-2026-11-15.json",
+            "ders-programi-kurtarma-2026-11-15-101010.json",
+            "ders-programi-silmeden-once-2026-11-15.json",
+        ] {
+            fs::write(s.0.join(ad), "x").unwrap();
+            remove_in(&s.0, ad).unwrap();
+            assert!(!s.0.join(ad).exists(), "silinmedi: {ad}");
+        }
+        for kotu in [
+            "ders-programi-kurtarma-2026-11-15-10101.json",
+            "ders-programi-kurtarma-2026-11-15-1010101.json",
+            "ders-programi-kurtarma-2026-11-15-10101x.json",
+            "ders-programi-kurtarma-2026-11-15.json.tmp",
+            "ders-programi-silmeden-once-2026-11-15.jsonx",
+            "xders-programi-kurtarma-2026-11-15.json",
+        ] {
+            assert!(!yedek_mi(kotu), "kabul edildi: {kotu}");
         }
     }
 

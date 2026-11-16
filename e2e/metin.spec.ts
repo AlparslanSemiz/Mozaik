@@ -21,7 +21,7 @@
 // keep their dashes.
 
 import { expect, test } from './kapan';
-import { openWithSample } from './helpers';
+import { openSettings, openWithSample } from './helpers';
 
 const SEKMELER = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
 const ADIMLAR = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar'];
@@ -61,7 +61,7 @@ test.describe('80. Ekranda okunan metin', () => {
       }
       if (sekme === 'Ayarlar') {
         for (const bolum of BOLUMLER) {
-          await page.locator('.ribbon .btn', { hasText: bolum }).first().click();
+          await openSettings(page, bolum);
           await bak(`Ayarlar → ${bolum}`);
         }
       }
@@ -123,7 +123,7 @@ test.describe('80. Ekranda okunan metin', () => {
       }
       if (sekme === 'Ayarlar') {
         for (const bolum of BOLUMLER) {
-          await page.locator('.ribbon .btn', { hasText: bolum }).first().click();
+          await openSettings(page, bolum);
           await bak(`Ayarlar → ${bolum}`);
         }
       }

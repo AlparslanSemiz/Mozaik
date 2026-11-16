@@ -3,19 +3,21 @@
 
 import { expect, test } from './kapan';
 import {
-  reopen,
   answerDialog,
-  open,
-  openWithSample,
-  openSetup,
-  openSettings,
-  openLessons,
-  mainList,
-  dragAndDrop,
-  rgb,
-  relativeLuminance,
   contrast,
+  darkTheme,
   deltaE,
+  dragAndDrop,
+  mainList,
+  open,
+  openLessons,
+  openSettings,
+  openSetup,
+  openWithSample,
+  relativeLuminance,
+  reopen,
+  rgb,
+  setTheme,
   tokens,
 } from './helpers';
 
@@ -28,18 +30,20 @@ import {
 // three into each other. These tests measure what is actually painted.
 
 test.describe('8. Tema', () => {
+  // The theme is in ONE place since 2026-11-16 (Sadeleşme): Ayarlar → Görünüm.
   test('tema düğmesi çalışıyor ve tercih sayfa yenilenince duruyor', async ({ page }) => {
     await open(page);
-    const toggle = page.getByRole('button', { name: 'Koyu tema' });
-
-    await toggle.click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: 'Koyu tema' })).toHaveCount(0);
+    await darkTheme(page);
+    await openSettings(page, 'Görünüm');
+    await expect(
+      page.getByRole('group', { name: 'Tema', exact: true }).getByRole('button', { name: 'Koyu' }),
+    ).toHaveAttribute('aria-pressed', 'true');
 
     await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await setTheme(page, 'light');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
     await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -60,7 +64,7 @@ test.describe('8. Tema', () => {
 
       // …and a deliberate choice still sticks, so "ignore the machine" has not
       // become "ignore the reader".
-      await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await darkTheme(page);
       await reopen(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     });
@@ -92,7 +96,7 @@ test.describe('8. Tema', () => {
     })();`);
 
     await open(page);
-    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await darkTheme(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
     await reopen(page);
@@ -116,7 +120,7 @@ test.describe('8. Tema', () => {
       page,
     }) => {
       await open(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      if (theme === 'dark') await darkTheme(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 
       const t = await tokens(page, [
@@ -188,7 +192,7 @@ test.describe('8. Tema', () => {
   for (const theme of ['light', 'dark'] as const) {
     test(`${theme} temada sekme renkleri işlevsel renklere karışmıyor`, async ({ page }) => {
       await open(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      if (theme === 'dark') await darkTheme(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 
       const SECTIONS = [
@@ -246,7 +250,7 @@ test.describe('8. Tema', () => {
     // three tokens are stronger, and this test is what keeps them so.
     test(`${theme} temada bırakma vurgusu kâğıttan gerçekten ayrılıyor`, async ({ page }) => {
       await open(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      if (theme === 'dark') await darkTheme(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 
       const t = await tokens(page, [
@@ -298,7 +302,7 @@ test.describe('8. Tema', () => {
 
     test(`${theme} temada satır önizlemesi okunuyor ama imleci bastırmıyor`, async ({ page }) => {
       await open(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      if (theme === 'dark') await darkTheme(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 
       const t = await tokens(page, [
@@ -344,7 +348,7 @@ test.describe('8. Tema', () => {
 
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await darkTheme(page);
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -372,7 +376,7 @@ test.describe('8. Tema', () => {
 
   test('koyu temada bile kâğıda açık basılıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await darkTheme(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
@@ -502,7 +506,7 @@ test.describe('14. Renk paleti', () => {
         .evaluateAll((cards) => cards.map((el) => getComputedStyle(el).backgroundColor));
 
     const light = await read();
-    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await darkTheme(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     expect(await read()).toEqual(light);
 
@@ -554,7 +558,7 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     }
   });
 
-  test('seçili görünüm bölüm rengiyle DOLU, diğeri değil', async ({ page }) => {
+  test('seçili görünüm işaretli (zemin ve alt çizgi), diğeri değil', async ({ page }) => {
     await openWithSample(page);
     const teacher = page.getByRole('button', { name: 'Öğretmen görünümü' });
     const klass = page.getByRole('button', { name: 'Sınıf görünümü' });
@@ -704,7 +708,7 @@ test.describe('11. Görsel cila', () => {
         .getByRole('button', { name: 'Her şeyi sil' })
         .evaluate((el) => getComputedStyle(el).color),
       page
-        .getByRole('button', { name: 'Dosyadan aç', exact: true })
+        .getByRole('button', { name: 'Kaydet', exact: true })
         .evaluate((el) => getComputedStyle(el).color),
     ]);
     // Not identical to a plain button until the pointer is already on it
@@ -714,7 +718,8 @@ test.describe('11. Görsel cila', () => {
   });
 });
 
-// The 4px rule of section colour along the very top of the bar.
+// The 4px rule of section colour along the very top of the bar (until
+// 2026-11-16; the test below now checks that it is gone).
 //
 // The reader asked whether it is weaker in the light theme — "en üstteki
 // şeridin üstündeki renk şeridi açık temada biraz daha az gözüküyor gibi …
@@ -738,53 +743,34 @@ test.describe('11. Görsel cila', () => {
 // that looked plausible and were wrong by a factor of three — the parser took
 // the lightness for a red channel and called every backdrop black.
 test.describe('80. Bölüm şeridi', () => {
+  // GONE since 2026-11-16 (Sadeleşme, DECISIONS "K1–K8"): one neutral lit tab
+  // on every section, no colour strip along the bar. Colour is for data and
+  // state. What is measured is that every section's lit tab looks the SAME,
+  // and that its label reads on it.
   const SECTIONS = ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`üst çubuğun renk şeridi ${theme} temada da görünüyor`, async ({ page }) => {
+    test(`seçili sekme ${theme} temada her bölümde aynı ve okunuyor`, async ({ page }) => {
       await open(page);
-      await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
+      await page.evaluate((th) => localStorage.setItem('ders-programi-tema', th), theme);
       await reopen(page);
-
+      const seen = new Set<string>();
       for (const section of SECTIONS) {
         await page.getByRole('button', { name: section, exact: true }).click();
-        const m = await page.evaluate(() => {
-          const bar = document.querySelector('.topbar') as HTMLElement;
-          const probe = document.createElement('div');
-          // The TOP stop of the bar's own wash, read from the token the
-          // stylesheet paints with. It was written out as 14%/16% here, and on
-          // the day the wash was quieted this test went on measuring against a
-          // mix nothing was painting any more — a measurement of a colour that
-          // had stopped existing (pitfall 42's shape, in a test).
-          probe.style.background =
-            'color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit))';
-          bar.appendChild(probe);
-          const mixed = getComputedStyle(probe).backgroundColor;
-          probe.remove();
-
-          const cv = document.createElement('canvas');
-          cv.width = 1;
-          cv.height = 1;
-          const ctx = cv.getContext('2d')!;
-          ctx.fillStyle = mixed;
-          ctx.fillRect(0, 0, 1, 1);
-          const px = ctx.getImageData(0, 0, 1, 1).data;
-
-          const before = getComputedStyle(bar, '::before');
-          return {
-            strip: before.backgroundColor,
-            height: parseFloat(before.height),
-            under: `rgb(${px[0]}, ${px[1]}, ${px[2]})`,
-          };
+        // Off the tab and past its colour transition: a hovered tab is not
+        // the lit tab's resting look.
+        await page.mouse.move(960, 700);
+        await page.waitForTimeout(400);
+        const m = await page.locator('.tab[aria-current="true"]').evaluate((el) => {
+          const cs = getComputedStyle(el);
+          const bar = getComputedStyle(document.querySelector('.topbar')!, '::before');
+          return { bg: cs.backgroundColor, fg: cs.color, strip: bar.display };
         });
-
-        // It has to BE there before it can be visible.
-        expect(m.height, `${section}: şerit çizilmiyor`).toBeGreaterThanOrEqual(3);
-        expect(
-          contrast(m.strip, m.under),
-          `${theme} ${section}: ${contrast(m.strip, m.under).toFixed(2)}`,
-        ).toBeGreaterThanOrEqual(3.5);
+        seen.add(m.bg);
+        expect(m.strip, `${section}: renk şeridi geri gelmiş`).toBe('none');
+        expect(contrast(m.fg, m.bg), `${theme} ${section}`).toBeGreaterThanOrEqual(7);
       }
+      expect(seen.size, 'seçili sekme bölüme göre renk değiştiriyor').toBe(1);
     });
   }
 });
@@ -807,7 +793,7 @@ test.describe('93. Listelerde zebra', () => {
       page,
     }) => {
       await openWithSample(page);
-      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      if (theme === 'dark') await darkTheme(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
 
       const t = await tokens(page, [

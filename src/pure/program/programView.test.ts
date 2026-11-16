@@ -226,8 +226,8 @@ describe('araç çubuğunun altındaki satır', () => {
       progress: { placedBlocks: 1, totalBlocks: 4, nodes: 0, elapsedMs: 50, excludedBlocks: 0 },
     };
     expect(describeBar(running, 'class', t, { applied: false, result: false })).toEqual({
-      text: 'Otomatik diziliyor…',
-      counter: '1/4 kart · 0,1 sn',
+      text: 'Program yapılıyor…',
+      counter: '1/4 ders · 0,1 sn',
       level: 'busy',
     });
     expect(describeBar(idle, 'teacher', t, { applied: false, result: false }).level).toBe('');
@@ -251,7 +251,7 @@ describe('araç çubuğunun altındaki satır', () => {
     };
     expect(describeBar(said, 'class', t, { applied: false, result: false }).level).toBe('');
     expect(describeBar(said, 'class', t, { applied: false, result: true }).text).toMatch(
-      /^Program dizildi\. 2 kart/,
+      /^Program yapıldı\. 2 ders/,
     );
     expect(describeBar(said, 'class', t, { applied: true, result: true }).text).toMatch(
       /^Öneri uygulandı/,

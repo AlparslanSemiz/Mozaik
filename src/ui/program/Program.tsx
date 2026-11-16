@@ -38,7 +38,7 @@ import {
   type PinScope,
 } from '../../pure/constraints';
 import { cellKey, type State, type Id } from '../../leaf/model';
-import { NextStep, useToast, T, useT } from '../common';
+import { Help, NextStep, useToast, T, useT } from '../common';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectShort } from '../../pure/entities';
@@ -272,12 +272,12 @@ function Program({
     level: barLevel,
     counter: barCounter,
   } = describeBar(solver, view, t, current);
-  // An idle bar also says when the week runs off the side (useWeekCut.ts).
+  // An idle bar says ONE sentence since Sadeleşme phase 1 (2026-11-16); what
+  // the rows are and that the week runs off the side (useWeekCut.ts) are
+  // behind its "?". A run, a result and a drag still speak in full here.
   const weekCut = useWeekCut(active && state.lessons.length > 0);
-  const barText =
-    barLevel === '' && weekCut
-      ? `${idleText} ${t('Haftanın tamamı sığmıyor; şeritteki Sığdır bütün günleri gösterir.')}`
-      : idleText;
+  const idle = barLevel === '';
+  const barText = idle ? t('Yerleşmiş dersi sürükleyerek taşıyın.') : idleText;
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -587,7 +587,7 @@ function Program({
           <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin müsait olmadığı saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin." />
           <br />
           <br />
-          {t('Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.')}
+          {t('Buraya döndüğünüzde dersler alttaki havuzda bekliyor olacak.')}
           <NextStep state={state} />
         </div>
       </>
@@ -623,6 +623,18 @@ function Program({
         <span role="status" aria-live="polite">
           {barText}
         </span>
+        {idle && (
+          <Help topic="Program">
+            <p>{idleText}</p>
+            {weekCut && (
+              <p>
+                {t(
+                  'Haftanın tamamı sığmıyor; Daha fazla → Yoğunluk → Sığdır bütün günleri gösterir.',
+                )}
+              </p>
+            )}
+          </Help>
+        )}
         {barCounter !== undefined && (
           <span className="reason-count" aria-busy="true">
             {barCounter}

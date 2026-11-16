@@ -19,7 +19,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open, answerDialog } from './helpers';
+import { answerDialog, KLASOR_YALNIZ_CHROMIUM, open, openSettings, openTechnical } from './helpers';
 
 /**
  * What the far side answers when the update is asked about.
@@ -109,15 +109,15 @@ function disk(page: Page): Promise<Record<string, string>> {
 // Two sections since the Ayarlar round: the folder lives with the plans and
 // the backups, the version lives with what this copy IS.
 async function openFolder(page: Page) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
+  await openSettings(page, 'Planlar ve yedek');
   await expect(page.getByRole('heading', { name: 'Nereye kaydedilsin' })).toBeVisible();
 }
 
+// "Veriler nerede" is inside the closed "Teknik bilgiler" since 2026-11-16.
 async function openAbout(page: Page) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Hakkında' }).first().click();
+  await openSettings(page, 'Hakkında');
   await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
+  await openTechnical(page);
 }
 
 const DAILY = /^ders-programi-\d{4}-\d{2}-\d{2}\.json$/;
@@ -218,7 +218,9 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await expect(panel.getByText(/tarama verilerini temizle/)).toHaveCount(0);
   });
 
-  test('AYNI dosya tarayıcıda bunların hiçbirini yapmıyor', async ({ page }) => {
+  test('AYNI dosya tarayıcıda bunların hiçbirini yapmıyor', async ({ page, browserName }) => {
+    // Its browser half is the folder panel's "Klasör seç", a Chromium API.
+    test.skip(browserName !== 'chromium', KLASOR_YALNIZ_CHROMIUM);
     // The guard on the whole round: the exe path is chosen by feature
     // detection, not by a build flag, so the very same dist/index.html must
     // keep behaving like a browser page when the bridge is absent. Without

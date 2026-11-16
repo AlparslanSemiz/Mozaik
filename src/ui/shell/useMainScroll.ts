@@ -1,9 +1,9 @@
-// The two effects that ride on the scrolled box under the strip. The two refs
+// The effects that ride on the scrolled box under the strip. The refs
 // are in the dependency lists because the linter cannot see they are App's
 // own `useRef`s; a ref object never changes, so the effects run exactly when
 // `tab` and `ribbonAuto` change, as they did inside App.
 
-import { useEffect, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
 import { attachRibbonScroll, attachScrollFade } from '../../platform/dom';
 import type { Tab } from '../../platform/prefs';
 
@@ -38,4 +38,43 @@ export function useMainScroll(
     if (box === null || shell === null || tab === 'program' || !ribbonAuto) return undefined;
     return attachRibbonScroll(box, shell);
   }, [mainRef, appRef, tab, ribbonAuto]);
+}
+
+/**
+ * Program's two scrollers keep their place across a tab change in every
+ * engine. Program stays mounted in a hidden `<Activity>`, i.e. `display:
+ * none`; Chromium and Firefox keep a hidden box's scroll offset, WebKit
+ * (Safari, iPad) drops it to 0 (pitfall 174). So each scroll of `.grid-wrap`
+ * or `.pool-list` is noted while the box is laid out (a hidden box has no
+ * client rects and answers 0, which must not overwrite the note), and when
+ * Program shows again the notes are written back before paint. A remounted
+ * box is a new element with no note. Re-attached per tab like the effects
+ * above, so a `<main>` that mounts later is still heard.
+ */
+const KEPT = '.grid-wrap, .pool-list';
+
+export function useProgramScrollKeep(mainRef: RefObject<HTMLElement | null>, tab: Tab): void {
+  const notes = useRef(new Map<Element, readonly [number, number]>());
+  useEffect(() => {
+    const box = mainRef.current;
+    if (box === null) return undefined;
+    const note = (e: Event): void => {
+      const el = e.target;
+      if (!(el instanceof Element) || !el.matches(KEPT) || el.getClientRects().length === 0) return;
+      notes.current.set(el, [el.scrollLeft, el.scrollTop]);
+    };
+    box.addEventListener('scroll', note, { capture: true, passive: true });
+    return () => box.removeEventListener('scroll', note, { capture: true });
+  }, [mainRef, tab]);
+  useLayoutEffect(() => {
+    if (tab !== 'program') return;
+    for (const [el, [left, top]] of notes.current) {
+      if (!el.isConnected) {
+        notes.current.delete(el);
+        continue;
+      }
+      if (el.scrollLeft !== left) el.scrollLeft = left;
+      if (el.scrollTop !== top) el.scrollTop = top;
+    }
+  }, [tab]);
 }

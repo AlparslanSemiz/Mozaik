@@ -1,11 +1,12 @@
 // Müsaitlik: whose hours, which one is open, and what the table shows.
 
 import type React from 'react';
-import { Clock, Flame } from 'lucide-react';
+
 import type { Kind } from '../../platform/prefs';
 import { paletteColor } from '../../leaf/model';
 import { KIND_ICON } from '../program';
-import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
+import { MoreCheck, MoreMenu } from '../common';
+import { Group, Sep, type StripContext } from './parts';
 
 const KINDS: Array<{ id: Kind; label: string }> = [
   { id: 'teacher', label: 'Öğretmen' },
@@ -67,8 +68,6 @@ export function availabilityStrip({
         </span>
       </Group>
 
-      <Spacer />
-
       {/* What is ON THIS SCREEN, top right — "sağ üstte haftanın darlığı
           açılsın mı kapalı mı kalsın özelliği olsun. Saatleri de oraya
           koyalım. ikinci şeritte olsun."
@@ -77,27 +76,16 @@ export function availabilityStrip({
           one is a position (`toolState`) and one a machine preference
           (`ders-programi-musaitlik-saat`), but both answer "what am I
           looking at", and that is the question a strip is for. The hour
-          toggle used to live three clicks away in Ayarlar → Görünüm. */}
-      <Group label={t('Göster')}>
-        <button
-          className="btn"
-          aria-pressed={ui.showHeat}
-          title={t('Haftanın darlığı tablosunu göster ya da gizle')}
-          onClick={() => ui.setShowHeat(!ui.showHeat)}
-        >
-          <Flame {...ICON} />
+          toggle used to live three clicks away in Ayarlar → Görünüm.
+          Behind Daha fazla since 2026-11-16: both are set once, if ever. */}
+      <MoreMenu>
+        <MoreCheck checked={ui.showHeat} onChange={ui.setShowHeat}>
           {t('Haftanın darlığı')}
-        </button>
-        <button
-          className="btn"
-          aria-pressed={availClock}
-          title={t('Saat numaralarının altına başlangıç saatlerini yaz')}
-          onClick={() => setAvailClock(!availClock)}
-        >
-          <Clock {...ICON} />
+        </MoreCheck>
+        <MoreCheck checked={availClock} onChange={setAvailClock}>
           {t('Saatler')}
-        </button>
-      </Group>
+        </MoreCheck>
+      </MoreMenu>
     </div>
   );
 }

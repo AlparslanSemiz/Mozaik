@@ -1,13 +1,10 @@
-// Program: the view, the automatic run, which timetable, and how the grid is drawn.
+// Program: the view, "Programı yap", and everything rarer behind Daha fazla.
 
 import type React from 'react';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
-  Check,
   Copy,
   Eraser,
   Eye,
-  Layers,
   Library,
   Maximize2,
   Minimize2,
@@ -41,6 +38,7 @@ import { sanitize, togglePinScope } from '../../pure/constraints';
 import { describeStrip } from '../../pure/program';
 import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
+import { MoreItem, MoreLabel, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
 import type { State } from '../../leaf/model';
 
@@ -71,7 +69,7 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
     id: 'ferah',
     label: 'Ferah',
     icon: <Maximize2 {...ICON} />,
-    why: 'Hücre en büyük, kartın alt satırı tam boyda',
+    why: 'Hücre en büyük, dersin alt satırı tam boyda',
   },
   {
     id: 'rahat',
@@ -120,12 +118,12 @@ export function programStrip({
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
     strip ?? describeStrip(state, programMask);
   const currentProgram = activeProgram(state);
-  /** "Baştan diz" and "Başka bir dizilim" say the same thing when they land. */
+  /** "Yeniden yap" and "Başka bir dizilim" say the same thing when they land. */
   const relaidNotice = (next: State) => {
     const said =
       pinnedHours === 0
-        ? t('Program baştan dizildi.')
-        : t('Program baştan dizildi, sabitlenen {n} saat yerinde kaldı.', {
+        ? t('Program yeniden yapıldı.')
+        : t('Program yeniden yapıldı, sabitlenen {n} saat yerinde kaldı.', {
             n: pinnedHours,
           });
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
@@ -194,16 +192,70 @@ export function programStrip({
     manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
     notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
   };
+  // The same condition that puts "Durdur" in Programı yap's place: a run, or
+  // the suggestion search after it. Nothing that starts or changes a run is
+  // offered meanwhile.
+  const busy = solver.running || solver.advice?.searching === true;
+  const rebuild = () => {
+    // No question since 2026-11-15 (TODO SD1): the run's answer lands as ONE
+    // step of the history (useSolver's `finish`), so its notice can offer
+    // "Geri al" for the whole of it. Nothing on the grid moves until the run
+    // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
+    keepBefore(state, t('Program yeniden yapıldı.'));
+    solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
+  };
+  // "Başka bir dizilim" (2026-11-16, main): the same rules, another of the
+  // many weeks they allow, a different one on every press. Behind Daha fazla
+  // beside Yeniden yap: the screen's one primary is "Programı yap".
+  const another = () => {
+    anotherSeed++;
+    // The week before the FIRST press is the one worth keeping: a second press
+    // would push the hand-made week out of the one slot with a week this button
+    // made (review, 2026-11-16).
+    if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'));
+    solver.start(state, { keepPlaced: false, exclusions, seed: anotherSeed }, (next) => {
+      anotherMade = next;
+      relaidNotice(next);
+    });
+  };
+  // `relay`: when the kept week leaves a lesson nowhere to go, the unpinned
+  // week is laid out again close to itself. Whatever moved is said, with the
+  // undo for it, and the week before is kept where a reload finds it.
+  const make = () =>
+    solver.start(state, { keepPlaced: true, exclusions, relay: true }, (next) => {
+      const before = activePlacements(state);
+      const after = activePlacements(next);
+      let moved = 0;
+      for (const key in before) if (after[key] !== before[key]) moved++;
+      if (moved === 0) return;
+      const said = t('Program yapıldı, {n} saat yer değiştirdi.', { n: moved });
+      keepBefore(state, said);
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    });
+  const clearGrid = () => {
+    // No question since SD1 (2026-11-15): it is undone with one click, so it
+    // happens and the notice offers that click. The pinned cells stay, and so
+    // do their pins: nothing takes a pinned block down but unpinning it.
+    const next = keepPinnedOnly(state);
+    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
+    change((d) => (d === state ? next : keepPinnedOnly(d)));
+    notify(
+      pinnedHours === 0
+        ? t('Dizilmiş {n} saat havuza döndü.', { n: placed })
+        : t('Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.', {
+            n: pinnedHours,
+          }),
+      'info',
+      { label: t('Geri al'), run: () => undoIf(next) },
+    );
+  };
+  const maskName = (mode: string) => (mode === 'ghost' ? t('soluk') : t('gizli'));
+
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program')}>
-      {/* Two positions, not one toggle: a single button saying "switch to the
-          class view" tells you what the next click does, never where you are.
-
-          FIRST, and back where it stood before the program library arrived
-          and pushed it a group to the right: "öğretmen ve sınıftan seçimleri
-          en solda eski yerinde olmalı". It earns the place on its own terms
-          too — the leftmost group on the other six strips answers "what am I
-          looking at", and on this screen that is the axis. */}
+      {/* What am I looking at: the axis. FIRST, in its old place ("öğretmen
+          ve sınıftan seçimleri en solda eski yerinde olmalı"). A segment,
+          never a fill: the screen's one filled button is the next one. */}
       <Group label="Görünüm">
         {VIEWS.map((v) => (
           <button
@@ -222,9 +274,11 @@ export function programStrip({
 
       <Sep />
 
-      {/* Three buttons and no settings. What "spread over the week" or "prefer
-          mornings" should mean is not knowable before a term has been laid
-          out with this (the former rule against guessed features). */}
+      {/* THE screen's one primary (Sadeleşme, phase 1, 2026-11-16): it was
+          the old "Otomatik diz (N kart)" beside an equally loud "Baştan diz". The
+          count lives in the pool and in the status chip; "Yeniden yap" is
+          behind Daha fazla, because emptying a laid-out week in one click is
+          not the click that should be next to the everyday one. */}
       <Group label="Diz">
         {solver.running || solver.advice?.searching === true ? (
           <button className="btn danger" onClick={solver.stop}>
@@ -232,348 +286,162 @@ export function programStrip({
             {t('Durdur')}
           </button>
         ) : (
-          <>
-            <button
-              className="btn primary"
-              disabled={pending === 0}
-              title={
-                pending === 0
-                  ? t('Havuzda bekleyen kart yok')
-                  : t('Havuzdaki kartları kurallara uyarak dizer')
-              }
-              onClick={() =>
-                // `relay`: when the kept week leaves a card nowhere to go, the
-                // unpinned week is laid out again close to itself. Whatever
-                // moved is said, with the undo for it.
-                solver.start(state, { keepPlaced: true, exclusions, relay: true }, (next) => {
-                  const before = activePlacements(state);
-                  const after = activePlacements(next);
-                  let moved = 0;
-                  for (const key in before) if (after[key] !== before[key]) moved++;
-                  if (moved === 0) return;
-                  // Cards the reader had placed moved: the week before is kept
-                  // where a reload finds it, as before "Baştan diz".
-                  keepBefore(
-                    state,
-                    t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
-                  );
-                  notify(
-                    t('Program yeniden dizildi, {n} saat yer değiştirdi.', { n: moved }),
-                    'info',
-                    {
-                      label: t('Geri al'),
-                      run: () => undoIf(next),
-                    },
-                  );
-                })
-              }
-            >
-              <Play {...ICON} />
-              {t('Otomatik diz ({n} kart)', { n: pending })}
-            </button>
-            <button
-              className="btn"
-              disabled={placed === 0}
-              title={t('Dizilmiş programı silip baştan dizer')}
-              onClick={() => {
-                // No question since 2026-11-15 (TODO SD1): the run's answer
-                // lands as ONE step of the history (useSolver's `finish`), so
-                // its notice can offer "Geri al" for the whole of it. Nothing
-                // on the grid moves until the run ends, and "Durdur" is on
-                // this same spot while it runs.
-                keepBefore(state, t('Program baştan dizildi.'));
-                solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
-              }}
-            >
-              <RotateCcw {...ICON} />
-              {t('Baştan diz')}
-            </button>
-            {/* The one new control of 2026-11-16: the same rules, another of
-                the many weeks they allow. "Baştan diz" gives the same week
-                for the same data; this one a different one on every press. */}
-            <button
-              className="btn"
-              disabled={placed === 0 && pending === 0}
-              onClick={() => {
-                anotherSeed++;
-                // The week before the FIRST press is the one worth keeping: a
-                // second press would push the hand-made week out of the one
-                // slot with a week this button made (review, 2026-11-16).
-                if (state !== anotherMade) keepBefore(state, t('Program baştan dizildi.'));
-                solver.start(
-                  state,
-                  { keepPlaced: false, exclusions, seed: anotherSeed },
-                  (next) => {
-                    anotherMade = next;
-                    relaidNotice(next);
-                  },
-                );
-              }}
-            >
-              <Shuffle {...ICON} />
-              {t('Başka bir dizilim')}
-            </button>
-          </>
+          <button
+            className="btn primary"
+            disabled={pending === 0}
+            title={
+              pending === 0
+                ? t('Yerleşmeyi bekleyen ders yok')
+                : t('Yerleşmeyen dersleri kurallara uyarak yerleştirir')
+            }
+            onClick={make}
+          >
+            <Play {...ICON} />
+            {t('Programı yap')}
+          </button>
         )}
       </Group>
 
-      <Sep />
+      {/* Which seçenek is open — said only once there are two. Choosing and
+          managing them is in Daha fazla; phase 3 folds them into plans (K2). */}
+      {state.programs.length > 1 && (
+        <>
+          <Sep />
+          <Group label="Seçenek">
+            <span className="ribbon-value">{currentProgram.name}</span>
+          </Group>
+        </>
+      )}
 
-      {/* WHICH TIMETABLE — and everything that can be done to one — behind a
-          SINGLE button.
-
-          It arrived as three controls (a `<select>`, "Bu seçeneğin kopyası" and a
-          "Yönet" menu) sitting at the head of the strip, and that was two
-          problems in one. It displaced the view switch, and it put a second
-          library selector three rows under the plan selector in the top bar —
-          two dropdowns, two different meanings of "which one am I editing",
-          and no way to tell from either which was which.
-
-          One button, showing the name of the timetable you are in. The list
-          of them is a RadioGroup rather than a row of items, because picking
-          one is a choice with a current answer, and Radix says so out loud
-          (`aria-checked`) instead of leaving it to the tick. */}
-      <Group label="Seçenek">
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button className="btn" disabled={solver.running} title={t('Seçenek seç ve yönet')}>
-              <Library {...ICON} />
-              <span className="ribbon-ellipsis">{currentProgram.name}</span>
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
-              <DropdownMenu.RadioGroup
-                value={state.activeProgramId}
-                onValueChange={(id) => viewProgram((d) => switchProgram(d, id))}
-              >
-                {state.programs.map((program) => (
-                  <DropdownMenu.RadioItem key={program.id} className="menu-item" value={program.id}>
-                    {/* A fixed slot, so the names line up whether or not the
-                        tick is in it. */}
-                    <span className="menu-mark" aria-hidden="true">
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={15} strokeWidth={2.4} />
-                      </DropdownMenu.ItemIndicator>
-                    </span>
-                    {program.name}
-                  </DropdownMenu.RadioItem>
-                ))}
-              </DropdownMenu.RadioGroup>
-              <DropdownMenu.Separator className="menu-sep" />
-              <DropdownMenu.Item className="menu-item" onSelect={() => void copyCurrent()}>
-                <Copy size={15} aria-hidden="true" />
-                {t('Bu seçeneğin kopyası')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className="menu-item" onSelect={() => void createBlank()}>
-                <Plus size={15} aria-hidden="true" />
-                {t('Boş seçenek')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Item className="menu-item" onSelect={() => void renameCurrent()}>
-                <Pencil size={15} aria-hidden="true" />
-                {t('Yeniden adlandır')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator className="menu-sep" />
-              <DropdownMenu.Item
-                className="menu-item danger"
-                disabled={state.programs.length <= 1}
-                onSelect={deleteCurrent}
-              >
-                <Trash2 size={15} aria-hidden="true" />
-                {t('Seçeneği sil')}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </Group>
-
-      {/* THE RIGHT-HAND END: what you are looking at, and the way back.
-          The left of the strip builds the timetable (diz, baştan diz); this
-          end changes how it is drawn and undoes it. A spacer rather than a
-          separator, because what divides them is a job, not a hairline. */}
       <Spacer />
 
-      <Group label="Renk">
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button className="btn" title={t('Kartların renk ölçütü')}>
-              <PaletteIcon {...ICON} />
-              {t(PROGRAM_COLORS.find((x) => x.id === programColor)?.label ?? 'Öğretmene göre')}
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
-              <DropdownMenu.RadioGroup
-                value={programColor}
-                onValueChange={(value) => setProgramColor(value as ProgramColorMode)}
-              >
-                {PROGRAM_COLORS.map((option) => (
-                  <DropdownMenu.RadioItem key={option.id} className="menu-item" value={option.id}>
-                    <span className="menu-mark" aria-hidden="true">
-                      <DropdownMenu.ItemIndicator>
-                        <Check size={15} strokeWidth={2.4} />
-                      </DropdownMenu.ItemIndicator>
-                    </span>
-                    {t(option.label)}
-                  </DropdownMenu.RadioItem>
-                ))}
-              </DropdownMenu.RadioGroup>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </Group>
-
-      <Sep />
-
-      {/* Density is a decision about the grid, taken while looking at the
-          grid — it spent a version three clicks away in Ayarlar → Görünüm,
-          where you cannot see what it does. It is still there too. */}
-      <Group label="Yoğunluk">
-        {DENSITIES.map((d) => (
-          <button
-            key={d.id}
-            className="btn"
-            aria-pressed={density === d.id}
-            title={t(d.why)}
-            onClick={() => {
-              applyDensity(d.id);
-              setDensity(d.id);
-            }}
+      {/* EVERYTHING ELSE behind the one door every strip has, at the same
+          right-hand end. The seçenek list, the colour, the density, the
+          bulk pins, the session's set-aside rows and emptying the grid are
+          all rare, and two of them are the kind of click that costs an
+          afternoon. */}
+      <MoreMenu>
+        <MoreItem icon={<RotateCcw size={15} />} disabled={placed === 0 || busy} onSelect={rebuild}>
+          {t('Yeniden yap')}
+        </MoreItem>
+        <MoreItem
+          icon={<Shuffle size={15} />}
+          disabled={(placed === 0 && pending === 0) || busy}
+          onSelect={another}
+        >
+          {t('Başka bir dizilim')}
+        </MoreItem>
+        <MoreSep />
+        <MoreSub
+          icon={<Library size={15} />}
+          disabled={busy}
+          label={t('Seçenek: {ad}', { ad: currentProgram.name })}
+        >
+          <MoreRadio
+            value={state.activeProgramId}
+            onChange={(id) => viewProgram((d) => switchProgram(d, id))}
+            options={state.programs.map((program) => ({ id: program.id, label: program.name }))}
+          />
+          <MoreSep />
+          <MoreItem icon={<Copy size={15} />} onSelect={() => void copyCurrent()}>
+            {t('Bu seçeneğin kopyası')}
+          </MoreItem>
+          <MoreItem icon={<Plus size={15} />} onSelect={() => void createBlank()}>
+            {t('Boş seçenek')}
+          </MoreItem>
+          <MoreItem icon={<Pencil size={15} />} onSelect={() => void renameCurrent()}>
+            {t('Yeniden adlandır')}
+          </MoreItem>
+          <MoreSep />
+          <MoreItem
+            icon={<Trash2 size={15} />}
+            danger
+            disabled={state.programs.length <= 1}
+            onSelect={deleteCurrent}
           >
-            {d.icon}
-            {t(d.label)}
-          </button>
-        ))}
-      </Group>
-
-      <Sep />
-
-      {/* "Programı sıfırla" — asked for by name. It is NOT the same button as
-          "Baştan diz": that one empties the grid and then fills it again, and
-          there was no way to simply CLEAR it and start placing by hand.
-          Undoable, and its notice offers "Geri al".
-
-          It stands at the far end, past the spacer, and not beside the two
-          buttons that fill the grid: the only two ways to lose a placement
-          by accident are clicking it and clicking "Baştan diz", and they no
-          longer sit next to each other. It is NOT renamed to "Sıfırla" —
-          temel.spec.ts asserts no button anywhere is called that: the
-          name stays with "Her şeyi sil", the widest click there is. */}
-      {/* THE WHOLE RIGHT-HAND END BEHIND ONE DOOR, and the reason is a
-          MEASUREMENT. Three buttons in an equal-column group are as wide as
-          the widest of them times three: at 150%, the scale where the strip
-          is under the most pressure, the group asked for 639 px of a strip
-          that had 1920 px for 2061 px of content, and two of the three came
-          out past the right edge. Not hidden: UNCLICKABLE (pitfall 48).
-          The strip has a declared order for what it gives up since then
-          (LAYOUT.md, strip rule 6), but a group this rare belongs behind a
-          door on its own terms.
-
-          One button now. What is behind it is also what belongs behind a
-          door: locking a whole timetable, listing what has been put aside,
-          and emptying the grid are all rare, and two of them are the kind of
-          click that costs an afternoon. */}
-      <Group label="Izgara">
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button className="btn" disabled={solver.running} title={t('Izgara işlemleri')}>
-              <Layers {...ICON} />
-              {t('İşlemler')}
-            </button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
-              <DropdownMenu.Item
-                className="menu-item"
-                disabled={gridEmpty}
-                onSelect={() => change((d) => togglePinScope(d, { kind: 'all' }))}
+            {t('Seçeneği sil')}
+          </MoreItem>
+        </MoreSub>
+        <MoreSub icon={<PaletteIcon size={15} />} label={t('Renk')}>
+          <MoreRadio
+            value={programColor}
+            onChange={setProgramColor}
+            options={PROGRAM_COLORS.map((o) => ({ id: o.id, label: t(o.label) }))}
+          />
+        </MoreSub>
+        <MoreSub icon={<Rows3 size={15} />} label={t('Yoğunluk')}>
+          <MoreRadio
+            value={density}
+            onChange={(next) => {
+              applyDensity(next);
+              setDensity(next);
+            }}
+            options={DENSITIES.map((d) => ({ id: d.id, label: t(d.label) }))}
+          />
+        </MoreSub>
+        <MoreSep />
+        <MoreItem
+          icon={allPinned ? <PinOff size={15} /> : <Pin size={15} />}
+          disabled={gridEmpty || busy}
+          onSelect={() => change((d) => togglePinScope(d, { kind: 'all' }))}
+        >
+          {allPinned ? t('Tüm sabitlemeleri kaldır') : t('Tüm programı sabitle')}
+        </MoreItem>
+        {/* What is put aside for this session. Only when something is: an
+            empty heading with "(0)" was a line saying nothing. */}
+        {masked > 0 && (
+          <>
+            <MoreSep />
+            <MoreLabel>{t('Geçici görünüm ({n})', { n: masked })}</MoreLabel>
+            {Object.entries(programMask.teachers).map(([id, mode]) => (
+              <MoreItem
+                key={`t-${id}`}
+                icon={<Eye size={15} />}
+                disabled={busy}
+                onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}
               >
-                {allPinned ? (
-                  <PinOff size={15} aria-hidden="true" />
-                ) : (
-                  <Pin size={15} aria-hidden="true" />
-                )}
-                {allPinned ? t('Tüm sabitlemeleri kaldır') : t('Tüm programı sabitle')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator className="menu-sep" />
-              {/* WHAT IS PUT ASIDE, and the count is the reason the label is
-                  here rather than on a button of its own: with nothing set
-                  aside there is nothing to list, and a disabled button that
-                  says "(0)" spends a fifth of the strip saying so. */}
-              <DropdownMenu.Label className="menu-label">
-                {t('Geçici görünüm ({n})', { n: masked })}
-              </DropdownMenu.Label>
-              {Object.entries(programMask.teachers).map(([id, mode]) => (
-                <DropdownMenu.Item
-                  key={`t-${id}`}
-                  className="menu-item"
-                  onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}
-                >
-                  <Eye size={15} aria-hidden="true" />
-                  {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} ·{' '}
-                  {mode === 'ghost' ? t('soluk') : t('gizli')}
-                </DropdownMenu.Item>
-              ))}
-              {Object.entries(programMask.classes).map(([id, mode]) => (
-                <DropdownMenu.Item
-                  key={`c-${id}`}
-                  className="menu-item"
-                  onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}
-                >
-                  <Eye size={15} aria-hidden="true" />
-                  {state.classes.find((group) => group.id === id)?.name ?? id} ·{' '}
-                  {mode === 'ghost' ? t('soluk') : t('gizli')}
-                </DropdownMenu.Item>
-              ))}
-              {Object.entries(programMask.days).map(([name, mode]) => (
-                <DropdownMenu.Item
-                  key={`d-${name}`}
-                  className="menu-item"
-                  onSelect={() => setProgramMask((m) => setDayMask(m, name))}
-                >
-                  <Eye size={15} aria-hidden="true" />
-                  {name} · {mode === 'ghost' ? t('soluk') : t('gizli')}
-                </DropdownMenu.Item>
-              ))}
-              <DropdownMenu.Item
-                className="menu-item"
-                disabled={masked === 0}
-                onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
+                {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} · {maskName(mode)}
+              </MoreItem>
+            ))}
+            {Object.entries(programMask.classes).map(([id, mode]) => (
+              <MoreItem
+                key={`c-${id}`}
+                icon={<Eye size={15} />}
+                disabled={busy}
+                onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}
               >
-                <Eye size={15} aria-hidden="true" />
-                {t('Tümünü geri yükle')}
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator className="menu-sep" />
-              <DropdownMenu.Item
-                className="menu-item danger"
-                disabled={placed === 0}
-                onSelect={() => {
-                  // No question since SD1 (2026-11-15): it is undone with one
-                  // click, so it happens and the notice offers that click.
-                  // The pinned cells stay, and so do their pins. One rule
-                  // with no exceptions: nothing takes a pinned block down
-                  // but unpinning it.
-                  const next = keepPinnedOnly(state);
-                  keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
-                  change((d) => (d === state ? next : keepPinnedOnly(d)));
-                  notify(
-                    pinnedHours === 0
-                      ? t('Dizilmiş {n} saat havuza döndü.', { n: placed })
-                      : t('Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.', {
-                          n: pinnedHours,
-                        }),
-                    'info',
-                    { label: t('Geri al'), run: () => undoIf(next) },
-                  );
-                }}
+                {state.classes.find((group) => group.id === id)?.name ?? id} · {maskName(mode)}
+              </MoreItem>
+            ))}
+            {Object.entries(programMask.days).map(([name, mode]) => (
+              <MoreItem
+                key={`d-${name}`}
+                icon={<Eye size={15} />}
+                disabled={busy}
+                onSelect={() => setProgramMask((m) => setDayMask(m, name))}
               >
-                <Eraser size={15} aria-hidden="true" />
-                {t('Programı boşalt')}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-      </Group>
+                {name} · {maskName(mode)}
+              </MoreItem>
+            ))}
+            <MoreItem
+              icon={<Eye size={15} />}
+              disabled={busy}
+              onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
+            >
+              {t('Tümünü geri yükle')}
+            </MoreItem>
+          </>
+        )}
+        <MoreSep />
+        <MoreItem
+          icon={<Eraser size={15} />}
+          danger
+          disabled={placed === 0 || busy}
+          onSelect={clearGrid}
+        >
+          {t('Programı boşalt')}
+        </MoreItem>
+      </MoreMenu>
     </div>
   );
 }

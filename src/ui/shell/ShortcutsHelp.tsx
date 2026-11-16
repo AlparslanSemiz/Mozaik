@@ -71,23 +71,23 @@ const GROUPS: Group[] = [
       { keys: 'Tab', desc: 'Izgaraya gir, bir daha basınca çık' },
       { keys: '← → ↑ ↓', desc: 'Hücreden hücreye git' },
       { keys: 'Home End', desc: 'Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra' },
-      { keys: 'Delete Backspace', desc: 'Odaklı kartı havuza kaldır' },
-      { keys: 'Enter Space', desc: 'Odaklı kartın sağ tık menüsünü aç' },
-      { keys: 'T', desc: 'Odaklı kartı taşımak için al' },
-      { keys: 'P', desc: 'Odaklı kartı sabitle veya sabitlemeyi kaldır' },
+      { keys: 'Delete Backspace', desc: 'Odaklı dersi havuza kaldır' },
+      { keys: 'Enter Space', desc: 'Odaklı dersin sağ tık menüsünü aç' },
+      { keys: 'T', desc: 'Odaklı dersi taşımak için al' },
+      { keys: 'P', desc: 'Odaklı dersi sabitle veya sabitlemeyi kaldır' },
     ],
   },
   {
     title: 'Havuz',
     rows: [
-      { keys: '← →', desc: 'Kartlar arasında git' },
-      { keys: 'Enter Space T', desc: 'Odaklı kartı ızgaraya koymak için al' },
+      { keys: '← →', desc: 'Dersler arasında git' },
+      { keys: 'Enter Space T', desc: 'Odaklı dersi ızgaraya koymak için al' },
       { keys: '↑ ↓ Home End', desc: 'Tutamakta: havuzun boyunu değiştir, Shift ile daha çok' },
     ],
   },
   {
     // The keyboard's pick-up (drag.ts `startKeys`) and the mouse's drag share Esc.
-    title: 'Kart eldeyken',
+    title: 'Ders eldeyken',
     rows: [
       { keys: '← →', desc: 'Hedefi bir saat kaydır' },
       { keys: 'Ctrl+← →', desc: 'Bırakılabilecek bir sonraki saate git' },

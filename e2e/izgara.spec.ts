@@ -18,7 +18,7 @@
 // layout measurements went with the rest of the layout contract.
 
 import { expect, test } from './kapan';
-import { reopen, openWithSample, startDrag, deltaE, tokens, loadWorld } from './helpers';
+import { reopen, openWithSample, startDrag, deltaE, tokens, loadWorld, darkTheme } from './helpers';
 
 /**
  * One teacher with a placed two-hour block (day 0, hours 0-1, one wide <td>
@@ -147,7 +147,7 @@ test.describe('47. Izgara enstrümanı', () => {
       });
 
     const light = await measure();
-    await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
+    await darkTheme(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
     const dark = await measure();
@@ -252,7 +252,7 @@ test.describe('47. Izgara enstrümanı', () => {
     await expect(page.locator('table.grid')).toBeVisible();
 
     // Fill the week, so the grid really carries merged blocks.
-    const run = page.getByRole('button', { name: /^Otomatik diz/ });
+    const run = page.getByRole('button', { name: 'Programı yap', exact: true });
     await run.click();
     await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 60_000 });
     const doubles = await page.locator("table.grid td[data-span='2']").count();

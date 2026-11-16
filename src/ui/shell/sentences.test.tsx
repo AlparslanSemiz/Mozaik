@@ -181,7 +181,7 @@ describe('cümle · engelin sebebi', () => {
       {
         "classBusy": "510 sınıfının Salı 1 saatinde Matematik var",
         "classClosed": "510 sınıfı Çarşamba 1 saatinde kapalı",
-        "dayEnd": "2 saatlik kart güne sığmıyor",
+        "dayEnd": "2 saatlik ders güne sığmıyor",
         "maxConsecutive": "AV art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
         "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
@@ -252,7 +252,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-kenar · kenar çubuğu tercihi",
         "ders-programi-olcek · yazı büyüklüğü tercihi",
         "ders-programi-yogunluk · ızgara yoğunluğu tercihi",
-        "ders-programi-program-rengi · program kart rengi tercihi",
+        "ders-programi-program-rengi · program renk tercihi",
         "ders-programi-arayuz-yogunluk · arayüz yoğunluğu tercihi",
         "ders-programi-havuz · havuz çekmecesi tercihi",
         "ders-programi-havuz-boy · havuz çekmecesinin boyu",

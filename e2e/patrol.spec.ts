@@ -21,7 +21,7 @@
 // and traces on; the daily loop should stay a list of yes/no answers.
 
 import { expect, test, type Page } from './kapan';
-import { answerDialog, open } from './helpers';
+import { answerDialog, open, openSettings } from './helpers';
 
 /** Deterministic PRNG. The seed is in the test name, so a red run repeats. */
 function mulberry32(seed: number): () => number {
@@ -137,8 +137,7 @@ test.describe('Devriye', () => {
     // With data, not without. An empty program draws empty screens, and an
     // empty screen is the one place a rendering bug cannot happen (pitfall
     // 41: a layout measured on nothing measures nothing).
-    await page.getByRole('button', { name: 'Ayarlar' }).click();
-    await page.locator('.ribbon .btn', { hasText: 'Hakkında' }).first().click();
+    await openSettings(page, 'Hakkında');
     await page.getByRole('button', { name: 'Örnek okulu yükle' }).click();
     await answerDialog(page);
     await expect(page.locator('.dlg')).toHaveCount(0);
