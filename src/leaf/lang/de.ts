@@ -1901,18 +1901,12 @@ const DE: Sozluk = {
     "Senden",
   "Göndermek için Bilgiler’de e-posta adresini yazın.":
     "Zum Senden die E-Mail-Adresse unter Angaben eintragen.",
-  "Programı henüz boş, gönderilecek bir şey yok.":
-    "Der Stundenplan ist noch leer, es gibt nichts zu senden.",
-  "Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.":
-    "Der Plan passt nicht in eine E-Mail; mit Drucken auf Papier bringen.",
   "Bilgiler":
     "Angaben",
   "Gelemediği saatler":
     "Stunden, in denen sie/er nicht kann",
   "Kapalı saatler":
     "Gesperrte Stunden",
-  "Saate tıklayın ya da basılı tutup sürükleyin; gün adı bütün günü değiştirir.":
-    "Stunde anklicken oder gedrückt ziehen; der Tagesname ändert den ganzen Tag.",
   "{kim} · kapalı saatler":
     "{kim} · gesperrte Stunden",
   "Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin.":
@@ -1925,8 +1919,6 @@ const DE: Sozluk = {
     "Grenzen",
   "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.":
     "Ein leeres Feld nimmt die Schuleinstellung; eine eingetragene Zahl ersetzt sie.",
-  "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer. Bir dersin Dersler’deki kendi sayısı bunun da yerine geçer.":
-    "Ein leeres Feld nimmt die Schuleinstellung; eine eingetragene Zahl ersetzt sie. Die eigene Zahl einer Stunde unter Fächer ersetzt auch diese.",
   "Okul ayarı geçerli: {n}":
     "Schuleinstellung gilt: {n}",
   "Kendi sayısı; okul ayarı: {n}":
@@ -1947,10 +1939,10 @@ const DE: Sozluk = {
     "{n} {n:Stunde|Stunden} gesperrt",
   "{n} saat fazla":
     "{n} {n:Stunde|Stunden} zu viel",
-  "Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın.":
-    "Die eigene Zahl einer Lehrkraft steht auf ihrer Seite und ersetzt diese: **Schule → Lehrkräfte**, auf den Namen klicken.",
-  "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
-    "Die eigene Zahl einer Klasse steht auf ihrer Seite und ersetzt diese: **Schule → Klassen**, auf den Namen klicken.",
+  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
+    "Für eine Lehrkraft: **Schule → Lehrkräfte**.",
+  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
+    "Für eine einzelne Klasse: **Schule → Klassen**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:Stunde liegt|Stunden liegen} noch in gesperrten Stunden; nichts wurde gelöscht, im Wochenplan rot.",

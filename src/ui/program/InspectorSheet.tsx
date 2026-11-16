@@ -463,8 +463,17 @@ export function Inspector({
         <h3 className="sheet-h">
           {target.kind === 'teacher' ? t('Gelemediği saatler') : t('Kapalı saatler')}
         </h3>
-        <p className="hint">
-          {t('Saate tıklayın ya da basılı tutup sürükleyin; gün adı bütün günü değiştirir.')}
+        {/* Müsaitlik's own sentence, and its tooltip for dragging and the
+            headers: one wording for one grid in two places. */}
+        <p
+          className="hint"
+          title={t(
+            'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki saat numarasına tıklayınca haftanın o saati değişir.',
+          )}
+        >
+          {target.kind === 'teacher'
+            ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
+            : t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')}
         </p>
         <AvailGrid
           key={target.id}
@@ -555,12 +564,11 @@ export function Inspector({
         {(teacherOf ?? classOf) !== undefined && (
           <>
             <h3 className="sheet-h">{t('Sınırları')}</h3>
+            {/* One sentence for both kinds. A class's number has a third
+                layer, the lesson's own box in Dersler; that box's own help
+                says so where it is set. */}
             <p className="hint">
-              {teacherOf !== undefined
-                ? t('Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.')
-                : t(
-                    'Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer. Bir dersin Dersler’deki kendi sayısı bunun da yerine geçer.',
-                  )}
+              {t('Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.')}
             </p>
             <dl className="sheet-edit">
               {teacherOf !== undefined ? (

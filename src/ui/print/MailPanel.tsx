@@ -157,9 +157,9 @@ export function SendTeacher({
             ? t('Göndermek için Bilgiler’de e-posta adresini yazın.')
             : why === 'adres hatalı'
               ? t('Tek bir e-posta adresi yazılır: ad@ornek.com')
-              : why === 'programı boş'
-                ? t('Programı henüz boş, gönderilecek bir şey yok.')
-                : t('Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.')}
+              : // Çıktı's own words for the other two, so the two places
+                // agree and the dictionaries carry one sentence less each.
+                t(why)}
         </p>
       )}
       <MailSaid said={said} />

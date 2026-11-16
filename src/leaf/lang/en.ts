@@ -1885,18 +1885,12 @@ const EN: Sozluk = {
     "Send",
   "Göndermek için Bilgiler’de e-posta adresini yazın.":
     "To send, type the e-mail address under Details.",
-  "Programı henüz boş, gönderilecek bir şey yok.":
-    "The timetable is still empty, there is nothing to send.",
-  "Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.":
-    "The timetable does not fit in an e-mail; print it with Print.",
   "Bilgiler":
     "Details",
   "Gelemediği saatler":
     "Hours they cannot come",
   "Kapalı saatler":
     "Closed hours",
-  "Saate tıklayın ya da basılı tutup sürükleyin; gün adı bütün günü değiştirir.":
-    "Click an hour or hold and drag; a day name changes the whole day.",
   "{kim} · kapalı saatler":
     "{kim} · closed hours",
   "Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin.":
@@ -1909,8 +1903,6 @@ const EN: Sozluk = {
     "Limits",
   "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.":
     "An empty box uses the school setting; a number typed here replaces it.",
-  "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer. Bir dersin Dersler’deki kendi sayısı bunun da yerine geçer.":
-    "An empty box uses the school setting; a number typed here replaces it. A lesson’s own number under Lessons replaces this one too.",
   "Okul ayarı geçerli: {n}":
     "School setting applies: {n}",
   "Kendi sayısı; okul ayarı: {n}":
@@ -1931,10 +1923,10 @@ const EN: Sozluk = {
     "{n} {n:hour|hours} closed",
   "{n} saat fazla":
     "{n} {n:hour|hours} too many",
-  "Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın.":
-    "A teacher’s own number is written on their page and replaces this one: **School → Teachers**, click the name.",
-  "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
-    "A class’s own number is written on its page and replaces this one: **School → Classes**, click the name.",
+  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
+    "For one teacher: **School → Teachers**.",
+  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
+    "For one class: **School → Classes**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:lesson is|lessons are} still on hours you closed; nothing was deleted, they are red in the weekly timetable.",

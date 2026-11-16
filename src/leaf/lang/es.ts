@@ -1902,18 +1902,12 @@ const ES: Sozluk = {
     "Enviar",
   "Göndermek için Bilgiler’de e-posta adresini yazın.":
     "Para enviar, escriba el correo en Datos.",
-  "Programı henüz boş, gönderilecek bir şey yok.":
-    "El horario aún está vacío, no hay nada que enviar.",
-  "Programı e-postaya sığmıyor; Yazdır ile kâğıda basın.":
-    "El horario no cabe en un correo; imprímalo con Imprimir.",
   "Bilgiler":
     "Datos",
   "Gelemediği saatler":
     "Horas en que no puede venir",
   "Kapalı saatler":
     "Horas cerradas",
-  "Saate tıklayın ya da basılı tutup sürükleyin; gün adı bütün günü değiştirir.":
-    "Haga clic en una hora o mantenga y arrastre; el nombre del día cambia todo el día.",
   "{kim} · kapalı saatler":
     "{kim} · horas cerradas",
   "Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin.":
@@ -1926,8 +1920,6 @@ const ES: Sozluk = {
     "Límites",
   "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer.":
     "Una casilla vacía usa el ajuste del centro; un número escrito lo sustituye.",
-  "Boş kutu okul ayarını kullanır; yazılan sayı onun yerine geçer. Bir dersin Dersler’deki kendi sayısı bunun da yerine geçer.":
-    "Una casilla vacía usa el ajuste del centro; un número escrito lo sustituye. El número propio de una clase en Clases sustituye también a este.",
   "Okul ayarı geçerli: {n}":
     "Se aplica el ajuste del centro: {n}",
   "Kendi sayısı; okul ayarı: {n}":
@@ -1948,10 +1940,10 @@ const ES: Sozluk = {
     "{n} {n:hora cerrada|horas cerradas}",
   "{n} saat fazla":
     "{n} {n:hora|horas} de más",
-  "Bir öğretmene özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Öğretmenler**, adına tıklayın.":
-    "El número propio de un profesor se escribe en su página y sustituye a este: **Escuela → Profesores**, haga clic en el nombre.",
-  "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
-    "El número propio de una clase se escribe en su página y sustituye a este: **Escuela → Clases**, haga clic en el nombre.",
+  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
+    "Para un profesor: **Escuela → Profesores**.",
+  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
+    "Para un solo grupo: **Escuela → Grupos**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:clase sigue|clases siguen} en horas que cerró; no se borró nada, están en rojo en el horario semanal.",
