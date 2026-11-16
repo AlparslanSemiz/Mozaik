@@ -129,8 +129,23 @@ artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son ge
 tbt 1469 → 384 (−74 %), uzun 1719 → 684 (−60 %), fcp 1556 → 908 (−42 %), izgara (görünür)
 1180 → 987 (−16 %), load 265 → 280 (gürültü içinde). Dal izinde görevler: 52–59 + 33 (çizim
 dilimleri), 250–290 (commit + ilk yerleşim, en uzunu), 75–86 (ilk kare), 118–129 (tabanlar,
-saydamlık kalkar). CI sayısı: yazılacak (taban medyanları
-#77'nin koşusundan: load 383–405, fcp ~1000, izgara ~890–940, tbt ~770–820, enUzun ~460–490).
+saydamlık kalkar). **CI** (`acilis.yml`, koşu 43875433229, taban `dddf572` → dal `f5a993f`, 9 koşu, medyan ms):
+load 479 → 485, fcp 2848 → 1648 (−42 %), hazir 2129 → 1502, izgara 2129 → 1881 (−12 %), uzun
+3192 → 1483, tbt 2892 → 1083 (−63 %), enUzun 1372 → 541 (−61 %).
+
+**Runner'lar aynı hızda değil.** Aynı uygulama kodu (`b44b59a` ile `dddf572` arasında `src/`
+değişmedi) üç koşuda izgara 1272 (43852956170), 1206 (43859573891) ve 2129 (43875433229) ölçtü;
+load 335 / 317 / 479. Aşama 3A'dan önceki `fd6e18e` 943 ölçmüştü (43852010083, load 405). Yani
+3A'nın açılışa eklediği aynı hızdaki runner'da ~%30, iki kat değil; iki koşunun sayısı ancak aynı
+koşunun taban ve dal sütunu olarak karşılaştırılır.
+
+**Kalan en uzun görev** (yerel iz, 4×): commit ile sayfanın ilk tam yerleşimi tek görevde,
+~250–290 ms; bunun ~13 ms'i `gridFit`'in okumaları, gerisi 3348 öğenin ilk stili ve tablonun ilk
+yerleşimi. **Denendi, bırakıldı:** Program'ın gövdesini ilk boyamaya kadar
+`content-visibility: hidden` tutup ızgarayı boyamadan sonra ilk kez yerleştirmek. Tek izde ilk
+yerleşim ucuzlamadı (159 + 340 ms tek karede), üstelik `gridChrome`'un `scrollTop` okuması kilitli
+gövdeyi commit'te zorla yerleştirdi (308 ms). Tuzak 221'deki ucuzluk tabanın SONRAKİ yazılarına
+ait: ızgara bir kez çizildikten sonra.
 
 **Kalan.** En uzun görev artık sayfanın ilk tam yerleşimi (~290 ms yerelde): 3348 öğenin ilk
 stili ve tablo. 200 ms'nin altı ya ızgaranın DOM'unu inceltmek (2937 öğe) ya da tabanları depoda
