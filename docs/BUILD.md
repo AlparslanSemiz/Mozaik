@@ -254,7 +254,7 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 Depoda yedi iş akışı var (2026-10-10'dan beri). `ci.yml` her dala her push'ta
 süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
 derleme ve boyut bir işte; ana E2E süiti üç parçada; öneri aramasını başlatan
-iki E2E testi kendi işinde, sırayla; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
+ve `@arama` etiketini taşıyan E2E testleri kendi işinde, üç parçada, her parça ayrı bir runner'da; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
 yeşilse ve push `main`'e ise `site.yml`'yi çağırır ve site yayınlanır. `site.yml`
 kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir commit'i
 yayınlayamaz. `windows.yml` her `main` push'unda ana E2E süitini Windows'ta koşar; siteyi
