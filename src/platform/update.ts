@@ -34,7 +34,13 @@
 import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './exe';
+import {
+  desktopApply,
+  desktopCheck,
+  desktopDownload,
+  desktopGuncellemeDurumu,
+  isDesktop,
+} from './exe';
 import { SURUM, tarihYazisi } from '../leaf/app';
 
 /**
@@ -81,9 +87,13 @@ export type ExeDurum =
       boyut: number;
       ozet: string;
       imza: string | null;
+      /** The download is the installer (update.rs, `kurulum`). */
+      kurulum: boolean;
+      /** The same version as the installer, for the standalone exe (`gecis`). */
+      gecis: boolean;
     }
   | { ad: 'indiriliyor' }
-  | { ad: 'hazir'; surum: string }
+  | { ad: 'hazir'; surum: string; kurulum: boolean }
   | { ad: 'hata'; mesaj: string };
 
 export interface UpdateRun {
@@ -104,6 +114,9 @@ export interface UpdateRun {
   indir: () => void;
   /** Exe route, third button: put it in place and restart onto it. */
   uygula: () => void;
+  /** Exe route, asked once at startup with no network (update.rs,
+      `guncelleme_durumu`): suggest the installer, or say it did not finish. */
+  kurulum: { oner: boolean; olmadi: number | null };
 }
 
 /** One sentence, whatever went wrong. Rust already writes Turkish for the
@@ -181,7 +194,7 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
     desktopCheck(SURUM.version).then(
       (c) => {
         setDurum(
-          c.yeni_var
+          c.yeni_var || c.gecis
             ? {
                 ad: 'var',
                 surum: c.version,
@@ -191,6 +204,8 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
                 // update.rs offers no download without a digest (`karar`).
                 ozet: c.sha256 ?? '',
                 imza: c.imza,
+                kurulum: c.kurulum,
+                gecis: c.gecis,
               }
             : { ad: 'guncel' },
         );
@@ -204,7 +219,7 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
     if (su.ad !== 'var') return;
     setDurum({ ad: 'indiriliyor' });
     desktopDownload(su.adres, su.boyut, su.ozet, su.imza).then(
-      () => setDurum({ ad: 'hazir', surum: su.surum }),
+      () => setDurum({ ad: 'hazir', surum: su.surum, kurulum: su.kurulum }),
       (e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }),
     );
   }, []);
@@ -222,6 +237,19 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
   }, []);
 
   const check = kind === 'exe' ? exeCheck : swCheck;
+
+  // Once, and only in the exe: no network, the exe says what this start is.
+  const [kurulum, setKurulum] = useState<UpdateRun['kurulum']>({ oner: false, olmadi: null });
+  useEffect(() => {
+    if (kind !== 'exe') return;
+    let canli = true;
+    void desktopGuncellemeDurumu().then((d) => {
+      if (canli) setKurulum({ oner: d.kurulum_oner, olmadi: d.kurulum_olmadi });
+    });
+    return () => {
+      canli = false;
+    };
+  }, [kind]);
 
   useEffect(() => {
     // ONLY the service worker route polls. In the exe every request to the
@@ -257,5 +285,5 @@ export function useUpdate(flush: () => void = () => undefined): UpdateRun {
     location.reload();
   }, []);
 
-  return { kind, supported, ready, reload, check, durum, indir, uygula };
+  return { kind, supported, ready, reload, check, durum, indir, uygula, kurulum };
 }

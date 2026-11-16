@@ -860,20 +860,31 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [~] **B7.38 Kurulum paketi ve CP-SAT (2026-11-15, DECISIONS).** Yazıldı:
       `teslim/kurulum-paketi` (NSIS, veri silmeyen kaldırıcı, köprü). Kalan, sırayla:
       (1) `surum.yml`'i yayınlamadan koşup kurulumun üretildiğini ve kancaların girdiğini
-      görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi;
+      görmek; (2) Windows'ta 2.2.0 → köprü exe → kurulum güncellemesi, planlar yerinde mi.
+      Yazıldı, doğrulanmadı (2026-11-16, `guncelleme/windows-yolu`, DECISIONS): köprü exe
+      kurulumu aynı sürümde öneriyor (`gecis`), güncellemeden sonra bir kez şeritte; kurulum
+      bekleyiciyle `/P /R`, bitmezse eski kopya kodlu uyarıyla açılıyor; eski dosya silinmiyor,
+      kurulan programı açıyor; CI'da gerçek 2.2.0'ın güncelleyicisi (`guncelleme-windows.yml`,
+      ikinci evre) ve kurulum kapısı (`kurulum-windows.yml`), ikisi de henüz koşmadı. Kalan:
+      ikisini `main`'de ya da elle koşup yeşile çekmek; başarısız kurulum yolunu (`--kurulum-olmadi`)
+      gerçek bir Windows'ta bir kez denemek (CI'da yok); babanın makinesinde kurulumun virüs
+      tarayıcısına takılmadığına bakmak;
       (3) Yazıldı (`ozellik/cpsat`): DLL'ler kurulumda, Rust C API'si, `CpFormula`, ikinci
       bakış (`cpsatOr`), CP-SAT'a kendi modeli (`cpModel.ts`, öğretmen saati aileleri ve
       kurallar) — ikinci bakış açık (`CP_SECOND_LOOK`, DECISIONS; ölçüm kirli). Kalan:
       (a) öteki aileler `cpModel.ts`'e (mixed, hand, reassign, blockShape, weeklyHours) ve
       ikinci bakışa, (b) babanın makinesinde çekirdek sayısı ve süre, temiz koşulda yeniden
       ölçüm, (c) gerçek exe'de `cpsat_var` doğru mu (WebView2'de ham bayt `invoke`'u
-      ölçülmedi), (d) CP-SAT'lı altın sayı testi (4, 6+..., 9) yerelde ya da haftalık işte.
+      ölçülmedi; `kurulum-windows.yml` yalnız kurulan DLL'in küçük modeli çözdüğünü ölçüyor),
+      (d) CP-SAT'lı altın sayı testi (4, 6+..., 9) yerelde ya da haftalık işte, (e) iki işçide
+      (iki çekirdekli makine) kanıt ve süre: `CP_PROOF_SUBSOLVERS`'ın yeni sırası ve
+      `BELOW_NORMAL` ölçülmedi. AVX2: DLL'ler istemiyor (DECISIONS 2026-11-16), kapı yok.
 - [~] **B7.39 Güvenlik sertleştirmesi (2026-11-15, `guvenlik/sertlestirme`, #20'nin üstünde).**
       Güvenlik ve veri denetiminin küçük maddeleri. **Yapılan:** `write_in` geçici dosyayı
       `sync_all` ile diske yazıp yeniden adlandırıyor, Unix'te klasörü de (V2); `verify`
       `boyut == 0`'ı reddediyor (G4); `.eski` yeni sürümün sayfası yüklenince siliniyor (V9);
       `remove_file` yalnız `ders-programi-YYYY-AA-GG.json` siliyor (G7); `.yeni` ve kurulum
-      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun (`ESKI_KOPYA_NOTU`) sınırının testleri (V8); üçüncü
+      `.tmp` + `sync_all` + rename ile (V10); eski kopya notunun sınırının testleri (V8; not ve silme 2026-11-16'da kalktı, sınır artık `kurulu_hedef`'te); üçüncü
       taraf action'lar SHA ile sabit (G5); Dependabot'ta cargo. Hepsi `cargo test`'te, Windows'ta
       koşulmadı. **Kalan, karar ya da ölçüm isteyen:**
       (1) **Capability (G6).** `core:default` yerine yalnız `core:event:allow-listen` ve
@@ -883,13 +894,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       düzenlemeyi yazmadan kapanır, bunu ölçen bir CI testi yok. Önce gerçek exe'de (`gercek-exe`
       süiti, kapanış testiyle) denenmeli; sonra `build.rs`'e `AppManifest::commands` ve
       capability'ye yalnız kullanılan `allow-*` izinleri.
-      (2) **CSP (G4).** `tauri.conf.json` `csp: null` bilerek kaldı. Öneri:
-      `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'
-      data: blob:; worker-src blob:; connect-src ipc: http://ipc.localhost; object-src 'none';
-      base-uri 'none'; form-action 'none'`. Risk: tek dosyalı derleme betiği satır içi
-      koyuyor; Tauri yalnız kendi eklediklerine hash basıyorsa sayfa açılmaz. Exe'de bir kez
-      açılıp konsolda CSP ihlali aranmalı, gerekiyorsa satır içi betiğin hash'i derlemede
-      üretilmeli.
+      (2) ~~**CSP (G4).**~~ Yazıldı 2026-11-16 (`guvenlik/sertlestirme`, DECISIONS 2026-11-16):
+      `e2e/csp.spec.ts` derlenmiş sayfayı Tauri'nin hesabıyla aynı başlık altında Chromium'da
+      yürüyor (worker'lar dahil). Gerçek WebView2'de doğrulanmadı: birleşince `exe-windows.yml`
+      (ya da dalda elle `workflow_dispatch`) konsolda CSP ihlali olmadan yeşil olmalı.
       (3) `download_update` URL'yi ve boyutu hâlâ sayfadan alıyor; `check_update`'in cevabı
       Rust'ta tutulup `download_update` argümansız yapılabilir (G4, 1. madde).
       (4) ~~`apply_update` `.yeni`'yi takastan önce yeniden doğrulamıyor (V10'un ikinci yarısı).~~

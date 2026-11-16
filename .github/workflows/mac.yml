@@ -38,10 +38,10 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
           cache: npm
@@ -72,6 +72,7 @@ jobs:
           set -euo pipefail
           app=src-tauri/target/release/bundle/macos/Mozaik.app
           codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | grep -q 'flags=.*runtime'
           test -f "$app/Contents/Frameworks/libortools.9.dylib"
           test -f "$app/Contents/Resources/UCUNCU-TARAF.txt"
           [ "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = "11.0" ]
@@ -97,7 +98,7 @@ jobs:
           kill "$pid"
           cat acilis.log
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: mac-acilis

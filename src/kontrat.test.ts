@@ -93,6 +93,7 @@ const PAGE_TYPE: Record<string, string> = {
   bool: 'boolean',
   u64: 'number',
   Cevap: 'UpdateCevap',
+  Durum: 'GuncellemeDurumu',
   // Raw bytes back: Tauri hands them over as an ArrayBuffer, or as numbers on an old WebView.
   'tauri::ipc::Response': 'ArrayBuffer | number[]',
 };
@@ -292,6 +293,12 @@ describe('exe köprüsü — Rust ile desktop.ts aynı sözleşmeyi konuşuyor',
 
   it('UpdateCevap ile Cevap aynı alanları taşıyor', () => {
     expect(interfaceFields(desktop, 'UpdateCevap').sort()).toEqual([...CEVAP].sort());
+  });
+
+  it('GuncellemeDurumu ile Durum aynı alanları taşıyor', () => {
+    expect(interfaceFields(desktop, 'GuncellemeDurumu').sort()).toEqual(
+      rustFields('Durum', updateRs).sort(),
+    );
   });
 });
 
@@ -494,7 +501,20 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     // An arch that did not arrive writes no field: undefined, which JSON.stringify drops.
     expect(surumYml).toContain("mac_arm64_imza: oku('imza-mac-arm64.minisig')");
     expect(surumYml).toContain('mac_x86_64_boyut: sayi(process.env.MAC_x86_64_BOYUT)');
-    expect(surumYml).toMatch(/for m in \$MAC_VAR; do\s+minisign -S/);
+    // The key is in `sign` alone (DECISIONS 2026-11-16), which signs an arch by
+    // the same rule `publish` admits it by: both of its files arrived.
+    const sign = surumYml.slice(
+      surumYml.indexOf('\n  sign:\n'),
+      surumYml.indexOf('\n  publish:\n'),
+    );
+    expect(sign).toContain('environment: release');
+    expect(sign).toMatch(/always\(\) &&\s+needs\.exe\.result == 'success'/);
+    expect(sign).toMatch(
+      /for m in arm64 x86_64; do\s+if \[ -s "teslim\/Mozaik-mac-\$m\.app\.tar\.gz" \] && \[ -s "teslim\/Mozaik-mac-\$m\.dmg" \]; then\s+minisign -S/,
+    );
+    const yayinlayan = surumYml.slice(surumYml.indexOf('\n  publish:\n'));
+    expect(yayinlayan).not.toContain('MOZAIK_IMZA_ANAHTARI');
+    expect(yayinlayan).toContain('[ -s "imza-mac-$m.minisig" ]');
   });
 
   it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {

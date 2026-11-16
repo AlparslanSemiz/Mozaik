@@ -334,6 +334,54 @@ parçacığında koşturuyordu: ilk öneri aramasında pencere bu süre boyunca 
 `cpsat_var` async ve yüklemeyi bekleme havuzunda yapıyor (`cpsat.rs`). Bir sonraki adım ölçmek:
 babanın türünden bir Mac'te ilk aramanın süresi (TODO B7.42).
 
+### 161 · Sürüm numarasına bakan bir köprü, eski kopyanın bilmediği alanı aynı sürümde hiç sunmaz
+Okunarak bulundu 2026-11-16 (Windows denetimi). Sahadaki 2.2.0 manifestten yalnız `exe` ve
+`boyut`'u okur; kurulum alanlarını taşıyan sürümde tek başına exe'yi takas eder. O exe kendi
+numarasıyla sorar, manifest aynı numarayı söyler, `karar` yalnız `is_newer`'a baktığı için
+"güncel" der: kurulum ve CP-SAT babaya hiçbir zaman ulaşmaz, DECISIONS'taki "bir sonraki
+Denetle kurulumu önerir" cümlesi doğru değildi. Karşı önlem: `update.rs`'in `windows_karari`'sı
+kurulmamış bir kopyaya aynı sürümün imzalı kurulumunu `gecis` olarak sunuyor, ve sayfa bunu
+güncellemeden sonraki ilk açılışta bir kez kendiliğinden söylüyor (`guncelleme_durumu`;
+2.2.0 yenisini bayraksız başlattığı için işaret yanında bıraktığı `.eski`). Koruyan:
+`a_standalone_copy_at_the_same_version_is_offered_the_installer` ve komşuları, 2.2.0'ın
+`karar`'ının kopyası (`the_published_220_reads_this_manifest...`), ve `guncelleme-windows.yml`'in
+gerçek 2.2.0 evresi (tuzak 164). Genel kural: bir köprüyü eski kopyanın kodunu okuyarak
+sınamak, yeni kopyanın kodunu değil.
+
+### 162 · Eski dosyayı silmek, ona bağlı her kısayolu ve sabitlemeyi kırar
+Okunarak bulundu 2026-11-16. Kurulan program açılışta tek başına eski kopyayı siliyordu
+(tek başına kopyanın bıraktığı not dosyasıyla). Babanın görev çubuğunda sabitlediği ya da masaüstüne koyduğu simge o
+dosyaya bağlı: silinince simge "öğe bulunamadı" der, kurulumun açtığı yeni kısayolu ise
+aramayı bilmez. Karşı önlem: eski dosya kalıyor; kurulan program yolunu
+`%LOCALAPPDATA%\com.dersprogrami.arac\kurulu-yol.txt`'ye yazıyor, tek başına kopya açılışta
+onu bulur ve kurulan program en az kendisi kadar yeniyse onu başlatıp çıkıyor
+(`kurulu_hedef`: yalnız kaldırıcısı yanında duran başka bir `.exe`). Koruyan:
+`a_standalone_copy_forwards_only_to_an_installed_program`, `the_note_forwards_only_to_an_installed_program_at_least_as_new`, ve
+`kurulum-windows.yml`'de eski dosyanın kurulan programı açtığı adım.
+
+### 163 · Sessiz kurulum (`/S`) durunca hiçbir şey söylemez, program yalnız kaybolur
+Okunarak bulundu 2026-11-16 (Tauri'nin NSIS şablonu). `/S` altında çalışan kopya
+kapatılamazsa kurulum sessizce `Abort` eder; WebView2 kurulumu, disk ya da virüs tarayıcısı
+da aynı yere düşer, ve `/R` programı yalnız başarıda yeniden açar. `kurulumu_baslat` kurulumu
+başlatıp hemen çıkıyordu: başarısızlıkta ekranda pencere de cümle de kalmazdı. Karşı önlem:
+kurulum `/P` (ilerleme çubuğu, hata kutusu) ile, ve geçici klasördeki bir bekleyici kopya
+(`Mozaik-kurulum-bekleyici.exe`, kurulumun kapattığı `Mozaik.exe` adını taşımıyor) onu
+bekleyip başarısızlıkta eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açıyor; sayfa kodu
+yazan bir uyarı gösteriyor. Koruyan: `the_installer_runs_passive_never_silent`,
+`the_waiter_reads_its_arguments...`; başarısız yolu bugün hiçbir CI koşmuyor.
+
+### 165 · Tauri `script-src`'e özet ekleyince `style-src`'e de nonce ekler, ve `'unsafe-inline'` düşer
+Ölçüldü 2026-11-16, CSP eklenirken (`e2e/csp.spec.ts`). `tauri.conf.json`'da bir `csp`
+verilince Tauri sayfayı gömerken her satır içi `<script>`'in `sha256-`'sını `script-src`'e,
+her `<style>`'a bir nonce koyup onu da `style-src`'e ekler. CSP2'den beri bir hash ya da
+nonce bulunan kaynak listesinde `'unsafe-inline'` yok sayılır: Radix'in pencere açarken
+çalışma anında yazdığı `<style>` reddedildi ("Applying inline style violates ...
+'unsafe-inline' is ignored if either a hash or nonce value is present"), oysa yapılandırmada
+`'unsafe-inline'` yazıyordu. Karşı önlem: `dangerousDisableAssetCspModification:
+["style-src"]`, `script-src` Tauri'nin özetlerine bırakılır. Koruyan test `e2e/csp.spec.ts`:
+sayfayı Tauri'nin hesabıyla kurulan başlık altında açar ve her ihlal bir konsol hatasıdır;
+bayrak kaldırılınca kırmızı.
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1368,6 +1416,17 @@ yalnız bir programın YOKLUĞUNU sınayan test sahtelerle tek başına koşar. 
 gösterildi (TESTFINDINGS 2026-10-10). Kural: **bir kabuk testinin PATH'i, betiğin
 yapmaması gereken şeyi yapabileceği kadar geniştir.**
 
+### 164 · Bugünkü kodu eski diye numaralamak, eski kodu sınamak değildir
+Okunarak bulundu 2026-11-16. `guncelleme-windows.yml`'in "eski" kopyası bu commit'in kodu,
+0.0.1 diye derlenmiş: güncelleme yolu yeşildi ama sahadaki 2.2.0'ın `karar`'ı, `verify`'ı ve
+takası hiç koşmamıştı, kurulum yolu (bekleyici, Restart Manager, kaldırma) da hiç, ve hiçbir iş
+`ortools.dll`'i Windows'ta yüklemiyordu (`MOZAIK_ORTOOLS` yokken küçük model testi erken
+dönüyor). Tuzak 161 tam bu boşlukta kaldı. Karşı önlem: aynı iş akışı yayınlanmış v2.2.0'ı
+(özeti sabit) kendi düğmeleriyle koşuyor; adresi derlenmiş olduğu için github.com runner'da
+hosts ve makinenin güvendiği bir sertifikayla yerel sunucuya çevriliyor
+(`scripts/guncelleme-220.mjs`). `kurulum-windows.yml` kurulumu kurup kaldırıyor ve CP-SAT'ı
+kurulan DLL'lerle koşuyor; `npm run yayinla` ikisini de bekliyor.
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1509,7 +1568,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97, 153, 159, 160 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152, 154, 155, 157, 158, 161, 162, 163, 165 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1517,13 +1576,13 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143, 156 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151, 164 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 160, yeni bir tuzak 161'den devam eder. Test stratejisi
+büyük kullanılan numara 165, yeni bir tuzak 166'dan devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

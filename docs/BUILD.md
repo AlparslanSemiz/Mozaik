@@ -274,8 +274,8 @@ Dependabot (`.github/dependabot.yml`, 2026-09-12) bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
 yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda. Üç ekosisteme
 bakar: npm (haftalık), `src-tauri`'nin cargo'su ve iş akışlarının eylemleri (aylık).
-Üçüncü taraf eylemler (`dtolnay/rust-toolchain`, `Swatinem/rust-cache`) tam commit
-SHA'sıyla sabit, yanında sürüm yorumu var (güvenlik denetimi 2026-11-15); `stable` bir dal
+Bütün eylemler, `actions/*` dahil, tam commit SHA'sıyla sabit, yanında sürüm yorumu var
+(güvenlik denetimi 2026-11-15, birinci taraflar 2026-11-16); `stable` bir dal
 olduğu için rust-toolchain'in SHA'sını Dependabot tazelemez, elle güncellenir.
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
@@ -329,7 +329,7 @@ ile derler ve iki şey teslim eder: tek başına `Mozaik.exe` ve kurulum sihirba
 Kurulumun gerekçesi CP-SAT'ın exe'nin yanında duran kütüphaneleri; tek dosya, eski
 kopyaların güncellenebilmesi için yayında kalıyor (DECISIONS 2026-11-15). Kaldırıcı
 veriyi silmez: `src-tauri/nsis/kancalar.nsh`, ve `surum.yml` bunu ölçmeden yayınlamaz. İki program da
-minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, DECISIONS 2026-11-15), exe imzasız hiçbir şey kurmaz.
+minisign ile imzalanır (`MOZAIK_IMZA_ANAHTARI`, `release` ortamının sırrı; aşağıda "Yayın güvenliği"), exe imzasız hiçbir şey kurmaz.
 
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
@@ -399,7 +399,9 @@ siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 Aynı `src-tauri/`, macOS'ta derlenince `Mozaik.app` ve bir `.dmg` (DECISIONS 2026-11-15, "Mac
 sürümü"). Mac'e özgü ayarların hepsi `src-tauri/tauri.macos.conf.json`'da; Tauri onu yalnız
 macOS'ta `tauri.conf.json`'ın üstüne katar, Windows ayarı değişmez. İçinde: paket hedefleri
-(`app`, `dmg`), en düşük macOS 11, ad-hoc imza (`signingIdentity: "-"`), program adı `Mozaik`
+(`app`, `dmg`), en düşük macOS 11, ad-hoc imza (`signingIdentity: "-"`), sertleştirilmiş çalışma
+zamanı her zaman açık (`hardenedRuntime`, DECISIONS 2026-11-16) ve onun tek istisnası
+`src-tauri/macos/Mozaik.entitlements` (aşağıda, "CP-SAT"), program adı `Mozaik`
 (`mainBinaryName`), `src-tauri/icons/Mozaik.icns` (`scripts/ikon-mac.mjs` üretir: çizim
 1024'lük tuvalde 824 piksel, macOS 11'in ızgarası) ve Belgeler izninin cümlesi
 (`src-tauri/macos/Info.plist`).
@@ -420,7 +422,13 @@ karşılaştırır ve `libortools.9.dylib`'in `@rpath` kapanışını (`otool -L
 `src-tauri/ortools/`'a kopyalar; ürettiği `src-tauri/tauri.ortools.json` (depoya girmez) onları `bundle.macOS.frameworks` olarak
 verir, Tauri `Contents/Frameworks`'e koyup tek tek imzalar (sır yoksa ad-hoc, varsa Developer ID).
 Betik her dylib'in en düşük macOS'unu da okur ve 11.0 değilse durur. `cpsat.rs` kütüphaneyi
-`Contents/MacOS/../Frameworks/` altında arar. Arşivin adındaki `macOS-26.2` derlendiği makine,
+`Contents/MacOS/../Frameworks/` altında arar. Sertleştirilmiş çalışma zamanının kütüphane
+doğrulaması yalnız aynı ekip kimliğiyle imzalı dylib'i yükler; ad-hoc imzada ekip kimliği yok ve
+CP-SAT "different Team IDs" ile reddedildi (ölçüldü 2026-11-16). Ad-hoc pakete bu yüzden
+`com.apple.security.cs.disable-library-validation` girer; Developer ID ile imzalanınca
+`surum.yml` onu çıkarır (`entitlements: null`) ve doğrulama açık kalır. `DYLD_*` ile kütüphane
+sokmak iki durumda da kapalı. Açılan güncelleme paketinde her bağ paketin içinde kalmalı
+(`update_mac.rs`, `icerde_mi`). Arşivin adındaki `macOS-26.2` derlendiği makine,
 en düşük sürüm değil (tuzak 157).
 
 **Veri ve pencere.** Klasör `~/Documents/Ders Programı`; Tauri'nin `document_dir`'i `$HOME`'u
@@ -433,9 +441,10 @@ olmadan bitiriyor. Dock'tan "Çık" ve oturum kapatma hâlâ o yoldan gidiyor.
 
 **Yayın.** `surum.yml`'in `mac` işi iki mimariyi `macos-15`'te derler, paketin içine bakar
 (`codesign --verify --deep --strict`, Frameworks, en düşük sürüm, mimari) ve
-`Mozaik-mac-<mimari>.app.tar.gz` ile `Mozaik-mac-<mimari>.dmg`'yi verir. `publish` arşivleri
-minisign ile imzalar ve `surum.json`'a yazar. Mac yayını engellemez (DECISIONS 2026-11-16):
-`publish` yalnız `package` ve `exe`'nin yeşilini bekler; bir mimarinin işi düştüyse ya da hiç
+`Mozaik-mac-<mimari>.app.tar.gz` ile `Mozaik-mac-<mimari>.dmg`'yi verir. `sign` iki dosyası da
+gelen arşivleri minisign ile imzalar, `publish` onları `surum.json`'a yazar (ikisi aşağıda,
+"Yayın güvenliği"). Mac yayını engellemez (DECISIONS 2026-11-16): `sign` ve `publish` yalnız
+`package` ve `exe`'nin yeşilini bekler; bir mimarinin işi düştüyse ya da hiç
 koşmadıysa o mimarinin dosyaları ve `mac_*` alanları o sürümde yok, iş özetinde ve bir uyarıda
 "Mac paketi bu sürümde yok" yazar, o Mac kopyaları da güncelleme önermez. Apple imzası bir anahtar: `APPLE_CERTIFICATE`,
 `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY` sırları tanımlıysa Developer ID ve
@@ -472,6 +481,105 @@ ve her sürümün paylaştığı kurulum ve indirme metni `.github/surum-notu.md
 biri boşsa iş durur, boş bir "yenilikler" yayınlanmaz. 2.2.0'a kadar sayfa yalnız
 kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
 
+## Yayın güvenliği
+
+Babanın makinesindeki exe yalnız bizim anahtarımızla imzalanmış bir programı kurar
+(`update.rs`, `imza_dogru`), yani bütün zincirin en değerli tek şeyi imza anahtarının gizli
+yarısı. Kurallar (DECISIONS 2026-11-16):
+
+- **Anahtarı tek iş görür.** `surum.yml`'in `sign` işi, `environment: release` ile; Windows'un
+  iki programını ve gelen her Mac arşivini o imzalar. Sır depo
+  düzeyinde değil o ortamda, ortamı yalnız `v*` etiketleri kullanabilir. `sign` kod derlemez,
+  npm koşturmaz, yazma token'ı taşımaz: exe artefaktını indirir, iki programı imzalar, iki
+  `.minisig` yükler. Anahtar dosyası `trap ... EXIT` ile adım nasıl biterse bitsin silinir.
+  Release'i yazan `publish` işi anahtarı hiç görmez. Elle koşuda (`workflow_dispatch`)
+  yayın ancak bir `v*` etiketinin üstünde koşturulursa imzalanır.
+- **Yayın derlemesi kurulum betiği koşturmaz ve önbellek kullanmaz** (Windows ve Mac işleri).
+  `npm ci --ignore-scripts`: lock'ta betiği olan tek paket `fsevents` (yalnız macOS), esbuild ve
+  rolldown'un ikilileri `optionalDependencies`'ten iner; `npm ci --ignore-scripts && npm run
+  build && npm run paket` temiz bir kopyada ölçüldü (2026-11-16). `setup-node`'un npm önbelleği
+  ve `rust-cache` `surum.yml`'den çıktı: önbelleği başka dallardaki koşular da besler.
+- **Her eylem tam commit SHA'sıyla, sürümü yanında yorum.** Birinci taraf (`actions/*`) da.
+  Dependabot SHA'yı ve yorumu birlikte günceller. Tauri CLI `@tauri-apps/cli@2.12.4` sabit.
+- **Exe'nin sayfası katı bir CSP altında** (`tauri.conf.json`, `security.csp`): `default-src
+  'none'`, betik yalnız `'self'` ve Tauri'nin satır içi betiklere eklediği özetler, worker yalnız
+  `blob:` (öneri araması), font ve resim `data:`, `connect-src` yalnız Tauri'nin IPC'si. Uzak
+  köken yok: güncellemeyi Rust indirir, CSP onu kapsamaz. `style-src` `'unsafe-inline'`
+  taşır ve Tauri'ye dokundurulmaz (`dangerousDisableAssetCspModification`, tuzak 165).
+  `e2e/csp.spec.ts` derlenmiş sayfayı Tauri'nin hesabıyla aynı başlık altında açıp örneği,
+  Otomatik diz'i (worker'larla), Çıktı'yı, PDF'i ve kaydetmeyi yürür. `withGlobalTauri` açık
+  kalıyor: köprü `src/platform/exe/desktop.ts`'te tek yerde ama E2E'nin sahte köprüsü ve
+  WebDriver sürücüsü `window.__TAURI__`'ya dayanıyor, kapatmak `@tauri-apps/api`'yi `dist`'e
+  sokmak olurdu.
+- **CP-SAT yalnız kurulu kopyanın klasöründen** (`cpsat.rs`, `kutuphane_yolu`): Windows'ta
+  yanında `uninstall.exe` olmayan bir exe `ortools.dll` aramaz (İndirilenler'e bırakılmış bir
+  DLL yüklenmesin), kütüphane `LoadLibraryExW` ile yalnız kendi klasörü ve System32'de arama
+  yaparak açılır. `MOZAIK_ORTOOLS` yalnız debug derlemede okunur. `uninstall.exe` bir kanıt değil,
+  bir eşik: DLL bırakabilen `uninstall.exe` de bırakabilir; durdurduğu, sıradan bir indirme klasörü.
+- **İndirme beklenen boyutta kesilir** (`update.rs`, `sinirli_ekle`): parça parça okunur,
+  manifestin `boyut`'unu ya da 256 MB'ı aşan ilk parçada durur. Kurulum her seferinde
+  `%TEMP%`'in altında yeni, tahmin edilemez adlı bir klasöre yazılır (`yeni_gecici_klasor`,
+  `create_dir` var olan adı reddeder) ve oradan çalıştırılır; önceki indirmelerin klasörleri yeni
+  indirmeden önce silinir (`eski_gecici_klasorleri_sil`).
+
+### GitHub ayarları
+
+Bunlar kodda değil depo ayarında, ve `gh api` ile bir kez yapılır. Sıra önemli: ortam ve sır
+önce, depo sırrı ondan sonra silinir. Sır silindikten sonra bir yayın ortam sırrını bulamazsa
+`sign` "sırrı tanımlı değil" diyerek durur, imzasız bir şey yayınlanmaz.
+
+```sh
+R=AlparslanSemiz/Mozaik
+
+# 1. `release` ortamı, onaylayıcı yok, yalnız seçilmiş ref'ler.
+gh api -X PUT repos/$R/environments/release \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+
+# 2. O ref'ler: yalnız `v*` etiketleri (dal kuralı yok, yani hiçbir dal giremez).
+gh api -X POST repos/$R/environments/release/deployment-branch-policies \
+  -f name='v*' -f type=tag
+
+# 3. Gizli anahtar ortama (değer, şifreleme gerektirdiği için `gh api` değil `gh secret`).
+gh secret set MOZAIK_IMZA_ANAHTARI --env release --repo $R < ~/.config/mozaik-imza/mozaik.key
+
+# 4. Depo düzeyindeki eski sır silinir.
+gh api -X DELETE repos/$R/actions/secrets/MOZAIK_IMZA_ANAHTARI
+
+# 5. `v*` etiketleri: yalnız yönetici (RepositoryRole 5 = admin, yani `npm run yayinla`)
+#    açar, kimse taşıyamaz ya da silemez. Bir Actions token'ı yeni bir sürüm etiketi açamaz.
+gh api -X POST repos/$R/rulesets --input - <<'JSON'
+{
+  "name": "surum-etiketleri",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "rules": [
+    { "type": "creation" },
+    { "type": "update" },
+    { "type": "deletion" },
+    { "type": "non_fast_forward" }
+  ],
+  "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]
+}
+JSON
+
+# 6. SHA'ya sabitlenmemiş bir eylem hiçbir iş akışında koşmasın.
+gh api -X PUT repos/$R/actions/permissions \
+  -F enabled=true -f allowed_actions=all -F sha_pinning_required=true
+```
+
+Denetim, her adımdan sonra ya da sonda:
+
+```sh
+gh api repos/$R/environments/release --jq '.deployment_branch_policy'
+gh api repos/$R/environments/release/deployment-branch-policies --jq '.branch_policies[] | [.name, .type]'
+gh secret list --env release --repo $R     # MOZAIK_IMZA_ANAHTARI
+gh secret list --repo $R                   # MOZAIK_IMZA_ANAHTARI yok
+gh api repos/$R/rulesets --jq '.[] | [.name, .target, .enforcement]'
+gh api repos/$R/actions/permissions        # "sha_pinning_required": true
+```
+
 ## Sürüm numarası
 
 Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
@@ -502,7 +610,7 @@ Sonra `package.json`, `Cargo.toml` ve `package-lock.json` yazılır, `CHANGELOG.
 Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu,
 sonra `exe-windows.yml` koşusu (yoksa `main`'de başlatılarak) bulunup sonuna kadar
 beklenir, dördüncü olarak güncelleme kapısı `guncelleme-windows.yml` da (aşağıda), her
-sürümde. Hepsi yeşilse etiket annotated atılır, adıyla itilir
+sürümde, beşinci olarak kurulum kapısı `kurulum-windows.yml` (2026-11-16). Hepsi yeşilse etiket annotated atılır, adıyla itilir
 ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi
 görünür: site güncellenir, üç indirme dosyası eski kalır. Biri kırmızıysa, iptal
 edildiyse ya da hiç görünmediyse etiket atılmadan durur. Site yalnız `ci.yml`'in
@@ -518,9 +626,9 @@ yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor
 worktree `main`'in commit'inde ayrık durabilir.
 
 `npm run yayinla -- --kuru` depoda hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`,
-`windows.yml`, `exe-windows.yml` ve `guncelleme-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. İki exe iş akışı her push'ta
+`windows.yml`, `exe-windows.yml`, `guncelleme-windows.yml` ve `kurulum-windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur. Üç exe iş akışı her push'ta
 koşmadığı için commit'in koşusu yoksa onu `main`'de başlatır (2026-10-10, güncelleme kapısı
-2026-10-24).
+2026-10-24, kurulum kapısı 2026-11-16).
 
 **Güncelleme kapısı (2026-10-24, `guncelleme-windows.yml`).** Babanın bugünkü exe'sinden bu
 commit'in exe'sine geçişin kendisi: son Release'in `Mozaik.exe`'si indirilir ve özeti
@@ -539,6 +647,23 @@ değerin depoda ve Belgeler'deki pakette, bu commit'in şemasında durduğu, hi�
 boyunun değişmediği ve günlük kopyaların silinmediği sorulur (`e2e/guncelleme-exe.spec.ts`). Exe'ye, şemaya ya da depolama koduna dokunan bir `main`
 push'unda (sürüm commit'i dahil) ve elle koşar; `yayinla` onu her sürümden önce, koşulsuz
 bekler (kullanıcının kararı, 2026-10-24).
+
+İkinci evre babanın kendi yolu (2026-11-16, tuzak 164): yukarıdaki eski kopya bu commit'in
+kodu, 2.2.0'ınki değil. Yayınlanmış v2.2.0 (özeti sabit) `Ders-Programi.exe` adıyla açılır;
+manifest adresi içine derlenmiş olduğu için github.com runner'da geçici olarak bu makineye
+çevrilir (hosts dosyası ve makinenin güvendiği tek günlük bir sertifika, adım bitince ikisi de
+geri alınır), ve 2.2.0 kendi üç düğmesiyle bu commit'in exe'sine geçer. Yeni exe kurulum
+şeridini göstermeli, kendi denetimi aynı sürümün kurulumunu önermeli ve istemeli
+(`scripts/guncelleme-220.mjs`). Kurulumun imzası orada yok; kurulum yolu aşağıda.
+
+**Kurulum kapısı (2026-11-16, `kurulum-windows.yml`).** Kurulum `surum.yml`'deki gibi
+OR-Tools'la derlenir; tek başına bir test exe'si (güncelleme kökü yerel sunucuda, aynı numara)
+kendi düğmeleriyle aynı sürümün kurulumuna geçer, bekleyici kurulumu `/P /R` ile çalıştırır,
+kurulan program açılıp notunu yazar, beklenen dosyalar (CP-SAT'ın 9 DLL'i ve VC++) kurulum
+klasöründedir, eski dosya yerindedir ve yeniden açılınca kurulan programı açar
+(`scripts/kurulum-gecisi.mjs`). Sonra `cpsat.rs`'in küçük modeli kurulan `ortools.dll`'le
+cevap verir, ve kaldırıcı programı siler, Belgeler'deki yedeği ve profili bırakır. Kuruluma ve
+güncellemeye dokunan bir `main` push'unda ve elle koşar; `yayinla` bekler.
 
 **Etiketten önce gerçek exe'de pencere kapanışı (2026-10-24, kullanıcının kararı, TODO TB7).**
 `e2e/gercek-exe.spec.ts`'in "X ile hemen kapanan pencere…" testi etiketten önce Windows'ta
@@ -607,9 +732,18 @@ yok, ve `MZ` denetimi platformu değil biçimi soruyor, yani Windows exe'sini ke
 yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir. Manifest bir kurulum
-taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir ve `/S /R` ile
-çalıştırır; tek dosyalık bir kopya geçerken yolunu bir not dosyasına (`update.rs`, `ESKI_KOPYA_NOTU`) yazar ve kurulan
-program onu açılışta siler (`update.rs`).
+taşıyorsa (`kurulum`, 2026-11-15'ten) aynı üç düğme kurulumu indirir. Kurulmamış bir kopyaya
+kurulum aynı sürümde de önerilir (`gecis`, `windows_karari`; 2026-11-16): sahadaki 2.2.0 tek
+dosyayı takas eder ve o exe yoksa kendini güncel bulurdu (tuzak 161). Güncellemeden sonraki
+ilk açılışta şerit bunu bir kez söyler (`guncelleme_durumu`, ağsız). "Şimdi kur" kurulumu
+kendisi çalıştırmaz: geçici klasöre kopyalanan bir bekleyici (`Mozaik-kurulum-bekleyici.exe`)
+programın kapanmasını bekler, kurulumu `/P /R` ile çalıştırır (ilerleme çubuğu, hata kutusu)
+ve bitmezse eski kopyayı `--kurulum-olmadi <kod>` ile yeniden açar (tuzak 163). Eski dosya
+silinmez: kurulan program yolunu profil klasöründeki `update.rs`'in `KURULU_NOTU`'na yazar,
+ve tek başına kopya onu bulunca, kurulan program en az kendisi kadar yeniyse, kurulan programı açıp
+çıkar (`kurulu_program`, tuzak 162; geliştirme derlemesi açmaz). Bekleyici kurulumun özetini
+çalıştırmadan hemen önce yeniden denetler.
+CP-SAT sorusu sürerken exe kendi sürecini `BELOW_NORMAL`'a indirir (`cpsat.rs`).
 
 **`exe`, Mac'te.** Aynı üç düğme ve aynı iki kilit (özet ve minisign imzası, güvenilen yorum
 `mozaik <sürüm> Mozaik-mac-<mimari>.app.tar.gz`). Mac kopyası manifestten yalnız kendi mimarisinin
