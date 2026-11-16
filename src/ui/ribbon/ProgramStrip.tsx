@@ -16,12 +16,14 @@ import {
   Plus,
   RotateCcw,
   Rows3,
+  Shuffle,
   Square,
   Trash2,
 } from 'lucide-react';
 import { applyDensity, type Density, type ProgramColorMode, type View } from '../../platform/prefs';
 import { setDayMask, setRowMask } from '../../pure/program';
 import {
+  activePlacements,
   activeProgram,
   addProgram,
   blankProgram,
@@ -38,6 +40,7 @@ import { newId } from '../../pure/entities';
 import { classIcon, teacherIcon } from '../program';
 import { MoreItem, MoreLabel, MoreMenu, MoreRadio, MoreSep, MoreSub } from '../common';
 import { Group, ICON, Sep, Spacer, type StripContext } from './parts';
+import type { State } from '../../leaf/model';
 
 /**
  * The two views. `short` is what the button shows, `label` what it is called.
@@ -82,6 +85,16 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
   },
 ];
 
+/**
+ * Which "Başka bir dizilim" this is: every press asks the search for the next
+ * seed, so the same data gives a new week each time, and the same sequence of
+ * weeks after a reload. Module-level and not a hook: `programStrip` is called
+ * as a function, once per render of whichever strip is open.
+ */
+let anotherSeed = 0;
+/** The week the last "Başka bir dizilim" put on the grid. */
+let anotherMade: State | null = null;
+
 export function programStrip({
   ui,
   state,
@@ -105,6 +118,16 @@ export function programStrip({
   const { exclusions, pending, placed, pinnedHours, gridEmpty, masked, allPinned } =
     strip ?? describeStrip(state, programMask);
   const currentProgram = activeProgram(state);
+  /** "Yeniden yap" and "Başka bir dizilim" say the same thing when they land. */
+  const relaidNotice = (next: State) => {
+    const said =
+      pinnedHours === 0
+        ? t('Program yeniden yapıldı.')
+        : t('Program yeniden yapıldı, sabitlenen {n} saat yerinde kaldı.', {
+            n: pinnedHours,
+          });
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+  };
 
   const askProgramName = async (initial: string, exceptId?: string) => {
     const name = await prompt({
@@ -179,16 +202,36 @@ export function programStrip({
     // "Geri al" for the whole of it. Nothing on the grid moves until the run
     // ends, and "Durdur" stands in "Programı yap"'s place while it runs.
     keepBefore(state, t('Program yeniden yapıldı.'));
-    solver.start(state, { keepPlaced: false, exclusions }, (next) => {
-      const said =
-        pinnedHours === 0
-          ? t('Program yeniden yapıldı.')
-          : t('Program yeniden yapıldı, sabitlenen {n} saat yerinde kaldı.', {
-              n: pinnedHours,
-            });
-      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    solver.start(state, { keepPlaced: false, exclusions }, relaidNotice);
+  };
+  // "Başka bir dizilim" (2026-11-16, main): the same rules, another of the
+  // many weeks they allow, a different one on every press. Behind Daha fazla
+  // beside Yeniden yap: the screen's one primary is "Programı yap".
+  const another = () => {
+    anotherSeed++;
+    // The week before the FIRST press is the one worth keeping: a second press
+    // would push the hand-made week out of the one slot with a week this button
+    // made (review, 2026-11-16).
+    if (state !== anotherMade) keepBefore(state, t('Program yeniden yapıldı.'));
+    solver.start(state, { keepPlaced: false, exclusions, seed: anotherSeed }, (next) => {
+      anotherMade = next;
+      relaidNotice(next);
     });
   };
+  // `relay`: when the kept week leaves a lesson nowhere to go, the unpinned
+  // week is laid out again close to itself. Whatever moved is said, with the
+  // undo for it, and the week before is kept where a reload finds it.
+  const make = () =>
+    solver.start(state, { keepPlaced: true, exclusions, relay: true }, (next) => {
+      const before = activePlacements(state);
+      const after = activePlacements(next);
+      let moved = 0;
+      for (const key in before) if (after[key] !== before[key]) moved++;
+      if (moved === 0) return;
+      const said = t('Program yapıldı, {n} saat yer değiştirdi.', { n: moved });
+      keepBefore(state, said);
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    });
   const clearGrid = () => {
     // No question since SD1 (2026-11-15): it is undone with one click, so it
     // happens and the notice offers that click. The pinned cells stay, and so
@@ -251,7 +294,7 @@ export function programStrip({
                 ? t('Yerleşmeyi bekleyen ders yok')
                 : t('Yerleşmeyen dersleri kurallara uyarak yerleştirir')
             }
-            onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
+            onClick={make}
           >
             <Play {...ICON} />
             {t('Programı yap')}
@@ -280,6 +323,13 @@ export function programStrip({
       <MoreMenu>
         <MoreItem icon={<RotateCcw size={15} />} disabled={placed === 0 || busy} onSelect={rebuild}>
           {t('Yeniden yap')}
+        </MoreItem>
+        <MoreItem
+          icon={<Shuffle size={15} />}
+          disabled={(placed === 0 && pending === 0) || busy}
+          onSelect={another}
+        >
+          {t('Başka bir dizilim')}
         </MoreItem>
         <MoreSep />
         <MoreSub

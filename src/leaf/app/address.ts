@@ -3,17 +3,17 @@
 //
 // The values are in `adres.json` beside this file and NOT here, because two
 // things that are not TypeScript read them too: `vite.site.config.ts` (the
-// site-only probe for the new address) and `site.yml` (the CNAME file Pages
-// gets once the switch is on). One file, so the address cannot be spelled
-// two ways.
+// site-only probe for the new address) and `site.yml` (the CNAME of the new
+// address's own repository). One file, so the address cannot be spelled two
+// ways.
 //
 // What the switch does and does not do. `yeniAdresAcik` moves the address
-// this program SHOWS (`SITE_ADRESI`) and makes the deploy carry a CNAME. It
-// does NOT gate the move of the plans: a copy at the old address cannot be
-// updated once Pages redirects that address (its service worker's update
-// check gets a redirect and fails), so the code that moves the plans has to
-// be in every build from before the switch and has to find out by itself that
-// the new address answers (`vite.site.config.ts`, `yeniAdresYoklamasi`).
+// this program SHOWS (`SITE_ADRESI`), nothing else. The new address is its
+// own Pages site (AlparslanSemiz/mozaik-site) and the old one keeps serving
+// the app, so the copy at the old origin, the only page that can read the
+// plans kept there, stays reachable (BUILD.md, "Alan adına geçiş"). The move
+// is not gated by the switch either: it finds out by itself that the new
+// address answers (`vite.site.config.ts`, `yeniAdresYoklamasi`).
 
 import adres from './adres.json' with { type: 'json' };
 

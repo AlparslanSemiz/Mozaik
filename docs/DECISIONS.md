@@ -84,6 +84,38 @@ seçmiş makine seçimini korur), DESIGN'ın bölüm renkleri ve "Seçili sekme 
 nötr seçili sekme; renk yalnız veri ve durum için), şeritte basılı düğmenin dolu bölüm rengi
 (artık bir segment: açık zemin ve alt çizgi, dolu yalnız ana düğme), Başlarken'in dokuz adımı
 (2026-11-15; artık beş iş).
+### 2026-11-16 · Çözücü ilk yasal haftada durmuyor: iyileştirme, tohum, yakın yeniden dizme (`cozucu/iyilestirme`)
+
+Alp'in kararı (2026-11-16): "daha iyi program" öncelik. Denetim ölçtü: arama ilk yasal haftada
+duruyor, boşluk yalnız eşitlik bozan bir anahtar, Uyar kuralları ve boşluk/en az sınırları hiç
+okunmuyor; `Baştan diz` aynı veride hep aynı haftayı veriyor; tıkanma cümlesi açığı değil tek
+bir kapalı hücreyi söylüyor. Dört karar:
+
+- **Aramadan sonra bir iyileştirme geçişi** (`pure/solver/improve.ts`). Bütün blokları taşır ya
+  da takas eder (sınıfın içinde aynı boyda pencereyle, ya da aynı öğretmenin başka sınıftaki
+  aynı boy bloğuyla); her adım `blocker()`'dan geçer, sabit ve tutulan hücre oynamaz, kartın
+  ızgaradan okunuşu (`placedBlocks`) değişmez. Hedef sırayla: Engelle'deki en az/boşluk ihlali,
+  Uyar ihlalleri, bir dersin güne yığılması, öğretmen boşluğu, öğretmen günü, sınıf boşluğu, geç
+  saat. Hedef hiç artmaz (yalnız iyileşen ya da eşit adım). Bütçe adım değil **puanlanan aday
+  sayısı** (300 000), yani tohum her makinede aynı haftayı verir; 4 s'lik duvar saati yalnız
+  emniyet. Geçiş yalnız **bitmiş** haftada koşar: tıkanmış hafta öneri aramasının ilk tahmini ve
+  boşluğu toplanmış bir hafta daha kötü bir tahmin (babanın dosyasında en az saat yolu 4 yerine
+  5, `relaxFullCourse.test.ts`).
+- **Denendi, bırakıldı: tekmeli yerel arama** (iterated local search, en iyi haftaya geri dönen
+  30 tekme). Babanın haftasında 118 yerine 114 boşluk, ama geçişi bu makinede ~30 ms'den ~400 ms'ye
+  çıkarıyordu ve brotli eşiğini 120 B aşıyordu. Kod oturumun scratch'inde.
+- **`Başka bir dizilim`** düğmesi (tek yeni denetim): her basış bir sonraki tohum. Tohum 0 eskisi
+  gibi; başka tohum aramanın eşit aday sırasını ve gün sırasını karıştırır.
+- **Otomatik diz yerleşmişi önce tutar, sığmazsa yakınında yeniden dizer** (`relay`): tutulan
+  hafta bir kartı yersiz bırakırsa sabitlenmemiş hafta, kendisi ipucu olarak, yeniden dizilir ve
+  ancak her kart yerleşirse alınır; ipucu sıralamanın ilk anahtarı, onarımda eşitlik bozan ve
+  geçişte kurallardan hemen sonra gelen katman. İkinci koşunun onarım sabrı 50/blok (ilki 500):
+  yakın hafta erken bulunur ya da hiç; babanın kurulamayan haftası önerileri 0,7 s geç görür.
+  Bir şey yer değiştirdiyse bildirim kaç saat olduğunu söyler, `Geri al` ile.
+- **Tıkanma cümlesi önce açığı söyler** (`shortfall.ts`): "AY: 18 saat ders, 15 müsait saat; 3
+  saat açılmalı", sınıf ve paylaşılan derslik için de; açık yoksa bağlayan "aynı gün olmasın"
+  çifti. Bunlar listenin başına geçer. Derslik değiştirme önerisi ayrı bir iş (TODO B5.14).
+
 ### 2026-11-16 · Sözlükler derlemede paketleniyor, sıkıştırılmış saklama bırakıldı (`boyut/kucult`)
 
 **Ölçülen.** Kaynak haritasıyla sayıldı: `dist/index.html`'in betiği 1 186 kB, bunun 425 kB'ı
@@ -209,6 +241,16 @@ güncellenemez: kod ondan önce yayında olmalı ve yeni adresin cevap verdiğin
 görünür ve klasörü olmayan bir tarayıcıda bir haftalık kaydedilmemiş değişiklik tek bir şerit
 çıkarır; service worker kabuğu HTTP önbelleğinin arkasından ister; indirmenin blob adresi 30 s
 yaşar; `/ders-programi/` için kendini silen bir sayfa (`site/eski-adres/`).
+
+**Yeni adres ayrı bir Pages sitesi (`web/ayri-site`, aynı gün).** İlk plan `Mozaik`
+deposuna özel alan adı koymaktı. Bir proje sitesine özel alan adı konunca GitHub eski adresi
+yeni adrese 301 ile yönlendirir; eski kökende uygulama yalnız service worker'ı olan
+tarayıcılarda açılır, ve eski kökendeki planları okuyabilen tek sayfa odur. Yeni adres bu
+yüzden ayrı bir depo (`AlparslanSemiz/mozaik-site`, `gh-pages`), `site.yml` aynı derlemeyi
+oraya SSH deploy anahtarıyla iter; eski adres en az bir dönem uygulamayı yayınlamaya devam
+eder, sonra bir taşıma sayfası olur ve hiç yönlendirilmez. **Seçenekler:** (a) özel alan
+adı bu depoda, bir süre sonra: yönlendirme yine planları bırakır; (b) Cloudflare'de vekil:
+DNS'e dokunmayan bir kural ister ve kökeni yine GitHub sayfası olur; (c) ayrı depo: seçildi.
 
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 

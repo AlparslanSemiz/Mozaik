@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti, B5.12 dalda (boyut kararı), B5.13 ve B5.14 açık |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu), kullanılabilirlik raporunun bıraktıkları (§8m) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -640,6 +640,30 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       **Kalan, babada:** hangisi doğru, Mozaik'teki müsaitlik mi Roboders'teki mi?
       Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te açılınca program
       çıkıyor. Soru §8b'de.
+- [~] **B5.12 Daha iyi program (Alp, 2026-11-16) — YAZILDI, BİRİM VE E2E YEŞİL, DALDA
+      (`cozucu/iyilestirme`).** Bitmiş haftaya iyileştirme geçişi (`improve.ts`), `Başka bir
+      dizilim`, Otomatik diz'in yakın yeniden dizmesi (`relay`), açığı söyleyen tıkanma cümlesi
+      (`shortfall.ts`). Ölçümler WORKLOG 2026-11-16, kararlar DECISIONS 2026-11-16. Kalan:
+      - **Boyut kararı (Alp):** dal tek başına eşiğin altındaydı (1 317 720 B, brotli 305,93 kB);
+        `main` aynı gece eşiğe dayandı (1 319 030 B) ve birleşince 1 335 122 B, brotli 309,37 kB.
+        Eşik yükseltilmedi; `file://` açılışı 4×'te ölçüldü (WORKLOG). Seçenekler: (a) eşik
+        1 340 000 B / 311 000 B, (b) sözlükleri ilk açılışta yüklememek (WORKLOG 2026-11-16'nın
+        adayı), (c) geçişi küçültmek (en çok ~3 kB kazanılır).
+      - Tıkanmış haftada geçiş koşmuyor: öneri aramasının ilk tahmini o hafta ve boşluğu
+        toplanmış hafta daha kötü bir tahmin (DECISIONS). Öneri uygulandıktan sonraki hafta da
+        geçişten geçmiyor; `applySuggestion`'dan sonra geçişi koşmak sıradaki adım.
+      - Babanın haftasında öğretmen günü 63, alt sınır ~44: hedefte boşluktan sonra geliyor ve
+        tam dolu sınıflarda yalnız takas var. Daha geniş komşuluk (üçlü döngü, Kempe zinciri) ya
+        da CP-SAT ile masaüstünde iyileştirme ölçülmedi.
+- [ ] **B5.13 CP-SAT modeli ile `legal()` tohum 55'te ayrışıyor.** `cpModel.test.ts`'in havuzu
+      çözücünün cevabından türüyor; iyileştirme geçişi açıkken tohum 55 bozulmuş bir hafta çekiyor
+      ve `cpEvaluate` "yasal", testin `legal()`'ı "değil" diyor (refusal `teacherCap`, t0 gün 1
+      en çok 1). Havuz `improve: false` ile eskisi gibi tutuldu; hangi tarafın haklı olduğu
+      bakılmadı.
+- [ ] **B5.14 Derslik değiştirme önerisi.** Paylaşılan derslik açığı artık cümlede ("A
+      dersliği: 24 saat ders, 20 açık saat; 4 saat açılmalı ya da bir sınıf başka dersliğe
+      geçmeli") ama öneri aramasında "9B, B dersliğine geçsin" diye bir yol yok; denetimin K3
+      dünyası 30 s'de 0 öneri. Yeni bir aile (değişiklik türü, ızgarada uygulama, doğrulama).
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)

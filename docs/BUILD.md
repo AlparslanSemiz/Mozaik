@@ -292,45 +292,56 @@ Pages `max-age=600` gönderiyor ve düz bir istek eski `index.html`'i tarayıcı
 
 Site kendi alt alan adına taşınıyor, `https://mozaik.alparslansemiz.com/` (DECISIONS
 2026-11-16): `alparslansemiz.github.io` kökeni o hesabın bütün Pages sayfalarıyla ortak ve
-localStorage kökene bağlı. Adresler ve tek anahtar `src/leaf/app/adres.json`'da:
-`yeniAdresAcik` açılınca `SITE_ADRESI` yeni adresi gösterir ve `site.yml` yayına bir
-`CNAME` koyar. Actions ile yayınlanan bir Pages sitesi özel alan adını dosyadan değil
-Settings → Pages'ten alır; `CNAME` yayınla birlikte giden yazılı kayıttır.
+localStorage kökene bağlı. Adresler ve tek anahtar `src/leaf/app/adres.json`'da;
+`yeniAdresAcik` yalnız ekranda gösterilen adresi (`SITE_ADRESI`) değiştirir.
 
-Planların taşınması anahtara bağlı değil, çünkü Pages eski yolu yönlendirmeye başlayınca
-eski adresteki kopya bir daha güncellenemez (service worker'ın `sw.js` sorusu
-yönlendirmeye düşer). O yüzden taşıma kodu yönlendirmeden ÖNCE yayında olmalı. Eski
-kökende açılan sayfa, yalnız site derlemesindeki bir betikle yeni adresin manifestini
-okur (`vite.site.config.ts`, `yeniAdresYoklamasi`); cevap gelirse bir şerit çıkar ve
-**Planları taşı** yeni adresi açıp bütün planları `postMessage` ile verir
+**Bu depoya özel alan adı konmaz.** Bir proje sitesine özel alan adı konunca GitHub eski
+adresi (`https://alparslansemiz.github.io/Mozaik/`) yeni adrese 301 ile yönlendirir. O
+andan sonra eski kökende uygulama yalnız service worker'ı olan tarayıcılarda açılır, ve
+eski kökendeki planları okuyabilen tek sayfa o. Bu yüzden yeni adres AYRI bir Pages
+sitesidir: `AlparslanSemiz/mozaik-site` deposu, `gh-pages` dalından. `site.yml` aynı
+derlemeyi iki yere yayınlar: eski adrese bugünkü gibi `deploy-pages` ile, yeni adrese
+`yeni-adres` işiyle (`dist-site` + `CNAME` + `.nojekyll`, SSH ile, deploy anahtarıyla,
+`--force` tek commit). İş yalnız `main`'de ve `mozaik-site` ortamında koşar; anahtar o
+ortamın sırrıdır. Sır yoksa iş bir notla yeşil biter.
+
+Taşıma: eski kökende açılan sayfa, yalnız site derlemesindeki bir betikle yeni adresin
+manifestini okur (`vite.site.config.ts`, `yeniAdresYoklamasi`); cevap gelirse bir şerit
+çıkar ve **Planları taşı** yeni adresi açıp bütün planları `postMessage` ile verir
 (`platform/storage/move.ts`). Yeni adres Tümünü dosyadan aç'ın sorusuyla sorar, sormadan
 hiçbir şey yazmaz; cevap gelmezse planlar bir plan dosyasına iner. Eski adresteki veri
 silinmez. Çift tıklanan dosyada `fetch` yok (`site.spec.ts`).
 
 Adımlar, bu sırayla (Alp):
 
-1. Bu dal `main`'e girer ve `ci.yml` siteyi yayınlar. Siteyi tarayıcıda kullanan biri
-   eski adresi bir kez açıp "Yeni sürüm hazır"da **Yenile** demeli, ya da sekmeyi kapatıp
-   yeniden açmalı: taşıma kodu onun önbelleğine ancak böyle girer.
-2. Cloudflare DNS (`alparslansemiz.com` bölgesi): `CNAME`, ad `mozaik`, hedef
-   `alparslansemiz.github.io`, proxy **kapalı** (gri bulut, "DNS only"), TTL Auto. Proxy
-   açıkken GitHub sertifika veremez. `dig +short mozaik.alparslansemiz.com` hedefi göstermeli.
-3. Önerilen: GitHub → Settings (hesap) → Pages → Add a domain ile `alparslansemiz.com`'u
-   doğrula (verdiği `_github-pages-challenge-alparslansemiz` TXT kaydı Cloudflare'e). Başka
-   bir hesabın bu alt alanı ele geçirmesini önler.
-4. Depo → Settings → Pages → Custom domain: `mozaik.alparslansemiz.com`, Save. DNS
-   denetimi geçince **Enforce HTTPS** işaretlenir (sertifika birkaç dakika ile bir saat
-   arası). Bu andan itibaren eski adres (`https://alparslansemiz.github.io/Mozaik/`) yeni adrese yönlenir.
-5. `https://mozaik.alparslansemiz.com/` açılıyor ve
-   `https://mozaik.alparslansemiz.com/manifest.webmanifest` 200 dönüyorsa eski adresteki
-   kopyalar şeridi göstermeye başlar.
-6. Ayrı bir dalda `yeniAdresAcik: true`; aynı commit'te dışarıda yazılı kopyalar:
-   `README.md`, `.github/surum-notu.md`, `scripts/yayinla.mjs`'teki adres ve
-   `e2e/surum.spec.ts`'in yazılı adresi (`src/surum.test.ts` ilk ikisini yeni adrese karşı
-   okur). `main`'e girince yayında `CNAME` olur.
+1. Cloudflare DNS (`alparslansemiz.com`): `CNAME`, ad `mozaik`, hedef
+   `alparslansemiz.github.io`, proxy **kapalı** ("DNS only"). (2026-11-16'da kuruldu.)
+2. Önerilen: GitHub → hesap Settings → Pages → Add a domain ile `alparslansemiz.com`'u
+   doğrula (`_github-pages-challenge-alparslansemiz` TXT kaydı Cloudflare'e).
+3. Yeni, herkese açık depo `AlparslanSemiz/mozaik-site` (boş; README gerekmez).
+4. Anahtar: `ssh-keygen -t ed25519 -N '' -C mozaik-site-deploy -f mozaik_site`.
+   `mozaik-site` → Settings → Deploy keys → Add: `mozaik_site.pub`, **Allow write access**.
+   Özel yarı `Mozaik`'in `mozaik-site` **ortamının** sırrı olur, depo sırrı değil; ortam
+   yalnız `main`'i kabul eder ("Yayın güvenliği", `gh api` komutları orada). Sonra iki
+   dosya silinir.
+5. `Mozaik`'in `ci.yml`'i `main`'de bir kez koşar (elle "Run workflow" ya da bir push):
+   `yeni-adres` işi `gh-pages` dalını oluşturur.
+6. `mozaik-site` → Settings → Pages → Source: Deploy from a branch, `gh-pages`, `/ (root)`.
+   Custom domain alanı `CNAME` dosyasından `mozaik.alparslansemiz.com` olarak dolar
+   (dolmazsa elle yazılır, Save). DNS denetimi geçince **Enforce HTTPS** (sertifika birkaç
+   dakika ile bir saat arası).
+7. `https://mozaik.alparslansemiz.com/manifest.webmanifest` 200 dönünce eski adresteki
+   kopyalar şeridi kendiliğinden gösterir.
+8. Ayrı bir dalda `yeniAdresAcik: true`; aynı commit'te `README.md`, `.github/surum-notu.md`,
+   `scripts/yayinla.mjs`'teki adres ve `e2e/surum.spec.ts`'in yazılı adresi
+   (`src/surum.test.ts` ilk ikisini yeni adrese karşı okur).
+9. `https://alparslansemiz.github.io/Mozaik/` en az bir dönem uygulamayı yayınlamaya devam
+   eder. Sonra yerine, `site/eski-adres/`'in `/Mozaik/` için bir eşi konur: planı olana
+   taşımayı ve dosyayı sunar. Eski adres hiçbir zaman yönlendirilmez ve `Mozaik` deposuna
+   özel alan adı konmaz.
 
-Geri almak: Settings → Pages'ten alan adını sil, `yeniAdresAcik: false`. Eski kökendeki
-veri hiçbir adımda silinmediği için geri dönüş veri kaybettirmez.
+Geri almak: `mozaik-site`'ta Pages'i kapatmak, `yeniAdresAcik: false`. Eski kökendeki veri
+hiçbir adımda silinmediği için geri dönüş veri kaybettirmez.
 
 #### Eski adres
 
@@ -341,12 +352,11 @@ girdileri `/ders-programi/` altında olan önbellekleri siler (Mozaik'inki aynı
 aynı adla başlıyor), açık sayfaları ağdan yeniden yükler ve kaydını siler. `index.html`
 eski service worker'ı sayfadan da siler, sonra karar verir: bu kökende plan yoksa ya da yeni
 adres henüz cevap vermiyorsa aynı kökendeki `/Mozaik/`'e gider (planlar orada okunur);
-plan varsa ve yeni adres cevap veriyorsa (`/Mozaik/` artık oraya yönleniyor) durur ve
-Mozaik'in kendi taşımasını sunar: aynı üç mesaj, aynı kökenler, ve bütün planlar tek
+plan varsa ve yeni adres cevap veriyorsa durur ve Mozaik'in kendi taşımasını sunar: aynı üç mesaj, aynı kökenler, ve bütün planlar tek
 dosyaya. Bu klasör `dist-site`'a girmez (`SERVIS_EDILMEYEN`); ikisi `src/sw.test.ts` ve
 `e2e/tasima.spec.ts`'te. Yayını Alp yapar: `ders-programi` adında herkese açık bir depo,
 kökünde `index.html` ve `sw.js`, Settings → Pages → Deploy from a branch (`main`, `/`).
-Sırası serbest, adım 4'ten önce olması iyi.
+Sırası serbest.
 
 ### Yerel kurulum
 
@@ -627,6 +637,17 @@ gh api -X POST repos/$R/rulesets --input - <<'JSON'
   "bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }]
 }
 JSON
+
+# 5b. Yeni adresin deploy anahtarı (site.yml, `yeni-adres`; "Alan adına geçiş"): kendi
+#     ortamında, yalnız `main` dalı girer. Depo sırrı olarak hiç tanımlanmaz.
+gh api -X PUT repos/$R/environments/mozaik-site \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api -X POST repos/$R/environments/mozaik-site/deployment-branch-policies \
+  -f name=main -f type=branch
+gh secret set MOZAIK_SITE_DEPLOY_KEY --env mozaik-site --repo $R < mozaik_site
+# Daha önce depo sırrı olarak eklendiyse:
+gh api -X DELETE repos/$R/actions/secrets/MOZAIK_SITE_DEPLOY_KEY || true
 
 # 6. SHA'ya sabitlenmemiş bir eylem hiçbir iş akışında koşmasın.
 gh api -X PUT repos/$R/actions/permissions \

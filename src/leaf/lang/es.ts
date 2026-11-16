@@ -1896,8 +1896,15 @@ const ES: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan con identificador ausente o repetido: {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "No se escribe nada en la carpeta hasta que elija.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Este plan más pequeño sustituye al último archivo de plan de la carpeta. El estado anterior queda en las copias diarias.",
-  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
-  // new address is left in Turkish: it only ever shows at the old address.
+
+  // src/pure/solver (2026-11-16)
+  "Başka bir dizilim": "Otra distribución",
+  "Program yapıldı, {n} saat yer değiştirdi.": "El horario está hecho; {n} {n:hora movida|horas movidas}.",
+  "{kim}: {yuk} saat ders, {acik} müsait saat; {fazla} saat açılmalı": "{kim}: {yuk} horas de clase, {acik} disponibles; hay que abrir {fazla}",
+  "{sinif}: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı": "{sinif}: {yuk} horas de clase, {acik} abiertas; hay que abrir {fazla}",
+  "{derslik} dersliği: {yuk} saat ders, {acik} açık saat; {fazla} saat açılmalı ya da bir sınıf başka dersliğe geçmeli": "Aula {derslik}: {yuk} horas de clase, {acik} abiertas; abrir {fazla} más o pasar un grupo a otra aula",
+  "{bir} ile {iki} aynı güne konmamalı: {n1} + {n2} gün gerekiyor, {g} gün var": "{bir} y {iki} no el mismo día: hacen falta {n1} + {n2} días, hay {g}",
+  // The plan-file reminder and the move to the new address (2026-11-16).
   "son plan dosyasının tarihi":
     "fecha del último archivo de plan",
   "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
@@ -1906,6 +1913,20 @@ const ES: Sozluk = {
     "**El último archivo de plan es del {tarih}.** Lo que ha hecho desde entonces solo está en este navegador.",
   "Son plan dosyası: {tarih}.":
     "Último archivo de plan: {tarih}.",
+  "Eski adresteki planlar buraya gelsin mi?":
+    "¿Traer aquí los planes de la dirección anterior?",
+  "**Planlar bir plan dosyasına yazıldı** (İndirilenler). Yeni adreste **Tümünü dosyadan aç** ile açın.":
+    "**Los planes se escribieron en un archivo de plan** (Descargas). En la nueva dirección, ábralo con **Abrir todos desde archivo**.",
+  "**Planlar yeni adrese taşındı.** Bundan sonra orayı kullanın:":
+    "**Los planes se han trasladado a la nueva dirección.** A partir de ahora, use esa:",
+  "Yeni adres açıldı. Oradaki soruyu cevaplayın.":
+    "Se ha abierto la nueva dirección. Responda allí a la pregunta.",
+  "**Mozaik yeni adresine taşındı.** Planlarınız burada da kalır.":
+    "**Mozaik se ha trasladado a una nueva dirección.** Sus planes también se quedan aquí.",
+  "Hiçbir plan taşınmadı.":
+    "No se trasladó ningún plan.",
+  "Planları taşı":
+    "Trasladar planes",
 };
 
 registerSozluk("es", ES);
