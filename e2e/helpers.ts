@@ -295,11 +295,22 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
   for (let index = 0; index < Math.min(cardCount, 8); index++) {
     await startDrag(page, index);
 
-    const cells = page.locator('tr.target-row td');
-    for (const point of await visibleCells(page, 'tr.target-row td')) {
+    // The drag paints the whole row's answer once when it starts (`can-ok`,
+    // `can-warn`, `can-no` in drag.ts), so only the cells it calls droppable
+    // are tried. Sweeping every visible cell with a fixed 40 ms pause after
+    // each one made this helper several seconds of a test's 30, and on a
+    // loaded machine the test ran out of time before its own assertions
+    // (pitfall 170).
+    await expect(page.locator('tr.target-row td[data-day]').first()).toHaveClass(
+      /\bcan-(ok|warn|no)\b/,
+    );
+    const cells = page.locator('tr.target-row td.can-ok');
+    for (const point of await visibleCells(page, 'tr.target-row td.can-ok')) {
       await page.mouse.move(point.x, point.y, { steps: 3 });
-      await page.waitForTimeout(40); // the highlight is applied in the rAF loop
       const cell = cells.nth(point.index);
+      // The strong highlight under the cursor is applied in the rAF loop:
+      // wait for it to be painted, whichever verdict it is.
+      await expect(cell).toHaveClass(/\bdrop-(ok|warn|blocked)\b/);
       if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
         const day = (await cell.getAttribute('data-day'))!;
         const hour = (await cell.getAttribute('data-hour'))!;
