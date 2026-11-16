@@ -189,7 +189,12 @@ test.describe('61. Elle sıralama', () => {
   test('pasif tutamak sürüklenmiyor — sıra kıpırdamıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
+    const entered = (await names(page)).join('|');
     await page.locator('select.sort-pick').selectOption({ label: 'Ada göre' });
+    // The list is drawn deferred: read the order only once the sort is ON
+    // screen, or "before" is the unsorted list and the sort looks like a move.
+    await expect(grips(page).first()).toBeDisabled();
+    await expect.poll(async () => (await names(page)).join('|')).not.toBe(entered);
 
     const before = await names(page);
     await dragRow(page, 0, 3);

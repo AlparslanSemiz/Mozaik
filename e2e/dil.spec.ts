@@ -65,8 +65,13 @@ test.describe('82. Dil', () => {
     await openWithSample(page);
     await chooseLang(page, 'en');
     await page.locator('.tabstrip').getByRole('button', { name: 'Classes', exact: true }).click();
-    await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitem', { name: 'Every lesson in one list' }).click();
+    // Every lesson is the "All" row at the top of the Lessons view's list
+    // since denetim/kisi (2026-11-16), not a Daha fazla item.
+    await page.locator('.ribbon').getByRole('button', { name: 'Lessons', exact: true }).click();
+    await page
+      .getByRole('button', { name: /^All\b/ })
+      .first()
+      .click();
     await expect(page.locator('.panel.step-panel h2').first()).toContainText(
       '99 lessons · 433 hours',
     );
@@ -156,7 +161,16 @@ test.describe('82. Dil', () => {
   test('çoğul EKRANDA doğru biçimi seçiyor', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');
-    await page.locator('.tabstrip').getByRole('button', { name: 'Teachers', exact: true }).click();
+    // The rooms' Özet says which classes sit in a room: "3 classes: 410, …"
+    // (the teachers' Özet lost its counted lists to "problems only", 2026-11-16).
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'School details', exact: true })
+      .click();
+    await page
+      .locator('.ribbon')
+      .getByRole('button', { name: /^Rooms/ })
+      .click();
     const metin = await page.locator('body').innerText();
     expect(metin).toMatch(/\b\d+ (rooms|classes|teachers|subjects)\b/);
   });

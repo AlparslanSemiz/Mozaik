@@ -56,8 +56,10 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, all, onA
           </span>
           <span className="entity-name">{t('Hepsi')}</span>
           <span className="entity-count">
-            {state.lessons.length} ders · {state.lessons.reduce((n, l) => n + l.weeklyHours, 0)}{' '}
-            saat
+            {t('{ders} ders · {saat} saat', {
+              ders: state.lessons.length,
+              saat: state.lessons.reduce((n, l) => n + l.weeklyHours, 0),
+            })}
           </span>
         </button>
         {picking.map((x) => {
@@ -98,8 +100,10 @@ export function LessonPicker({ state, mode, picking, focused, setFocus, all, onA
                         girdim" and "haftası doldu mu" are different questions
                         and the second one is the one that bites. */}
               <span className="entity-count">
-                {count} ders · {weeklyLoad(state, mode === 'teacher' ? 'teacher' : 'class', x.id)}{' '}
-                saat
+                {t('{ders} ders · {saat} saat', {
+                  ders: count,
+                  saat: weeklyLoad(state, mode === 'teacher' ? 'teacher' : 'class', x.id),
+                })}
               </span>
             </button>
           );

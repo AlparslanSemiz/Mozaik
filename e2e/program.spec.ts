@@ -2140,7 +2140,9 @@ test.describe('86. Sabitleme', () => {
     // WITH NOTHING HOVERED, then with the card hovered.
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(0);
+    // Faint at rest since the screen audit (2026-11-16): a pin nobody can see
+    // is a pin a reader with low vision never finds. Faint, not full.
+    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(0.45, 2);
     await card.hover();
     await settledMotion(page);
     expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
@@ -2177,7 +2179,7 @@ test.describe('86. Sabitleme', () => {
     await expect(pin).toHaveAttribute('aria-pressed', 'false');
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(0);
+    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(0.45, 2);
   });
 
   // Since 2026-11-16 (Sadeleşme K7) a heading has no menu: what it held was

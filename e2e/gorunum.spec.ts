@@ -24,6 +24,7 @@ import {
   savedText,
   settledText,
   openPerson,
+  openPrintClasses,
 } from './helpers';
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
@@ -346,10 +347,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   }) => {
     test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
-    await page
-      .locator('.tabstrip')
-      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
-      .click();
+    await openPrintClasses(page);
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbirini seçme' }).click();

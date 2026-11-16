@@ -66,7 +66,7 @@ test.describe('52. Komut paleti', () => {
     await openWithSample(page);
     await page.locator('.tabstrip').getByRole('button', { name: 'Program', exact: true }).click();
     await page.locator('.ribbon .more-menu').evaluate((b) => (b as HTMLButtonElement).click());
-    await expect(page.getByRole('menuitem', { name: /Bu programın kopyası/ })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /Programı boşalt/ })).toBeVisible();
   });
 
   test('sekmeye gidiyor', async ({ page }) => {

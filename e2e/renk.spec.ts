@@ -895,9 +895,12 @@ test.describe('93. Listelerde zebra', () => {
       await page.mouse.move(0, 0);
       await expect.poll(() => ring(rows.nth(1))).toBe('none');
 
-      // table.stat: the same rule, the same token.
-      await openProblems(page);
-      const stat = page.getByRole('dialog').locator('table.stat tbody tr');
+      // table.stat: the same rule, the same token. The week's own table is
+      // one row since the wording pass, so a load table (Daha fazla).
+      const problems = await openProblems(page);
+      await problems.locator('.more-menu').click();
+      await page.getByRole('menuitemradio', { name: 'Öğretmen yükleri' }).click();
+      const stat = page.getByRole('dialog').locator('.stat-scroll table.stat > tbody > tr');
       expect(await stat.count()).toBeGreaterThanOrEqual(2);
       expect(await ground(stat.nth(0))).toBe('rgba(0, 0, 0, 0)');
       expect(await ground(stat.nth(1))).toBe(t['--zebra']);
