@@ -58,6 +58,24 @@ while ((Get-Date) -lt $son) {
       if ($tur -notmatch 'Button|TabItem|Hyperlink|MenuItem|RadioButton|CheckBox') { continue }
       if (-not (Uyar $ad) -or -not $acik) { continue }
       $o = $null
+      # A radio or check item SELECTS; its Invoke may be a click the page's
+      # menu never sees, and a radio menu item pressed that way changed
+      # nothing (kurulum-windows, 2026-11-16). Selected first, then invoked,
+      # then focused and Enter: a menu item answers the key the same way.
+      if ($tur -match 'RadioButton|CheckBox') {
+        if ($e.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern, [ref]$o)) {
+          $o.Select(); "basildi Select $tur '$ad'"; exit 0
+        }
+        if ($e.TryGetCurrentPattern([System.Windows.Automation.TogglePattern]::Pattern, [ref]$o)) {
+          $o.Toggle(); "basildi Toggle $tur '$ad'"; exit 0
+        }
+        try {
+          $e.SetFocus()
+          Add-Type -AssemblyName System.Windows.Forms
+          [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
+          "basildi Enter $tur '$ad'"; exit 0
+        } catch { }
+      }
       if ($e.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$o)) {
         $o.Invoke(); "basildi Invoke $tur '$ad'"; exit 0
       }

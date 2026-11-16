@@ -2,10 +2,10 @@
 // is about.
 
 import type React from 'react';
-import { Bell, Eye, Scale } from 'lucide-react';
+import { Bell, Eye, Info, Library, Scale } from 'lucide-react';
 import type { SectionId } from '../../platform/prefs';
 import { surumEtiketi } from '../../leaf/app';
-import { MoreMenu, MoreRadio } from '../common';
+import { MoreItem, MoreMenu } from '../common';
 import { STEPS } from '../program';
 import { Group, ICON, Spacer, type StripContext } from './parts';
 
@@ -38,7 +38,6 @@ export function settingsStrip({
   planName,
 }: StripContext): React.ReactElement {
   const rules = Object.values(state.settings.rules);
-  const rare = RARE.find((s) => s.id === ui.section);
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul bilgileri')}>
       <Group label="Bölüm">
@@ -101,11 +100,21 @@ export function settingsStrip({
       {/* The unread release note's dot sits on the door now, since Hakkında
           is behind it. */}
       <MoreMenu dot={changelogUnseen}>
-        <MoreRadio
-          value={rare?.id ?? ''}
-          onChange={(id) => ui.setSection(id as SectionId)}
-          options={RARE.map((s) => ({ id: s.id, label: t(s.label) }))}
-        />
+        {/* Plain menu items, not radio items: choosing one GOES to a
+            section, it does not set anything. A menuitem is also what
+            Windows UI Automation and a screen reader can press; a
+            menuitemradio arrived as a RadioButton whose Invoke selected
+            nothing (kurulum-windows, 2026-11-16). The strip's reading on
+            the right says which one is open. */}
+        {RARE.map((s) => (
+          <MoreItem
+            key={s.id}
+            icon={s.id === 'plans' ? <Library size={15} /> : <Info size={15} />}
+            onSelect={() => ui.setSection(s.id)}
+          >
+            {t(s.label)}
+          </MoreItem>
+        ))}
       </MoreMenu>
     </div>
   );

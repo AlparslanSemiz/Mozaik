@@ -177,7 +177,8 @@ try {
   console.log(uiaBas(ADLAR.ayarlar, { tam: true, sureMs: 120_000 }));
   console.log(uiaBas(ADLAR.dahaFazla, { tam: true }));
   console.log(uiaBas(ADLAR.hakkinda, { tam: true }));
-  console.log(uiaBas(ADLAR.denetle, { tam: true }));
+  // Waits for Hakkında to be drawn: the press above has to have opened it.
+  console.log(uiaBas(ADLAR.denetle, { tam: true, sureMs: 60_000 }));
   console.log(uiaBas(ADLAR.kurulum, { tam: true, sureMs: 60_000 }));
   console.log(uiaBas(ADLAR.kur, { tam: true, sureMs: 120_000 }));
 

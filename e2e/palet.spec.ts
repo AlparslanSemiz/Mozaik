@@ -71,7 +71,7 @@ test.describe('52. Komut paleti', () => {
       .getByRole('button', { name: 'Okul bilgileri', exact: true })
       .click();
     await page.locator('.ribbon .more-menu').evaluate((b) => (b as HTMLButtonElement).click());
-    const item = page.getByRole('menuitemradio', { name: 'Hakkında' });
+    const item = page.getByRole('menuitem', { name: 'Hakkında' });
     await expect(item).toBeVisible();
     await item.evaluate((el) => (el as HTMLElement).click());
     await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();

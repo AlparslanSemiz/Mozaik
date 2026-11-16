@@ -234,7 +234,7 @@ export async function openSettings(page: Page, section: string) {
   // 2026-11-16 (Sadeleşme); the strip then READS which one is open.
   if (section === 'Planlar ve yedek' || section === 'Hakkında') {
     await page.locator('.ribbon .more-menu').click();
-    await page.getByRole('menuitemradio', { name: section }).click();
+    await page.getByRole('menuitem', { name: section }).click();
     await expect(page.locator('.ribbon .ribbon-label').last()).toHaveText(
       section === 'Hakkında' ? /sürüm/i : /açık plan/i,
     );
