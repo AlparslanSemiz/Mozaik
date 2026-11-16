@@ -75,9 +75,9 @@ export default function Classes({ state, change }: PanelProps) {
             <thead>
               <tr>
                 {order.head}
-                <th>{t('Ad')}</th>
+                <th className="w-col-xl">{t('Ad')}</th>
                 <th>{t('Derslik')}</th>
-                <th className="num">{t('Ders saati')}</th>
+                <th>{t('Ders saati')}</th>
                 <th>{t('Durum')}</th>
               </tr>
             </thead>

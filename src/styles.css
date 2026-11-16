@@ -7661,10 +7661,6 @@ table.person-list tbody tr {
   cursor: pointer;
 }
 
-table.person-list tbody tr:hover {
-  background: var(--accent-bg);
-}
-
 .person-status {
   color: var(--muted);
   font-size: var(--fs-sm);

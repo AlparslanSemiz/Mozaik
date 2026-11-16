@@ -75,6 +75,9 @@ export function NewTeacher({ state, change, added }: Props) {
 
   return (
     <>
+      <p className="hint">
+        <T k="Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur." />
+      </p>
       <dl className="sheet-edit">
         <dt>{t('Ad')}</dt>
         <dd>
@@ -222,6 +225,9 @@ export function NewClass({ state, change, added }: Props) {
 
   return (
     <>
+      <p className="hint">
+        <T k="Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir." />
+      </p>
       <dl className="sheet-edit">
         <dt>{t('Ad')}</dt>
         <dd>

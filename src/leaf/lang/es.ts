@@ -1952,6 +1952,14 @@ const ES: Sozluk = {
     "El número propio de un profesor se escribe en su página y sustituye a este: **Escuela → Profesores**, haga clic en el nombre.",
   "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
     "El número propio de una clase se escribe en su página y sustituye a este: **Escuela → Clases**, haga clic en el nombre.",
+  // ------------------------------------------- the person page (K5)
+  "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
+    "{n} {n:clase sigue|clases siguen} en horas que cerró; no se borró nada, están en rojo en el horario semanal.",
+  // ------------------------------------------- the person page (K5)
+  "Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur.":
+    "La materia se **elige de la lista**; el nombre corto encabeza la fila.",
+  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
+    "Un grupo de alumnos con el mismo horario; el **aula** es su sala fija.",
 };
 
 registerSozluk("es", ES);

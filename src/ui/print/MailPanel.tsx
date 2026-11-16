@@ -85,7 +85,8 @@ function MailButton({
   setSaid,
 }: {
   url: string;
-  name: string;
+  /** Omitted on the person page: there the visible "Gönder" is the name (WCAG 2.5.3). */
+  name?: string;
   children: ReactNode;
   setSaid: (next: Said) => void;
 }) {
@@ -135,11 +136,7 @@ export function SendTeacher({
   return (
     <>
       {why === null ? (
-        <MailButton
-          url={url}
-          name={t('{kim} için e-postayı aç', { kim: teacher.short })}
-          setSaid={setSaid}
-        >
+        <MailButton url={url} setSaid={setSaid}>
           {t('Gönder')}
         </MailButton>
       ) : (

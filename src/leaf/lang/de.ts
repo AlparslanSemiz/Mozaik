@@ -1951,6 +1951,14 @@ const DE: Sozluk = {
     "Die eigene Zahl einer Lehrkraft steht auf ihrer Seite und ersetzt diese: **Schule → Lehrkräfte**, auf den Namen klicken.",
   "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
     "Die eigene Zahl einer Klasse steht auf ihrer Seite und ersetzt diese: **Schule → Klassen**, auf den Namen klicken.",
+  // ------------------------------------------- the person page (K5)
+  "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
+    "{n} {n:Stunde liegt|Stunden liegen} noch in gesperrten Stunden; nichts wurde gelöscht, im Wochenplan rot.",
+  // ------------------------------------------- the person page (K5)
+  "Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur.":
+    "Das Fach wird **aus der Liste gewählt**; der Kurzname steht am Zeilenkopf.",
+  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
+    "Eine Schülergruppe mit gemeinsamem Stundenplan; der **Raum** ist ihr fester Raum.",
 };
 
 registerSozluk("de", DE);

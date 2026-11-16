@@ -55,6 +55,8 @@ export function PersonRow({ state, kind, id, name, color, grip, cells }: Props) 
       // the row is not a second Tab stop.
       onClick={(e) => {
         if ((e.target as HTMLElement).closest('button, a, input, select, .grip-col') === null) {
+          // Focus first, so closing the page hands the keyboard back here.
+          e.currentTarget.querySelector<HTMLElement>('.person-open')?.focus();
           inspect(kind, id);
         }
       }}

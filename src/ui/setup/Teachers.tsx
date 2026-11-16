@@ -129,7 +129,7 @@ export default function Teachers({ state, change }: PanelProps) {
             <thead>
               <tr>
                 {order.head}
-                <th>{t('Ad')}</th>
+                <th className="w-col-xl">{t('Ad')}</th>
                 <th>{t('Kısa ad')}</th>
                 <th>{t('Branş')}</th>
                 <th className="num">{t('Ders saati')}</th>

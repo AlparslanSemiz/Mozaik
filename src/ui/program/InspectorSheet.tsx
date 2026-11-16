@@ -193,16 +193,26 @@ export function Inspector({
     const facts = entityFacts(state, target.kind, target.id);
     return facts === null ? null : { facts };
   }, [state, target]);
-  // The laid-out week is folded, and drawn only once it is unfolded: opening
-  // the page has a 100 ms budget at 4x on the father's week.
-  const [weekOpen, setWeekOpen] = useState(false);
+  // The laid-out week is folded, and its table is drawn only once it is
+  // unfolded: opening the page has a 100 ms budget at 4x on the father's week.
+  // The week itself is cheap and always read, because a lesson left on an hour
+  // closed afterwards must be visible (pitfall 16): then the fold opens by
+  // itself and a line under the closed hours says so. `null`: not touched.
+  const [weekOpen, setWeekOpen] = useState<boolean | null>(null);
+  // A new page starts folded and not printing: the sheet stays mounted from
+  // one person to the next, and so would these (review, 2026-11-16).
+  const [shown, setShown] = useState(target);
+  if (shown !== target) {
+    setShown(target);
+    setWeekOpen(null);
+    setPrinting(false);
+  }
   const week = useMemo(
-    () =>
-      weekOpen && target !== null && target.id !== ''
-        ? entityWeek(state, target.kind, target.id)
-        : null,
-    [weekOpen, state, target],
+    () => (target !== null && target.id !== '' ? entityWeek(state, target.kind, target.id) : null),
+    [state, target],
   );
+  const stranded = week?.reduce((n, row) => n + row.filter((c) => c.conflict).length, 0) ?? 0;
+  const showWeek = weekOpen ?? stranded > 0;
 
   const hours = hourLabels(state.settings.hours.length, state.settings.hours.join(','));
   const lessons =
@@ -262,6 +272,14 @@ export function Inspector({
             and the key makes the box forget its draft when another person is
             opened in the same page, or Ctrl+Z changes the value under it. */}
         <h3 className="sheet-h">{t('Bilgiler')}</h3>
+        {/* The short form is the grid's row head: a clash is said where it is
+            made, not only on the list behind the page. */}
+        {teacherOf !== undefined &&
+          state.teachers.some((x) => x.id !== teacherOf.id && x.short === teacherOf.short) && (
+            <div className="warn-box">
+              <T k="**Aynı kısa ad birden çok öğretmende:** ızgarada iki satır ayırt edilemez." />
+            </div>
+          )}
         <dl className="sheet-edit">
           <dt>{t('Ad')}</dt>
           <dd>
@@ -461,6 +479,13 @@ export function Inspector({
               : t('{kim} · kapalı saatler', { kim: view.facts.name })
           }
         />
+        {stranded > 0 && (
+          <div className="warn-box">
+            {t('Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.', {
+              n: stranded,
+            })}
+          </div>
+        )}
 
         {/* "Öğretmenin bilgisine girip bir sınıfı başka bir hocaya aktarma
             olsun." A teacher's rows move the CLASS to another teacher, a
@@ -580,11 +605,11 @@ export function Inspector({
             column = lesson, the way Müsaitlik and the printed sheet read. */}
         <details
           className="sheet-more"
-          open={weekOpen}
+          open={showWeek}
           onToggle={(e) => setWeekOpen(e.currentTarget.open)}
         >
           <summary>{t('Haftalık programı')}</summary>
-          {week !== null && (
+          {week !== null && showWeek && (
             <div className="scroll-x">
               <table className="sheet-week">
                 <thead>
@@ -712,6 +737,7 @@ export function Inspector({
                     </button>
                     {teacherOf !== undefined && (
                       <SendTeacher
+                        key={teacherOf.id}
                         state={state}
                         teacher={teacherOf}
                         onMissing={() => emailBox.current?.focus()}

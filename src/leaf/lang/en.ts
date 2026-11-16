@@ -1935,6 +1935,14 @@ const EN: Sozluk = {
     "A teacher’s own number is written on their page and replaces this one: **School → Teachers**, click the name.",
   "Bir sınıfa özel sayı onun sayfasında yazılır ve bunun yerine geçer: **Okul → Sınıflar**, adına tıklayın.":
     "A class’s own number is written on its page and replaces this one: **School → Classes**, click the name.",
+  // ------------------------------------------- the person page (K5)
+  "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
+    "{n} {n:lesson is|lessons are} still on hours you closed; nothing was deleted, they are red in the weekly timetable.",
+  // ------------------------------------------- the person page (K5)
+  "Branş **listeden seçilir**; kısa ad ızgarada satır başlığı olur.":
+    "The subject is **picked from the list**; the short name heads the grid row.",
+  "Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit dersliğidir.":
+    "A group of pupils sharing one timetable; the **room** is that class's fixed room.",
 };
 
 registerSozluk("en", EN);
