@@ -238,6 +238,30 @@ export function sanitize(d: State): State {
     changed = true;
   }
 
+  // The dated layer (v18) names people, classes and hours like the grid: an
+  // absence of somebody deleted, or a cover whose class, hour or substitute is
+  // gone, goes with them. A date is never judged here: the past is history.
+  const givenDated = d.dated ?? { absent: [], covers: [] };
+  const people = (id: Id) => teacherIds.has(id) || classIds.has(id);
+  const absent = givenDated.absent.filter((a) => people(a.id));
+  const covers = givenDated.covers.filter(
+    (c) =>
+      classIds.has(c.classId) &&
+      Number.isInteger(c.hour) &&
+      c.hour >= 0 &&
+      c.hour < hourCount &&
+      (c.teacherId === null || teacherIds.has(c.teacherId)),
+  );
+  let dated = givenDated;
+  if (
+    d.dated === undefined ||
+    absent.length !== givenDated.absent.length ||
+    covers.length !== givenDated.covers.length
+  ) {
+    dated = { ...givenDated, absent, covers };
+    changed = true;
+  }
+
   if (!changed) return d;
   return {
     ...d,
@@ -249,5 +273,6 @@ export function sanitize(d: State): State {
     activeProgramId,
     answers,
     relations: relations.length === givenRelations.length ? givenRelations : relations,
+    dated,
   };
 }

@@ -476,6 +476,57 @@ describe('şema örnekleri — öğretmenin e-postası (v17)', () => {
   });
 });
 
+describe('şema örnekleri — tarihli değişiklikler (v18)', () => {
+  it.each(VERSIONS)('v%i dosyasının gelmeyenleri ve ikameleri doğru geliyor', (version) => {
+    const dated = parse(version).dated;
+    // v18 brought them. A file below it has none, and none is right.
+    expect(dated).toEqual(
+      version >= 18
+        ? {
+            absent: [
+              { id: 'tMC', from: '2026-11-17', to: '2026-11-17' },
+              { id: 'c511', from: '2026-11-17', to: '2026-11-19' },
+            ],
+            covers: [{ date: '2026-11-17', classId: 'c510', hour: 0, teacherId: 'tAV' }],
+          }
+        : { absent: [], covers: [] },
+    );
+  });
+
+  it('okunamayan tek bir kayıt tek başına düşüyor, silinen kişinin kaydı da', () => {
+    const state = edited<{ dated: { absent: unknown[]; covers: unknown[] } }>(
+      SCHEMA_VERSION,
+      (raw) => {
+        raw.dated.absent.push(
+          { id: 'tAV', from: '17.11.2026', to: '2026-11-18' },
+          { id: 'tAV', from: '2026-11-19', to: '2026-11-18' },
+          { id: 'tYOK', from: '2026-11-17', to: '2026-11-17' },
+          null,
+        );
+        raw.dated.covers.push(
+          { date: '2026-11-17', classId: 'c510', hour: 1, teacherId: null },
+          { date: '2026-11-17', classId: 'c510', hour: 99, teacherId: 'tAV' },
+          { date: '2026-11-17', classId: 'c510', hour: 2, teacherId: 'tYOK' },
+          { date: '2026-11-17', classId: 'c510', hour: '3', teacherId: 'tAV' },
+        );
+      },
+    );
+    expect(state).not.toBeNull();
+    expect(state!.dated.absent.map((a) => a.id)).toEqual(['tMC', 'c511']);
+    expect(state!.dated.covers.map((c) => [c.hour, c.teacherId])).toEqual([
+      [0, 'tAV'],
+      [1, null],
+    ]);
+  });
+
+  it('alan hiç yoksa ya da nesne değilse boş geliyor, dosya açılıyor', () => {
+    const state = edited<{ dated?: unknown }>(SCHEMA_VERSION, (raw) => {
+      raw.dated = 'bozuk';
+    });
+    expect(state!.dated).toEqual({ absent: [], covers: [] });
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**
