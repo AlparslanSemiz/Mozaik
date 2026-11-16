@@ -20,8 +20,11 @@ export function cleanPhone(x: unknown): string {
 /**
  * The number as wa.me wants it, international and digits only, or null when
  * the box does not hold one. Loose on purpose: "0532 123 45 67",
- * "532 123 45 67", "+90 532…" and "0090 532…" are the same Turkish mobile;
- * any other country is typed with its `+` or `00`.
+ * "532 123 45 67", "905321234567", "+90 532…" and "0090 532…" are the same
+ * Turkish mobile. Any other country is typed with its `+` or `00`; without
+ * one, a number that is not Turkish's length is refused rather than read as
+ * another country's ("212 555 12 34" is Istanbul without its 0, not Morocco:
+ * a wrong guess opens a stranger's chat).
  */
 export function whatsappNumber(phone: string): string | null {
   let n = phone.replace(/\D/g, '');
@@ -29,7 +32,8 @@ export function whatsappNumber(phone: string): string | null {
     // Already international.
   } else if (n.startsWith('00')) n = n.slice(2);
   else if (n.length === 11 && n.startsWith('0')) n = `90${n.slice(1)}`;
-  else if (n.length === 10 && n.startsWith('5')) n = `90${n}`;
+  else if (n.length === 10) n = `90${n}`;
+  else if (!(n.length === 12 && n.startsWith('90'))) return null;
   return /^[1-9]\d{7,14}$/.test(n) ? n : null;
 }
 

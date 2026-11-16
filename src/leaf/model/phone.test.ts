@@ -24,10 +24,22 @@ describe('öğretmenin telefonu', () => {
     }
     // Another country, typed with its own code.
     expect(whatsappNumber('+49 151 2345 6789')).toBe('4915123456789');
+    expect(whatsappNumber('0049 151 2345 6789')).toBe('4915123456789');
+    // A landline without its 0 is still Istanbul, not Morocco (+212).
+    expect(whatsappNumber('212 555 12 34')).toBe('902125551234');
   });
 
   it('whatsappNumber numaraya benzemeyeni geri çeviriyor', () => {
-    for (const bad of ['', '123', '0532', '0000000000000', '+0 532 123 45 67', '1'.repeat(16)]) {
+    for (const bad of [
+      '',
+      '123',
+      '0532',
+      '0000000000000',
+      '+0 532 123 45 67',
+      '1'.repeat(16),
+      // No + or 00, and not a Turkish length: another country, guessed.
+      '4915123456789',
+    ]) {
       expect(whatsappNumber(bad), bad).toBeNull();
     }
   });

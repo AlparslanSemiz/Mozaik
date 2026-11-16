@@ -5,7 +5,7 @@
  * And the same teacher's page as the plain text of an e-mail (`mail.ts`), and
  * one sheet as a PDF file (`pdf.ts`).
  */
-export { sheetPdf, type PdfPage } from './pdf';
+export { A4, pdfDoc, sheetPdf, type Pen, type PdfPage } from './pdf';
 export { MAILTO_SINIRI, teacherMail, type MailForm, type TeacherMail } from './mail';
 export {
   classSheet,

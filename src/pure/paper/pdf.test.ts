@@ -5,7 +5,15 @@
 
 import { describe, expect, it } from 'vitest';
 import { blockSpans, buildIndex, placementKey } from '../constraints';
-import { classSheet, sheetHead, sheetPdf, teacherSheet, type SheetOptions } from './index';
+import {
+  A4,
+  classSheet,
+  pdfDoc,
+  sheetHead,
+  sheetPdf,
+  teacherSheet,
+  type SheetOptions,
+} from './index';
 import { translate } from '../../leaf/i18n/i18n';
 import { paletteColor, type State } from '../../leaf/model';
 import { makeWorld } from '../worlds';
@@ -89,5 +97,25 @@ describe('sheetPdf', () => {
       [...pdf.matchAll(/([\d.]+ [\d.]+ [\d.]+) rg/g)].filter((m) => m[1] !== '0.933 0.933 0.933');
     expect(fills(pdfOf(world(), 'class', true)).length).toBeGreaterThan(0);
     expect(fills(pdfOf(world(), 'class', false))).toHaveLength(0);
+  });
+});
+
+describe('pdfDoc', () => {
+  it('başka bir liste de aynı kalemle çiziliyor, ve uzun açıklama satıra bölünüyor', () => {
+    let lines: string[] = [];
+    const pdf = pdfDoc((pen) => {
+      pen.text('İkame listesi', A4.W / 2, A4.H - 40, 17, true, 0.5);
+      pen.box(A4.M, A4.M, 100, 20, null);
+      lines = pen.lines(
+        Array.from({ length: 20 }, (_, i) => `Ö${i} Öğretmen Adı Soyadı ${i}`),
+        7,
+        A4.W - 2 * A4.M,
+      );
+    });
+    expect(pdf).toContain('(\\335kame listesi)');
+    expect(pdf).toContain(' re S');
+    // Twenty names do not fit one line of the page; none is dropped.
+    expect(lines.length).toBeGreaterThan(1);
+    expect(lines.join(' · ').split(' · ')).toHaveLength(20);
   });
 });

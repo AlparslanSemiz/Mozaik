@@ -1463,7 +1463,6 @@ const EN: Sozluk = {
     "E-mail",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "One e-mail address goes here: name@example.com",
-  "E-postayla gönder": "Send by e-mail",
   "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "The teacher's timetable opens as a new message in your mail app. You press Send.",
   "adres yok":
     "no address",
@@ -1868,6 +1867,7 @@ const EN: Sozluk = {
   "Yerine": "Covered by",
   "Ayrı plan yap":
     "Make it a plan of its own",
+  "WhatsApp açılamadı.": "WhatsApp could not be opened.",
 };
 
 registerSozluk("en", EN);

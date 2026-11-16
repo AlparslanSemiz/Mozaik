@@ -11,7 +11,7 @@ import {
   whatsappNumber,
   whatsappUrl,
 } from '../../leaf/model';
-import { desktopWhatsapp, isDesktop } from '../../platform/exe';
+import { desktopMail, desktopWhatsapp, isDesktop } from '../../platform/exe';
 import { readPrintOptions } from '../../platform/prefs';
 import { activePlanName, downloadFile } from '../../platform/storage';
 import { blockSpans, buildIndex } from '../../pure/constraints';
@@ -20,18 +20,23 @@ import type { useT } from '../common';
 
 type Translate = ReturnType<typeof useT>;
 
+/** A PDF file not yet saved: its name in İndirilenler and its text. */
+export interface PdfFile {
+  name: string;
+  pdf: string;
+}
+
 /**
- * Saves one teacher's or class's sheet as "Mozaik – 510 – 2026-11-16.pdf",
- * with the same switches the printer uses, and returns the file's name; null
- * when there is no such person any more.
+ * One teacher's or class's sheet as "Mozaik – 510 – 2026-11-16.pdf", with the
+ * same switches the printer uses; null when there is no such person any more.
  */
-export function savePdf(
+export function sheetFile(
   state: State,
   kind: 'teacher' | 'class',
   id: string,
   colored: boolean,
   t: Translate,
-): string | null {
+): PdfFile | null {
   const options = readPrintOptions();
   const ix = buildIndex(state);
   const spans = blockSpans(state);
@@ -54,8 +59,32 @@ export function savePdf(
     left: activePlanName(),
     right: options.stamp ? `${printStamp(now)} · ${page}` : page,
   });
-  downloadFile(name, pdf, 'application/pdf');
-  return name;
+  return { name, pdf };
+}
+
+/**
+ * THE REUSABLE HALF (İkame's list is the next caller): saves `file` in
+ * İndirilenler, then opens the WhatsApp chat or the mail program it is to be
+ * attached in, or nothing. Answers whether that opened; in a browser a page
+ * cannot know, and says yes. Called inside the click: nothing is awaited
+ * before `window.open`, so no pop-up blocker stands in the way. The exe opens
+ * the default browser (`whatsapp_ac`), and its own window never turns into
+ * WhatsApp's site.
+ */
+export function sendPdf(
+  file: PdfFile,
+  to?: { whatsapp: string } | { mailto: string },
+): Promise<boolean> {
+  downloadFile(file.name, file.pdf, 'application/pdf');
+  if (to === undefined) return Promise.resolve(true);
+  if ('whatsapp' in to) {
+    if (isDesktop()) return desktopWhatsapp(to.whatsapp);
+    window.open(to.whatsapp, '_blank', 'noopener');
+  } else {
+    if (isDesktop()) return desktopMail(to.mailto).then((r) => r === 'acildi');
+    window.location.href = to.mailto;
+  }
+  return Promise.resolve(true);
 }
 
 /** The teacher's WhatsApp chat with one line typed in, or null without a usable number. */
@@ -64,14 +93,4 @@ export function whatsappLink(teacher: Teacher, t: Translate): string | null {
   return number === null
     ? null
     : whatsappUrl(number, t('{ad} · Haftalık ders programı', { ad: teacher.name }));
-}
-
-/**
- * Opens the link the way a click on it would: a new tab in a browser (inside
- * the click, so no pop-up blocker stands in the way), the default browser
- * from the exe, whose own window must not turn into WhatsApp's site.
- */
-export function openWhatsapp(url: string): void {
-  if (isDesktop()) void desktopWhatsapp(url);
-  else window.open(url, '_blank', 'noopener');
 }

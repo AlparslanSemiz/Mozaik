@@ -1477,7 +1477,6 @@ const DE: Sozluk = {
     "E-Mail",
   "Tek bir e-posta adresi yazılır: ad@ornek.com":
     "Hier steht genau eine E-Mail-Adresse: name@beispiel.de",
-  "E-postayla gönder": "Per E-Mail senden",
   "Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.": "Der Stundenplan der Lehrkraft öffnet sich als neue Nachricht in Ihrer E-Mail-App. Auf Senden drücken Sie selbst.",
   "adres yok":
     "keine Adresse",
@@ -1882,6 +1881,7 @@ const DE: Sozluk = {
   "Yerine": "Vertreten durch",
   "Ayrı plan yap":
     "Als eigenen Plan anlegen",
+  "WhatsApp açılamadı.": "WhatsApp konnte nicht geöffnet werden.",
 };
 
 registerSozluk("de", DE);

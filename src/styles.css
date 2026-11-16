@@ -5817,7 +5817,7 @@ table.availability .av-head {
   white-space: nowrap;
 }
 
-/* Çıktı's "E-postayla gönder": one teacher per line, the short name, then the
+/* The "Gönder" panel: one teacher per line, the short name, then the
    button or the few words that say why there is none. */
 .mail-list {
   list-style: none;
@@ -5991,6 +5991,18 @@ table.print td .p-bottom {
   font-size: var(--fs-p-min);
   line-height: 1.2;
   color: var(--muted);
+}
+
+/* One line, whatever the plan is called: a second line of 7 pt would reach
+   the title at two and four up, where the padding is 4 mm. */
+.p-head > span {
+  white-space: nowrap;
+}
+
+.p-head > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .print-area[data-per='2'] .p-head,

@@ -25,7 +25,7 @@ import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
 import { blockSpans, buildIndex, type Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';
 import { useT } from '../common';
-import { openWhatsapp, savePdf, whatsappLink } from './send';
+import { sendPdf, sheetFile, whatsappLink } from './send';
 
 interface Props {
   state: State;
@@ -56,10 +56,36 @@ function mailFor(
   return { why: null, url: mail.url };
 }
 
-type Said = EpostaSonucu | 'tarayici' | null;
+type Said = EpostaSonucu | 'tarayici' | 'wa-olmadi' | null;
 
 /** The name of the PDF just saved. */
 type Saved = string | null;
+
+/** Where a press sends the saved PDF: nothing more, or that teacher's chat. */
+type Save = (to?: { whatsapp: string }) => void;
+
+/**
+ * The press itself: one sheet's PDF into İndirilenler, then the chat, and
+ * the two lines that say so (`MailSaid`).
+ */
+function saver(
+  state: State,
+  kind: 'teacher' | 'class',
+  colored: boolean,
+  t: Translate,
+  setSaved: (name: Saved) => void,
+  setSaid: (said: Said) => void,
+) {
+  return (id: string): Save =>
+    (to) => {
+      const file = sheetFile(state, kind, id, colored, t);
+      if (file === null) return;
+      setSaved(file.name);
+      void sendPdf(file, to).then((opened) => {
+        if (!opened) setSaid('wa-olmadi');
+      });
+    };
+}
 
 /** What happened after a press. */
 function MailSaid({ said, saved }: { said: Said; saved: Saved }) {
@@ -81,6 +107,10 @@ function MailSaid({ said, saved }: { said: Said; saved: Saved }) {
         <p className="hint" role="status">
           {t('E-posta uygulaması açılmadıysa bu bilgisayarda seçili bir e-posta uygulaması yok.')}
         </p>
+      ) : said === 'wa-olmadi' ? (
+        <div className="warn-box" role="status">
+          {t('WhatsApp açılamadı.')}
+        </div>
       ) : said === 'olmadi' ? (
         <div className="warn-box" role="status">
           {t('E-posta uygulaması açılamadı.')}
@@ -103,7 +133,7 @@ function MailButton({
   name?: string;
   children: ReactNode;
   setSaid: (next: Said) => void;
-  save: () => void;
+  save: Save;
 }) {
   return isDesktop() ? (
     <button
@@ -143,7 +173,7 @@ function WhatsappButton({
 }: {
   url: string | null;
   name?: string;
-  save: () => void;
+  save: Save;
   missing: () => void;
 }) {
   return (
@@ -151,9 +181,8 @@ function WhatsappButton({
       className="btn"
       aria-label={name}
       onClick={() => {
-        if (url === null) return missing();
-        save();
-        openWhatsapp(url);
+        if (url === null) missing();
+        else save({ whatsapp: url });
       }}
     >
       <MessageCircle size={16} strokeWidth={2} aria-hidden="true" />
@@ -166,9 +195,10 @@ function WhatsappButton({
 export function SavePdf({ state, id, colored }: { state: State; id: string; colored: boolean }) {
   const t = useT();
   const [saved, setSaved] = useState<Saved>(null);
+  const save = saver(state, 'class', colored, t, setSaved, () => undefined)(id);
   return (
     <>
-      <button className="btn" onClick={() => setSaved(savePdf(state, 'class', id, colored, t))}>
+      <button className="btn" onClick={() => save()}>
         <FileDown size={16} strokeWidth={2} aria-hidden="true" />
         {t('PDF kaydet')}
       </button>
@@ -202,9 +232,11 @@ export function SendTeacher({
     () => mailFor(state, buildIndex(state), blockSpans(state), teacher, t),
     [state, teacher, t],
   );
-  const save = () => {
+  const send = saver(state, 'teacher', colored, t, setSaved, setSaid)(teacher.id);
+  const save: Save = (to) => {
     setAsked(null);
-    setSaved(savePdf(state, 'teacher', teacher.id, colored, t));
+    setSaid(null);
+    send(to);
   };
   return (
     <>
@@ -266,11 +298,11 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
       })),
     [state, ix, spans, t],
   );
-  const save = (id: string) => () => setSaved(savePdf(state, 'teacher', id, colored, t));
+  const save = saver(state, 'teacher', colored, t, setSaved, setSaid);
 
   return (
     <div className="panel no-print mail-panel">
-      <h2>{t('E-postayla gönder')}</h2>
+      <h2>{t('Gönder')}</h2>
       <p className="hint">
         {t(
           'Öğretmenin programı e-posta uygulamanızda yeni bir ileti olarak açılır. Gönder’e siz basarsınız.',
