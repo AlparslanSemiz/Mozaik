@@ -809,7 +809,8 @@ test.describe('69. Kâğıdın 2026-08-26 turu', () => {
     for (const pct of [100, 150]) {
       if (pct !== 100) {
         await openSettings(page, 'Görünüm');
-        await page.getByRole('button', { name: `%${pct}`, exact: true }).click();
+        // Named steps since 2026-11-16; %150 is "Çok büyük".
+        await page.getByRole('button', { name: 'Çok büyük', exact: true }).click();
       }
       await page
         .locator('.tabstrip')

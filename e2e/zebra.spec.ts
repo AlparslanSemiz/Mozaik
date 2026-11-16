@@ -226,7 +226,8 @@ const ORNEK: Liste[] = [
         );
       await p.locator('.panel.inset').getByRole('button', { name: 'Önizle' }).click();
     },
-    satir: 'ul.paste-preview > li',
+    // A table with a column chooser per column since 2026-11-16.
+    satir: 'table.paste-preview > tbody > tr',
   },
   {
     ad: 'Günler',
