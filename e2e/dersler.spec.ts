@@ -146,13 +146,13 @@ test.describe('69. Dersler sekmesi', () => {
 
     // Now give that same teacher a second branch and the question becomes real.
     await openSetup(page, 'Öğretmenler');
-    // By `data-row-name` and not by text: the name lives in an <input>'s value,
-    // which `hasText` cannot see.
+    // On the teacher's page since 2026-11-16 (K5): the row is text.
     const row = mainList(page).locator(`tbody tr[data-row-name="${who}"]`);
-    await row.getByRole('button', { name: /ikinci branş ekle/ }).click();
-    const second = row.getByLabel(/ikinci branşı/);
+    await row.locator('.person-open').click();
+    const second = page.getByRole('dialog').getByRole('combobox', { name: '2. branş' });
     const other = await second.locator('option').nth(1).getAttribute('value');
     await second.selectOption(other!);
+    await page.keyboard.press('Escape');
 
     await openLessons(page, 'teacher');
     await expect(box, 'iki branşlı hocada branş kutusu açılmıyor').toHaveCount(1);

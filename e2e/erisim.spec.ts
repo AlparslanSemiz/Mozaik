@@ -19,7 +19,7 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from './kapan';
-import { open, openSettings, openSetup, openWithSample } from './helpers';
+import { open, openPerson, openSettings, openSetup, openWithSample } from './helpers';
 
 /** Rules switched off, each with the reason it is off. */
 const KAPALI = [
@@ -42,7 +42,9 @@ const KAPALI = [
  * corner and the five day bands' dividers) and Müsaitlik's two corners.
  */
 const BILINEN: Record<string, Record<string, number>> = {
-  Müsaitlik: { 'empty-table-header': 2 },
+  // One since 2026-11-16: the paint grid's corner is named (`AvailGrid.tsx`),
+  // the heat table's is not yet.
+  Müsaitlik: { 'empty-table-header': 1 },
   Program: { 'empty-table-header': 6 },
 };
 
@@ -134,6 +136,23 @@ test.describe('90. Erişilebilirlik taraması', () => {
       await openWithSample(page);
       await openSetup(page, adim);
       karsilastir(`Okul · ${adim}`, await tara(page));
+    });
+  }
+
+  // The person page (Sadeleşme, K5): every control that left the Okul rows
+  // is here now, so it is scanned like a screen, with the week unfolded.
+  for (const adim of ['Öğretmenler', 'Sınıflar']) {
+    test(`Kişi sayfası · ${adim}, dolu veriyle`, async ({ page }) => {
+      await openWithSample(page);
+      await openSetup(page, adim);
+      const sheet = await openPerson(page, 0);
+      await sheet.getByText('Haftalık programı', { exact: true }).click();
+      karsilastir(`Kişi sayfası · ${adim}`, await tara(page));
+      await page.keyboard.press('Escape');
+      await page
+        .getByRole('button', { name: adim === 'Öğretmenler' ? '+ Yeni öğretmen' : '+ Yeni sınıf' })
+        .click();
+      karsilastir(`Yeni kişi · ${adim}`, await tara(page));
     });
   }
 

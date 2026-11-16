@@ -29,6 +29,7 @@ import {
   savedText,
   settledMotion,
   tokens,
+  deletePerson,
 } from './helpers';
 
 /** The ground a row is painted on: its own, or the panel's when it has none. */
@@ -453,7 +454,9 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
       }
 
       // A row goes from the middle, and comes back to the same place.
-      await rows.nth(2).getByRole('button', { name: 'Sil', exact: true }).click();
+      // Teachers and classes are deleted on their page since 2026-11-16 (K5).
+      if (l.ad === 'Öğretmenler' || l.ad === 'Sınıflar') await deletePerson(page, 2);
+      else await rows.nth(2).getByRole('button', { name: 'Sil', exact: true }).click();
       // Every list's deletion goes at once with a "Geri al" notice (SD1).
       await expect(rows).toHaveCount(total - 1);
       await check('silmeden sonra');
@@ -526,7 +529,8 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
         expect(f.color, `${f.who} odak rengi accent`).toBe(t['--accent']);
         expect(f.color).not.toBe(t['--muted']);
       }
-      expect(seen.length, 'satırda Tab ile gezildi').toBeGreaterThanOrEqual(5);
+      // Two since 2026-11-16 (K5): the handle and the name; the boxes are on the page.
+      expect(seen.length, 'satırda Tab ile gezildi').toBeGreaterThanOrEqual(2);
 
       // The selected entity: its own ground, --text on it, and the hover ring
       // does not land on it.

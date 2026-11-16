@@ -4,6 +4,7 @@ import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import {
   answerDialog,
+  deletePerson,
   open,
   openWithSample,
   openSetup,
@@ -94,7 +95,7 @@ test.describe('6. Gün ve ders saatleri', () => {
 async function makeColourGap(page: Page) {
   await openSetup(page, 'Öğretmenler');
   // No question since SD1: the deletion happens and a notice offers "Geri al".
-  await page.locator('table.list tbody tr').nth(1).getByRole('button', { name: 'Sil' }).click();
+  await deletePerson(page, 1);
   await expect(page.locator('.cols aside')).toContainText('Renkler');
 }
 
@@ -185,7 +186,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     // The colours are still one per teacher, and the timetable is untouched.
     await openSetup(page, 'Öğretmenler');
     const colors = await page
-      .locator('table.list tbody tr .color-pick')
+      .locator('table.list tbody tr .person-open .row-dot')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(new Set(colors).size).toBe(colors.length);
 
@@ -754,7 +755,7 @@ test.describe('34. Ayarlar — planlar ve hakkında', () => {
   test('dolu planın yerine örnek okul Geri al ile geri dönüyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await expect(mainList(page).locator('tbody tr')).toHaveCount(24);
 
     await openSettings(page, 'Hakkında');

@@ -16,6 +16,7 @@ import {
   openLessons,
   PDF_YALNIZ_CHROMIUM,
   darkTheme,
+  addClass,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -399,8 +400,7 @@ test.describe('21. Yazdırmada seçim', () => {
     await expect(page.locator('.print-page')).toHaveCount(1);
 
     await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder('Sınıf adı, örn. 510').fill('999');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await addClass(page, '999');
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(2);

@@ -20,7 +20,7 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
   answerDialog,
-  mainList,
+  deletePerson,
   open,
   openSettings,
   openSetup,
@@ -334,7 +334,7 @@ test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (den
     await answerDialog(page);
     await page.waitForTimeout(2500);
     await openSetup(page, 'Sınıflar');
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await expect
       .poll(async () =>
         Object.keys((await disk(page)).files).filter((n) =>
@@ -362,7 +362,7 @@ test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
   }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await expect.poll(() => classesStored(page)).toBe(19);
     await reopen(page);
     await expect(lastDelete(page)).toContainText('silindi');
@@ -389,7 +389,7 @@ test.describe('94. Son silme yenilemeden sonra geri getiriliyor (SD1)', () => {
   test('geri alınmış silme yenilemede önerilmiyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await page.locator('.toast').getByRole('button', { name: 'Geri al' }).click();
     await expect.poll(() => classesStored(page)).toBe(20);
     await reopen(page);

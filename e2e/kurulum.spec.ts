@@ -5,6 +5,9 @@ import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
   reopen,
+  openPerson,
+  deletePerson,
+  addClass,
   open,
   openWithSample,
   openSetup,
@@ -76,30 +79,36 @@ test.describe('5. Kurulum ve yedek', () => {
     await addSubjects(page, 'Matematik', 'Fizik');
     await openSetup(page, 'Öğretmenler');
 
-    const name = page.getByPlaceholder('Ad Soyad');
-    const short = page.getByLabel('Kısa ad', { exact: true });
-    const branch = page.getByLabel('Branş', { exact: true });
-
-    // The placeholder shows what will be derived, live
-    await name.fill('Ahmet Sarı');
-    await expect(short).toHaveAttribute('placeholder', 'AS');
-    await branch.selectOption('Matematik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-
-    // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
-    await name.fill('Ayşe Solmaz');
-    await expect(short).toHaveAttribute('placeholder', 'AS');
-    await branch.selectOption('Fizik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    // On the new teacher's page since 2026-11-16 (K5).
+    for (const [who, subject] of [
+      ['Ahmet Sarı', 'Matematik'],
+      // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
+      ['Ayşe Solmaz', 'Fizik'],
+    ] as const) {
+      await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+      const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
+      // The placeholder shows what will be derived, live
+      await sheet.getByPlaceholder('Ad Soyad').fill(who);
+      await expect(sheet.getByLabel('Kısa ad', { exact: true })).toHaveAttribute(
+        'placeholder',
+        'AS',
+      );
+      await sheet.getByLabel('Branş', { exact: true }).selectOption(subject);
+      await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: who })).toBeVisible();
+      await page.keyboard.press('Escape');
+    }
 
     const warning = page.locator('.warn-box', { hasText: 'Aynı kısa ad' });
     await expect(warning).toBeVisible();
     await expect(warning).toContainText('Ahmet Sarı, Ayşe Solmaz');
 
     // Fixing one of them clears the warning
-    const secondShort = page.locator('table.list tbody tr').nth(1).locator('input').nth(1);
+    const sheet = await openPerson(page, 'Ayşe Solmaz');
+    const secondShort = sheet.getByRole('textbox', { name: 'Kısa ad' });
     await secondShort.fill('AYS');
     await secondShort.blur();
+    await page.keyboard.press('Escape');
     await expect(page.locator('.warn-box', { hasText: 'Aynı kısa ad' })).toHaveCount(0);
   });
 
@@ -128,7 +137,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Sınıflar');
     const rows = mainList(page).locator('tbody tr');
     const before = await rows.count();
-    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await expect(page.locator('.dlg')).toHaveCount(0);
     await expect(rows).toHaveCount(before - 1);
     const notice = page.locator('.toast', { hasText: 'sınıfı silindi' });
@@ -234,38 +243,51 @@ test.describe('16. Branş seçimi', () => {
     await open(page);
     await addSubjects(page, 'Matematik');
     await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
 
-    const branch = page.getByLabel('Branş', { exact: true });
+    const branch = sheet.getByLabel('Branş', { exact: true });
     await expect(branch).toHaveJSProperty('tagName', 'SELECT');
-    await expect(page.getByPlaceholder('Branş')).toHaveCount(0);
+    await expect(sheet.getByPlaceholder('Branş')).toHaveCount(0);
 
     // Branch is required: half a teacher record is not worth storing. The
     // refusal is SAID, by Ekle and by Enter alike: a grey button and a dead
     // Enter refused without a word.
-    await page.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
-    await page.getByPlaceholder('Ad Soyad').press('Enter');
+    await sheet.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
+    await sheet.getByPlaceholder('Ad Soyad').press('Enter');
     await expect(
-      page.getByRole('status').filter({ hasText: 'Önce bir branş seçin.' }),
+      sheet.getByRole('status').filter({ hasText: 'Önce bir branş seçin.' }),
     ).toBeVisible();
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
     await branch.selectOption('Matematik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+    const own = page.getByRole('dialog', { name: 'Mehmet Çelik' });
+    await expect(own.getByRole('combobox', { name: 'Branş', exact: true })).toHaveValue(
+      'Matematik',
+    );
+    await page.keyboard.press('Escape');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
-    await expect(page.getByLabel('MÇ branşı')).toHaveValue('Matematik');
   });
 
   test('“+ Yeni branş” hem öğretmene atanıyor hem listeye giriyor', async ({ page }) => {
     await open(page);
     await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+    const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
 
-    await page.getByPlaceholder('Ad Soyad').fill('Ayşe Yıldız');
-    await page.getByLabel('Branş', { exact: true }).selectOption({ label: '+ Yeni branş…' });
-    await page.getByLabel('Yeni branşın adı').fill('Robotik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await sheet.getByPlaceholder('Ad Soyad').fill('Ayşe Yıldız');
+    await sheet.getByLabel('Branş', { exact: true }).selectOption({ label: '+ Yeni branş…' });
+    await sheet.getByLabel('Yeni branşın adı').fill('Robotik');
+    await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await expect(page.getByLabel('AY branşı')).toHaveValue('Robotik');
+    await expect(
+      page
+        .getByRole('dialog', { name: 'Ayşe Yıldız' })
+        .getByRole('combobox', { name: 'Branş', exact: true }),
+    ).toHaveValue('Robotik');
+    await page.keyboard.press('Escape');
 
     // ...and it is in the school's list from now on, with a short form
     await openSetup(page, 'Branşlar');
@@ -305,9 +327,11 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
     // By VALUE: an option reads "Mat · Matematik" now, and what this test asks
     // is which subjects the dropdown still OFFERS.
     const options = await page
+      .getByRole('dialog')
       .getByLabel('Branş', { exact: true })
       .locator('option')
       .evaluateAll((els) => els.map((e) => (e as HTMLOptionElement).value));
@@ -324,7 +348,7 @@ test.describe('16. Branş seçimi', () => {
     await page.getByRole('button', { name: 'Önizle' }).click();
     await page.getByRole('button', { name: /2 satırı ekle/ }).click();
 
-    await expect(page.getByLabel('KA branşı')).toHaveValue('Robotik');
+    await expect(page.locator('tr[data-row-name="Kerem Aslan"]')).toContainText('Robotik');
     await openSetup(page, 'Branşlar');
     await expect(page.locator(`table.list tr[data-row-name="Robotik"]`)).toHaveCount(1);
     await expect(page.locator(`table.list tr[data-row-name="Astronomi"]`)).toHaveCount(1);
@@ -347,20 +371,20 @@ test.describe('30. Kurulum — düzenleme', () => {
     await expect(first.locator('input')).toHaveValue('Z');
 
     await openSetup(page, 'Sınıflar');
-    await expect(page.getByLabel('410 dersliği')).toContainText('Z');
+    await expect(page.locator('tr[data-row-name="410"]')).toContainText('Z');
   });
 
   test('öğretmenin adı, kısaltması ve branşı değiştirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    const row = page.locator('table.list tbody tr').first();
+    const sheet = await openPerson(page, 0);
 
-    await row.locator('input[type=text]').first().fill('Yeni Ad');
-    await row.locator('input[type=text]').first().blur();
-    await row.locator('input[type=text]').nth(1).fill('YA');
-    await row.locator('input[type=text]').nth(1).blur();
-    // The label follows the short form, which the line above just changed.
-    await row.getByLabel('YA branşı').selectOption('Fizik');
+    await sheet.getByRole('textbox', { name: 'Ad', exact: true }).fill('Yeni Ad');
+    await sheet.getByRole('textbox', { name: 'Ad', exact: true }).blur();
+    await sheet.getByRole('textbox', { name: 'Kısa ad' }).fill('YA');
+    await sheet.getByRole('textbox', { name: 'Kısa ad' }).blur();
+    await sheet.getByRole('combobox', { name: 'Branş', exact: true }).selectOption('Fizik');
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     // "Fzk", not "Fizik": the row head reads the subject SHORT, the same string
@@ -379,16 +403,21 @@ test.describe('30. Kurulum — düzenleme', () => {
 
     await openSetup(page, 'Öğretmenler');
     // Row 1, not row 0: the sample gives every third teacher a limit of their
-    // own, and an overridden box would not show the default at all.
-    const box = page.locator('table.list tbody tr').nth(1).locator('input[type=number]').first();
+    // own, and an overridden box would not show the default at all. The box
+    // is on the teacher's page since 2026-11-16 (K5).
+    const sheet = await openPerson(page, 1);
+    const box = sheet.getByRole('spinbutton', { name: /art arda en fazla kaç saat/ });
     // Empty means "use the school default", and the default is shown as the
-    // placeholder so an empty box still says what it will do.
+    // placeholder so an empty box still says what it will do — and the line
+    // beside it says which number is in force.
     await expect(box).toHaveValue('');
     await expect(box).toHaveAttribute('placeholder', '3');
+    await expect(sheet.getByText('Okul ayarı geçerli: 3')).toBeVisible();
 
     await box.fill('1');
     await box.blur();
     await expect(box).toHaveValue('1');
+    await expect(sheet.getByText('Kendi sayısı; okul ayarı: 3')).toBeVisible();
 
     await box.fill('');
     await box.blur();
@@ -399,11 +428,12 @@ test.describe('30. Kurulum — düzenleme', () => {
   test('sınıfın adı ve dersliği değiştirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    const row = page.locator('table.list tbody tr').first();
+    const sheet = await openPerson(page, 0);
 
-    await row.locator('input[type=text]').fill('999');
-    await row.locator('input[type=text]').blur();
-    await page.getByLabel('999 dersliği').selectOption({ label: 'B' });
+    await sheet.getByRole('textbox', { name: 'Ad', exact: true }).fill('999');
+    await sheet.getByRole('textbox', { name: 'Ad', exact: true }).blur();
+    await sheet.getByRole('combobox', { name: 'Derslik' }).selectOption({ label: 'B' });
+    await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
@@ -535,7 +565,9 @@ test.describe('31. Kurulum — sağ sütun', () => {
   test('dersliksiz sınıf sağ sütunda uyarı çıkarıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await page.getByLabel('410 dersliği').selectOption({ label: 'Derslik yok' });
+    const sheet = await openPerson(page, '410');
+    await sheet.getByRole('combobox', { name: 'Derslik' }).selectOption({ label: 'Derslik yok' });
+    await page.keyboard.press('Escape');
 
     await openSetup(page, 'Derslikler');
     await expect(page.locator('.cols aside .warn-box')).toContainText('dersliği yok');
@@ -548,8 +580,7 @@ test.describe('31. Kurulum — sağ sütun', () => {
   test('dersi olmayan sınıf Özet’te sayılıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder(/Sınıf adı/).fill('700');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await addClass(page, '700');
 
     await expect(page.locator('.cols aside .warn-box')).toContainText('1 sınıfın hiç dersi yok');
     // ...and so did the one number that decides whether the week fits at all.
@@ -565,8 +596,7 @@ test.describe('31. Kurulum — sağ sütun', () => {
   test('uyarı kapasite tablosunun ÜSTÜNDE, ve sorun gidince kayboluyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder(/Sınıf adı/).fill('700');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await addClass(page, '700');
 
     const panel = page.locator('.cols > aside > .panel');
     const order = await panel.evaluate((el) => {
@@ -670,10 +700,12 @@ test.describe('44. Panel simetrisi', () => {
 
   // The description rail went behind the heading's "?" on 2026-11-16
   // (Sadeleşme): the head and the form are the two rails now.
-  test('beş yeni-ekleme panelinin başlık ve form rayları eşit', async ({ page }) => {
+  // Öğretmenler and Sınıflar have no add panel since 2026-11-16 (K5): their
+  // "+ Yeni" is the last row of the list and opens the person's page.
+  test('üç yeni-ekleme panelinin başlık ve form rayları eşit', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
     await openWithSample(page);
-    const screens = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar', 'Dersler'];
+    const screens = ['Derslikler', 'Branşlar', 'Dersler'];
     const measured: Array<{
       name: string;
       height: number;
@@ -715,7 +747,7 @@ test.describe('44. Panel simetrisi', () => {
   // Dersler is in the list because it is the SAME kind of panel, even though it
   // is a tab of its own now: the shape is a rule about what a reader meets
   // first, and it does not stop applying when a screen changes address.
-  for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
+  for (const step of ['Derslikler', 'Dersler']) {
     test(`${step}: başlık (? ile), ekleme, liste`, async ({ page }) => {
       await openWithSample(page);
       if (step === 'Dersler') await openLessons(page);
@@ -744,6 +776,20 @@ test.describe('44. Panel simetrisi', () => {
       // match" line, the table) is the list, and only its ORDER is fixed.
       expect(list[0], `${step} liste bloğu başlıkla açmıyor`).toBe('baslik');
       expect(list.indexOf('liste'), `${step}: listede tablo yok`).toBeGreaterThan(0);
+    });
+  }
+
+  for (const step of ['Öğretmenler', 'Sınıflar']) {
+    test(`${step}: tek blok, başlık, liste ve sonunda + Yeni`, async ({ page }) => {
+      await openWithSample(page);
+      await openSetup(page, step);
+      const panels = page.locator('.cols > div > .panel');
+      await expect(panels).toHaveCount(1);
+      const list = await shapeOf(page, '.panel.step-panel');
+      expect(list[0]).toBe('baslik');
+      expect(list.indexOf('liste')).toBeGreaterThan(0);
+      const last = panels.locator(':scope > *').last();
+      await expect(last).toHaveClass(/add-row/);
     });
   }
 
@@ -783,14 +829,18 @@ test.describe('44. Panel simetrisi', () => {
 // It deliberately does NOT reach the paper. Nobody asked for a form of address
 // on a timetable, and a printed sheet is the last place to guess at one.
 test.describe('63. Öğretmende cinsiyet', () => {
-  const row = (page: Page, n: number) => mainList(page).locator('tbody tr').nth(n);
+  // On the teacher's page since 2026-11-16 (K5).
+  const genderOf = async (page: Page, n: number) => {
+    const sheet = await openPerson(page, n);
+    return sheet.getByRole('combobox', { name: 'Cinsiyet' });
+  };
 
   test('seçilen cinsiyet YENİLEMEDEN sonra da duruyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
 
     // Mehmet Çelik ships as "Erkek"; İlknur Aydın as "Kadın".
-    const first = row(page, 0).locator('select').nth(1);
+    const first = await genderOf(page, 0);
     await expect(first).toHaveValue('e');
 
     // The choice reaches storage through the 400 ms autosave, not at the
@@ -800,21 +850,22 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await savedState(page, previous);
     await reopen(page);
     await openSetup(page, 'Öğretmenler');
-    await expect(row(page, 0).locator('select').nth(1)).toHaveValue('k');
+    await expect(await genderOf(page, 0)).toHaveValue('k');
   });
 
   test('belirtilmemiş de bir DEĞER — boş bırakılabiliyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    const box = row(page, 0).locator('select').nth(1);
+    const box = await genderOf(page, 0);
     await box.selectOption('');
     await expect(box).toHaveValue('');
+    await page.keyboard.press('Escape');
 
     // And it is not only reachable, it is SHIPPED: "Deniz" is genuinely both,
     // so the sample carries the blank the real staff list will carry.
     await page.getByLabel('öğretmen ara').fill('Deniz Erdem');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
-    await expect(row(page, 0).locator('select[aria-label*="cinsiyeti"]')).toHaveValue('');
+    await expect(await genderOf(page, 0)).toHaveValue('');
   });
 
   test('çip satırı süzüyor — Branş’ın YANINDA, yerine değil', async ({ page }) => {
@@ -847,9 +898,15 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await openSetup(page, 'Öğretmenler');
     await page.locator('select.sort-pick').selectOption({ label: 'Cinsiyete göre' });
 
-    const values = await mainList(page)
-      .locator('tbody tr td select[aria-label*="cinsiyeti"]')
-      .evaluateAll((els) => els.map((e) => (e as HTMLSelectElement).value));
+    // The rows are text since 2026-11-16 (K5): the order is read from the
+    // names, the genders from the saved plan.
+    const names = await mainList(page)
+      .locator('tbody tr')
+      .evaluateAll((els) => els.map((e) => e.getAttribute('data-row-name') ?? ''));
+    const saved = JSON.parse(await savedText(page)) as {
+      teachers: Array<{ name: string; gender: string }>;
+    };
+    const values = names.map((n) => saved.teachers.find((t) => t.name === n)?.gender ?? '?');
     // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
     expect(values).toEqual(
       [...values].sort((a, b) => {
@@ -897,12 +954,10 @@ test.describe('63. Öğretmende cinsiyet', () => {
       if (pct !== 100) await chooseScale(page, pct);
       await openSetup(page, 'Öğretmenler');
 
-      for (const box of [
-        mainList(page).locator('select[aria-label*="cinsiyeti"]').first(),
-        // Scoped to the add form: the chip row is a `role="group"` with the
-        // same name, and both are things you can address by that label.
-        page.locator('.form-row select[aria-label="Cinsiyet"]'),
-      ]) {
+      // The teacher's page and the new teacher's page (2026-11-16, K5).
+      await openPerson(page, 0);
+      const boxes = [page.getByRole('dialog').getByRole('combobox', { name: 'Cinsiyet' })];
+      for (const box of boxes) {
         const fit = await box.evaluate((el) => {
           const s = el as HTMLSelectElement;
           const clone = s.cloneNode(true) as HTMLSelectElement;
@@ -921,20 +976,21 @@ test.describe('63. Öğretmende cinsiyet', () => {
     });
   }
 
-  // The regression this column caused and the scroll box fixed: at 150% the
-  // name input went from 232 px to 26 px, because a `width: 100%` table takes
-  // the room it needs from whichever column can still shrink.
+  // The regression the old box column caused and the scroll box fixed: at
+  // 150% the name went from 232 px to 26 px, because a `width: 100%` table
+  // takes the room it needs from whichever column can still shrink. The name
+  // is text since 2026-11-16 and must still be read whole.
   for (const pct of [100, 150]) {
-    test(`%${pct} ölçekte AD kutusu okunur kalıyor, sayfa yatay taşmıyor`, async ({ page }) => {
+    test(`%${pct} ölçekte AD okunur kalıyor, sayfa yatay taşmıyor`, async ({ page }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
       await openSetup(page, 'Öğretmenler');
 
       const ad = await mainList(page)
-        .locator('tbody tr td > input[type="text"]:not(.text-sm)')
+        .locator('tbody tr .person-open')
         .first()
-        .evaluate((el) => el.getBoundingClientRect().width);
-      expect(ad, `%${pct}: ad kutusu ${ad}px`).toBeGreaterThan(120);
+        .evaluate((el) => ({ have: el.getBoundingClientRect().width, want: el.scrollWidth }));
+      expect(ad.have, `%${pct}: ad ${ad.have}px`).toBeGreaterThanOrEqual(ad.want - 1);
 
       // The width goes somewhere: the TABLE scrolls, the page does not.
       const spill = await page.evaluate(
@@ -989,15 +1045,17 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // button sat with dead space after it: measured 42 px at 100 % and 73 px at
   // 150 %, against 6 to 19 px elsewhere. Same markup, different answer,
   // because the alignment came from a neighbour instead of from a rule.
-  test('Sil dört listede de aynı yerde — en sağda', async ({ page }) => {
+  // Öğretmenler and Sınıflar have no row Sil since 2026-11-16 (K5): it is on
+  // the person's page. The two lists that keep one still agree.
+  test('Sil iki listede de aynı yerde — en sağda', async ({ page }) => {
     await openWithSample(page);
     const inset: Record<string, number> = {};
-    for (const step of STEPS) {
+    for (const step of ['Derslikler', 'Dersler']) {
       await goList(page, step);
       inset[step] = await deleteInset(page);
     }
     const values = Object.values(inset);
-    for (const step of STEPS) {
+    for (const step of ['Derslikler', 'Dersler']) {
       expect(inset[step], `${step}: Sil sağ kenardan ${inset[step]}px içeride`).toBeLessThanOrEqual(
         14,
       );
@@ -1118,7 +1176,9 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       })(),
       page: Math.round(document.body.scrollWidth - document.body.clientWidth),
     }));
-    expect(m.box, 'kaydırma kutusu bu ölçekte iş görmeli').toBeGreaterThan(0);
+    // The teacher list is text since 2026-11-16 (K5) and may fit at 150 %; if it
+    // does not, the box scrolls and the page still does not.
+    expect(m.box).toBeGreaterThanOrEqual(0);
     expect(m.page).toBeLessThanOrEqual(1);
   });
 
@@ -1161,97 +1221,12 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     expect(await said.evaluate((el) => el.getAttribute('role'))).toBe('status');
   });
 
-  // THE GUARD ON THE TRIM. Four widths came down and every one of them was set
-  // from what the browser asked for, not from taste — so the assertion asks
-  // the browser the same question: clone the control at `width: auto` and
-  // compare. Written the day the widths changed, and run at the two scales
-  // where a `ch` count and a font's quantisation disagree most (pitfall 39).
-  for (const pct of [100, 150]) {
-    test(`%${pct}: kırpılan kutuların hiçbiri metnini kesmiyor`, async ({ page }) => {
-      await openWithSample(page);
-      if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Öğretmenler');
-
-      const boxes = await mainList(page)
-        .locator('tbody tr')
-        .first()
-        .evaluate((tr) => {
-          function want(el: HTMLElement) {
-            const c = el.cloneNode(true) as HTMLElement;
-            c.style.width = 'auto';
-            c.style.minWidth = '0';
-            c.style.position = 'absolute';
-            c.style.visibility = 'hidden';
-            el.parentElement!.appendChild(c);
-            const w = c.getBoundingClientRect().width;
-            c.remove();
-            return w;
-          }
-          const out: Array<{ ad: string; var: number; istenen: number }> = [];
-          for (const [ad, sel] of [
-            ['renk', '.color-pick'],
-            ['sayı kutusu', 'input.num'],
-            ['cinsiyet', 'select[aria-label*="cinsiyeti"]'],
-            ['eylemler', 'td:last-child > .form-row'],
-          ] as const) {
-            const el = tr.querySelector(sel) as HTMLElement | null;
-            if (el !== null)
-              out.push({
-                ad,
-                var: el.getBoundingClientRect().width,
-                istenen: want(el),
-              });
-          }
-          return out;
-        });
-
-      expect(boxes.length, 'ölçülecek kutu bulunamadı').toBe(4);
-      for (const b of boxes) {
-        expect(
-          b.var,
-          `%${pct} ${b.ad}: kutu ${Math.round(b.var)} < istenen ${Math.round(b.istenen)}`,
-        ).toBeGreaterThanOrEqual(b.istenen - 1);
-      }
-    });
-  }
-
-  // The short-form box is the one that got narrowest, and it is narrowed ONLY
-  // inside a row: the add form's box carries the placeholder "Kısaltma", a
-  // whole word, and shrinking that one would be pitfall 33 with a new coat on.
-  test('kısaltma kutusu satırda dar, ekleme formunda geniş', async ({ page }) => {
-    await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const inRow = await mainList(page)
-      .locator('tbody tr input.text-sm')
-      .first()
-      .evaluate((el) => el.getBoundingClientRect().width);
-    // A descendant and not a child: the form sits inside `.add-panel-body`,
-    // one of the three grid tracks `AddPanel.tsx` draws.
-    const inForm = await page
-      .locator('.panel.add-panel .form-row input.text-sm')
-      .first()
-      .evaluate((el) => el.getBoundingClientRect().width);
-    expect(inRow).toBeLessThan(inForm);
-    // The add box has to hold its own placeholder, whatever it happens to be.
-    const fits = await page
-      .locator('.panel.add-panel .form-row input.text-sm')
-      .first()
-      .evaluate((el) => {
-        const s = el as HTMLInputElement;
-        const probe = document.createElement('span');
-        probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
-        probe.style.font = getComputedStyle(s).font;
-        probe.textContent = s.placeholder;
-        document.body.appendChild(probe);
-        const need = probe.getBoundingClientRect().width;
-        probe.remove();
-        return { have: s.clientWidth, need };
-      });
-    expect(
-      fits.have,
-      `ekleme kutusu ${Math.round(fits.have)} < "${'Kısaltma'}" ${Math.round(fits.need)}`,
-    ).toBeGreaterThanOrEqual(fits.need);
-  });
+  // THE GUARD ON THE TRIM was here: four boxes on the teacher row (colour,
+  // limits, gender, actions) measured against what the browser asked for.
+  // The row is text since 2026-11-16 (K5) and those boxes are on the
+  // teacher's page, so the measurement went with them (`cinsiyet kutusu`
+  // above measures the page's own box). So did "kısaltma kutusu satırda dar":
+  // there is no short-form box on a row any more.
 });
 
 // 67. The split: how a week's hours fall into blocks.
@@ -1422,14 +1397,16 @@ test.describe('67. Ders dağılımı', () => {
 
     // The first class, tightened to one hour of any one lesson a day. The
     // sample school's own number is 2.
+    // On the class's page since 2026-11-16 (K5).
     const first = mainList(page).locator('tbody tr').first();
     const className = (await first.getAttribute('data-row-name'))!;
-    const box = first.getByRole('spinbutton', {
+    const box = (await openPerson(page, 0)).getByRole('spinbutton', {
       name: /aynı dersten en fazla/,
     });
     await expect(box, 'boş kutu okulun sayısını gösteriyor').toHaveAttribute('placeholder', '2');
     await box.fill('1');
     await box.blur();
+    await page.keyboard.press('Escape');
 
     // Dersler reads it: that class's lessons now warn at two hours a day, and
     // the placeholder in their own box names the CLASS's number, not the
@@ -1446,11 +1423,9 @@ test.describe('67. Ders dağılımı', () => {
     await reopen(page);
     await openSetup(page, 'Sınıflar');
     await expect(
-      mainList(page)
-        .locator('tbody tr')
-        .first()
-        .getByRole('spinbutton', { name: /aynı dersten en fazla/ }),
+      (await openPerson(page, 0)).getByRole('spinbutton', { name: /aynı dersten en fazla/ }),
     ).toHaveValue('1');
+    await page.keyboard.press('Escape');
 
     // Ayarlar → Kurallar counts it, the way it already counts teachers who
     // carry their own numbers.
@@ -1528,10 +1503,10 @@ test.describe('82. Branş yeniden adlandırma', () => {
 
     await expect(nameBox(page, 'Coğrafya ve Jeoloji')).toBeVisible();
 
-    // The teachers' dropdown is the proof: it reads the same list.
+    // The teachers' list is the proof: it reads the same list.
     await openSetup(page, 'Öğretmenler');
     await expect(
-      page.locator('table.list select').filter({ hasText: 'Coğrafya ve Jeoloji' }).first(),
+      page.locator('table.list tbody tr').filter({ hasText: 'Coğrafya ve Jeoloji' }).first(),
     ).toBeVisible();
   });
 

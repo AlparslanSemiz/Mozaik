@@ -811,10 +811,12 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     expect(before).toBeGreaterThan(0);
 
     await openSetup(page, 'Öğretmenler');
-    const first = mainList(page).locator('tbody tr').first();
-    const short = first.locator('input.text-sm').first();
+    // On the teacher's page since 2026-11-16 (K5).
+    await mainList(page).locator('tbody tr').first().locator('.person-open').click();
+    const short = page.getByRole('dialog').getByRole('textbox', { name: 'Kısa ad' });
     await short.fill('ZZ');
     await short.blur();
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     expect(

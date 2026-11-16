@@ -1112,3 +1112,51 @@ export async function openTechnical(page: Page): Promise<void> {
 export async function darkTheme(page: Page): Promise<void> {
   await setTheme(page, 'dark');
 }
+
+/**
+ * Opens a teacher's or a class's page from the Okul list (Sadeleşme, K5,
+ * 2026-11-16): the rows are text, and everything a row used to hold as a box
+ * is on that page. `which` is the row's index or the person's full name.
+ */
+export async function openPerson(page: Page, which: number | string) {
+  const opener =
+    typeof which === 'number'
+      ? page.locator('table.list tbody tr').nth(which).locator('.person-open')
+      : page.locator('table.list .person-open', { hasText: which }).first();
+  await opener.click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet).toBeVisible();
+  return sheet;
+}
+
+/** Deletes one row of the Okul teacher or class list through its page. */
+export async function deletePerson(page: Page, which: number | string) {
+  const sheet = await openPerson(page, which);
+  await sheet.getByRole('button', { name: /^(Öğretmeni|Sınıfı) sil$/ }).click();
+  await expect(sheet).toBeHidden();
+}
+
+/** Adds a teacher through "+ Yeni öğretmen", and closes the page Ekle opens. */
+export async function addTeacher(page: Page, name: string, subject: string, short = '') {
+  await page.getByRole('button', { name: '+ Yeni öğretmen' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Yeni öğretmen' });
+  await sheet.getByPlaceholder('Ad Soyad').fill(name);
+  if (short !== '') await sheet.getByRole('textbox', { name: 'Kısa ad' }).fill(short);
+  await sheet.getByRole('combobox', { name: 'Branş', exact: true }).selectOption(subject);
+  await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: name.trim() })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+}
+
+/** Adds a class through "+ Yeni sınıf", and closes the page Ekle opens. */
+export async function addClass(page: Page, name: string, room = '') {
+  await page.getByRole('button', { name: '+ Yeni sınıf' }).click();
+  const sheet = page.getByRole('dialog', { name: 'Yeni sınıf' });
+  await sheet.getByPlaceholder('Sınıf adı, örn. 510').fill(name);
+  if (room !== '') await sheet.getByRole('combobox', { name: 'Derslik' }).selectOption(room);
+  await sheet.getByRole('button', { name: 'Ekle', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: `${name.trim()} sınıfı` })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+}

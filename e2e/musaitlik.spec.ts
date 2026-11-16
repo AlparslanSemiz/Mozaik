@@ -18,6 +18,7 @@ import {
   openSetup,
   mainList,
   onScreen,
+  deletePerson,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -28,7 +29,7 @@ test.describe('10. Müsaitlik: liste sekme açıkken doluyor', () => {
   test('silinen öğretmen Ctrl+Z ile geri gelince çizelge çiziliyor', async ({ page }) => {
     await loadWorld(page, makeWorld({ days: 2, hours: 3 }), 'Okul');
     await openSetup(page, 'Öğretmenler');
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await deletePerson(page, 0);
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();

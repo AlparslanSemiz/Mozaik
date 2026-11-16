@@ -30,6 +30,8 @@ test.describe('48. Varlık paneli', () => {
     await expect(sheet.locator('.sheet-mark')).toHaveText(who);
     await expect(sheet.locator('.sheet-kind')).toHaveText('Öğretmen');
 
+    // Folded on the person page since 2026-11-16 (K5); one click unfolds it.
+    await sheet.getByText('Haftalık programı', { exact: true }).click();
     // Row = day, column = lesson — the Müsaitlik axis, not the Program one.
     const rows = sheet.locator('.sheet-week tbody tr');
     await expect(rows).toHaveCount(6);
@@ -116,7 +118,9 @@ test.describe('48. Varlık paneli', () => {
 
     // The lesson is NOT removed (no-data-loss principle) — it is marked, here as well as
     // on the grid, because this is now the easiest place to notice it.
+    // The folded week opens by itself and a line says so (person page, K5).
     const sheet = page.locator('.sheet');
+    await expect(sheet.locator('.warn-box')).toContainText('Kapattığınız saatlerde');
     expect(await sheet.locator('.sheet-week td.conflict').count()).toBeGreaterThan(0);
   });
 });
@@ -135,13 +139,8 @@ test.describe('83. Panelden ders aktarma', () => {
   test('öğretmenin dersi BAŞKA hocaya geçiyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    // The row's own "bilgileri" button: an icon-only control, so its
-    // aria-label is its only name.
-    await mainList(page)
-      .locator('tbody tr')
-      .first()
-      .getByRole('button', { name: /^Ayrıntı/ })
-      .click();
+    // The name opens the teacher's page since 2026-11-16 (K5).
+    await mainList(page).locator('tbody tr').first().locator('.person-open').click();
 
     await expect(sheet(page)).toBeVisible();
     const rows = sheet(page).locator('.sheet-lessons tbody tr');
@@ -149,7 +148,9 @@ test.describe('83. Panelden ders aktarma', () => {
     const which = (await rows.first().locator('td').first().innerText()).trim();
     const before = await rows.count();
 
-    const pick = rows.first().getByRole('combobox');
+    const pick = rows.first().getByRole('combobox', { name: /başka öğretmene aktar/ });
+    // Its teachers are drawn when it is reached (`TransferPick`).
+    await pick.focus();
     const to = (await pick.locator('option').nth(1).innerText()).trim();
     await pick.selectOption({ index: 1 });
 
@@ -171,16 +172,15 @@ test.describe('83. Panelden ders aktarma', () => {
   test('sınıfın panelinde de aynı aktarma var', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
-    await mainList(page)
-      .locator('tbody tr')
-      .first()
-      .getByRole('button', { name: /^Ayrıntı/ })
-      .click();
+    await mainList(page).locator('tbody tr').first().locator('.person-open').click();
 
     await expect(sheet(page)).toBeVisible();
     await expect(sheet(page).getByRole('heading', { name: 'Aldığı dersler' })).toBeVisible();
     await expect(
-      sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox'),
+      sheet(page)
+        .locator('.sheet-lessons tbody tr')
+        .first()
+        .getByRole('combobox', { name: /başka öğretmene aktar/ }),
     ).toBeVisible();
   });
 
@@ -203,9 +203,13 @@ test.describe('83. Panelden ders aktarma', () => {
     );
     await loadWorld(page, world, 'Okul');
     await openSetup(page, 'Öğretmenler');
-    await mainList(page).getByRole('button', { name: 'Ayrıntı · MÇ' }).click();
+    await mainList(page).locator('.person-open', { hasText: 'MÇ' }).click();
 
-    const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
+    const pick = sheet(page)
+      .locator('.sheet-lessons tbody tr')
+      .first()
+      .getByRole('combobox', { name: /başka öğretmene aktar/ });
+    await pick.focus();
     await pick.selectOption('oAV');
     // Precondition: both blocks are on the grid, and AV's week is shut.
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
@@ -224,12 +228,12 @@ test.describe('83. Panelden ders aktarma', () => {
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await openSetup(page, 'Öğretmenler');
-    await mainList(page)
-      .locator('tbody tr')
+    await mainList(page).locator('tbody tr').first().locator('.person-open').click();
+    const pick = sheet(page)
+      .locator('.sheet-lessons tbody tr')
       .first()
-      .getByRole('button', { name: /^Ayrıntı/ })
-      .click();
-    const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
+      .getByRole('combobox', { name: /başka öğretmene aktar/ });
+    await pick.focus();
     await pick.selectOption({ index: 1 });
     await page.getByRole('button', { name: 'Aktar' }).click();
     await expect(page.locator('.toast').last()).toContainText('geçti');

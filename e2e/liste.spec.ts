@@ -10,7 +10,15 @@
 // the round trip through a real input.
 
 import { expect, test } from './kapan';
-import { open, openSetup, openLessons, openWithSample, mainList, settledMotion } from './helpers';
+import {
+  addClass,
+  open,
+  openSetup,
+  openLessons,
+  openWithSample,
+  mainList,
+  settledMotion,
+} from './helpers';
 
 const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');
 
@@ -76,12 +84,12 @@ test.describe('49. Liste araçları', () => {
     // locale, so this is the search that silently found nothing.
     await box.fill('ilknur');
     await expect(rows(page)).toHaveCount(1);
-    await expect(rows(page).first().locator('input').first()).toHaveValue('İlknur Aydın');
+    await expect(rows(page).first().locator('.person-open')).toHaveText('İlknur Aydın');
 
     // ...and somebody typing quickly leaves the accents off.
     await box.fill('gokhan');
     await expect(rows(page)).toHaveCount(1);
-    await expect(rows(page).first().locator('input').first()).toHaveValue('Gökhan Çetin');
+    await expect(rows(page).first().locator('.person-open')).toHaveText('Gökhan Çetin');
   });
 
   test('branş çipi süzüyor ve ÖTEKİ çiplerin sayıları duruyor', async ({ page }) => {
@@ -123,24 +131,18 @@ test.describe('49. Liste araçları', () => {
     await checkLoadFacet(page, await rows(page).count());
 
     await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder('Sınıf adı, örn. 510').fill('Z boş sınıf');
-    await page.locator('.add-panel').getByRole('button', { name: 'Ekle', exact: true }).click();
+    await addClass(page, 'Z boş sınıf');
     await checkLoadFacet(page, await rows(page).count());
   });
 
   test('sıralama gerçekten sıralıyor, ve varsayılan GİRİLDİĞİ sıra', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    // NOT `td:nth-child(n)`: the name column has moved twice now (a drag
-    // handle went in front of it, a gender box behind it) and each time this
-    // line failed with "undefined" rather than with anything about columns.
-    // The name box is the one plain text input in the row — the short form
-    // carries `.text-sm`, the limits are number boxes, and the e-mail box
-    // (schema v17) says `inputmode="email"`.
-    const names = () =>
-      rows(page).locator('td > input[type="text"]:not(.text-sm):not([inputmode="email"])').all();
+    // NOT `td:nth-child(n)`: the name column has moved more than once. The
+    // name is the row's page link since 2026-11-16 (K5).
+    const names = () => rows(page).locator('.person-open').all();
 
-    const entered = await Promise.all((await names()).map((i) => i.inputValue()));
+    const entered = await Promise.all((await names()).map((i) => i.innerText()));
     expect(entered[0]).toBe('Mehmet Çelik'); // sample order, not alphabetical
 
     // The rows follow the sort a render late (`useDeferredValue` in
@@ -148,7 +150,7 @@ test.describe('49. Liste araçları', () => {
     // the old order (pitfall 170). So the same assertions are retried.
     await page.locator('select.sort-pick').selectOption({ label: 'Ada göre' });
     await expect(async () => {
-      const alpha = await Promise.all((await names()).map((i) => i.inputValue()));
+      const alpha = await Promise.all((await names()).map((i) => i.innerText()));
       expect(alpha).not.toEqual(entered);
       // Turkish collation, done by the browser: Ç sorts after C, not after Z.
       expect([...alpha].sort((a, b) => a.localeCompare(b, 'tr'))).toEqual(alpha);
@@ -160,7 +162,7 @@ test.describe('49. Liste araçları', () => {
     );
     await sort.selectOption({ label: 'Ders yüküne göre' });
     // Counted from the END for the same reason: "Ders saati" is always the
-    // cell before the buttons, whatever gets inserted ahead of it.
+    // cell before the status, whatever gets inserted ahead of it.
     await expect(async () => {
       const loads = await rows(page).locator('td:nth-last-child(2)').allInnerTexts();
       const numbers = loads.map((t) => Number(t.trim()));
@@ -291,9 +293,11 @@ test.describe('Silmeden sonra klavye ve bildirim', () => {
       return el?.closest('tr')?.getAttribute('data-row-name') ?? el?.tagName ?? null;
     });
 
+  // Derslikler: the teacher and class rows have no Sil since 2026-11-16 (K5);
+  // their page's Sil hands the focus to the next name (kisi.spec.ts).
   test('odak sonraki satırın Sil’ine, son satırda öncekinin Sil’ine gidiyor', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, 'Derslikler');
     const names = await rows(page).evaluateAll((trs) =>
       trs.map((tr) => tr.getAttribute('data-row-name')),
     );
@@ -338,7 +342,7 @@ test.describe('Silmeden sonra klavye ve bildirim', () => {
   test('bildirim odak ya da fare üstündeyken kapanmıyor, süresi 10 saniye', async ({ page }) => {
     test.setTimeout(60_000);
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, 'Derslikler');
     const total = await rows(page).count();
 
     await rows(page).first().getByRole('button', { name: 'Sil', exact: true }).click();

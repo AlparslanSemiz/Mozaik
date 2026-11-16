@@ -35,7 +35,15 @@
 // unit test cannot know is whether the token reaches the element.
 
 import { expect, test } from './kapan';
-import { openSetup, openWithSampleTheme, contrast, deltaE, dragAndDrop, tokens } from './helpers';
+import {
+  openPerson,
+  openSetup,
+  openWithSampleTheme,
+  contrast,
+  deltaE,
+  dragAndDrop,
+  tokens,
+} from './helpers';
 
 const STEPS = ['Öğretmenler', 'Sınıflar'] as const;
 
@@ -93,17 +101,21 @@ for (const theme of ['light', 'dark'] as const) {
         await openWithSampleTheme(page, theme);
         await openSetup(page, step);
 
-        const picks = page.locator('table.list tbody tr .color-pick');
-        await expect(picks.first()).toBeVisible();
-        expect(await picks.count()).toBeGreaterThan(10);
-
-        const measured = await picks.evaluateAll((nodes) =>
-          nodes.map((node) => ({
-            text: (node.textContent ?? '').trim(),
-            name: node.getAttribute('aria-label') ?? '',
-            swatch: getComputedStyle(node as HTMLElement).backgroundColor,
-          })),
-        );
+        // The colour is chosen on the person's page since 2026-11-16 (K5):
+        // the first few pages, one swatch each.
+        const measured: Array<{ text: string; name: string; swatch: string }> = [];
+        for (let i = 0; i < 4; i++) {
+          const pick = (await openPerson(page, i)).locator('.color-pick');
+          await expect(pick).toBeVisible();
+          measured.push(
+            await pick.evaluate((node) => ({
+              text: (node.textContent ?? '').trim(),
+              name: node.getAttribute('aria-label') ?? '',
+              swatch: getComputedStyle(node as HTMLElement).backgroundColor,
+            })),
+          );
+          await page.keyboard.press('Escape');
+        }
 
         for (const cell of measured) {
           // What the reader asked for: the number is off the colour.
@@ -118,8 +130,8 @@ for (const theme of ['light', 'dark'] as const) {
           expect(cell.swatch).not.toBe('rgba(0, 0, 0, 0)');
         }
 
-        // Twenty-five rows, twenty-five different names: the colour is an
-        // IDENTITY, and a name that repeats would hide two teachers sharing one.
+        // Different people, different names: the colour is an IDENTITY, and a
+        // name that repeats would hide two teachers sharing one.
         const names = measured.map((c) => c.name);
         expect(new Set(names).size, 'iki satırın adı aynı').toBe(names.length);
       });
@@ -128,7 +140,7 @@ for (const theme of ['light', 'dark'] as const) {
         await openWithSampleTheme(page, theme);
         await openSetup(page, step);
 
-        const first = page.locator('table.list tbody tr .color-pick').first();
+        const first = (await openPerson(page, 0)).locator('.color-pick');
         const before = await first.evaluate((el) => getComputedStyle(el).backgroundColor);
         await first.click();
 

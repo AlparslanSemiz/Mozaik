@@ -20,18 +20,17 @@ import {
   openLessons,
   openWithSample,
   savedState,
+  savedText,
   settledText,
 } from './helpers';
 
 const rows = (page: Page) => mainList(page).locator('tbody tr');
 const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
 
-/** The name boxes, top to bottom. Column-position free (see liste.spec.ts). */
+/** The rows' names, top to bottom: the stored name every list row carries
+ *  (a box in Derslikler, text in Öğretmenler since 2026-11-16). */
 async function names(page: Page): Promise<string[]> {
-  const boxes = await rows(page)
-    .locator('td > input[type="text"]:not(.text-sm):not([inputmode="email"])')
-    .all();
-  return Promise.all(boxes.map((b) => b.inputValue()));
+  return rows(page).evaluateAll((trs) => trs.map((tr) => tr.getAttribute('data-row-name') ?? ''));
 }
 
 /** Drags row `from` onto row `to` with a real pointer. */
@@ -288,16 +287,16 @@ test.describe('61. Elle sıralama', () => {
       new RegExp(`${before[0]} 4\\. sıraya taşındı`),
     );
 
-    // THE point: the dropdown the reader picks a branch from is in this order.
+    // THE point: the dropdown the reader picks a branch from is in this order
+    // (on the teacher's page since 2026-11-16, K5).
     await openSetup(page, 'Öğretmenler');
     // Read the VALUE, not the text. Each option reads "Mat · Matematik" now —
     // the short first, because that is the string the grid and the paper carry
     // — and the subject's identity was never the label anyway.
-    const options = await mainList(page)
-      .locator('tbody tr')
-      .first()
-      .locator('select')
-      .first()
+    await mainList(page).locator('tbody tr').first().locator('.person-open').click();
+    const options = await page
+      .getByRole('dialog')
+      .getByRole('combobox', { name: 'Branş', exact: true })
       .locator('option')
       .evaluateAll((els) => els.map((e) => (e as HTMLOptionElement).value));
     expect(options.filter((o) => after.includes(o)).slice(0, 4)).toEqual(after.slice(0, 4));
@@ -345,17 +344,15 @@ test.describe('61. Elle sıralama', () => {
     // (`aria-label="<kısaltma> branşı"`), not from a column position: that cell
     // has moved twice already and a positional selector went on reading an
     // empty neighbour and passing.
-    const rowSubjects = await mainList(page)
+    // The rows are text since 2026-11-16 (K5): the subject of each row is
+    // read from the saved plan by the row's name, not from a cell.
+    const names = await mainList(page)
       .locator('tbody tr')
-      .evaluateAll((rows) =>
-        rows.map((r) => {
-          const box = r.querySelector('select[aria-label$="branşı"]') as HTMLSelectElement | null;
-          // The value, not the option's text: the text carries the short form
-          // in front of the name ("Mat · Matematik") and the subject's identity
-          // is the name.
-          return box === null ? '' : box.value;
-        }),
-      );
+      .evaluateAll((rows) => rows.map((r) => r.getAttribute('data-row-name') ?? ''));
+    const saved = JSON.parse(await savedText(page)) as {
+      teachers: Array<{ name: string; subject: string }>;
+    };
+    const rowSubjects = names.map((n) => saved.teachers.find((t) => t.name === n)?.subject ?? '');
     const ranks = rowSubjects.map((x) => order.indexOf(x)).filter((n) => n >= 0);
     expect(ranks.length).toBeGreaterThan(3);
     expect(

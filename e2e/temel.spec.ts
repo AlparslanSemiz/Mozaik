@@ -14,6 +14,7 @@ import {
   mainList,
   open,
   openFileMenu,
+  openPerson,
   openSettings,
   openSetup,
   openWithSample,
@@ -372,7 +373,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     // The two teachers no longer share a colour...
     await openSetup(page, 'Öğretmenler');
     const teacherColors = await page
-      .locator('table.list tbody tr .color-pick')
+      .locator('table.list tbody tr .person-open .row-dot')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(teacherColors).toHaveLength(2);
     expect(new Set(teacherColors).size).toBe(2);
@@ -380,7 +381,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     // ...and the classes were given colours of their own.
     await openSetup(page, 'Sınıflar');
     const classColors = await page
-      .locator('table.list tbody tr .color-pick')
+      .locator('table.list tbody tr .person-open .row-dot')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(classColors).toHaveLength(2);
     expect(new Set(classColors).size).toBe(2);
@@ -405,9 +406,13 @@ test.describe('5. Yedek ve şema göçü', () => {
     await openedWithoutQuestion(page);
 
     await openSetup(page, 'Öğretmenler');
-    const kutu = page.getByRole('textbox', { name: 'MÇ e-postası' });
+    // On the teacher's page since 2026-11-16 (K5).
+    const eposta = async (n: number) =>
+      (await openPerson(page, n)).getByRole('textbox', { name: 'E-posta' });
+    await expect(await eposta(1)).toHaveValue('');
+    await page.keyboard.press('Escape');
+    const kutu = await eposta(0);
     await expect(kutu).toHaveValue('');
-    await expect(page.getByRole('textbox', { name: 'AV e-postası' })).toHaveValue('');
 
     await kutu.fill('  mehmet.celik@example.com ');
     await kutu.press('Tab');
@@ -425,9 +430,7 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     await reopen(page);
     await openSetup(page, 'Öğretmenler');
-    await expect(page.getByRole('textbox', { name: 'MÇ e-postası' })).toHaveValue(
-      'mehmet.celik@example.com',
-    );
+    await expect(await eposta(0)).toHaveValue('mehmet.celik@example.com');
   });
 });
 

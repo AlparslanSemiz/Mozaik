@@ -407,10 +407,10 @@ test.describe('14. Renk paleti', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
 
-    // The colour select in the teacher list paints itself with that teacher's
-    // colour, so it is the one per-teacher swatch on screen.
+    // The dot before each name in the teacher list is that teacher's
+    // colour, the one per-teacher swatch on the list since 2026-11-16 (K5).
     const colors = await page
-      .locator('table.list tbody tr .color-pick')
+      .locator('table.list tbody tr .person-open .row-dot')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
 
     expect(colors.length).toBeGreaterThanOrEqual(25);
@@ -463,7 +463,7 @@ test.describe('14. Renk paleti', () => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
     const swatches = await page
-      .locator('table.list tbody tr .color-pick')
+      .locator('table.list tbody tr .person-open .row-dot')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(swatches.length).toBeGreaterThanOrEqual(15);
     expect(new Set(swatches).size, 'iki sınıf aynı renkte').toBe(swatches.length);
@@ -821,9 +821,11 @@ test.describe('93. Listelerde zebra', () => {
       }
 
       // table.list: the first row keeps the panel's paper, the second is zebra.
-      await openSetup(page, 'Öğretmenler');
+      // Derslikler: the one Okul list whose rows still hold boxes since
+      // 2026-11-16 (K5), and the fields are measured below.
+      await openSetup(page, 'Derslikler');
       const rows = mainList(page).locator('tbody tr');
-      await expect(rows).toHaveCount(25);
+      await expect(rows).toHaveCount(8);
       expect(await ground(rows.nth(0))).toBe('rgba(0, 0, 0, 0)');
       expect(await ground(rows.nth(1))).toBe(t['--zebra']);
       expect(await ground(rows.nth(2))).toBe('rgba(0, 0, 0, 0)');
