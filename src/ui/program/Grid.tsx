@@ -147,11 +147,18 @@ function GridInner({
 
   return (
     <div className="grid-wrap" ref={wrapRef}>
+      {/* The keys, said once when the grid is entered: nothing on the page tells
+          a keyboard user that T picks a lesson up. Hidden text still describes. */}
+      <span id="grid-keys" hidden>
+        {t(
+          'Oklarla gezin. T taşır, P sabitler, Enter menüyü açar, Delete havuza kaldırır. Bütün kısayollar: ?',
+        )}
+      </span>
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu} onPointerDown={startLongPress}>
           {/* role=grid: the arrows belong to the table (platform/dom/gridKeys.ts),
               and a screen reader in browse mode would otherwise keep them. */}
-          <table className="grid" role="grid" style={columns}>
+          <table className="grid" role="grid" style={columns} aria-describedby="grid-keys">
             <caption className="sr-only">
               {t('Haftalık dersler')} · {firstColumnTitle}
             </caption>

@@ -1,6 +1,7 @@
-// Program: the view, "Programı yap", and everything rarer behind Daha fazla.
+// Program: the view, "Kalanı diz", and everything rarer behind Daha fazla.
 
 import type React from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Check,
   Eraser,
@@ -43,6 +44,103 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
   { id: 'subject', label: 'Branşa göre' },
 ];
 
+type MainKind = 'stop' | 'fix' | 'done' | 'make' | 'none';
+
+/**
+ * The strip's one main control. Each state is its own keyed element, so a
+ * button never turns into another one under the same DOM node (a second Enter
+ * on "Kalanı diz" used to land on the "Yeniden yap" that took its place), and
+ * when the control the keyboard was on goes away, focus follows to what
+ * replaced it instead of falling to the page (audit, 2026-11-17).
+ */
+function MainAction({
+  kind,
+  onStop,
+  onRebuild,
+  onMake,
+  t,
+}: {
+  kind: MainKind;
+  onStop: () => void;
+  onRebuild: () => void;
+  onMake: () => void;
+  t: StripContext['t'];
+}) {
+  const refs = useRef<Record<string, HTMLElement | null>>({});
+  /** Set when a press came from the focused main control; cleared once the run has settled. */
+  const follow = useRef(false);
+  /** A rebuild press this soon after focus arrived is a held or repeated Enter. */
+  const guardUntil = useRef(0);
+  useEffect(() => {
+    if (!follow.current) return;
+    const active = document.activeElement;
+    // Only when focus really fell off: never steal it from somewhere else.
+    if (active === null || active === document.body) {
+      const el = refs.current[kind];
+      el?.focus();
+      if (kind === 'fix') guardUntil.current = performance.now() + 700;
+    }
+    if (kind !== 'stop') follow.current = false;
+  }, [kind]);
+  const press = (e: React.MouseEvent<HTMLElement>, run: () => void) => {
+    follow.current = document.activeElement === e.currentTarget;
+    run();
+  };
+  const set = (k: MainKind) => (el: HTMLElement | null) => {
+    refs.current[k] = el;
+  };
+  if (kind === 'stop')
+    return (
+      <button key="stop" ref={set('stop')} className="btn danger" onClick={onStop}>
+        <Square {...ICON} />
+        {t('Durdur')}
+      </button>
+    );
+  if (kind === 'fix')
+    // Nothing waits, yet the week is broken (a lesson on an hour closed
+    // since, a hard rule broken): "Kalanı diz" had nothing to do and the way
+    // out was behind Daha fazla. Not for a "Tercih" warning: a rebuild need not
+    // mend that, and it would take every unpinned hand placement with it.
+    return (
+      <button
+        key="fix"
+        ref={set('fix')}
+        className="btn primary"
+        onClick={(e) => {
+          if (performance.now() < guardUntil.current) return;
+          press(e, onRebuild);
+        }}
+      >
+        <RotateCcw {...ICON} />
+        {t('Yeniden yap')}
+      </button>
+    );
+  if (kind === 'done')
+    // Nothing waits and the week is sound: a READING and not a dimmed button.
+    // Focusable, so focus can land on it when the button it replaced goes.
+    return (
+      <span key="done" ref={set('done')} className="strip-done" tabIndex={-1}>
+        <Check {...ICON} />
+        {t('Hepsi yerleşti')}
+      </span>
+    );
+  if (kind === 'none') return null;
+  return (
+    <button
+      key="make"
+      ref={set('make')}
+      className="btn primary"
+      title={t(
+        'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz',
+      )}
+      onClick={(e) => press(e, onMake)}
+    >
+      <Play {...ICON} />
+      {t('Kalanı diz')}
+    </button>
+  );
+}
+
 /**
  * Which "Yeniden yap" this is: every press asks the search for the next seed,
  * so the same data gives a new week each time, and the same sequence of weeks
@@ -79,7 +177,11 @@ export function programStrip({
         : t('Program yeniden yapıldı, sabitlenen {n} saat yerinde kaldı.', {
             n: pinnedHours,
           });
-    notify(said, 'info', { label: t('Önceki programa dön'), run: () => undoIf(next) });
+    notify(said, 'info', {
+      label: t('Önceki programa dön'),
+      run: () => undoIf(next),
+      expected: next,
+    });
   };
 
   // A file from before K2 may hold several programs in one plan. They are
@@ -98,9 +200,9 @@ export function programStrip({
     const next = sanitize(removeProgram(state, currentProgram.id));
     keepBefore(state, said);
     manageProgram((d) => (d === state ? next : removeProgram(d, currentProgram.id)), said);
-    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
   };
-  // The same condition that puts "Durdur" in Programı yap's place: a run, or
+  // The same condition that puts "Durdur" in Kalanı diz's place: a run, or
   // the suggestion search after it. Nothing that starts or changes a run is
   // offered meanwhile.
   const busy = solver.running || solver.advice?.searching === true;
@@ -135,7 +237,11 @@ export function programStrip({
       const said = movedNotice(state, next);
       if (said === '') return;
       keepBefore(state, said, true);
-      notify(said, 'info', { label: t('Önceki programa dön'), run: () => undoIf(next) });
+      notify(said, 'info', {
+        label: t('Önceki programa dön'),
+        run: () => undoIf(next),
+        expected: next,
+      });
     });
   const clearGrid = () => {
     // No question since SD1 (2026-11-15): it is undone with one click, so it
@@ -151,7 +257,7 @@ export function programStrip({
             n: pinnedHours,
           }),
       'info',
-      { label: t('Geri al'), run: () => undoIf(next) },
+      { label: t('Geri al'), run: () => undoIf(next), expected: next },
     );
   };
 
@@ -185,41 +291,23 @@ export function programStrip({
           not the click that should be next to the everyday one, unless the
           week is broken in a way a rebuild mends (below). */}
       <Group>
-        {solver.running || solver.advice?.searching === true ? (
-          <button className="btn danger" onClick={solver.stop}>
-            <Square {...ICON} />
-            {t('Durdur')}
-          </button>
-        ) : pending === 0 && placed > 0 && status.stranded + status.blocked > 0 ? (
-          // Nothing waits, yet the week is broken (a lesson on an hour closed
-          // since, a hard rule broken): "Kalanı diz" had nothing to do and
-          // the way out was behind Daha fazla (walkthrough, 2026-11-16). Not
-          // for a "Tercih" warning: a rebuild need not mend that, and it would
-          // take every unpinned hand placement with it.
-          <button className="btn primary" onClick={rebuild}>
-            <RotateCcw {...ICON} />
-            {t('Yeniden yap')}
-          </button>
-        ) : state.lessons.length === 0 ? null : pending === 0 ? (
-          // Nothing waits and the week is sound: a READING and not a dimmed
-          // button (denetim, 2026-11-16). A disabled primary asked "why can't
-          // I?" and the pool, which used to say this, is hidden now.
-          <span className="strip-done" role="status">
-            <Check {...ICON} />
-            {t('Hepsi yerleşti')}
-          </span>
-        ) : (
-          <button
-            className="btn primary"
-            title={t(
-              'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz',
-            )}
-            onClick={make}
-          >
-            <Play {...ICON} />
-            {t('Kalanı diz')}
-          </button>
-        )}
+        <MainAction
+          kind={
+            busy
+              ? 'stop'
+              : pending === 0 && placed > 0 && status.stranded + status.blocked > 0
+                ? 'fix'
+                : state.lessons.length === 0
+                  ? 'none'
+                  : pending === 0
+                    ? 'done'
+                    : 'make'
+          }
+          onStop={solver.stop}
+          onRebuild={rebuild}
+          onMake={make}
+          t={t}
+        />
       </Group>
 
       {/* The dated layer's one door (v18): today, who is away, and this
@@ -243,7 +331,7 @@ export function programStrip({
             {currentProgram.name} · {t('Sil')}
           </MoreItem>
         )}
-        <MoreSub icon={<PaletteIcon size={15} />} label={t('Renk')}>
+        <MoreSub icon={<PaletteIcon size={15} />} label={t('Renkler neye göre')}>
           <MoreRadio
             value={programColor}
             onChange={setProgramColor}

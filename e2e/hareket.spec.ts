@@ -273,12 +273,12 @@ test.describe('14. Ekran hareketleri', () => {
     await openWithSample(page);
     await page.keyboard.press('Control+k');
     await page.locator('.palette').waitFor();
-    await page.getByText('Animasyonları kapat', { exact: true }).click();
+    await page.getByText('Ekran hareketlerini kapat', { exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'kapali');
 
     await page.keyboard.press('Control+k');
     await page.locator('.palette').waitFor();
-    await page.getByText('Animasyonları aç', { exact: true }).click();
+    await page.getByText('Ekran hareketlerini aç', { exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'tam');
   });
 

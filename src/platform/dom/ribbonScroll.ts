@@ -13,7 +13,7 @@
 // WHICH BOX. `.main` and nothing else. Only six of the seven tabs scroll it:
 // Program hands its overflow to `.grid-wrap` (`main no-overflow`), and the
 // answer there is deliberately "the strip never hides" — that strip carries
-// "Programı yap" and the density switch, which are the two things a hand
+// "Kalanı diz" and the density switch, which are the two things a hand
 // reaches for WHILE looking at the grid.
 //
 // WHAT IT IS NOT. It is not the fold. `ders-programi-serit` is a preference

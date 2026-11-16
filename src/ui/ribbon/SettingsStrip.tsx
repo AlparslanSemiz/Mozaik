@@ -42,7 +42,7 @@ export function settingsStrip({
         className={`${step === undefined ? 'btn' : 'btn step'}${
           s.id === 'about' && changelogUnseen ? ' has-dot' : ''
         }`}
-        aria-pressed={s.id === ui.section}
+        aria-current={s.id === ui.section ? 'true' : undefined}
         data-empty={step === undefined ? undefined : step.count(state) === 0}
         // The unread release note's dot is on its exact door, Hakkında.
         {...(s.id === 'about' && changelogUnseen ? { 'aria-describedby': 'about-news' } : {})}
@@ -72,7 +72,7 @@ export function settingsStrip({
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul bilgileri')}>
       <Group label="Bölüm">{TERM.map(button)}</Group>
       <Sep />
-      <Group>{MACHINE.map(button)}</Group>
+      <Group hiddenLabel="Bu bilgisayar">{MACHINE.map(button)}</Group>
 
       <Spacer />
 

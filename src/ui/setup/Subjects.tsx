@@ -267,7 +267,7 @@ export default function Subjects({ state, change }: PanelProps) {
     moveFocusFromDeleted(button);
     keepBefore(state, said);
     change((d) => (d === state ? next : deleteSubject(d, subject)), said);
-    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
   }
 
   return (

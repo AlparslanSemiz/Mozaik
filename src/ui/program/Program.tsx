@@ -216,12 +216,15 @@ function Program({
           : verdict.action.kind === 'swap'
             ? t('{olay}, yerlerinde sabitlendi.', { olay: told })
             : t('{ders} yerleşti ve sabitlendi; {olay}.', { ders: name, olay: told });
-      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
     },
     [change, ix, notify, state, undoIf, t],
   );
 
-  const { start, startKeys } = useDrag(drop, notify);
+  // A refused drop is a warning, not a success: the notice is amber and says it
+  // once (the bar's own copy is silent to a reader, drag.ts).
+  const refused = useCallback((why: string) => notify(why, 'warn'), [notify]);
+  const { start, startKeys } = useDrag(drop, refused);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -305,7 +308,13 @@ function Program({
   // the rows are is behind its "?". A run, a result and a drag still speak in
   // full here.
   const idle = barLevel === '';
-  const barText = idle ? t('Yerleşmiş dersi sürükleyerek taşıyın.') : idleText;
+  // Nothing laid out yet: the one thing to do is the strip's main button.
+  const hasPlaced = Object.keys(activePlacements(state)).length > 0;
+  const barText = !idle
+    ? idleText
+    : !hasPlaced
+      ? t("Dersleri yerleştirmek için Kalanı diz'e basın.")
+      : t('Yerleşmiş dersi sürükleyerek taşıyın · Klavye: T ile alın');
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */
   const classAt = useCallback(
@@ -322,7 +331,7 @@ function Program({
       // what a reader reads as a broken key.
       const classId = classAt(state, rowId, day, hour);
       if (classId !== null && blockPinned(state, classId, day, hour)) {
-        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'), 'warn');
         return;
       }
       const found = classId === null ? null : blockAt(state, classId, day, hour);
@@ -473,7 +482,7 @@ function Program({
           intro: t('{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.', {
             ders: name,
           }),
-          onRefuse: notify,
+          onRefuse: refused,
           onCancel: (byTab) => {
             keyPlace.current = null;
             notify(t('Taşımadan vazgeçildi.'));
@@ -505,7 +514,7 @@ function Program({
         color: programColorIndex(state, lesson, colorMode),
       });
     },
-    [state, ix, view, start, startKeys, notify, solver.running, colorMode, t],
+    [state, ix, view, start, startKeys, notify, refused, solver.running, colorMode, t],
   );
 
   const cardStart = useCallback(
@@ -551,7 +560,7 @@ function Program({
     (rowId: string, day: number, hour: number) => {
       const classId = classAt(state, rowId, day, hour);
       if (classId !== null && blockPinned(state, classId, day, hour)) {
-        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        notify(t('Bu ders sabitlenmiş. Taşımak için önce P ile sabitlemeyi kaldırın.'), 'warn');
         return;
       }
       cellMoveStart(null, rowId, day, hour);

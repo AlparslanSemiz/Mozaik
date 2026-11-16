@@ -227,7 +227,8 @@ export const Row = memo(function Row({
                   // The pin is no longer a Tab stop of its own (KS8); its key is.
                   e.preventDefault();
                   onCellPin(row.id, g, s);
-                } else if (key === 't' && !cell.pinned) {
+                } else if (key === 't') {
+                  // A pinned card says why it will not move (Program.tsx cellPick).
                   e.preventDefault();
                   onCellPick(row.id, g, s);
                 }

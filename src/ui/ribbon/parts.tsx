@@ -8,6 +8,7 @@
 // change. The strips call no hooks for the same reason; `index.tsx` calls them
 // and hands the results down.
 
+import { useId } from 'react';
 import type React from 'react';
 import type { State } from '../../leaf/model';
 import type { SolverRun } from '../../platform/search';
@@ -86,12 +87,34 @@ export function Spacer() {
  * other, so the only thing grouping them was the hairline. Now the inside gap
  * is smaller than the outside one and the group reads as a group.
  */
-export function Group({ label, children }: { label?: string; children: React.ReactNode }) {
+export function Group({
+  label,
+  hiddenLabel,
+  children,
+}: {
+  label?: string;
+  /** The group's name for a screen reader when no caption is drawn. */
+  hiddenLabel?: string;
+  children: React.ReactNode;
+}) {
   const t = useT();
+  const id = useId();
+  const named = label !== undefined || hiddenLabel !== undefined;
   return (
     <>
-      {label !== undefined && <span className="ribbon-label">{t(label)}</span>}
-      <span className="ribbon-group">{children}</span>
+      {label !== undefined && (
+        <span className="ribbon-label" id={id}>
+          {t(label)}
+        </span>
+      )}
+      <span className="ribbon-group" {...(named ? { role: 'group', 'aria-labelledby': id } : {})}>
+        {hiddenLabel !== undefined && (
+          <span className="sr-only" id={id}>
+            {t(hiddenLabel)}
+          </span>
+        )}
+        {children}
+      </span>
     </>
   );
 }
