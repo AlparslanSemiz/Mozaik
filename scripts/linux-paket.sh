@@ -47,7 +47,8 @@ yerel=$(find "$kok/src-tauri/ortools" -maxdepth 1 -name '*.so*' | wc -l)
 # shipped so would load nothing, quietly.
 yazilir=$(find "$kaynak" -maxdepth 1 -perm /022)
 [ -z "$yazilir" ] || { echo "AppImage'da başkalarının yazabildiği dosyalar var:" >&2; echo "$yazilir" >&2; exit 1; }
-readelf -d "$kaynak/libortools.so.9" | grep -E '(RUNPATH|RPATH)' | grep -q '\$ORIGIN' \
+yollar=$(readelf -d "$kaynak/libortools.so.9" | grep -E '(RUNPATH|RPATH)' || true)
+grep -q '\$ORIGIN' <<< "$yollar" \
   || { echo "libortools.so.9'un RUNPATH'i \$ORIGIN değil" >&2; readelf -d "$kaynak/libortools.so.9" | grep -i path >&2; exit 1; }
 
 glibc=$(readelf -V "$program" | grep -o 'GLIBC_[0-9.]*' | sed 's/^GLIBC_//' | sort -V | tail -1)

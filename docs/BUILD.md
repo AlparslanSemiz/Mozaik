@@ -906,7 +906,8 @@ AppImage: `APPIMAGE`, yalnız program `APPDIR`'in içindeyse inanılır (tuzak 1
 dosyanın yanına `.yeni` olarak yazılır ve çalıştırılabilir yapılır (ELF ve `AI\x02` imi, boyut,
 özet, imza önce). "Şimdi yeniden başlat" `.yeni`'yi yeniden özetler, eskisini `.eski` sabit
 bağıyla korur ve `.yeni`'yi tek `rename` ile onun yerine koyar: o yolda Mozaik'siz bir an yok.
-Yeni sürüm başlamazsa `.eski` geri konur; başlarsa sayfası yüklenince `.eski`'yi siler. Klasör
+Yeni sürüm başlatılamazsa (`spawn` düşerse) `.eski` geri konur; başlarsa sayfası yüklenince
+`.eski`'yi siler, sayfasını çizemeyen bir yeni sürüm `.eski`'yi silmez. Klasör
 yazılamıyorsa (`/opt`) indirmeden önce "ev klasörünüzde yazabildiğiniz bir yere taşıyın" der
 (`src-tauri/src/update_linux.rs`).
 

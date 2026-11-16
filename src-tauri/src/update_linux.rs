@@ -15,7 +15,7 @@
 //!             no Mozaik at its path. The running copy is not disturbed, because
 //!             its runtime holds the old file open (the kernel keeps an open
 //!             file's data until the last holder closes it). The new version is
-//!             started and this one exits; if it cannot be started, `.eski` is
+//!             started and this one exits; if it cannot be spawned, `.eski` is
 //!             renamed back.
 //!   next start  the new version, once its page has drawn, deletes `.eski`
 //!             (`update::sweep_old`).
@@ -75,10 +75,13 @@ pub fn bu_appimage() -> Option<PathBuf> {
     }
     static YOL: std::sync::OnceLock<Option<PathBuf>> = std::sync::OnceLock::new();
     YOL.get_or_init(|| {
-        let exe = std::env::current_exe().ok()?;
+        // Links resolved on both sides, as cpsat.rs `linux_yolu` does: a
+        // `/tmp` that is a link must not make an AppImage look like none.
+        let exe = fs::canonicalize(std::env::current_exe().ok()?).ok()?;
+        let appdir = std::env::var_os("APPDIR").and_then(|a| fs::canonicalize(a).ok());
         let dosya = appimage_yolu(
             std::env::var_os("APPIMAGE").as_deref(),
-            std::env::var_os("APPDIR").as_deref(),
+            appdir.as_deref().map(|a| a.as_os_str()),
             &exe,
         )?;
         dosya.is_file().then_some(dosya)
@@ -166,7 +169,9 @@ pub fn degistir(dosya: &Path) -> Result<(), String> {
     })
 }
 
-/// The way back when the new version cannot be started: `.eski` over it again.
+/// The way back when the new version cannot be spawned: `.eski` over it again.
+/// A new version that spawns and then dies is not caught here; `.eski` stays
+/// beside it until a new version draws its page, for a person to rename back.
 pub fn geri_al(dosya: &Path) {
     let _ = fs::rename(crate::update::yan(dosya, crate::update::ESKI), dosya);
 }

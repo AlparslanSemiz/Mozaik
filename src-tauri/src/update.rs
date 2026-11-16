@@ -1441,7 +1441,7 @@ async fn linux_indir(
 }
 
 /// The AppImage's "Şimdi yeniden başlat": `.yeni` checked again, put in the
-/// file's place, the new version started. If it cannot be started, the old
+/// file's place, the new version started. If it cannot be spawned, the old
 /// file goes back and this version keeps running.
 fn linux_uygula(app: &tauri::AppHandle) -> Result<(), String> {
     let dosya = update_linux::bu_appimage()

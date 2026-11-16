@@ -85,6 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           app=$(find src-tauri/target/release/bundle/appimage -maxdepth 1 -name '*.AppImage' | head -1)
+          test -n "$app" || { echo "AppImage üretilmedi" >&2; ls -R src-tauri/target/release/bundle | head -50; exit 1; }
           scripts/linux-paket.sh "$app"
           mkdir -p teslim
           cp "$app" teslim/Mozaik-linux-x86_64.AppImage

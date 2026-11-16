@@ -476,7 +476,7 @@ jobs:
   # İMZALAYAN TEK İŞ, ve anahtarı gören tek iş (DECISIONS 2026-11-16). Sır depo
   # düzeyinde değil `release` ortamında; o ortamı yalnız `v*` etiketleri
   # kullanabilir (ayarları BUILD.md'nin "Yayın güvenliği" bölümünde). Bu iş kod
-  # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe ve Mac artefaktlarını
+  # derlemez, npm koşturmaz ve yazma token'ı taşımaz: exe, Mac ve Linux artefaktlarını
   # indirir, imzalar, `.minisig`'leri yükler. Yayınlayan iş anahtarı hiç görmez.
   # Mac'i beklemez gibi değil, bekler ama ona takılmaz (`always()`, `publish`'teki
   # kuralın aynısı): gelmeyen bir mimari imzalanmaz.

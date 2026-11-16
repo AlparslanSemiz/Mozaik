@@ -32,7 +32,7 @@ if [ "${2:-}" = "--ayikla" ]; then arg=(--appimage-extract-and-run); fi
 
 env DISPLAY=:99 HOME="$ev" XDG_CONFIG_HOME="$ev/.config" XDG_DATA_HOME="$ev/.local/share" \
   XDG_CACHE_HOME="$ev/.cache" XDG_DOCUMENTS_DIR="$ev/Belgeler" \
-  dbus-run-session -- "$app" "${arg[@]}" > "$cikti/acilis.log" 2>&1 &
+  setsid dbus-run-session -- "$app" "${arg[@]}" > "$cikti/acilis.log" 2>&1 &
 pid=$!
 sleep 20
 if command -v import > /dev/null; then
@@ -43,6 +43,7 @@ if ! kill -0 "$pid" 2> /dev/null; then
   cat "$cikti/acilis.log" >&2
   exit 1
 fi
-kill "$pid" 2> /dev/null || true
+# The whole group: dbus-run-session, the AppImage runtime and Mozaik itself.
+kill -- "-$pid" 2> /dev/null || kill "$pid" 2> /dev/null || true
 cat "$cikti/acilis.log"
 echo "Mozaik açıldı ve yirmi saniye ayakta kaldı"
