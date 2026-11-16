@@ -162,6 +162,16 @@ görünür ve klasörü olmayan bir tarayıcıda bir haftalık kaydedilmemiş de
 çıkarır; service worker kabuğu HTTP önbelleğinin arkasından ister; indirmenin blob adresi 30 s
 yaşar; `/ders-programi/` için kendini silen bir sayfa (`site/eski-adres/`).
 
+**Yeni adres ayrı bir Pages sitesi (`web/ayri-site`, aynı gün).** İlk plan `Mozaik`
+deposuna özel alan adı koymaktı. Bir proje sitesine özel alan adı konunca GitHub eski adresi
+yeni adrese 301 ile yönlendirir; eski kökende uygulama yalnız service worker'ı olan
+tarayıcılarda açılır, ve eski kökendeki planları okuyabilen tek sayfa odur. Yeni adres bu
+yüzden ayrı bir depo (`AlparslanSemiz/mozaik-site`, `gh-pages`), `site.yml` aynı derlemeyi
+oraya SSH deploy anahtarıyla iter; eski adres en az bir dönem uygulamayı yayınlamaya devam
+eder, sonra bir taşıma sayfası olur ve hiç yönlendirilmez. **Seçenekler:** (a) özel alan
+adı bu depoda, bir süre sonra: yönlendirme yine planları bırakır; (b) Cloudflare'de vekil:
+DNS'e dokunmayan bir kural ister ve kökeni yine GitHub sayfası olur; (c) ayrı depo: seçildi.
+
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 
 **Karar (Alp, 2026-11-16).** Babanın programı Windows'ta ve sitede; Mac ikinci sırada. `surum.yml`'in
