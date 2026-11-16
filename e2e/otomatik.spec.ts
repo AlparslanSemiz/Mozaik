@@ -201,12 +201,20 @@ test.describe('22. Otomatik dizme', () => {
   // DK4: the bar kept saying what the last run or the last suggestion did
   // after Ctrl+Z had taken it back — a green "Öneri uygulandı" beside a chip
   // counting the lessons that did not fit again.
-  test('geri alınan önerinin başarı cümlesi kalmıyor', async ({ page }) => {
+  //
+  // The click waits for the search to END. In this world the search often
+  // finds `teacherHours` first and `teacherDays`, earlier in the order, a few
+  // dozen ms later; the panel then folds the first row under "Başka yollar"
+  // by `hidden`, without redrawing it. A click resolved in that window keeps
+  // retrying on the hidden button until the test's limit (CI 2026-11-16,
+  // 43791760095: "element is not visible" for 28 s; 4 of 40 locally).
+  test('geri alınan önerinin başarı cümlesi kalmıyor', { tag: '@arama' }, async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
     await loadWorld(page, world.state);
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
     const apply = page.locator('.panel.suggestions .btn.primary').first();
     await expect(apply).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 60_000 });
     await apply.click();
     const bar = page.locator('.reason-bar');
     await expect(bar).toContainText('Öneri uygulandı');
