@@ -1922,6 +1922,16 @@ const DE: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan mit fehlender oder doppelter Kennung: {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Bis Sie wählen, wird nichts in den Ordner geschrieben.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Dieser kleinere Plan ersetzt die letzte Plandatei im Ordner. Der alte Stand bleibt in den täglichen Sicherungen.",
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
+  "son plan dosyasının tarihi":
+    "Datum der letzten Plandatei",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Für diesen Plan gibt es keine Plandatei.** Was Sie getan haben, ist nur in diesem Browser.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Die letzte Plandatei ist vom {tarih}.** Was Sie seitdem getan haben, ist nur in diesem Browser.",
+  "Son plan dosyası: {tarih}.":
+    "Letzte Plandatei: {tarih}.",
 };
 
 registerSozluk("de", DE);

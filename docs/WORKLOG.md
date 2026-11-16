@@ -72,6 +72,9 @@ Unreleased). Şema **v17** `main`'de (öğretmen e-postası): ilk sürüm okunam
 4. Babanın makinesi: çekirdek sayısı, CP-SAT ikinci bakışın süresi, ilk gerçek güncelleme
    (2.2.0 → yeni exe → kurulum, 2026-11-16'dan beri aynı sürümde önerilen), antivirüs/SmartScreen
    davranışı; bekleyici exe'nin geçici klasörden çalışması bir tarayıcıya takılır mı.
+5. Sitenin alt alan adı (2026-11-16, `web/kalicilik`, birleşmedi): DNS kaydı, Pages'in özel
+   alan adı, `ders-programi` deposunda eski adres sayfası ve sonra `yeniAdresAcik`; sıra
+   [BUILD.md](BUILD.md) "Alan adına geçiş"te.
 5. Mac sürümü `platform/mac` dalında, birleşmedi (aşağıdaki tarihli girdi, TODO B7.42): Apple
    imzasız, ilk açılışta "Yine de Aç". Apple Developer üyeliği alınırsa yalnız `APPLE_*` sırları.
 
@@ -87,6 +90,11 @@ kaydı öneriyor ve seçilene kadar klasöre yazmıyor, keskin küçülme kurtar
 budama en dolu günlüğü silmiyor, sorusuz silmelerin önceki hâli yenilemeden sonra "Geri getir"
 ile geliyor (tuzak 159, 160; aşağıdaki tarihli girdi). Gerçek Windows exe'de koşulmadı.
 
+**Kararsız testler (2026-11-16, `test/kararsiz`, birleşmedi):** `program.spec.ts`'in dağılım
+seçicisi testi havuzu bekliyor ve `dragAndDrop()` sabit beklemesiz; yükte 5 s'yi aşan ağır birim
+dosyaları sınırlarını gerekçesiyle söylüyor, dropMap'in süresi görelileşti (tuzak 170, 171;
+aşağıdaki tarihli girdi). E2E'de kalan 40 küsur `waitForTimeout` bakılmadı.
+
 ---
 
 weeklyHours) eski formülle ve ikinci bakışa girmiyor. `erisim/anlam` (ekran okuyucu adları,
@@ -97,6 +105,83 @@ bulgusu yalnız `Grid.tsx` ve `Availability.tsx`'in boş köşe başlıkları.
 kilitsiz ve ölçümler "kirli". Rust: `export PATH="$(brew --prefix rustup)/bin:$PATH"`, `cargo test`
 için önce `npx vite build`. Birleştirme ff-only, hazır dallar doğrusal zincir. Alp 2026-11-15'te
 birleştirme ve "her düzeltmeyi yap" yetkisi verdi; veri kaybı sınıfı yine sorulur.
+
+## 2026-11-16 · Kararsız testler (`test/kararsiz`)
+
+CI'ın son 300 koşusu (`ci.yml`, 2026-10-09'dan beri) tarandı: aynı commit'te önce düşüp
+yeniden koşunca geçen tek test `program.spec.ts`'in "dağılım seçicisi bütün seçenekleri
+açıyor"u (43769965101 ve 43773651075, ikisi de "> 146, received 146"). Öteki kırmızıların
+çoğu dal zincirinin kendi gerilemesiydi (zincirin her dalında aynı test, sonra düzeldi), ya
+da `main`'de zaten düzeltilmişti (`temel.spec` "kayıt çalışmıyorsa" süzgeci,
+`kurulum.spec` cinsiyet testinin `savedState`'i).
+
+- **Dağılım seçicisi:** havuz `useDeferredValue` ile bir render geriden geliyor, test havuzu
+  ızgara boşaldıktan sonra bir kez okuyordu (tuzak 170). `poolHours()` yığın boyuyla sayıyor,
+  `dragAndDrop()` havuz kartı bırakana kadar dönmüyor, sonrası `expect.poll`. Kanıt: işlemci 8
+  kat yavaşlatılınca (CDP) eski hâl 6 koşunun 3'ünde CI'ın hatasıyla düştü (2'si 30 s'yi aştı),
+  yeni hâl 6/6 geçti. Yavaşlatmasız eski hâl bu Mac'te 15/15 geçiyordu. Yükte ikinci bir
+  düşüş: 30 s'lik test sınırı, çünkü `dragAndDrop()` satırın her görünen hücresinde 40 ms
+  bekliyordu (CI'da test 11-13 s). Yardımcı artık yalnız sürüklemenin başta `can-ok` diye
+  boyadığı hücreleri deniyor ve vurgunun boyanmasını bekliyor: beş sürükleme testi aynı
+  yükte 8,9-14,8 s'den 3,5-6,8 s'ye.
+- **Birim süre sınırları (tuzak 171):** yük ortalaması 78–266 (8 çekirdek) iken `hizli`'de
+  `linuxKur`, `useFolder`, `App`, `sentences`, `programScreen` ve `relax.test`'in "aynı
+  girdi"si 5 s'yi aştı, derslik darboğazı 30 s'ye yaklaştı (24 s). Bekleme ya da yarış yok,
+  iş ağır ve belirli: dosya başında gerekçeli `vi.setConfig({ testTimeout: 30_000 })`,
+  darboğaz 120 s.
+  `sample.test`'in dropMap testi açgözlü doldurmayı ikinci kez koşuyordu ve 50 ms'lik mutlak
+  eşiği vardı: doldurma bir kez, eşik dolu/boş medyan oranı < 4 (bugün ~1,3). Hücre başına
+  `blockAt` çağıran mutasyon oranı 6,7'ye çıkardı ve kırmızı, eski eşik onda 13 ms ile yeşil kalırdı.
+- **Çözücünün saati:** tam `npm test`'te `solver.test`'in "Roboders'teki saatlerle" testi
+  varsayılan 15 s'lik bütçeyle yükte iki blok eksik kaldı (iş 18,5 s sürdü). Bütçe 600 s
+  (durma kuralı hamle sayıyor), test sınırı 120 s.
+- **Tam E2E (`--workers=2`, 34 dk, yük 42-135):** 765 geçti, 7 düştü. `liste.spec` sıralaması
+  ertelenmiş render'ı okuyordu (düzeldi, `toPass`, 5/5); `erisim.spec`'in dört axe taraması
+  30 s'yi aştı, tek başına geçti (`test.slow()`). Kalan: `kayma.spec.ts:129` bu Mac'te her
+  koşuda kırmızı (macOS'un yer kaplamayan kaydırma çubuğu, test kendisi "hiçbir şey
+  ölçmüyor" diyor; CI Linux'ta yeşil), `otomatik.spec.ts:258` @arama 420 s'yi aştı (B7.41).
+- **Tam `npm test`:** iki koşu üst üste bindi (benim hatam), `relaxFullCourse` ve
+  `relaxLaidOut` 120-240 s sınırlarını aştı; bunlara dokunulmadı, ölçülmedi.
+
+Belgeler: TRAPS 170 ve 171 (159–165 alınmış, açık dallar da numara beklediği için 170'ten başlandı), TESTPLAN
+"Birim"e süre sınırı kuralı, "E2E ortamı"na havuz beklemesi.
+
+---
+
+---
+
+## 2026-11-16 · Tek dosyanın küçültülmesi: sözlükler paketli (`boyut/kucult`)
+
+**Neyin yer tuttuğu** (kaynak haritasıyla, `main` f5d4417'ye birleşmeden önce): betik 1 186 kB, dört
+sözlük 425 kB (fr 110, de 108, es 105, en 100), react-dom 178 kB, `ui/program` 68 kB,
+`pure/relax` 56 kB; CSS 112 kB, bunun 32,5 kB'ı tek woff2 data: URI'si. Öneri worker'ı çift
+gömülü değil (sayfanın kendi betiğinden `blob:`). knip temiz, CSS'te üç kullanılmayan sınıf.
+Brotli payları (modül grubu çıkarılınca kazanılan): sözlükler ~60 kB, react-dom ~46 kB, Radix ~15 kB.
+
+**Yapılan.** `scripts/sozluk-paket.mjs` (derlemeye özel eklenti, iki yapılandırmada) 1 221 Türkçe
+anahtarı bir kez, her dilin çevirilerini aynı sırada tek dizge yazıyor; `sozlukOf` dili ilk
+istenince açıyor. Deflate + base64 saklama denendi, brotli'yi 9,2 kB büyüttüğü için bırakıldı
+(DECISIONS aynı gün).
+
+| | `main` (f5d4417) | bu dal | fark |
+|---|---|---|---|
+| ham `dist/index.html` | 1 319 045 B | 1 154 736 B | −164 309 B (−%12,5) |
+| brotli | 305,14 kB | 295,48 kB | −9,66 kB |
+| site `dist-site/index.html` | — | 1 155 058 B | |
+| `file://` açılış, tr, `loadEventEnd` medyanı | 280 ms | 248 ms | −32 ms |
+| aynı, FCP medyanı | 488 ms | 456 ms | −32 ms |
+| `file://` açılış, en, `loadEventEnd` medyanı | 283 ms | 255 ms | −28 ms |
+
+Açılış: Chromium, işlemci 4× yavaş (CDP), 1920×1080, 9 koşu dönüşümlü, her koşu taze bağlam;
+makine yüklü (yük 65–200), yani kirli. Betik oturumun `scratch/olcum/ac.cjs`'inde. Eşik: ham
+1 320 000 → 1 200 000 (45 kB pay), brotli 306 000'de (10,5 kB pay); bağlayıcı olan artık brotli.
+
+**Koşulan.** `npm run tipler` 0, `eslint src` 0, prettier, knip temiz, `npm run hizli` (yükten altı
+zaman aşımı; o dört dosya tek başına 61/61 yeşil), `npx vite build`, `npm run boyut`, E2E `dil`
+12/12, `otomatik` (@arama-heavy dışı) 15/15, `temel`+`program`+`yazdir` 151/151, site süiti
+24/24. Taze bağlamlı inceleme: veri riski yok; belge bulguları düzeltildi.
+
+---
 
 
 ## 2026-11-16 · Boyut eşiği geçici olarak 1 340 000 B ve brotli 310 000 B (`guvenlik/sertlestirme`, zincirin ucu)
@@ -262,6 +347,42 @@ eslint, prettier, `kontrat`/`docs`/sözlük testleri yeşil; `npm run hizli` yü
 akışında temiz. **Koşulmayan:** iki Windows iş akışı (Windows makinesi yok, dal itilmedi),
 Playwright, iki işçide CP-SAT ölçümü (babanın verisi bu oturumda yok; örnek okulla ölçmek
 kanıt sorusunu cevaplamazdı).
+## 2026-11-16 · Web kalıcılığı ve alt alan adına geçiş (`web/kalicilik`)
+
+Web denetiminin (Chromium'da doğrulanmış) beş bulgusu ve Alp'in kararı: site
+`mozaik.alparslansemiz.com`'a taşınıyor (DECISIONS 2026-11-16).
+
+- `persist()` hiç istenmiyordu, canlı site `persisted: false`. Sitede iş taşıyan ilk
+  değişiklikte bir kez isteniyor (`persist.ts`).
+- Son plan dosyasının tarihi Dosyaya kaydet'in ipucunda; klasöre yazılmayan tarayıcıda bir
+  haftalık kaydedilmemiş değişiklik tek şerit (`fileSaved.ts`, yeni anahtar
+  `ders-programi-son-dosya`).
+- `sw.js` kabuğu `cache: 'reload'`, tazelemeyi `cache: 'no-cache'` ile istiyor
+  (`src/sw.test.ts` dosyayı sahte `self` ile koşuyor; site süiti istek kipini göremiyor).
+- `download.ts` blob adresini 30 s sonra bırakıyor (`temel.spec.ts` gerilemesi: tıklamadan
+  sonra adres okunuyor).
+- `/ders-programi/` için kendini silen sayfa `site/eski-adres/`; yayını Alp yapacak.
+- Taşıma: `move.ts` (el sıkışma), `useMove.ts`, `openBundle.ts` (Tümünü dosyadan aç'tan
+  ayrıldı), yoklama `vite.site.config.ts`'te. `tasima.spec.ts` iki gerçek kökeni Playwright
+  yönlendiricisiyle `dist-site`'tan sunuyor: evet, vazgeç, yabancı köken, cevap yok.
+
+İnceleme (taze bağlamlı alt ajan) dokuz bulgu verdi, yedisi düzeldi: eski `/ders-programi/`
+sayfası yönlendirmeyi körü körüne izleyip planları eski kökende bırakıyordu (artık yeni adres
+cevap verince kendisi taşıyor); depo dolup bir kısmı yazılamayan taşıma "taşındı" diyordu
+(`eksik`, dosyaya da iner); cevapsız kalan pencereden sonra düğme gizli kalıyordu; üst üste
+gelen iki soru ilkini sonsuza dek bekletiyordu (`Dialogs.tsx`, ilki "hayır" sayılıyor);
+yoklamanın olayı efektten önce gelirse kaçıyordu; `?tasima=1` her kökende dinleniyordu (artık
+yalnız yeni kökende). Bırakılanlar: ikinci taşımada hangi tarafın yeni olduğunu söylemek (soru
+zaten sayıyor) ve bir nonce (aynı kökendeki bir sayfa kendi akışını başlatabildiği için
+kazancı az).
+
+Boyut: ham 1 316 168 B (sınır 1 320 000; `main`'deki Mac işiyle birlikte), brotli 304,83 kB
+(sınır 306 000). Koşulanlar: `tipler`, e2e `tsc`, `lint`, `prettier --check`, `sinir`, `knip`,
+`npm run hizli` (68 dosya yeşil), `npx vite build`, `npm run boyut`, site süiti `--workers=2`
+(30/30, `tasima.spec.ts` dahil), `temel`, `planlar`, `ayarlar` (99/99), önceden `metin`,
+`kabuk`, `surum`, `dil`. `scripts/agir.sh` bu Mac'te `flock` olmadığı için çalışmadı;
+Playwright kilitsiz, `--workers=2` ile koştu. Koşulmayanlar: ana E2E süitinin geri kalanı,
+WebKit, Firefox (persist'in sorusu elle görülmedi).
 
 ## 2026-11-16 · Erişim ve kullanım zincirinin boyutu (`kullanim/ilk-acilis`, zincirin ucu)
 

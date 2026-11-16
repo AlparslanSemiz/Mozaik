@@ -235,7 +235,10 @@ describe('site adresi — dışarıda yazılı her kopya SITE_ADRESI', () => {
   // to Mozaik is a different page, and the old one is a plain 404 (pitfall
   // 106). The Release page's body kept the old one for a month because no
   // test read the file it comes from.
-  const SAYFA = /https:\/\/alparslansemiz\.github\.io\/[^\s>)'"]*/g;
+  // Both the old address and the new subdomain (DECISIONS 2026-11-16): when
+  // the switch in leaf/app/adres.json is flipped, every copy outside has to
+  // move with it, and this is what says which one is left behind.
+  const SAYFA = /https:\/\/(alparslansemiz\.github\.io|mozaik\.alparslansemiz\.com)\/[^\s>)'"]*/g;
 
   it.each([
     ['.github/surum-notu.md', surumNotu],

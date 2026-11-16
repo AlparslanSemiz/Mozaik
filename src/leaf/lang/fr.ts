@@ -1930,6 +1930,16 @@ const FR: Sozluk = {
   "Kimliği eksik ya da tekrarlanan plan: {adlar}.": "Plan à l’identifiant manquant ou répété : {adlar}.",
   "Siz seçene kadar klasöre hiçbir şey yazılmıyor.": "Rien n’est écrit dans le dossier tant que vous n’avez pas choisi.",
   "Klasördeki son plan dosyasının yerine bu küçük plan yazılır. Eski hâli günlük yedeklerde kalır.": "Ce plan plus petit remplace le dernier fichier de plan du dossier. L’ancien état reste dans les sauvegardes quotidiennes.",
+  // The plan-file reminder (2026-11-16). The one-time notice of the move to the
+  // new address is left in Turkish: it only ever shows at the old address.
+  "son plan dosyasının tarihi":
+    "date du dernier fichier de plan",
+  "**Bu planın bir plan dosyası yok.** Yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Ce plan n’a pas de fichier de plan.** Ce que vous avez fait n’est que dans ce navigateur.",
+  "**Son plan dosyası {tarih} tarihli.** Ondan sonra yaptıklarınız yalnız bu tarayıcıda duruyor.":
+    "**Le dernier fichier de plan date du {tarih}.** Ce que vous avez fait depuis n’est que dans ce navigateur.",
+  "Son plan dosyası: {tarih}.":
+    "Dernier fichier de plan : {tarih}.",
 };
 
 registerSozluk("fr", FR);

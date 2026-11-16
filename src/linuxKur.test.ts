@@ -26,7 +26,13 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+// Every test here starts bash, git several times and `npm run build` once or
+// twice: a second or two of process start-up on a quiet machine, and 6-9 s
+// on 2026-11-16 with other sessions loading the same cores, over Vitest's 5 s.
+// Nothing in it waits on time, it is only slow to start (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
 
 const KUR = resolve('scripts/linux-kur.sh');
 const BASLAT = resolve('scripts/linux-mozaik.sh');

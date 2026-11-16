@@ -60,6 +60,30 @@ jobs:
             exit 1
           fi
 
+      # THE NEW ADDRESS (DECISIONS 2026-11-16). One switch, `yeniAdresAcik` in
+      # src/leaf/app/adres.json, and it is off until Alp has set the DNS record
+      # and the custom domain in Settings -> Pages (BUILD.md, "Alan adına
+      # geçiş"). On, the artifact carries a CNAME with the new host name. A
+      # Pages site deployed by Actions takes its custom domain from Settings,
+      # not from this file, so the file is a written record that travels with
+      # the deploy rather than the thing that moves the site; off, there is no
+      # CNAME at all, so flipping it back cannot leave one behind.
+      - name: CNAME for the new address
+        run: |
+          set -euo pipefail
+          node -e '
+            const fs = require("fs");
+            const a = JSON.parse(fs.readFileSync("src/leaf/app/adres.json", "utf8"));
+            if (a.yeniAdresAcik === true) {
+              const host = new URL(a.yeni).hostname;
+              fs.writeFileSync("dist-site/CNAME", host + "\n");
+              console.log("CNAME: " + host);
+            } else {
+              fs.rmSync("dist-site/CNAME", { force: true });
+              console.log("CNAME yok: yeniAdresAcik kapali");
+            }
+          '
+
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: dist-site

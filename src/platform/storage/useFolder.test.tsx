@@ -19,6 +19,12 @@ import { SCHEMA_VERSION } from '../../leaf/model';
 import type { FolderRun } from './useFolder';
 import type { useStore as UseStore } from './useStore';
 
+// Every launch below throws the module graph away (`vi.resetModules`) and
+// imports React, the store and the folder hook afresh, and G2 does that eleven
+// times. The clock is fake, so nothing waits on time; it is module loading,
+// 1-3 s on a quiet machine and over Vitest's 5 s under load (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }

@@ -41,6 +41,11 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseState } from '../../pure/io/parseState';
 
+// The full-course case draws the Program screen and the printed sheet of a
+// week with hundreds of placements in jsdom: 4-7 s under load on 2026-11-16,
+// over Vitest's 5 s. Synchronous rendering, no timer or wait (pitfall 171).
+vi.setConfig({ testTimeout: 30_000 });
+
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }

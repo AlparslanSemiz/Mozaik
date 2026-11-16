@@ -12,7 +12,7 @@
 // Three files now, and they are here for the same reason rather than by
 // convenience: every one of them tests something that DOES NOT EXIST under
 // file:// — a service worker (site), a secure context (sunucu), the File
-// System Access API (klasor).
+// System Access API (klasor), and two real origins (tasima).
 
 import { defineConfig } from '@playwright/test';
 import { sitePort } from './e2e/sitePort';
@@ -25,7 +25,7 @@ const url = `http://localhost:${port}/`;
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: '**/{site,sunucu,klasor,linux-tasima}.spec.ts',
+  testMatch: '**/{site,sunucu,klasor,linux-tasima,tasima}.spec.ts',
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],

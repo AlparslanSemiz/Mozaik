@@ -36,6 +36,35 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Sözlükler derlemede paketleniyor, sıkıştırılmış saklama bırakıldı (`boyut/kucult`)
+
+**Ölçülen.** Kaynak haritasıyla sayıldı: `dist/index.html`'in betiği 1 186 kB, bunun 425 kB'ı
+dört sözlük, 178 kB'ı react-dom. Her sözlük bütün Türkçe cümleyle anahtarlandığı için aynı
+1 221 cümle dosyada dört kez duruyordu. Öneri worker'ı çift gömülü değil: sayfanın kendi
+betiğinden bir `blob:` (2026-09-25 kaydı). Font 32,5 kB'lık tek bir woff2 (`npm run font`'un
+reçetesi zaten dar), CSS'te kullanılmayan sınıf üç tane, knip'in bulgusu yok.
+
+**Karar.** Derlemenin eklentisi (`scripts/sozluk-paket.mjs`, iki vite yapılandırmasında da)
+`lang/{en,de,es,fr}.ts`'in yerine birer `registerPaket` çağrısı yazıyor: anahtarlar paylaşılan
+tek bir dizge, her dilin çevirileri aynı sırada `~` ile birleşmiş bir dizge. `sozlukOf` dili
+ilk istendiğinde nesneye açıyor, yani Türkçe bir açılış ve her öneri worker'ı dört 1 221
+anahtarlı nesneyi hiç kurmuyor. Ham boy −164 kB, brotli −9,7 kB, açılış ölçüldüğü kadarıyla
+kötüleşmedi (WORKLOG). Kaynak dosyalar, geliştirme sunucusu ve vitest değişmedi;
+`paket.test.ts` paketin kaynakla anahtar anahtar aynı olduğunu ölçüyor.
+
+**Denendi, bırakıldı: çevirileri sıkıştırılmış saklamak.** Dört dilin çevirileri
+deflate'lenip base64 olarak gömülünce (açılışı `DecompressionStream` yapacaktı) ham boy 124 kB
+daha inerdi, ama brotli hâli 9,2 kB büyürdü (paketli dosyada 292,3 → 301,5 kB, bugünkü
+`main` birleşmeden önce ölçüldü): sıkıştırılmış veriyi brotli
+sıkıştıramaz, base64 da bedelini ekler. Bugün bağlayıcı olan eşik brotli olduğu için
+yanlış yöne bir takas, üstelik `t()` eşzamanlı ve dil değişimi beklemeye dönerdi.
+
+**Denendi, bırakıldı: anahtarların sırası.** Anahtarları sıralamak ya da dört çeviriyi anahtar
+başına yan yana koymak brotli'de ±2 kB içinde kaldı (sıralı −0,3 kB, iç içe +2,5 kB).
+
+**Kalan.** Brotli hâlinin büyük parçaları çevirilerin kendisi (~56 kB) ve react-dom (~46 kB).
+İkisini küçültmek bir özellik kaybı ya da bir kütüphane değişimi; bu dalda yapılmadı.
+
 ### 2026-11-16 · İmza anahtarı `release` ortamında, exe'nin sayfası CSP altında (`guvenlik/sertlestirme`)
 
 **Karar (Alp, 2026-11-16).** İkinci güvenlik denetiminin en ağır bulgusu: imza anahtarı bir depo
@@ -109,6 +138,29 @@ tek başına exe'de; bir sonraki sürüm ona kurulumu ve CP-SAT'ı güvenle geti
   yerel sunucuya çevriliyor. Yeni `kurulum-windows.yml` kurulumu derleyip bekleyiciyle kuruyor,
   CP-SAT'ı kurulan DLL'lerle koşuyor ve kaldırmanın veriyi bıraktığını ölçüyor; `yayinla`
   ikisini de bekliyor. İkisi de henüz koşmadı.
+### 2026-11-16 · Site kendi alt alan adına, planlar sorulup taşınır (`web/kalicilik`)
+
+**Karar (Alp, 2026-11-16).** Web sürümü `https://mozaik.alparslansemiz.com/`'a taşınıyor
+(TODO'daki "Sitenin kökeni GitHub Pages depolarınla ortak" sorusunun (a) seçeneği). Gerekçe
+kökenin kendisi: `alparslansemiz.github.io` o hesabın bütün Pages sayfalarıyla ortak ve
+localStorage kökene bağlı, yani başka bir depo Mozaik'in planlarını okuyabilir ya da
+silebilirdi. DNS kaydını ve Pages'in özel alan adını Alp kurar ([BUILD.md](BUILD.md), "Alan
+adına geçiş").
+
+**Taşıma.** Yeni köken boş başlar, o yüzden eski kökendeki kopya planları kendisi taşır: yeni
+adres cevap verince bir şerit, **Planları taşı** yeni adresi açar ve paketi `postMessage` ile
+verir. Köken iki yönde de açıkça yazılı (hiçbir yerde `'*'` yok), kaynak açılan ya da açan
+pencere, şekil sıkı; paket Tümünü dosyadan aç'ın okuyucusundan ve sorusundan geçer, yani bir
+yabancının verdiği dosyadan fazla güvenilmez. Yeni adres sormadan yazmaz; eski adresteki veri
+silinmez; pencere cevap vermezse planlar plan dosyasına iner. Taşımanın açılıp açılmayacağı
+derleme anahtarına bağlanmadı, çünkü Pages eski yolu yönlendirdiği anda oradaki kopya bir daha
+güncellenemez: kod ondan önce yayında olmalı ve yeni adresin cevap verdiğini kendisi
+öğrenmeli. Bu yoklama yalnız site derlemesinde; çift tıklanan dosyada `fetch` yok.
+
+**Aynı turda (web denetimi).** `persist()` sitede bir kez istenir; son plan dosyasının tarihi
+görünür ve klasörü olmayan bir tarayıcıda bir haftalık kaydedilmemiş değişiklik tek bir şerit
+çıkarır; service worker kabuğu HTTP önbelleğinin arkasından ister; indirmenin blob adresi 30 s
+yaşar; `/ders-programi/` için kendini silen bir sayfa (`site/eski-adres/`).
 
 ### 2026-11-16 · Windows ve web önce, Mac hiçbir şeyi engellemez (`platform/mac`)
 

@@ -135,6 +135,13 @@ Zincir `main`'e bağlanınca (2026-10-24 gece) bu dalda birleşik ham boy 1 194 
 `rk2-bozuk-iliski`'te (zincirin ucu) birleşik ham boy 1 198 108 bayt; ham eşik CLAUDE.md'nin ölçüm
 çizgisine, 1 200 000'e çekildi: onu aşan ilk dal, eşiği yükseltmeden önce `file://` açılışını 4×
 yavaşlatılmış işlemcide ölçer.
+`boyut/kucult` (2026-11-16) dört sözlüğü derlemede paketledi (`scripts/sozluk-paket.mjs`): her
+sözlük bütün Türkçe cümleyle anahtarlandığı için aynı 1 221 cümle dosyada dört kez duruyordu.
+Ham boy 1 319 045'ten 1 154 736 bayta (−164 kB), brotli hâli 305,14'ten 295,48 kB'a indi. Ham
+eşik 1 320 000'den 1 200 000'e indi (45 kB pay, CLAUDE.md'nin ölçüm çizgisi); brotli eşiği
+306 000'de kaldı, payı 10,5 kB. Bugün bağlayıcı olan brotli: yeni bir cümle artık ham boya bir
+kez anahtar ve dört çeviri olarak giriyor, ama brotli hâline girdiği kadar girmeye devam ediyor
+(WORKLOG 2026-11-16, DECISIONS aynı gün).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
@@ -183,6 +190,7 @@ scripts/sunucu.mjs           sunucu.ps1'in Node ikizi, geliştirme ve ölçüm i
 scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-source/)
 scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
+scripts/sozluk-paket.mjs     derlemenin eklentisi: dört sözlüğün Türkçe anahtarları bir kez, diller ilk istenince açılır
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/dal-temizle.mjs      biten dal ve worktree'leri arşivleyip siler (kuru koşu varsayılan)
@@ -275,6 +283,70 @@ yeşil bir `main` push'unda yayınlar. Sayfa ilk açılıştan sonra service wor
 bağlantısız da açılır, ve bu `site.spec.ts`'te ölçülüyor. Service worker'ın
 önbellek adı sürüm damgasını taşır, yoksa güncelleme bir açılış geriden gelir
 (tuzak 73).
+Kabuğu kurarken `cache: 'reload'`, arkadaki tazelemede `cache: 'no-cache'` ile ister:
+Pages `max-age=600` gönderiyor ve düz bir istek eski `index.html`'i tarayıcının HTTP
+önbelleğinden alıp yeni sürümün adıyla saklayabiliyordu (web denetimi, 2026-11-16;
+`src/sw.test.ts` dosyayı sahte bir `self` ile koşup bunu ölçer).
+
+#### Alan adına geçiş
+
+Site kendi alt alan adına taşınıyor, `https://mozaik.alparslansemiz.com/` (DECISIONS
+2026-11-16): `alparslansemiz.github.io` kökeni o hesabın bütün Pages sayfalarıyla ortak ve
+localStorage kökene bağlı. Adresler ve tek anahtar `src/leaf/app/adres.json`'da:
+`yeniAdresAcik` açılınca `SITE_ADRESI` yeni adresi gösterir ve `site.yml` yayına bir
+`CNAME` koyar. Actions ile yayınlanan bir Pages sitesi özel alan adını dosyadan değil
+Settings → Pages'ten alır; `CNAME` yayınla birlikte giden yazılı kayıttır.
+
+Planların taşınması anahtara bağlı değil, çünkü Pages eski yolu yönlendirmeye başlayınca
+eski adresteki kopya bir daha güncellenemez (service worker'ın `sw.js` sorusu
+yönlendirmeye düşer). O yüzden taşıma kodu yönlendirmeden ÖNCE yayında olmalı. Eski
+kökende açılan sayfa, yalnız site derlemesindeki bir betikle yeni adresin manifestini
+okur (`vite.site.config.ts`, `yeniAdresYoklamasi`); cevap gelirse bir şerit çıkar ve
+**Planları taşı** yeni adresi açıp bütün planları `postMessage` ile verir
+(`platform/storage/move.ts`). Yeni adres Tümünü dosyadan aç'ın sorusuyla sorar, sormadan
+hiçbir şey yazmaz; cevap gelmezse planlar bir plan dosyasına iner. Eski adresteki veri
+silinmez. Çift tıklanan dosyada `fetch` yok (`site.spec.ts`).
+
+Adımlar, bu sırayla (Alp):
+
+1. Bu dal `main`'e girer ve `ci.yml` siteyi yayınlar. Siteyi tarayıcıda kullanan biri
+   eski adresi bir kez açıp "Yeni sürüm hazır"da **Yenile** demeli, ya da sekmeyi kapatıp
+   yeniden açmalı: taşıma kodu onun önbelleğine ancak böyle girer.
+2. Cloudflare DNS (`alparslansemiz.com` bölgesi): `CNAME`, ad `mozaik`, hedef
+   `alparslansemiz.github.io`, proxy **kapalı** (gri bulut, "DNS only"), TTL Auto. Proxy
+   açıkken GitHub sertifika veremez. `dig +short mozaik.alparslansemiz.com` hedefi göstermeli.
+3. Önerilen: GitHub → Settings (hesap) → Pages → Add a domain ile `alparslansemiz.com`'u
+   doğrula (verdiği `_github-pages-challenge-alparslansemiz` TXT kaydı Cloudflare'e). Başka
+   bir hesabın bu alt alanı ele geçirmesini önler.
+4. Depo → Settings → Pages → Custom domain: `mozaik.alparslansemiz.com`, Save. DNS
+   denetimi geçince **Enforce HTTPS** işaretlenir (sertifika birkaç dakika ile bir saat
+   arası). Bu andan itibaren eski adres (`https://alparslansemiz.github.io/Mozaik/`) yeni adrese yönlenir.
+5. `https://mozaik.alparslansemiz.com/` açılıyor ve
+   `https://mozaik.alparslansemiz.com/manifest.webmanifest` 200 dönüyorsa eski adresteki
+   kopyalar şeridi göstermeye başlar.
+6. Ayrı bir dalda `yeniAdresAcik: true`; aynı commit'te dışarıda yazılı kopyalar:
+   `README.md`, `.github/surum-notu.md`, `scripts/yayinla.mjs`'teki adres ve
+   `e2e/surum.spec.ts`'in yazılı adresi (`src/surum.test.ts` ilk ikisini yeni adrese karşı
+   okur). `main`'e girince yayında `CNAME` olur.
+
+Geri almak: Settings → Pages'ten alan adını sil, `yeniAdresAcik: false`. Eski kökendeki
+veri hiçbir adımda silinmediği için geri dönüş veri kaybettirmez.
+
+#### Eski adres
+
+`site/eski-adres/` `https://alparslansemiz.github.io/ders-programi/` için: depo yeniden
+adlandırılınca o adres 404 oldu (tuzak 106) ve 404, eski service worker'ı sonsuza dek
+yaşatıyor, çünkü güncelleme sorusu başarısız oluyor. `sw.js` kurulur, yalnız bütün
+girdileri `/ders-programi/` altında olan önbellekleri siler (Mozaik'inki aynı kökende ve
+aynı adla başlıyor), açık sayfaları ağdan yeniden yükler ve kaydını siler. `index.html`
+eski service worker'ı sayfadan da siler, sonra karar verir: bu kökende plan yoksa ya da yeni
+adres henüz cevap vermiyorsa aynı kökendeki `/Mozaik/`'e gider (planlar orada okunur);
+plan varsa ve yeni adres cevap veriyorsa (`/Mozaik/` artık oraya yönleniyor) durur ve
+Mozaik'in kendi taşımasını sunar: aynı üç mesaj, aynı kökenler, ve bütün planlar tek
+dosyaya. Bu klasör `dist-site`'a girmez (`SERVIS_EDILMEYEN`); ikisi `src/sw.test.ts` ve
+`e2e/tasima.spec.ts`'te. Yayını Alp yapar: `ders-programi` adında herkese açık bir depo,
+kökünde `index.html` ve `sw.js`, Settings → Pages → Deploy from a branch (`main`, `/`).
+Sırası serbest, adım 4'ten önce olması iyi.
 
 ### Yerel kurulum
 
@@ -754,7 +826,8 @@ kopyaya sonradan önek öğretilemez. `surum.yml` manifeste eski adlı adresi
 yazar, GitHub onu yeni ada yönlendirir, yani tek adres eski ve yeni kopyaların
 ikisini de doyurur. GitHub Pages bir depoyu adıyla yayınladığı ve yönlendirme
 yapmadığı için `SITE_ADRESI` `https://alparslansemiz.github.io/Mozaik/`
-(tuzak 106).
+(tuzak 106). Alt alan adına geçişte `src/leaf/app/adres.json`'ın anahtarını izler
+(yukarıda, "Alan adına geçiş").
 
 ## Font
 

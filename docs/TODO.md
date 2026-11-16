@@ -1077,7 +1077,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **R6 ne zaman koşsun?** Görünür bir Chromium penceresi açılacak ve odağı
       alacak; oturumu sen açacaksın. Müsait olduğun bir zaman gerekiyor.
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
-- [ ] **Sitenin kökeni GitHub Pages depolarınla ortak (2026-10-10, B7.28).** Site
+- [x] **Sitenin kökeni GitHub Pages depolarınla ortak (2026-10-10, B7.28).** **Karar (Alp,
+      2026-11-16): (a), `mozaik.alparslansemiz.com`.** Kod ve taşıma `web/kalicilik`'te
+      (DECISIONS 2026-11-16); DNS ve Pages adımları Alp'te, [BUILD.md](BUILD.md) "Alan adına
+      geçiş". Soru o günkü hâliyle: Site
       `https://alparslansemiz.github.io/Mozaik/`'te, ve tarayıcı veriyi yola göre değil
       kökene göre ayırıyor: o kökende Pages yayınlayan her deponun sayfası (kök
       `AlparslanSemiz.github.io` deposu dahil, B7.2) Mozaik'in localStorage'ını ve

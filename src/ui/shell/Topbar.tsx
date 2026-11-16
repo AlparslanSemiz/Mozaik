@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { Keyboard, Search as SearchIcon } from 'lucide-react';
-import { APP_NAME } from '../../leaf/app';
+import { APP_NAME, tarihYazisi } from '../../leaf/app';
 import type { State } from '../../leaf/model';
 import type { Tab, Theme } from '../../platform/prefs';
 import { downloadBackup } from '../../platform/storage';
@@ -32,6 +32,8 @@ interface Props {
   toggleRibbon: () => void;
   theme: Theme;
   toggleTheme: () => void;
+  /** The last plan file's day, YYYY-MM-DD; null when this browser never wrote one. */
+  lastFileDay: string | null;
 }
 
 export default function Topbar({
@@ -54,6 +56,7 @@ export default function Topbar({
   toggleRibbon,
   theme,
   toggleTheme,
+  lastFileDay,
 }: Props) {
   const t = useT();
   return (
@@ -212,9 +215,18 @@ export default function Topbar({
           downloadBackup(state);
           notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         }}
-        title={t(
-          'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
-        )}
+        title={[
+          t(
+            'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
+          ),
+          // When the last one left this browser (fileSaved.ts): the one fact
+          // that says how much a cleared browser would take with it.
+          lastFileDay === null
+            ? ''
+            : t('Son plan dosyası: {tarih}.', { tarih: tarihYazisi(lastFileDay) }),
+        ]
+          .filter((x) => x !== '')
+          .join(' ')}
       >
         {t('Dosyaya kaydet')}
       </button>
