@@ -1081,7 +1081,12 @@ export const WORLDS: SolverWorld[] = [
     state: realScale(1.6, 60),
     // The sentence a lesson gets when the week simply cannot hold it: the
     // ceiling, not "the class is busy" — there is nothing to move out of the way.
-    want: { solved: false, reasonLike: /en fazla \d+ saat veriyor/ },
+    // The room's shortfall, not one lesson's ceiling, since 2026-11-16: the
+    // load is over what the shared rooms hold, and that is what to change.
+    want: {
+      solved: false,
+      reasonLike: /dersliği: \d+ saat ders, \d+ açık saat; \d+ saat açılmalı/,
+    },
   },
 ];
 
