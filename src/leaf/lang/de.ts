@@ -417,8 +417,6 @@ const DE: Sozluk = {
   Saat: "Stunde",
   Hareket: "Bewegung",
   Dil: "Sprache",
-  "Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir.":
-    "Noch keine Lehrkräfte. Fügen Sie sie unter **Schule → Lehrkräfte** hinzu; hier wird diese Liste gezeigt.",
   "**Tam.** Tasarlandığı gibi.": "**Voll.** Wie entworfen.",
   "**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz.":
     "**Aus.** Nichts gleitet, nichts blendet ein.",
@@ -1615,8 +1613,6 @@ const DE: Sozluk = {
     "Der Datei fehlt die Liste der Lehrkräfte, Klassen, Fächer oder Räume; sie wurde vielleicht gekürzt oder von Hand bearbeitet. Wählen Sie die Datei, die Sie mit „Speichern“ gespeichert haben.",
   "Bu, Mozaik'in kaydettiği bir dosya değil. 'Kaydet' ile kaydettiğiniz dosyayı seçin.":
     "Das ist keine von Mozaik gespeicherte Datei. Wählen Sie die Datei, die Sie mit „Speichern“ gespeichert haben.",
-  "Excel'deki bir listeyi almak için Okul'daki listelerde Excel'den yapıştır düğmesini kullanın.":
-    "Um eine Liste aus Excel zu übernehmen, nutzen Sie in den Listen unter Schule die Schaltfläche „Aus Excel einfügen“.",
   "**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın.":
     "**Mozaik ist auch in einem anderen Fenster offen, und der Plan wurde dort geändert.** Die letzten Änderungen in diesem Fenster wurden nicht gespeichert. Drücken Sie **Neu laden**.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın.":
@@ -1846,10 +1842,6 @@ const DE: Sozluk = {
     "{n} {n:Stunde|Stunden} gesperrt",
   "{n} saat fazla":
     "{n} {n:Stunde|Stunden} zu viel",
-  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
-    "Für eine Lehrkraft: **Schule → Lehrkräfte**.",
-  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
-    "Für eine einzelne Klasse: **Schule → Klassen**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:Stunde liegt|Stunden liegen} noch in gesperrten Stunden; nichts wurde gelöscht, im Wochenplan rot.",
@@ -1901,6 +1893,16 @@ const DE: Sozluk = {
     "Tragen Sie zuerst die Fächer ein und erstellen Sie dann im Reiter **Stundenplan** den Plan.",
   "Bu plandaki öteki programlarda da {n} saat kalkacak.":
     "Auch in den anderen Stundenplänen dieses Plans {n:verschwindet|verschwinden} {n} {n:Stunde|Stunden}.",
+  "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.":
+    "Klicken Sie die Stunden an, zu denen der Raum geschlossen ist. Klassen, die diesen Raum nutzen, können dann keinen Unterricht haben.",
+  "Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası.":
+    "Für eine Lehrkraft: ihre Seite in der Liste **Lehrkräfte**.",
+  "Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası.":
+    "Für eine einzelne Klasse: ihre Seite in der Liste **Klassen**.",
+  "Henüz öğretmen yok. **Öğretmenler** sekmesinden ekleyin; burası o listeyi gösterir.":
+    "Noch keine Lehrkräfte. Fügen Sie sie im Reiter **Lehrkräfte** hinzu; hier wird diese Liste gezeigt.",
+  "Excel'deki bir listeyi almak için listelerin başındaki Excel'den yapıştır düğmesini kullanın.":
+    "Um eine Liste aus Excel zu übernehmen, nutzen Sie die Schaltfläche „Aus Excel einfügen“ oben in den Listen.",
 };
 
 registerSozluk("de", DE);

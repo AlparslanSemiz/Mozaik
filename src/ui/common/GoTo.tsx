@@ -10,10 +10,11 @@
 
 import { createContext, useContext } from 'react';
 import type { Id } from '../../leaf/model';
-import type { PeopleView, SectionId, Tab } from '../../platform/prefs';
+import type { OldTab, PeopleView, SectionId, Tab } from '../../platform/prefs';
 
 export interface Place {
-  tab: Tab;
+  /** One of the five, or an id from before K1 (`OLD_TAB`). */
+  tab: Tab | OldTab;
   /** Öğretmenler's or Sınıflar's view, when the tab is one of them. */
   people?: PeopleView;
   /** Whose lessons the form opens on, with `people: 'lessons'`. */

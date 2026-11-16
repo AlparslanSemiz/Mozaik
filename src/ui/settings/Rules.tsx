@@ -177,12 +177,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}>
             <p>
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası." />
             </p>
           </HelpHead>
           {custom.length === 0 ? (
             <p className="hint">
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası." />
             </p>
           ) : (
             <table className="list">
@@ -228,12 +228,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}>
             <p>
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası." />
             </p>
           </HelpHead>
           {customClasses.length === 0 ? (
             <p className="hint">
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası." />
             </p>
           ) : (
             <table className="list">

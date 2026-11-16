@@ -143,7 +143,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/paper/mail.ts` | aynı öğretmen sayfasının düz metin e-postası ve `mailto:`'su: sınıra (`MAILTO_SINIRI`) sığan en dolu biçim, sığmazsa hiç |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün Kontrol'le paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
+| `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün sorun listesiyle paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
 | `pure/forms/lessonForm.ts` | ders ekleme formunun kuralları: hangi branşlar ve öğretmenler sunulur, birini seçmek ötekine ne yapar (`lessonChoices`, `chooseTeacher`, `chooseSubject`), eklemeden sonra ne kalır (`afterAdd`); taslak ekranın kendi durumunda |
 | `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
 | `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
@@ -218,7 +218,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/shell/useMachinePrefs.ts` | App'in tuttuğu makine tercihi kopyaları ve üç geçiş (şerit, hareket, tema) |
 | `ui/shell/useMainScroll.ts` | şeridin altındaki kaydırılan kutunun iki etkisi: sündürme ve şeridin çekilmesi |
 | `ui/shell/useProgramMask.ts` | plan başına, oturumluk geçici Program maskesi |
-| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..7 ve '?' |
+| `ui/shell/useShortcuts.ts` | Ctrl+K, Alt+1..5 ve '?' |
 | `ui/shell/usePaletteActions.ts` | paletin hedeflerin yanında sunduğu sık işler |
 | `ui/shell/openPlanFile.tsx` | "Dosyadan aç": dosyayı bir kez okur, açılamıyorsa kendi cümlesiyle reddeder, iki planı sayarak onaylatır; açık plan boşsa ve geri alınacak bir şey yoksa sormadan açar (`isEmptyPlan`) |
 
@@ -245,7 +245,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/InspectorSheet.tsx` | kişi sayfası (2026-11-16, K5): öğretmenin, sınıfın ya da dersliğin bilgileri, gelemediği saatler, dersleri, sınırları, Yazdır, Gönder ve Sil; boş kimlikle `NewPerson.tsx`'in yeni öğretmen ya da sınıf formu |
 | `ui/common/AvailGrid.tsx` | bir varlığın boyanan kapalı saat ızgarası; kişi sayfası çizer |
 | `ui/print/PrintOne.tsx` | kişi sayfasının Yazdır'ı: tek kişinin sayfası, Yazdır ve gönder'in seçimlerine dokunmadan |
-| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor) |
+| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `AddPanel` (ekleme bloğunun başlığı ve tek cümlelik açıklaması), `ListTools` (listelerin üstündeki ara, sırala ve süz şeridi), `useRowOrder` (ortak elle sıralama kancası), `Paste` (yapıştırarak ekleme), `Summary` (Özet), `CapacityRows` (kapasite tablosu, Özet ve sorun listesi aynı çizimi kullanıyor) |
 | `ui/lessons/` | Dersler (Öğretmenler ve Sınıflar şeritlerinin `Dersler`'i): `index.tsx` ekran ve liste, `LessonForm` (ekleme bloğu ve yapıştırma), `LessonRow` (listenin bir satırı), `LessonPicker` (odaklı kipte sağdaki öğretmen ya da sınıf listesi) |
 | `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, kişi sayfası (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
 | `ui/program/Program.tsx` | Program: ızgarayı, havuzu ve sağ tık menülerini bağlar, sürüklemeyi başlatır; satırları ve havuzu `programView.ts` hesaplar, ne zaman hesaplanacakları burada |

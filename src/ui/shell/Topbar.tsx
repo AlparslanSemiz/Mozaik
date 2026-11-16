@@ -161,7 +161,7 @@ export default function Topbar({
             <span className="tab-label">{t(dest.label)}</span>
             {/* An unread release note. Presence only, no count — "something
               changed" is the whole message, the panel says what. Clears
-              the moment the folded notes in Ayarlar → Hakkında are opened
+              the moment the folded notes in Okul bilgileri → Hakkında are opened
               (`Changelog`'s onToggle), not on a bare tab click. */}
             {dest.id === 'school' && changelogUnseen && (
               <span className="tab-dot" aria-hidden="true" />

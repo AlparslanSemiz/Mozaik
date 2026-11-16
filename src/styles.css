@@ -844,13 +844,11 @@ textarea {
 /* Which section's colour this chrome is drawing. One custom property resolved
    from the attribute App writes, so nothing downstream has to know the tab
    names and no colour is ever written in the JSX. */
-[data-section="setup"] { --sec: var(--sec-setup); }
-[data-section="availability"] { --sec: var(--sec-availability); }
-[data-section="lessons"] { --sec: var(--sec-lessons); }
+[data-section="teachers"] { --sec: var(--sec-setup); }
+[data-section="classes"] { --sec: var(--sec-lessons); }
 [data-section="program"] { --sec: var(--sec-program); }
-[data-section="check"] { --sec: var(--sec-check); }
 [data-section="print"] { --sec: var(--sec-print); }
-[data-section="settings"] { --sec: var(--sec-settings); }
+[data-section="school"] { --sec: var(--sec-settings); }
 
 .topbar {
   display: flex;

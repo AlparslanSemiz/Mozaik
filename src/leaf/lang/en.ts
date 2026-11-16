@@ -410,8 +410,6 @@ const EN: Sozluk = {
   Saat: "Hour",
   Hareket: "Motion",
   Dil: "Language",
-  "Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir.":
-    "No teachers yet. Add them in **School → Teachers**; this shows that list.",
   "**Tam.** Tasarlandığı gibi.": "**Full.** As designed.",
   "**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz.":
     "**Off.** Nothing slides and nothing fades.",
@@ -1599,8 +1597,6 @@ const EN: Sozluk = {
     "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose the file you saved with “Save”.",
   "Bu, Mozaik'in kaydettiği bir dosya değil. 'Kaydet' ile kaydettiğiniz dosyayı seçin.":
     "This is not a file Mozaik saved. Choose the file you saved with “Save”.",
-  "Excel'deki bir listeyi almak için Okul'daki listelerde Excel'den yapıştır düğmesini kullanın.":
-    "To bring in a list from Excel, use the “Paste from Excel” button in the School lists.",
   "**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın.":
     "**Mozaik is also open in another window, and the plan was changed there.** The last changes in this window were not saved. Press **Reload**.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın.":
@@ -1830,10 +1826,6 @@ const EN: Sozluk = {
     "{n} {n:hour|hours} closed",
   "{n} saat fazla":
     "{n} {n:hour|hours} too many",
-  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
-    "For one teacher: **School → Teachers**.",
-  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
-    "For one class: **School → Classes**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:lesson is|lessons are} still on hours you closed; nothing was deleted, they are red in the weekly timetable.",
@@ -1885,6 +1877,16 @@ const EN: Sozluk = {
     "First enter the lessons, then make the timetable in the **Timetable** tab.",
   "Bu plandaki öteki programlarda da {n} saat kalkacak.":
     "{n} {n:hour|hours} will also go from the other timetables in this plan.",
+  "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.":
+    "Click the hours the room is closed. Classes using that room cannot have lessons then.",
+  "Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası.":
+    "For one teacher: their page, from the **Teachers** list.",
+  "Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası.":
+    "For one class: its page, from the **Classes** list.",
+  "Henüz öğretmen yok. **Öğretmenler** sekmesinden ekleyin; burası o listeyi gösterir.":
+    "No teachers yet. Add them in the **Teachers** tab; this shows that list.",
+  "Excel'deki bir listeyi almak için listelerin başındaki Excel'den yapıştır düğmesini kullanın.":
+    "To bring in a list from Excel, use the “Paste from Excel” button at the top of the lists.",
 };
 
 registerSozluk("en", EN);

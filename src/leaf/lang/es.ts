@@ -418,8 +418,6 @@ const ES: Sozluk = {
   Saat: "Hora",
   Hareket: "Movimiento",
   Dil: "Idioma",
-  "Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir.":
-    "Todavía no hay profesores. Añádalos en **Escuela → Profesores**; aquí se muestra esa lista.",
   "**Tam.** Tasarlandığı gibi.": "**Completo.** Tal como se diseñó.",
   "**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz.":
     "**Desactivado.** Nada se desliza y nada se atenúa.",
@@ -1616,8 +1614,6 @@ const ES: Sozluk = {
     "Al archivo le falta la lista de profesores, grupos, clases o aulas; puede que esté cortado o editado a mano. Elija el archivo que guardó con «Guardar».",
   "Bu, Mozaik'in kaydettiği bir dosya değil. 'Kaydet' ile kaydettiğiniz dosyayı seçin.":
     "Este no es un archivo guardado por Mozaik. Elija el archivo que guardó con «Guardar».",
-  "Excel'deki bir listeyi almak için Okul'daki listelerde Excel'den yapıştır düğmesini kullanın.":
-    "Para traer una lista de Excel, use el botón «Pegar desde Excel» en las listas de Escuela.",
   "**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın.":
     "**Mozaik también está abierto en otra ventana y el plan se cambió allí.** Los últimos cambios de esta ventana no se guardaron. Pulse **Recargar**.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın.":
@@ -1847,10 +1843,6 @@ const ES: Sozluk = {
     "{n} {n:hora cerrada|horas cerradas}",
   "{n} saat fazla":
     "{n} {n:hora|horas} de más",
-  "Bir öğretmene özel sayı: **Okul → Öğretmenler**.":
-    "Para un profesor: **Escuela → Profesores**.",
-  "Bir sınıfa özel sayı: **Okul → Sınıflar**.":
-    "Para un solo grupo: **Escuela → Grupos**.",
   // ------------------------------------------- the person page (K5)
   "Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.":
     "{n} {n:clase sigue|clases siguen} en horas que cerró; no se borró nada, están en rojo en el horario semanal.",
@@ -1902,6 +1894,16 @@ const ES: Sozluk = {
     "Introduzca primero las clases y haga el horario en la pestaña **Horario**.",
   "Bu plandaki öteki programlarda da {n} saat kalkacak.":
     "También se quitarán {n} {n:hora|horas} de los otros horarios de este plan.",
+  "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.":
+    "Pulse las horas en que el aula está cerrada. Las clases que usan esa aula no pueden dar clase entonces.",
+  "Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası.":
+    "Para un profesor: su página, desde la lista **Profesores**.",
+  "Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası.":
+    "Para un solo grupo: su página, desde la lista **Clases**.",
+  "Henüz öğretmen yok. **Öğretmenler** sekmesinden ekleyin; burası o listeyi gösterir.":
+    "Todavía no hay profesores. Añádalos en la pestaña **Profesores**; aquí se muestra esa lista.",
+  "Excel'deki bir listeyi almak için listelerin başındaki Excel'den yapıştır düğmesini kullanın.":
+    "Para traer una lista de Excel, use el botón «Pegar desde Excel» en la cabecera de las listas.",
 };
 
 registerSozluk("es", ES);

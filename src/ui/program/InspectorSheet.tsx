@@ -476,7 +476,11 @@ export function Inspector({
         >
           {target.kind === 'teacher'
             ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
-            : t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')}
+            : target.kind === 'class'
+              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
+              : t(
+                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+                )}
         </p>
         <AvailGrid
           key={target.id}

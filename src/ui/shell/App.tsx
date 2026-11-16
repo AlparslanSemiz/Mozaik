@@ -28,6 +28,8 @@ import {
 } from '../../platform/storage';
 import {
   lessonModeOf,
+  tabOf,
+  type Tab,
   useToolState,
   readPrintOptions,
   writePrintOptions,
@@ -143,20 +145,29 @@ export default function App() {
    * cross-fade, and the browser will do that without freezing the page. Same
    * reasoning that left `motion` (127 KB) on the shelf: pay for what you use.
    */
-  const goTab = setTab;
   // The status chip's problem list (K3): open, and on which lesson's row.
   const [problems, setProblems] = useState<{ lesson: Id | null } | null>(null);
+  // A tab button or Alt+1..5: going to a tab closes the list over it.
+  const goTab = useCallback(
+    (next: Tab) => {
+      setProblems(null);
+      setTab(next);
+    },
+    [setTab],
+  );
   // Where an empty screen's button or a Başlarken step sends the reader: the
   // tab, and inside it the view, the section or the problem list
   // (common/GoTo.tsx).
   const { setSection, setPeople, setLessonFocus } = ui;
   const goTo = useCallback(
     (place: Place) => {
+      // An old tab id still lands somewhere (`OLD_TAB`).
+      const tab = tabOf(place.tab);
       if (place.section !== undefined) setSection(place.section);
-      if (place.people !== undefined && (place.tab === 'teachers' || place.tab === 'classes'))
-        setPeople(place.tab, place.people);
+      if (place.people !== undefined && (tab === 'teachers' || tab === 'classes'))
+        setPeople(tab, place.people);
       if (place.focus !== undefined) setLessonFocus(place.focus);
-      setTab(place.tab);
+      setTab(tab);
       // Going anywhere else closes the list: its own buttons (an empty plan's
       // "Öğretmen ekle") lead out of it.
       setProblems(
