@@ -2191,6 +2191,18 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       katlanır, okul geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe
       (K3), başka dalda. 2. aşamadan sonra babanın bir oturumu izlenir.
 
+- [~] **SD9 · İkame ve hafta istisnası (Alp'in önceliği, 2026-11-16).** Yazıldı
+      (`ozellik/ikame`, `sade/asama-3a`'nın üstünde, birleşmedi; DECISIONS "İkame ve hafta
+      istisnası", WORKLOG): şema v18 `dated` (gelmeyen öğretmen ya da sınıf, tarih aralığıyla;
+      saat saat ikame ya da boş geçsin), kişi sayfasında `Gelmiyor…`, Program şeridinde tarih
+      çipi, tarih sayfası ve İkame listesinin Yazdır'ı, öğretmen sayfasında ikame sayısı,
+      `Bu haftanın değişikliklerini sil`. Birim (`pure/dated/dated.test.ts`, `fixtures.test.ts`
+      v18) ve E2E (`e2e/ikame.spec.ts`, axe dahil) yeşil. **Kalan:** (1) tatil günü (bir tarihin
+      bütün dersleri) ve bir dersi yalnız o hafta başka saate taşımak, bütçe yüzünden yok;
+      (2) ızgara o haftayı göstermiyor, değişiklik yalnız çipte ve tarih sayfasında; (3) İkame
+      listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle; (4) 3B birleşince çip yeni
+      Program şeridine taşınır; (5) brotli +2,5 kB, bütçe 2 kB idi (WORKLOG).
+
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.

@@ -77,6 +77,11 @@ Ayarlar yüzdeyi gösteriyor; tuzak 172), bekleyici kurulumun taze klasöründe,
 dosya yap" tek yazımlık, kurtarma ve silmeden-önce dosyaları budanıyor (aşağıdaki tarihli girdi).
 Gerçek Windows exe'de koşulmadı.
 
+**İkame ve hafta istisnası (2026-11-16, `ozellik/ikame`, `sade/asama-3a`'nın üstünde,
+birleşmedi; 3B'den sonra birleşir):** şema v18 `dated`, kişi sayfasında `Gelmiyor…`, Program
+şeridinde tarih çipi, tarih sayfası ve İkame listesi (TODO SD9, DECISIONS). Brotli 302 044 →
+304 530 B (+2 486; bütçe 2 kB'tı, eşiğe 1 470 B kaldı), ham 1 174 531 → 1 184 968 B.
+
 **Linux sürümü (2026-11-16, `platform/linux`, birleşmedi):** tek `Mozaik-linux-x86_64.AppImage`,
 kendini güncelliyor (`update_linux.rs`), CP-SAT içinde (OR-Tools AlmaLinux 8 arşivi), `surum.yml`'in
 `linux` işi Mac gibi hiçbir şeyi engellemiyor, `linux.yml` PR'da derleyip dört sistemde açıyor
@@ -102,6 +107,25 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 `npx vitest run src/docs.test.ts` her seferinde bellek yetmeyip çöktü (`main`'in kendi hâlinde de);
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
+
+## 2026-11-16 · İkame ve hafta istisnası (`ozellik/ikame`, TODO SD9)
+
+**Ne yapıldı.** Taban haftanın üstünde tarihli bir katman, şema v18 (`State.dated`: `absent`,
+`covers`). `pure/dated/` tarihin gün sütununu kayıtlı gün adından okur, gelmeyen öğretmenin o
+günkü saatlerini ve o saatte boş olanları sıralar (aynı branş, bu hafta en az ikame, o gün
+okulda); gelmeyen sınıfın saatleri ikame istemez ve öğretmenini boşaltır. `ui/dated/` tarih
+sayfası (tek ana düğme Yazdır, `usePrintNow` PrintOne'dan çıkarıldı) ve Program şeridindeki
+çip; kişi sayfasında `Gelmiyor…` ve ikame sayısı. OldCopies'in gün adı `dayName`'e taşındı.
+Örnek dosya reçetesine v18 basamağı; v1–v17 bayt bayt aynı.
+
+**Boyut.** `main`'li `sade/asama-3a` 302 044 B brotli, bu dal 304 530 B (+2 486), ham +10 437 B.
+Ölçülen parçalar: çevirilerin dört dili ~400 B, çip ve hafta adı ~340 B, tatil günü ~60 B
+(çıkarıldı). Bütçe 2 kB'tı; daha inmek için ilk adaylar `Son gün` (aralık) ve haftayı geri alma,
+ikisi de istenen işin parçası olduğu için kesilmedi.
+
+**Doğrulama.** `tsc` (uygulama ve araçlar), eslint, prettier, knip, depcruise, `npm run hizli`,
+`pure/dated` ve `fixtures` birim testleri, `e2e/ikame.spec.ts` (axe dahil) Chromium'da yeşil.
+Tıklama testi 1920 ve 1366'da örnek okulla (görüntüler `scratch/ikame/`).
 
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 

@@ -36,6 +36,35 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · İkame ve hafta istisnası: taban haftanın üstünde tarihli bir katman (`ozellik/ikame`, şema v18)
+
+**Karar (Alp'in önceliği "İkame ve hafta istisnası").** Taban hafta saf kalır: tarihli her
+değişiklik `State.dated`'da, iki listede durur. `absent` bir öğretmenin ya da sınıfın bir tarih
+aralığında gelmediğini, `covers` o tarihte bir sınıfın bir saatine kimin girdiğini (ya da
+`null`, "boş geçsin") söyler. Izgara, havuz, Kontrol, kâğıt ve çözücü onu okumaz; bir tarih
+geçince kayıt bir şey değiştirmez (kendiliğinden biter) ama silinmez, çünkü ikameler öğretmenin
+adalet sayısı. Ayrıntı [DATA.md](DATA.md)'de.
+
+- **Hafta istisnası = gelmeyen sınıf.** Gezi ya da sınav haftası bir sınıfın o günlerde
+  gelmemesi: dersleri ikame istemez, öğretmenleri o saatlerde boş sayılır ve ikame önerisine
+  girer. Ayrı bir "dersi taşı" ya da "tatil günü" kavramı yok (aşağıda).
+- **Öneri sırası:** o saatte ders vermeyen, başka bir saate ikame girmemiş, kendi saatlerinde
+  müsait ve o gün gelmeyen olmayan öğretmenler; önce aynı branş (birinci ya da ikinci), sonra bu
+  hafta en az ikameye girmiş, sonra o gün zaten okulda olan. Seçim babanındır; Mozaik kimseyi
+  kendiliğinden atamaz.
+- **Girişler:** kişi sayfasında `Gelmiyor…` (bugün, sayfadaki tarih değişince tek günlük yokluk
+  o güne taşınır) ve Program şeridinde tek bir tarih çipi (`Bugün kim yok?`, bu hafta değişiklik
+  varsa `Bu hafta: 18–22 Kasım, 3 değişiklik`). Tarih sayfasının tek ana düğmesi `Yazdır`
+  (İkame listesi). Yerleri yeni dosyalarda (`ui/dated/`), aşama 3B'nin sekmelerine ve şeridine
+  dokunmadan: çip Program şeridine tek satırla giriyor, 3B onu yeni şeride taşır.
+- **Şema v18, ve eski kopya.** Alan sürüm artırılmadan eklenseydi eski kopya dosyayı açar ve ilk
+  kayıtta alanı silerdi; artırıldığı için eski kopya "daha yeni bir sürüm" der ve dokunmaz.
+- **Bırakılan, bütçe yüzünden (brotli):** tatil günü (`off`, bir tarihin bütün dersleri) yazıldı
+  ve çıkarıldı; bir dersi yalnız o hafta başka saate taşımak hiç yazılmadı, çünkü ızgaranın
+  sürüklemesini tarihli katmana bağlamak 3B'nin dosyalarına girer. İkisi TODO'da.
+- **Gönderme:** İkame listesi bugün yalnız basılıyor (Yazdır'dan PDF de). WhatsApp ve e-posta
+  "gönder" işiyle (aşama 4).
+
 ### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
 
 - **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",
