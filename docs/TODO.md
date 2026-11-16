@@ -1314,7 +1314,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       listesinin bugünkü hâli, bir AST taramasıyla: görünür yaklaşık 24 yer, yalnız
       erişilebilir adda 8 yer ve elle yazılmış iki `'tr-TR'` (`Print.tsx:107`, `Data.tsx`).
       Görünür olanlar `App.tsx:835` (taslak eki), `Dialogs.tsx:196` ve `:214` (varsayılan
-      düğme adları), `ribbon/AvailabilityStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
+      düğme adları), `ribbon/PeopleStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
       `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
@@ -1757,7 +1757,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       `transferLesson().returned`'dan (`LessonEdit.tsx` 156), cümleleri de ayrı. Okundu,
       ölçülmedi.
 - [ ] **RK5 Müsaitlik boyamasında her yeni hücre tabloyu yeniden çiziyor olabilir.**
-      `Availability.tsx` 181 sürükleme sırasında her `pointerenter`'da `setPending`
+      `common/AvailGrid.tsx` (eskiden Müsaitlik sekmesinde) sürükleme sırasında her `pointerenter`'da `setPending`
       çağırıyor, tuzak 1'in kuralına aykırı görünüyor. Önce babanın verisinde ve iki
       motorda ölçülür (tuzak 105, 141). Okundu, ölçülmedi.
 - [ ] **RK6 `.main`'in sekme solması büyük ihtimalle koşmuyor, ve test bunu görmüyor.**
@@ -1918,6 +1918,13 @@ yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) ve 8 (adı
 `fix/veri-kaybi` girdi, sıradaki 4 (`platform/storage`), sonra 5 ve 6. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
+
+- [ ] **RK18 Ölü tercih: Müsaitlik'in saat gösterimi (2026-11-16, `sade/asama-3b`).** Müsaitlik
+      sekmesi kalkınca `ders-programi-musaitlik-saat` hiçbir şeyi değiştirmiyor: kişi sayfası
+      saatleri hep gösteriyor. `platform/prefs/availClock.ts`, `main.tsx`'teki uygulanışı,
+      `styles.css`'in `data-avail-clock` kuralı, `preferences.test.ts`'in satırı ve "Veriler
+      nerede"nin satırı birlikte kalkmalı; anahtar eski makinelerde kalır, okunmaz. Davranış
+      değişmediği için aşama 3B'de dokunulmadı.
 
 ### 8l · Test programı (2026-10-09)
 
@@ -2158,7 +2165,7 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       Çıktı'daki düğmeyle işaretlenir, Ctrl+P'yi görmez; (3) varsayılan hafta Salı–Pazar × 12
       bilerek kaldı (dershane, DATA "Varsayılanlar", `bell.test.ts`), yalnız Başlarken'in ilk
       adımı onu yazıyor; (4) boyut eşiği 1 230 000 → 1 260 000 B (sözlükler, ölçüm WORKLOG'da); brotli eşiğe 476 B kaldı;
-      (5) `hiz/tepki` zinciriyle birleşti (`Check.tsx`, `Availability.tsx`, `App.tsx` iki tarafın davranışıyla).
+      (5) `hiz/tepki` zinciriyle birleşti (o günkü Kontrol ve Müsaitlik ekranları, `App.tsx` iki tarafın davranışıyla).
 - [x] **SD6 · Okul'daki etiketsiz kutular.** Yapıldı (2026-11-15, `erisim/anlam`, §8e'nin
       `label` maddesi). Dersler'deki haftalık saat kutusu ve bütün sınır
       kutuları (`LimitBox`) artık adlı. Okul'un öğretmen ve sınıf satırlarındaki kutular
@@ -2171,10 +2178,12 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       listeler düz yazı, öğretmen ve sınıfın tek sayfası (bilgiler, saatleriyle gelemediği
       saatler, dersleri, sınırları), sayfadan Yazdır (iki tıklama) ve Gönder (e-posta), sınırlar
       tek yerde. Aşama 4'e not: sayfanın Gönder'ine WhatsApp ve PDF (`MailPanel.tsx`'teki TODO).
-      Sırada: **aşama 3** beş sekme (K1; Müsaitlik sekmesi kişi sayfasına katlanır, okul
-      geneli sınırlar Okul bilgileri'ne), Plan + Seçenek (K2), Kontrol çipe (K3),
-      Sığdır/Ferah/Rahat (K6) ile Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline
-      dön (K8, Dosya menüsünde yeri ayrıldı). 2. aşamadan sonra babanın bir oturumu izlenir.
+      **Aşama 3B** yazıldı (`sade/asama-3b`, aşama 2'nin üstünde, birleşmedi; WORKLOG): beş
+      görev sekmesi (K1; Müsaitlik kişi sayfasına, Dersler Öğretmenler ve Sınıflar'ın şeridine,
+      Derslikler, Branşlar ve Ayarlar Okul bilgileri'ne), ikinci diziliş bir plan (K2), Kontrol
+      çipin açtığı sorun listesi (K3). **Aşama 3A** (paralel dal): Sığdır/Ferah/Rahat (K6) ile
+      Geçici görünüm ve toplu sabitleme (K7) kalkar, Eski hâline dön (K8); 3B ile birleştirilecek.
+      Sonra babanın bir oturumu izlenir.
 
 ## §9. Ham notlar
 

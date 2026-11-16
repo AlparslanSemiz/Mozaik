@@ -36,6 +36,54 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Beş görev sekmesi, sorun listesi çipte, ikinci diziliş bir plan (Sadeleşme aşama 3B, K1–K3)
+
+**Değişen (K1).** Yedi yer yerine beş iş, bu sırayla ve Alt+1..5: **Program · Öğretmenler ·
+Sınıflar · Yazdır ve gönder · Okul bilgileri**. Eski sekmelerin içeriğinin gittiği yer LAYOUT
+"Sekmeler"de tablo olarak. Kısaca: Okul'un dört listesinden Öğretmenler ve Sınıflar kendi
+sekmesi, Derslikler ve Branşlar Okul bilgileri'nin bölümü; Dersler iki kapıdan, Öğretmenler ve
+Sınıflar şeritlerinin `Dersler` düğmesi (o kişinin ders formu ve listesi), genel liste ikisinin
+Daha fazla'sında (`Bütün dersler tek listede`), kişi sayfasında da `Ders gir`; Ayarlar'ın beş
+bölümü ve iki liste Okul bilgileri'nde tek şeritte (`Zil ve günler · Derslikler · Branşlar ·
+Kurallar · Görünüm`, Planlar ve yedek ile Hakkında Daha fazla'da). Başlarken Okul bilgileri'nin
+okul verisi bölümlerinin başında; boş plan oraya açılır. **Gerekçe.** Babanın "neyin nerede
+olduğunu anlayamıyorum"u: sekmeler bir işi değil bir veri türünü adlandırıyordu, ve bir öğretmenin
+işi dört sekmeye dağılıyordu.
+
+- **Müsaitlik sekmesi kalktı**, kişi sayfasına katlandı (aşama 2'den beri ızgara orada). Okul
+  geneli bir düzenleme yolu **bırakılmadı**: saatler kişi kişi girilir ve listeden sayfaya bir
+  tıklama; gerçek bir "herkesi birden düzenle" işi bulunmadı. Sekmenin iki kısayolu, `Bütün
+  haftayı aç` ve `Bütün haftayı kapat`, kişi sayfasına geldi. "Haftanın darlığı" ısı tablosu
+  kalktı: yalnız okunan bir özetti; takılmanın sebebini sorun listesi kişinin adıyla söylüyor ve
+  yük tabloları orada. Saatleri gösterme tercihi (`ders-programi-musaitlik-saat`) artık bir şey
+  değiştirmiyor (kişi sayfası saatleri hep gösteriyor); anahtar duruyor, temizliği TODO §8k.
+- **Sekme kimlikleri saklanmıyor**: açılış veriye göre seçiliyor (ders varsa Program, yoksa Okul
+  bilgileri). Taşınacak kayıtlı bir sekme yok; eski yedi kimliğin yeni yeri `toolState.ts`'teki
+  `OLD_TAB`'ta.
+
+**Değişen (K2).** Program → Daha fazla → `Bu programın kopyası` yeni bir **plan** açar (açık
+planın verisi ve haftası) ve üst çubuğun plan seçicisi onunla görünür. Seçenek menüsü (seçim,
+kopya, boş seçenek, yeniden adlandır, sil) ve şeritteki `Seçenek` okuması kalktı; ekranda yalnız
+"plan" var. Veri modeli değişmedi (`programs[]`). Birden çok seçenek taşıyan eski bir dosya
+açılır: her seçeneği üst çubuk seçicisinde planın adının altında bir satır ("Plan 1 · Seçenek
+2"), açık olanı Daha fazla'da silinir. **Bilerek kabul edilen.** Kopya ayrı bir plan olduğu için
+sonradan eklenen bir öğretmen öbürüne geçmez; iki dizilişi karşılaştırmak veri girildikten sonra
+yapılan bir iş.
+
+**Değişen (K3).** Kontrol sekmesi kalktı. Durum çipi sorun listesini açar (sağdan bir sayfa,
+`ProblemList.tsx`): hüküm, haftanın sayıları, kapalı saatte kalan dersler, kural ihlalleri,
+yerleşemeyen dersler, İpuçları, ve Daha fazla'da üç yük tablosu; satırların `Göster`'i listeyi
+kapatıp Program'da gösterir, `Müsaitlik'te aç` `Sayfasını aç` oldu. Havuzdaki dersin sağ tık
+menüsünün başında `Neden yerleşmedi?` listeyi o dersin satırında açar (sebep ve kimin sayfası),
+ızgaranın satırındaki "Ayrıntı: Kontrol sekmesi." yazısı `Ayrıntı` düğmesi oldu.
+
+**Ters çevirdikleri.** LAYOUT "Sekmeler" (yedi sekme, "Okul yalnız listeleri, Ayarlar yalnız
+ayarları tutar"), "Durum çipi … Kontrol'e götürür", LAYOUT "Kontrol" ve "Müsaitlik" bölümleri,
+Program şeridinin `Seçenek` grubu; DECISIONS 2026-08-27 "Dersler kendi sekmesi", 2026-08-28 "İki
+sekme ve bir bölüm yeniden adlandırıldı" ve "Branşlar Okul'a, Ayarlar beş bölüm" (üçü silindi,
+bu dosyanın kuralı; Branşlar'ın gerekçesi, öğretmen listeden branş seçer, bölüm sırasında
+yaşıyor).
+
 ### 2026-11-16 · Kişi sayfası: bir kişi tek yerde (Sadeleşme aşama 2, K5)
 
 **Değişen.** Okul'un öğretmen ve sınıf listeleri düz yazı; ada tıklayınca sağda kişinin sayfası
@@ -79,13 +127,13 @@ bir ana düğme, az kullanılan her şey her ekranda aynı köşedeki tek bir "D
   bugünkü yedi sekmenin (Okul, Müsaitlik, Dersler, Program, Kontrol, Çıktı, Ayarlar) yerine.
   Ters çevirdiği: LAYOUT "Sekmeler" (yedi sekme, "Okul yalnız listeleri, Ayarlar yalnız ayarları
   tutar"), DECISIONS 2026-08-27 "Dersler kendi sekmesi", 2026-08-28 "İki sekme ve bir bölüm yeniden
-  adlandırıldı". Aşama 3.
+  adlandırıldı". Aşama 3B'de yapıldı (yukarıdaki kayıt).
 - **K2 · Plan ve Seçenek tek kavram:** gündelik ekranda yalnız "plan"; ikinci diziliş "Bu programın
   kopyası" ile açılır ve ancak o zaman görünür. Ters çevirdiği: TODO SD3'ün terim haritasındaki
-  ayrı **seçenek** kavramı, LAYOUT "Program" şeridinin `Seçenek` grubu. Aşama 3.
+  ayrı **seçenek** kavramı, LAYOUT "Program" şeridinin `Seçenek` grubu. Aşama 3B'de yapıldı.
 - **K3 · Kontrol sekmesi kalkar:** sorunlar durum çipinin açtığı listede, yerleşmeyen derse
   tıklayınca neden ve çözüm. Ters çevirdiği: LAYOUT "Kontrol" ve "Durum çipi … Kontrol'e götürür".
-  Aşama 3.
+  Aşama 3B'de yapıldı.
 - **K4a · Yeni adlar:** "Otomatik diz (N kart)" → "Programı yap", "Baştan diz" → "Yeniden yap",
   "Danışman" → "İpuçları", kural seviyesi "Engel / Uyarı" → "Kesin / Tercih", "N saat havuzda" →
   "N saat yerleşmedi". **K4b · ekranda "kart" yerine "ders"**: iç adlar, veri ve dosya adları
@@ -2200,27 +2248,6 @@ seçiliyor, değilse İngilizce (commit `a1f3c1a`). **Gerekçe.** Beş sözlük
 tamamlanınca yedek, en çok kişinin okuyabildiği dil oldu. E2E süiti `kapan.ts`'te
 Türkçeye sabitli.
 
-### 2026-08-28 · İki sekme ve bir bölüm yeniden adlandırıldı
-
-**Değişen.** `Kurulum` sekmesi `Okul`, `Yazdır` sekmesi `Çıktı`, Ayarlar'ın
-`Okul ve zil` bölümü `Zil ve günler` oldu. **Gerekçe.** İlk sekme okulun dört listesini
-tutuyor, bir kurulum değil. `Yazdır` adlar arasındaki tek fiildi. Üçüncüsü zorunluydu: bir
-düğme adı üç piksel ötedeki sekmenin adını taşıyamıyor (tuzak 49 ve 74).
-
-### 2026-08-28 · Branşlar Okul'a, Ayarlar beş bölüm
-
-**Değişen.** Branşlar Ayarlar'dan Okul'un dört listesinden biri oldu. Ayarlar beş
-bölüme indi: `Zil ve günler · Kurallar · Görünüm · Planlar ve yedek · Hakkında`.
-Okul listelerinin önündeki sıra numaraları kalktı. Yeni bir proje boş branş
-listesiyle doğuyor, gömülü branşlar bir teklif panelinde duruyor. "Kurulum durumu"
-paneli silindi. **Gerekçe.** Branş eklemek, yarısı yazılmış bir öğretmeni bırakıp
-bir sekme öteye gitmek demekti. Liste sırası bağımlılık zinciri: sınıf bir dersliği
-gösterir, öğretmen listeden branş seçer. Sıra numaraları kimsenin saymadığı bir
-sırayı sayıyordu, çünkü her liste her an açık (kullanıcı isteği). Tohumlanmış
-branş listesinde teklif paneli her yeni projede boştu, yani işe yaradığı tek ekranda
-işe yaramıyordu. `Program hakkında` adı alınmadı, çünkü `Program` sorgusuna da cevap
-verirdi.
-
 ### 2026-08-28 · Denendi: Kontrol şeridinde süzgeç
 
 **Denenen.** 2026-08-27'de Kontrol'e şerit gelince şerit raporu süzüyordu:
@@ -2270,16 +2297,10 @@ ağaç istenen vakaların yarısını çözer ve branş listesine ikinci bir ver
 sokardı. Branşın adı değil bayrak saklanıyor, çünkü ad öğretmenin branşı
 düzeltilince sessizce saparak ikinci bir gerçek olurdu.
 
-### 2026-08-27 · Dersler kendi sekmesi
+### 2026-08-27 · Şerit her sekmede ve bir standardı var
 
-**Değişen.** Dersler Kurulum'un dördüncü adımından çıkıp yedinci sekme oldu.
-**Gerekçe.** Kullanıcı: *"hocaları onu bunu ayarlıyorsun ama ders en önemli kısım"*.
-En çok kullanılan ekrana bir sihirbazın dördüncü adımından geçilerek varılmıyor.
-
-### 2026-08-27 · Şerit yedi sekmede ve bir standardı var
-
-**Değişen.** Araç şeridi yedi sekmenin yedisinde çiziliyor ve beş maddelik bir
-şekli var ([LAYOUT.md](LAYOUT.md)). **Gerekçe.** Şekli olmayan bir şeyi hiçbir test
+**Değişen.** Araç şeridi her sekmede çiziliyor ve beş maddelik bir şekli var
+([LAYOUT.md](LAYOUT.md)). **Gerekçe.** Şekli olmayan bir şeyi hiçbir test
 koruyamaz. Kontrol okunan bir rapor ve ona yapılacak bir şey az, ama şeritsiz bir Kontrol
 ekranı zıplatır: şeridin yüksekliği sekmeyle gelip gittiği için
 Kontrol'e her girişte altındaki her şey 45 px zıplıyordu.
