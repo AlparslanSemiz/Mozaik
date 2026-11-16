@@ -85,6 +85,7 @@ function world(): State {
         subject: 'Matematik',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
@@ -96,6 +97,7 @@ function world(): State {
         subject: 'Fizik',
         subject2: '',
         email: '',
+        phone: '',
         gender: '',
         color: 1,
         limits: { ...NO_TEACHER_LIMITS },
@@ -333,7 +335,10 @@ describe('cümle · basılan sayfanın iskeleti', () => {
     expect(sheet, 'Çıktı ekranında .print-sheet yok').not.toBeNull();
 
     expect(skeleton(sheet!).join('\n')).toMatchInlineSnapshot(`
-      "div.print-page
+      "div.p-head
+        span
+        span
+      div.print-page
         h2
           span.p-title-main
             span.p-dot

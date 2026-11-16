@@ -142,6 +142,32 @@ yeni yolu söylüyor; tarihli kayıtlar olduğu gibi.
 **Koşulan.** `npx vitest run src/linuxKur.test.ts` 13/13 (shellcheck dahil), `npm run hizli`
 1746/1746.
 
+## 2026-11-16 · Öğretmene gönder: kâğıdın üst satırı, PDF ve WhatsApp (`ozellik/gonder`, B3.4)
+
+`sade/asama-3a`'nın üstünde, 3B'den sonra birleşir (Çıktı sekmesi orada "Yazdır ve gönder"
+oluyor). Kararlar DECISIONS 2026-11-16'da.
+
+- **Kâğıt.** Her kâğıdın üstünde plan, tarih ve `Sayfa i / N` (`.p-head`, akışın dışında);
+  sınıf sayfasında kodların açıklaması; yazı merdiveni `max(7pt, …)`; yazdırırken sayfanın
+  adı dosyanın adı (`Mozaik – 510 – 2026-11-16`); çıktı tarihi öntanımlı açık; Yazdır'ın
+  altında "Hedef'i PDF olarak kaydet yapın". **Ölçüldü:** "Arka plan grafikleri" kapalıyken
+  renk basılıyor (tuzak 211); 1/2/4 × üç boyutun dokuzunda kâğıt taşmıyor ve en küçük yazı
+  9,33 px (7 pt); A4 yatay `@page` ile zorunlu, dikey Chromium'un penceresinde seçilemiyor.
+- **Şema v19** `Teacher.phone` (v18 İkame'nin, bu dal onun üstünde); **PDF** elle (`pdf.ts`, Helvetica, Latin-5); **WhatsApp** tek
+  tıklama (PDF İndirilenler'e, sonra `wa.me`), exe'de `mail.rs`'te `whatsapp_ac` (yalnız
+  `https://wa.me/<rakam>…`, `cargo test mail` Mac'te 4/4; Windows modülü derlenmedi).
+- **Boyut (bütçe aşıldı).** 3B ve İkame'nin üstüne (`ozellik/ikame` f7234d1): brotli 301,91 →
+  304,68 kB (+2,77; eşik 306, kalan 1,32), ham 1 168,5 → 1 178,0 kB (+9,6). PDF yazıcısı bunun
+  +1,3 kB brotli'si (onsuz derleme, düğüm brotli'siyle ölçüldü). Bütçe 1,5 kB'tı. Seçenekler:
+  (a) böyle birleşir, sonraki iş kalan 1,3 kB'a sığar ya da eşik açılış ölçülerek yükselir;
+  (b) PDF yazıcısı çıkar, PDF yalnız yazdırma penceresinden (dosya adı doğru), WhatsApp yalnız
+  sohbeti açar; (c) sözlüklerde yer açılır. Öneri (a).
+- **Doğrulanmadı:** WebView2'de indirmenin İndirilenler'e gittiği (Linux exe testinde ölçülü,
+  tuzak 132) ve `whatsapp_ac`'ın varsayılan tarayıcıyı açtığı; PDF'in telefonda WhatsApp
+  önizlemesinde Türkçe harflerle okunduğu (Mac'in Önizleme'si ve `sips` doğru çiziyor).
+- **Birleşme sırası:** 3B (`origin/sade/asama-3b`) → İkame (`ozellik/ikame`, şema v18) → bu dal
+  (şema v19); ikisi de bu dalın içinde. v1–v18 örnek dosyaları İkame'ninkiyle bayt bayt aynı.
+
 ## 2026-11-16 · İkame ve hafta istisnası (`ozellik/ikame`, TODO SD9)
 
 **Ne yapıldı.** Taban haftanın üstünde tarihli bir katman, şema v18 (`State.dated`: `absent`,

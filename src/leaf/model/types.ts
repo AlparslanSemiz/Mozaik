@@ -59,6 +59,12 @@ export interface Teacher {
    * mail program opens.
    */
   email: string;
+  /**
+   * The teacher's phone, for WhatsApp (schema v19), or '' for none. Personal
+   * data, carried exactly as `email` is; it only fills a `wa.me` link the
+   * user clicks (`whatsappUrl`).
+   */
+  phone: string;
 }
 
 export interface TeacherLimits {
@@ -387,5 +393,6 @@ export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
  * v18: State.dated — absences and covers on given dates, over the
  *      base week. A file below it has none. An older copy refuses a v18 file
  *      as "newer" rather than opening it and dropping the field on save.
+ * v19: Teacher.phone — the number WhatsApp opens. A file below it has none.
  */
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 19;

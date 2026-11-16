@@ -11,3 +11,4 @@ export * from './blocks';
 export * from './subjects';
 export * from './palette';
 export * from './email';
+export * from './phone';
