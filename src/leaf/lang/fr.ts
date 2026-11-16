@@ -213,7 +213,6 @@ const FR: Sozluk = {
   "Havuza kaldır": "Renvoyer au bac",
   sabitlenmiş: "épinglé",
   "Dersi düzenle": "Modifier le cours",
-  "Dersi buraya sabitle": "Épingler le cours ici",
   "Sabitlemeyi kaldır": "Détacher",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "Ce cours est épinglé. Détachez-le d’abord.",
@@ -1529,7 +1528,6 @@ const FR: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} est retourné dans le bac.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} pris. Choisissez la cellule cible avec les flèches ; Entrée dépose, Échap annule.",
   "Taşımadan vazgeçildi.": "Déplacement annulé.",
-  "{ders} yerleşti: {yer}.": "{ders} placé : {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:heure ouverte|heures ouvertes}, {yuk} {yuk:heure|heures} de cours prévues",
   "Izgaraya gir, bir daha basınca çık": "Entrer dans la grille ; appuyer encore pour en sortir",
   "Hücreden hücreye git": "Aller de cellule en cellule",
@@ -1822,6 +1820,13 @@ const FR: Sozluk = {
   "Kaydırınca gizlensin": "Masquer au défilement",
   "Kural aşımları": "Règles enfreintes",
   "Yeni sürüm notu var": "Il y a une nouvelle note de version",
+  "Sabitle": "Épingler",
+  "{ders} yerleşti ve sabitlendi.": "{ders} placé et épinglé.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} placé et épinglé : {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay} ; épinglés à leur place.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placé et épinglé ; {olay}.",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Rend le cours de nouveau déplaçable : Placer le reste ou Refaire peut le déplacer.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Garde le cours en place : Placer le reste et Refaire n’y touchent pas.",
 };
 
 registerSozluk("fr", FR);

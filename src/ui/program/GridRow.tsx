@@ -256,14 +256,16 @@ export const Row = memo(function Row({
               ]
                 .filter((part) => part !== '')
                 .join(', ')}
+              // The clash first: every hand placement is pinned now (A1), and a
+              // pinned card on a closed hour must still say what is wrong.
               title={
-                cell.pinned
-                  ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
-                  : cell.conflict === null
-                    ? t('Sürükleyerek taşıyın · sağ tık: seçenekler')
-                    : t('{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın', {
-                        sorun: cell.conflict,
-                      })
+                cell.conflict !== null
+                  ? t('{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın', {
+                      sorun: cell.conflict,
+                    })
+                  : cell.pinned
+                    ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
+                    : t('Sürükleyerek taşıyın · sağ tık: seçenekler')
               }
             >
               <span className="card-top">
@@ -322,9 +324,7 @@ export const Row = memo(function Row({
                       alt: cell.bottom,
                     })
               }
-              title={
-                cell.pinned ? t('Sabitlenmiş. Kaldırmak için tıklayın') : t('Dersi buraya sabitle')
-              }
+              title={cell.pinned ? t('Sabitlenmiş. Kaldırmak için tıklayın') : t('Sabitle')}
             >
               {/* The icon is the button's own `::before` (styles.css): an
                   <svg> with two <path>s was three more boxes on each of 199

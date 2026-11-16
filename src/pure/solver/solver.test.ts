@@ -5,7 +5,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place, setBlockPinned } from '../constraints';
+import { buildIndex, placedBlocks, placementKey, place, setBlockPinned } from '../constraints';
+import { activePinned } from '../grid';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../entities';
 import { parseState } from '../io/parseState';
 import { findViolations } from '../constraints/rules';
@@ -720,6 +721,28 @@ describe('iyileştirme — gerçek haftalar', () => {
     expect(relaid.relaid ?? 0).toBeGreaterThan(0);
     expect(cellsChanged(week, relaid.state)).toBeLessThan(total / 10);
     expect(cellsChanged(week, relaid.state) * 5).toBeLessThan(cellsChanged(week, fresh.state));
+  }, 60_000);
+
+  it('Kalanı diz yeniden dizerken sabitlenen (elle konan) blokları kesin yerinde bırakıyor', () => {
+    // A1 (2026-11-16): a hand placement is pinned, and the run that lays the
+    // week out again around an edited lesson may move anything BUT a pin.
+    const week = solve(emptied(sampleState()), { keepPlaced: false }).state;
+    let pinned = week;
+    week.lessons.forEach((lesson, i) => {
+      if (lesson.id === 'd1' || i % 3 !== 0) return;
+      const block = placedBlocks(pinned, lesson)[0];
+      if (block !== undefined)
+        pinned = setBlockPinned(pinned, lesson.classId, block.day, block.hour, true);
+    });
+    const keys = Object.keys(activePinned(pinned));
+    expect(keys.length).toBeGreaterThan(20);
+    const edited = updateLesson(pinned, 'd1', { blocks: [2] });
+    const relaid = solve(edited, { keepPlaced: true, relay: true });
+    expect(hardBreaches(relaid.state)).toEqual([]);
+    const before = activeProgram(pinned).placements;
+    const after = activeProgram(relaid.state).placements;
+    for (const key of keys) expect(after[key]).toBe(before[key]);
+    expect(Object.keys(activePinned(relaid.state)).sort()).toEqual(keys.sort());
   }, 60_000);
 
   it('yeniden dizmek yetmeyince katı koşunun cevabı kalıyor', () => {

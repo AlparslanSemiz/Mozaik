@@ -212,7 +212,6 @@ const EN: Sozluk = {
   "Havuza kaldır": "Send to tray",
   sabitlenmiş: "pinned",
   "Dersi düzenle": "Edit lesson",
-  "Dersi buraya sabitle": "Pin lesson here",
   "Sabitlemeyi kaldır": "Unpin",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "This lesson is pinned. Unpin it first.",
@@ -1510,7 +1509,6 @@ const EN: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} went back to the tray.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} picked up. Choose the target cell with the arrow keys; Enter drops it, Esc cancels.",
   "Taşımadan vazgeçildi.": "Move cancelled.",
-  "{ders} yerleşti: {yer}.": "{ders} placed: {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hour|hours} open, {yuk} {yuk:hour|hours} of lessons loaded",
   "Izgaraya gir, bir daha basınca çık": "Enter the grid; press again to leave it",
   "Hücreden hücreye git": "Move from cell to cell",
@@ -1803,6 +1801,13 @@ const EN: Sozluk = {
   "Kaydırınca gizlensin": "Hide on scroll",
   "Kural aşımları": "Rule breaches",
   "Yeni sürüm notu var": "There is a new release note",
+  "Sabitle": "Pin",
+  "{ders} yerleşti ve sabitlendi.": "{ders} placed and pinned.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} placed and pinned: {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay}; pinned where they are.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placed and pinned; {olay}.",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Lets the lesson move again: Place the rest or Make it again may move it.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Keeps the lesson where it is: Place the rest and Make it again leave it alone.",
 };
 
 registerSozluk("en", EN);

@@ -214,7 +214,6 @@ const DE: Sozluk = {
   "Havuza kaldır": "Ins Ablagefach",
   sabitlenmiş: "angeheftet",
   "Dersi düzenle": "Stunde bearbeiten",
-  "Dersi buraya sabitle": "Stunde hier anheften",
   "Sabitlemeyi kaldır": "Anheftung lösen",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "Diese Stunde ist angeheftet. Lösen Sie zuerst die Anheftung.",
@@ -1523,7 +1522,6 @@ const DE: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} ist zurück in der Ablage.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} aufgenommen. Zielzelle mit den Pfeiltasten wählen; Enter legt ab, Esc bricht ab.",
   "Taşımadan vazgeçildi.": "Verschieben abgebrochen.",
-  "{ders} yerleşti: {yer}.": "{ders} gesetzt: {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:Stunde|Stunden} offen, {yuk} {yuk:Stunde|Stunden} Unterricht geplant",
   "Izgaraya gir, bir daha basınca çık": "In das Raster wechseln, erneut drücken zum Verlassen",
   "Hücreden hücreye git": "Von Zelle zu Zelle gehen",
@@ -1816,6 +1814,13 @@ const DE: Sozluk = {
   "Kaydırınca gizlensin": "Beim Scrollen ausblenden",
   "Kural aşımları": "Regelverstöße",
   "Yeni sürüm notu var": "Es gibt eine neue Versionsnotiz",
+  "Sabitle": "Anheften",
+  "{ders} yerleşti ve sabitlendi.": "{ders} gesetzt und angeheftet.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} gesetzt und angeheftet: {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay}; an ihren Plätzen angeheftet.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} gesetzt und angeheftet; {olay}.",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Macht die Stunde wieder beweglich: Rest legen oder Neu erstellen kann sie verschieben.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Hält die Stunde an ihrem Platz: Rest legen und Neu erstellen lassen sie in Ruhe.",
 };
 
 registerSozluk("de", DE);

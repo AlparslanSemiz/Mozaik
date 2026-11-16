@@ -213,7 +213,6 @@ const ES: Sozluk = {
   "Havuza kaldır": "Enviar a la bandeja",
   sabitlenmiş: "fijada",
   "Dersi düzenle": "Editar la clase",
-  "Dersi buraya sabitle": "Fijar la clase aquí",
   "Sabitlemeyi kaldır": "Soltar",
   "Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.":
     "Esta clase está fijada. Suéltela primero.",
@@ -1524,7 +1523,6 @@ const ES: Sozluk = {
   "{ders} havuza kaldırıldı.": "{ders} volvió a la bandeja.",
   "{ders} alındı. Hedef hücreyi oklarla seçin, Enter bırakır, Esc vazgeçer.": "{ders} tomada. Elija la celda de destino con las flechas; Intro la suelta, Esc cancela.",
   "Taşımadan vazgeçildi.": "Movimiento cancelado.",
-  "{ders} yerleşti: {yer}.": "{ders} colocada: {yer}.",
   "{acik} saat açık, {yuk} saat ders yüklenmiş": "{acik} {acik:hora abierta|horas abiertas}, {yuk} {yuk:hora|horas} de clase cargadas",
   "Izgaraya gir, bir daha basınca çık": "Entrar en la cuadrícula; pulse otra vez para salir",
   "Hücreden hücreye git": "Ir de celda en celda",
@@ -1817,6 +1815,13 @@ const ES: Sozluk = {
   "Kaydırınca gizlensin": "Ocultar al desplazar",
   "Kural aşımları": "Reglas incumplidas",
   "Yeni sürüm notu var": "Hay una nota de versión nueva",
+  "Sabitle": "Fijar",
+  "{ders} yerleşti ve sabitlendi.": "{ders} colocada y fijada.",
+  "{ders} yerleşti ve sabitlendi: {yer}.": "{ders} colocada y fijada: {yer}.",
+  "{olay}, yerlerinde sabitlendi.": "{olay}; fijadas donde están.",
+  "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} colocada y fijada; {olay}.",
+  "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Permite mover la clase otra vez: Colocar el resto o Rehacer pueden moverla.",
+  "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Mantiene la clase donde está: Colocar el resto y Rehacer no la tocan.",
 };
 
 registerSozluk("es", ES);

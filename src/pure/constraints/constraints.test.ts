@@ -1305,6 +1305,50 @@ describe('yerleşmiş blokların atomik takası', () => {
     expect(activeProgram(result.state).placements[placementKey('s433', 0, 1)]).toBeUndefined();
   });
 
+  // A1 (2026-11-16): what a hand moves stays where it was put.
+  it('takasla yer değiştiren iki blok da yeni yerinde sabitlenir', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    const result = swapAt(d, ref('x1', 's510', 0, 0, 1), 0, 1);
+    const pinned = activeProgram(result.state).pinned;
+    expect(Object.keys(pinned).sort()).toEqual([
+      placementKey('s510', 0, 1),
+      placementKey('s511', 0, 0),
+    ]);
+  });
+
+  it('bırakılan blok yerinde sabitlenir, komşusu sabitlenmez', () => {
+    // x1 at 0|0 is the neighbour of the same class and lesson: reading the drop's
+    // cells back through blockAt would take it for one longer block.
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x1', 1, 0, 1);
+    const moved = applyDrop(d, {
+      lessonId: 'x1',
+      size: 1,
+      source: ref('x1', 's510', 1, 0, 1),
+      day: 0,
+      hour: 1,
+      action: { kind: 'place' },
+    });
+    const pinned = Object.keys(activeProgram(moved).pinned);
+    expect(pinned).toEqual([placementKey('s510', 0, 1)]);
+  });
+
+  it('havuzdan bırakılan blok da sabitlenir', () => {
+    const d = build();
+    const verdict = dropMap(d, buildIndex(d), 'x1', 1, null).get('0|2')!;
+    expect(verdict.blocked).toBeNull();
+    const dropped = applyDrop(d, {
+      lessonId: 'x1',
+      size: 1,
+      source: null,
+      day: 0,
+      hour: 2,
+      action: verdict.action,
+    });
+    expect(Object.keys(activeProgram(dropped).pinned)).toEqual([placementKey('s510', 0, 2)]);
+  });
+
   it('sabit hedefi değiştirmez', () => {
     let d = place(build(), 'x1', 0, 0, 1);
     d = place(d, 'x2', 0, 1, 1);

@@ -67,7 +67,7 @@ export default function PoolMenu({ poolMenuLesson, container, editLesson, inspec
         <ContextMenu.Separator className="menu-sep" />
         <ContextMenu.Item className="menu-item" disabled>
           <Pin size={15} aria-hidden="true" />
-          {t('Dersi buraya sabitle')}
+          {t('Sabitle')}
         </ContextMenu.Item>
       </ContextMenu.Content>
     </ContextMenu.Portal>

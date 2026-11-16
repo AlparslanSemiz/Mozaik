@@ -145,7 +145,14 @@ const STEP = 14;
  */
 const REASON_GAP = 100;
 
-export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
+/** How long a refused drop's reason stays on the bar after the hand let go (ms). */
+const REFUSAL_STAYS = 5500;
+
+export function useDrag(
+  drop: (data: DragData, day: number, hour: number) => void,
+  /** The pointer let go on a cell that refuses: why. The keyboard says the same through `KeyMove.onRefuse`. */
+  onRefuse?: (why: string) => void,
+) {
   const data = useRef<DragData | null>(null);
   const ghost = useRef<HTMLDivElement | null>(null);
   const highlighted = useRef<HTMLElement[]>([]);
@@ -170,6 +177,12 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
    * one answer, so letting the class through early would leave the bar green
    * while it still reads a red sentence.
    */
+  /** A refused drop's reason, kept on the bar for a few seconds (`finish`). */
+  const refusal = useRef<{
+    why: string | null;
+    timer: ReturnType<typeof setTimeout> | null;
+    settle: (() => void) | null;
+  }>({ why: null, timer: null, settle: null });
   const barPace = useRef<{
     last: number;
     timer: ReturnType<typeof setTimeout> | null;
@@ -212,10 +225,33 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     if (barPace.current.timer !== null) clearTimeout(barPace.current.timer);
     barPace.current = { last: 0, timer: null, pending: null };
     if (savedBar.current !== null) {
-      savedBar.current.element.className = savedBar.current.className;
-      const text = savedBar.current.element.querySelector<HTMLElement>(':scope > span');
-      if (text !== null) text.textContent = savedBar.current.text;
+      const saved = savedBar.current;
       savedBar.current = null;
+      const text = saved.element.querySelector<HTMLElement>(':scope > span');
+      const restore = () => {
+        saved.element.className = saved.className;
+        if (text !== null) text.textContent = saved.text;
+      };
+      const why = refusal.current.why;
+      refusal.current.why = null;
+      if (why === null || text === null) {
+        restore();
+      } else {
+        // A refused drop keeps its reason on the bar: the sentence was red
+        // under the hand the whole time and vanished the moment it let go.
+        // Put back only if nothing else wrote the bar meanwhile (a run, a
+        // result): React owns the text and has already said what it says.
+        saved.element.className = 'reason-bar bad';
+        text.textContent = why;
+        const settle = () => {
+          if (refusal.current.timer !== null) clearTimeout(refusal.current.timer);
+          refusal.current.timer = null;
+          refusal.current.settle = null;
+          if (text.textContent === why) restore();
+        };
+        refusal.current.settle = settle;
+        refusal.current.timer = setTimeout(settle, REFUSAL_STAYS);
+      }
     }
   }, [clearHighlight, clearPreview]);
 
@@ -272,6 +308,9 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
   // Every answer is imperative. Red/yellow targets used to call setState
   // here and redraw Program while the pointer crossed the row.
   function holdBar(first: string) {
+    // The last refusal's reason is still on the bar: put the real text back
+    // first, or it would be saved as the text to return to.
+    refusal.current.settle?.();
     const bar = document.querySelector<HTMLElement>('.reason-bar');
     const barText = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
     if (bar !== null && barText !== null) {
@@ -594,13 +633,18 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
         raw === null || d === null
           ? null
           : { day: raw.day, hour: clampToDay(raw.hour, d.blockSize, d.hourCount) };
-      // A warning does not stop the drop; only `blocked` does.
-      if (
-        d !== null &&
-        target !== null &&
-        d.map.get(cellKey(target.day, target.hour))?.blocked === null
-      ) {
-        drop(d, target.day, target.hour);
+      // A warning does not stop the drop; only `blocked` does. A refusal is
+      // said, as the keyboard says it (`onRefuse`), and stays on the bar.
+      const verdict =
+        d !== null && target !== null ? d.map.get(cellKey(target.day, target.hour)) : undefined;
+      if (d !== null && target !== null) {
+        if (verdict?.blocked === null) {
+          drop(d, target.day, target.hour);
+        } else {
+          const why = verdict?.blocked ?? t('Bu hücreye bırakılamaz');
+          refusal.current.why = why;
+          onRefuse?.(why);
+        }
       }
       finish();
     };

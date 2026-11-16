@@ -43,6 +43,30 @@ export default function GridMenu({
       <ContextMenu.Content className="menu" collisionPadding={8}>
         {menuAt !== null && (
           <>
+            {/* THE FIRST ITEM since 2026-11-16: a hand placement pins itself
+                now, and the one thing a hand wants next to a placed lesson
+                is to lift that pin to move it again, or to pin one the run
+                put there. The title says what the pin does, in the words
+                the strip's button uses. */}
+            <ContextMenu.Item
+              className="menu-item"
+              title={
+                menuPinned
+                  ? t(
+                      'Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.',
+                    )
+                  : t('Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.')
+              }
+              onSelect={togglePin}
+            >
+              {menuPinned ? (
+                <PinOff size={15} aria-hidden="true" />
+              ) : (
+                <Pin size={15} aria-hidden="true" />
+              )}
+              {menuPinned ? t('Sabitlemeyi kaldır') : t('Sabitle')}
+            </ContextMenu.Item>
+            <ContextMenu.Separator className="menu-sep" />
             {/* The keyboard's way to move a block (KS8): the same pick-up a
                 drag makes, walked with the arrows. Started on the next task,
                 once the menu has closed; Radix may still be handing focus back, so
@@ -97,21 +121,6 @@ export default function GridMenu({
             >
               {KIND_ICON.class}
               {t('Sınıfı düzenle')}
-            </ContextMenu.Item>
-            <ContextMenu.Separator className="menu-sep" />
-            {/* ONE HOUR, back at the top level. It spent a round inside
-                the scope submenu, where the commonest lock in the
-                program was two clicks and a hover away from the hand
-                that wanted it. The card now carries a pin of its own,
-                so this is the same question asked the long way — and
-                the long way should still put it first. */}
-            <ContextMenu.Item className="menu-item" onSelect={togglePin}>
-              {menuPinned ? (
-                <PinOff size={15} aria-hidden="true" />
-              ) : (
-                <Pin size={15} aria-hidden="true" />
-              )}
-              {menuPinned ? t('Sabitlemeyi kaldır') : t('Dersi buraya sabitle')}
             </ContextMenu.Item>
           </>
         )}
