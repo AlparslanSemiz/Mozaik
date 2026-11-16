@@ -1,0 +1,19 @@
+Mozaik is licensed under the PolyForm Noncommercial License 1.0.0; see LICENSE.
+Releases up to and including v2.2.0 remain available under the MIT License.
+
+## Third-party
+
+### IBM Plex Sans
+
+`scripts/font-source/IBMPlexSansVar-Roman.woff2`, and the subset built from it
+at `src/fonts/`, are IBM Plex Sans, licensed under the SIL Open Font License
+1.1. The full licence text is in `scripts/font-source/OFL.txt`.
+
+    Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+
+The font is embedded in the built `dist/index.html` as a data: URI. Embedding
+is permitted by the OFL; the font is not sold on its own and its Reserved Font
+Name is not used for the subset.
+
+The Windows, Mac and Linux programs also bundle third-party libraries; their
+licences are in `src-tauri/lisanslar/UCUNCU-TARAF.txt`.
