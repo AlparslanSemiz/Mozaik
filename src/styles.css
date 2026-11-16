@@ -6891,40 +6891,6 @@ input.search-box:focus-visible {
   max-width: 100%;
 }
 
-/* The clock under each lesson number on the MÜSAİTLİK grid. Off by default
-   (the reader asked for that), and the reason it is worth a switch at all is
-   the same one pitfall 37 measured on the Program grid: the clock is the
-   widest thing in the heading, so it sets the column's floor — and this is a
-   screen you PAINT by dragging across, where a narrower column is a shorter
-   drag. Whoever wants the times has them in Ayarlar → Zil ve günler and on paper. */
-/* HIDDEN, NOT REMOVED — and the difference is the claim the setting makes.
-
-   Turning the clock off is about NOISE, not about room: the reader said he did
-   not want to look at the times, not that he wanted the table shorter. A table
-   that changes height would make that a lie, and `gorunum.spec.ts` 50 measures
-   exactly that.
-
-   `display: none` held only by luck. The heading's height came from the shared
-   cell rule at 2.125rem, which at a 14px root is 29.75px against two 14.4px
-   line boxes — near enough to round equal. The root went to 13px on 2026-08-30
-   and the type did not follow it (re-pinned; 12px is the floor), so the margin
-   went negative and the table grew 2.16px the moment the clock came on.
-
-   Reserving the line costs no arithmetic and cannot drift: the second line box
-   is there in both states, so the two heights are the same BY CONSTRUCTION
-   rather than by a number somebody has to re-derive whenever the root moves
-   (pitfall 36). `toBeHidden()` and `innerText` both still say it is gone.
-
-   The grid draws no `.hour-clock` at all since 2026-11-16 (K6), and that is
-   the opposite case on purpose: there the whole measured point IS the room the
-   line gives back (2461 -> 1728px, pitfall 37). Its old rule was once unscoped
-   and took this heading's second line box too, so the reader's "Saatler"
-   button had nothing left to switch; `gorunum.spec.ts` 50 still measures this
-   heading against the grid. */
-:root:not([data-avail-clock='acik']) table.availability:not(.with-clock) thead .hour-clock {
-  visibility: hidden;
-}
-
 /* The same reserved line for a column whose days disagree about the clock
    (the one after a lunch break that moves). Its span is EMPTY, and an empty
    block makes no line box: that heading had one line where its neighbours had

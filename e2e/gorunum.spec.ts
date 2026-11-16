@@ -683,7 +683,7 @@ test.describe('50. Gelemediği saatlerde saat gösterimi', () => {
   // The Müsaitlik tab and its "Saatler" switch went with K1 (2026-11-16): the
   // grid lives on the person's page, which always shows the bell, because
   // "Ayşe Hoca salı 10:10'da gelemiyor" is said in clock times. The stored
-  // switch (`ders-programi-musaitlik-saat`) no longer changes anything, and
+  // switch (`ders-programi-musaitlik-saat`) is gone; an old value is never read, and
   // the grid's own clockless layout (K6) does not reach this heading.
   test('kişi sayfasının ızgarası saati hep gösteriyor, ızgara göstermiyor', async ({ page }) => {
     await openWithSample(page);

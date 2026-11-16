@@ -310,7 +310,12 @@ export default function App() {
   const copyPlan = useCallback(() => {
     const name = plans.library.plans.find((p) => p.id === plans.planId)?.name ?? 'Plan';
     const program = activeProgram(state);
-    plans.createPlan(t('{ad} kopyası', { ad: name }), {
+    // In an old file with several programs this is how one of them becomes a
+    // plan of its own, named after it, and is renamed from then on like any
+    // plan (Planlar ve yedek). A copy and not a move: the old one goes with
+    // its own "· Sil", which Geri al brings back.
+    const own = state.programs.length > 1 ? `${name} · ${program.name}` : null;
+    plans.createPlan(own ?? t('{ad} kopyası', { ad: name }), {
       ...state,
       programs: [program],
       activeProgramId: program.id,

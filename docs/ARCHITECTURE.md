@@ -169,7 +169,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/prefs/dock.ts` | havuz çekmecesi: açık mı ve boyu; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/ribbon.ts` | araç şeridi: gösterilir mi ve okurken çekilir mi; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/scale.ts` | arayüzün ölçeği; hepsi `preference.ts` fabrikasından |
-| `platform/prefs/availClock.ts` | eski Müsaitlik ızgarasının saat tercihi; 2026-11-16'dan beri bir şey değiştirmiyor (TODO §8k); hepsi `preference.ts` fabrikasından |
 | `platform/prefs/motion.ts` | arayüzün ne kadar kımıldayabileceği; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/intro.ts` | tanıtım satırı görüldü mü; hepsi `preference.ts` fabrikasından |
 | `platform/prefs/stored.ts` | iki yönlü tercihlerin yazılışı (`onOff`) |

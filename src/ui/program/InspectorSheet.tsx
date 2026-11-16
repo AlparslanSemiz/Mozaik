@@ -537,6 +537,18 @@ export function Inspector({
                     people: 'lessons',
                     focus: target.id,
                   });
+                  // The name that opened this page is gone with the list, so
+                  // the keyboard goes where the work now is: the form's first
+                  // box. After the sheet's own close has run.
+                  requestAnimationFrame(() =>
+                    requestAnimationFrame(() =>
+                      document
+                        .querySelector<HTMLElement>(
+                          'main .add-panel select:not(:disabled), main .add-panel input:not(:disabled)',
+                        )
+                        ?.focus(),
+                    ),
+                  );
                 }}
               >
                 {t('Ders gir')}

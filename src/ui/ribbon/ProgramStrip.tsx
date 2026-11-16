@@ -229,7 +229,9 @@ export function programStrip({
         {/* A second arrangement is a second PLAN (K2, 2026-11-16): one word
             for one thing, and the switcher in the top bar appears with it. */}
         <MoreItem icon={<Copy size={15} />} disabled={busy} onSelect={copyPlan}>
-          {t('Bu programın kopyası')}
+          {/* In an old file with several programs the same copy is how one
+              of them becomes its own plan, and then renames like any plan. */}
+          {state.programs.length > 1 ? t('Ayrı plan yap') : t('Bu programın kopyası')}
         </MoreItem>
         {state.programs.length > 1 && (
           <MoreItem icon={<Trash2 size={15} />} danger disabled={busy} onSelect={deleteCurrent}>

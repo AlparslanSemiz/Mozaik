@@ -1931,13 +1931,6 @@ yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) ve 8 (adı
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 
-- [ ] **RK18 Ölü tercih: Müsaitlik'in saat gösterimi (2026-11-16, `sade/asama-3b`).** Müsaitlik
-      sekmesi kalkınca `ders-programi-musaitlik-saat` hiçbir şeyi değiştirmiyor: kişi sayfası
-      saatleri hep gösteriyor. `platform/prefs/availClock.ts`, `main.tsx`'teki uygulanışı,
-      `styles.css`'in `data-avail-clock` kuralı, `preferences.test.ts`'in satırı ve "Veriler
-      nerede"nin satırı birlikte kalkmalı; anahtar eski makinelerde kalır, okunmaz. Davranış
-      değişmediği için aşama 3B'de dokunulmadı.
-
 ### 8l · Test programı (2026-10-09)
 
 Kaynak 2026-10-09'un analizi (`test/kapsam`): rapor `scratch/test-plan/PLAN.md`'de, git

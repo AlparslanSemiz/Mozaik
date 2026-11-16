@@ -2243,6 +2243,23 @@ test.describe('86. Sabitleme', () => {
     return page.locator('.topbar .plan-picker');
   }
 
+  // An old file's program becomes a plan of its own, named after it; from
+  // then on it renames in Planlar ve yedek like any plan.
+  test('eski dosyanın programı Ayrı plan yap ile kendi adını taşıyan bir plan oluyor', async ({
+    page,
+  }) => {
+    const picker = await twoPrograms(page);
+    await picker.selectOption({ index: 1 });
+    await openMore(page);
+    await page.getByRole('menuitem', { name: 'Ayrı plan yap' }).click();
+    // Two plans now; the open one is the new one, named after the program.
+    await expect(picker.locator('option')).toHaveCount(2);
+    await expect(picker.locator('option:checked')).toHaveText(/· Seçenek 2$/);
+    await openMore(page);
+    await expect(page.getByRole('menuitem', { name: 'Bu programın kopyası' })).toBeVisible();
+    await page.keyboard.press('Escape');
+  });
+
   test('eski dosyanın iki programı plan seçicide, açık olan sormadan siliniyor ve Geri al getiriyor', async ({
     page,
   }) => {

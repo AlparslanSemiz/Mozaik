@@ -46,6 +46,8 @@ test.describe('69. Dersler', () => {
     await expect(sheet).toBeHidden();
     await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText('Dersler');
     await expect(page.locator('.ribbon .ribbon-value')).toContainText('411');
+    // ...and the keyboard is in the form, not on <body>.
+    await expect(page.locator('main .add-panel :focus')).toHaveCount(1);
   });
 
   // The shortening the reader asked for by name: "tek bir sınıf için ders

@@ -509,6 +509,11 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     const sheet = page.getByRole('dialog');
     await expect(sheet.locator('.sheet-mark')).toHaveText('AV');
     await expect(sheet.getByRole('heading', { name: 'Gelemediği saatler' })).toBeVisible();
+    // The button that opened the page went with the list; the keyboard goes
+    // back to where the list was opened from, the status chip.
+    await page.keyboard.press('Escape');
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('.topbar .health')).toBeFocused();
   });
 
   // K3: a lesson in the pool says why it is there, and the way out.

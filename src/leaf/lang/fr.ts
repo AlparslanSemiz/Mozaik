@@ -1870,6 +1870,8 @@ const FR: Sozluk = {
   "Plan eski hâline döndü: {gun}.": "Le plan est revenu à son état du {gun}.",
   "günlük kopya": "copie quotidienne",
   "{hafta} {gun} {ay}": "{hafta} {gun} {ay}",
+  "Ayrı plan yap":
+    "En faire un plan à part",
 };
 
 registerSozluk("fr", FR);

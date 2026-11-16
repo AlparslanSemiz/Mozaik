@@ -55,8 +55,8 @@ işi dört sekmeye dağılıyordu.
   tıklama; gerçek bir "herkesi birden düzenle" işi bulunmadı. Sekmenin iki kısayolu, `Bütün
   haftayı aç` ve `Bütün haftayı kapat`, kişi sayfasına geldi. "Haftanın darlığı" ısı tablosu
   kalktı: yalnız okunan bir özetti; takılmanın sebebini sorun listesi kişinin adıyla söylüyor ve
-  yük tabloları orada. Saatleri gösterme tercihi (`ders-programi-musaitlik-saat`) artık bir şey
-  değiştirmiyor (kişi sayfası saatleri hep gösteriyor); anahtar duruyor, temizliği TODO §8k.
+  yük tabloları orada. Saatleri gösterme tercihi (`ders-programi-musaitlik-saat`) kalktı: kişi
+  sayfası saatleri hep gösteriyor; eski bir değer okunmuyor, Veriler nerede'de tarihsel satır.
 - **Sekme kimlikleri saklanmıyor**: açılış veriye göre seçiliyor (ders varsa Program, yoksa Okul
   bilgileri). Taşınacak kayıtlı bir sekme yok; eski yedi kimliğin yeni yeri `toolState.ts`'teki
   `OLD_TAB`'ta.
@@ -66,7 +66,8 @@ planın verisi ve haftası) ve üst çubuğun plan seçicisi onunla görünür. 
 kopya, boş seçenek, yeniden adlandır, sil) ve şeritteki `Seçenek` okuması kalktı; ekranda yalnız
 "plan" var. Veri modeli değişmedi (`programs[]`). Birden çok seçenek taşıyan eski bir dosya
 açılır: her seçeneği üst çubuk seçicisinde planın adının altında bir satır ("Plan 1 · Seçenek
-2"), açık olanı Daha fazla'da silinir. **Bilerek kabul edilen.** Kopya ayrı bir plan olduğu için
+2"); açık olan Daha fazla'da `Ayrı plan yap` ile kendi adını taşıyan bir plan olur (bir kopya,
+eskisi yerinde kalır; sonra her plan gibi Planlar ve yedek'te adlandırılır) ya da silinir. **Bilerek kabul edilen.** Kopya ayrı bir plan olduğu için
 sonradan eklenen bir öğretmen öbürüne geçmez; iki dizilişi karşılaştırmak veri girildikten sonra
 yapılan bir iş.
 
