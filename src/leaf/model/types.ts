@@ -283,6 +283,11 @@ export interface Cover {
   classId: Id;
   hour: number;
   teacherId: Id | null;
+  /**
+   * The lesson moved, that date only, to this hour of the same day (a "hafta
+   * istisnası"); `teacherId` is then `null` and the hour itself is empty.
+   */
+  to?: number | undefined;
 }
 
 /**

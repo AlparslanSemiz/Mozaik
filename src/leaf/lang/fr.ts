@@ -1885,6 +1885,11 @@ const FR: Sozluk = {
   "Seçilmedi": "Non choisi",
   "Son gün": "Dernier jour",
   "Yerine": "Remplacé par",
+  "Değişen": "Modifié",
+  "Temel haftaya dön": "Revenir à la semaine habituelle",
+  "{n}. saate taşı": "Déplacer à l'heure {n}",
+  "Bir dersi değiştir…": "Modifier un cours…",
+  "Programda göster": "Afficher dans l'emploi du temps",
   "Ayrı plan yap":
     "En faire un plan à part",
 };

@@ -72,6 +72,8 @@ import PreviewBar from './PreviewBar';
 import GridMenu from './GridMenu';
 import PoolMenu from './PoolMenu';
 import { usePreview } from './usePreview';
+import { WeekBar, useShownWeek } from '../dated';
+import { weekView } from '../../pure/dated';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -199,7 +201,23 @@ function Program({
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
   const advice = solver.advice;
-  const { preview, setPreview, stale, previewed, diff, shown } = usePreview(state, advice);
+  const {
+    preview,
+    setPreview,
+    stale,
+    previewed,
+    diff: suggestedDiff,
+    shown: suggested,
+  } = usePreview(state, advice);
+  // A dated week (v18) is drawn the way a suggestion is previewed: a copy laid
+  // over the grid, marked, never edited. A suggestion's preview goes first.
+  const week = useShownWeek();
+  const dated = useMemo(
+    () => (week === null || previewed !== null ? null : weekView(state, week)),
+    [state, week, previewed],
+  );
+  const shown = suggested ?? dated?.state ?? null;
+  const diff = suggestedDiff ?? dated?.diff ?? null;
   const colorOf = useCallback<ColorOf>(
     (d, lesson) => programColorIndex(d, lesson, colorMode),
     [colorMode],
@@ -238,12 +256,13 @@ function Program({
     total: poolTotal,
   } = useMemo(
     // In the preview the tray is the suggested week's too: what it leaves
-    // waiting, which for a way that builds the week is nothing.
+    // waiting, which for a way that builds the week is nothing. A dated week
+    // leaves the tray the base week's: what it waits for has not changed.
     () =>
-      shown === null || shownIx === null
+      suggested === null || shownIx === null
         ? buildPool(trayState, trayIx, view, poolSort, poolFilter, colorOf, t)
-        : buildPool(shown, shownIx, view, poolSort, poolFilter, colorOf, t),
-    [shown, shownIx, trayState, trayIx, view, poolSort, poolFilter, colorOf, t],
+        : buildPool(suggested, shownIx, view, poolSort, poolFilter, colorOf, t),
+    [suggested, shownIx, trayState, trayIx, view, poolSort, poolFilter, colorOf, t],
   );
   // The branches with something still waiting (see `waitingSubjects`).
   const poolSubjects = useMemo(() => waitingSubjects(trayState), [trayState]);
@@ -607,6 +626,7 @@ function Program({
         />
       )}
 
+      {dated !== null && <WeekBar />}
       {previewed !== null && preview !== null && diff !== null && (
         <PreviewBar
           previewed={previewed}

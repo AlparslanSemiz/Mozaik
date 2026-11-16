@@ -92,33 +92,44 @@ export function setAwayEnd(d: State, i: number, to: string | null): State {
       : next;
 }
 
-/** Who takes `classId` at `hour` on `iso`: a teacher, `null` (nobody), or `undefined` (not chosen). */
+/**
+ * Who takes `classId` at `hour` on `iso`: a teacher, `null` (nobody: "boş
+ * geçsin", or with `to` the lesson moved to that hour of the same day), or
+ * `undefined` (no change).
+ */
 export function setCover(
   d: State,
   iso: string,
   classId: Id,
   hour: number,
   teacherId: Id | null | undefined,
+  to?: number,
 ): State {
   const covers = d.dated.covers.filter(
     (c) => !(c.date === iso && c.classId === classId && c.hour === hour),
   );
-  if (teacherId !== undefined) covers.push({ date: iso, classId, hour, teacherId });
+  if (teacherId !== undefined) covers.push({ date: iso, classId, hour, teacherId, to });
   return put(d, { covers });
 }
 
-/** How many changes touch the date's week: the absences in it. */
+/** How many changes touch the date's week: absences, and hours changed on their own. */
 export function weekChanges(d: State, iso: string): number {
   const [from, to] = weekOf(iso);
-  return d.dated.absent.filter((a) => a.from <= to && a.to >= from).length;
+  let n = d.dated.absent.filter((a) => a.from <= to && a.to >= from).length;
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(from, i);
+    n += coverRows(d, date).filter(
+      (r) => r.cover !== undefined && !isAway(d, r.teacherId, date),
+    ).length;
+  }
+  return n;
 }
 
 /** "18–22 Kasım": the date's week, from its first to its last school day. */
 export function weekLabel(d: State, iso: string): string {
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekOf(iso)[0], i));
   const taught = days.filter((x) => d.settings.days.some((y) => y.name === WEEK[weekday(x)]));
-  const shown = taught.length > 0 ? taught : days;
-  return aralikYazisi(shown[0]!, shown[shown.length - 1]!);
+  return aralikYazisi(taught[0] ?? '', taught[taught.length - 1] ?? '');
 }
 
 /**
@@ -156,62 +167,83 @@ export interface Candidate {
   week: number;
 }
 
-/** One hour that needs somebody on the date, because its teacher is away. */
+/** One hour of the date that changes: its teacher is away, or it was changed on its own. */
 export interface CoverRow {
   hour: number;
   classId: Id;
   lessonId: Id;
-  /** The absent teacher. */
+  /** The lesson's own teacher. */
   teacherId: Id;
   /** Chosen: a teacher, `null` for "boş geçsin", `undefined` for not yet. */
   cover: Id | null | undefined;
   /** Free at that hour, best first. */
   options: Candidate[];
+  /** Moved that date to this hour. */
+  to: number | undefined;
+  /** The hours of the same day it could move to: its class and teacher free. */
+  hours: number[];
+}
+
+/** What the date teaches: the base week's cells on its day, the classes away left out. */
+export function taughtOn(d: State, iso: string) {
+  const day = dayOf(d, iso);
+  const taught: Array<{ hour: number; classId: Id; lessonId: Id; teacherId: Id }> = [];
+  for (const [key, lessonId] of Object.entries(activePlacements(d))) {
+    const [classId, k, h] = key.split('|');
+    const lesson = d.lessons.find((l) => l.id === lessonId);
+    if (Number(k) !== day || lesson === undefined || isAway(d, classId!, iso)) continue;
+    taught.push({ hour: Number(h), classId: classId!, lessonId, teacherId: lesson.teacherId });
+  }
+  return taught;
 }
 
 /**
- * The date's hours whose teacher is away, each with the teachers free then:
- * not teaching (a class away frees its teacher), not covering another hour,
- * not closed in their own hours. Best first: the same subject, then the fewest
- * covers this week, then those at school that day anyway.
+ * The date's hours that change: its teacher is away, or a change was made to
+ * it on its own. Each comes with the teachers free then (not teaching, not
+ * covering another hour, not closed, not away; a class away frees its
+ * teacher), best first: the same subject, then the fewest covers this week,
+ * then those at school that day anyway; and with the hours of the same day the
+ * lesson could move to.
  */
 export function coverRows(d: State, iso: string): CoverRow[] {
   const day = dayOf(d, iso);
   if (day < 0) return [];
-  const lessons = new Map(d.lessons.map((l) => [l.id, l]));
   const covers = d.dated.covers.filter((c) => c.date === iso);
-
-  // Who teaches what at each hour that day, the classes away left out.
-  const taught: Array<{ hour: number; classId: Id; lessonId: Id; teacherId: Id }> = [];
-  for (const [key, lessonId] of Object.entries(activePlacements(d))) {
-    const [classId, k, h] = key.split('|');
-    const lesson = lessons.get(lessonId);
-    if (Number(k) !== day || lesson === undefined || isAway(d, classId!, iso)) continue;
-    taught.push({ hour: Number(h), classId: classId!, lessonId, teacherId: lesson.teacherId });
-  }
+  const taught = taughtOn(d, iso);
+  const ownOf = (x: { classId: Id; hour: number }) =>
+    covers.find((c) => c.classId === x.classId && c.hour === x.hour);
   const atSchool = new Set([
     ...taught.map((x) => x.teacherId),
     ...covers.flatMap((c) => c.teacherId ?? []),
   ]);
   const order = new Map(d.classes.map((c, i) => [c.id, i]));
+  /** Who and which class are taken at `hour` that date, the asking cell `me` left out. */
+  const busy = (hour: number, me: (typeof taught)[number]) => {
+    const out = new Set<Id>();
+    for (const y of taught) {
+      const own = ownOf(y);
+      if (y === me || (own?.teacherId === null && own.to === undefined)) continue;
+      if ((own?.to ?? y.hour) !== hour) continue;
+      out.add(y.classId);
+      out.add(own?.teacherId ?? y.teacherId);
+    }
+    return out;
+  };
 
   return taught
-    .filter((x) => isAway(d, x.teacherId, iso))
+    .filter((x) => isAway(d, x.teacherId, iso) || ownOf(x) !== undefined)
     .sort((a, b) => a.hour - b.hour || order.get(a.classId)! - order.get(b.classId)!)
     .map((x) => {
-      const own = covers.find((c) => c.classId === x.classId && c.hour === x.hour);
-      const busy = new Set([
-        ...taught.filter((y) => y.hour === x.hour).map((y) => y.teacherId),
-        ...covers.flatMap((c) => (c.hour === x.hour && c !== own ? (c.teacherId ?? []) : [])),
-      ]);
-      const subject = lessonSubject(d, lessons.get(x.lessonId)!);
+      const own = ownOf(x);
+      const taken = busy(x.hour, x);
+      const free = (id: Id, hour: number) =>
+        !isAway(d, id, iso) && d.unavailable[closedKey(id, day, hour)] === undefined;
+      const subject = lessonSubject(
+        d,
+        d.lessons.find((l) => l.id === x.lessonId)!,
+      );
       const options = d.teachers
-        .filter(
-          (t) =>
-            !busy.has(t.id) &&
-            !isAway(d, t.id, iso) &&
-            d.unavailable[closedKey(t.id, day, x.hour)] === undefined,
-        )
+        .filter((t) => !taken.has(t.id) && free(t.id, x.hour))
         .map((t) => {
           const same = subject !== '' && (t.subject === subject || t.subject2 === subject);
           return {
@@ -229,6 +261,60 @@ export function coverRows(d: State, iso: string): CoverRow[] {
       const kept = d.teachers.find((t) => t.id === own?.teacherId);
       if (kept !== undefined && !options.some((o) => o.id === kept.id))
         options.push({ id: kept.id, subject: kept.subject, week: 0 });
-      return { ...x, cover: own?.teacherId, options };
+      const hours = d.settings.hours.flatMap((_, h) => {
+        const b = busy(h, x);
+        return h !== x.hour && !b.has(x.classId) && !b.has(x.teacherId) && free(x.teacherId, h)
+          ? [h]
+          : [];
+      });
+      return { ...x, cover: own?.teacherId, options, to: own?.to, hours };
     });
+}
+
+/**
+ * The date's week as it is taught: a copy of the plan with that week's changes
+ * laid over the base grid, to be drawn and never edited. A covered hour is the
+ * lesson under its substitute; `moved` holds the cells that changed and
+ * `opened` the hours nobody teaches, keyed the way the suggestion preview
+ * keys them, so the grid marks them with its own two patterns.
+ */
+export function weekView(d: State, iso: string) {
+  const base = activePlacements(d);
+  const placements = { ...base };
+  const lessons = [...d.lessons];
+  const opened = new Set<string>();
+  const moved = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(weekOf(iso)[0], i);
+    const day = dayOf(d, date);
+    if (day < 0) continue;
+    for (const [key, lessonId] of Object.entries(base)) {
+      const [classId, k, h] = key.split('|');
+      const teacherId = d.lessons.find((l) => l.id === lessonId)?.teacherId ?? '';
+      if (Number(k) === day && isAway(d, classId!, date))
+        opened.add(closedKey(teacherId, day, Number(h)));
+    }
+    for (const r of coverRows(d, date)) {
+      const key = `${r.classId}|${day}|${r.hour}`;
+      if (r.to !== undefined) {
+        const to = `${r.classId}|${day}|${r.to}`;
+        if (placements[key] === r.lessonId) delete placements[key];
+        placements[to] = r.lessonId;
+        moved.add(to);
+      } else if (r.cover != null) {
+        const lesson = d.lessons.find((l) => l.id === r.lessonId)!;
+        lessons.push({ ...lesson, id: key, teacherId: r.cover, second: false });
+        placements[key] = key;
+        moved.add(key);
+      } else opened.add(closedKey(r.teacherId, day, r.hour));
+    }
+  }
+  return {
+    state: {
+      ...d,
+      lessons,
+      programs: d.programs.map((p) => (p.id === d.activeProgramId ? { ...p, placements } : p)),
+    },
+    diff: { opened, moved, movedBlocks: 0 },
+  };
 }

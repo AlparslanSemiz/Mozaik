@@ -4,3 +4,5 @@
  */
 export { DateChip } from './DateChip';
 export { DayDialog } from './DayDialog';
+export { WeekBar } from './WeekBar';
+export { showWeek, useShownWeek } from './shownWeek';

@@ -176,7 +176,15 @@ function readDated(x: unknown): State['dated'] {
       id(c['classId']) &&
       typeof c['hour'] === 'number' &&
       (c['teacherId'] === null || id(c['teacherId']))
-        ? [{ date: c['date'], classId: c['classId'], hour: c['hour'], teacherId: c['teacherId'] }]
+        ? [
+            {
+              date: c['date'],
+              classId: c['classId'],
+              hour: c['hour'],
+              teacherId: c['teacherId'],
+              ...(typeof c['to'] === 'number' ? { to: c['to'] } : {}),
+            },
+          ]
         : [],
     ),
   };

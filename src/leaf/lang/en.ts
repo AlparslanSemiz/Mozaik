@@ -1865,6 +1865,11 @@ const EN: Sozluk = {
   "Seçilmedi": "Not chosen",
   "Son gün": "Last day",
   "Yerine": "Covered by",
+  "Değişen": "Changed",
+  "Temel haftaya dön": "Back to the usual week",
+  "{n}. saate taşı": "Move to hour {n}",
+  "Bir dersi değiştir…": "Change a lesson…",
+  "Programda göster": "Show on the timetable",
   "Ayrı plan yap":
     "Make it a plan of its own",
 };

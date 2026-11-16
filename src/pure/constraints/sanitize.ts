@@ -250,7 +250,8 @@ export function sanitize(d: State): State {
       Number.isInteger(c.hour) &&
       c.hour >= 0 &&
       c.hour < hourCount &&
-      (c.teacherId === null || teacherIds.has(c.teacherId)),
+      (c.teacherId === null || teacherIds.has(c.teacherId)) &&
+      (c.to === undefined || (Number.isInteger(c.to) && c.to >= 0 && c.to < hourCount)),
   );
   let dated = givenDated;
   if (

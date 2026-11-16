@@ -10,6 +10,7 @@ import type { State } from '../../leaf/model';
 import { weekChanges, weekLabel } from '../../pure/dated';
 import { useT } from '../common';
 import { DayDialog } from './DayDialog';
+import { showWeek } from './shownWeek';
 
 export function DateChip({
   state,
@@ -36,6 +37,10 @@ export function DateChip({
         date={date}
         setDate={setDate}
         onClose={() => setDate(null)}
+        onShow={() => {
+          showWeek(date);
+          setDate(null);
+        }}
       />
     </>
   );
