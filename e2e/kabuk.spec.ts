@@ -38,12 +38,23 @@ test.describe('23. Sekmeler', () => {
 
     // Under ~1320px of bar the label moves UNDER the icon instead of going away: %150
     // on a 1920 screen is this box, and a bar of seven bare pictures is what a
-    // reader who has trouble seeing got there (2026-11-15). And the page does
-    // not scroll sideways for it.
+    // reader who has trouble seeing got there (2026-11-15). Narrower still
+    // (under 75em of bar) the tabs take a row of their own, words beside their
+    // icons again (walkthrough, 2026-11-16). Either way the label stays and the
+    // page does not scroll sideways for it.
     await page.setViewportSize({ width: 1100, height: 900 });
     await expect(page.locator('.tabstrip .tab-label').first()).toBeVisible();
     const tab = page.locator('.tabstrip .tab').first();
-    await expect(tab).toHaveCSS('flex-direction', 'column');
+    await expect(tab).toHaveCSS('flex-direction', 'row');
+    // The row is the tabs' own: the strip is as wide as the bar's content box.
+    const whole = await page.locator('.tabstrip').evaluate((el) => {
+      const bar = el.parentElement!;
+      const pad =
+        parseFloat(getComputedStyle(bar).paddingLeft) +
+        parseFloat(getComputedStyle(bar).paddingRight);
+      return Math.abs(el.getBoundingClientRect().width - (bar.clientWidth - pad)) <= 1;
+    });
+    expect(whole, 'sekmeler kendi satırında').toBe(true);
     expect(
       await page.evaluate(
         () => document.scrollingElement!.scrollWidth - document.scrollingElement!.clientWidth,

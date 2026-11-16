@@ -62,7 +62,7 @@ Baba gibi tıklanan bir turun bulguları, Alp hepsini onayladı. Ters çevirdikl
 - **Excel yapıştırmada sütunlar tanınır.** Başlık satırı ya da hücreler (bilinen branş, ≤ 4 harf
   büyük harf kısa ad, E/K, adres); hücrelerin söylemediği eski sıraya düşer ama hiçbir zaman
   "Kısa ad"a. Önizleme eklenecek olanın tablosu, sütun başına seçimle.
-- **Ad, baş harf değil.** Satır başında soyadı (on harfe kadar), kartta saat başına üç harf
+- **Ad, baş harf değil.** Satır başında soyadı (on harfe kadar), kartta saat başına iki harf
   sığıyorsa soyadı; öğretmen seçicileri "Ad Soyad · Branş". Ölçülen taban (`--cell-min`) bu
   yüzden büyümesin diye sığma bir harf bütçesiyle karar veriliyor, ölçülerek değil.
 - **Yazı büyüklüğü dört adlı basamak** (%100/%115/%130/%150), Görünüm'de, `?` menüsünde ve

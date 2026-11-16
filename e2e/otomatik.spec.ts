@@ -84,7 +84,8 @@ test.describe('22. Otomatik dizme', () => {
     await expect(cards).toHaveCount(first - 1);
 
     // No question since SD1: the run's answer lands as one step of the
-    // history, and its notice offers "Geri al" for the whole of it.
+    // history, and its notice offers "Önceki programa dön" for the whole of it
+    // (the usability walkthrough, 2026-11-16: re-laying is not a deletion).
     // In the strip's Daha fazla since 2026-11-16.
     await openMore(page);
     await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
@@ -92,7 +93,7 @@ test.describe('22. Otomatik dizme', () => {
     const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
     await expect(cards).toHaveCount(first);
-    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await notice.getByRole('button', { name: 'Önceki programa dön' }).click();
     await expect(cards).toHaveCount(first - 1);
   });
 
@@ -118,7 +119,7 @@ test.describe('22. Otomatik dizme', () => {
     await expect(bar).toContainText(`Program yapıldı. ${placed!}`);
     expect(await week()).not.toBe(before);
     // One undo step brings the week before back.
-    await notice.getByRole('button', { name: 'Geri al' }).click();
+    await notice.getByRole('button', { name: 'Önceki programa dön' }).click();
     await expect.poll(week).toBe(before);
   });
 
