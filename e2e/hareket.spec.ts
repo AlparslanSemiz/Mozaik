@@ -72,7 +72,10 @@ test.describe('14. Hareket', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openWithSample(page);
 
-    await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     // No wait: the point is that there is nothing to wait FOR. If a view
     // transition were running this is exactly when it would be running.
     const running = await page.evaluate(
@@ -90,7 +93,7 @@ test.describe('14. Hareket', () => {
     const moving = await page.evaluate(async () => {
       const strip = [...document.querySelectorAll('.tab')];
       strip
-        .find((b) => (b.textContent ?? '').includes('Ayarlar'))
+        .find((b) => (b.textContent ?? '').includes('Okul bilgileri'))
         ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await new Promise((r) => requestAnimationFrame(r));
       return document.getAnimations().some((a) => a.playState === 'running');
@@ -119,7 +122,7 @@ test.describe('14. Hareket', () => {
           .find((b) => (b.textContent ?? '').includes(name))
           ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-      click('Kontrol');
+      click('Sınıflar');
       await new Promise((r) => setTimeout(r, 500));
       click('Program');
 
@@ -283,7 +286,10 @@ test.describe('14. Hareket', () => {
     // and measuring one that does not is measuring nothing (pitfall 41).
     await page.setViewportSize({ width: 1280, height: 620 });
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
 
     const main = page.locator('main');
     await expect(main).toHaveClass(/scroll-fade/);

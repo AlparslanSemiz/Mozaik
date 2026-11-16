@@ -6,7 +6,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { makeWorld } from '../src/pure/worlds';
-import { hover, loadWorld } from './helpers';
+import { hover, loadWorld, openProblems } from './helpers';
 
 /** 510 · MÇ Matematik on Salı 1; 511 · AV Fizik waiting in the tray. */
 function world(placeB = false) {
@@ -85,7 +85,7 @@ test.describe('İlişki · aynı gün olmasın', () => {
       '511',
     );
 
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await openProblems(page);
     const main = page.locator('.check-page');
     await expect(main).toContainText(
       '510 · MÇ Matematik ile 511 · AV Fizik Salı günü ikisi de var, aynı gün olmamalı.',

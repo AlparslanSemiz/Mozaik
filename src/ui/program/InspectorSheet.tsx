@@ -30,6 +30,7 @@ import {
   hourLabels,
   lessonSubject,
   setTeacherLimit,
+  setWholeWeek,
   shortDay,
   subjectKey,
   subjectLabel,
@@ -49,6 +50,7 @@ import {
   useDialogs,
   useKeepBefore,
   useReturnFocus,
+  useGoTo,
   useT,
   useToast,
   useUndoIf,
@@ -96,6 +98,7 @@ export function Inspector({
   const returnFocus = useReturnFocus(target !== null);
   const { confirm } = useDialogs();
   const toast = useToast();
+  const goTo = useGoTo();
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const [printing, setPrinting] = useState(false);
@@ -480,7 +483,11 @@ export function Inspector({
         >
           {target.kind === 'teacher'
             ? t('Öğretmenin müsait olmadığı saatlere tıklayın.')
-            : t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')}
+            : target.kind === 'class'
+              ? t('Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.')
+              : t(
+                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+                )}
         </p>
         <AvailGrid
           key={target.id}
@@ -495,6 +502,17 @@ export function Inspector({
               : t('{kim} · kapalı saatler', { kim: view.facts.name })
           }
         />
+        {/* Müsaitlik's two whole-week buttons came here with its grid (K1,
+            2026-11-16): somebody who comes one day a week is closed in two
+            clicks, not seventy. */}
+        <div className="form-row">
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, false))}>
+            {t('Bütün haftayı aç')}
+          </button>
+          <button className="btn" onClick={() => change((d) => setWholeWeek(d, target.id, true))}>
+            {t('Bütün haftayı kapat')}
+          </button>
+        </div>
         {stranded > 0 && (
           <div className="warn-box">
             {t('Kapattığınız saatlerde {n} ders kaldı; silinmedi, haftalık programda kırmızı.', {
@@ -513,11 +531,37 @@ export function Inspector({
             <h3 className="sheet-h">
               {target.kind === 'teacher' ? t('Verdiği dersler') : t('Aldığı dersler')}
             </h3>
-            {lessons.length === 0 ? (
-              <p className="hint">
-                <T k="Henüz dersi yok. Ders eklemek için **Dersler** sekmesine gidin." />
-              </p>
-            ) : (
+            {/* Where this person's lessons are ENTERED: the lesson form of
+                its tab, open on this person (K1). Closing the page first,
+                because the form is under it. */}
+            <p>
+              <button
+                className="btn"
+                onClick={() => {
+                  onClose();
+                  goTo({
+                    tab: target.kind === 'teacher' ? 'teachers' : 'classes',
+                    people: 'lessons',
+                    focus: target.id,
+                  });
+                  // The name that opened this page is gone with the list, so
+                  // the keyboard goes where the work now is: the form's first
+                  // box. After the sheet's own close has run.
+                  requestAnimationFrame(() =>
+                    requestAnimationFrame(() =>
+                      document
+                        .querySelector<HTMLElement>(
+                          'main .add-panel select:not(:disabled), main .add-panel input:not(:disabled)',
+                        )
+                        ?.focus(),
+                    ),
+                  );
+                }}
+              >
+                {t('Ders gir')}
+              </button>
+            </p>
+            {lessons.length > 0 && (
               <table className="sheet-lessons">
                 <tbody>
                   {lessons.map((x) => {

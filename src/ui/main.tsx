@@ -3,12 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { Root } from './shell';
 import { applyDil, readDil } from '../leaf/i18n';
 import {
-  applyAvailClock,
   applyMotion,
   applyRibbon,
   applyScale,
   applyTheme,
-  readAvailClock,
   readMotion,
   readRibbon,
   readScale,
@@ -35,7 +33,6 @@ function boot(): void {
   applyRibbon(readRibbon());
   // ...and the availability heading, for the same reason: a clock that appears
   // after the first paint widens every column in the table under it.
-  applyAvailClock(readAvailClock());
   // Motion LAST and before the first paint both: a reader who has asked for no
   // animation must not watch the shell fade in once before the setting lands.
   applyMotion(readMotion());

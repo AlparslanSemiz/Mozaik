@@ -49,7 +49,9 @@ test.afterAll(() => {
 test.describe('73. Yerel sunucu', () => {
   test('GERÇEK BİR KÖKEN — turun gerekçesi, ölçülmüş hâliyle', async ({ page }) => {
     await page.goto(AD);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
 
     const facts = await page.evaluate(async () => {
       const out: Record<string, unknown> = {
@@ -111,7 +113,9 @@ test.describe('73. Yerel sunucu', () => {
 
   test('bilinmeyen yol uygulamaya düşüyor, ölü bir sayfaya değil', async ({ page }) => {
     await page.goto(`${AD}/bilinmeyen/yol`);
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
 
     // Derin bir yolda sayfa yanındaki `sw.js`'i istiyor ve orada öyle bir
     // dosya YOK, yani kayıt 404 alıyor. Bu bir kusur değil, yolun bir

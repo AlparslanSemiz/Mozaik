@@ -6,7 +6,7 @@
 // read, and a shortcut is a target you cannot miss.
 
 import { expect, test } from './kapan';
-import { openWithSample, open, chooseScale } from './helpers';
+import { openWithSample, open, chooseScale, chooseEntity } from './helpers';
 
 test.describe('52. Komut paleti', () => {
   test('Ctrl+K açıyor, Escape kapatıyor, üst çubuktaki düğme de açıyor', async ({ page }) => {
@@ -38,14 +38,17 @@ test.describe('52. Komut paleti', () => {
     await page.getByLabel('Ara veya komut yaz').fill('baskı');
     await expect(page.locator('.palette')).toContainText('Yazdır');
     await page.keyboard.press('Enter');
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Çıktı');
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Yazdır ve gönder',
+    );
 
     await page.keyboard.press('Control+k');
     await page.getByLabel('Ara veya komut yaz').fill('koyu');
     await page.keyboard.press('Enter');
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Okul bilgileri',
     );
     await expect(page.getByRole('group', { name: 'Tema', exact: true })).toBeVisible();
   });
@@ -57,7 +60,10 @@ test.describe('52. Komut paleti', () => {
     await page.keyboard.press('Enter');
 
     await expect(page.locator('.palette')).toBeHidden();
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Çıktı');
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
+      'aria-label',
+      'Yazdır ve gönder',
+    );
   });
 
   test('öğretmeni adıyla bulup PANELİNİ açıyor', async ({ page }) => {
@@ -131,32 +137,41 @@ test.describe('53. Durum çipi', () => {
       );
       return row?.querySelector('td[data-row]')?.getAttribute('data-row') ?? '';
     });
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.locator(`.entity[data-id="${id}"]`).click();
-    await page.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    const sheet = await chooseEntity(page, id);
+    await sheet.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    await page.keyboard.press('Escape');
 
     await expect(chip).toHaveClass(/impossible/);
     await expect(chip).toContainText('kapalı saatte');
   });
 
-  test("her sekmede duruyor ve Kontrol'e götürüyor", async ({ page }) => {
+  // The Kontrol tab became the list the chip opens (K3, 2026-11-16).
+  test('her sekmede duruyor ve sorun listesini açıyor', async ({ page }) => {
     await openWithSample(page);
-    for (const tab of ['Okul', 'Müsaitlik', 'Program', 'Çıktı', 'Ayarlar']) {
-      await page.getByRole('button', { name: tab, exact: true }).click();
+    for (const tab of [
+      'Öğretmenler',
+      'Sınıflar',
+      'Program',
+      'Yazdır ve gönder',
+      'Okul bilgileri',
+    ]) {
+      await page.locator('.tabstrip').getByRole('button', { name: tab, exact: true }).click();
       await expect(page.locator('.health')).toBeVisible();
     }
     await page.locator('.health').click();
+    await expect(page.getByRole('dialog', { name: 'Programın durumu' })).toBeVisible();
+    // ...over the tab it was asked from.
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Kontrol',
+      'Okul bilgileri',
     );
   });
 });
 
 test.describe('54. Klavye kısayolları', () => {
-  test('Alt+1..7 sekmelere gidiyor', async ({ page }) => {
+  test('Alt+1..5 sekmelere gidiyor', async ({ page }) => {
     await openWithSample(page);
-    const names = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
+    const names = ['Program', 'Öğretmenler', 'Sınıflar', 'Yazdır ve gönder', 'Okul bilgileri'];
     for (const [i, name] of names.entries()) {
       await page.keyboard.press(`Alt+${i + 1}`);
       await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', name);
@@ -195,10 +210,13 @@ test.describe('54. Klavye kısayolları', () => {
     expect(fits.over, 'sekmeler kendi kutusundan taşıyor').toBeLessThanOrEqual(0);
     expect(fits.barOver, 'üst çubuk yatay taşıyor').toBeLessThanOrEqual(0);
 
-    await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Okul bilgileri', exact: true })
+      .click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Ayarlar',
+      'Okul bilgileri',
     );
     await chooseScale(page, 100);
   });
@@ -222,7 +240,7 @@ test.describe('54. Klavye kısayolları', () => {
     await page.getByRole('menuitem', { name: /Klavye kısayolları/ }).click();
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('Ctrl+K');
-    await expect(dlg).toContainText('Alt+1..7');
+    await expect(dlg).toContainText('Alt+1..5');
 
     await page.keyboard.press('Escape');
     await expect(dlg).toBeHidden();

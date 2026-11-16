@@ -8,7 +8,7 @@
 //      SAME version as the standalone exe, with the installer built in this
 //      run beside it (no signature: the test copy accepts none);
 //   3. starts the standalone test exe (`--tek`) and presses, through Windows
-//      UI Automation, Ayarlar -> Hakkında -> Denetle -> "Kurulumu indir" ->
+//      UI Automation, Okul bilgileri -> Daha fazla -> Hakkında -> Denetle -> "Kurulumu indir" ->
 //      "Şimdi kur": update.rs's waiter runs the installer `/P /R`;
 //   4. waits for the installed program to start and leave its note
 //      (`kurulu-yol.txt`), and checks the files the installer put in place,
@@ -42,7 +42,10 @@ const kurulum = arguman('--kurulum');
 const bekle = (ms) => new Promise((tamam) => setTimeout(tamam, ms));
 
 const ADLAR = {
-  ayarlar: ['Settings', 'Ayarlar'],
+  // Okul bilgileri since 2026-11-16 (Sadeleşme K1); Hakkında is in its
+  // strip's Daha fazla.
+  ayarlar: ['School details', 'Okul bilgileri'],
+  dahaFazla: ['More', 'Daha fazla'],
   hakkinda: ['About', 'Hakkında'],
   denetle: ['Check for updates', 'Güncellemeleri denetle'],
   kurulum: ['Download the installer', 'Kurulumu indir'],
@@ -172,6 +175,7 @@ const sunucu = await sunucuBaslat({
 try {
   spawn(tek, [], { stdio: 'ignore' });
   console.log(uiaBas(ADLAR.ayarlar, { tam: true, sureMs: 120_000 }));
+  console.log(uiaBas(ADLAR.dahaFazla, { tam: true }));
   console.log(uiaBas(ADLAR.hakkinda, { tam: true }));
   console.log(uiaBas(ADLAR.denetle, { tam: true }));
   console.log(uiaBas(ADLAR.kurulum, { tam: true, sureMs: 60_000 }));

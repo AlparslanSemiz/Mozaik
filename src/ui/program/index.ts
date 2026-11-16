@@ -8,7 +8,7 @@
  * draws them.
  */
 export { default as Program } from './Program';
-export { default as Check } from './Check';
+export { default as ProblemList } from './ProblemList';
 export { InspectorProvider, useInspect } from './Inspector';
 export { LessonEditProvider, useLessonEdit } from './LessonEdit';
 export { KIND_ICON, STEPS, classIcon, lessonIcon, teacherIcon } from './steps';

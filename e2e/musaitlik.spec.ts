@@ -1,9 +1,6 @@
-// The Müsaitlik tab: row = day, column = lesson (aSc's Time off layout).
-//
-// `table.availability` is no longer unique: C9 put a second one in the right
-// column — the "haftanın darlığı" heat map, which reuses the same shape to say
-// how many people are closed at each hour. The paintable one is
-// `table.availability:not(.heat)` and every locator here says so.
+// The closed-hours grid: row = day, column = lesson (aSc's Time off layout).
+// It is on the person's page since 2026-11-16 (Sadeleşme, K1): the Müsaitlik
+// tab, its entity list and its "haftanın darlığı" heat table went.
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
@@ -17,48 +14,40 @@ import {
   loadWorld,
   openSetup,
   mainList,
-  onScreen,
   deletePerson,
+  openPerson,
+  openProblems,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
-// Hook order. The empty-list screen returned before two `useMemo` calls, so a
-// list that filled up while the tab stayed open (Ctrl+Z, "Dosyadan aç") asked
-// React for more hooks than the render before it had.
-test.describe('10. Müsaitlik: liste sekme açıkken doluyor', () => {
+/** The first teacher's page, and its grid. */
+async function firstTeacher(page: Page) {
+  await openSetup(page, 'Öğretmenler');
+  const sheet = await openPerson(page, 0);
+  return { sheet, table: sheet.locator('table.availability') };
+}
+
+// A list that fills up again while the page is reachable (Ctrl+Z): the
+// teacher comes back with his grid.
+test.describe('10. Gelemediği saatler: liste geri doluyor', () => {
   test('silinen öğretmen Ctrl+Z ile geri gelince çizelge çiziliyor', async ({ page }) => {
-    await loadWorld(page, makeWorld({ days: 2, hours: 3 }), 'Okul');
+    await loadWorld(page, makeWorld({ days: 2, hours: 3 }), 'Öğretmenler');
     await openSetup(page, 'Öğretmenler');
     await deletePerson(page, 0);
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await expect(onScreen(page, '.empty-screen')).toBeVisible();
-
     await page.keyboard.press('Control+z');
-    await expect(page.locator('table.availability:not(.heat)')).toBeVisible();
+    const sheet = await openPerson(page, 0);
+    await expect(sheet.locator('table.availability')).toBeVisible();
   });
 });
 
-test.describe('10. Müsaitlik çizelgesi', () => {
-  test('üst çizelgeyle haftanın darlığı aynı satır yüksekliğini kullanıyor', async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const upper = page.locator('table.availability:not(.heat) tbody tr').first();
-    const heat = page.locator('table.availability.heat tbody tr').first();
-    await expect(upper).toBeVisible();
-    await expect(heat).toBeVisible();
-    const [upperBox, heatBox] = await Promise.all([upper.boundingBox(), heat.boundingBox()]);
-    expect(Math.abs(upperBox!.height - heatBox!.height)).toBeLessThanOrEqual(1);
-  });
-
+test.describe('10. Gelemediği saatler çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-
-    const table = page.locator('table.availability:not(.heat)');
+    const { sheet, table } = await firstTeacher(page);
     // The sample teacher already has a whole day closed; start from a clean slate
-    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
+    await sheet.getByRole('button', { name: 'Bütün haftayı aç' }).click();
     // 6 day rows, 12 lesson columns
     await expect(table.locator('tbody tr')).toHaveCount(6);
     await expect(table.locator('tbody tr').first().locator('td')).toHaveCount(12);
@@ -77,13 +66,22 @@ test.describe('10. Müsaitlik çizelgesi', () => {
     await expect(wednesday.locator('td.closed')).toHaveCount(0);
   });
 
+  // Müsaitlik's two whole-week buttons came to the page with the grid.
+  test('Bütün haftayı kapat ve aç kişi sayfasında', async ({ page }) => {
+    await openWithSample(page);
+    const { sheet, table } = await firstTeacher(page);
+    await sheet.getByRole('button', { name: 'Bütün haftayı kapat' }).click();
+    await expect(table.locator('tbody td:not(.closed)')).toHaveCount(0);
+    await sheet.getByRole('button', { name: 'Bütün haftayı aç' }).click();
+    await expect(table.locator('tbody td.closed')).toHaveCount(0);
+  });
+
   test('sütun başlığı haftanın o saatini değiştiriyor, saat uyuşmayınca boş kalıyor', async ({
     page,
   }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
-    const table = page.locator('table.availability:not(.heat)');
+    const { sheet, table } = await firstTeacher(page);
+    await sheet.getByRole('button', { name: 'Bütün haftayı aç' }).click();
 
     // Lessons 1-5 are the same on every day, so they carry a clock...
     await expect(table.locator('thead th').nth(1)).toContainText('09:00');
@@ -99,38 +97,25 @@ test.describe('10. Müsaitlik çizelgesi', () => {
   // number's own text is measured (a Range), not the cell (pitfall 140).
   test('saati boş kalan sütunun numarası ötekilerle aynı hizada', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const table = page.locator('table.availability:not(.heat)');
+    const { table } = await firstTeacher(page);
     await expect(table.locator('thead th').nth(6)).not.toContainText(':');
-    const tops = () =>
-      table.locator('thead th:not(.corner-head)').evaluateAll((ths) =>
-        ths.map((th) => {
-          const range = document.createRange();
-          range.selectNodeContents(th.firstChild!);
-          return range.getBoundingClientRect().top;
-        }),
-      );
-    // Both states of the strip's "Saatler": the clock hidden, and shown.
-    for (const state of ['kapalı', 'açık']) {
-      if (state === 'açık') {
-        // In the strip's Daha fazla since 2026-11-16 (Sadeleşme).
-        await page.locator('.ribbon .more-menu').click();
-        await page.getByRole('menuitemcheckbox', { name: 'Saatler' }).click();
-        await page.keyboard.press('Escape');
-      }
-      const measured = await tops();
-      for (const [i, top] of measured.entries()) {
-        expect(Math.abs(top - measured[0]!), `${state}, ${i + 1}. sütun`).toBeLessThanOrEqual(0.5);
-      }
+    const measured = await table.locator('thead th:not(.corner-head)').evaluateAll((ths) =>
+      ths.map((th) => {
+        const range = document.createRange();
+        range.selectNodeContents(th.firstChild!);
+        return range.getBoundingClientRect().top;
+      }),
+    );
+    for (const [i, top] of measured.entries()) {
+      expect(Math.abs(top - measured[0]!), `${i + 1}. sütun`).toBeLessThanOrEqual(0.5);
     }
   });
 
   test('öğle arası her satırda kendi yerinde işaretli', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-
-    const positions = await page.evaluate(() =>
-      [...document.querySelectorAll('table.availability:not(.heat) tbody tr')].map((row) =>
+    const { table } = await firstTeacher(page);
+    const positions = await table.evaluate((t) =>
+      [...t.querySelectorAll('tbody tr')].map((row) =>
         [...row.querySelectorAll('td')].findIndex((td) => td.classList.contains('break-after')),
       ),
     );
@@ -145,33 +130,36 @@ test.describe('10. Müsaitlik çizelgesi', () => {
 // Availability is edited AFTER a timetable is laid out. Closing an hour that
 // already held a lesson used to do nothing at all — and worse, it was
 // invisible: the hatch is drawn only on EMPTY cells, so the card covered the
-// closed hour and neither the grid nor Kontrol ever said a word.
+// closed hour and nothing ever said a word.
 //
 // The lesson is NOT removed (no-data-loss principle). It is marked instead.
 
 test.describe('20. Kapalı saatte ders', () => {
   /** Lays a lesson down, then closes exactly that hour for its teacher. */
-  async function conflict(page: Page) {
+  async function conflict(page: Page, keepOpen = false) {
     await openWithSample(page);
     const { day, hour, row } = await dragAndDrop(page);
     const before = await page.locator('table.grid .card').count();
     expect(before).toBeGreaterThan(0);
 
-    await closeHour(page, row, Number(day), Number(hour));
+    await closeHour(page, row, Number(day), Number(hour), keepOpen);
     return { day: Number(day), hour: Number(hour), row, before };
   }
 
-  /** Toggles one cell of the availability grid for one entity. */
-  async function closeHour(page: Page, entityId: string, day: number, hour: number) {
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+  /** Toggles one cell of one person's grid, on their page. */
+  async function closeHour(
+    page: Page,
+    entityId: string,
+    day: number,
+    hour: number,
+    keepOpen = false,
+  ) {
     // The row the card landed on IS the teacher: the grid row id is the id.
-    await chooseEntity(page, entityId);
-    await page
-      .locator('table.availability:not(.heat) tbody tr')
-      .nth(day)
-      .locator('td')
-      .nth(hour)
-      .click();
+    const sheet = await chooseEntity(page, entityId);
+    await sheet.locator('table.availability tbody tr').nth(day).locator('td').nth(hour).click();
+    if (keepOpen) return;
+    await page.keyboard.press('Escape');
+    await expect(sheet).toBeHidden();
   }
 
   test('kapatınca ders SİLİNMİYOR, kırmızı işaretleniyor', async ({ page }) => {
@@ -190,21 +178,19 @@ test.describe('20. Kapalı saatte ders', () => {
     await expect(marked.first()).toHaveAttribute('title', /müsait değil|kapalı/);
   });
 
-  test('Kontrol sekmesi tek tek sayıyor ve sebebini yazıyor', async ({ page }) => {
+  test('sorun listesi tek tek sayıyor ve sebebini yazıyor', async ({ page }) => {
     await conflict(page);
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    const list = await openProblems(page);
 
-    const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
+    const panel = list.locator('.panel', { hasText: 'Kapalı saatte ders' });
     await expect(panel.getByRole('heading', { name: /Kapalı saatte ders/ })).toBeVisible();
     await expect(panel.locator('tbody tr')).not.toHaveCount(0);
     await expect(panel.locator('tbody tr').first()).toContainText(/müsait değil|kapalı/);
   });
 
-  test('Müsaitlik ekranı olan biteni söylüyor', async ({ page }) => {
-    await conflict(page);
-    await expect(page.locator('.warn-box', { hasText: 'yerleşmiş' })).toContainText(
-      'Hiçbiri silinmedi',
-    );
+  test('kişi sayfası olan biteni söylüyor', async ({ page }) => {
+    await conflict(page, true);
+    await expect(page.getByRole('dialog').locator('.warn-box')).toContainText('silinmedi');
   });
 
   test('saat yeniden açılınca işaret kalkıyor', async ({ page }) => {
@@ -224,19 +210,18 @@ test.describe('20. Kapalı saatte ders', () => {
 //
 // The reason this is measured rather than eyeballed: red is a FUNCTIONAL
 // colour in this tool — it means "this drop is refused" — and grey hatching
-// means "this hour is closed". Letting the second borrow the first's colour is
-// only safe because the two can never be on screen together here. What the
-// test holds is the part that could rot: the mark is red, it is bigger than
-// the body text, it reads against its own ground, and the hatch is still there
-// so the state does not depend on the colour alone.
+// means "this hour is closed". What the test holds is the part that could
+// rot: the mark is red, it is bigger than the body text, it reads against its
+// own ground, and the hatch is still there so the state does not depend on
+// the colour alone.
 test.describe('67. Kapalı saatin işareti', () => {
   test('çarpı KIRMIZI, büyük, ve kendi zemininde okunuyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    const { sheet, table } = await firstTeacher(page);
     // Clean slate: the sample's first teacher already has a whole day shut, so
     // clicking a cell blind would OPEN one rather than close one.
-    await page.getByRole('button', { name: 'Bütün haftayı aç' }).click();
-    const cell = page.locator('table.availability:not(.heat) tbody td').first();
+    await sheet.getByRole('button', { name: 'Bütün haftayı aç' }).click();
+    const cell = table.locator('tbody td').first();
     await cell.click();
     await expect(cell).toHaveClass(/closed/);
 
@@ -287,28 +272,5 @@ test.describe('67. Kapalı saatin işareti', () => {
     }, ground);
     const ratio = contrast(seen.color, asRgb);
     expect(ratio, `çarpı/zemin kontrastı ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(4.5);
-  });
-
-  test('ISI haritasındaki sayılar kırmızıya dönmedi', async ({ page }) => {
-    // The heat table wears the same `td.closed` class for a completely
-    // different thing — how many people are shut at that hour — and a count of
-    // six out of twenty-five is not a refusal.
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const heat = page.locator('table.availability.heat td.closed').first();
-    if ((await heat.count()) === 0) return;
-    const color = await heat.evaluate((el) => getComputedStyle(el).color);
-    const text = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
-    );
-    const asRgb = await page.evaluate((hex) => {
-      const p = document.createElement('span');
-      p.style.color = hex;
-      document.body.appendChild(p);
-      const out = getComputedStyle(p).color;
-      p.remove();
-      return out;
-    }, text);
-    expect(rgb(color)).toEqual(rgb(asRgb));
   });
 });

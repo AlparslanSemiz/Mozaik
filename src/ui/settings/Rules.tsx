@@ -24,7 +24,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'minPerDay',
     label: 'Öğretmen günde en az',
-    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız Kontrol sekmesinde uyarır.',
+    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız sorun listesinde uyarır.',
     canBlock: false,
   },
   {
@@ -42,7 +42,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'maxGapsClass',
     label: 'Sınıfın dersleri arasında en fazla boşluk',
-    hint: 'Aynısı sınıf için. Yalnız Kontrol sekmesinde uyarır.',
+    hint: 'Aynısı sınıf için. Yalnız sorun listesinde uyarır.',
     canBlock: false,
   },
 ];
@@ -177,12 +177,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}>
             <p>
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası." />
             </p>
           </HelpHead>
           {custom.length === 0 ? (
             <p className="hint">
-              <T k="Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
+              <T k="Bir öğretmene özel sayı: **Öğretmenler** listesinde kişinin sayfası." />
             </p>
           ) : (
             <table className="list">
@@ -228,12 +228,12 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <HelpHead topic={t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}>
             <p>
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası." />
             </p>
           </HelpHead>
           {customClasses.length === 0 ? (
             <p className="hint">
-              <T k="Bir sınıfa özel sayı: **Okul → Sınıflar**." />
+              <T k="Bir sınıfa özel sayı: **Sınıflar** listesinde sınıfın sayfası." />
             </p>
           ) : (
             <table className="list">

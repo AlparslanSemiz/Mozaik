@@ -117,7 +117,7 @@ Kök yazı boyu `calc(13px * var(--ui-scale))`, ekran merdiveni `rem` cinsinden 
 basamak. Kâğıt merdiveni `pt` cinsinden, ekran ölçeğinden etkilenmez, ve kâğıttaki
 yazı ayarının çarpanı merdivenle aynı öğede tanımlıdır (tuzak 63). Sütun
 genişlikleri `ch` cinsinden, ve ölçekler arasında korunan şey piksel değil `ch`
-sayısı (tuzak 39). `.hint` her yerde `--fs-sm` (13 px), Ayarlar'da ise gövde boyu
+sayısı (tuzak 39). `.hint` her yerde `--fs-sm` (13 px), Okul bilgileri'nde ise gövde boyu
 `--fs-base` (15 px, `.settings-pane`, 2026-10-24, TODO B7.36): oradaki notlar bir
 tıklamanın bütün planlara ne yaptığını söylüyor, göz ucuyla değil okunarak bakılıyor.
 
@@ -241,7 +241,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.tabstrip` `.tab` `.tab-label` | seçili sekme kâğıt zeminli ve accent alt çizgili, tek ve nötr. `flex: 0 0`, daralan çubukta feda edilmez (tuzak 48) |
 | `.health` `.health-dot` `.health-text` | durum çipi: her sekmede, sorunu adlandırır. Yer daralınca noktasına iner |
 | `.panel-head` | başlık ve tek bir kontrol (Okul listelerinde ve Dersler'de "Excel'den yapıştır"). `baseline` hizalı, sarabilir |
-| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, yedi sekmede de. Basılı kontrol bir segment (zemin ve alt çizgi). Sağ ucunda `.more-menu` (Daha fazla ▾, `common/More.tsx`). `-label` bir grubun başlığı (büyük harf, soluk), `-value` bir grubun değeri (normal, tam mürekkep) |
+| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, her sekmede. Basılı kontrol bir segment (zemin ve alt çizgi). Sağ ucunda `.more-menu` (Daha fazla ▾, `common/More.tsx`). `-label` bir grubun başlığı (büyük harf, soluk), `-value` bir grubun değeri (normal, tam mürekkep) |
 | `.topbar-doc` `.app-title` `.plan-picker` | hangi belge açık |
 | `.btn-group` `.topbar-sep` `.spacer` | bitişik düğme kümesi · ayraç · itici |
 
@@ -263,7 +263,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.help-btn` `.help-pop` `.help-body` `.panel-head.with-help` | "?": bir panelin açıklaması, Radix Popover (`common/Help.tsx`, `HelpHead`) |
 | `.more-menu` + `.menu` `.menu-item` | Daha fazla ▾ ve üst çubuğun Dosya ▾ ile ? menüleri (`common/More.tsx`) |
 | `.dlg` `.dlg-overlay` `.dlg-head` `.dlg-icon` `.dlg-title` `.dlg-body` `.dlg-actions` | her soru: `useDialogs()` ile `confirm` ya da `alert` |
-| `.sheet` `.sheet-mark` `.sheet-title` `.sheet-facts` `.sheet-week` `.sheet-actions` `.sheet-more` `.sheet-foot` | kişi sayfası: bir öğretmenin, sınıfın ya da dersliğin her şeyi. Sağdan kayar, solmaz, çünkü altından iki bin hücre geçiyor. Başı yapışkan ve kâğıt zeminli, bölüm başlıkları `.sheet-h` (küçük, büyük harf, `--muted`), ızgarası Müsaitlik'inkinden kısa satırlı, Sil en altta bir çizginin altında |
+| `.sheet` `.sheet-mark` `.sheet-title` `.sheet-facts` `.sheet-week` `.sheet-actions` `.sheet-more` `.sheet-foot` | kişi sayfası: bir öğretmenin, sınıfın ya da dersliğin her şeyi; aynı çekmece sorun listesini de taşır (`.problem-list`, başlığın altında bölüm segmenti `.sheet-views`, K3). Sağdan kayar, solmaz, çünkü altından iki bin hücre geçiyor. Başı yapışkan ve kâğıt zeminli, bölüm başlıkları `.sheet-h` (küçük, büyük harf, `--muted`), ızgarası kısa satırlı, Sil en altta bir çizginin altında |
 | `.palette` `.palette-row` `.palette-group` `.palette-hint` `kbd` | Ctrl+K |
 | `.toasts` `.toast` `.toast-close` | olan biteni söyleyen kısa satır |
 
@@ -284,14 +284,14 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.pool-stack` | aynı dersin aynı boydaki blokları tek bir deste, ve DOM'da deste başına tek kart. Derinliği `::before` ile `::after` boyuyor, en çok iki katman görünür, blok sayısı `data-count`'ta ve kartın `title`'ında. Yani `.pool-card` sayısı deste sayısıdır |
 | `.pool-card[data-size]` | kartın kaç saat olduğu yazıyla ve genişlikle. Bir ders birden çok kart bırakır (`2+1` bir ikili ve bir tekli), ve hangisinin sürüklendiği kaç hücrenin yanacağını belirler |
 | `.inspect` | bir adı kişi sayfasına bağlayan bağlantı (ızgaranın satır başı) |
-| `.person-open` `table.person-list` `.person-status` `.btn.add-row` | Okul'un öğretmen ve sınıf listesi: kutusuz satırlar, kalın tam ad bir bağlantı gibi okunur, durum küçük ve `--muted` (sığmayan hafta `--bad`), listenin sonundaki ekleme satırı kesik kenarlı, tablonun eni kadar bir düğme |
+| `.person-open` `table.person-list` `.person-status` `.btn.add-row` | Öğretmenler ve Sınıflar listesi: kutusuz satırlar, kalın tam ad bir bağlantı gibi okunur, durum küçük ve `--muted` (sığmayan hafta `--bad`), listenin sonundaki ekleme satırı kesik kenarlı, tablonun eni kadar bir düğme |
 
-### Okul · Dersler · Müsaitlik · Çıktı
+### Listeler · Dersler · Gelemediği saatler · Yazdır ve gönder
 | Sınıf | İş |
 |---|---|
-| `.step` `.step-count` `.step-icon` | Okul'un liste adımları |
+| `.step` `.step-count` `.step-icon` | şeritlerdeki liste düğmeleri, sayısıyla (Liste, Derslikler, Branşlar) |
 | `.split-pick` | Dersler'deki dağılım seçicisi, açılır listesi olan bir düğme. Etiketleri saatle büyüdüğü için sabit bir genişliği yok, yalnız alt sınırı. Listede yanındaki girdiler gibi kâğıt zeminli ve `--line` kenarlı; form satırında ve kişi sayfasında tarayıcının düğmesi |
-| `.intro-line` · `.btn.quiet` | Okul'daki ilk kullanım teklifi ve onu kapatan sessiz düğme. Teklifin yanındaki eşit ağırlıkta ikinci bir düğme, bir kapatmayı bir karara çevirirdi |
+| `.intro-line` · `.btn.quiet` | Okul bilgileri'ndeki ilk kullanım teklifi ve onu kapatan sessiz düğme. Teklifin yanındaki eşit ağırlıkta ikinci bir düğme, bir kapatmayı bir karara çevirirdi |
 | `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi. Simge `steps.tsx`'in `KIND_ICON`'undan |
 | `table.availability` (+`.heat`) | boyanan çizelge ve haftanın darlığı ısı tablosu |
 | `.pickers` `.pick-list` `.pick-item` | hangi sayfaların basılacağı |
@@ -305,7 +305,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 
 Tema, ölçek, havuz, şerit, müsaitlik saati, hareket, dil ve program
 kart rengi bu makinenin tercihleri. State'e ve yedeğe yazılmıyorlar, ve hepsi
-Ayarlar → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların tam
+Okul bilgileri → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların tam
 listesi [DATA.md](DATA.md)'de.
 
 ---

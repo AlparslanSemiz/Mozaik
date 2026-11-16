@@ -19,6 +19,8 @@ import {
   rgb,
   setTheme,
   tokens,
+  openProblems,
+  openPerson,
 } from './helpers';
 
 // 8. Theme
@@ -349,6 +351,8 @@ test.describe('8. Tema', () => {
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await darkTheme(page);
+    // The offer stands over the school's own data, not over Görünüm (K1).
+    await openSettings(page, 'Zil ve günler');
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -378,7 +382,10 @@ test.describe('8. Tema', () => {
     await openWithSample(page);
     await darkTheme(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page
+      .locator('.tabstrip')
+      .getByRole('button', { name: 'Yazdır ve gönder', exact: true })
+      .click();
 
     await page.emulateMedia({ media: 'print' });
     const printed = await tokens(page, ['--paper', '--text']);
@@ -648,8 +655,11 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     // red means "refused", and a column of red crosses out-shouted the lessons.
     // Its mark is the quiet ink, never red, and still the size of the text
     // beside it (asserted above). The hatch is the state on both tables.
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const avail = await page
+    // On the person's page since K1 (2026-11-16); the sample's first teacher
+    // has a closed day.
+    await openSetup(page, 'Öğretmenler');
+    const sheet = await openPerson(page, 0);
+    const avail = await sheet
       .locator('table.availability td.closed')
       .first()
       .evaluate((el) => {
@@ -749,7 +759,13 @@ test.describe('80. Bölüm şeridi', () => {
   // on every section, no colour strip along the bar. Colour is for data and
   // state. What is measured is that every section's lit tab looks the SAME,
   // and that its label reads on it.
-  const SECTIONS = ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
+  const SECTIONS = [
+    'Program',
+    'Öğretmenler',
+    'Sınıflar',
+    'Yazdır ve gönder',
+    'Okul bilgileri',
+  ] as const;
 
   for (const theme of ['light', 'dark'] as const) {
     test(`seçili sekme ${theme} temada her bölümde aynı ve okunuyor`, async ({ page }) => {
@@ -758,7 +774,7 @@ test.describe('80. Bölüm şeridi', () => {
       await reopen(page);
       const seen = new Set<string>();
       for (const section of SECTIONS) {
-        await page.getByRole('button', { name: section, exact: true }).click();
+        await page.locator('.tabstrip').getByRole('button', { name: section, exact: true }).click();
         // Off the tab and past its colour transition: a hovered tab is not
         // the lit tab's resting look.
         await page.mouse.move(960, 700);
@@ -875,10 +891,8 @@ test.describe('93. Listelerde zebra', () => {
       await expect.poll(() => ring(rows.nth(1))).toBe('none');
 
       // table.stat: the same rule, the same token.
-      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-      const stat = page
-        .locator('.panel', { has: page.getByRole('heading', { name: 'Programın durumu' }) })
-        .locator('table.stat tbody tr');
+      await openProblems(page);
+      const stat = page.getByRole('dialog').locator('table.stat tbody tr');
       expect(await stat.count()).toBeGreaterThanOrEqual(2);
       expect(await ground(stat.nth(0))).toBe('rgba(0, 0, 0, 0)');
       expect(await ground(stat.nth(1))).toBe(t['--zebra']);
@@ -886,6 +900,7 @@ test.describe('93. Listelerde zebra', () => {
       await expect.poll(() => ring(stat.nth(1))).toBe('solid');
       expect(await ground(stat.nth(1))).toBe(t['--zebra']);
       await page.mouse.move(0, 0);
+      await page.keyboard.press('Escape');
 
       // The split picker was the one control in a list on the browser's own
       // grey (4.53 in the dark theme, by a hair). On a zebra row it is paper

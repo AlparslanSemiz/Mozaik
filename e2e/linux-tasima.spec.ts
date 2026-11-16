@@ -48,7 +48,9 @@ async function yeniKopya(browser: Browser) {
     if (!/^(file|data|blob|about):/.test(r.url())) istekler.push(r.url());
   });
   await page.goto(FILE);
-  await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+  await expect(
+    page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+  ).toBeVisible();
   return { context, page, istekler };
 }
 
@@ -59,7 +61,9 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
   }) => {
     // The old copy: the sample school, and a second plan with a name of its own.
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(
+      page.locator('.tabstrip').getByRole('button', { name: 'Okul bilgileri', exact: true }),
+    ).toBeVisible();
     expect(new URL(page.url()).protocol).toBe('http:');
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
