@@ -5389,6 +5389,12 @@ table.availability {
   width: 100%;
 }
 
+/* A finger drawn over the hours paints them instead of scrolling the page
+   (iPad). Only the painted cells: the day and hour headings still scroll. */
+table.availability:not(.heat) tbody td {
+  touch-action: none;
+}
+
 table.availability th,
 table.availability td {
   border-right: 1px solid var(--line);

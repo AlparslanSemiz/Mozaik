@@ -6,6 +6,7 @@
  * (ARCHITECTURE, "Doğrudan DOM'a yazma deseni"; pitfall 1).
  */
 export { useDrag, type DragData, type KeyMove } from './drag';
+export { startLongPress } from './longPress';
 export { attachRoving, focusItem } from './roving';
 export { attachGridKeys, cellPlace, focusCellSoon } from './gridKeys';
 export { attachRowDrag, clampIndex } from './rowDrag';
