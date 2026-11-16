@@ -105,7 +105,7 @@ function teshis() {
   );
   bak(
     'süreçler',
-    "Get-Process | Where-Object { $_.Name -like '*Mozaik*' -or $_.Name -like '*kurulum*' -or $_.Name -like '*setup*' } | Select-Object Id, Name, Path, StartTime | Out-String -Width 250",
+    "Get-Process | Where-Object { $_.Name -like '*Mozaik*' -or $_.Name -like 'ders-programi*' -or $_.Name -like '*kurulum*' -or $_.Name -like '*setup*' } | Select-Object Id, Name, Path, StartTime | Out-String -Width 250",
   );
   bak(
     'kayıt defteri',
