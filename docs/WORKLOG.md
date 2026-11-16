@@ -125,10 +125,11 @@ satır başının `innerText`'i boş kaldı, E2E'de 2 kırmızı), `gridFit` yer
 artık gizli tabloyu saymıyor (yoksa ölçü iyileşmiş görünürdü). Son geometri iki derlemede aynı
 (`--cell-min` 32px, `--head-min` 73px, tablo 2410×695, bütün `col` genişlikleri, 1920 ve 1366).
 
-**Yerel, 9 dönüşümlü koşu, medyan (taban → dal, ms):** enUzun 682 → 278 (−59 %), tbt 1481 → 416
-(−72 %), uzun 1731 → 766, fcp 1580 → 928, izgara (görünür) 1204 → 1031 (−14 %), load değişmedi
-sayılır. Dal izinde görevler: 64 + 37 (çizim dilimleri), ~290–310 (commit + ilk yerleşim, en
-uzunu), 66 (ilk kare), 126 (tabanlar + açılış). CI sayısı: yazılacak (taban medyanları
+**Yerel, 9 dönüşümlü koşu, medyan (taban → dal, ms, son derleme):** enUzun 684 → 276 (−60 %),
+tbt 1469 → 384 (−74 %), uzun 1719 → 684 (−60 %), fcp 1556 → 908 (−42 %), izgara (görünür)
+1180 → 987 (−16 %), load 265 → 280 (gürültü içinde). Dal izinde görevler: 52–59 + 33 (çizim
+dilimleri), 250–290 (commit + ilk yerleşim, en uzunu), 75–86 (ilk kare), 118–129 (tabanlar,
+saydamlık kalkar). CI sayısı: yazılacak (taban medyanları
 #77'nin koşusundan: load 383–405, fcp ~1000, izgara ~890–940, tbt ~770–820, enUzun ~460–490).
 
 **Kalan.** En uzun görev artık sayfanın ilk tam yerleşimi (~290 ms yerelde): 3348 öğenin ilk
