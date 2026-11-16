@@ -172,7 +172,16 @@ try {
   await bekleKi('Kapanması', () => calisanlar().length === 0, 30_000);
 } finally {
   await sunucu.kapat();
-  ps('Get-Process -Name Mozaik -ErrorAction SilentlyContinue | Stop-Process -Force');
+  // Best effort: a Mozaik that is already closing makes Stop-Process fail
+  // ("process has exited"), and an error thrown in `finally` would hide the
+  // real result of the steps above (first run on main, 2026-11-16).
+  try {
+    ps(
+      'Get-Process -Name Mozaik -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; exit 0',
+    );
+  } catch {
+    // nothing left to stop
+  }
 }
 
 if (!existsSync(yedek) || !existsSync(profilIsareti)) throw new Error('veri gitti');
