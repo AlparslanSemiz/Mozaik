@@ -426,13 +426,14 @@ jobs:
 
       # Tauri'nin Linux'ta istedikleri (WebKitGTK 4.1 ve GTK), AppImage
       # paketleyicisinin `file`'ı, paketin içine bakan `readelf` (binutils), ve
-      # açılış denemesi için sanal ekran ile oturum veri yolu.
+      # açılış denemesi için sanal ekran, oturum veri yolu ve bir masaüstünün
+      # grafik kütüphaneleri (Mesa: AppImage libEGL/libGL'i sistemden alır).
       - name: System libraries
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
             libayatana-appindicator3-dev libssl-dev patchelf file binutils desktop-file-utils \
-            xvfb dbus libfuse2 >/dev/null
+            xvfb dbus libfuse2 libgtk-3-0 libegl1 libgl1 libgles2 libgbm1 >/dev/null
 
       # Betiksiz ve önbelleksiz, Windows ve Mac işleri gibi.
       - run: npm ci --ignore-scripts

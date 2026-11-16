@@ -126,18 +126,22 @@ jobs:
           - ad: ubuntu-22.04
             runner: ubuntu-22.04
             fuse: libfuse2
+            gtk: libgtk-3-0
             kap: ''
           - ad: ubuntu-24.04
             runner: ubuntu-24.04
             fuse: libfuse2t64
+            gtk: libgtk-3-0t64
             kap: ''
           - ad: debian-12
             runner: ubuntu-24.04
             fuse: ''
+            gtk: ''
             kap: debian:12@sha256:268fb24c39bca92d326dd83ea3abebe4a3f7751c804ffef23bb6d857dd343ff8
           - ad: fedora-42
             runner: ubuntu-24.04
             fuse: ''
+            gtk: ''
             kap: fedora:42@sha256:99e203b80b1c3d8f7e161ec10a68fd02b081ef83a3963553e513c82846b97814
     runs-on: ${{ matrix.runner }}
     container: ${{ matrix.kap }}
@@ -155,18 +159,25 @@ jobs:
           name: linux-appimage
           path: teslim
 
-      - name: A virtual screen and a session bus
+      # A desktop's graphics and text stack, which the AppImage takes from the
+      # system on purpose (linuxdeploy's excludelist: libEGL, libGL, libgbm,
+      # fribidi, harfbuzz, fontconfig, X11; BUILD.md, "Linux"). Every desktop
+      # with GTK has them; a headless runner or a bare container does not, so
+      # GTK 3 and Mesa are installed here, for the smoke run only.
+      - name: A virtual screen, a session bus and a desktop's libraries
         run: |
           set -eu
           if [ -n "${{ matrix.fuse }}" ]; then
             sudo apt-get update -qq
-            sudo apt-get install -y -qq xvfb dbus ${{ matrix.fuse }} >/dev/null
+            sudo apt-get install -y -qq xvfb dbus ${{ matrix.fuse }} ${{ matrix.gtk }} \
+              libegl1 libgl1 libgles2 libgbm1 >/dev/null
           elif command -v apt-get > /dev/null; then
             apt-get update -qq
-            apt-get install -y -qq xvfb dbus fontconfig fonts-dejavu-core libgl1 libegl1 >/dev/null
+            apt-get install -y -qq xvfb dbus fontconfig fonts-dejavu-core libgtk-3-0 \
+              libegl1 libgl1 libgles2 libgbm1 >/dev/null
           else
             dnf install -y -q xorg-x11-server-Xvfb dbus-daemon fontconfig dejavu-sans-fonts \
-              mesa-libGL mesa-libEGL procps-ng >/dev/null
+              gtk3 mesa-libGL mesa-libEGL mesa-libgbm procps-ng >/dev/null
           fi
 
       - name: Does it start and stay up

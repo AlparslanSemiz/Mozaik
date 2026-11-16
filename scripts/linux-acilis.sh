@@ -21,7 +21,8 @@ mkdir -p "$cikti"
 
 ev="$(mktemp -d)"
 trap 'kill "${xvfb:-}" 2>/dev/null || true; rm -rf "$ev"' EXIT
-mkdir -p "$ev/Belgeler" "$ev/.config" "$ev/.local/share" "$ev/.cache"
+mkdir -p "$ev/Belgeler" "$ev/.config" "$ev/.local/share" "$ev/.cache" "$ev/.run"
+chmod 700 "$ev/.run"
 
 Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp > "$cikti/xvfb.log" 2>&1 &
 xvfb=$!
@@ -30,7 +31,11 @@ sleep 2
 arg=()
 if [ "${2:-}" = "--ayikla" ]; then arg=(--appimage-extract-and-run); fi
 
-env DISPLAY=:99 HOME="$ev" XDG_CONFIG_HOME="$ev/.config" XDG_DATA_HOME="$ev/.local/share" \
+# Xvfb has no GPU: software GL, and WebKitGTK without its compositing mode,
+# so a missing GPU does not read as a program that will not start. For this
+# smoke run only; a desktop draws with its own driver.
+env DISPLAY=:99 HOME="$ev" LIBGL_ALWAYS_SOFTWARE=1 WEBKIT_DISABLE_COMPOSITING_MODE=1 \
+  XDG_RUNTIME_DIR="$ev/.run" XDG_CONFIG_HOME="$ev/.config" XDG_DATA_HOME="$ev/.local/share" \
   XDG_CACHE_HOME="$ev/.cache" XDG_DOCUMENTS_DIR="$ev/Belgeler" \
   setsid dbus-run-session -- "$app" "${arg[@]}" > "$cikti/acilis.log" 2>&1 &
 pid=$!

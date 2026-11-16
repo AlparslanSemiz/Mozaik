@@ -477,7 +477,12 @@ siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 Aynı `src-tauri/`, Linux'ta derlenince tek bir AppImage, `Mozaik-linux-x86_64.AppImage`
 (DECISIONS 2026-11-16, "Linux sürümü"). Bütün dağıtımlar için tek dosya: içinde WebKitGTK ve
 GTK, yani dağıtımın kendi WebKitGTK sürümü önemli değil; ekran kartı sürücüleri (libGL, EGL)
-sistemden gelir. Linux'a özgü ayarlar `src-tauri/tauri.linux.conf.json`'da (hedef yalnız
+sistemden gelir, bilerek: linuxdeploy'un dışlama listesi libEGL, libGL, libgbm, fribidi,
+harfbuzz, fontconfig ve X11 kütüphanelerini pakete koymaz, çünkü onlar kullanıcının sürücüsüne
+bağlı ve GTK'lı her masaüstünde kurulu. Bir runner ya da çıplak bir kap onları taşımıyor
+(ilk `linux.yml` koşusu: `libEGL.so.1`, `libfribidi.so.0` yok); açılış denemesi o yüzden GTK 3
+ve Mesa'yı kendisi kurar, Xvfb altında yazılımla çizer (`LIBGL_ALWAYS_SOFTWARE`,
+`WEBKIT_DISABLE_COMPOSITING_MODE`, yalnız `scripts/linux-acilis.sh`'de). Linux'a özgü ayarlar `src-tauri/tauri.linux.conf.json`'da (hedef yalnız
 `appimage`, kategori, medya çatısı yok); Tauri onu yalnız Linux'ta katar. `.deb` ve `.rpm` yok:
 ikisi de kendini güncelleyemez (program `/usr/bin`'de, root'un), `.deb` yalnız Debian ailesinde
 açılır (karar kaydında). Yalnız x86_64.
