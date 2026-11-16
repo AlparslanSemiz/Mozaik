@@ -37,6 +37,9 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- Windows app: a copy that is not installed (the single Mozaik.exe) is now offered the installer of its own version in Settings → About ("Install Mozaik on this computer": the suggestion search's CP-SAT comes only with it), and once in a strip right after it has been updated. The installer runs with a progress bar instead of silently, and if it does not finish Mozaik opens again with a message that gives the code. The old Mozaik.exe is no longer deleted: it opens the installed program, so desktop icons and taskbar pins keep working.
+- Windows app: the suggestion search runs at a lower priority while CP-SAT works, so the window stays usable on a two-core computer.
+
 - Opening a plan file into an empty plan no longer asks first, because nothing can be lost; opening it over a plan that holds something still asks.
 - After "Add" in Lessons the weekly hours go back to 4 and the split to single hours, so the last lesson's number is not reused by mistake.
 - Adding a teacher without a subject now says "Önce bir branş seçin" (choose a subject first) instead of greying out the button without a word.
@@ -69,6 +72,12 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- If the app opens empty while the folder (Belgelerim\Ders Programı in the .exe) holds a fuller plan file, a strip says so, with "Belgelerim'deki son kaydı aç" (open it) and "Boş başla" (start empty); nothing is written to the folder until one is pressed. Before this, a wiped app profile opened empty, the first teacher typed in went over the whole school in the folder's main file and today's backup, and on each following day one more real daily backup was pruned.
+- A change that would leave the plan with under half the rooms, teachers, classes and lessons of the folder's last file no longer goes over it: it is written to that day's rescue file (`ders-programi-kurtarma-YYYY-MM-DD.json`) and a strip says so, with buttons to open the folder's copy or, after a question, keep the smaller plan. The daily backup with the most work in it is never pruned.
+- Deletions that ask no question (class, room, subject, option, teacher, lesson, "Empty the timetable", "Lay out again"), "Delete everything", the sample school over a plan and "Open from file" now keep the plan as it was before them. After a reload, if the plan has not changed since, a strip offers it once: "Son silmeyi geri almak için: Geri getir". Before this their undo lived only in memory and a reload lost it. In a folder the copy is also written as that day's `ders-programi-silmeden-once-YYYY-MM-DD.json`.
+- When a plan's saved text is not even JSON, the folder line now turns red and names the plan instead of the folder silently not being written.
+- "Open all from file" names the plans it skips because they have no id or repeat an earlier one's, instead of dropping them without a word.
+- The plan list is no longer rewritten at every start, and fields a newer copy of Mozaik put in it are kept.
 - On the site, Mozaik asks the browser to keep its storage (`persist`) after the first real change, so it is not cleared when space runs low or, in Safari, after a week without a visit.
 - A site update could store the previous version under the new version's name for up to ten minutes; the service worker now asks past the browser's cache.
 - Saving a plan file could fail in some Safari versions, because the file's address was released in the same moment as the click.
@@ -114,6 +123,10 @@ release is incomplete, the entry says so.
 - Dragging a card along its row no longer stutters in the Fit density. On a full week, 23% of frames were dropped even on a fast machine, and nearly all of them on a slow one. Now none are, and the column widths are exactly what they were. The Linux build also stuttered in both densities, and it is smooth now too.
 - In the Fit density, card text no longer ends in "…" where it can be shown: a class name is written with its first word ("411A" for "411A SAY", on the card and on the class row), and a line that still does not fit is drawn smaller, down to 9px, instead of being cut. Rows keep their height, the full name is still what the card says to a screen reader, and the Comfortable and Spacious densities are unchanged. On a 1920 screen a full week with long class names went from 204 of 211 cards cut to 2; at Windows 125% the sample school went from 315 of 374 to none.
 - In the Fit density, a card in the first lesson of a day is now as wide as the cards beside it. The thick line between days was drawn inside that lesson's column and took 3px of its card, so on Windows a full week with long class names still showed five cards as "41…" at 1920. They now read "415D", "450C" and so on; the other columns are a quarter of a pixel narrower.
+
+### Security
+
+- Windows app: the window now runs under a strict Content Security Policy (no remote scripts, styles, fonts or connections). Updates are only ever downloaded up to the size the release states, and the installer is run from a new folder of its own in the temporary folder. The fast suggestion search's library is loaded only by an installed copy, from its own folder.
 
 ## [2.2.0] - 2026-09-26
 

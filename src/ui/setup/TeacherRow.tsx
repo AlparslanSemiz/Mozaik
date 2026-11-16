@@ -21,7 +21,15 @@ import {
 } from '../../leaf/model';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../program';
-import { ColorPick, LimitBox, moveFocusFromDeleted, useT, useToast, useUndoIf } from '../common';
+import {
+  ColorPick,
+  LimitBox,
+  moveFocusFromDeleted,
+  useT,
+  useKeepBefore,
+  useToast,
+  useUndoIf,
+} from '../common';
 import { GENDERS } from './genders';
 
 interface Props {
@@ -41,6 +49,7 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
   const t = useT();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   const inspect = useInspect();
   return (
     <tr data-row-name={teacher.name}>
@@ -263,6 +272,7 @@ export function TeacherRow({ state, change, teacher, grip, subjects, opening, se
               const said = deletionNotice(state, 'teacher', teacher.id);
               const next = deleteTeacher(state, teacher.id);
               moveFocusFromDeleted(e.currentTarget);
+              keepBefore(state, said);
               change((d) => (d === state ? next : deleteTeacher(d, teacher.id)), said);
               notify(said, 'info', {
                 label: t('Geri al'),

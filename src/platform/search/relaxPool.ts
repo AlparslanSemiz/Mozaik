@@ -244,7 +244,14 @@ function cpsatOr(
       previous: answer.suggestions,
       startRelaid: answer.suggestions.some((x) => x.relaid),
     });
-    const workers = typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4);
+    // At least two: on one worker CP-SAT ignores `subsolvers` and runs its
+    // single-thread default, which never gave the proof. On Windows the exe
+    // lowers its own priority while it solves (cpsat.rs), so the window stays
+    // usable on a weak machine whose every core this occupies.
+    const workers = Math.max(
+      2,
+      typeof navigator === 'undefined' ? 4 : (navigator.hardwareConcurrency ?? 4),
+    );
     let reply: CpAnswer | undefined;
     for (;;) {
       const step = cp.next(reply);

@@ -55,7 +55,7 @@
 
 import { useDeferredValue, useMemo } from 'react';
 import { describeStrip } from '../../pure/program';
-import { useDialogs, useT, useToast, useUndoIf } from '../common';
+import { useDialogs, useKeepBefore, useT, useToast, useUndoIf } from '../common';
 import type { RibbonProps, StripContext } from './parts';
 import { availabilityStrip } from './AvailabilityStrip';
 import { checkStrip } from './CheckStrip';
@@ -71,6 +71,7 @@ export default function Ribbon(props: RibbonProps) {
   const dialogs = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
+  const keepBefore = useKeepBefore();
   // The Program strip's counts walk every lesson's blocks (~4.5 ms on the
   // father's week), and App draws the ribbon on every solver slice. Only the
   // Program tab reads them, and they change only with the plan or the mask
@@ -89,7 +90,7 @@ export default function Ribbon(props: RibbonProps) {
   // having only if it gives the row back whole. The way back is in the top bar.
   if (!open) return null;
 
-  const c: StripContext = { ...props, t, dialogs, notify, undoIf, strip };
+  const c: StripContext = { ...props, t, dialogs, notify, undoIf, keepBefore, strip };
   if (ui.tab === 'setup') return setupStrip(c);
   if (ui.tab === 'lessons') return lessonsStrip(c);
   if (ui.tab === 'availability') return availabilityStrip(c);
