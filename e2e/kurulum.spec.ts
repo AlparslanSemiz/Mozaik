@@ -893,20 +893,24 @@ test.describe('63. Öğretmende cinsiyet', () => {
 
     // The rows are text since 2026-11-16 (K5): the order is read from the
     // names, the genders from the saved plan.
-    const names = await mainList(page)
-      .locator('tbody tr')
-      .evaluateAll((els) => els.map((e) => e.getAttribute('data-row-name') ?? ''));
     const saved = JSON.parse(await savedText(page)) as {
       teachers: Array<{ name: string; gender: string }>;
     };
-    const values = names.map((n) => saved.teachers.find((t) => t.name === n)?.gender ?? '?');
-    // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
-    expect(values).toEqual(
-      [...values].sort((a, b) => {
-        const label = (v: string) => (v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın');
-        return label(a).localeCompare(label(b), 'tr');
-      }),
-    );
+    const label = (v: string) => (v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın');
+    // Polled: the list is a deferred render, and under load the first read
+    // still had the old order (2026-11-16).
+    await expect
+      .poll(async () => {
+        const names = await mainList(page)
+          .locator('tbody tr')
+          .evaluateAll((els) => els.map((e) => e.getAttribute('data-row-name') ?? ''));
+        const values = names.map((n) => saved.teachers.find((t) => t.name === n)?.gender ?? '?');
+        // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
+        return values.every(
+          (v, i) => i === 0 || label(values[i - 1]!).localeCompare(label(v), 'tr') <= 0,
+        );
+      })
+      .toBe(true);
   });
 
   test('Kurulum özeti dağılımı SAYIYOR', async ({ page }) => {

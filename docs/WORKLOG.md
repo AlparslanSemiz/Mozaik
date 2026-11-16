@@ -128,7 +128,7 @@ tarih.
 **Ölçülen.** Üst bar, örnek okul (`scratch/bar.mjs`): 1366 %100/%115 ve 1920 %100–%150 tek
 satır; 1366 %130/%150 önce `?` ikinci satıra düşüyordu (bar 91/105 px), şimdi sekmeler kendi
 satırında (76/87 px), sayfa yana kaymıyor. Boyut: `npm run boyut` önce 1 157 480 B / brotli
-299 040 B, sonra 1 155 093 B / 298 982 B (−58 B brotli).
+299 040 B, sonra 1 154 391 B / 298 847 B (−193 B brotli; `main` ile birleşmiş sonuç raporda).
 
 ## 2026-11-16 · Sadeleşme aşama 3B: beş sekme, sorun listesi çipte, ikinci diziliş plan (`sade/asama-3b`, TODO SD8, K1–K3)
 
