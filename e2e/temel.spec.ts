@@ -211,7 +211,11 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect(page.locator('table.grid td:has(.card)')).toHaveAttribute('colspan', '2');
     await expect(page.locator('.day-head').first()).toHaveText('Cuma');
     // The bell times the migration filled in are visible in the header.
-    await expect(page.locator('table.grid thead').first()).toContainText('09:00');
+    // In the hour heading's title since 2026-11-16 (K6: the grid draws no clock).
+    await expect(page.locator('table.grid thead th[data-col]').first()).toHaveAttribute(
+      'title',
+      /^09:00–/,
+    );
   });
 
   test('v3 biçimli yedek (branş kısaltması yokken) açılıyor, blok yerinde kalıyor', async ({
