@@ -60,6 +60,12 @@ test.describe('İkame', () => {
 
     const day = page.getByRole('dialog', { name: 'Salı 17 Kasım' });
     await expect(day).toBeVisible();
+    // Another date moves the one-day absence with it, and back.
+    await day.getByLabel('Tarih').fill('2026-11-18');
+    await expect(page.getByRole('dialog', { name: 'Çarşamba 18 Kasım' })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Yerine: 2 · 510' })).toBeVisible();
+    await page.getByLabel('Tarih').fill('2026-11-17');
+    await expect(day).toBeVisible();
     const pick = day.getByRole('combobox', { name: 'Yerine: 1 · 510' });
     // Same subject first; Cem teaches another one.
     await expect(pick.locator('option')).toHaveText([
@@ -96,11 +102,6 @@ test.describe('İkame', () => {
     await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
     await expect(paper).toHaveCount(0);
 
-    // Another date moves the one-day absence with it.
-    await day.getByLabel('Tarih').fill('2026-11-18');
-    await expect(page.getByRole('dialog', { name: 'Çarşamba 18 Kasım' })).toBeVisible();
-    await expect(page.getByRole('combobox', { name: 'Yerine: 2 · 510' })).toBeVisible();
-    await page.getByLabel('Tarih').fill('2026-11-17');
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
 

@@ -2201,7 +2201,7 @@ panelinde yalnız ilk yol açık ve tek satır ilerleme, Dersler'deki kutuların
       bütün dersleri) ve bir dersi yalnız o hafta başka saate taşımak, bütçe yüzünden yok;
       (2) ızgara o haftayı göstermiyor, değişiklik yalnız çipte ve tarih sayfasında; (3) İkame
       listesini WhatsApp ya da e-postayla göndermek "gönder" işiyle; (4) 3B birleşince çip yeni
-      Program şeridine taşınır; (5) brotli +2,5 kB, bütçe 2 kB idi (WORKLOG).
+      Program şeridine taşınır; (5) brotli +2,6 kB, bütçe 2 kB idi (WORKLOG).
 
 ## §9. Ham notlar
 
