@@ -47,7 +47,7 @@ import { TABS } from './tabs';
 import Topbar from './Topbar';
 import Notices from './Notices';
 import { useMachinePrefs } from './useMachinePrefs';
-import { useMainScroll } from './useMainScroll';
+import { useMainScroll, useProgramScrollKeep } from './useMainScroll';
 import { useProgramMask } from './useProgramMask';
 import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
@@ -157,6 +157,7 @@ export default function App() {
   );
 
   useMainScroll(mainRef, appRef, tab, ribbonAuto);
+  useProgramScrollKeep(mainRef, tab);
 
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
