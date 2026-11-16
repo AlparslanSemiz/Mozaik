@@ -668,7 +668,9 @@ test.describe('44. Panel simetrisi', () => {
       );
   }
 
-  test('beş yeni-ekleme panelinin başlık, açıklama ve form rayları eşit', async ({ page }) => {
+  // The description rail went behind the heading's "?" on 2026-11-16
+  // (Sadeleşme): the head and the form are the two rails now.
+  test('beş yeni-ekleme panelinin başlık ve form rayları eşit', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
     await openWithSample(page);
     const screens = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar', 'Dersler'];
@@ -676,7 +678,6 @@ test.describe('44. Panel simetrisi', () => {
       name: string;
       height: number;
       head: number;
-      desc: number;
       body: number;
     }> = [];
     for (const name of screens) {
@@ -692,7 +693,6 @@ test.describe('44. Panel simetrisi', () => {
           return {
             height: Math.round(p.height),
             head: rel('.add-panel-head'),
-            desc: rel('.add-panel-description'),
             body: rel('.add-panel-body'),
           };
         });
@@ -706,7 +706,6 @@ test.describe('44. Panel simetrisi', () => {
         ...{
           height: reference.height,
           head: reference.head,
-          desc: reference.desc,
           body: reference.body,
         },
       });
@@ -717,7 +716,7 @@ test.describe('44. Panel simetrisi', () => {
   // is a tab of its own now: the shape is a rule about what a reader meets
   // first, and it does not stop applying when a screen changes address.
   for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
-    test(`${step}: başlık, açıklama, ekleme, liste`, async ({ page }) => {
+    test(`${step}: başlık (? ile), ekleme, liste`, async ({ page }) => {
       await openWithSample(page);
       if (step === 'Dersler') await openLessons(page);
       else await openSetup(page, step);
@@ -731,14 +730,16 @@ test.describe('44. Panel simetrisi', () => {
       const add = await shapeOf(page, '.panel.add-panel');
       const list = await shapeOf(page, '.panel.step-panel');
 
-      // The add block names the work, explains it, then asks for it. Warnings
+      // The add block names the work (its "?" holds the explanation since
+      // 2026-11-16), then asks for it. Warnings
       // are dropped rather than placed: Dersler grows one between the two when
       // there is nothing to add a lesson TO, and where it appears is that
       // screen's business, not this rule's.
       expect(
         add.filter((x) => x !== 'uyari'),
         `${step} ekleme bloğu`,
-      ).toEqual(['baslik', 'aciklama', 'ekleme']);
+      ).toEqual(['baslik', 'ekleme']);
+      await expect(page.locator('.add-panel-head .help-btn')).toHaveCount(1);
       // The list block names what it holds. What follows (search strip, "no
       // match" line, the table) is the list, and only its ORDER is fixed.
       expect(list[0], `${step} liste bloğu başlıkla açmıyor`).toBe('baslik');
@@ -1346,8 +1347,8 @@ test.describe('67. Ders dağılımı', () => {
     // veeya 2 saat x3 gibi gözükmesin kartlarda güzel değil"). It is still in
     // the tooltip, and on screen it is the WIDTH — which is what the reader is
     // choosing between when two cards of one lesson sit side by side.
-    await expect(own.first()).toHaveAttribute('title', /2 saatlik kart/);
-    await expect(own.last()).toHaveAttribute('title', /1 saatlik kart/);
+    await expect(own.first()).toHaveAttribute('title', /2 saatlik ders/);
+    await expect(own.last()).toHaveAttribute('title', /1 saatlik ders/);
   });
 
   // A THREE-hour block, which the model could not express between v7 and v9.
@@ -1374,7 +1375,7 @@ test.describe('67. Ders dağılımı', () => {
     const card = page.locator('.pool-card', { hasText: name }).first();
     await expect(card).toHaveAttribute('data-size', '3');
 
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 60_000,
     });
@@ -1496,7 +1497,7 @@ test.describe('67. Ders dağılımı', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.pool-card', { hasText: name }).first()).toBeVisible();
 
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
       timeout: 60_000,
     });

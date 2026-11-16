@@ -19,6 +19,7 @@ import {
   openWithSample,
   revealRibbon,
   settledMotion,
+  darkTheme,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -78,7 +79,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
   //
   // Read as CAPTIONS rather than as buttons, because that is the level the
   // request was about — which question the strip asks first.
-  test('Program şeridi Görünüm ile başlıyor, kitaplık üçüncü grup', async ({ page }) => {
+  test('Program şeridi Görünüm ile başlıyor, sağ ucu yalnız Daha fazla', async ({ page }) => {
     await openWithSample(page);
     await go(page, 'Program');
 
@@ -99,8 +100,12 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       }
       return sides;
     });
-    expect(left).toEqual(['GÖRÜNÜM', 'DİZ', 'SEÇENEK']);
-    expect(right).toEqual(['RENK', 'YOĞUNLUK', 'IZGARA']);
+    // Since 2026-11-16 (Sadeleşme): the seçenek's name shows only once there
+    // are two, and Renk, Yoğunluk and the grid's operations are behind the
+    // one Daha fazla at the right end.
+    expect(left).toEqual(['GÖRÜNÜM', 'DİZ']);
+    expect(right).toEqual([]);
+    await expect(page.locator('.ribbon > .more-menu')).toHaveCount(1);
 
     // ...and the first control on it is the teacher view, before the class one
     // (the strip's own teacher-before-class rule).
@@ -427,19 +432,25 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     });
   }
 
-  test('şerit katlanınca yedi sekmede de gidiyor, geri gelince duruyor', async ({ page }) => {
+  // The fold lives in Ayarlar → Görünüm since 2026-11-16 (Sadeleşme); Ayarlar
+  // keeps its strip even folded, because its sections and the way back are
+  // there.
+  test("şerit katlanınca altı sekmede gidiyor, Ayarlar'da kalıyor, geri gelince duruyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    // The fold button's accessible name is its `aria-label` — the title
-    // changes with the state and a name that moves is not a name (pitfall 49).
-    const fold = page.getByRole('button', { name: 'Araç şeridi', exact: true });
-    await fold.click();
+    await openSettings(page, 'Görünüm');
+    const group = page.getByRole('group', { name: 'Araç şeridi', exact: true });
+    await group.getByRole('button', { name: 'Gizlensin', exact: true }).click();
 
     for (const tab of TABS) {
       await page.getByRole('button', { name: tab, exact: true }).click();
-      await expect(page.locator('.ribbon')).toHaveCount(0);
+      await expect(page.locator('.ribbon')).toHaveCount(tab === 'Ayarlar' ? 1 : 0);
     }
 
-    await fold.click();
+    await openSettings(page, 'Görünüm');
+    await group.getByRole('button', { name: 'Görünsün', exact: true }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.ribbon')).toBeVisible();
   });
 });
@@ -458,19 +469,33 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     await expect(page.locator('.ribbon')).toBeVisible();
   }
 
-  test('beş kapı: Sorunlar · Danışman · Öğretmenler · Sınıflar · Derslikler', async ({ page }) => {
+  // Two doors on the strip and three behind Daha fazla since 2026-11-16: the
+  // load tables are the same drawing Okul's Özet shows.
+  const LOADS = [
+    ['Öğretmen yükleri', 'Öğretmenler'],
+    ['Sınıf yükleri', 'Sınıflar'],
+    ['Derslik yükleri', 'Derslikler'],
+  ] as const;
+  async function load(page: Page, item: string) {
+    await page.locator('.ribbon .more-menu').click();
+    await page.getByRole('menuitemradio', { name: item }).click();
+  }
+
+  test("beş kapı: Sorunlar · İpuçları, ve Daha fazla'da üç yük", async ({ page }) => {
     await openCheck(page);
     const bar = page.locator('.ribbon');
     await expect(bar.getByRole('button', { name: /^Sorunlar \(\d+\)$/ })).toBeVisible();
-    await expect(bar.getByRole('button', { name: /^Danışman \(\d+\)$/ })).toBeVisible();
-    for (const name of ['Öğretmenler', 'Sınıflar', 'Derslikler']) {
-      await expect(bar.getByRole('button', { name, exact: true })).toBeVisible();
+    await expect(bar.getByRole('button', { name: /^İpuçları \(\d+\)$/ })).toBeVisible();
+    await bar.locator('.more-menu').click();
+    for (const [item] of LOADS) {
+      await expect(page.getByRole('menuitemradio', { name: item })).toBeVisible();
     }
+    await page.keyboard.press('Escape');
+    await expect(bar.locator('.more-menu')).toBeFocused();
   });
 
-  test('şerit sayfayı DEĞİŞTİRİYOR — ve basılı kalıyor', async ({ page }) => {
+  test('şerit sayfayı DEĞİŞTİRİYOR — ve seçili kalıyor', async ({ page }) => {
     await openCheck(page);
-    const bar = page.locator('.ribbon');
 
     // "Programın durumu" is the one panel every view keeps: it is the question
     // a reader arrives with, not one of the answers.
@@ -478,11 +503,15 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
       has: page.getByRole('heading', { name: 'Programın durumu', exact: true }),
     });
 
-    for (const name of ['Öğretmenler', 'Sınıflar', 'Derslikler']) {
-      const button = bar.getByRole('button', { name, exact: true });
-      await button.click();
-      // The click is VISIBLE in two ways: the button latches...
-      await expect(button).toHaveAttribute('aria-pressed', 'true');
+    for (const [item, name] of LOADS) {
+      await load(page, item);
+      // The click is VISIBLE in two ways: the item is ticked...
+      await page.locator('.ribbon .more-menu').click();
+      await expect(page.getByRole('menuitemradio', { name: item })).toHaveAttribute(
+        'aria-checked',
+        'true',
+      );
+      await page.keyboard.press('Escape');
       // ...and the page holds that panel and no other capacity panel.
       await expect(durum).toHaveCount(1);
       await expect(
@@ -505,16 +534,22 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     // Danışman's label carries a live count, like Sorunlar's — matched by
     // pattern rather than a guessed number (the real count comes from the
     // sample school and is not predicted here, pitfall 101).
-    const buttons = [
-      bar.getByRole('button', { name: 'Sorunlar (0)', exact: true }),
-      bar.getByRole('button', { name: /^Danışman \(\d+\)$/ }),
-      bar.getByRole('button', { name: 'Öğretmenler', exact: true }),
-      bar.getByRole('button', { name: 'Sınıflar', exact: true }),
-      bar.getByRole('button', { name: 'Derslikler', exact: true }),
+    const views: Array<() => Promise<string>> = [
+      async () => {
+        await bar.getByRole('button', { name: 'Sorunlar (0)', exact: true }).click();
+        return 'Sorunlar';
+      },
+      async () => {
+        await bar.getByRole('button', { name: /^İpuçları \(\d+\)$/ }).click();
+        return 'İpuçları';
+      },
+      ...LOADS.map(([item]) => async () => {
+        await load(page, item);
+        return item;
+      }),
     ];
-    for (const button of buttons) {
-      const label = await button.innerText();
-      await button.click();
+    for (const view of views) {
+      const label = await view();
       const box = await page.evaluate(() => {
         const m = document.querySelector('.main')!;
         return {
@@ -541,21 +576,12 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     await expect(page.locator('.main')).toContainText('yerleşemeyen ders yok');
   });
 
-  test('şeritteki sayılar raporun kendisiyle aynı şeyi söylüyor', async ({ page }) => {
-    // The strip states rather than asks here, and a reading that disagrees with
-    // the panels under it is worse than no reading.
+  // The strip's "N engel · N uyarı" reading left on 2026-11-16: it said the
+  // chip's number a third time. One count per screen.
+  test('şerit sayıyı bir kez söylüyor: Sorunlar (N), engel/uyarı okuması yok', async ({ page }) => {
     await openCheck(page);
-    const value = page.locator('.ribbon .ribbon-value');
-    await expect(value).toContainText(/\d+ engel/);
-    await expect(value).toContainText(/\d+ uyarı/);
-
-    const blocked = Number((await value.innerText()).match(/(\d+) engel/)![1]);
-    const inPanels = await page.locator('table.stat .badge.impossible').count();
-    // Not equality — the panels also badge closed-hour leftovers and capacity
-    // rows, which the chip counts separately. What must hold is the direction:
-    // a strip saying "0 engel" over a page full of red is the bug.
-    if (blocked > 0) expect(inPanels).toBeGreaterThan(0);
-    else await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toHaveCount(0);
+    await expect(page.locator('.ribbon .ribbon-value')).toHaveCount(0);
+    await expect(page.locator('.ribbon')).not.toContainText(/\d+ (engel|uyarı)/);
   });
 
   test('"Sorunlar (N)" gerçek sorunlu okulda AÇIK ve doğru sayıyor', async ({ page }) => {
@@ -599,62 +625,40 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
 // sections say the same thing — a strip that reads the same wherever you stand
 // is a strip that is not about where you are.
 test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
-  const SECTIONS = ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında'];
+  // Since 2026-11-16 (Sadeleşme): a reading only where the section has one of
+  // its own (Kurallar's levels, the open plan, the version), and on every
+  // section the same Daha fazla at the very end. The theme's copy that stood
+  // here is gone: the theme is in Görünüm's panel alone.
+  const READS: Array<[string, RegExp]> = [
+    ['Kurallar', /kesin.*tercih.*kapalı/i],
+    ['Planlar ve yedek', /Açık plan/i],
+    ['Hakkında', /Sürüm/i],
+  ];
 
-  test('beş bölümün beşinde de sağda bir grup var, ve beşi ayrı şeyler söylüyor', async ({
-    page,
-  }) => {
+  test('okuması olan bölümde sağda okuması var, her bölümde sonda Daha fazla', async ({ page }) => {
     await openWithSample(page);
-
-    const seen: string[] = [];
-    for (const s of SECTIONS) {
+    for (const [s, read] of READS) {
       await openSettings(page, s);
-      const right = await page.evaluate(() => {
-        const bar = document.querySelector('.ribbon')!;
-        const kids = [...bar.children];
-        const at = kids.findIndex((k) => k.classList.contains('spacer'));
-        if (at < 0) return null;
-        const after = kids.slice(at + 1) as HTMLElement[];
-        if (after.length === 0) return null;
-        const box = bar.getBoundingClientRect();
-        return {
-          text: after
-            .map((k) => k.textContent ?? '')
-            .join(' ')
-            .split(/\s+/)
-            .join(' ')
-            .trim(),
-          // Past the middle of the strip: "sağ üstte" is the request itself.
-          rightOfCentre: after[0]!.getBoundingClientRect().left > box.left + box.width / 2,
-          spill: after.some((k) => k.getBoundingClientRect().right > box.right + 1),
-        };
-      });
-      expect(right, `${s}: şeridin sağ ucu boş`).not.toBeNull();
-      expect(right!.text, `${s}: sağ grup boş`).not.toBe('');
-      expect(right!.rightOfCentre, `${s}: sağ grup sağda değil`).toBe(true);
-      expect(right!.spill, `${s}: sağ grup şeridin dışına taştı`).toBe(false);
-      seen.push(right!.text);
+      await expect(page.locator('.ribbon')).toContainText(read);
     }
-
-    // Five sections, five different readings — not one sentence repeated.
-    expect(new Set(seen).size, seen.join(' | ')).toBe(SECTIONS.length);
+    for (const s of ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında']) {
+      await openSettings(page, s);
+      const last = await page.evaluate(
+        () => document.querySelector('.ribbon')!.lastElementChild!.className,
+      );
+      expect(last, s).toContain('more-menu');
+    }
   });
 
-  // The one section whose right-hand group ASKS instead of stating, and the
-  // reason it earns that is scrolling: Görünüm is long enough that the theme
-  // panel — its first — is off the top of the screen by the time you are at
-  // Hareket or Dil. The strip does not move.
-  test('Görünümün sağ ucu temayı GERÇEKTEN çeviriyor', async ({ page }) => {
+  test('tema şeritte değil, yalnız Görünüm panelinde', async ({ page }) => {
     await open(page);
     await openSettings(page, 'Görünüm');
-
-    const ground = () => page.evaluate(() => document.documentElement.dataset.theme ?? '');
-    const rightEnd = page.locator('.ribbon .ribbon-group').last();
-
-    await rightEnd.getByRole('button', { name: 'Koyu', exact: true }).click();
-    expect(await ground()).toBe('dark');
-    await rightEnd.getByRole('button', { name: 'Açık', exact: true }).click();
-    expect(await ground()).toBe('light');
+    await expect(page.locator('.ribbon').getByRole('button', { name: 'Koyu' })).toHaveCount(0);
+    await page
+      .getByRole('group', { name: 'Tema', exact: true })
+      .getByRole('button', { name: 'Koyu', exact: true })
+      .click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 });
 
@@ -706,7 +710,7 @@ test.describe('59. Şeritteki simgeler', () => {
         });
 
     expect(await inkMatches()).toBe(true);
-    await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
+    await darkTheme(page);
     expect(await inkMatches()).toBe(true);
   });
 });

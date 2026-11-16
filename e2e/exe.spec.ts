@@ -19,7 +19,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open, answerDialog } from './helpers';
+import { answerDialog, open, openSettings, openTechnical } from './helpers';
 
 /**
  * What the far side answers when the update is asked about.
@@ -107,15 +107,15 @@ function disk(page: Page): Promise<Record<string, string>> {
 // Two sections since the Ayarlar round: the folder lives with the plans and
 // the backups, the version lives with what this copy IS.
 async function openFolder(page: Page) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
+  await openSettings(page, 'Planlar ve yedek');
   await expect(page.getByRole('heading', { name: 'Nereye kaydedilsin' })).toBeVisible();
 }
 
+// "Veriler nerede" is inside the closed "Teknik bilgiler" since 2026-11-16.
 async function openAbout(page: Page) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Hakkında' }).first().click();
+  await openSettings(page, 'Hakkında');
   await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
+  await openTechnical(page);
 }
 
 const DAILY = /^ders-programi-\d{4}-\d{2}-\d{2}\.json$/;

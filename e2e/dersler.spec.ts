@@ -86,14 +86,13 @@ test.describe('69. Dersler sekmesi', () => {
     const teacherValue = await teacherPick.locator('option').nth(1).getAttribute('value');
     await teacherPick.selectOption(teacherValue!);
 
+    // The total is the list heading's since 2026-11-16 (one count per screen).
+    const heading = page.locator('.panel.step-panel h2').first();
     const before = Number(
-      await page
-        .locator('.ribbon-value')
-        .innerText()
-        .then((t) => t.split(' ')[0]),
+      await heading.innerText().then((t) => t.replace('Dersler · ', '').split(' ')[0]),
     );
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('.ribbon-value')).toContainText(`${before + 1} ders`);
+    await expect(heading).toContainText(`${before + 1} ders`);
 
     // The class is still 411; the teacher is back to "choose one".
     expect(await classPick.inputValue()).not.toBe('');
@@ -267,15 +266,14 @@ test.describe('69. Dersler sekmesi', () => {
     expect((await rail.boundingBox())!.width).toBeCloseTo(wide, 0);
   });
 
-  // Rows and hours, and the same two numbers the strip states. One screen
-  // reading one number two ways is the drift this program keeps catching.
-  test('başlık ders sayısını da saati de söylüyor, şeritle AYNI', async ({ page }) => {
+  // Rows and hours, said ONCE: the strip's copy of the total left on
+  // 2026-11-16 (Sadeleşme, one count per screen).
+  test('başlık ders sayısını da saati de söylüyor, şerit tekrar etmiyor', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'all');
     const heading = await page.locator('.panel.step-panel h2').first().innerText();
     expect(heading).toMatch(/^Dersler · \d+ ders · \d+ saat$/);
-    const strip = await page.locator('.ribbon .ribbon-value').last().innerText();
-    expect(heading.replace('Dersler · ', '')).toBe(strip.trim());
+    await expect(page.locator('.ribbon')).not.toContainText(heading.replace('Dersler · ', ''));
   });
   // A 6 left in the box from the last lesson went silently into the next one
   // (2026-11-15). After Ekle the box is back at the default, and the split

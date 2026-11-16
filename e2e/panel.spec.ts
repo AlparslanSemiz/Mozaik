@@ -17,7 +17,7 @@ test.describe('48. Varlık paneli', () => {
   test('ızgarada satır başına tıklamak o öğretmenin haftasını açıyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     // The row head IS the entity.
@@ -82,7 +82,7 @@ test.describe('48. Varlık paneli', () => {
     await mainList(page)
       .locator('tbody tr')
       .first()
-      .getByRole('button', { name: /bilgileri$/ })
+      .getByRole('button', { name: /^Ayrıntı/ })
       .click();
 
     const sheet = page.locator('.sheet');
@@ -95,7 +95,7 @@ test.describe('48. Varlık paneli', () => {
   test('kapatılan saatte kalmış ders panelde de KIRMIZI (tuzak 16)', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     // Find a teacher who really has something placed, then close their week.
@@ -140,7 +140,7 @@ test.describe('83. Panelden ders aktarma', () => {
     await mainList(page)
       .locator('tbody tr')
       .first()
-      .getByRole('button', { name: /bilgileri$/ })
+      .getByRole('button', { name: /^Ayrıntı/ })
       .click();
 
     await expect(sheet(page)).toBeVisible();
@@ -174,7 +174,7 @@ test.describe('83. Panelden ders aktarma', () => {
     await mainList(page)
       .locator('tbody tr')
       .first()
-      .getByRole('button', { name: /bilgileri$/ })
+      .getByRole('button', { name: /^Ayrıntı/ })
       .click();
 
     await expect(sheet(page)).toBeVisible();
@@ -203,31 +203,31 @@ test.describe('83. Panelden ders aktarma', () => {
     );
     await loadWorld(page, world, 'Okul');
     await openSetup(page, 'Öğretmenler');
-    await mainList(page).getByRole('button', { name: 'MÇ bilgileri' }).click();
+    await mainList(page).getByRole('button', { name: 'Ayrıntı · MÇ' }).click();
 
     const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
     await pick.selectOption('oAV');
     // Precondition: both blocks are on the grid, and AV's week is shut.
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
-      '2 kartı',
+      '2 ders yeni',
     );
     await page.getByRole('button', { name: 'Aktar' }).click();
 
-    await expect(page.locator('.toast').last()).toContainText('2 kart havuza döndü');
+    await expect(page.locator('.toast').last()).toContainText('2 ders havuza döndü');
   });
 
   // The whole reason this is not a one-line teacherId write.
   test('aktarma yeni hocayı ÇİFT REZERVE ETMİYOR', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await openSetup(page, 'Öğretmenler');
     await mainList(page)
       .locator('tbody tr')
       .first()
-      .getByRole('button', { name: /bilgileri$/ })
+      .getByRole('button', { name: /^Ayrıntı/ })
       .click();
     const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
     await pick.selectOption({ index: 1 });
@@ -280,7 +280,7 @@ test.describe('87. Panelden düzenleme', () => {
   async function laidOut(page: import('@playwright/test').Page) {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
   }
 
@@ -326,7 +326,7 @@ test.describe('87. Panelden düzenleme', () => {
   test('dersliğin Ad kutusuna girip çıkmak adı değiştirmiyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Derslikler');
-    await page.getByRole('button', { name: 'A bilgileri' }).click();
+    await page.getByRole('button', { name: 'Ayrıntı · A', exact: true }).click();
     const box = sheet(page).getByRole('textbox', { name: 'Ad' });
     await expect(box).toHaveValue('A');
     await box.focus();
@@ -334,7 +334,7 @@ test.describe('87. Panelden düzenleme', () => {
     await expect(box).toHaveValue('A');
     await page.keyboard.press('Escape');
     // The list's button is named after the room: still "A", not "A dersliği".
-    await expect(page.getByRole('button', { name: 'A bilgileri', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Ayrıntı · A', exact: true })).toBeVisible();
   });
 
   test('karttan "Sınıfı düzenle" SINIFI açıyor — ızgaranın çizilmediği eksen', async ({ page }) => {

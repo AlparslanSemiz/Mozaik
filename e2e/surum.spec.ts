@@ -111,6 +111,9 @@ test.describe('79. Yenilikler', () => {
 
     const panel = changelogPanel(page);
     await expect(panel).toBeVisible();
+    // Folded since 2026-11-16 (Sadeleşme): the newest release opens with one
+    // click, and the archive is a second fold inside.
+    await panel.locator('details > summary').first().click();
 
     // The promise, not today's count: the NEWEST release is open on the page
     // and every older one waits in ONE closed archive. This used to name the
@@ -122,8 +125,9 @@ test.describe('79. Yenilikler', () => {
       await expect(panel.getByText(line, { exact: true })).toBeVisible();
     }
 
-    const archive = panel.locator('details');
-    await expect(archive).toHaveCount(older.length > 0 ? 1 : 0);
+    // The archive is the SECOND fold (the first holds the newest release).
+    const archive = panel.locator('details').nth(1);
+    await expect(panel.locator('details')).toHaveCount(older.length > 0 ? 2 : 1);
     if (older.length > 0) {
       await expect(archive).not.toHaveAttribute('open');
       for (const old of older) {
@@ -141,6 +145,10 @@ test.describe('79. Yenilikler', () => {
     await expect(dot).toBeVisible();
 
     await openSettings(page, 'Hakkında');
+    // Folded since 2026-11-16: the dot goes when the notes are OPENED, not
+    // when the section is drawn with nothing read.
+    await expect(dot).toBeVisible();
+    await changelogPanel(page).locator('details > summary').first().click();
     await expect(dot).toBeHidden();
 
     // ...and the mark is written, not merely the in-memory state: it survives

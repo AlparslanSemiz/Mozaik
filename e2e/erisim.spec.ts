@@ -172,14 +172,6 @@ test.describe('90. Erişilebilirlik taraması', () => {
 // focus on <body> when it closed (Radix returns it to a Dialog.Trigger, and
 // none of ours has one), so the next Tab started from the top of the page.
 test.describe('91. Odak: diyalog kapanınca ve içeriğe geçerken', () => {
-  /** Says which element has focus, by its accessible-ish name. */
-  const odakta = (page: import('@playwright/test').Page) =>
-    page.evaluate(() => {
-      const el = document.activeElement;
-      if (el === null || el === document.body) return 'BODY';
-      return `${el.tagName}:${el.getAttribute('aria-label') ?? el.id ?? ''}`;
-    });
-
   test('ilk Tab "İçeriğe geç", Enter içerik alanına götürür', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
@@ -193,22 +185,54 @@ test.describe('91. Odak: diyalog kapanınca ve içeriğe geçerken', () => {
     ).toBe(true);
   });
 
-  for (const ad of ['Klavye kısayolları', 'Ara ve git']) {
-    test(`"${ad}" Esc ile kapanınca odak düğmesine döner`, async ({ page }) => {
+  // Both are behind the top bar's "?" menu since 2026-11-16 (Sadeleşme): the
+  // keyboard opens the menu, picks the item, and Esc on the window brings
+  // focus back to the "?" it all started from.
+  for (const ad of ['Klavye kısayolları', 'Ara ve yap']) {
+    test(`"${ad}" Esc ile kapanınca odak "?" düğmesine döner`, async ({ page }) => {
       await open(page);
-      const button = page.getByRole('button', { name: ad, exact: true });
+      const button = page.locator('.topbar .topbar-help');
       await button.focus();
+      await page.keyboard.press('Enter');
+      await page.getByRole('menuitem', { name: new RegExp(ad) }).focus();
       await page.keyboard.press('Enter');
       await expect(page.getByRole('dialog')).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toHaveCount(0);
-      await expect.poll(() => odakta(page)).toBe(`BUTTON:${ad}`);
+      await expect(button).toBeFocused();
     });
   }
 
+  test('Daha fazla menüsü klavyeyle açılıyor, Esc ile kapanınca odak düğmeye dönüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    const more = page.locator('.ribbon .more-menu');
+    await more.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('menu')).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Yeniden yap' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('menu')).toHaveCount(0);
+    await expect(more).toBeFocused();
+  });
+
+  test('"?" açıklaması klavyeyle açılıp kapanıyor, odak geri dönüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+    const help = page.getByRole('button', { name: 'Açıklama: Kurallar' });
+    await help.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.help-pop')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.help-pop')).toHaveCount(0);
+    await expect(help).toBeFocused();
+  });
+
   test('kart menüsünden açılan ders penceresi kapanınca odak karta döner', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     const card = page.locator('table.grid .card').first();

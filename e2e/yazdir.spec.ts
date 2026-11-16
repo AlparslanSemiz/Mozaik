@@ -15,6 +15,7 @@ import {
   onScreen,
   openLessons,
   PDF_YALNIZ_CHROMIUM,
+  darkTheme,
 } from './helpers';
 import { makeWorld } from '../src/pure/worlds';
 
@@ -61,7 +62,7 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
   test('blok kâğıtta TEK hücre — ve satır hâlâ tam hafta', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
@@ -88,7 +89,7 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
   test('birleşmiş hücre ÖĞLE ARASINI yutmuyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
@@ -560,7 +561,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     // light sheet the printer gets. Measured on the SHEET, not on :root, and
     // on a world with a placed lesson: the sample has none, so no card.
     await loadWorld(page, PAPER_WORLD, 'Çıktı');
-    await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
+    await darkTheme(page);
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     const m = await page.evaluate(() => {

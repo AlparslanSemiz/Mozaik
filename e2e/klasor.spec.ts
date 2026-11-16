@@ -25,7 +25,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { reopen } from './helpers';
+import { openSettings, reopen } from './helpers';
 
 const KLASOR = 'Belgelerim';
 
@@ -108,8 +108,7 @@ const DOLU_PAKET = JSON.stringify({
 });
 
 async function openData(page: Page) {
-  await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
+  await openSettings(page, 'Planlar ve yedek');
   await expect(page.getByRole('heading', { name: 'Nereye kaydedilsin' })).toBeVisible();
 }
 

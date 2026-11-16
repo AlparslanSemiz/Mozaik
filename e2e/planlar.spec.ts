@@ -8,14 +8,16 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFile } from 'node:fs/promises';
 import {
-  reopen,
+  answerDialog,
   dragAndDrop,
+  openFileMenu,
   openSettings,
   openSetup,
+  openTechnical,
   openWithSample,
+  reopen,
   savedText,
   settledText,
-  answerDialog,
 } from './helpers';
 
 const picker = (page: Page) => page.getByLabel('Plan', { exact: true });
@@ -54,12 +56,18 @@ async function openWithOneLesson(page: Page) {
 const openRow = (page: Page) => page.locator('table.list tr[aria-current="true"]');
 
 test.describe('40. Plan kitaplığı', () => {
-  test('üst çubukta plan seçici var ve tek plan "Plan 1" adıyla geliyor', async ({ page }) => {
+  // Since 2026-11-16 (Sadeleşme) the picker shows only once there is a second
+  // plan to pick: with one, "Plan 1" answered a question nobody asked.
+  test('tek planda üst çubukta seçici yok, plan "Plan 1"; ikinci planla seçici geliyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
+    await expect(picker(page)).toHaveCount(0);
+    await openPlans(page);
+    await expect(page.getByLabel('Plan 1 adı')).toBeVisible();
+    await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
     await expect(picker(page)).toBeVisible();
-    await expect(picker(page).locator('option')).toHaveCount(1);
-    await expect(picker(page)).toHaveValue('1');
-    await expect(picker(page).locator('option')).toHaveText(['Plan 1']);
+    await expect(picker(page).locator('option')).toHaveCount(2);
   });
 
   test('devralma: kitaplık kurulsa da program ESKİ anahtarda duruyor', async ({ page }) => {
@@ -141,9 +149,13 @@ test.describe('40. Plan kitaplığı', () => {
     await expect(
       page.locator('.topbar').getByRole('button', { name: 'Geri al', exact: true }),
     ).toBeDisabled();
-    await expect(
-      page.locator('.topbar').getByRole('button', { name: 'İleri al', exact: true }),
-    ).toBeDisabled();
+    // İleri al is an item of Dosya ▾ since 2026-11-16.
+    await openFileMenu(page);
+    await expect(page.getByRole('menuitem', { name: /İleri al/ })).toHaveAttribute(
+      'data-disabled',
+      '',
+    );
+    await page.keyboard.press('Escape');
   });
 
   test('değişiklikten hemen sonra geçmek o değişikliği GİDEN planda bırakıyor', async ({
@@ -177,9 +189,10 @@ test.describe('40. Plan kitaplığı', () => {
     await box.fill('Güz dönemi');
     await box.blur();
 
-    await expect(picker(page).locator('option')).toHaveText(['Güz dönemi']);
+    // One plan: no picker; the name is kept in the plan's own row.
     await reopen(page);
-    await expect(picker(page).locator('option')).toHaveText(['Güz dönemi']);
+    await openPlans(page);
+    await expect(page.getByLabel('Güz dönemi adı')).toHaveValue('Güz dönemi');
   });
 
   test('silme onay soruyor ve ne kaybedileceğini SAYIYOR', async ({ page }) => {
@@ -198,9 +211,9 @@ test.describe('40. Plan kitaplığı', () => {
 
     await openRow(page).getByRole('button', { name: 'Sil', exact: true }).click();
     await answerDialog(page);
-    await expect(picker(page).locator('option')).toHaveCount(1);
-    // Deleting the OPEN plan lands on the survivor, not on an empty screen.
-    await expect(picker(page)).toHaveValue('1');
+    // One plan left: the picker goes (since 2026-11-16). Deleting the OPEN
+    // plan lands on the survivor, not on an empty screen.
+    await expect(picker(page)).toHaveCount(0);
     expect(await placedCards(page)).toBe(before);
   });
 
@@ -227,7 +240,7 @@ test.describe('40. Plan kitaplığı', () => {
     const bar = (await page.locator('header.topbar').boundingBox())!;
     const box = (await page.getByLabel('Plan', { exact: true }).boundingBox())!;
     expect(box.x + box.width).toBeLessThanOrEqual(bar.x + bar.width + 1);
-    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Kaydet', exact: true })).toBeVisible();
   });
 });
 
@@ -369,7 +382,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await openPlans(page);
     await page.getByRole('button', { name: 'Sil', exact: true }).nth(1).click();
     await answerDialog(page);
-    await expect(picker(page).locator('option')).toHaveCount(1);
+    await expect(picker(page)).toHaveCount(0);
 
     await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
       name: 'ders-programi-tumu-2026-08-25-1200.json',
@@ -471,7 +484,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
       .locator('.hint.bad[role="status"]');
     await expect(note).toContainText('okunamadı');
     await expect(note).not.toContainText('Dosyadan aç');
-    await expect(picker(page).locator('option')).toHaveCount(1);
+    await expect(picker(page)).toHaveCount(0);
   });
 
   // B7.34: a plan from a newer program asks for the program to be updated; it
@@ -502,7 +515,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
   test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
     await openWithSample(page);
     const single = await grab(page, () =>
-      page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }).click(),
+      page.getByRole('button', { name: 'Kaydet', exact: true }).click(),
     );
 
     await openPlans(page);
@@ -512,7 +525,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
       buffer: Buffer.from(single.text),
     });
     await expect(page.locator('.panel .hint.bad[role="status"]')).toContainText('Dosyadan aç');
-    await expect(picker(page).locator('option')).toHaveCount(1);
+    await expect(picker(page)).toHaveCount(0);
   });
 });
 
@@ -525,6 +538,7 @@ test.describe('43. Veriler nerede', () => {
     await openSettings(page, 'Planlar ve yedek');
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
     await openSettings(page, 'Hakkında');
+    await openTechnical(page);
 
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     const shown = await panel.locator('tbody code').allInnerTexts();

@@ -12,20 +12,21 @@ import { readFileSync } from 'node:fs';
 import type { State } from '../src/leaf/model/types';
 import { expect, test } from './kapan';
 import {
-  loadWorld,
-  reopen,
-  openSetup,
-  revealRibbon,
+  PDF_YALNIZ_CHROMIUM,
   chooseDensity,
-  chooseUiDensity,
-  open,
-  openWithSample,
-  openSettings,
   chooseScale,
+  chooseUiDensity,
+  loadWorld,
+  open,
+  openGridMenu,
+  openMoreSub,
+  openSettings,
+  openSetup,
+  openWithSample,
+  reopen,
+  revealRibbon,
   savedText,
   settledText,
-  openGridMenu,
-  PDF_YALNIZ_CHROMIUM,
 } from './helpers';
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
@@ -293,7 +294,10 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
       const left = cols.firstElementChild!;
       const rail = cols.querySelector('aside')!;
       const titles = (root: Element) =>
-        [...root.querySelectorAll(':scope > .panel > h2')].map((h) => h.textContent?.trim() ?? '');
+        // A heading with its "?" sits in a `.panel-head` since 2026-11-16.
+        [...root.querySelectorAll(':scope > .panel > h2, :scope > .panel > .panel-head > h2')].map(
+          (h) => h.textContent?.trim() ?? '',
+        );
       return { left: titles(left), rail: titles(rail) };
     });
 
@@ -464,7 +468,7 @@ test.describe('46. Görünüm — Ferah', () => {
   test('Ferah hücreyi büyütüyor ve kartın alt satırını geri veriyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     const roomy = await gridMetrics(page);
@@ -491,14 +495,16 @@ test.describe('46. Görünüm — Ferah', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
-    // The strip is where this decision is actually taken: you are looking at
-    // the grid when you take it.
-    const strip = page.locator('.ribbon');
-    await strip.getByRole('button', { name: 'Ferah', exact: true }).click();
-    await expect(strip.getByRole('button', { name: 'Ferah', exact: true })).toHaveAttribute(
-      'aria-pressed',
+    // Taken while looking at the grid: Daha fazla → Yoğunluk since
+    // 2026-11-16 (Sadeleşme; phase 3 removes the three, K6).
+    await openMoreSub(page, /^Yoğunluk/);
+    await page.getByRole('menuitemradio', { name: 'Ferah', exact: true }).click();
+    await openMoreSub(page, /^Yoğunluk/);
+    await expect(page.getByRole('menuitemradio', { name: 'Ferah', exact: true })).toHaveAttribute(
+      'aria-checked',
       'true',
     );
+    await page.keyboard.press('Escape');
 
     await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -527,7 +533,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     // "nothing is clipped" assertion pass on a grid with nothing in it, which
     // is exactly the free green pitfall 33 warned about — the cards are what
     // set the column's floor once the clock is gone.
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('table.grid .card').first()).toBeVisible();
 
@@ -600,7 +606,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       await openWithSample(page);
       if (target.scale !== 100) await chooseScale(page, target.scale);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
-      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
       await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
         timeout: 30_000,
       });
@@ -661,7 +667,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       await openWithSample(page);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
       await page.getByRole('button', { name: view }).click();
-      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
       await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
         timeout: 30_000,
       });
@@ -699,7 +705,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     await page.setViewportSize({ width: 1600, height: 968 });
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
     await chooseDensity(page, 'Sığdır');
@@ -851,7 +857,7 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
             await openWithSample(page);
             await page.getByRole('button', { name: 'Program', exact: true }).click();
             await page.getByRole('button', { name: view }).click();
-            await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+            await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
             await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
               timeout: 30_000,
             });
@@ -927,9 +933,19 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
   });
 });
 
-/** Müsaitlik's own strip holds it; `.ribbon` scopes the short name (pitfall 49). */
-function hoursButton(page: import('@playwright/test').Page) {
-  return page.locator('.ribbon .btn').filter({ hasText: /^Saatler$/ });
+/** Müsaitlik's Daha fazla holds it since 2026-11-16 (Sadeleşme), as a ticked item. */
+async function hoursOn(page: import('@playwright/test').Page): Promise<boolean> {
+  await page.locator('.ribbon .more-menu').click();
+  const on = await page
+    .getByRole('menuitemcheckbox', { name: 'Saatler' })
+    .getAttribute('aria-checked');
+  await page.keyboard.press('Escape');
+  return on === 'true';
+}
+async function toggleHours(page: import('@playwright/test').Page): Promise<void> {
+  await page.locator('.ribbon .more-menu').click();
+  await page.getByRole('menuitemcheckbox', { name: 'Saatler' }).click();
+  await page.keyboard.press('Escape');
 }
 
 test.describe('50. Müsaitlikte saat gösterimi', () => {
@@ -951,7 +967,7 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     // Ayarlar → Görünüm: what it changes is on this table, and it used to be
     // reached by leaving the table to find it.
     await revealRibbon(page);
-    await hoursButton(page).click();
+    await toggleHours(page);
     await expect(clock).toBeVisible();
     await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
 
@@ -996,7 +1012,7 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     const before = (await grid.boundingBox())!;
 
     await revealRibbon(page);
-    await hoursButton(page).click();
+    await toggleHours(page);
     await expect(clock).toBeVisible();
     await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
 
@@ -1024,9 +1040,9 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     // One button with two states rather than two labels: `aria-pressed` is
     // what a toggle says, and a label that renames itself cannot be found by
     // the name it had a moment ago.
-    await expect(hoursButton(page)).toHaveAttribute('aria-pressed', 'false');
-    await hoursButton(page).click();
-    await expect(hoursButton(page)).toHaveAttribute('aria-pressed', 'true');
+    expect(await hoursOn(page)).toBe(false);
+    await toggleHours(page);
+    expect(await hoursOn(page)).toBe(true);
 
     await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-avail-clock', 'acik');
@@ -1052,14 +1068,14 @@ test.describe('51. Program: programı boşalt', () => {
   test('dizilmiş programı havuza geri gönderiyor, geri alınabiliyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await page.getByRole('button', { name: 'Programı yap', exact: true }).click();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     const placed = await page.locator('table.grid .card').count();
     expect(placed).toBeGreaterThan(0);
 
     await openGridMenu(page);
     await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
-    // Not the same thing as "Baştan diz": that one refills the grid. This one
+    // Not the same thing as "Yeniden yap": that one refills the grid. This one
     // clears it, which is what the reader asked for by name. No question since
     // SD1: it happens, and the notice says so and offers "Geri al".
     await expect(page.locator('.dlg')).toHaveCount(0);

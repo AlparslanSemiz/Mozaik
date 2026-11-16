@@ -17,11 +17,13 @@ import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import {
   contrast,
+  darkTheme,
   listWorld,
   loadWorld,
   openLessons,
   openSettings,
   openSetup,
+  openTechnical,
   openWithSample,
   openWithSampleTheme,
   savedText,
@@ -258,7 +260,10 @@ const ORNEK: Liste[] = [
   },
   {
     ad: 'Veriler nerede',
-    git: (p) => openSettings(p, 'Hakkında'),
+    git: async (p) => {
+      await openSettings(p, 'Hakkında');
+      await openTechnical(p);
+    },
     satir: '.panel:has(h2:text-is("Veriler nerede")) table.stat > tbody > tr',
   },
   {
@@ -272,11 +277,24 @@ const kontrol = (adi: RegExp) => async (p: Page) => {
   await p.getByRole('button', { name: 'Kontrol', exact: true }).click();
   await p.locator('.ribbon').getByRole('button', { name: adi }).click();
 };
+// The three load tables are behind Kontrol's Daha fazla since 2026-11-16.
+const yuk = (item: string) => async (p: Page) => {
+  await p.getByRole('button', { name: 'Kontrol', exact: true }).click();
+  await p.locator('.ribbon .more-menu').click();
+  await p.getByRole('menuitemradio', { name: item }).click();
+};
 const panelRows = (h2: string, table = 'table') =>
   `.panel:has(h2:text-matches("^${h2}")) ${table} > tbody > tr`;
 
 const DUNYA: Liste[] = [
-  { ad: 'Programın durumu', git: kontrol(/^Sorunlar/), satir: panelRows('Programın durumu') },
+  // Two rows since 2026-11-16 (the week's fill % and free class hours left):
+  // too short a list to have a stripe worth measuring, so only its ink.
+  {
+    ad: 'Programın durumu',
+    git: kontrol(/^Sorunlar/),
+    satir: panelRows('Programın durumu'),
+    tek: true,
+  },
   { ad: 'Kapalı saatte ders', git: kontrol(/^Sorunlar/), satir: panelRows('Kapalı saatte ders') },
   { ad: 'Kural ihlalleri', git: kontrol(/^Sorunlar/), satir: panelRows('Kural ihlalleri') },
   {
@@ -284,20 +302,20 @@ const DUNYA: Liste[] = [
     git: kontrol(/^Sorunlar/),
     satir: panelRows('Yerleşemeyen dersler'),
   },
-  { ad: 'Danışman notları', git: kontrol(/^Danışman/), satir: panelRows('Danışman notları') },
+  { ad: 'İpuçları', git: kontrol(/^İpuçları/), satir: panelRows('İpuçları') },
   {
     ad: 'Öğretmenlerin kapasitesi',
-    git: kontrol(/^Öğretmenler$/),
+    git: yuk('Öğretmen yükleri'),
     satir: '#kontrol-ogretmenler table.stat > tbody > tr',
   },
   {
     ad: 'Sınıfların kapasitesi',
-    git: kontrol(/^Sınıflar$/),
+    git: yuk('Sınıf yükleri'),
     satir: '#kontrol-siniflar table.stat > tbody > tr',
   },
   {
     ad: 'Dersliklerin kapasitesi',
-    git: kontrol(/^Derslikler$/),
+    git: yuk('Derslik yükleri'),
     satir: '#kontrol-derslikler table.stat > tbody > tr',
   },
   {
@@ -357,7 +375,7 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
         page,
       }) => {
         await loadWorld(page, listWorld(), 'Kontrol');
-        if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+        if (theme === 'dark') await darkTheme(page);
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await olc(page, l, theme);
       });
@@ -418,9 +436,15 @@ test.describe('94. Zebra: her listede, görünen sırayla', () => {
         let grouped = false;
         for (let i = 0; i < (await chips.count()) && !grouped; i++) {
           await chips.nth(i).click();
+          // Wait for the list to answer the click: read at once, the count
+          // could still be the unfiltered one and the chip got clicked off.
+          await expect.poll(() => rows.count()).toBeLessThan(total);
           const n = await rows.count();
           if (n >= 3 && n < total) grouped = true;
-          else await chips.nth(i).click();
+          else {
+            await chips.nth(i).click();
+            await expect.poll(() => rows.count()).toBe(total);
+          }
         }
         expect(grouped, `${l.ad}: süzen bir grup çipi bulunamadı`).toBe(true);
         await check('grup çipinden sonra');

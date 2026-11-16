@@ -37,8 +37,12 @@ async function load(page: Page, world: WorldSpec) {
  * the three used to be stacked in a sticky rail, reached by buttons that called
  * `scrollIntoView` at a rail that never moves.
  */
+// The three load tables are behind the strip's Daha fazla since 2026-11-16.
 async function showCapacity(page: Page, which: string) {
-  await page.locator('.ribbon').getByRole('button', { name: which, exact: true }).click();
+  const item =
+    { Öğretmenler: 'Öğretmen yükleri', Sınıflar: 'Sınıf yükleri' }[which] ?? 'Derslik yükleri';
+  await page.locator('.ribbon .more-menu').click();
+  await page.getByRole('menuitemradio', { name: item }).click();
 }
 
 test.describe('26. Kontrol — kapasite', () => {
@@ -73,8 +77,9 @@ test.describe('26. Kontrol — kapasite', () => {
       }),
       'Kontrol',
     );
-    await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
-    await expect(page.locator('.ok-box')).toContainText('Sıkışık');
+    // The week is fully laid out, so since 2026-11-16 the box says so rather
+    // than "it can be laid out" — and still never "Dikkat".
+    await expect(page.locator('.ok-box')).toContainText('Program tamam');
     await expect(page.locator('.warn-box')).toHaveCount(0);
   });
 
@@ -234,7 +239,8 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     await expect(page.locator('.check-page .warn-box').first()).toContainText(
       '1 dersin 1 saati kapalı saatte kaldı',
     );
-    await expect(page.locator('.ribbon')).toContainText('1 engel');
+    // The strip's "N engel" reading left on 2026-11-16; Sorunlar counts it.
+    await expect(page.locator('.ribbon')).toContainText('Sorunlar (1)');
   });
 });
 
@@ -250,9 +256,9 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
 
     await page
       .locator('.ribbon')
-      .getByRole('button', { name: /^Danışman/ })
+      .getByRole('button', { name: /^İpuçları/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
+    const panel = page.locator('.panel', { hasText: 'İpuçları' });
     await expect(panel).toContainText('yalnızca 1 gün var');
     await expect(panel).toContainText('en az bir günde iki kez görülecek');
     // A single-day world with a 2-block lesson trips BOTH heuristics — the
@@ -275,9 +281,9 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await page
       .locator('.ribbon')
-      .getByRole('button', { name: /^Danışman/ })
+      .getByRole('button', { name: /^İpuçları/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
+    const panel = page.locator('.panel', { hasText: 'İpuçları' });
     await expect(panel).toContainText('MÇ yalnızca 1 günde müsait');
     await expect(panel).toContainText('bir güne iki kez düşebilir');
   });
@@ -293,11 +299,11 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await page
       .locator('.ribbon')
-      .getByRole('button', { name: /^Danışman/ })
+      .getByRole('button', { name: /^İpuçları/ })
       .click();
-    const panel = page.locator('.panel', { hasText: 'Danışman notları' });
+    const panel = page.locator('.panel', { hasText: 'İpuçları' });
     await expect(panel).toContainText('2 ayrı bloğa bölünmüş');
-    await expect(panel).toContainText('çözücünün deneyebileceği tek şekil bu');
+    await expect(panel).toContainText("Mozaik'in deneyebileceği tek şekil bu");
   });
 
   test('şeritteki Danışman düğmesi sayıyı taşıyor', async ({ page }) => {
@@ -305,7 +311,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
     });
     await expect(
-      page.locator('.ribbon').getByRole('button', { name: /^Danışman \(\d+\)$/ }),
+      page.locator('.ribbon').getByRole('button', { name: /^İpuçları \(\d+\)$/ }),
     ).toBeVisible();
   });
 });
@@ -324,7 +330,14 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
  * memory.
  */
 test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
-  const VIEWS = ['Sorunlar', 'Danışman', 'Öğretmenler', 'Sınıflar', 'Derslikler'] as const;
+  // Two on the strip, three behind Daha fazla since 2026-11-16 (Sadeleşme).
+  const VIEWS = [
+    'Sorunlar',
+    'İpuçları',
+    'Öğretmen yükleri',
+    'Sınıf yükleri',
+    'Derslik yükleri',
+  ] as const;
 
   async function box(page: Page) {
     return page.evaluate(() => {
@@ -348,10 +361,15 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
       // other three do not — a prefix match covers both without risking a
       // collision with another button (pitfall 49): this locator is already
       // scoped to the Kontrol strip alone.
-      await page
-        .locator('.ribbon')
-        .getByRole('button', { name: new RegExp('^' + view) })
-        .click();
+      if (view.endsWith('yükleri')) {
+        await page.locator('.ribbon .more-menu').click();
+        await page.getByRole('menuitemradio', { name: view }).click();
+      } else {
+        await page
+          .locator('.ribbon')
+          .getByRole('button', { name: new RegExp('^' + view) })
+          .click();
+      }
       await settledMotion(page);
       const m = await box(page);
       rows.push({ view, ...m });

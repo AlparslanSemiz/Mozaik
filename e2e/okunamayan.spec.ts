@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open } from './helpers';
+import { open, openSettings } from './helpers';
 import { SCHEMA_VERSION } from '../src/leaf/model';
 
 const DOLU = JSON.parse(readFileSync(resolve('src/fixtures/tam-dolu-kurs-dizili.json'), 'utf8'));
@@ -98,8 +98,7 @@ test.describe('94. Okunamayan kayıt üzerine yazılmıyor', () => {
 
   test('madde 7: okunamayan yedek Ayarlar → Planlar ve yedek’te görünüyor', async ({ page }) => {
     await seedAndReload(page, { 'ders-programi-yedek-0': YENI });
-    await page.getByRole('button', { name: 'Ayarlar' }).click();
-    await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
+    await openSettings(page, 'Planlar ve yedek');
     const panel = page.locator('.panel', { hasText: 'Bu bilgisayardaki otomatik yedekler' });
     await expect(panel).toContainText('bir önceki açılış');
     await expect(panel).toContainText('daha yeni bir sürümle yazılmış');

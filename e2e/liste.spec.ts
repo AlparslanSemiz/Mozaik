@@ -37,7 +37,9 @@ test.describe('49. Liste araçları', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
     await expect(rows(page)).toHaveCount(25);
-    await expect(page.locator('.list-count')).toContainText('25 öğretmen');
+    // The plain total is the strip's since 2026-11-16 (one count per screen);
+    // the list says a number only while it is narrowed.
+    await expect(page.locator('.list-count')).toHaveText('');
 
     await page.getByLabel('öğretmen ara').fill('matematik');
     await expect(rows(page)).toHaveCount(3);
