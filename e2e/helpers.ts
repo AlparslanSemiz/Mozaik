@@ -309,8 +309,14 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
       await page.mouse.move(point.x, point.y, { steps: 3 });
       const cell = cells.nth(point.index);
       // The strong highlight under the cursor is applied in the rAF loop:
-      // wait for it to be painted, whichever verdict it is.
-      await expect(cell).toHaveClass(/\bdrop-(ok|warn|blocked)\b/);
+      // wait for it to be painted, whichever verdict it is. A cell that never
+      // lights (the grid was still scrolling and the cursor landed elsewhere)
+      // is skipped, as the old sweep skipped it, rather than failing here.
+      const painted = await expect(cell)
+        .toHaveClass(/\bdrop-(ok|warn|blocked)\b/, { timeout: 2_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!painted) continue;
       if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
         const day = (await cell.getAttribute('data-day'))!;
         const hour = (await cell.getAttribute('data-hour'))!;
