@@ -65,7 +65,7 @@ minisign-verify = "0.3"
 # Loads OR-Tools' CP-SAT (cpsat.rs) when the installer put it next to the
 # program, and only then: a missing library is a sentence, not a program that
 # will not start. Already in the lock at this version (a tauri dependency).
-libloading = "0.7"
+libloading = "0.9"
 
 [dev-dependencies]
 # update.rs's tests: a recorded manifest read back, and a 2.2.0 copy still
