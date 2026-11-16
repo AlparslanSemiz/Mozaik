@@ -39,7 +39,7 @@ function world(): State {
     ...w,
     teachers: w.teachers.map((t) =>
       t.id === 'tAY'
-        ? { ...t, name: 'Ayşe Yılmaz', email: 'ayse@ornek.com' }
+        ? { ...t, name: 'Ayşe Yılmaz', email: 'ayse@ornek.com', phone: '0555 000 00 01' }
         : { ...t, name: 'Mehmet Çelik' },
     ),
   };
@@ -264,5 +264,80 @@ test.describe('Kişi sayfası', () => {
     await expect(sheet.locator('table.sheet-lessons')).toContainText('Ayşe Yılmaz');
     await expect(sheet.getByRole('button', { name: 'Yazdır', exact: true })).toBeVisible();
     await expect(sheet.getByRole('button', { name: 'Gönder' })).toHaveCount(0);
+  });
+
+  // B3.4, the WhatsApp half: the PDF is saved and the chat opens in ONE
+  // click. `window.open` is caught rather than followed: the test makes no
+  // request to wa.me.
+  test('WhatsApp PDF’yi kaydedip öğretmenin sohbetini açıyor, numarasıza nereye yazılacağını söylüyor', async ({
+    page,
+  }) => {
+    await openTeachers(page);
+    await page.evaluate(() => {
+      window.open = ((url: string) => {
+        (window as unknown as { acilan: string }).acilan = url;
+        return null;
+      }) as typeof window.open;
+    });
+    await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
+    const sheet = page.getByRole('dialog');
+    const download = page.waitForEvent('download');
+    await sheet.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    const file = await download;
+    const day = new Date().toLocaleDateString('sv-SE');
+    expect(file.suggestedFilename()).toBe(`Mozaik – Ayşe Yılmaz – ${day}.pdf`);
+    const bytes = await (await import('node:fs/promises')).readFile(await file.path());
+    expect(bytes.subarray(0, 8).toString('latin1')).toBe('%PDF-1.4');
+    expect(await page.evaluate(() => (window as unknown as { acilan: string }).acilan)).toBe(
+      `https://wa.me/905550000001?text=${encodeURIComponent('Ayşe Yılmaz · Haftalık ders programı')}`,
+    );
+    await expect(sheet.getByRole('status')).toContainText(`Mozaik – Ayşe Yılmaz – ${day}.pdf`);
+    await expect(sheet.getByRole('status')).toContainText('İndirilenler');
+    await page.keyboard.press('Escape');
+
+    await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
+    const other = page.getByRole('dialog');
+    await other.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    await expect(other.getByRole('status')).toContainText('telefon numarasını yazın');
+    const phone = other.getByRole('textbox', { name: 'Telefon' });
+    await expect(phone).toBeFocused();
+    expect(await page.evaluate(() => (window as unknown as { acilan: string }).acilan)).toContain(
+      'Ay%C5%9Fe',
+    );
+
+    // The number typed there is the plan's (schema v18), and the button now works.
+    const before = await savedText(page);
+    await phone.fill('+90 (555) 000-00-02');
+    await phone.blur();
+    const saved = await savedState(page, before);
+    expect(saved.teachers.find((x) => x.id === 'tMC')?.phone).toBe('+90 (555) 000-00-02');
+    await other.getByRole('button', { name: 'WhatsApp', exact: true }).click();
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { acilan: string }).acilan))
+      .toMatch(/^https:\/\/wa\.me\/905550000002\?text=/);
+  });
+
+  test('Gönder e-postayı açarken PDF’yi de kaydediyor; sınıfın PDF kaydet’i aynı dosyayı yazıyor', async ({
+    page,
+  }) => {
+    await openTeachers(page);
+    await page.getByRole('button', { name: 'Ayşe Yılmaz', exact: true }).click();
+    const sheet = page.getByRole('dialog');
+    // The mailto: itself is not followed: there is no mail program here.
+    await page.route('mailto:*', (route) => route.abort());
+    const send = sheet.getByRole('link', { name: 'Gönder', exact: true });
+    await send.evaluate((a) => a.addEventListener('click', (e) => e.preventDefault()));
+    const download = page.waitForEvent('download');
+    await send.click();
+    expect((await download).suggestedFilename()).toMatch(/^Mozaik – Ayşe Yılmaz – .*\.pdf$/);
+    await expect(sheet.getByRole('status').first()).toContainText('ataşla ekleyin');
+    await page.keyboard.press('Escape');
+
+    await openSetup(page, 'Sınıflar');
+    await page.getByRole('button', { name: '510', exact: true }).click();
+    const cls = page.getByRole('dialog', { name: '510 sınıfı' });
+    const pdf = page.waitForEvent('download');
+    await cls.getByRole('button', { name: 'PDF kaydet', exact: true }).click();
+    expect((await pdf).suggestedFilename()).toMatch(/^Mozaik – 510 – .*\.pdf$/);
   });
 });

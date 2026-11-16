@@ -138,8 +138,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/grid/programs.ts` | bir planın içindeki program alternatifleri, açık olanı, ve "Programı boşalt"ın yalnız sabitlenenleri bırakması (`keepPinnedOnly`) |
 | `pure/program/index.ts` | Program ekranı paketinin giriş noktası: geçici maske ve ekranın hesabı |
 | `pure/program/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`), sağ tık menülerinin okuduğu (`describeMenu`, `poolMenuFacts`), bırakmanın cümlesi (`dropNotice`) ve kenara ayrılan günün reddi (`blockMaskedDays`), şeridin sayıları (`describeStrip`) ve araç çubuğunun altındaki satır (`describeBar`). Programların kendisi `grid/`'de: `pure/constraints/` ile `pure/entities/` onları okuyor, bu dosya da onları, ve tek paket döngü olurdu |
-| `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
-| `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
+| `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`, `paperName`) ve tipleri, ve PDF'i (`sheetPdf`); kesme paketin içinde kalır |
+| `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı, teneffüste kesilmiş hücreler ve sınıf sayfasında kodların açıklaması; kaydedilen dosyanın adı (`paperName`). Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
+| `pure/paper/pdf.ts` | bir sayfanın PDF dosyası, kütüphanesiz: A4 yatay tek sayfa, gömülmemiş Helvetica, Türkçe harfler Latin-5 yerlerinde, yalnız ASCII bayt |
 | `pure/paper/mail.ts` | aynı öğretmen sayfasının düz metin e-postası ve `mailto:`'su: sınıra (`MAILTO_SINIRI`) sığan en dolu biçim, sığmazsa hiç |
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
@@ -161,7 +162,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/storage/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), açılışta okunamayıp kenara konan planlar (`setAside`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/storage/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/storage/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
-| `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
+| `platform/storage/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle`, zarfa girecek durumları toplayan `collectStates`, ve bir PDF'in de indiği `downloadFile` |
 | `platform/storage/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
 | `platform/storage/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
 | `platform/storage/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
@@ -263,7 +264,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
-| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına bir düğme ya da neden olmadığı; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı. Kişi sayfasının `Gönder`'i (`SendTeacher`) aynı yol |
+| `ui/print/MailPanel.tsx` | Çıktı'nın "E-postayla gönder"i: öğretmen başına e-posta düğmesi ya da neden olmadığı, ve numarası varsa WhatsApp; ikisi de önce PDF'i kaydeder; exe'de Rust komutu, tarayıcıda düz `mailto:` bağlantısı. Kişi sayfasının `Gönder`'i ve `WhatsApp`'ı (`SendTeacher`) ve sınıfın `PDF kaydet`'i (`SavePdf`) aynı yol |
+| `ui/print/send.ts` | bir kişinin PDF'ini İndirilenler'e kaydetmek (`savePdf`) ve WhatsApp sohbetini açmak (`whatsappLink`, `openWhatsapp`; exe'de `whatsapp_ac`) |
+| `ui/print/usePrintTitle.ts` | yazdırma penceresi açıkken sayfanın adı kaydedilecek dosyanın adı |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
 | `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
 | `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
@@ -485,6 +488,9 @@ olmayan paketli bir uygulamanın (yeni Outlook, Posta) COM işleyicisi ya da Pro
 (ölçülmedi). Komut yalnız `mailto:` ile başlayan, yalnız `encodeURIComponent`'in ürettiği
 karakterleri ve `:@?&=` taşıyan ve sınırdan kısa bir adresi kabul eder, yani "herhangi bir
 dosyayı aç"a dönüşemez ve bir `"` programın komut satırına giremez. Hiçbir şey gönderilmez.
+WhatsApp'ın `whatsapp_ac`'ı aynı kabuk çağrısıdır, e-posta programı sorulmadan: yalnız
+`https://wa.me/` ve ardından rakamla başlayan, aynı karakterlerden bir adresi varsayılan
+tarayıcıya verir; exe penceresi WhatsApp'ın sitesine dönüşmez.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).

@@ -24,7 +24,8 @@ import { flushSync } from 'react-dom';
 import { blockSpans, buildIndex } from '../../pure/constraints';
 import { parseKey, paletteColor, type State } from '../../leaf/model';
 import { activePlacements } from '../../pure/grid';
-import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
+import { classSheet, paperName, sheetHead, teacherSheet } from '../../pure/paper';
+import { activePlanName } from '../../platform/storage';
 import {
   markPrinted,
   PER_SHEET_LABELS,
@@ -33,7 +34,8 @@ import {
   type Scope,
   type PrintOptions,
 } from '../../platform/prefs';
-import Sheet from './Sheet';
+import Sheet, { PaperHead } from './Sheet';
+import { usePrintTitle } from './usePrintTitle';
 import { HelpHead, NextStep, T, useT } from '../common';
 import MailPanel from './MailPanel';
 
@@ -80,12 +82,17 @@ export const NOTHING_EXCLUDED: Excluded = { classes: new Set(), teachers: new Se
  * renaming what a page IS would have quietly changed what all of that means.
  * At per = 1 the two boxes are the same size and nothing about the sheet moved.
  */
-function sheets(plans: React.ReactElement[], per: number): React.ReactElement[] {
+function sheets(
+  plans: React.ReactElement[],
+  per: number,
+  head: { plan: string; date: string | null; of: number },
+): React.ReactElement[] {
   const out: React.ReactElement[] = [];
   for (let i = 0; i < plans.length; i += per) {
     const slice = plans.slice(i, i + per);
     out.push(
       <div className="print-sheet" key={`s${i}`}>
+        <PaperHead {...head} n={i / per + 1} />
         {slice}
       </div>,
     );
@@ -151,6 +158,7 @@ export default function Print({
   // the honest answer is "about now". Recomputing it per page would put five
   // different minutes on five sheets that came out of the same job.
   const stamped = useMemo(() => printStamp(new Date()), []);
+  const plan = useMemo(activePlanName, []);
 
   // The header of lesson numbers and bell times, the same on every page.
   const head = useMemo(() => sheetHead(state, options), [state, options]);
@@ -178,6 +186,19 @@ export default function Print({
 
   const { drawn, all } = useGrowingCount(state.classes.length + state.teachers.length);
 
+  const classPages = scope !== 'teachers';
+  const teacherPages = scope !== 'classes';
+
+  const chosenClasses = classPages ? state.classes.filter((x) => !excluded.classes.has(x.id)) : [];
+  const chosenTeachers = teacherPages
+    ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
+    : [];
+  const pageCount = chosenClasses.length + chosenTeachers.length;
+
+  // The saved PDF's name: the one person when one page is chosen, else the plan.
+  const only = pageCount === 1 ? (chosenClasses[0]?.name ?? chosenTeachers[0]?.name) : undefined;
+  usePrintTitle(paperName(only ?? plan, new Date()));
+
   if (state.lessons.length === 0) {
     return (
       <>
@@ -192,14 +213,6 @@ export default function Print({
     );
   }
 
-  const classPages = scope !== 'teachers';
-  const teacherPages = scope !== 'classes';
-
-  const chosenClasses = classPages ? state.classes.filter((x) => !excluded.classes.has(x.id)) : [];
-  const chosenTeachers = teacherPages
-    ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
-    : [];
-  const pageCount = chosenClasses.length + chosenTeachers.length;
   // The pages drawn so far (see `useGrowingCount`): classes first, as before.
   const drawnClasses = chosenClasses.slice(0, drawn);
   const drawnTeachers = chosenTeachers.slice(0, Math.max(0, drawn - drawnClasses.length));
@@ -284,7 +297,6 @@ export default function Print({
                 sheet={classSheet(state, ix, spans, group, options, t)}
                 head={head}
                 colored={colored}
-                stamped={options.stamp ? stamped : null}
               />
             )),
             ...drawnTeachers.map((teacher) => (
@@ -293,21 +305,24 @@ export default function Print({
                 sheet={teacherSheet(state, ix, spans, teacher, options)}
                 head={head}
                 colored={colored}
-                stamped={options.stamp ? stamped : null}
               />
             )),
           ],
           options.perSheet,
+          {
+            plan,
+            date: options.stamp ? stamped : null,
+            of: Math.ceil(pageCount / options.perSheet),
+          },
         )}
       </div>
 
       <aside>
         <div className="panel no-print">
-          <HelpHead topic="Çıktı">
-            <p>
-              <T k="Renkler kâğıtta çıkmazsa: yazdırma penceresinde **Diğer ayarlar**’ı açın ve **Arka plan grafikleri** kutusunu işaretleyin." />
-            </p>
-          </HelpHead>
+          {/* No "Arka plan grafikleri" advice any more: `print-color-adjust:
+              exact` prints the colours with that box off too (measured in
+              Chromium, 2026-11-16, e2e/yazdir.spec.ts). */}
+          <h2>{t('Çıktı')}</h2>
           {/* "Ne basılsın" moved to the tool strip and "Renkli bas" to its
               Daha fazla; the
               button stayed, because the page COUNT comes from the tick lists
@@ -329,6 +344,11 @@ export default function Print({
               {t('Yazdır ({n} kâğıt)', { n: Math.ceil(pageCount / options.perSheet) })}
             </button>
           </div>
+          {/* Before the print window, where it is read: Chromium's own
+              word for its destination. */}
+          <p className="hint">
+            <T k="Dosya olarak saklamak için yazdırma penceresinde Hedef’i **PDF olarak kaydet** yapın." />
+          </p>
 
           {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
               normal request and used to mean printing all 45 pages and throwing
@@ -346,7 +366,7 @@ export default function Print({
         {/* Right under the printer: the other way a teacher's page leaves
             this screen. Every teacher, whatever the tick lists say: sending
             one teacher's week is not a print job. */}
-        <MailPanel state={state} ix={ix} spans={spans} />
+        <MailPanel state={state} ix={ix} spans={spans} colored={colored} />
 
         {/* HOW THE SHEET IS LAID OUT — two questions, and they are not the
             same question as "what is on it", so they are not in the same

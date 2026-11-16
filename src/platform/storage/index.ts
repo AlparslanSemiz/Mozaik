@@ -11,8 +11,9 @@
  * this folder writes a plan text or watches another window.
  */
 export { isTextInput, useStore, type SaveTrouble } from './useStore';
+export { activePlanName } from './libraryStore';
 export { listBackups, loadPlan, storageWorks, unreadablePlan } from './planStore';
-export { bundleText, downloadBackup, downloadBundle } from './download';
+export { bundleText, downloadBackup, downloadBundle, downloadFile } from './download';
 export { isoDay, markChanged, reminderDue, useFileRecord, type FileRecord } from './fileSaved';
 export { askToKeep } from './persist';
 export {

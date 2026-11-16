@@ -27,10 +27,12 @@ import type { Id, State } from '../../leaf/model';
  */
 export const REVOKE_AFTER = 30_000;
 
-/** Hands the browser a file to save. Both file kinds go through here. */
-function download(name: string, text: string): void {
-  const blob = new Blob([text], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+/**
+ * Hands the browser a file to save, into İndirilenler (in the exe as well,
+ * TRAPS 132). The plan files and a teacher's PDF go through here.
+ */
+export function downloadFile(name: string, text: string, type: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
@@ -38,6 +40,11 @@ function download(name: string, text: string): void {
   a.click();
   a.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER);
+}
+
+/** A plan file: saved, and remembered as the last time the plan left the machine. */
+function download(name: string, text: string): void {
+  downloadFile(name, text, 'application/json');
   markFileSaved();
 }
 

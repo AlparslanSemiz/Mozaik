@@ -287,6 +287,18 @@ export function desktopMail(adres: string): Promise<EpostaSonucu> {
   );
 }
 
+/**
+ * Opens a `https://wa.me/` link in the default browser, the way a click on a
+ * link would, and WhatsApp takes it from there (src-tauri/src/mail.rs,
+ * `whatsapp_ac`). False when the shell could not open it.
+ */
+export function desktopWhatsapp(adres: string): Promise<boolean> {
+  return bridge()<void>('whatsapp_ac', { adres }).then(
+    () => true,
+    () => false,
+  );
+}
+
 // ------------------------------------------------------------- CP-SAT
 
 /**

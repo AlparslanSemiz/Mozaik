@@ -41,6 +41,17 @@ pub fn adres_gecerli(adres: &str) -> bool {
         && adres[..7].eq_ignore_ascii_case("mailto:")
 }
 
+/// Only a WhatsApp chat link as `src/leaf/model/phone.ts` builds it
+/// (`https://wa.me/<number>?text=<encoded>`), and not too long. Like
+/// `adres_gecerli`, the check is what keeps `whatsapp_ac` from opening
+/// anything else: another site, a `file:`, a program.
+pub fn whatsapp_gecerli(adres: &str) -> bool {
+    let yol = adres.strip_prefix("https://wa.me/").unwrap_or("");
+    adres.len() <= EN_UZUN
+        && yol.starts_with(|c: char| c.is_ascii_digit())
+        && yol.bytes().all(kodlanmis)
+}
+
 /// Is this registered command Windows' "pick an app" question rather than a
 /// mail program?
 pub fn secici_mi(komut: &str) -> bool {
@@ -56,6 +67,19 @@ pub async fn eposta_ac(adres: String) -> Result<(), String> {
     // xdg-open as long as it likes, and neither may hold an async worker. The
     // thread is the one COM is initialised on (`kabuk::ac`).
     tauri::async_runtime::spawn_blocking(move || kabuk::ac(&adres))
+        .await
+        .unwrap_or_else(|_| Err("acilamadi".into()))
+}
+
+/// The teacher's WhatsApp chat (TODO B3.4), in the default browser, which
+/// hands it to WhatsApp. Nothing is sent: WhatsApp opens the chat with the
+/// text typed in, and the user attaches the saved PDF and presses Send.
+#[tauri::command]
+pub async fn whatsapp_ac(adres: String) -> Result<(), String> {
+    if !whatsapp_gecerli(&adres) {
+        return Err("gecersiz".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || kabuk::tarayici(&adres))
         .await
         .unwrap_or_else(|_| Err("acilamadi".into()))
 }
@@ -154,6 +178,12 @@ mod kabuk {
         if !istemci_var() {
             return Err(ISTEMCI_YOK.into());
         }
+        tarayici(adres)
+    }
+
+    /// `ShellExecuteW` alone, without asking about a mail program first: an
+    /// `https:` link always has a browser behind it.
+    pub fn tarayici(adres: &str) -> Result<(), String> {
         let co = unsafe {
             CoInitializeEx(
                 null_mut(),
@@ -199,6 +229,10 @@ mod kabuk {
             Err(e) => Err(format!("acilamadi: {e}")),
         }
     }
+
+    pub fn tarayici(adres: &str) -> Result<(), String> {
+        ac(adres)
+    }
 }
 
 /// The Linux copy, for development only: `xdg-open`, whose exit code 3 is
@@ -216,6 +250,10 @@ mod kabuk {
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(ISTEMCI_YOK.into()),
             Err(e) => Err(format!("acilamadi: {e}")),
         }
+    }
+
+    pub fn tarayici(adres: &str) -> Result<(), String> {
+        ac(adres)
     }
 }
 
@@ -246,6 +284,27 @@ mod tests {
             "mailto:a@example.com?body=a\\b",
         ] {
             assert!(!adres_gecerli(kotu), "{kotu}");
+        }
+    }
+
+    #[test]
+    fn yalniz_wa_me_baglantisi_gecer() {
+        assert!(whatsapp_gecerli(
+            "https://wa.me/905321234567?text=Ali%20Hoca%20%C2%B7%20Program"
+        ));
+        for kotu in [
+            "",
+            "https://wa.me/",
+            "http://wa.me/905321234567",
+            "https://wa.me.evil.example/905321234567",
+            "https://example.com/?u=https://wa.me/1",
+            "https://wa.me/905321234567/../../x",
+            "https://wa.me/905321234567?text=iki kelime",
+            "https://wa.me/905321234567?text=x\"%20-p",
+            "file:///C:/Windows/System32/calc.exe",
+            "mailto:a@example.com",
+        ] {
+            assert!(!whatsapp_gecerli(kotu), "{kotu}");
         }
     }
 

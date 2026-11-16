@@ -19,6 +19,9 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- Send a teacher their timetable as a PDF: on the teacher's page and in Print, "WhatsApp" saves the sheet as `Mozaik – Name – date.pdf` in Downloads and opens the chat with that teacher's number; the e-mail button saves the same file to attach. A class's page has "Save PDF". Teachers have a phone field (schema v18); the number only goes into the WhatsApp link you click.
+- Every printed sheet has a line at the top with the plan, the date and "Page 2 of 5"; class sheets explain the teacher codes ("MÇ Mehmet Çelik"); no printed text is smaller than 7 pt; "Save as PDF" suggests a file name like `Mozaik – 510 – 2026-11-16`. The print date is now on by default.
+
 - Linux: a single `Mozaik-linux-x86_64.AppImage` for Ubuntu 22.04 and later, Debian 12 and Fedora, with the CP-SAT suggestion search built in. It updates itself from Settings → About like the Windows and Mac programs, checked against the same signature; kept in a folder it cannot write, it says to move it before downloading anything. A release whose Linux build fails still ships Windows, the Mac and the web.
 - Automatic layout now makes the week better after it has placed every card: it moves and swaps whole cards, never breaking a rule and never touching a pinned or kept card, to give fewer free hours between a teacher's lessons, fewer days a teacher has to come in and fewer gaps in a class's day, and to keep "Warn" rules unbroken where it can. On the sample school a teacher waits 61 free hours a week instead of 271; on the father's course 118 instead of 151.
 - "Başka bir dizilim" (Another layout) next to "Baştan diz" lays out a different week under the same rules on every press; "Geri al" brings the week before back.

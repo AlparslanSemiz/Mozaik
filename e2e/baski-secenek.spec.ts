@@ -40,12 +40,16 @@ test.describe('62. Sayfada ne olsun', () => {
     const panel = page.locator('.panel', { hasText: 'Sayfada ne olsun' });
     await expect(panel.locator('input[type=checkbox]')).toHaveCount(5);
 
-    // Everything that was already on paper stays on it; the stamp is the one
-    // thing that never existed, so it starts off.
-    for (const on of ['Okul adı', 'Derslik ve branş', 'Günün saatleri', 'Hücrenin alt satırı']) {
+    // All five start on, the date too since 2026-11-16.
+    for (const on of [
+      'Okul adı',
+      'Derslik ve branş',
+      'Günün saatleri',
+      'Hücrenin alt satırı',
+      'Çıktı tarihi',
+    ]) {
       await expect(box(page, on), on).toBeChecked();
     }
-    await expect(box(page, 'Çıktı tarihi')).not.toBeChecked();
   });
 
   test('kurs adı kapanınca künye satırından ÇIKIYOR, derslik kalıyor', async ({ page }) => {
@@ -97,19 +101,22 @@ test.describe('62. Sayfada ne olsun', () => {
     await expect(area.locator('.p-top')).toHaveCount(tops);
   });
 
-  test('çıktı tarihi açılınca sayfaya bir tarih satırı geliyor', async ({ page }) => {
+  // Since 2026-11-16 the date is in the header line every sheet carries, and
+  // on from the start; the switch takes it out of that line.
+  test('çıktı tarihi AÇIK başlıyor, üst satırda; kapanınca satırda yalnız sayfa kalıyor', async ({
+    page,
+  }) => {
     await openPrint(page);
-    await expect(page.locator('.p-stamp')).toHaveCount(0);
-
-    await box(page, 'Çıktı tarihi').check();
-    const stamp = page.locator('.print-page').first().locator('.p-stamp');
-    await expect(stamp).toBeVisible();
+    const head = page.locator('.print-sheet').first().locator('.p-head');
     // A real date, not a placeholder: gg.aa.yyyy ss:dd.
-    await expect(stamp).toHaveText(/\d{2}\.\d{2}\.\d{4} \d{2}:\d{2} tarihinde yazdırıldı/);
+    await expect(head).toContainText(/\d{2}\.\d{2}\.\d{4} \d{2}:\d{2} · Sayfa 1 \/ \d+/);
+    // Every sheet carries one, not only the first.
+    const sheets = await page.locator('.print-sheet').count();
+    await expect(page.locator('.p-head')).toHaveCount(sheets);
 
-    // Every page carries it, not only the first.
-    const pages = await page.locator('.print-page').count();
-    await expect(page.locator('.p-stamp')).toHaveCount(pages);
+    await box(page, 'Çıktı tarihi').uncheck();
+    await expect(head).not.toContainText(/\d{2}\.\d{2}\.\d{4}/);
+    await expect(head).toContainText(/Sayfa 1 \/ \d+/);
   });
 
   test('öğretmen sayfasında da branş kapanabiliyor', async ({ page }) => {
@@ -131,7 +138,7 @@ test.describe('62. Sayfada ne olsun', () => {
   }) => {
     test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openPrint(page);
-    await box(page, 'Çıktı tarihi').check();
+    await expect(box(page, 'Çıktı tarihi')).toBeChecked();
 
     // Only the busiest class, so the count below is about the stamp and not
     // about how many sheets the sample makes.
@@ -158,16 +165,16 @@ test.describe('62. Sayfada ne olsun', () => {
   test('seçim YENİLEMEDEN sonra da duruyor', async ({ page }) => {
     await openPrint(page);
     await box(page, 'Günün saatleri').uncheck();
-    await box(page, 'Çıktı tarihi').check();
+    await box(page, 'Çıktı tarihi').uncheck();
 
     await reopen(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     await expect(box(page, 'Günün saatleri')).not.toBeChecked();
-    await expect(box(page, 'Çıktı tarihi')).toBeChecked();
+    await expect(box(page, 'Çıktı tarihi')).not.toBeChecked();
     await expect(page.locator('.p-clock')).toHaveCount(0);
-    await expect(page.locator('.p-stamp').first()).toBeVisible();
+    await expect(page.locator('.p-head').first()).not.toContainText(/\d{4}/);
   });
 
   test('seçenekler EKRANDA kalıyor, kâğıda geçmiyor', async ({ page }) => {

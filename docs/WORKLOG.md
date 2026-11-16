@@ -103,6 +103,32 @@ Ana klasörde 16 ajan worktree'si (`.claude/worktrees/`, her biri `node_modules`
 worktree'ler kaldırılınca 9/9 geçti. Neden kesinleşmedi (büyük olasılıkla Vite'ın dosya taraması):
 birleşen worktree'leri bekletmemek yeter.
 
+## 2026-11-16 · Öğretmene gönder: kâğıdın üst satırı, PDF ve WhatsApp (`ozellik/gonder`, B3.4)
+
+`sade/asama-3a`'nın üstünde, 3B'den sonra birleşir (Çıktı sekmesi orada "Yazdır ve gönder"
+oluyor). Kararlar DECISIONS 2026-11-16'da.
+
+- **Kâğıt.** Her kâğıdın üstünde plan, tarih ve `Sayfa i / N` (`.p-head`, akışın dışında);
+  sınıf sayfasında kodların açıklaması; yazı merdiveni `max(7pt, …)`; yazdırırken sayfanın
+  adı dosyanın adı (`Mozaik – 510 – 2026-11-16`); çıktı tarihi öntanımlı açık; Yazdır'ın
+  altında "Hedef'i PDF olarak kaydet yapın". **Ölçüldü:** "Arka plan grafikleri" kapalıyken
+  renk basılıyor (tuzak 211); 1/2/4 × üç boyutun dokuzunda kâğıt taşmıyor ve en küçük yazı
+  9,33 px (7 pt); A4 yatay `@page` ile zorunlu, dikey Chromium'un penceresinde seçilemiyor.
+- **Şema v18** `Teacher.phone`; **PDF** elle (`pdf.ts`, Helvetica, Latin-5); **WhatsApp** tek
+  tıklama (PDF İndirilenler'e, sonra `wa.me`), exe'de `mail.rs`'te `whatsapp_ac` (yalnız
+  `https://wa.me/<rakam>…`, `cargo test mail` Mac'te 4/4; Windows modülü derlenmedi).
+- **Boyut (bütçe aşıldı).** brotli 302,04 → 304,56 kB (+2,52; eşik 306), ham 1 174,5 →
+  1 183,1 kB (+8,6). PDF yazıcısı +1,30 kB brotli (onsuz derleme 303,49 kB, düğüm brotli'siyle
+  ölçüldü). Bütçe 1,5 kB'tı, kalan pay 1,44 kB 3B ve İkame için. Seçenekler: (a) böyle
+  birleşir, 3B ve İkame kalan 1,4 kB'a sığar ya da eşik ölçülerek yükselir; (b) PDF yazıcısı
+  çıkar, PDF yalnız yazdırma penceresinden (dosya adı doğru), WhatsApp yalnız sohbeti açar;
+  (c) sözlüklerde yer açılır. Öneri (a).
+- **Doğrulanmadı:** WebView2'de indirmenin İndirilenler'e gittiği (Linux exe testinde ölçülü,
+  tuzak 132) ve `whatsapp_ac`'ın varsayılan tarayıcıyı açtığı; PDF'in telefonda WhatsApp
+  önizlemesinde Türkçe harflerle okunduğu (Mac'in Önizleme'si ve `sips` doğru çiziyor).
+- **Şema çakışması:** İkame dalı da şema artırırsa ikinci birleşen v19 olur (sürüm, kabul
+  listesi, örnek dosya).
+
 ## 2026-11-16 · Sadeleşme aşama 3A: K6, K7, K8 (`sade/asama-3a`, TODO SD8)
 
 `origin/sade/asama-2`'den açıldı (o `main`'i içeriyor). Aşama 3B (beş sekme, Plan+Seçenek,

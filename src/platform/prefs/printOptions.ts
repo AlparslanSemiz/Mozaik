@@ -46,16 +46,15 @@ export interface PrintOptions {
 }
 
 /**
- * Everything that was already on the paper stays on it; `stamp` is the one
- * thing that never existed, so it starts off. A default that changed what
- * comes out of the printer for somebody who never opened this panel would be
- * a preference nobody asked for.
+ * Everything is on the paper to begin with, the date as well since
+ * 2026-11-16 (asked for: a sheet on the wall should say how old it is). A
+ * stored explicit `false` still keeps it off.
  */
 export const PRINT_DEFAULTS: PrintOptions = {
   school: true,
   credits: true,
   clock: true,
-  stamp: false,
+  stamp: true,
   cellBottom: true,
   // One sheet, one timetable: that is what came out of the printer before
   // these two existed, and a default that changed it would be a preference
@@ -95,7 +94,7 @@ export const PRINT_OPTION_LABELS: Array<{ id: PrintSwitch; label: string; hint: 
   },
   { id: 'clock', label: 'Günün saatleri', hint: 'Sütun başlığında 08:30–09:10' },
   { id: 'cellBottom', label: 'Hücrenin alt satırı', hint: 'Öğretmenin kısa adı ya da derslik' },
-  { id: 'stamp', label: 'Çıktı tarihi', hint: 'Sayfanın altında yazdırılma tarihi ve saati' },
+  { id: 'stamp', label: 'Çıktı tarihi', hint: 'Sayfanın üstünde yazdırılma tarihi ve saati' },
 ];
 
 /**

@@ -16,10 +16,12 @@ import { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { State } from '../../leaf/model';
 import { blockSpans, buildIndex } from '../../pure/constraints';
-import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
+import { classSheet, paperName, sheetHead, teacherSheet } from '../../pure/paper';
+import { activePlanName } from '../../platform/storage';
 import { markPrinted, readPrintOptions } from '../../platform/prefs';
 import { useT } from '../common';
-import Sheet from './Sheet';
+import Sheet, { PaperHead } from './Sheet';
+import { usePrintTitle } from './usePrintTitle';
 
 export function PrintOne({
   state,
@@ -49,6 +51,9 @@ export function PrintOne({
     const group = ix.classById.get(id);
     return group === undefined ? null : classSheet(state, ix, spans, group, options, t);
   }, [state, kind, id, options, t]);
+  const who = kind === 'teacher' ? state.teachers : state.classes;
+  // Before the effect below: its `window.print()` fires `beforeprint`.
+  usePrintTitle(paperName(who.find((x) => x.id === id)?.name ?? '', new Date()));
 
   useEffect(() => {
     const root = document.documentElement;
@@ -69,12 +74,13 @@ export function PrintOne({
     <div className="print-one-box" aria-hidden="true">
       <div className="print-area" data-per={1} data-size={options.size}>
         <div className="print-sheet">
-          <Sheet
-            sheet={sheet}
-            head={sheetHead(state, options)}
-            colored={colored}
-            stamped={options.stamp ? printStamp(new Date()) : null}
+          <PaperHead
+            plan={activePlanName()}
+            date={options.stamp ? printStamp(new Date()) : null}
+            n={1}
+            of={1}
           />
+          <Sheet sheet={sheet} head={sheetHead(state, options)} colored={colored} />
         </div>
       </div>
     </div>,

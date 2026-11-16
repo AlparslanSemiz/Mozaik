@@ -1141,3 +1141,189 @@ test.describe('Çıktı: öğretmene e-postayla', () => {
     await expect(row('KB')).toContainText('programı boş');
   });
 });
+
+// 2026-11-16: what every sheet of paper says about itself, and the smallest
+// type on it.
+test.describe('Kâğıdın üst satırı, kodların açıklaması ve 7 pt', () => {
+  async function choose(page: Page, name: string) {
+    await page
+      .locator('.panel', { hasText: 'Sayfa düzeni' })
+      .getByRole('button', { name, exact: true })
+      .click();
+  }
+
+  test('her kâğıdın üstünde plan ve "Sayfa i / N", kâğıt ortamında da', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await choose(page, '2');
+    await page.emulateMedia({ media: 'print' });
+    const sheets = page.locator('.print-sheet');
+    await expect(sheets).toHaveCount(10);
+    const heads = await page
+      .locator('.p-head')
+      .evaluateAll((all) => all.map((h) => [...h.children].map((c) => c.textContent ?? '')));
+    expect(heads).toHaveLength(10);
+    heads.forEach(([plan, right], i) => {
+      expect(plan).not.toBe('');
+      expect(right).toMatch(new RegExp(`Sayfa ${i + 1} / 10$`));
+    });
+    // Visible on paper, inside the sheet, and over nothing of the plan.
+    const fits = await sheets.first().evaluate((s) => {
+      const head = s.querySelector('.p-head')!.getBoundingClientRect();
+      const title = s.querySelector('.print-page h2')!.getBoundingClientRect();
+      const box = s.getBoundingClientRect();
+      return head.height > 0 && head.top >= box.top && head.bottom <= title.top;
+    });
+    expect(fits).toBe(true);
+  });
+
+  test('sınıf sayfasında hücredeki her kodun açıklaması var', async ({ page }) => {
+    const world = makeWorld({
+      days: 2,
+      hours: 3,
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV' },
+      ],
+      lessons: [
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 1 },
+      ],
+      placements: { 's510|0|0': 'x1', 's510|1|2': 'x2' },
+    });
+    world.teachers[0]!.name = 'Mehmet Çelik';
+    world.teachers[1]!.name = 'Ayşe Vural';
+    await loadWorld(page, world, 'Çıktı');
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    const first = page.locator('.print-page').first();
+    await expect(first.locator('.p-legend')).toHaveText('AV Ayşe Vural · MÇ Mehmet Çelik');
+    const codes = new Set(await first.locator('.p-bottom').allTextContents());
+    expect(codes.size).toBeGreaterThan(0);
+    const legend = (await first.locator('.p-legend').textContent()) ?? '';
+    for (const code of codes) expect(legend).toMatch(new RegExp(`(^| · )${code} \\S`));
+  });
+
+  test('dokuz birleşimin hiçbirinde kâğıtta 7 pt’tan küçük yazı yok', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    const small: Record<string, number> = {};
+    for (const per of ['1', '2', '4']) {
+      for (const size of ['Küçük', 'Normal', 'Büyük']) {
+        await choose(page, per);
+        await choose(page, size);
+        await page.emulateMedia({ media: 'print' });
+        const least = await page
+          .locator('.print-sheet')
+          .first()
+          .evaluate((s) => {
+            let min = Infinity;
+            for (const el of s.querySelectorAll('*')) {
+              const own = [...el.childNodes].some(
+                (n) => n.nodeType === 3 && (n.textContent ?? '').trim() !== '',
+              );
+              if (own) min = Math.min(min, Number.parseFloat(getComputedStyle(el).fontSize));
+            }
+            return min;
+          });
+        await page.emulateMedia({ media: null });
+        // 7 pt is 9.33 CSS px.
+        if (least < 9.33) small[`per=${per} ${size}`] = least;
+      }
+    }
+    expect(small).toEqual({});
+  });
+
+  test('yazdırırken sayfanın adı kaydedilecek dosyanın adı, sonra geri geliyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    const before = await page.title();
+    const day = new Date().toLocaleDateString('sv-SE');
+    const during = () =>
+      page.evaluate(() => {
+        window.dispatchEvent(new Event('beforeprint'));
+        const title = document.title;
+        window.dispatchEvent(new Event('afterprint'));
+        return title;
+      });
+    expect(await during()).toMatch(new RegExp(`^Mozaik – .+ – ${day}$`));
+    expect(await page.title()).toBe(before);
+
+    // One page chosen: the file is that class's.
+    await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
+    const first = page.locator('.pick-item').first();
+    const name = ((await first.textContent()) ?? '').trim();
+    await first.locator('input').check();
+    expect(await during()).toBe(`Mozaik – ${name} – ${day}`);
+  });
+
+  // The advice that used to stand here ("Arka plan grafikleri") was not
+  // needed: `print-color-adjust: exact` prints the colours with that box off.
+  test('renkler "Arka plan grafikleri" kapalıyken de basılıyor', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
+    const zlib = await import('node:zlib');
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page.getByRole('button', { name: 'Hiçbiri' }).first().click();
+    await page.locator('.pick-item').first().locator('input').check();
+    const pdf = (await page.pdf({ preferCSSPageSize: true, printBackground: false })).toString(
+      'latin1',
+    );
+    let fills = 0;
+    for (const m of pdf.matchAll(/stream\r?\n/g)) {
+      const start = m.index + m[0].length;
+      try {
+        const body = zlib
+          .inflateSync(Buffer.from(pdf.slice(start, pdf.indexOf('endstream', start)), 'latin1'))
+          .toString('latin1');
+        // A colour, not white, black or a grey: the three channels differ.
+        for (const f of body.matchAll(/([\d.]+) ([\d.]+) ([\d.]+) (?:rg|sc)\b/g)) {
+          if (!(f[1] === f[2] && f[2] === f[3])) fills++;
+        }
+      } catch {
+        /* not a Flate stream */
+      }
+    }
+    expect(fills).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Çıktı: öğretmene WhatsApp’tan', () => {
+  test('numarası olan öğretmenin satırında WhatsApp, PDF’yi kaydedip sohbeti açıyor', async ({
+    page,
+  }) => {
+    const world = makeWorld({
+      days: 2,
+      hours: 3,
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV' },
+      ],
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
+      placements: { 's510|0|0': 'x1' },
+    });
+    world.teachers[0]!.phone = '0555 000 00 01';
+    world.teachers[1]!.phone = '123';
+    await loadWorld(page, world, 'Çıktı');
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await page.evaluate(() => {
+      window.open = ((url: string) => {
+        (window as unknown as { acilan: string }).acilan = url;
+        return null;
+      }) as typeof window.open;
+    });
+    const panel = page.locator('.mail-panel');
+    // A number WhatsApp cannot read gets no button.
+    await expect(
+      panel.locator('.mail-row', { hasText: 'AV' }).getByRole('button', { name: /WhatsApp/ }),
+    ).toHaveCount(0);
+    const download = page.waitForEvent('download');
+    await panel.getByRole('button', { name: 'MÇ · WhatsApp' }).click();
+    expect((await download).suggestedFilename()).toMatch(/^Mozaik – MÇ – \d{4}-\d\d-\d\d\.pdf$/);
+    expect(await page.evaluate(() => (window as unknown as { acilan: string }).acilan)).toMatch(
+      /^https:\/\/wa\.me\/905550000001\?text=M%C3%87%20%C2%B7%20/,
+    );
+    await expect(panel.getByRole('status')).toContainText('İndirilenler');
+  });
+});

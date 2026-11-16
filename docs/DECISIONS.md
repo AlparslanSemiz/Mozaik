@@ -36,6 +36,34 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-16 · Öğretmene PDF ve WhatsApp: dosyayı sayfa yazar, göndereni kullanıcı (B3.4, `ozellik/gonder`)
+
+**Alp'in onayı, öntanımlar dahil:** her kâğıtta tarih açık, renk açık.
+
+- **PDF elle yazılıyor (`pure/paper/pdf.ts`), yazdırma penceresinden değil.** Yazdırma yolu
+  zaten bir PDF veriyor ("PDF olarak kaydet", dosya adı artık kişinin adı), ama baba için her
+  seferinde dört adım: pencere, hedef, Kaydet, klasör. Sayfanın yazdığı dosya tek tıklama ve
+  plan dosyası gibi İndirilenler'e iner (exe'de de, tuzak 132). Kütüphane yok: bir sayfa
+  çizgi, kutu ve yazı 2,8 kB ham, 1,3 kB brotli; bir PDF kütüphanesi 100–300 kB. Yazı tipi
+  gömülmüyor: Helvetica her okuyucuda var, Türkçe harfler Latin-5'in yerlerinde, standart
+  glif adlarıyla. **Bedeli:** yazı genişliği tahmin (ölçü tablosu yok), ortalama bir kılın
+  kadar kayabilir; ve bütçe aşıldı (aşağıda).
+- **WhatsApp tek düğme:** önce PDF kaydedilir, sonra `https://wa.me/<numara>?text=` aynı
+  tıklamanın içinde açılır (tarayıcıda yeni sekme, exe'de `whatsapp_ac` ile varsayılan
+  tarayıcı; exe penceresi WhatsApp'ın sitesine dönüşmesin diye). Bir satır dosyanın adını ve
+  "ataşla ekleyin"i söyler. **Bırakılan: Web Share API (dosyalı `navigator.share`).** Windows'ta
+  Chrome'da var, ama numarayı seçemiyor, Windows'un paylaşım penceresi babaya yeni bir ekran,
+  WebView2'de ve `file://`'da ölçülmedi.
+- **E-posta yolu aynı kaldı, PDF'i ekliyor:** `mailto:` dosya taşıyamaz; düğme önce PDF'i kaydeder
+  ve satır "iletiye ekleyin" der. Exe'den "ekli ileti aç" (MAPI) Windows'ta yeni bir yerel kod
+  ve ölçülemeyen bir e-posta programı demek, yapılmadı.
+- **Telefon State'te (şema v18),** e-posta ile aynı kural ve aynı KVKK notu. Yalnız kullanıcının
+  tıkladığı `wa.me` bağlantısına girer; Türkiye'nin yazılış biçimleri (0532…, 532…) 90'a çevrilir.
+- **Ölçülen boyut, ve aşılan bütçe:** dalın tamamı +2,5 kB brotli (302,04 → 304,56 kB; ham
+  1 174,5 → 1 183,1 kB). Bütçe 1,5 kB'tı; PDF yazıcısı tek başına 1,3 kB. Tek dosyalı derlemede
+  tembel yüklenen bir parça yok (`vite-plugin-singlefile` her şeyi satır içine alır, tuzak 19),
+  yani PDF yazıcısı ya pakette ya hiç yok. Karar Alp'in (WORKLOG'da seçenekler).
+
 ### 2026-11-16 · Tek ızgara düzeni, toplu sabitleme ve geçici görünüm yok, günlük kopyalar (Sadeleşme aşama 3A, K6–K8)
 
 - **K6, ters çevirdikleri.** Izgaranın varsayılanı Rahat'tı ("babanın bildiği ızgara",

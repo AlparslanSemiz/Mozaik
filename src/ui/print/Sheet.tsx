@@ -10,11 +10,39 @@ interface Props {
   sheet: SheetModel;
   head: SheetHour[];
   colored: boolean;
-  /** "… tarihinde yazdırıldı", or null when the stamp is off. */
-  stamped: string | null;
 }
 
-export default function Sheet({ sheet, head, colored, stamped }: Props) {
+/**
+ * The line along the top of every sheet of paper: the plan on the left, the
+ * date (when `Çıktı tarihi` is on) and "Sayfa 2 / 5" on the right. Out of the
+ * flow (styles.css, `.p-head`), so it cannot push the plan off the sheet.
+ * Numbered here and not by the browser: its header lives in the page margin,
+ * and the margin is 0 so that the file path never reaches the paper.
+ */
+export function PaperHead({
+  plan,
+  date,
+  n,
+  of,
+}: {
+  plan: string;
+  date: string | null;
+  n: number;
+  of: number;
+}) {
+  const t = useT();
+  return (
+    <div className="p-head">
+      <span>{plan}</span>
+      <span>
+        {date === null ? '' : `${date} · `}
+        {t('Sayfa {n} / {m}', { n, m: of })}
+      </span>
+    </div>
+  );
+}
+
+export default function Sheet({ sheet, head, colored }: Props) {
   const t = useT();
   return (
     <div className="print-page">
@@ -74,7 +102,7 @@ export default function Sheet({ sheet, head, colored, stamped }: Props) {
       </table>
       {/* Last child of the page box, so `justify-content: safe center` centres
           the plan WITH it rather than around it. */}
-      {stamped !== null && <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>}
+      {sheet.legend.length > 0 && <div className="p-legend">{sheet.legend.join(' · ')}</div>}
     </div>
   );
 }

@@ -5569,12 +5569,16 @@ table.availability .av-head {
   --p-zoom: 1;
   --p-type: calc(var(--p-fit) * var(--p-zoom));
 
-  --fs-p-xl:   calc(17pt   * var(--p-type)); /* page title */
-  --fs-p-lg:   calc(12pt   * var(--p-type)); /* .p-top, .p-daycol */
-  --fs-p-md:   calc(10.5pt * var(--p-type)); /* the credit line */
-  --fs-p-base: calc(10pt   * var(--p-type)); /* table body and heading */
-  --fs-p-sm:   calc(9pt    * var(--p-type)); /* .p-bottom */
-  --fs-p-xs:   calc(8pt    * var(--p-type)); /* .p-clock */
+  /* Never under 7 pt (2026-11-16): at four up and Küçük the chain gave 3.4
+     pt, which nobody reads off a wall. The floor is `--fs-p-min`, and the
+     header line and the legend are set in it. */
+  --fs-p-min: 7pt;
+  --fs-p-xl:   max(var(--fs-p-min), calc(17pt   * var(--p-type))); /* page title */
+  --fs-p-lg:   max(var(--fs-p-min), calc(12pt   * var(--p-type))); /* .p-top, .p-daycol */
+  --fs-p-md:   max(var(--fs-p-min), calc(10.5pt * var(--p-type))); /* the credit line */
+  --fs-p-base: max(var(--fs-p-min), calc(10pt   * var(--p-type))); /* table body and heading */
+  --fs-p-sm:   max(var(--fs-p-min), calc(9pt    * var(--p-type))); /* .p-bottom */
+  --fs-p-xs:   max(var(--fs-p-min), calc(8pt    * var(--p-type))); /* .p-clock */
 
   /* One day's row. Was written inside `@media print` alone, which is why the
      preview's rows were 30 px against the paper's 86.93 — the thing
@@ -5631,6 +5635,7 @@ table.availability .av-head {
    the sheets lie on. Those are undone in @media print, and a test reads them
    on both media. */
 .print-sheet {
+  position: relative;
   box-sizing: border-box;
   width: 297mm;
   height: 205mm;
@@ -5952,13 +5957,35 @@ table.print td .p-bottom {
 
 /* Start-end time under the lesson number in the printed hour column. */
 
-/* When the sheet came out of the printer. The LAST child of `.print-page`,
-   so `justify-content: safe center` centres the plan together with it. */
-.p-stamp {
-  margin-top: 2mm;
-  text-align: right;
-  font-size: var(--fs-p-xs);
+/* Who the codes are, on a class sheet. The LAST child of `.print-page`, so
+   `justify-content: safe center` centres the plan together with it. */
+.p-legend {
+  margin-top: 1.5mm;
+  font-size: var(--fs-p-min);
   color: var(--muted);
+}
+
+/* The plan, the date and "Sayfa 2 / 5" along the top of the SHEET. Out of the
+   flow, in the top padding of the page under it (8 mm, or 4 mm at two and
+   four up), so it can never push a timetable onto a second sheet. */
+.p-head {
+  position: absolute;
+  top: 2.5mm;
+  left: 10mm;
+  right: 10mm;
+  display: flex;
+  justify-content: space-between;
+  gap: 4mm;
+  font-size: var(--fs-p-min);
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.print-area[data-per='2'] .p-head,
+.print-area[data-per='4'] .p-head {
+  top: 0.8mm;
+  left: 5mm;
+  right: 5mm;
 }
 
 .p-clock {

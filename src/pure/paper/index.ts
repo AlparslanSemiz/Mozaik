@@ -2,11 +2,14 @@
  * The one way into this folder from outside it: a timetable on paper as data
  * (`sheet.ts`: a class's or a teacher's page, and the header they share). Where
  * a printed row is cut into cells (`cut.ts`) stays inside: only the sheets ask.
- * And the same teacher's page as the plain text of an e-mail (`mail.ts`).
+ * And the same teacher's page as the plain text of an e-mail (`mail.ts`), and
+ * one sheet as a PDF file (`pdf.ts`).
  */
+export { sheetPdf, type PdfPage } from './pdf';
 export { MAILTO_SINIRI, teacherMail, type MailForm, type TeacherMail } from './mail';
 export {
   classSheet,
+  paperName,
   sheetHead,
   teacherSheet,
   type Sheet,

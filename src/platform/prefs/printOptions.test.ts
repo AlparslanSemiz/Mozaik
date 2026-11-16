@@ -95,8 +95,8 @@ describe('normalizePrintOptions', () => {
 
   // The one that never existed before. On by default would change what comes
   // out of the printer for somebody who never opened the panel.
-  it('çıktı tarihi KAPALI başlıyor, kalan dördü açık', () => {
-    expect(PRINT_DEFAULTS.stamp).toBe(false);
+  it('beşi de AÇIK başlıyor, çıktı tarihi dahil (2026-11-16)', () => {
+    expect(PRINT_DEFAULTS.stamp).toBe(true);
     expect(PRINT_DEFAULTS.school).toBe(true);
     expect(PRINT_DEFAULTS.credits).toBe(true);
     expect(PRINT_DEFAULTS.clock).toBe(true);
