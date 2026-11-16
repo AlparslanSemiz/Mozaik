@@ -49,6 +49,9 @@ interface Props extends PanelProps {
   setTheme: (next: Theme) => void;
   motion: Motion;
   setMotion: (next: Motion) => void;
+  /** Whether the strip is drawn: its switch moved here from the top bar. */
+  ribbon: boolean;
+  toggleRibbon: () => void;
   /** Which section. Owned by App: the tool strip above shows it. */
   section: SectionId;
 }
@@ -71,6 +74,8 @@ export default function Settings({
   setTheme,
   motion,
   setMotion,
+  ribbon,
+  toggleRibbon,
   section,
   update,
   onChangelogSeen,
@@ -96,6 +101,8 @@ export default function Settings({
           setTheme={setTheme}
           motion={motion}
           setMotion={setMotion}
+          ribbon={ribbon}
+          toggleRibbon={toggleRibbon}
         />
       )}
       {(section === 'plans' || section === 'about') && (

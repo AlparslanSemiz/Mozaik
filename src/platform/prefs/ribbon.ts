@@ -53,11 +53,12 @@ export const applyRibbon = ribbonPreference.apply;
  * olsun." The thing that happens by itself is the thing that has to be able to
  * be turned off.
  *
- * Default ON, because that is what the program did before this key existed and
- * a preference nobody has set must not change what they already have.
+ * Default OFF since 2026-11-16 (Sadeleşme, phase 1): a strip that slips away
+ * while he reads takes the buttons he was about to press with it. A machine
+ * that chose explicitly keeps its choice — only "absent" changed meaning.
  */
 /**
- * Only the exact string 'kapali' turns it off.
+ * Only the exact string 'acik' turns it on.
  *
  * A boolean is accepted too, because this normalizer is called from two
  * directions — the store on read, and the settings button on write — and a
@@ -67,13 +68,13 @@ export const applyRibbon = ribbonPreference.apply;
  */
 export function normalizeRibbonAuto(raw: unknown): boolean {
   if (typeof raw === 'boolean') return raw;
-  return raw !== 'kapali';
+  return raw === 'acik';
 }
 
 export const ribbonAutoPreference = preference<boolean>({
   key: RIBBON_AUTO_KEY,
   normalize: normalizeRibbonAuto,
-  fallback: () => true,
+  fallback: () => false,
   encode: onOff,
 });
 

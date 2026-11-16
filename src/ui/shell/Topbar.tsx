@@ -1,14 +1,29 @@
 // The top bar: which document, where you are, what you did, and the file.
+//
+// Since Sadeleşme phase 1 (2026-11-16) only these: Dosya ▾, the tabs, the
+// status chip, the document's name, Geri al, Kaydet and "?". The theme lives
+// in Ayarlar → Görünüm alone; the strip's fold is in Ayarlar → Görünüm and
+// Ctrl+K; shortcuts and search are behind "?".
 
 import type React from 'react';
-import { Keyboard, Search as SearchIcon } from 'lucide-react';
+import {
+  CopyPlus,
+  FileText,
+  FolderOpen,
+  Info,
+  Keyboard,
+  Library,
+  ListChecks,
+  Save,
+  Search as SearchIcon,
+} from 'lucide-react';
 import { APP_NAME } from '../../leaf/app';
 import type { State } from '../../leaf/model';
-import type { Tab, Theme } from '../../platform/prefs';
+import type { Tab } from '../../platform/prefs';
 import { downloadBackup } from '../../platform/storage';
 import type { health } from '../../pure/feasibility';
 import type { PlanControls } from '../common';
-import { useT } from '../common';
+import { MoreItem, MoreMenu, MoreSep, useT } from '../common';
 import { BrandMark, ICON } from './icons';
 import { TABS } from './tabs';
 
@@ -28,10 +43,12 @@ interface Props {
   fileChosen: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setPaletteOpen: (open: boolean) => void;
   openShortcuts: () => void;
-  ribbon: boolean;
-  toggleRibbon: () => void;
-  theme: Theme;
-  toggleTheme: () => void;
+  /** Dosya ▾ → Planlar ve yedek, ? → Hakkında and ? → Başlarken. */
+  openPlans: () => void;
+  openAbout: () => void;
+  openChecklist: () => void;
+  /** Dosya ▾ → Yeni dönem için kopyala. */
+  copyForNewTerm: () => void;
 }
 
 export default function Topbar({
@@ -50,12 +67,16 @@ export default function Topbar({
   fileChosen,
   setPaletteOpen,
   openShortcuts,
-  ribbon,
-  toggleRibbon,
-  theme,
-  toggleTheme,
+  openPlans,
+  openAbout,
+  openChecklist,
+  copyForNewTerm,
 }: Props) {
   const t = useT();
+  const save = () => {
+    downloadBackup(state);
+    notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
+  };
   return (
     <header className="topbar" data-section={tab}>
       {/* Zone zero: WHAT THIS IS. The simple mark, the same drawing as the
@@ -73,6 +94,34 @@ export default function Topbar({
       <span className="brand" aria-hidden="true">
         <BrandMark />
       </span>
+
+      {/* Dosya ▾: everything about the FILE that is not today's save. Kaydet
+        is here too, so the menu is the whole list and not "the rest". */}
+      <MoreMenu
+        label="Dosya"
+        className="topbar-file"
+        icon={<FileText size={18} aria-hidden="true" />}
+        align="start"
+      >
+        <MoreItem icon={<Save size={15} />} onSelect={save}>
+          {t('Kaydet')}
+        </MoreItem>
+        <MoreItem icon={<FolderOpen size={15} />} onSelect={() => fileInput.current?.click()}>
+          {t('Dosyadan aç')}
+        </MoreItem>
+        <MoreItem icon={<CopyPlus size={15} />} onSelect={copyForNewTerm}>
+          {t('Yeni dönem için kopyala')}
+        </MoreItem>
+        {/* TODO(Sadeleşme aşama 3, K8): "Eski hâline dön", the dated daily
+            copies, goes here. */}
+        <MoreItem icon={<Library size={15} />} onSelect={openPlans}>
+          {t('Planlar ve yedek')}
+        </MoreItem>
+        <MoreSep />
+        <MoreItem icon={ICON.redo} hint="Ctrl+Y" disabled={!canRedo} onSelect={redo}>
+          {t('İleri al')}
+        </MoreItem>
+      </MoreMenu>
 
       {/* Zone one: WHERE YOU ARE. Seven destinations, one lit, and they come
         FIRST: they are the most-clicked thing on the row and the eye starts
@@ -142,92 +191,54 @@ export default function Topbar({
 
       <span className="spacer" />
 
-      {/* Zone two: WHICH DOCUMENT is open. The school and the plan answer
-        one question between them, so they are drawn as one object rather
-        than as a heading that happens to be followed by a dropdown. It
-        sits at the head of the right-hand group — the things you reach for
-        about this document rather than about where you are in it. */}
+      {/* Zone two: WHICH DOCUMENT is open. The school's name always; the plan
+        picker only once there is a second plan to pick (Sadeleşme, phase 1,
+        2026-11-16). With one plan "Plan 1" answered a question nobody was
+        asking, and the plans themselves are one click away in Dosya ▾. */}
       <div className="topbar-doc">
         <h1 className="app-title">{state.settings.schoolName.trim() || APP_NAME}</h1>
-
-        {/* Which timetable is open. It is shown even when there is only one:
-          "hangi planı düzenliyorum" is the question this answers, and a
-          picker that appears only after you already have two plans cannot
-          be how you find out that plans exist. Everything that CREATES,
-          renames or deletes one is in Ayarlar > Veri — the top bar must
-          stay a place where no click can lose an afternoon. */}
-        <select
-          className="plan-picker"
-          aria-label={t('Plan')}
-          title={t(
-            'Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek',
-          )}
-          value={plans.planId}
-          onChange={(e) => plans.switchPlan(e.target.value)}
-        >
-          {plans.library.plans.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.draft ? `${p.name} (taslak)` : p.name}
-            </option>
-          ))}
-        </select>
+        {plans.library.plans.length > 1 && (
+          <select
+            className="plan-picker"
+            aria-label={t('Plan')}
+            title={t('Planlar arasında geçiş yapar')}
+            value={plans.planId}
+            onChange={(e) => plans.switchPlan(e.target.value)}
+          >
+            {plans.library.plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.draft ? `${p.name} (taslak)` : p.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <span className="topbar-sep" />
 
-      {/* Zone three: the HISTORY of this session — two icons, because their
-        labels are the longest words on the bar and the shortcut in the
-        tooltip is what anyone actually reaches for twice. */}
-      <div className="btn-group">
-        <button
-          className="btn icon"
-          onClick={undo}
-          disabled={!canUndo}
-          aria-label={t('Geri al')}
-          title={t('Geri al (Ctrl+Z)')}
-        >
-          {ICON.undo}
-        </button>
-        <button
-          className="btn icon"
-          onClick={redo}
-          disabled={!canRedo}
-          aria-label={t('İleri al')}
-          title={t('İleri al (Ctrl+Y)')}
-        >
-          {ICON.redo}
-        </button>
-      </div>
-
-      <span className="topbar-sep" />
-
-      {/* Zone four: the FILE. The one habit, kept the loudest thing here.
-        The sentence that used to explain it ("saklanıyor... kaydetmek
-        taşımak için") moved to Ayarlar > Veri, next to the report that
-        says where the data actually is: it was 400px of teaching on a row
-        that now has seven destinations to hold. */}
+      {/* Zone three: undo, with its word. "İleri al" is Ctrl+Y and an item in
+        Dosya ▾; on the bar it was a second unlabelled arrow. */}
       <button
-        className="btn primary"
-        onClick={() => {
-          downloadBackup(state);
-          notify(t('Plan dosyaya yazıldı. İndirilenler klasörüne bakın.'));
-        }}
+        className="btn topbar-text"
+        onClick={undo}
+        disabled={!canUndo}
+        title={t('Geri al (Ctrl+Z)')}
+      >
+        {ICON.undo}
+        {t('Geri al')}
+      </button>
+
+      {/* Zone four: the FILE, quiet. It was the one solid button on every
+        screen, so each screen's own primary stood in its shadow. */}
+      <button
+        className="btn topbar-text"
+        onClick={save}
         title={t(
           'Açık planı bir .json plan dosyasına yazar. Mozaik bu bilgisayarda kendiliğinden saklıyor; dosya taşımak ve saklamak için.',
         )}
       >
-        {t('Dosyaya kaydet')}
+        {t('Kaydet')}
       </button>
-      <button
-        className="btn"
-        onClick={() => fileInput.current?.click()}
-        title={t('Daha önce kaydedilmiş bir .json dosyasını açar')}
-      >
-        {t('Dosyadan aç')}
-      </button>
-      {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
-        aç". It is now in Ayarlar > Veri: the rarest button in the app,
-        and the widest. */}
       <input
         ref={fileInput}
         type="file"
@@ -236,64 +247,25 @@ export default function Topbar({
         onChange={fileChosen}
       />
 
-      <span className="topbar-sep" />
-
-      {/* The theme is a MACHINE setting, not timetable data, and it is the
-        only one that has to be reachable from anywhere: the room gets
-        dark while you work. Scale and density live in Ayarlar. */}
-      {/* Folds the tool strip away. Beside the theme because both are
-        settings of the SCREEN, not of the timetable — and it has to be up
-        here: once folded, the strip has no row to hold its own button. */}
-      <button
-        className="btn icon"
-        aria-label={t('Ara ve git')}
-        title={t('Ara ve git (Ctrl+K)')}
-        onClick={() => setPaletteOpen(true)}
-      >
-        <SearchIcon size={18} strokeWidth={2} />
-      </button>
-
-      <button
-        className="btn icon"
-        aria-label={t('Klavye kısayolları')}
-        title={t('Klavye kısayolları (?)')}
-        onClick={openShortcuts}
-      >
-        <Keyboard size={18} strokeWidth={2} />
-      </button>
-
-      <button
-        className="btn icon"
-        aria-expanded={ribbon}
-        aria-label={t('Araç şeridi')}
-        title={
-          ribbon
-            ? t('Araç şeridini gizle, ızgaraya bir satır daha kalsın')
-            : t('Araç şeridini göster')
-        }
-        onClick={toggleRibbon}
-      >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <path
-            d={ribbon ? 'M5 15l7-7 7 7' : 'M5 9l7 7 7-7'}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      <button
-        className="btn icon"
-        aria-pressed={theme === 'dark'}
-        aria-label={t('Koyu tema')}
-        title={theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç')}
-        onClick={toggleTheme}
-      >
-        {theme === 'dark' ? ICON.sun : ICON.moon}
-      </button>
+      {/* "?": search, shortcuts and the first-run list behind one door. */}
+      <MoreMenu label="?" className="topbar-help" icon={null}>
+        <MoreItem
+          icon={<SearchIcon size={15} />}
+          hint="Ctrl+K"
+          onSelect={() => setPaletteOpen(true)}
+        >
+          {t('Ara ve yap')}
+        </MoreItem>
+        <MoreItem icon={<Keyboard size={15} />} hint="?" onSelect={openShortcuts}>
+          {t('Klavye kısayolları')}
+        </MoreItem>
+        <MoreItem icon={<ListChecks size={15} />} onSelect={openChecklist}>
+          {t('Başlarken')}
+        </MoreItem>
+        <MoreItem icon={<Info size={15} />} onSelect={openAbout}>
+          {t('Hakkında')}
+        </MoreItem>
+      </MoreMenu>
     </header>
   );
 }

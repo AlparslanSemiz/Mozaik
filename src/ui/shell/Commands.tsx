@@ -39,7 +39,7 @@ interface Props {
   go: (next: Tab) => void;
   sections: Section[];
   /** The handful of things worth doing without finding the button first. */
-  actions: Array<{ id: string; label: string; hint?: string; run: () => void }>;
+  actions: Array<{ id: string; label: string; hint?: string; extra?: string; run: () => void }>;
 }
 
 /** A small square of the entity's own colour — the way the grid names it. */
@@ -69,6 +69,7 @@ export default function Commands({ open, setOpen, state, go, sections, actions }
         // Spread rather than `hint: a.hint`: `exactOptionalPropertyTypes` is on,
         // so an explicit `undefined` is not the same as an absent key.
         ...(a.hint === undefined ? {} : { hint: a.hint }),
+        ...(a.extra === undefined ? {} : { extra: a.extra }),
         icon: <Play size={16} strokeWidth={2} />,
         run: a.run,
       });

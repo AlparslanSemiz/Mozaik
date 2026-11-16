@@ -111,9 +111,13 @@ const CASES: Case[] = [
     pref: theme.ribbonAutoPreference,
     read: theme.readRibbonAuto,
     save: theme.applyRibbonAuto,
-    absent: true,
+    // Off unless chosen since Sadeleşme phase 1 (2026-11-16).
+    absent: false,
     junk: ['', 'saçma'],
-    stored: [['kapali', false]],
+    stored: [
+      ['kapali', false],
+      ['acik', true],
+    ],
     values: [
       [false, 'kapali'],
       [true, 'acik'],

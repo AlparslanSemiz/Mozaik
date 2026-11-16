@@ -37,7 +37,7 @@ import {
   type Theme,
 } from '../../platform/prefs';
 import { DILLER, DIL_ADI } from '../../leaf/i18n';
-import { T, useLang } from '../common';
+import { HelpHead, T, useLang } from '../common';
 import { type State, paletteColor } from '../../leaf/model';
 
 interface Props {
@@ -56,6 +56,8 @@ interface Props {
   setTheme: (next: Theme) => void;
   motion: Motion;
   setMotion: (next: Motion) => void;
+  ribbon: boolean;
+  toggleRibbon: () => void;
 }
 
 /** The two grounds. Named, not toggled: a button that says "Koyu tema" and is
@@ -90,6 +92,8 @@ export default function Appearance({
   setTheme,
   motion,
   setMotion,
+  ribbon,
+  toggleRibbon,
 }: Props) {
   const { dil, setDil, t } = useLang();
 
@@ -124,169 +128,128 @@ export default function Appearance({
     setMotion(next);
   }
 
+  // Sadeleşme, phase 1 (2026-11-16): the screen said 21 help sentences at
+  // once. Each panel is now a heading, its buttons and a "?" that holds what
+  // the sentences said; the one sentence left on view is the sample's.
+  const segmented = (
+    label: string,
+    options: Array<{ id: string; label: string; lang?: string }>,
+    current: string,
+    pick: (id: string) => void,
+  ) => (
+    <div className="form-row" role="group" aria-label={t(label)}>
+      {options.map((o) => (
+        <button
+          key={o.id}
+          className="btn"
+          {...(o.lang === undefined ? {} : { lang: o.lang })}
+          aria-pressed={o.id === current}
+          onClick={() => pick(o.id)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+  const densities = (['ferah', 'rahat', 'sigdir'] as const).map((id) => ({
+    id,
+    label: t(id === 'ferah' ? 'Ferah' : id === 'rahat' ? 'Rahat' : 'Sığdır'),
+  }));
+
   return (
     <div className="cols">
       <div>
-        {/* THE THEME, WHERE THE OTHER MACHINE PREFERENCES ARE. Its button is
-            still in the top bar and stays there — it is reached a dozen times
-            a day. But it was the ONLY appearance preference with no line on
-            the screen that lists appearance preferences, so somebody looking
-            for it here found eight panels and no theme. Same state, two doors;
-            the one in the top bar is the shortcut, this is the inventory. */}
+        {/* THE THEME, and since 2026-11-16 ONLY here: it stood in four places
+            (the top bar, this strip, this panel and Ctrl+K) and is changed
+            about once. Ctrl+K's "tema" opens this panel. */}
         <div className="panel">
-          <h2>{t('Tema')}</h2>
-          <p className="hint">
-            <T k="Burada ne seçerseniz o kalır; bilgisayarınızın tercihini **izlemez**." />
-          </p>
-          <div className="form-row" role="group" aria-label={t('Tema')}>
-            {THEMES.map((x) => (
-              <button
-                key={x.id}
-                className="btn"
-                aria-pressed={x.id === theme}
-                onClick={() => chooseTheme(x.id)}
-              >
-                {t(x.label)}
-              </button>
-            ))}
-          </div>
+          <HelpHead topic="Tema">
+            <p>
+              <T k="Burada ne seçerseniz o kalır; bilgisayarınızın tercihini **izlemez**." />
+            </p>
+          </HelpHead>
+          {segmented(
+            'Tema',
+            THEMES.map((x) => ({ id: x.id, label: t(x.label) })),
+            theme,
+            (id) => chooseTheme(id as Theme),
+          )}
         </div>
 
         <div className="panel">
-          <h2>{t('Yazı büyüklüğü')}</h2>
-          <p className="hint">
-            {t(
-              'Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve ızgara hücrelerini.',
-            )}
-          </p>
-
-          <div className="form-row" role="group" aria-label={t('Yazı büyüklüğü')}>
-            {STEPS.map((value) => (
-              <button
-                key={value}
-                className="btn"
-                aria-pressed={value === scale}
-                onClick={() => choose(value)}
-              >
-                %{Math.round(value * 100)}
-              </button>
-            ))}
-          </div>
-
-          <p className="hint">
-            <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde." />
-          </p>
+          <HelpHead topic="Yazı büyüklüğü">
+            <p>
+              {t(
+                'Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve ızgara hücrelerini.',
+              )}
+            </p>
+            <p>
+              <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde." />
+            </p>
+          </HelpHead>
+          {segmented(
+            'Yazı büyüklüğü',
+            STEPS.map((value) => ({ id: String(value), label: `%${Math.round(value * 100)}` })),
+            String(scale),
+            (id) => choose(Number(id)),
+          )}
         </div>
 
-        {/* ONE panel, TWO questions — and they really are two. "Program
-            ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
-            farklı olsun." The steps trade different things (days on screen
-            against cell size, versus rows in a list against how far apart the
-            controls sit), so a reader who wants the whole week in the box has
-            not thereby asked for a cramped Ayarlar.
-
-            They were two panels for a day and that was one border, one shadow
-            and one set of margins too many for a screen that already had
-            eight. What holds them apart is what always held them apart: two
-            `role="group"`s with their own names, which is also how the test
-            helper finds them. */}
+        {/* ONE panel, TWO questions — and they really are two: the grid's
+            cells and the rest of the screen's spacing. Two `role="group"`s
+            with their own names, which is how the test helper finds them.
+            Phase 3 of Sadeleşme removes both (K6). */}
         <div className="panel">
-          <h2>{t('Yoğunluk')}</h2>
+          <HelpHead topic="Yoğunluk">
+            <p>
+              <T k="Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı." />
+            </p>
+            <ul>
+              <li>
+                <T k="**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan." />
+              </li>
+              <li>
+                <T k="**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız." />
+              </li>
+              <li>
+                <T k="**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
+              </li>
+            </ul>
+            <p>
+              <T k="Basılan sayfada saatler her üç durumda da yazar." />
+            </p>
+            <p>
+              <T k="Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz." />
+            </p>
+          </HelpHead>
           <h3>{t('Izgara')}</h3>
-          <p className="hint">
-            <T k="Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı." />
-          </p>
-          <ul className="hint choice-list">
-            <li>
-              <T k="**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan." />
-            </li>
-            <li>
-              <T k="**Rahat.** Hücre geniş ve saatler yazılı; program sığmadığı için sağa kaydırırsınız." />
-            </li>
-            <li>
-              <T k="**Sığdır.** Programın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
-            </li>
-          </ul>
-
-          <div className="form-row" role="group" aria-label={t('Izgara yoğunluğu')}>
-            <button
-              className="btn"
-              aria-pressed={density === 'ferah'}
-              onClick={() => chooseDensity('ferah')}
-            >
-              {t('Ferah')}
-            </button>
-            <button
-              className="btn"
-              aria-pressed={density === 'rahat'}
-              onClick={() => chooseDensity('rahat')}
-            >
-              {t('Rahat')}
-            </button>
-            <button
-              className="btn"
-              aria-pressed={density === 'sigdir'}
-              onClick={() => chooseDensity('sigdir')}
-            >
-              {t('Sığdır')}
-            </button>
-          </div>
-
-          <p className="hint">
-            <T k="Basılan sayfada saatler her üç durumda da yazar." />
-          </p>
-
+          {segmented('Izgara yoğunluğu', densities, density, (id) => chooseDensity(id as Density))}
           <h3>{t('Arayüzün geri kalanı')}</h3>
-          <p className="hint">
-            <T k="Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz." />
-          </p>
-          <ul className="hint choice-list">
-            <li>
-              <T k="**Ferah.** Satırlar en açık, paneller en geniş." />
-            </li>
-            <li>
-              <T k="**Rahat.** Bugüne kadarki aralık." />
-            </li>
-            <li>
-              <T k="**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**." />
-            </li>
-          </ul>
-
-          <div className="form-row" role="group" aria-label={t('Arayüz yoğunluğu')}>
-            <button
-              className="btn"
-              aria-pressed={uiDensity === 'ferah'}
-              onClick={() => chooseUiDensity('ferah')}
-            >
-              {t('Ferah')}
-            </button>
-            <button
-              className="btn"
-              aria-pressed={uiDensity === 'rahat'}
-              onClick={() => chooseUiDensity('rahat')}
-            >
-              {t('Rahat')}
-            </button>
-            <button
-              className="btn"
-              aria-pressed={uiDensity === 'sigdir'}
-              onClick={() => chooseUiDensity('sigdir')}
-            >
-              {t('Sığdır')}
-            </button>
-          </div>
+          {segmented('Arayüz yoğunluğu', densities, uiDensity, (id) =>
+            chooseUiDensity(id as Density),
+          )}
         </div>
 
-        {/* The strip's own movement, and it is the movement rather than the
-            strip: folding it is a button in the top bar and a preference of
-            its own. What is answered here is "does it get out of the way by
-            itself", which is the only thing on this screen that happens
-            without being asked for. */}
+        {/* The strip: whether it is there at all (its button left the top bar
+            on 2026-11-16 and lives here and in Ctrl+K), and whether it slips
+            away while reading — off unless chosen, since the same day. */}
         <div className="panel">
-          <h2>{t('Araç şeridi')}</h2>
-          <p className="hint">
-            <T k="Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
-          </p>
+          <HelpHead topic="Araç şeridi">
+            <p>
+              <T k="Sekmelerin altındaki araç şeridi, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
+            </p>
+          </HelpHead>
+          {segmented(
+            'Araç şeridi',
+            [
+              { id: 'acik', label: t('Görünsün') },
+              { id: 'kapali', label: t('Gizlensin') },
+            ],
+            ribbon ? 'acik' : 'kapali',
+            (id) => {
+              if ((id === 'acik') !== ribbon) toggleRibbon();
+            },
+          )}
           <div className="form-row">
             <button
               className="btn"
@@ -302,61 +265,45 @@ export default function Appearance({
         </div>
 
         <div className="panel">
-          <h2>{t('Hareket')}</h2>
-          <p className="hint">
-            <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez." />
-          </p>
-          <ul className="hint choice-list">
-            <li>
-              <T k="**Tam.** Tasarlandığı gibi." />
-            </li>
-            <li>
-              <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır." />
-            </li>
-            <li>
-              <T k="**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz." />
-            </li>
-          </ul>
-
-          <div className="form-row" role="group" aria-label={t('Hareket')}>
-            {MOTIONS.map((m) => (
-              <button
-                key={m.id}
-                className="btn"
-                aria-pressed={m.id === motion}
-                onClick={() => chooseMotion(m.id)}
-              >
-                {t(m.label)}
-              </button>
-            ))}
-          </div>
-
-          <p className="hint">
-            <T k="Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır." />
-          </p>
+          <HelpHead topic="Hareket">
+            <p>
+              <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez." />
+            </p>
+            <ul>
+              <li>
+                <T k="**Tam.** Tasarlandığı gibi." />
+              </li>
+              <li>
+                <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır." />
+              </li>
+              <li>
+                <T k="**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz." />
+              </li>
+            </ul>
+            <p>
+              <T k="Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır." />
+            </p>
+          </HelpHead>
+          {segmented(
+            'Hareket',
+            MOTIONS.map((m) => ({ id: m.id, label: t(m.label) })),
+            motion,
+            (id) => chooseMotion(id as Motion),
+          )}
         </div>
 
         <div className="panel">
-          <h2>{t('Dil')}</h2>
-          <p className="hint">
-            {t('Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.')}
-          </p>
-          {/* The same button shape as the four questions above it, and each
-              language NAMES ITSELF: a language menu is read by somebody who
-              does not yet speak the one the app is currently in. */}
-          <div className="form-row" role="group" aria-label={t('Dil')}>
-            {DILLER.map((d) => (
-              <button
-                key={d}
-                className="btn"
-                lang={d}
-                aria-pressed={d === dil}
-                onClick={() => setDil(d)}
-              >
-                {DIL_ADI[d]}
-              </button>
-            ))}
-          </div>
+          <HelpHead topic="Dil">
+            <p>{t('Arayüzün dili. Bu bilgisayara aittir, plan dosyasına girmez.')}</p>
+          </HelpHead>
+          {/* Each language NAMES ITSELF: a language menu is read by somebody
+              who does not yet speak the one the app is currently in. */}
+          {segmented(
+            'Dil',
+            DILLER.map((d) => ({ id: d, label: DIL_ADI[d], lang: d })),
+            dil,
+            (id) => setDil(id as typeof dil),
+          )}
         </div>
       </div>
 
@@ -371,11 +318,8 @@ export default function Appearance({
               <T k="Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir." />
             </p>
           ) : (
-            /* IN A SCROLL BOX, because Hareket and Dil moved to the left column on
-               2026-08-30 and this is now the rail's ONLY panel — which is the
-               shape `.cols > aside > .panel:only-child` is written for: the box
-               that gives ground is the list, never the panel around it. The
-               heading and the two sentences under it stay put. */
+            /* IN A SCROLL BOX: this is the rail's ONLY panel, the shape
+               `.cols > aside > .panel:only-child` is written for. */
             <div className="stat-scroll">
               <table className="list">
                 <thead>
@@ -386,31 +330,23 @@ export default function Appearance({
                   </tr>
                 </thead>
                 <tbody>
-                  {teachers.map((t) => (
-                    <tr key={t.id}>
+                  {teachers.map((x) => (
+                    <tr key={x.id}>
                       <td>
                         <span
                           className="color-dot"
-                          style={{ background: paletteColor(t.color) }}
+                          style={{ background: paletteColor(x.color) }}
                           aria-hidden="true"
                         />
-                        {t.name}
+                        {x.name}
                       </td>
-                      <td>{t.subject}</td>
-                      <td className="num">{hoursOf(t.id)}</td>
+                      <td>{x.subject}</td>
+                      <td className="num">{hoursOf(x.id)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
-          {state.teachers.length > teachers.length && (
-            <p className="hint">
-              {t('{toplam} öğretmenin ilk {kac} tanesi.', {
-                toplam: state.teachers.length,
-                kac: teachers.length,
-              })}
-            </p>
           )}
         </div>
       </aside>
