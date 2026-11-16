@@ -390,13 +390,9 @@ export default function School({ state, change }: PanelProps) {
           are still being typed. */}
       <aside>
         <div className="panel">
-          <HelpHead topic="Zil saatleri">
-            <p>
-              {t(
-                'Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.',
-              )}
-            </p>
-          </HelpHead>
+          {/* No "?": the panel beside it already says the bell is computed
+              from the start and three durations. */}
+          <h2>{t('Zil saatleri')}</h2>
 
           {/* Twelve lessons and their breaks, and on a short window that is
               taller than the panel: the one box here that can outgrow the

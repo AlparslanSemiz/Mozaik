@@ -1437,8 +1437,6 @@ const DE: Sozluk = {
     "Die Werkzeugleiste unter den Reitern **blendet sich beim Herunterscrollen aus**.",
   "Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.":
     "Löschungen haben Lücken in den Farben hinterlassen; Neuverteilen ordnet sie nur.",
-  "Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.":
-    "Aus Startzeit und drei Dauern berechnet; jedes Pausenmuster hat eine eigene Spalte.",
   "Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
     "Der Stand der letzten drei Starts wird als automatische Sicherung getrennt aufbewahrt; er gehört zu **diesem Computer** und zum Plan, der beim Start offen war.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":

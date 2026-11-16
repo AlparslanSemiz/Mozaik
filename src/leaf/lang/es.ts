@@ -1438,8 +1438,6 @@ const ES: Sozluk = {
     "La barra de herramientas bajo las pestañas **se oculta sola al bajar** por la página.",
   "Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.":
     "Los borrados dejaron huecos en los colores; repartirlos solo los reordena.",
-  "Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.":
-    "Se calcula de la hora de inicio y tres duraciones; cada patrón tiene su columna.",
   "Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
     "El estado de las tres últimas aperturas se guarda aparte como copia de seguridad automática; pertenece a **este ordenador** y al plan abierto al inicio.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":

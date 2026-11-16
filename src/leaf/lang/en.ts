@@ -1423,8 +1423,6 @@ const EN: Sozluk = {
     "The tool strip under the tabs **hides itself as you scroll down** the page.",
   "Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.":
     "Deletions left gaps in the colours; redealing only puts them back in order.",
-  "Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.":
-    "Computed from the start time and three durations; each break pattern gets a column.",
   "Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
     "The state at each of the last three openings is kept apart as an automatic backup; it belongs to **this computer** and the plan open at startup.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":

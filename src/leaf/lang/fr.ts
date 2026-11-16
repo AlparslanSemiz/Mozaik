@@ -1443,8 +1443,6 @@ const FR: Sozluk = {
     "La barre d’outils sous les onglets **se masque d’elle-même** quand vous défilez.",
   "Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.":
     "Les suppressions ont laissé des trous ; redistribuer ne fait que les remettre en ordre.",
-  "Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.":
-    "Calculé depuis l’heure de début et trois durées ; chaque motif a sa colonne.",
   "Son üç açılıştaki durum otomatik yedek olarak ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir.":
     "L’état des trois dernières ouvertures est gardé à part comme sauvegarde automatique ; il appartient à **cet ordinateur** et au plan ouvert au démarrage.",
   "Sınıf başına **{yer}** saat var ({gun} gün × {ders} saat); girilen yük **{yuk}** saat.":
