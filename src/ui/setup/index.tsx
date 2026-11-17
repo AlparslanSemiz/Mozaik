@@ -53,7 +53,7 @@ export function Start({
 }: PanelProps & { plans: PlanControls; onOwn: () => void }) {
   const t = useT();
   const notify = useToast();
-  const loadSample = useLoadSample();
+  const loadSample = useLoadSample(plans);
   // Read once on mount: `markIntroSeen()` writes to localStorage, and a
   // component cannot re-render on that. The local flag is what makes the line
   // go away in the same breath as the click.
@@ -83,7 +83,19 @@ export function Start({
         <p className="hint sample-line">
           <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
           {t('Bu örnek okul.')}
-          <button className="btn" onClick={onOwn}>
+          <button
+            className="btn"
+            onClick={() => {
+              onOwn();
+              // The button goes with the sample line: the keyboard stays on
+              // the page, at the heading the new plan starts from.
+              requestAnimationFrame(() =>
+                document
+                  .querySelector<HTMLElement>('.checklist h2, .checklist button, .checklist a')
+                  ?.focus(),
+              );
+            }}
+          >
             {t('Kendi okulumla başla')}
           </button>
         </p>

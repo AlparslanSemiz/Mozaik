@@ -179,6 +179,10 @@ export default function School({ state, change }: PanelProps) {
               <input
                 type="text"
                 className="grow"
+                // Keyed by the saved name: Geri al, a backup or another plan
+                // changes it from outside and the box must show it. Typing does
+                // not touch the state until blur, so the caret never jumps.
+                key={state.settings.schoolName}
                 defaultValue={state.settings.schoolName}
                 placeholder={t('örn. Semiz Kurs')}
                 onBlur={(e) =>

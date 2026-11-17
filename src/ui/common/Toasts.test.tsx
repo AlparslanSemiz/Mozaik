@@ -99,4 +99,55 @@ describe('notices', () => {
     expect(host.querySelector('.toast-action')).toBeNull();
     expect(shown()).toEqual(['undoable']);
   });
+
+  it('Escape closes the newest from the grid, but not under an open dialog', () => {
+    draw();
+    const grid = document.createElement('div');
+    grid.className = 'grid-wrap';
+    const cell = document.createElement('button');
+    grid.append(cell);
+    document.body.append(grid);
+    cell.focus();
+    act(() => {
+      say('older');
+      say('newer');
+    });
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    document.body.append(dialog);
+    act(
+      () => void cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+    );
+    expect(shown()).toEqual(['older', 'newer']);
+    dialog.remove();
+    act(
+      () => void cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+    );
+    expect(shown()).toEqual(['older']);
+    grid.remove();
+  });
+
+  it('the focus goes back where it came from when its notice closes', () => {
+    draw();
+    const before = document.createElement('button');
+    document.body.append(before);
+    before.focus();
+    act(() => void say('note'));
+    const close = host.querySelector<HTMLElement>('.toast-close')!;
+    act(() => close.focus());
+    expect(document.activeElement).toBe(close);
+    act(() => void close.click());
+    expect(shown()).toHaveLength(0);
+    expect(document.activeElement).toBe(before);
+    before.remove();
+  });
+
+  it('says nothing of Ctrl+Z when the button is not a history step', () => {
+    draw();
+    act(() => void say('a', 'info', { label: 'Geri al', run: () => true }));
+    expect(host.querySelector('.sr-only')?.textContent).toContain('Ctrl+Z');
+    act(() => void say('b', 'info', { label: 'Geri al', run: () => true, apart: true }));
+    const texts = [...host.querySelectorAll('.toast-text')].map((n) => n.textContent);
+    expect(texts[1]).not.toContain('Ctrl+Z');
+  });
 });

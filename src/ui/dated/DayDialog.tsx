@@ -81,6 +81,9 @@ export function DayDialog({
   const askButton = useRef<HTMLButtonElement>(null);
   /** Whose row takes the focus once the absence is written and the button is gone. */
   const [focusRow, setFocusRow] = useState<Id | null>(null);
+  /** A removed row's button is gone: the keyboard goes to the next row, or to the heading when none is left. */
+  const awayHead = useRef<HTMLHeadingElement>(null);
+  const [focusHead, setFocusHead] = useState(false);
   const [printing, setPrinting] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const iso = date ?? '';
@@ -99,6 +102,11 @@ export function DayDialog({
     input.focus();
     setFocusRow(null);
   }, [focusRow, away.length]);
+  useEffect(() => {
+    if (!focusHead) return;
+    awayHead.current?.focus();
+    setFocusHead(false);
+  }, [focusHead, away.length]);
   const room = (classId: Id) => {
     const roomId = state.classes.find((c) => c.id === classId)?.roomId;
     return state.rooms.find((r) => r.id === roomId)?.name ?? '';
@@ -194,15 +202,18 @@ export function DayDialog({
             </label>
           </div>
 
-          <h3 className="sheet-h">{t('Yok olanlar')}</h3>
+          <h3 className="sheet-h" ref={awayHead} tabIndex={-1}>
+            {t('Yok olanlar')}
+          </h3>
           <div>
-            {away.map((a) => (
+            {away.map((a, at) => (
               <div key={a.i} className="form-row">
                 <span>{nameOf(a.id)}</span>
                 <label>
                   {t('Son gün')}{' '}
                   <input
                     type="date"
+                    aria-label={`${t('Son gün')}: ${nameOf(a.id) ?? ''}`}
                     value={a.to}
                     min={a.from}
                     data-away={a.id}
@@ -215,7 +226,12 @@ export function DayDialog({
                 <button
                   className="btn"
                   aria-label={`${t('Sil')}: ${nameOf(a.id)}`}
-                  onClick={() => change((d) => setAwayEnd(d, a.i, null))}
+                  onClick={() => {
+                    const after = away[at + 1];
+                    change((d) => setAwayEnd(d, a.i, null));
+                    if (after !== undefined) setFocusRow(after.id);
+                    else setFocusHead(true);
+                  }}
                 >
                   {t('Sil')}
                 </button>
@@ -241,7 +257,13 @@ export function DayDialog({
           </select>
 
           {rows.length === 0 ? (
-            <p className="hint">{t('Bu gün değişen ders yok.')}</p>
+            <p className="hint">
+              {person !== undefined &&
+              away.some((a) => a.id === person) &&
+              !taught.some((x) => x.teacherId === person)
+                ? t('{ad} için bu gün ders yok, değişecek ders yok.', { ad: nameOf(person) ?? '' })
+                : t('Bu gün değişen ders yok.')}
+            </p>
           ) : (
             <table className="list">
               <thead>

@@ -331,6 +331,7 @@ export default function App() {
     const freshText = fresh === null ? null : JSON.stringify(fresh);
     notify(t('Boş bir plan açıldı. Örnek okul, plan seçicide duruyor.'), 'info', {
       label: t('Geri al'),
+      apart: true,
       run: () => {
         plansNow.current.switchPlan(was);
         window.setTimeout(() => {

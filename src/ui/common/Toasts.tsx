@@ -55,6 +55,8 @@ export interface ToastAction {
    * "Arada başka bir değişiklik oldu" when pressed (audit, 2026-11-17).
    */
   expected?: unknown;
+  /** Ctrl+Z does not reverse this one (a plan switch is no history step): no hidden "Ctrl+Z" line. */
+  apart?: boolean;
 }
 
 interface Toast {
@@ -122,7 +124,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const hovered = useRef(new Set<number>());
   const paused = useRef(false);
 
+  // Where the keyboard was before it came to a notice: closing a notice (its
+  // button, its clock, Escape) takes the focus back there instead of letting
+  // it fall to <body> with the node.
+  const cameFrom = useRef<HTMLElement | null>(null);
+
   const drop = useCallback((id: number) => {
+    const here = document.activeElement;
+    if (
+      here instanceof HTMLElement &&
+      region.current?.querySelector(`[data-toast-id="${id}"]`)?.contains(here) === true &&
+      cameFrom.current?.isConnected === true
+    ) {
+      cameFrom.current.focus();
+    }
     const clock = clocks.current.get(id);
     if (clock?.timer !== undefined) window.clearTimeout(clock.timer);
     clocks.current.delete(id);
@@ -239,6 +254,35 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => notify, [notify]);
 
+  // Escape closes the newest notice. One sits over the grid's bottom right
+  // corner, and the keyboard had no way to clear it. Only from the grid or a
+  // notice, and only when nothing else owns the key: an open dialog or menu,
+  // a drag in the hand, a suggestion's preview.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      const at = document.activeElement;
+      const inside =
+        at instanceof Element &&
+        (at.closest('.grid-wrap') !== null || at.closest('.toasts') !== null);
+      if (!inside) return;
+      if (
+        document.querySelector(
+          '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], .grid.dragging, .previewed',
+        ) !== null
+      ) {
+        return;
+      }
+      const newest = region.current?.querySelector<HTMLElement>('.toast:last-child');
+      const id = Number(newest?.dataset.toastId);
+      if (!Number.isFinite(id)) return;
+      e.preventDefault();
+      drop(id);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drop]);
+
   const pointerIn = (id: number) => {
     hovered.current.add(id);
     settle();
@@ -247,9 +291,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     hovered.current.delete(id);
     settle();
   };
-  // Where the keyboard was before it came to a notice: "Geri al" takes its
-  // own notice away, and the focus goes back there instead of to <body>.
-  const cameFrom = useRef<HTMLElement | null>(null);
   const focused = (e: FocusEvent<HTMLDivElement>) => {
     const from = e.relatedTarget;
     if (from instanceof HTMLElement && region.current?.contains(from) !== true) {
@@ -285,6 +326,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <div
                 key={toast.id}
                 className={`toast ${toast.tone}`}
+                data-toast-id={toast.id}
                 onPointerEnter={() => pointerIn(toast.id)}
                 onPointerLeave={() => pointerOut(toast.id)}
               >
@@ -299,7 +341,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 </span>
                 <span className="toast-text">
                   {toast.text}
-                  {toast.action !== undefined && (
+                  {toast.action !== undefined && toast.action.apart !== true && (
                     <span className="sr-only"> {t('Geri almak için Ctrl+Z.')}</span>
                   )}
                 </span>
