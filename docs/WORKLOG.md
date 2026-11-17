@@ -48,6 +48,17 @@ eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni 
 dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
 olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
 
+## 2026-11-17 · Gece denetim döngüsü, 2. tur: boyut eşiği 307 000 → 310 000 B brotli
+
+İki denetim turunun düzeltmeleri (simetri, metin, Program/ızgara, kişi sayfası, erişilebilirlik,
+ilk kullanım; DECISIONS 2026-11-16 denetim kayıtları) brotli'yi 306 582'den (main 139aed3) 308 710
+B'ye çıkardı (+2,1 kB; çoğu dört dile giren yeni cümleler); ham 1 182 829 → 1 192 735 B, ham eşik
+(1 200 000) değişmedi. **Ölçülen** (`scripts/acilis-olc.mjs`, `file://`, CPU 4×, 9 dönüşümlü koşu,
+babanın dizili haftası; **kirli**: makinede başka işler koşuyordu, `temiz-kosul.sh` yok): medyan
+load 358 → 359 ms, hazır 1051 → 1080 ms (+2,7 %), ızgara 1242 → 1326 ms (+6,8 %), TBT 609 → 657 ms;
+aralıklar örtüşüyor, betiğin %15 eşiği aşılmadı. Alp eşiğin ölçülerek yükseltilmesini onayladı
+(2026-11-16 22:35). Pay ~1,3 kB.
+
 ## 2026-11-16 · Program ve ızgara denetimi (`denetim/program`)
 
 Alp'in onayladığı sekiz değişiklik (kararlar ve ters çevirdikleri DECISIONS'ta): elle konan ve
