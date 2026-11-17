@@ -38,7 +38,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     }) => {
       await open(page);
       const line = page.locator('.intro-line');
-      await expect(line).toContainText("Mozaik'in ne yaptığını görmek");
+      await expect(line).toContainText('Mozaik’in ne yaptığını görmek');
       await expect(line.getByRole('button', { name: 'Örnek okulu yükle' })).toBeVisible();
 
       await line.getByRole('button', { name: 'Bir daha gösterme' }).click();

@@ -564,7 +564,7 @@ test.describe('29. Hata yolları', () => {
     const said = await answerDialog(page);
     expect(said).toContain('Bu dosya okunamadı');
     // What to pick instead, in the words of the button he saved it with.
-    expect(said).toContain("Bu, Mozaik'in kaydettiği bir dosya değil.");
+    expect(said).toContain('Bu, Mozaik’in kaydettiği bir dosya değil.');
     expect(said).toContain('Kaydet');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
@@ -620,7 +620,7 @@ test.describe('29. Hata yolları', () => {
     // is the program's own, written by a newer copy of it.
     const said = await answerDialog(page);
     expect(said).toContain('Bu dosya daha yeni bir sürümle yazılmış');
-    expect(said).toContain("Mozaik'i güncelleyin");
+    expect(said).toContain('Mozaik’i güncelleyin');
     expect(said).not.toContain('okunamadı');
     // The answer is a button: "Güncellemeleri denetle" opens Ayarlar → Hakkında.
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
