@@ -35,7 +35,7 @@ const HEAD_AIR = 4;
 /** Air between one card's number and the next's: "412" "412" "320" ran into
  * "412412320" at 1366 and %150, where the column sits at its floor and the
  * digits touch the card's edge (3rd audit). Added to a card line only. */
-const CARD_AIR = 3;
+const CARD_AIR = 2;
 
 function floorOf(table: HTMLElement, lines: string): number {
   const range = document.createRange();
