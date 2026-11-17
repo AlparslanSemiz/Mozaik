@@ -17,7 +17,7 @@
 //
 // `useStore.ts` owns the timer and hands `park` down.
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import {
   type Bundle,
@@ -49,20 +49,29 @@ export interface PlanSeam {
 
 export function usePlans({ planId, park, openPlan }: PlanSeam) {
   const [library, setLibrary] = useState<Library>(readLibrary);
+  // The library every operation reads, kept current by `commit` itself and not
+  // by a render: two writes made before React renders again (create then
+  // rename, create then create) both see the first one. Read from the render's
+  // `library`, the second rebuilt the directory from before the first and
+  // dropped its row (review, 2026-11-17; no user path reached it, the plan's
+  // data stayed and came back as "Geri gelen plan", but the rule is cheap).
+  const libRef = useRef(library);
+  libRef.current = library;
 
   const commit = useCallback((next: Library) => {
+    libRef.current = next;
     writeLibrary(next);
     setLibrary(next);
   }, []);
 
   const switchPlan = useCallback(
     (id: Id) => {
-      if (id === planId || findPlan(library, id) === undefined) return;
+      if (id === planId || findPlan(libRef.current, id) === undefined) return;
       park();
       openPlan(id, loadPlan(id) ?? emptyState());
-      commit(setActive(library, id));
+      commit(setActive(libRef.current, id));
     },
-    [planId, park, commit, library, openPlan],
+    [planId, park, commit, openPlan],
   );
 
   /**
@@ -79,17 +88,22 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
       const id = newId();
       const clean = sanitize(seed);
       savePlan(id, clean);
-      commit(setActive(addPlan(library, { id, name: uniquePlanName(library, name), draft }), id));
+      commit(
+        setActive(
+          addPlan(libRef.current, { id, name: uniquePlanName(libRef.current, name), draft }),
+          id,
+        ),
+      );
       openPlan(id, clean);
       return id;
     },
-    [park, commit, library, openPlan],
+    [park, commit, openPlan],
   );
 
   const deletePlan = useCallback(
     (id: Id) => {
-      const next = removePlan(library, id);
-      if (next === library) return; // the last plan, or an id nobody knows
+      const next = removePlan(libRef.current, id);
+      if (next === libRef.current) return; // the last plan, or an id nobody knows
       // Flush FIRST even when the victim is the open plan: park() also cancels
       // the pending write, which is what stops a timer from resurrecting the
       // key one beat after it was dropped.
@@ -100,17 +114,17 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
         openPlan(next.activeId, loadPlan(next.activeId) ?? emptyState());
       }
     },
-    [library, commit, park, planId, openPlan],
+    [commit, park, planId, openPlan],
   );
 
   const renamePlan = useCallback(
-    (id: Id, name: string) => commit(renameInLibrary(library, id, name)),
-    [library, commit],
+    (id: Id, name: string) => commit(renameInLibrary(libRef.current, id, name)),
+    [commit],
   );
 
   const markDraft = useCallback(
-    (id: Id, draft: boolean) => commit(setDraft(library, id, draft)),
-    [library, commit],
+    (id: Id, draft: boolean) => commit(setDraft(libRef.current, id, draft)),
+    [commit],
   );
 
   /**
@@ -155,8 +169,10 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
       const missed = new Set(
         [...unreadable, ...parsed.map((x) => x.id)].filter((id) => !written.has(id)),
       );
-      const stays = new Map(library.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]));
-      for (const plan of library.plans) {
+      const stays = new Map(
+        libRef.current.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]),
+      );
+      for (const plan of libRef.current.plans) {
         if (!written.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
 
@@ -175,7 +191,7 @@ export function usePlans({ planId, park, openPlan }: PlanSeam) {
       openPlan(next.activeId, parsed.find((x) => x.id === next.activeId)!.state);
       return { ok: written.size, failed, unreadable: unreadable.length };
     },
-    [library, commit, park, openPlan],
+    [commit, park, openPlan],
   );
 
   return {
