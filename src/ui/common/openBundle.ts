@@ -65,10 +65,10 @@ export function useOpenBundle(plans: PlanControls) {
             bad: true,
             update: newer,
             text: newer
-              ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
+              ? t('Bu dosya Mozaik’in daha yeni bir sürümüyle yazılmış. Mozaik’i güncelleyin.')
               : isPlan
                 ? t(
-                    'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden "Dosyadan aç" ile açabilirsiniz.',
+                    'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki Dosya menüsünden “Dosyadan aç” ile açabilirsiniz.',
                   )
                 : [t('Bu dosya okunamadı') + '.', ...WRONG_FILE.map((k) => t(k))].join(' '),
           },
@@ -90,7 +90,7 @@ export function useOpenBundle(plans: PlanControls) {
             update: yeni > 0,
             text:
               yeni > 0
-                ? t("Bu dosya Mozaik'in daha yeni bir sürümüyle yazılmış. Mozaik'i güncelleyin.")
+                ? t('Bu dosya Mozaik’in daha yeni bir sürümüyle yazılmış. Mozaik’i güncelleyin.')
                 : t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
           },
         };
@@ -118,7 +118,7 @@ export function useOpenBundle(plans: PlanControls) {
             named,
             yeni > 0
               ? t(
-                  "Dosyadaki {yeni} plan Mozaik'in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik'i güncelleyin.",
+                  'Dosyadaki {yeni} plan Mozaik’in daha yeni bir sürümüyle yazılmış, açılmayacak. Mozaik’i güncelleyin.',
                   { yeni },
                 )
               : '',
@@ -163,7 +163,7 @@ export function useOpenBundle(plans: PlanControls) {
           update: yeni > 0,
           text:
             yeni > 0
-              ? `${said} ${t("{yeni} plan Mozaik'in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik'i güncelleyin.", { yeni })}`
+              ? `${said} ${t('{yeni} plan Mozaik’in daha yeni bir sürümüyle yazıldığı için açılmadı. Mozaik’i güncelleyin.', { yeni })}`
               : said,
         },
       };

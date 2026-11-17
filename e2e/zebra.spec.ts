@@ -215,7 +215,7 @@ const ORNEK: Liste[] = [
     ad: 'Yapıştırma önizlemesi',
     git: async (p) => {
       await openSetup(p, 'Öğretmenler');
-      await p.getByRole('button', { name: "Excel'den yapıştır" }).first().click();
+      await p.getByRole('button', { name: 'Excel’den yapıştır' }).first().click();
       await p
         .locator('.panel.inset textarea')
         .fill(

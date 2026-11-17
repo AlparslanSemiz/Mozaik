@@ -266,7 +266,7 @@ test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (den
     await expect(found(page)).toContainText(`${DOLU.teachers.length * 2} öğretmen`);
     await page.waitForTimeout(3000);
     expect(writesOf(await disk(page))).toEqual([]);
-    await page.getByRole('button', { name: "Belgelerim'deki son kaydı aç" }).click();
+    await page.getByRole('button', { name: 'Belgelerim’deki son kaydı aç' }).click();
     await expect(found(page)).toHaveCount(0);
     await expect
       .poll(async () => JSON.parse((await stored(page, 'ders-programi')) ?? '{}').teachers?.length)
@@ -319,7 +319,7 @@ test.describe('94. Exe: silinmiş profil Belgelerim’deki kaydı öneriyor (den
     await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
     await answerDialog(page);
     await expect(shrunk(page)).toBeVisible({ timeout: 8000 });
-    await shrunk(page).getByRole('button', { name: "Belgelerim'deki son kaydı aç" }).click();
+    await shrunk(page).getByRole('button', { name: 'Belgelerim’deki son kaydı aç' }).click();
     await expect
       .poll(async () => JSON.parse((await stored(page, 'ders-programi')) ?? '{}').teachers?.length)
       .toBe(DOLU.teachers.length);

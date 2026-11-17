@@ -80,7 +80,7 @@ export function openPlanFile({
           await confirm({
             title: t('Bu dosya daha yeni bir sürümle yazılmış'),
             body: t(
-              "Bu Mozaik onu açamıyor. Önce Mozaik'i güncelleyin, sonra dosyayı yeniden açın.",
+              'Bu Mozaik onu açamıyor. Önce Mozaik’i güncelleyin, sonra dosyayı yeniden açın.',
             ),
             confirmLabel: t('Güncellemeleri denetle'),
             cancelLabel: t('Kapat'),
@@ -95,7 +95,7 @@ export function openPlanFile({
         tone: 'warn',
         body: bundle
           ? t(
-              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki "Bütün planları dosyadan aç" düğmesini kullanın.',
+              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Okul bilgileri → Planlar ve yedek bölümündeki “Bütün planları dosyadan aç” düğmesini kullanın.',
             )
           : WRONG_FILE.map((k) => t(k)).join(' '),
       });
@@ -137,7 +137,7 @@ export function openPlanFile({
             </p>
             <p>
               {t(
-                'Ekrandaki plan dosyadakiyle değiştirilecek. Bundan sonra "Geri al" bu açılıştan öncesine dönemez. Vazgeçme ihtimaliniz varsa önce "Kaydet" deyin.',
+                'Ekrandaki plan dosyadakiyle değiştirilecek. Bundan sonra “Geri al” bu açılıştan öncesine dönemez. Vazgeçme ihtimaliniz varsa önce “Kaydet” deyin.',
               )}
             </p>
           </>

@@ -42,7 +42,7 @@ export function Folder({ folder }: { folder: FolderRun }) {
       {folder.fixed && s.kind !== 'yok' && (
         <p className="hint">
           <T
-            k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
+            k="**Bütün planlar** kendiliğinden Belgelerim’e yazılıyor; son {gun} günün yedeği durur."
             vars={{ gun: KEEP_DAILY }}
           />
         </p>

@@ -220,7 +220,7 @@ export default function Subjects({ state, change }: PanelProps) {
     );
     if (taken !== undefined) {
       await alert({
-        title: t('"{ad}" adı zaten kullanılıyor', { ad: subjectLabel(taken) }),
+        title: t('“{ad}” adı zaten kullanılıyor', { ad: subjectLabel(taken) }),
         tone: 'warn',
         body: t('İki branş aynı adı taşıyamaz. Başka bir ad seçin.'),
       });
@@ -231,7 +231,7 @@ export default function Subjects({ state, change }: PanelProps) {
     if (
       users.length > 0 &&
       !(await confirm({
-        title: t('"{eski}" branşı "{yeni}" olacak', {
+        title: t('“{eski}” branşı “{yeni}” olacak', {
           eski: subjectLabel(subject),
           yeni: next,
         }),
@@ -251,7 +251,7 @@ export default function Subjects({ state, change }: PanelProps) {
     const users = subjectTeachers(state, subject);
     if (users.length > 0) {
       await alert({
-        title: t('"{ad}" branşı kullanılıyor', { ad: subjectLabel(subject) }),
+        title: t('“{ad}” branşı kullanılıyor', { ad: subjectLabel(subject) }),
         tone: 'warn',
         body: t(
           '{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.',
@@ -262,7 +262,7 @@ export default function Subjects({ state, change }: PanelProps) {
     }
     // Nothing uses it, so nothing else goes with it: no question since SD1,
     // and the notice offers "Geri al" like every other deletion.
-    const said = t('"{ad}" branşı listeden çıkarıldı.', { ad: subjectLabel(subject) });
+    const said = t('“{ad}” branşı listeden çıkarıldı.', { ad: subjectLabel(subject) });
     const next = deleteSubject(state, subject);
     moveFocusFromDeleted(button);
     keepBefore(state, said);
@@ -281,7 +281,7 @@ export default function Subjects({ state, change }: PanelProps) {
           The COUNTED heading went with the list it counts, and this one
           names the work. No `.panel-head` here: that wrapper exists to put
           one control beside a heading, and this step has no paste button.
-          (Excel'den yapıştır is missing on purpose — a subject is a word,
+          (Excel’den yapıştır is missing on purpose — a subject is a word,
           and a column of words is not what anyone has in a spreadsheet.) */}
       <AddPanel
         title={t('Yeni branş')}

@@ -177,7 +177,7 @@ export default function Notices({
           ⚠{' '}
           {unreadable === 'yeni' ? (
             <>
-              <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez. Mozaik'i güncelleyin." />{' '}
+              <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez. Mozaik’i güncelleyin." />{' '}
               <button
                 className="btn"
                 onClick={() => {
@@ -211,7 +211,7 @@ export default function Notices({
             }}
           />{' '}
           <button className="btn primary" onClick={openFolderCopy}>
-            {t("Belgelerim'deki son kaydı aç")}
+            {t('Belgelerim’deki son kaydı aç')}
           </button>{' '}
           <button className="btn" onClick={folder.release}>
             {t('Boş başla')}
@@ -235,7 +235,7 @@ export default function Notices({
             }}
           />{' '}
           <button className="btn primary" onClick={openFolderCopy}>
-            {t("Belgelerim'deki son kaydı aç")}
+            {t('Belgelerim’deki son kaydı aç')}
           </button>{' '}
           <button className="btn" onClick={acceptShrink}>
             {t('Yeni hâlini asıl dosya yap')}
@@ -292,7 +292,7 @@ export default function Notices({
       {update.kurulum.oner && !kurulumGizli && update.kurulum.olmadi === null && (
         <div className="update-bar" role="status">
           <span>
-            <T k="**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır." />
+            <T k="**Mozaik’i bu bilgisayara kurun.** Öneri araması (CP-SAT) ancak kurulumla gelir ve çok daha hızlıdır. Planlarınız yerinde kalır." />
           </span>
           <span className="update-acts">
             <button
@@ -320,7 +320,7 @@ export default function Notices({
         <div className="save-warning" role="alert">
           ⚠{' '}
           <T
-            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Okul bilgileri → Hakkında'dan tekrar deneyebilirsiniz."
+            k="**Kurulum tamamlanamadı** (kod {kod}). Mozaik eski hâliyle açıldı, planlarınız yerinde. Bilgisayarı yeniden başlatıp Okul bilgileri → Hakkında’dan tekrar deneyebilirsiniz."
             vars={{ kod: update.kurulum.olmadi }}
           />{' '}
           <button className="btn" onClick={guncellemeyeBak}>

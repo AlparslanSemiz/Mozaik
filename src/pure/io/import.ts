@@ -58,7 +58,7 @@ export function parseRooms(text: string): ParseResult<{ name: string }> {
     const name = cells[0] ?? '';
     if (name === '') continue;
     if (seen.has(name)) {
-      errors.push(t('{n}. satır: "{ad}" iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }));
+      errors.push(t('{n}. satır: “{ad}” iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }));
       continue;
     }
     seen.add(name);
@@ -178,7 +178,7 @@ export function parseTeachers(
     if (name === '') continue;
     const subject = of('subject')[0] ?? '';
     if (subject === '')
-      errors.push(t('{n}. satır: "{ad}" için branş boş.', { n: i + 1, ad: name }));
+      errors.push(t('{n}. satır: “{ad}” için branş boş.', { n: i + 1, ad: name }));
 
     accepted.push({
       name,
@@ -215,7 +215,7 @@ export function parseClasses(text: string): ParseResult<ClassRow> {
     if (name === '') continue;
     if (seen.has(name)) {
       errors.push(
-        t('{n}. satır: "{ad}" sınıfı iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }),
+        t('{n}. satır: “{ad}” sınıfı iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }),
       );
       continue;
     }
@@ -261,7 +261,7 @@ export function parseLessons(text: string): ParseResult<LessonRow> {
     const weeklyHours = toNumber(cells[2], 0);
     if (weeklyHours === 0) {
       errors.push(
-        t('{n}. satır: "{sinif} / {kim}" için saat okunamadı, atlandı.', {
+        t('{n}. satır: “{sinif} / {kim}” için saat okunamadı, atlandı.', {
           n: i + 1,
           sinif: className,
           kim: teacher,

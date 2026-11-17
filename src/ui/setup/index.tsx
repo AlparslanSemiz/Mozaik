@@ -97,7 +97,7 @@ export function Start({
           {!introSeen && (
             <p className="hint intro-line">
               <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
-              {t("Mozaik'in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.")}
+              {t('Mozaik’in ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.')}
               <button
                 className="btn"
                 onClick={async () => {

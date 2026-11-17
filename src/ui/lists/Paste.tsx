@@ -1,6 +1,6 @@
 // The Excel paste box, shared by Rooms, Teachers, Classes and Dersler.
 //
-// CONTROLLED, since the trigger left the form row. "Excel'den yapıştır o
+// CONTROLLED, since the trigger left the form row. "Excel’den yapıştır o
 // bloğun en sağında hatta en sağ üstünde bile olabilir." — the button now
 // rides the panel's heading and the box opens BELOW the form, so opening it no
 // longer breaks the row of controls in half. The button belongs to the panel
@@ -63,7 +63,7 @@ export default function Paste<T>({
       <h3>{title}</h3>
       <p className="hint">
         <T
-          k="Excel'de sütunları seçip kopyalayın, aşağıya yapıştırın. Beklenen sıra: **{ornek}**"
+          k="Excel’de sütunları seçip kopyalayın, aşağıya yapıştırın. Beklenen sıra: **{ornek}**"
           vars={{ ornek: example }}
         />
       </p>
