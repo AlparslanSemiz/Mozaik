@@ -75,7 +75,7 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     await page.getByLabel('Okul adı').fill('İkinci Okul');
     await page.getByLabel('Okul adı').blur();
     const eski = await tumunuKaydet(page);
-    expect(eski.plans.map((p) => p.name)).toEqual(['Plan 1', 'Boş plan']);
+    expect(eski.plans.map((p) => p.name)).toEqual(['Örnek Kurs (örnek)', 'Boş plan']);
 
     const yeni = await yeniKopya(browser);
     const p2 = yeni.page;
@@ -118,7 +118,7 @@ test.describe('Linux uygulamasına taşıma: siteden file://’a (B7.28)', () =>
     // ...and on screen: the second plan's own school, the first plan's teachers.
     await picker(p2).selectOption({ label: 'Boş plan' });
     await expect(p2.locator('.app-title')).toHaveText('İkinci Okul');
-    await picker(p2).selectOption({ label: 'Plan 1' });
+    await picker(p2).selectOption({ label: 'Örnek Kurs (örnek)' });
     await openSetup(p2, 'Öğretmenler');
     expect(await p2.locator('table.list tbody tr').count()).toBeGreaterThan(0);
 
