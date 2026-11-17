@@ -58,6 +58,7 @@ import { useShortcuts } from './useShortcuts';
 import { usePaletteActions } from './usePaletteActions';
 import { openPlanFile } from './openPlanFile';
 import { emptyState } from '../../pure/entities';
+import { movedNotice } from '../../pure/program';
 import { activeProgram, blankProgram, DEFAULT_PROGRAM_ID, switchProgram } from '../../pure/grid';
 import { openChecklist } from '../../platform/prefs';
 import { useMoveIn, useMoveOut } from './useMove';
@@ -321,17 +322,20 @@ export default function App() {
   const startOwnSchool = useCallback(() => {
     const was = plans.planId;
     const id = plans.createPlan(t('Kendi okulum'), emptyState());
+    // The new plan as it was written, to tell "still untouched" from "a name,
+    // a bell, a rule typed in": only the first may be dropped. Counting the
+    // four lists said a plan with its school name and bell already typed was
+    // empty, and Geri al deleted them (review, 2026-11-17). No snapshot, no
+    // delete: an extra empty plan is the worst outcome, never a lost one.
+    const fresh = loadPlan(id);
+    const freshText = fresh === null ? null : JSON.stringify(fresh);
     notify(t('Boş bir plan açıldı. Örnek okul, plan seçicide duruyor.'), 'info', {
       label: t('Geri al'),
       run: () => {
         plansNow.current.switchPlan(was);
         window.setTimeout(() => {
           const left = loadPlan(id);
-          if (
-            left !== null &&
-            left.teachers.length + left.classes.length + left.lessons.length + left.rooms.length ===
-              0
-          ) {
+          if (freshText !== null && left !== null && JSON.stringify(left) === freshText) {
             plansNow.current.deletePlan(id);
           }
         }, 0);
@@ -358,24 +362,6 @@ export default function App() {
     notify(t('Kopya açıldı. Eski plana üst çubuktaki plan seçiciyle dönülür.'));
   }, [plans, state, notify, t]);
 
-  const paletteActions = usePaletteActions({
-    state,
-    ribbon,
-    motion,
-    solver,
-    goTo,
-    notify,
-    t,
-    openShortcuts,
-    openFile: () => fileInput.current?.click(),
-    copyForNewTerm,
-    openOldCopies: () => setOldCopiesOpen(true),
-    toggleRibbon,
-    toggleMotion,
-    scale,
-    chooseScale,
-  });
-
   // Before a deletion: the open plan goes to the storage's one slot and, with
   // a folder, to the day's `silmeden-once` file (TODO SD1). Both, because the
   // undo itself lives in memory and a wiped profile takes the slot with it.
@@ -387,6 +373,40 @@ export default function App() {
     },
     [keepInStore, keepInFolder],
   );
+
+  // Ctrl+K's "Kalanı diz" is the strip's, not a lesser copy of it: the same
+  // relay, the moved lessons said by name, the week before kept (review,
+  // 2026-11-17: the palette ran it without any of the three).
+  const makeRest = useCallback(() => {
+    solver.start(state, { keepPlaced: true, relay: true }, (next) => {
+      const said = movedNotice(state, next);
+      if (said === '') return;
+      keepBefore(state, said, true);
+      notify(said, 'info', {
+        label: t('Önceki programa dön'),
+        run: () => undoIf(next),
+        expected: next,
+      });
+    });
+  }, [solver, state, keepBefore, notify, t, undoIf]);
+
+  const paletteActions = usePaletteActions({
+    state,
+    ribbon,
+    motion,
+    goTo,
+    notify,
+    t,
+    openShortcuts,
+    openFile: () => fileInput.current?.click(),
+    copyForNewTerm,
+    openOldCopies: () => setOldCopiesOpen(true),
+    toggleRibbon,
+    toggleMotion,
+    scale,
+    chooseScale,
+    makeRest,
+  });
 
   // The state from before the last deletion of an earlier session, offered
   // once, on a strip: a reader who has trouble seeing would miss a toast.

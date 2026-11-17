@@ -86,6 +86,41 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await expect(picker).toHaveCount(0);
     });
 
+    // Review, 2026-11-17: the undo counted only the four lists, so a plan with
+    // its school name (or bell, or rules) already typed was "empty" and deleted.
+    test('Kendi okulumla başla sonrası yazılan okul adı Geri al ile SİLİNMİYOR', async ({
+      page,
+    }) => {
+      await open(page);
+      await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+      await answerDialog(page);
+      await openSetup(page, 'Derslikler');
+      await page
+        .locator('.sample-line')
+        .getByRole('button', { name: 'Kendi okulumla başla' })
+        .click();
+      await openSettings(page, 'Zil ve günler');
+      await page.getByLabel(/^Okul adı/).fill('Deneme Dershanesi');
+      await page.keyboard.press('Tab'); // the name is kept when the box is left
+      // The new plan's own key, not the legacy one `savedText` reads.
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            Object.values(localStorage).some((v) => v.includes('Deneme Dershanesi')),
+          ),
+        )
+        .toBe(true);
+
+      await page
+        .locator('.toast', { hasText: 'Boş bir plan açıldı' })
+        .getByRole('button', { name: 'Geri al' })
+        .click();
+      // Back on the sample, and the typed plan is still a plan of its own.
+      await expect(page.locator('.sample-line')).toBeVisible();
+      const picker = page.getByRole('combobox', { name: 'Plan', exact: true });
+      await expect(picker.locator('option')).toHaveCount(2);
+    });
+
     test('kendi verisini girmeye başlayan da bir daha görmüyor', async ({ page }) => {
       await open(page);
       await expect(page.locator('.intro-line')).toBeVisible();
