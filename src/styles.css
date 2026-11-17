@@ -7228,16 +7228,29 @@ table.availability thead .hour-clock:empty::before {
 }
 /* "? Yardım" is the last thing that wrapped onto a second row of its own
    ("?" alone, then 1920 at %150). Narrow, it is the "?" and nothing else: the
-   button's text is one text node, so it is CLIPPED to the mark rather than
-   swapped, and its name for a reader is still the whole word. */
+   word is its own span (`.help-word`, see MoreMenu's `lead`) and is taken off
+   the screen, so the mark is centred by the box and not clipped out of a text
+   run (which showed "? H" at 768 and 375). Its name for a reader is still the
+   whole word. */
 @container bar (max-width: 100em) {
   .topbar > .btn.topbar-help:not(.icon) {
-    width: calc(var(--space-3) * 2 + .6em + 2px);
+    position: relative;
+    width: auto;
     max-width: none;
     padding-inline: var(--space-3);
     white-space: nowrap;
+    justify-content: center;
+  }
+
+  /* The word leaves the screen and stays in the name (`.visually-hidden`'s
+     recipe, on the span MoreMenu's `lead` makes). */
+  .topbar-help .help-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
     overflow: hidden;
-    justify-content: flex-start;
+    clip-path: inset(50%);
   }
 
   .topbar-help .more-caret {
@@ -8125,4 +8138,61 @@ table.person-list td:not(.person-status) {
 
 .pool.pool-empty {
   display: none;
+}
+
+/* NARROW WINDOWS (768 and the phone's 375): the two strips keep their words and
+   scroll sideways inside their own box instead of squeezing the buttons or
+   pushing the page (measured 2026-11-17: the page was 518 px wide at 375, the
+   ribbon's buttons 30 px wide with 39-75 px of words in them). The tab strip
+   is a child of the bar and answers the bar's width; the ribbon is its own
+   container, so it can only be told by the window. `em` of the window is the
+   browser's 16 px, not the program's scale: the scale's own ladder above
+   still does the work between 960 and 1500. The ribbon wraps up to 40em
+   and scrolls below it. Padding-block keeps the pressed
+   tab's shadow and a control's focus ring inside the scrolling box. */
+@container bar (max-width: 56em) {
+  .tabstrip {
+    grid-auto-columns: max-content;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-block: var(--space-1);
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 60em) {
+  .ribbon {
+    /* Tablet width: everything stays in view on a second row. */
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  /* A rule at the start of a wrapped row separates nothing. */
+  .ribbon > .ribbon-sep {
+    display: none;
+  }
+
+  .ribbon > *,
+  .ribbon .btn {
+    flex-shrink: 0;
+  }
+
+  .ribbon .btn,
+  .ribbon .ribbon-label {
+    white-space: nowrap;
+  }
+
+  .ribbon > .more-menu {
+    margin-left: auto;
+  }
+}
+
+/* Phone width: one row that scrolls; wrapped it would take half the screen. */
+@media (max-width: 40em) {
+  .ribbon {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
 }

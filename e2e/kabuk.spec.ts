@@ -70,6 +70,25 @@ test.describe('23. Sekmeler', () => {
     );
   });
 
+  // 375 (a phone) and 768 (a tablet): both strips keep their words and scroll or
+  // wrap inside their own box; the page itself never scrolls sideways. At 375
+  // it was 518 px wide, the ribbon's buttons 30 px with 39-75 px of words in them.
+  for (const width of [375, 768]) {
+    test(`${width} px'te sayfa yana kaymıyor, her sekmede`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await openWithSample(page);
+      for (const name of TABS) {
+        await page.locator('.tabstrip').getByRole('button', { name, exact: true }).click();
+        const taşma = await page.evaluate(
+          () => document.scrollingElement!.scrollWidth - document.scrollingElement!.clientWidth,
+        );
+        expect(taşma, `${name} ${width} px`).toBeLessThanOrEqual(0);
+      }
+      // The help button is a mark, whole, and still named by its word.
+      await expect(page.getByRole('button', { name: 'Yardım' })).toBeVisible();
+    });
+  }
+
   test('beş simge birbirine benzemiyor', async ({ page }) => {
     await open(page);
     const paths = await page

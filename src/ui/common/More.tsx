@@ -20,6 +20,18 @@ import { useT } from './T';
 
 const ITEM_ICON = { size: 15, 'aria-hidden': true, focusable: false } as const;
 
+/** "? Yardım" as a mark and a word; a label without a mark stays whole. */
+function LeadLabel({ text }: { text: string }) {
+  const m = /^(\S)\s+(.+)$/u.exec(text);
+  if (m === null) return <>{text}</>;
+  return (
+    <>
+      <span aria-hidden="true">{m[1]}</span>
+      <span className="help-word"> {m[2]}</span>
+    </>
+  );
+}
+
 /** The trigger and the menu. `label` defaults to "Daha fazla". */
 export function MoreMenu({
   children,
@@ -30,7 +42,15 @@ export function MoreMenu({
   align = 'end',
   dot = false,
   ariaLabel,
+  lead = false,
 }: {
+  /**
+   * The label opens with a drawn mark ("? Yardım"): the mark is shown to
+   * everybody and hidden from assistive technology, the word after it is
+   * `.help-word`, which a narrow bar may take off the screen (never out of
+   * the button's name). Clipping the one text node showed half of the word.
+   */
+  lead?: boolean;
   /** The accessible name when the visible word alone ("?") says too little. */
   ariaLabel?: string;
   children: React.ReactNode;
@@ -71,7 +91,7 @@ export function MoreMenu({
           {...(dot ? { 'aria-describedby': newsId } : {})}
         >
           {icon}
-          {t(label)}
+          {lead ? <LeadLabel text={t(label)} /> : t(label)}
           <ChevronDown size={15} aria-hidden="true" focusable="false" className="more-caret" />
           {dot && <span className="ribbon-dot" aria-hidden="true" />}
           {/* Hidden nodes are left out of the button's name; the description still reads it. */}
