@@ -32,6 +32,11 @@ const HEADS = 'tbody .row-head .inspect, tbody .row-head .secondary';
 /** Air around an hour number: a heading has no card padding to give it. */
 const HEAD_AIR = 4;
 
+/** Air between one card's number and the next's: "412" "412" "320" ran into
+ * "412412320" at 1366 and %150, where the column sits at its floor and the
+ * digits touch the card's edge (3rd audit). Added to a card line only. */
+const CARD_AIR = 3;
+
 function floorOf(table: HTMLElement, lines: string): number {
   const range = document.createRange();
   let most = 0;
@@ -63,7 +68,10 @@ function floorOf(table: HTMLElement, lines: string): number {
         )
       : cell === line
         ? HEAD_AIR
-        : cell.getBoundingClientRect().width - line.getBoundingClientRect().width - rule;
+        : cell.getBoundingClientRect().width -
+          line.getBoundingClientRect().width -
+          rule +
+          CARD_AIR;
     most = Math.max(most, (text + around) / Math.max(1, cell.colSpan));
   }
   return Math.ceil(most);
