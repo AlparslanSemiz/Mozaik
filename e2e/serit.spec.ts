@@ -163,6 +163,9 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
   //
   // "İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı
   //  yerde olsun ve yazı ortalansın."
+  // Since 2026-11-17 the word sits at the END of its box instead (Alp chose it
+  // over centring: centred, short and long captions stood at different
+  // distances from the rule), so the check below reads the right margin.
   //
   // The caption box was already padded to one width, so the first BUTTON did
   // land at one x — and that is all the old contract said, which is why nothing
@@ -188,9 +191,8 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
           const box = cap.getBoundingClientRect();
           // Where the rule is painted, in the strip's own coordinates.
           const rule = parseFloat(after.left);
-          // The word is centred when the ink left of it matches the ink right
-          // of it. Measured with a Range, since the caption's box is wider than
-          // its text by design.
+          // The word ends where its box ends. Measured with a Range, since the
+          // caption's box is wider than its text by design.
           const range = document.createRange();
           range.selectNodeContents(cap);
           const text = range.getBoundingClientRect();
@@ -202,13 +204,14 @@ test.describe('57. Düğme satırı — yedi sekme, tek iskelet', () => {
           };
         });
         expect(m.width, `${tab}: başlık kutusu yok`).toBeGreaterThan(0);
-        // Centred: the two margins agree. One pixel of tolerance is the
-        // sub-pixel rounding of half an odd number.
+        // Flush to the end: no air between the word and its box's right edge,
+        // so every caption stops the same distance before the rule. One pixel
+        // of tolerance is sub-pixel rounding.
         expect(
-          Math.abs(m.left - m.right),
-          `${tab}: başlık ortalanmamış (sol ${m.left.toFixed(1)}, sağ ${m.right.toFixed(1)})`,
+          Math.abs(m.right),
+          `${tab}: başlık sağa yaslı değil (sol ${m.left.toFixed(1)}, sağ ${m.right.toFixed(1)})`,
         ).toBeLessThanOrEqual(1);
-        // ...and it fits the box it is centred in, or the box is a lie.
+        // ...and it fits the box it ends in, or the box is a lie.
         expect(m.left, `${tab}: başlık kutusundan taşıyor`).toBeGreaterThanOrEqual(-0.5);
         seen[tab] = { rule: m.rule, slack: m.left };
       }

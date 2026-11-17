@@ -1420,7 +1420,7 @@ textarea {
   align-items: center;
 }
 
-/* THE OPENING CAPTION IS ONE FIXED BOX WITH THE WORD CENTRED IN IT, so the
+/* THE OPENING CAPTION IS ONE FIXED BOX WITH THE WORD AT ITS END, so the
    first button starts at the same x on all seven strips — "İlk baştaki yazı
    sonrası hepsi aynı hizadan başlasın mı güzel olur mu? arada bir çizgi olur."
 
@@ -1428,10 +1428,17 @@ textarea {
    longer than the floor pushed the strip sideways again — which is the half of
    the request that was never actually delivered.
 
-   `em` and NOT `ch`: see --ribbon-lead-w. */
+   `em` and NOT `ch`: see --ribbon-lead-w.
+
+   The word sits at the box's END, not its centre (Alp, 2026-11-17, replacing
+   the earlier "yazı ortalansın"): centred, a short caption ("BÖLÜM") stood
+   further from the rule than a long one, so the rule had uneven air on its
+   two sides from strip to strip. Flush to the end, every caption stops the
+   same distance before the rule and caption, rule and buttons read as one line.
+   `end` and not `right`, so a right-to-left language mirrors it. */
 .ribbon > .ribbon-label:first-child {
   width: var(--ribbon-lead-w);
-  text-align: center;
+  text-align: end;
 }
 
 /* ...and the rule after it, PINNED TO THE BOX rather than trailing the word.
