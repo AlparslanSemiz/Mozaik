@@ -310,7 +310,7 @@ describe('holeReason', () => {
     const ix = buildIndex(d);
 
     expect(commonestBlock(d, ix, 'x1').reason).toContain('510 sınıfı');
-    expect(holeReason(d, ix, 'x1')).toBe('MÇ, Pazartesi 3. saatte kapalı');
+    expect(holeReason(d, ix, 'x1')).toBe('Mehmet Çelik, Pazartesi 3. saatte kapalı');
   });
 
   it('boş saatler bloğa uymuyorsa şekli söylüyor', () => {

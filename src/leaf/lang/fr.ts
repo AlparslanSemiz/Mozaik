@@ -205,8 +205,6 @@ const FR: Sozluk = {
     "Glissez pour déplacer · clic droit pour les options",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Glissez pour déplacer, clic droit pour les options",
-  "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
-    "Épinglé. Clic droit pour le détacher",
 
   // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Renvoyer au bac",
@@ -770,7 +768,6 @@ const FR: Sozluk = {
   "başka ders": "un autre cours",
   "{sinif} sınıfı {gun} {saat}. saatte kapalı": "la classe {sinif} est fermée le {gun} à l’heure {saat}",
   "{kim}, {gun} {saat}. saatte kapalı": "L’heure {saat} du {gun} est fermée pour {kim}",
-  "{kim}, {gun} {saat}. saatte {sinif} sınıfında": "{kim} est avec la classe {sinif} le {gun} à l’heure {saat}",
   başka: "une autre",
   "{derslik} dersliğinde {gun} {saat}. saatte {sinif} var": "la salle {derslik} accueille {sinif} le {gun} à l’heure {saat}",
   "başka sınıf": "une autre classe",
@@ -1246,7 +1243,6 @@ const FR: Sozluk = {
   "{ne} dersi {kim} öğretmenine geçecek": "Le cours de {ne} passera à {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
     "Ce cours n’est pas encore placé, il n’y a donc rien à perdre.",
-  "Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Ses {n} cours placés seront réessayés sur les heures ouvertes du nouvel enseignant ; ceux qui ne rentrent pas retournent au bac.",
   Aktar: "Confier",
   "{ne} dersi {kim} öğretmenine geçti.": "Le cours de {ne} est passé à {kim}.",
   "{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.":
@@ -1821,6 +1817,12 @@ const FR: Sozluk = {
   "Bu örnek okul.": "Voici l’école d’exemple.",
   "Kendi okulumla başla": "Commencer avec mon établissement",
   "? Yardım": "? Aide",
+  "Örnek Kurs (örnek)": "Cours d’exemple (exemple)",
+  "Bu ders sabitlenmiş. Taşımak için sağ tıklayıp Sabitlemeyi kaldır’ı seçin.": "Ce cours est épinglé. Pour le déplacer, faites un clic droit et choisissez Détacher.",
+  "Sabitlenmiş. Sağ tıklayarak sabitlemeyi kaldırabilirsiniz": "Épinglé. Clic droit pour le détacher",
+  "{ad} için bu gün ders yok, değişecek ders yok.": "{ad} n’a aucun cours ce jour, rien à changer.",
+  "{kim} {gun} {saat}. saatte {sinif} sınıfında": "{kim} est avec la classe {sinif} le {gun} à l’heure {saat}",
+  "Programdaki {n} saat yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Ses {n} heures placées seront réessayées sur les heures ouvertes du nouvel enseignant ; celles qui ne rentrent pas retournent au bac.",
 };
 
 registerSozluk("fr", FR);

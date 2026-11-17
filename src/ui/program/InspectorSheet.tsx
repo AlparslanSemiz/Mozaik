@@ -157,7 +157,7 @@ export function Inspector({
     const to = state.teachers.find((x) => x.id === teacherId);
     const lesson = state.lessons.find((x) => x.id === lessonId);
     if (to === undefined || lesson === undefined) return;
-    const placed = placedBlocks(state, lesson).length;
+    const placed = placedBlocks(state, lesson).reduce((n, b) => n + b.size, 0);
     // A teacher of another subject: the lesson is taught under hers (the
     // first one, `transferLesson`), which the question says before it happens.
     const was = lessonSubject(state, lesson);
@@ -167,7 +167,7 @@ export function Inspector({
       placed === 0
         ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
         : t(
-            'Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
+            'Programdaki {n} saat yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
             { n: placed },
           );
     if (
@@ -195,17 +195,21 @@ export function Inspector({
     // The count comes from a preview on the state the reader is looking at: a
     // variable written inside the reducer callback is still 0 here, because
     // React runs that callback late (pitfall 20).
-    const { returned } = transferLesson(state, lessonId, teacherId);
-    change((d) => transferLesson(d, lessonId, teacherId).state);
-    toast(
+    const { returned, state: next } = transferLesson(state, lessonId, teacherId);
+    const said =
       returned === 0
         ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.name })
         : t('{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.', {
             ne: other,
             kim: to.name,
             n: returned,
-          }),
-    );
+          });
+    // The blocks that went back to the pool are the cost, and the way back:
+    // Geri al names exactly this state, so after any other edit it is gone
+    // rather than reversing the wrong thing (SD1).
+    if (returned > 0) keepBefore(state, said);
+    change((d) => (d === state ? next : transferLesson(d, lessonId, teacherId).state), said);
+    toast(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
     // The menu's button goes with the row on a teacher's page: the keyboard
     // goes to the next row's, or to the list's heading when there is none.
     // After the question's own focus return has run.
@@ -598,7 +602,7 @@ export function Inspector({
                               change((d) => updateLesson(d, x.id, { weeklyHours }));
                             }}
                           />{' '}
-                          {t('saat')}
+                          <span className="muted-inline">{t('saat')}</span>
                         </td>
                         <td data-lesson-menu={x.id}>
                           <RowMenu

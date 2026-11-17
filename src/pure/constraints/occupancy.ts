@@ -32,6 +32,8 @@ export interface Index {
   placedHours: Map<Id, number>;
   /** lessonId -> the lessons it may not share a day with (State.relations, both ends). */
   notSameDay: Map<Id, Id[]>;
+  /** The day and hour names, for the sentences that name a block. */
+  settings: State['settings'];
 }
 
 export function buildIndex(d: State): Index {
@@ -85,6 +87,7 @@ export function buildIndex(d: State): Index {
     roomById,
     placedHours,
     notSameDay,
+    settings: d.settings,
   };
 }
 

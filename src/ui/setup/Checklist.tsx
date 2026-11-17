@@ -208,7 +208,7 @@ export function Checklist({ state, children }: { state: State; children?: React.
   return (
     <section className="panel checklist" aria-label={t('Başlarken')}>
       <div className="checklist-head">
-        <h2>{t('Başlarken')}</h2>
+        <h2 tabIndex={-1}>{t('Başlarken')}</h2>
         <span className="checklist-count">
           {t('{n} / {toplam} adım', { n: doneCount, toplam: steps.length })}
         </span>

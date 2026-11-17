@@ -238,7 +238,9 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x2', 0, 3);
     const found = findViolations(d, buildIndex(d));
     expect(found).toHaveLength(1);
-    expect(found[0]!.message).toBe('MÇ Salı günü 3 saat ders veriyor, en fazla 2 saat isteniyor.');
+    expect(found[0]!.message).toBe(
+      'Mehmet Çelik Salı günü 3 saat ders veriyor, en fazla 2 saat isteniyor.',
+    );
     expect(found[0]!.level).toBe('block');
   });
 
@@ -248,7 +250,7 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x1', 0, 0);
     const found = findViolations(d, buildIndex(d));
     expect(found[0]!.message).toBe(
-      'MÇ Salı günü sadece 1 saat ders veriyor, en az 2 saat isteniyor.',
+      'Mehmet Çelik Salı günü sadece 1 saat ders veriyor, en az 2 saat isteniyor.',
     );
     expect(found[0]!.level).toBe('warn');
   });
@@ -269,7 +271,7 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x2', 0, 2);
     const found = findViolations(d, buildIndex(d));
     expect(found[0]!.message).toBe(
-      'MÇ Salı günü art arda 3 saat ders veriyor, en fazla 2 saat isteniyor.',
+      'Mehmet Çelik Salı günü art arda 3 saat ders veriyor, en fazla 2 saat isteniyor.',
     );
   });
 
@@ -280,7 +282,7 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x1', 0, 2);
     const found = findViolations(d, buildIndex(d));
     expect(found.map((x) => x.message)).toContain(
-      '510 sınıfı Salı günü MÇ dersinden 2 saat görüyor, en fazla 1 saat isteniyor.',
+      '510 sınıfı Salı günü Matematik dersinden 2 saat görüyor, en fazla 1 saat isteniyor.',
     );
   });
 

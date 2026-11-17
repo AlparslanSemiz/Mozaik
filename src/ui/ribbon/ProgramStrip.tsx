@@ -74,7 +74,7 @@ function MainAction({
    * once more before it is final). 0: not following.
    */
   const following = useRef(0);
-  /** A rebuild press this soon after focus arrived is a held or repeated Enter. */
+  /** A rebuild or stop press this soon after focus arrived is a held or repeated Enter. */
   const guardUntil = useRef(0);
   useEffect(() => {
     if (following.current === 0) return;
@@ -89,7 +89,7 @@ function MainAction({
     // Only when focus really fell off: never steal it from somewhere else.
     if (active === null || active === document.body) {
       refs.current[kind]?.focus();
-      if (kind === 'fix') guardUntil.current = now + 700;
+      if (kind === 'fix' || kind === 'stop') guardUntil.current = now + 700;
     } else if (!Object.values(refs.current).includes(active as HTMLElement)) {
       following.current = 0;
     }
@@ -104,7 +104,18 @@ function MainAction({
   };
   if (kind === 'stop')
     return (
-      <button key="stop" ref={set('stop')} className="btn danger" onClick={onStop}>
+      <button
+        key="stop"
+        ref={set('stop')}
+        className="btn danger"
+        onClick={(e) => {
+          // The Enter that pressed "Kalanı diz", still held, repeats on the
+          // button the focus has just moved to: it must not stop the run.
+          // A pointer press (detail > 0) is never held.
+          if (e.detail === 0 && performance.now() < guardUntil.current) return;
+          onStop();
+        }}
+      >
         <Square {...ICON} />
         {t('Durdur')}
       </button>

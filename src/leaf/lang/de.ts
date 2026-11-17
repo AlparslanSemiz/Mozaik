@@ -206,8 +206,6 @@ const DE: Sozluk = {
     "Zum Verschieben ziehen · Rechtsklick für Optionen",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Zum Verschieben ziehen, Rechtsklick für Optionen",
-  "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
-    "Angeheftet. Mit Rechtsklick lösen",
 
   // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Ins Ablagefach",
@@ -763,7 +761,6 @@ const DE: Sozluk = {
   "başka ders": "einen anderen Unterricht",
   "{sinif} sınıfı {gun} {saat}. saatte kapalı": "Klasse {sinif} ist am {gun} in der {saat}. Stunde geschlossen",
   "{kim}, {gun} {saat}. saatte kapalı": "Die {saat}. Stunde am {gun} ist für {kim} gesperrt",
-  "{kim}, {gun} {saat}. saatte {sinif} sınıfında": "{kim} ist am {gun} in der {saat}. Stunde bei Klasse {sinif}",
   başka: "einer anderen",
   "{derslik} dersliğinde {gun} {saat}. saatte {sinif} var": "In Raum {derslik} ist am {gun} in der {saat}. Stunde {sinif}",
   "başka sınıf": "eine andere Klasse",
@@ -1239,7 +1236,6 @@ const DE: Sozluk = {
   "{ne} dersi {kim} öğretmenine geçecek": "Der Unterricht {ne} geht an {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
     "Dieser Unterricht steht noch nicht im Stundenplan, es kann also nichts verloren gehen.",
-  "Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Seine {n} gelegten Stunden werden gegen die offenen Stunden der neuen Lehrkraft erneut geprüft; was nicht passt, geht zurück ins Ablagefach.",
   Aktar: "Übergeben",
   "{ne} dersi {kim} öğretmenine geçti.": "Der Unterricht {ne} ging an {kim}.",
   "{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.":
@@ -1814,6 +1810,12 @@ const DE: Sozluk = {
   "Bu örnek okul.": "Das ist die Beispielschule.",
   "Kendi okulumla başla": "Mit meiner eigenen Schule beginnen",
   "? Yardım": "? Hilfe",
+  "Örnek Kurs (örnek)": "Beispielkurs (Beispiel)",
+  "Bu ders sabitlenmiş. Taşımak için sağ tıklayıp Sabitlemeyi kaldır’ı seçin.": "Diese Stunde ist angeheftet. Zum Verschieben mit Rechtsklick „Lösen“ wählen.",
+  "Sabitlenmiş. Sağ tıklayarak sabitlemeyi kaldırabilirsiniz": "Angeheftet. Mit Rechtsklick lösen",
+  "{ad} için bu gün ders yok, değişecek ders yok.": "{ad} hat an diesem Tag keinen Unterricht, es ändert sich nichts.",
+  "{kim} {gun} {saat}. saatte {sinif} sınıfında": "{kim} ist am {gun} in der {saat}. Stunde bei Klasse {sinif}",
+  "Programdaki {n} saat yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Seine {n} gelegten Stunden werden gegen die offenen Stunden der neuen Lehrkraft erneut geprüft; was nicht passt, geht zurück ins Ablagefach.",
 };
 
 registerSozluk("de", DE);

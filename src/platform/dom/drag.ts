@@ -260,7 +260,10 @@ export function useDrag(
           if (refusal.current.timer !== null) clearTimeout(refusal.current.timer);
           refusal.current.timer = null;
           refusal.current.settle = null;
+          // Something else wrote the bar meanwhile: the sentence is React's, but
+          // the silence this drop set on it is still ours to lift.
           if (text.textContent === why) restore();
+          else unhush();
         };
         refusal.current.settle = settle;
         refusal.current.timer = setTimeout(settle, REFUSAL_STAYS);
@@ -665,7 +668,10 @@ export function useDrag(
     };
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') finish();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        finish();
+      }
     };
 
     window.addEventListener('pointermove', onMove);
@@ -784,8 +790,11 @@ export function useDrag(
         e.stopPropagation();
         return;
       }
-      if (k === 'Escape') end();
-      else if (k === 'ArrowRight') go(e.ctrlKey ? nextDroppable(1) : index + 1);
+      if (k === 'Escape') {
+        // The key was this hand's: a notice behind it must not take it too.
+        e.preventDefault();
+        end();
+      } else if (k === 'ArrowRight') go(e.ctrlKey ? nextDroppable(1) : index + 1);
       else if (k === 'ArrowLeft') go(e.ctrlKey ? nextDroppable(-1) : index - 1);
       else if (k === 'ArrowDown') go(otherDay(1));
       else if (k === 'ArrowUp') go(otherDay(-1));

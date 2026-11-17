@@ -86,6 +86,43 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await expect(picker).toHaveCount(0);
     });
 
+    // Denetim 3. tur: the picker said "Plan 1" for the sample, the focus fell
+    // to <body> with the button, and the notice told of Ctrl+Z, which does not
+    // undo a plan switch.
+    test('Kendi okulumla başla: örnek planın adı örnek, odak Başlarken başlığında, Ctrl+Z yazmıyor', async ({
+      page,
+    }) => {
+      await open(page);
+      await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+      await answerDialog(page);
+      await openSetup(page, 'Derslikler');
+      await page
+        .locator('.sample-line')
+        .getByRole('button', { name: 'Kendi okulumla başla' })
+        .click();
+      const picker = page.getByRole('combobox', { name: 'Plan', exact: true });
+      await expect(picker.locator('option', { hasText: 'Örnek Kurs (örnek)' })).toHaveCount(1);
+      await expect(picker.locator('option', { hasText: 'Plan 1' })).toHaveCount(0);
+      await expect(page.locator('.checklist h2')).toBeFocused();
+      const notice = page.locator('.toast', { hasText: 'Boş bir plan açıldı' });
+      await expect(notice).not.toContainText('Ctrl+Z');
+    });
+
+    test('Okul adı kutusu Geri al sonrası kayıttaki adı gösteriyor', async ({ page }) => {
+      await open(page);
+      await page.getByRole('button', { name: /Örnek okulu yükle/ }).click();
+      await answerDialog(page);
+      await openSettings(page, 'Zil ve günler');
+      const box = page.getByLabel(/^Okul adı/);
+      await expect(box).toHaveValue('Örnek Kurs');
+      await box.fill('Başka Kurs');
+      await page.keyboard.press('Tab');
+      await expect(box).toHaveValue('Başka Kurs');
+      await page.locator('body').click({ position: { x: 2, y: 2 } });
+      await page.keyboard.press('Control+z');
+      await expect(box).toHaveValue('Örnek Kurs');
+    });
+
     // Review, 2026-11-17: the undo counted only the four lists, so a plan with
     // its school name (or bell, or rules) already typed was "empty" and deleted.
     test('Kendi okulumla başla sonrası yazılan okul adı Geri al ile SİLİNMİYOR', async ({
