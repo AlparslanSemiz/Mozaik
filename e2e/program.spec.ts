@@ -2182,6 +2182,18 @@ test.describe('86. Sabitleme', () => {
       'sabit kartın raptiyesinde dolu zemin yok',
     ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
     expect(await card.boundingBox()).toEqual(box);
+    // The pinned mark sits in the corner BESIDE the room letter and not on it
+    // (3rd audit): a pinned card is told apart at a glance, and the letter
+    // stays readable. Its chip is white at every theme, not --paper.
+    const overLetter = await pin.evaluate((el) => {
+      const cell = el.parentElement!;
+      const range = document.createRange();
+      range.selectNodeContents(cell.querySelector('.card-bottom')!);
+      const letter = range.getBoundingClientRect();
+      const mark = el.getBoundingClientRect();
+      return letter.width > 0 && mark.left < letter.right && letter.left < mark.right && mark.top < letter.bottom && letter.top < mark.bottom;
+    });
+    expect(overLetter, 'sabit kartın raptiyesi oda harfinin üstüne bindi').toBe(false);
 
     // ...and the same button takes it off again.
     await pin.click();

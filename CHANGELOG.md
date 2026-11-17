@@ -174,6 +174,7 @@ release is incomplete, the entry says so.
 
 - Windows app: the window now runs under a strict Content Security Policy (no remote scripts, styles, fonts or connections). Updates are only ever downloaded up to the size the release states, and the installer is run from a new folder of its own in the temporary folder. The fast suggestion search's library is loaded only by an installed copy, from its own folder.
 - Screen polish after the second audit: the strip's first divider no longer touches its label, the Print list lays names in equal columns, panel headings and their buttons share one height, the person page's buttons sit in an even 3 + 2 grid, disabled buttons are readable, the pin stays out of the way of a narrow card's room letter and is clearly marked when pinned, and card numbers side by side no longer run together.
+- Look: panel headings side by side start on the same line, the pinned card's mark no longer sits on the room letter and shows in the dark theme, the status chip is no longer cut at a larger text size, card numbers have air between them on a small screen, and the sample-school line, the filter group names and the group dividers in the strip are laid out properly.
 
 ## [2.2.0] - 2026-09-26
 

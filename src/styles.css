@@ -1341,9 +1341,6 @@ textarea {
     gap: var(--space-1);
   }
 
-  .ribbon-sep {
-    margin: 0 var(--space-1);
-  }
 }
 
 @container serit (max-width: 95em) {
@@ -1521,7 +1518,9 @@ textarea {
 .ribbon-sep {
   width: 1px;
   align-self: stretch;
-  margin: 0 var(--space-2);
+  /* No margin of its own: `.ribbon > * + *` already puts the same space on
+     both sides (itself and the group after it), so the rule sits in the
+     middle. Its own margin made the two sides 3px and 10px. */
   background: var(--line);
 }
 
@@ -1849,7 +1848,10 @@ table.list tbody tr {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0 var(--edge-x);
+  /* The strip above has a 4px section rule on its left, so its content starts
+     4px in from --edge-x; this bar and the pool's head start there too, one
+     line down the whole screen (3rd audit). */
+  padding: 0 var(--edge-x) 0 calc(var(--edge-x) + 4px);
   /* Nothing wrong: the plain state, and the strip where the grid's own
      description sits. It is a shade of PAPER, not of chrome — it belongs to
      the timetable below it, not to the tools above it. */
@@ -2797,8 +2799,20 @@ table.grid tbody td.unavailable {
    "pinned" does not rest on a 74%-box glyph alone. The ink is --on-color over
    a --paper chip, neither of which turns with the theme's colour channel. */
 .card-pin[aria-pressed='true'] {
-  background: color-mix(in oklab, var(--paper) 55%, transparent);
+  /* White at 55% and not --paper: in the dark theme --paper is dark and the
+     chip under a dark --on-color glyph vanished (3rd audit). Neither turns
+     with the theme, like the ink. */
+  background: color-mix(in oklab, #fff 55%, transparent);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--on-color) 35%, transparent);
+  /* Smaller than the aimed-at pin: the corner it rests in is beside the room
+     letter, not under it (the second term keeps it under 29% of the column,
+     which is where the letter begins at every scale), so the pinned card reads
+     at a glance by its mark alone. */
+  --pin-size: clamp(
+    .4rem,
+    min(calc(var(--cell-h) * .3), calc(var(--cell-min, 34px) * .29)),
+    .6875rem
+  );
 }
 
 /* The target reaches into the cell's own padding, down and to the left, and
@@ -2831,7 +2845,10 @@ table.grid tbody td.unavailable {
 .card-pin[aria-pressed='true'],
 table.grid tbody td:hover > .card-pin,
 .card-pin:hover,
-.card-pin:focus-visible {
+.card-pin:focus-visible,
+/* The pin is out of the tab order (tabIndex -1), so the focus a keyboard
+   brings to the narrow card is the CARD's: the pin shows with it. */
+table.grid tbody td > .card:focus-visible ~ .card-pin {
   opacity: 1;
 }
 
@@ -3282,7 +3299,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   align-items: center;
   gap: var(--space-2);
   flex: 0 0 auto;
-  padding: var(--space-2) var(--edge-x);
+  padding: var(--space-2) var(--edge-x) var(--space-2) calc(var(--edge-x) + 4px);
 }
 
 /* "neye göre filtrelensin sıralansın ayarı bile olabilir." Pushed to the far
@@ -3331,6 +3348,9 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 .pool-toggle {
   flex: 0 0 auto;
+  /* The arrow, not its button, sits on the line: the button's own padding and
+     border are taken back. */
+  margin-left: calc(-1 * (var(--space-3) + 1px));
   border-color: transparent;
   background: none;
 }
@@ -3851,6 +3871,14 @@ main:focus {
   font-weight: 600;
   letter-spacing: var(--ls-tighter);
   line-height: var(--lh-head);
+}
+
+/* A bare heading is as tall as a `.panel-head` (one row, --row-ctl-h), so two
+   panels side by side start their text on the same y. Padding and not a
+   min-height: the rule (::before) stretches to the box and must not grow. */
+.panel > h2:first-child {
+  --h2-pad: calc((var(--row-ctl-h) - var(--fs-xl) * var(--lh-head)) / 2);
+  padding-block: var(--h2-pad);
 }
 
 .panel > h2::before,
@@ -4717,16 +4745,24 @@ table.sheet-lessons td:last-child {
    that can be done about it, all on one row. It is a `.hint` on purpose — this
    is an offer, not an instruction, and it reads in the same quiet grey as every
    other note on the screen. */
-.intro-line {
+.intro-line,
+.sample-line {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   flex-wrap: wrap;
 }
 
-.intro-line > svg {
+.intro-line > svg,
+.sample-line > svg {
   flex: none;
   color: var(--accent);
+}
+
+.checklist-head .btn,
+.sample-line .btn {
+  min-height: var(--row-ctl-h);
+  padding-block: 0;
 }
 
 /* The way out is a real button because it does something the reader cannot
@@ -5376,6 +5412,12 @@ table.sheet-lessons td:last-child {
   margin-block: calc(var(--space-6) * -1) 0;
 }
 
+/* The sticky band of a bare heading keeps the same extra the plain one has, so
+   its text lands where a `.panel-head`'s does in the panel beside it. */
+.cols > aside > .panel:only-child > h2:first-child {
+  padding-block: calc(var(--space-6) + var(--h2-pad)) calc(var(--space-2) + var(--h2-pad));
+}
+
 /* ...and the ceilings those boxes carried are the screen's job now: 22rem on
    the capacity table and 62vh on the availability list were numbers written in
    this file, and a ten-row table scrolling in its own little window on a
@@ -5950,6 +5992,18 @@ table.availability .av-head {
   overflow-clip-margin: 4px;
 }
 
+/* The box keeps its size and the name gives way: a long name is cut with "…",
+   it does not squeeze the tick (and the dot is the scaled `.row-dot`). */
+.pick-item > input {
+  flex: none;
+}
+
+.pick-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* The "Gönder" panel: one teacher per line, the short name, then the
    button or the few words that say why there is none. */
 .mail-list {
@@ -6023,14 +6077,6 @@ table.availability .av-head {
 .form-col > .pick-item > input[type='checkbox'] {
   margin-top: .2em;
   flex: none;
-}
-
-.pick-item .row-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--edge);
 }
 
 .print-page h2 .p-dot {
@@ -7035,6 +7081,14 @@ input.search-box:focus-visible {
   gap: var(--space-2);
 }
 
+/* The group's name beside its chips, set like the "Sırala" label next to it. */
+.chips-label {
+  align-self: center;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-right: var(--space-1);
+}
+
 /* A chip is a filter you can see the size of before you press it. */
 .chip {
   display: inline-flex;
@@ -7112,8 +7166,7 @@ table.availability thead .hour-clock:empty::before {
      shrinks. The old 28rem cap moved onto the sentence (24rem, the box's
      28rem less its padding and dot), because the box's own max-width is now
      its content. */
-  flex: 1 1 2.5rem;
-  min-width: 2.5rem;
+  flex: 0 0 auto;
   max-width: max-content;
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--hairline);
@@ -7148,6 +7201,7 @@ table.availability thead .hour-clock:empty::before {
 .health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn-ink); }
 .health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad-ink); }
 
+.health.empty .health-dot { background: var(--muted); }
 .health.tight .health-dot { background: var(--warn); }
 .health.impossible .health-dot { background: var(--bad); }
 
@@ -7158,14 +7212,36 @@ table.availability thead .hour-clock:empty::before {
    only the dot, and a coloured pill with a dot in it read as an on/off switch
    (usability review, 2026-11-15). */
 .health-short { display: none; }
-@media (max-width: 1500px) {
+/* In `em` of the bar and not px of the window: at %150 the same window holds
+   fewer ems, and the sentence was cut ("Sorun …") where px said there was room
+   (3rd audit). 94em is the 1500px it was at %100 (16px to the em). */
+@container bar (max-width: 94em) {
   .health-text { display: none; }
   .health-short { display: inline; }
-  /* Its own width, not a grown share of the bar: the five tabs of K1 are
-     wider than the seven were, and a share left "433 saat yerleşme" cut at
-     1366 px. The document's name gives way instead. */
-  .health { flex: 0 0 auto; }
 }
+/* "? Yardım" is the last thing that wrapped onto a second row of its own
+   ("?" alone, then 1920 at %150). Narrow, it is the "?" and nothing else: the
+   button's text is one text node, so it is CLIPPED to the mark rather than
+   swapped, and its name for a reader is still the whole word. */
+@container bar (max-width: 100em) {
+  .topbar > .btn.topbar-help:not(.icon) {
+    width: calc(var(--space-3) * 2 + .6em + 2px);
+    max-width: none;
+    padding-inline: var(--space-3);
+    white-space: nowrap;
+    overflow: hidden;
+    justify-content: flex-start;
+  }
+
+  .topbar-help .more-caret {
+    display: none;
+  }
+}
+
+/* Its own width, never a grown share of the bar: the five tabs of K1 are
+   wider than the seven were, and a share left "433 saat yerleşme" cut at
+   1366 px. The document's name and the plan picker give way instead. */
+.health { flex: 0 0 auto; }
 
 /* --------------------------------------------------------- command palette
    Ctrl+K. With 25 teachers, 20 classes, 8 rooms and 99 lessons, reaching one
@@ -7988,7 +8064,8 @@ table.sheet-lessons td.num {
   white-space: nowrap;
 }
 
-table.sheet-lessons td.num input.num {
+table.sheet-lessons td.num input.num,
+.sheet .form-row > input.num {
   width: 4.5rem;
 }
 
