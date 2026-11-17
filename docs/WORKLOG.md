@@ -19,9 +19,17 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-16 akşam. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
-tarihli girdilerde, kararlar DECISIONS'ta. Açık iş dalı yok: 2026-11-16 akşamı her şey `main`'e
-girdi ve Mozaik yeni işlere boş.
+Son güncelleme: 2026-11-17 sabah. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
+tarihli girdilerde, kararlar DECISIONS'ta.
+
+**2026-11-17 gece denetim döngüsü.** 4 denetim turu (simetri, metin, Program/ızgara, kişi/liste/
+yazdır, erişilebilirlik); 1-3. turların düzeltmeleri ve 4. turun plan kitaplığı düzeltmesi
+(`usePlans` ref'ten okuyor, aynı tick'te iki yazma birbirini silmiyor) `main`'de. Yarım kalan:
+`denetim/tur4-css` ve `denetim/tur4-tsx` dallarında haftalık kullanım sınırında kesilmiş,
+doğrulanmamış "YARIM" commit'ler (dar ekranda "? Yardım" düğmesinin kesilmesi, sol hizada 4 px
+kayma dahil); bitirmeden önce gözden geçir. Ham boyut 1,2 MB sınırına ~1 kB uzakta.
+Alp'e açık sorular: sabit (elle konmuş) ders sürüklenebilsin mi (öneri: evet); şeritlerin ilk
+etiketi ortalı mı sağa yaslı mı.
 
 **2026-11-16 akşamı `main`'e giren (tek doğrusal zincir, sırayla):** #87 checkout yeri
 (`~/dev/Mozaik`), #86 Öğretmene gönder (kâğıdın üst satırı, PDF, WhatsApp, şema v19),
