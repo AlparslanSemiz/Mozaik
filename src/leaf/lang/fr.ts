@@ -1147,6 +1147,8 @@ const FR: Sozluk = {
   "Sınıf görünümü": "Vue classe",
   Görünüm: "Vue",
   Hakkında: "À propos",
+  Künye: "Mentions légales",
+  Gizlilik: "Confidentialité",
   "Planlar ve yedek": "Plans et sauvegarde",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Choisissez un enseignant et saisissez à la suite toutes les classes qu’il assure",

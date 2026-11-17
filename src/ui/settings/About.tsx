@@ -78,6 +78,34 @@ export function TechRows() {
   );
 }
 
+/**
+ * Who makes this and where the legal pages are (Impressum, Datenschutz). Plain
+ * links, nothing fetched: the same policy as the site address below (a new
+ * tab, no referrer). The pages live on the author's own site.
+ */
+const YAZAR_ADRESI = 'https://alparslansemiz.com/';
+const KUNYE_ADRESI = 'https://alparslansemiz.com/de/impressum/';
+const GIZLILIK_ADRESI = 'https://alparslansemiz.com/de/datenschutz/';
+
+function LegalLinks() {
+  const t = useT();
+  return (
+    <p className="hint legal-links">
+      <a href={YAZAR_ADRESI} target="_blank" rel="noreferrer">
+        Alparslan Semiz
+      </a>
+      {' · '}
+      <a href={KUNYE_ADRESI} target="_blank" rel="noreferrer">
+        {t('Künye')}
+      </a>
+      {' · '}
+      <a href={GIZLILIK_ADRESI} target="_blank" rel="noreferrer">
+        {t('Gizlilik')}
+      </a>
+    </p>
+  );
+}
+
 export function Build({ update }: { update: UpdateRun }) {
   const t = useT();
 
@@ -109,6 +137,7 @@ export function Build({ update }: { update: UpdateRun }) {
           </a>
         </p>
       )}
+      <LegalLinks />
     </div>
   );
 }

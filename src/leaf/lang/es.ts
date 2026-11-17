@@ -1141,6 +1141,8 @@ const ES: Sozluk = {
   "Sınıf görünümü": "Vista de grupo",
   Görünüm: "Vista",
   Hakkında: "Acerca de",
+  Künye: "Aviso legal",
+  Gizlilik: "Privacidad",
   "Planlar ve yedek": "Planes y copias de seguridad",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Elija un profesor e introduzca seguidas las clases de todos sus grupos",
