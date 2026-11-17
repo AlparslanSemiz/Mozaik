@@ -760,7 +760,7 @@ export function describeBar(
 
   if (done.stuck.length === 0) {
     return {
-      text: t('Kalan dizildi: {n} saat yerleşti.', {
+      text: t('Bütün {n} saat yerleşti.', {
         n: Object.keys(activePlacements(done.state)).length,
       }),
       level: 'ok',

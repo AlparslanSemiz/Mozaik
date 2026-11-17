@@ -217,7 +217,7 @@ export default function Summary({
                 const inside = roomClasses(state, r.id);
                 return (
                   <li key={r.id}>
-                    <b>{r.name}</b>:{' '}
+                    <b>{r.name}</b> ·{' '}
                     {inside.length === 0
                       ? t('sınıf yok')
                       : t('{n} sınıf: {hangileri}', {

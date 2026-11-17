@@ -313,7 +313,7 @@ function Program({
   const barText = !idle
     ? idleText
     : !hasPlaced
-      ? t("Dersleri yerleştirmek için Kalanı diz'e basın.")
+      ? t('Dersleri yerleştirmek için Kalanı diz düğmesine basın.')
       : t('Yerleşmiş dersi sürükleyerek taşıyın · Klavye: T ile alın');
 
   /** WHICH CLASS a grid cell belongs to (see `classOfCell`). */

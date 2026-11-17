@@ -56,7 +56,7 @@ export default function Rooms({ state, change }: PanelProps) {
         title={t('Yeni derslik')}
         action={
           <button className="btn" onClick={() => setPasteOpen(true)}>
-            {t("Excel'den yapıştır")}
+            {t('Excel’den yapıştır')}
           </button>
         }
         description={t(

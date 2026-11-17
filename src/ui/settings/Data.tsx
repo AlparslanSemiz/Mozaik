@@ -114,7 +114,7 @@ export default function Data({
       !(await confirm({
         title: t('Her şey silinecek'),
         body: t(
-          'Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından "Geri al" ile geri gelir.',
+          'Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak. Hemen ardından “Geri al” ile geri gelir.',
         ),
         confirmLabel: t('Her şeyi sil'),
         danger: true,
@@ -262,7 +262,7 @@ export default function Data({
         <p className="hint">
           {storageKind() === 'exe' ? (
             <T
-              k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
+              k="Bütün planlar Belgelerim’deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
               vars={{ klasor: EXE_FOLDER }}
             />
           ) : (
@@ -284,7 +284,7 @@ export default function Data({
         {storageKind() !== 'exe' && (
           <p className="hint">
             <T
-              k="Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik'in deposu **ayrıdır**."
+              k="Bu depo yalnız {adres} adresine ait; başka adreste açılan Mozaik’in deposu **ayrıdır**."
               vars={{ adres: storageAddress() }}
             />
           </p>
@@ -311,7 +311,7 @@ export default function Data({
         </table>
         <p className="hint">
           <T
-            k="Toplam **{yer}**; tarayıcının Mozaik'e ayırdığı yer yaklaşık **5 MB**."
+            k="Toplam **{yer}**; tarayıcının Mozaik’e ayırdığı yer yaklaşık **5 MB**."
             vars={{ yer: size(report.totalChars) }}
           />
         </p>

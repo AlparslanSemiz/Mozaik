@@ -105,7 +105,7 @@ const GROUPED: Record<Advice['code'], string> = {
   teacherManyBlockedDays:
     '{n} öğretmenin açık günü bir dersinin istediğinden az; bir güne iki kez düşebilir:',
   lessonManyBlocks:
-    "{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; Mozaik'in deneyebileceği tek şekil bu:",
+    '{n} ders bloklara bölünmüş ve hiç tekli saat bırakmıyor; Mozaik’in deneyebileceği tek şekil bu:',
 };
 
 /** One load table, the whole width of the list. */
@@ -370,7 +370,7 @@ function Report({
         {placed < totalWanted && (
           <p className="hint">
             <T
-              k="Kalan **{n}** saat yerleşmedi. **Program** sekmesindeki **Kalanı diz** ile yerleştirebilirsiniz."
+              k="Kalan **{n}** saat bekliyor. **Program** sekmesindeki **Kalanı diz** düğmesine basın."
               vars={{ n: totalWanted - placed }}
             />
           </p>

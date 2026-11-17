@@ -60,7 +60,7 @@ export default function DraftStart({ plans, label, notify }: Props) {
               programs: [blankProgram()],
               activeProgramId: DEFAULT_PROGRAM_ID,
             });
-            notify?.(t('"{ad}" taslağından yeni bir plan açıldı.', { ad: d.name }));
+            notify?.(t('“{ad}” taslağından yeni bir plan açıldı.', { ad: d.name }));
           }}
         >
           {label(d.name)}

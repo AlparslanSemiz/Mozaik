@@ -40,6 +40,19 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 Kararlar: Esc ızgaradayken ya da bildirimdeyken en yeni bildirimi kapatır; pencere, menü, tutulan sürükleme ve öneri önizlemesi Esc'i önce alır. Bildirim kapanınca (düğme, süre, Esc) odak geldiği yere döner. `Geri al`ı bir geçmiş adımı olmayan bildirim (plan değişimi) gizli "Ctrl+Z" cümlesi taşımaz. Örnek okul yüklenince adı `Plan N` olan plan `Örnek Kurs (örnek)` olur, kullanıcının verdiği ad kalır; `Geri al` adı geri verir. Sabit kartı fareyle çekmek yalnız uyarır, sürükleme kuralı değişmedi (sabit dersin sürüklenebilmesi Alp'e sorulacak). Sebep cümleleri öğretmeni tam adıyla, dersi branş adıyla söyler; takasta iki taraf gün ve saatle ayrılır. Kendi okulumla başla'da örnek planın adı o yolda değiştirilmedi: aynı turda iki plan yazması bayat kütüphaneyle plan düşürür.
 
+### 2026-11-17 · Denetim turu 3: tek adlar ve çeviri (`denetim/tur3-metin`)
+
+"Açık" üç şey demesin diye tema `Açık renk` / `Koyu renk`, ekran hareketleri `Tam` / `Az` / `Kapalı`
+oldu; `Açık` yalnız açık saat. Yerleşmemiş saatin tek adı `bekliyor` (çip, sonuç şeridi,
+`Bekleyen dersleri…` ipucu); dizilmiş saat `yerleşmiş` saat oldu. Tam yerleşince şerit `Bütün {n} saat
+yerleşti` der (sayı toplam yerleşik saat). Kurallar'daki `0 = sınır yok` cümlesi kalktı, çünkü
+boşluk kurallarında yanlıştı: kuralı kapatan `Seviye`yi `Yok` yapmaktır. Kesin seçeneği olmayan üç kuralda ipucu yalnız
+`Programın durumu`'nda saydığını söyler; `Uyar` adı geçmez. Kapalı saatler
+ipucu öğretmende ve sınıfta tek cümle. Türkçe metinde kesme `’`, tırnak `“…”`; `i18n.test.ts` iki
+işareti dört sözlükte yakalar. Çeviri: `Yeniden yap` en/es/fr `Place again`/`Colocar de nuevo`/`Placer à nouveau`
+(Redo ile karışmasın), de `Neu einplanen`; Almanca kapalı saat her yerde `gesperrt`, yerleştirme fiili `einplanen`;
+İngilizce `tray` ve sıra sayısı için `period`; es/fr kapalı kalıbı `{ne_zaman} … para {kim}`.
+
 ---
 
 ### 2026-11-17 · İkinci denetim turu: TSX, metin, erişilebilirlik (`denetim/tur2-tsx`)

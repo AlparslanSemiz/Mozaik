@@ -115,7 +115,7 @@ export function health(d: State): Health {
   if (report.unplaceable.length > 0)
     parts.push(t('{n} ders sığmıyor', { n: report.unplaceable.length }));
   if (warnings > 0) parts.push(t('{n} uyarı', { n: warnings }));
-  if (pending > 0) parts.push(t('{n} saat yerleşmedi', { n: pending }));
+  if (pending > 0) parts.push(t('{n} saat bekliyor', { n: pending }));
 
   // An empty project is not "fine", it is NOT STARTED — and saying "Sorun yok"
   // to somebody who has just opened the program for the first time is the chip
@@ -147,7 +147,7 @@ export function health(d: State): Health {
         : warnings > 0
           ? t('{n} uyarı', { n: warnings })
           : pending > 0
-            ? t('{n} saat yerleşmedi', { n: pending })
+            ? t('{n} saat bekliyor', { n: pending })
             : t('Sorun yok'),
   };
 }

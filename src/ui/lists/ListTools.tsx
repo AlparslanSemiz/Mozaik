@@ -258,7 +258,7 @@ export default function ListTools<T>({
           because `.list-tools` is not one of the panel's counted children. */}
       {!canReorder(query) && (
         <p className="list-note">
-          <T k="Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın." />
+          <T k="Satırları elle sıralamak için **Sırala**’yı “Girildiği sıra”ya alın ve süzmeyi kaldırın." />
         </p>
       )}
     </div>

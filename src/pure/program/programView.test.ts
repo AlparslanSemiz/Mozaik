@@ -218,7 +218,7 @@ describe('araç çubuğunun altındaki satır', () => {
     };
     expect(describeBar(said, 'class', t, { applied: false, result: false }).level).toBe('');
     expect(describeBar(said, 'class', t, { applied: false, result: true }).text).toMatch(
-      /^Kalan dizildi: \d+ saat yerleşti\.$/,
+      /^Bütün \d+ saat yerleşti\.$/,
     );
     expect(describeBar(said, 'class', t, { applied: true, result: true }).text).toMatch(
       /^Öneri uygulandı/,

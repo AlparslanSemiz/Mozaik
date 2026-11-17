@@ -185,7 +185,7 @@ export function LessonForm({ state, change, mode, focused, modeNoun }: Props) {
         title={t('Yeni ders')}
         action={
           <button className="btn" onClick={() => setPasteOpen(true)}>
-            {t("Excel'den yapıştır")}
+            {t('Excel’den yapıştır')}
           </button>
         }
         description={<T k="Bir ders = bir sınıfın bir öğretmenden aldığı haftalık saat." />}

@@ -182,7 +182,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
           kind: 'hata',
           name: handle.name,
           plan: bundle.broken,
-          text: t('"{plan}" planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.', {
+          text: t('“{plan}” planı okunamıyor, bu yüzden hiçbir plan klasöre yazılmıyor.', {
             plan: bundle.broken,
           }),
         });

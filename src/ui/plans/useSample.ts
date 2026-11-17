@@ -56,7 +56,7 @@ export function useLoadSample(plans: PlanControls): LoadSample {
           // An empty plan loses nothing: the title is the whole question.
           body: holds
             ? t(
-                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından "Geri al" ile geri gelir.',
+                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 ders olan örnek bir okul gelir. Diğer planlara dokunulmaz. Hemen ardından “Geri al” ile geri gelir.',
                 { kayip: cost },
               )
             : undefined,

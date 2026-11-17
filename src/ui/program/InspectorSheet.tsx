@@ -643,13 +643,11 @@ export function Inspector({
             they do in their own titles; a paragraph's tooltip was never
             hovered (2026-11-16). */}
         <p className="hint">
-          {target.kind === 'teacher'
-            ? t('Kapalı saatlere tıklayın.')
-            : target.kind === 'class'
-              ? t('Ders olmayacak saatlere tıklayın.')
-              : t(
-                  'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
-                )}
+          {target.kind === 'room'
+            ? t(
+                'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+              )
+            : t('Kapatmak ya da açmak istediğiniz saate tıklayın.')}
         </p>
         <AvailGrid
           key={target.id}

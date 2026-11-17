@@ -5,7 +5,7 @@
 //
 // Ekle makes the teacher or the class and the page becomes theirs at once, so
 // the next thing a new teacher needs — the hours they cannot come — is right
-// there. Twenty-five at a time is what "Excel'den yapıştır" over the list is
+// there. Twenty-five at a time is what "Excel’den yapıştır" over the list is
 // for.
 
 import { useState } from 'react';

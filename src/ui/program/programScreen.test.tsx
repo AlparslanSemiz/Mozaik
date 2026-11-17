@@ -642,7 +642,7 @@ describe('araç çubuğunun altındaki satır', () => {
         "reason-bar :: Yerleşmiş dersi sürükleyerek taşıyın · Klavye: T ile alın",
         "reason-bar busy :: Program yapılıyor… | 3/9 ders · 1,2 sn",
         "reason-bar ok :: Öneri uygulandı ve program dizildi.",
-        "reason-bar ok :: Kalan dizildi: 8 saat yerleşti.",
+        "reason-bar ok :: Bütün 8 saat yerleşti.",
         "reason-bar bad :: 8 / 11 saat yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. Öğretmen dolu (ve 2 saat daha).",
         "reason-bar warn :: Durduruldu. 8 / 11 saat yerleşti. 510 SAY — MÇ Matematik: 1 saat yerleşemedi. x.",
       ]

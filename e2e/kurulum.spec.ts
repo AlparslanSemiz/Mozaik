@@ -28,7 +28,7 @@ test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
     await open(page);
     await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await page.getByRole('button', { name: 'Excel’den yapıştır' }).click();
 
     await page.locator('textarea').fill('Ali Vural\tAV\tMatematik\nDeniz Ak\tDA\tFizik');
     await page.getByRole('button', { name: 'Önizle' }).click();
@@ -341,7 +341,7 @@ test.describe('16. Branş seçimi', () => {
     await open(page);
     await openSetup(page, 'Öğretmenler');
 
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await page.getByRole('button', { name: 'Excel’den yapıştır' }).click();
     await page.locator('textarea').fill('Kerem Aslan\tKA\tRobotik\nSelin Demir\tSD\tAstronomi');
     await page.getByRole('button', { name: 'Önizle' }).click();
     await page.getByRole('button', { name: /2 satırı ekle/ }).click();
@@ -674,7 +674,7 @@ test.describe('44. Panel simetrisi', () => {
         [...el.children]
           .map((c) => {
             if (c.tagName === 'H2') return 'baslik';
-            // The heading grew a button beside it ("Excel'den yapıştır" moved out
+            // The heading grew a button beside it ("Excel’den yapıştır" moved out
             // of the form row), so it is wrapped. It is still the heading, and it
             // is still first — which is the only thing this test is about.
             if (c.classList.contains('panel-head')) return 'baslik';
@@ -929,7 +929,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
   }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await page.getByRole('button', { name: 'Excel’den yapıştır' }).click();
     await expect(page.getByText('Ad Soyad · Kısa ad · Branş · Cinsiyet')).toBeVisible();
 
     await page.locator('textarea').fill('Nazlı Er\tNE\tFizik\tKadın\nOkan Su\tOS\tKimya');

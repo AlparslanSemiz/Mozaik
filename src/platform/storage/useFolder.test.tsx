@@ -360,7 +360,7 @@ describe('exe klasörü · silinmiş profil (denetim 2026-11-16)', () => {
     expect(writes(disk)).toEqual([]);
   });
 
-  it('"Belgelerim\'deki son kaydı aç": okul geri geliyor, sonra klasöre yazılıyor', async () => {
+  it('"Belgelerim’deki son kaydı aç": okul geri geliyor, sonra klasöre yazılıyor', async () => {
     const disk = fakeDisk(realFolder());
     const { box, act, wait } = await launch(disk);
     const { parseBundle } = await import('../../pure/io');

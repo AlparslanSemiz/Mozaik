@@ -39,7 +39,9 @@ test.describe('8. Tema', () => {
     await darkTheme(page);
     await openSettings(page, 'Görünüm');
     await expect(
-      page.getByRole('group', { name: 'Tema', exact: true }).getByRole('button', { name: 'Koyu' }),
+      page
+        .getByRole('group', { name: 'Tema', exact: true })
+        .getByRole('button', { name: 'Koyu renk' }),
     ).toHaveAttribute('aria-pressed', 'true');
 
     await reopen(page);

@@ -241,7 +241,7 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
         {kendini ? (
           <T k="Mozaik burada kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
         ) : (
-          <T k="Bu, Mozaik'in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
+          <T k="Bu, Mozaik’in geliştirme ve test sürümü; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
         )}
       </p>
 
@@ -270,7 +270,7 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
           {d.ad === 'guncel' && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
           {d.ad === 'var' && d.gecis && (
             <T
-              k="**Mozaik'i bu bilgisayara kurun.** Öneri araması (CP-SAT) için gerekli, onunla çok daha hızlı. İndirmek {mb} MB yer kaplar."
+              k="**Mozaik’i bu bilgisayara kurun.** Öneri araması (CP-SAT) için gerekli, onunla çok daha hızlı. İndirmek {mb} MB yer kaplar."
               vars={{ mb: Math.round(d.boyut / 1024 / 1024) }}
             />
           )}

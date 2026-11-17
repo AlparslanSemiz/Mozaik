@@ -1057,9 +1057,9 @@ export async function chooseScale(page: Page, percent: number) {
  * The three names are short and generic, so `exact: true` — "Az" is inside
  * "Azalt" and every other word in the section (pitfall 49).
  */
-export async function chooseMotion(page: Page, name: 'Açık' | 'Az' | 'Kapalı') {
+export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
   await openSettings(page, 'Görünüm');
-  // The theme has an "Açık" of its own: the group says which one.
+  // The theme is "Açık renk" / "Koyu renk"; the group says which control.
   const step = page
     .getByRole('group', { name: 'Ekran hareketleri', exact: true })
     .getByRole('button', { name, exact: true });
@@ -1162,7 +1162,7 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
   await openSettings(page, 'Görünüm');
   await page
     .getByRole('group', { name: 'Tema', exact: true })
-    .getByRole('button', { name: theme === 'dark' ? 'Koyu' : 'Açık', exact: true })
+    .getByRole('button', { name: theme === 'dark' ? 'Koyu renk' : 'Açık renk', exact: true })
     .click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   if (back !== null && back !== 'Ayarlar') {

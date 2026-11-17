@@ -73,7 +73,7 @@ export default function Plans({ state, plans }: Props) {
             );
     if (
       !(await confirm({
-        title: t('"{ad}" planı silinecek', { ad: name }),
+        title: t('“{ad}” planı silinecek', { ad: name }),
         body: what,
         confirmLabel: t('Planı sil'),
         danger: true,

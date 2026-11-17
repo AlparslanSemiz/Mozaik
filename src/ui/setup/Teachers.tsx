@@ -82,7 +82,7 @@ export default function Teachers({ state, change }: PanelProps) {
             {t('+ Yeni öğretmen')}
           </button>
           <button className="btn" onClick={() => setPasteOpen(true)}>
-            {t("Excel'den yapıştır")}
+            {t('Excel’den yapıştır')}
           </button>
         </span>
       </div>

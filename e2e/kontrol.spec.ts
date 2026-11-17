@@ -307,7 +307,7 @@ test.describe('89. Kontrol — Danışman notları (B5.4)', () => {
       .click();
     const panel = page.locator('.panel', { hasText: 'İpuçları' });
     await expect(panel).toContainText('2 ayrı bloğa bölünmüş');
-    await expect(panel).toContainText("Mozaik'in deneyebileceği tek şekil bu");
+    await expect(panel).toContainText('Mozaik’in deneyebileceği tek şekil bu');
   });
 
   test('şeritteki Danışman düğmesi sayıyı taşıyor', async ({ page }) => {
