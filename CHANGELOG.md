@@ -20,6 +20,7 @@ release is incomplete, the entry says so.
 ### Changed
 
 - Licence: from this commit on Mozaik is under the PolyForm Noncommercial License 1.0.0 (free for personal use, teachers, public and non-profit schools; commercial use needs a licence). Releases up to v2.2.0 remain under the MIT License.
+- Layout polish: the program screen's reason bar and the tray's head line up with the logo and the strip label; the top bar shows the plan's whole name at every text size and the school's name gives way first; "? Yardım" is a plain "?" in a narrow bar; the add panels and the Getting started panel have even space above and below; long notices are wider; in the dark theme an empty box's hint is italic and fainter than the typed value.
 
 ### Added
 

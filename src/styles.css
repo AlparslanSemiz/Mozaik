@@ -950,7 +950,9 @@ textarea {
      have ellipsised on one. */
   flex: 1 1 8em;
   max-width: max-content;
-  min-width: 0;
+  /* Not 0: the plan picker inside never shrinks, and a box narrower than it
+     let the picker spill out of the frame (%200). */
+  min-width: min-content;
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   /* The same height as the destinations beside it (31/29/25px before). */
   min-height: var(--ribbon-h);
@@ -968,14 +970,22 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* First to give way, and never to nothing: the plan's name beside it shrinks
+     far slower and keeps its floor. */
+  flex: 0 10 auto;
+  min-width: 3ch;
 }
 
 /* Which plan is open. Capped, because a plan is named by hand and a long name
    would push the destinations off the row. */
 .plan-picker {
-  max-width: 9rem;
+  /* Sized to the chosen plan's own name, so it is read whole ("Örnek Kurs
+     (örr" was cut at 9rem even at Normal). It never shrinks: the school's
+     name beside it gives way first */
+  field-sizing: content;
+  max-width: 16rem;
   font-size: var(--fs-xs);
-  flex: 0 1 auto;
+  flex: 0 0 auto;
 }
 
 /* Row one, zone two: the six destinations. Horizontal, icon beside label —
@@ -991,7 +1001,6 @@ textarea {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
-  padding-left: var(--space-1);
 }
 
 .brand-mark {
@@ -1848,10 +1857,11 @@ table.list tbody tr {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  /* The strip above has a 4px section rule on its left, so its content starts
-     4px in from --edge-x; this bar and the pool's head start there too, one
-     line down the whole screen (3rd audit). */
-  padding: 0 var(--edge-x) 0 calc(var(--edge-x) + 4px);
+  /* The ribbon's section rule is gone (`border-left: 0`), so its content starts
+     at --edge-x and so do this bar and the pool's head: logo, strip label,
+     reason and pool arrow stand on one line (4th audit; the old +4px was left
+     over from the rule). */
+  padding: 0 var(--edge-x);
   /* Nothing wrong: the plain state, and the strip where the grid's own
      description sits. It is a shade of PAPER, not of chrome — it belongs to
      the timetable below it, not to the tools above it. */
@@ -3299,7 +3309,7 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   align-items: center;
   gap: var(--space-2);
   flex: 0 0 auto;
-  padding: var(--space-2) var(--edge-x) var(--space-2) calc(var(--edge-x) + 4px);
+  padding: var(--space-2) var(--edge-x);
 }
 
 /* "neye göre filtrelensin sıralansın ayarı bile olabilir." Pushed to the far
@@ -3981,6 +3991,22 @@ input[type='checkbox'] {
   opacity: 1;
 }
 
+/* Dark: --muted is #b6bec9 and the typed value is #e8edf5, close enough that an
+   empty box read as a filled one (4th audit: rgb 182 against 232). A
+   placeholder is not text to be read at 4.5:1, it is a hint that the box is
+   empty, so it steps down to a mix with the ground and goes italic. */
+:root[data-theme="dark"] ::placeholder {
+  color: color-mix(in srgb, var(--muted) 62%, var(--paper-sunk));
+  font-style: italic;
+}
+
+/* The print list's two selectors sit together at the far end of its row. */
+.pick-acts {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
 /* Buttons had no focus style at all: tabbing through the top bar was invisible.
    :focus-visible, so a mouse click does not leave a ring behind. */
 .btn:focus-visible,
@@ -4500,8 +4526,10 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
      sentence, not the geometry. */
   grid-template-rows: minmax(3rem, auto) auto 1fr;
   /* 13rem to 9.75rem on 2026-11-16: the description rail went behind the
-     heading's "?" (Sadeleşme, phase 1). */
-  min-height: 9.75rem;
+     heading's "?" (Sadeleşme, phase 1). 9.75rem to 8.5rem in the 4th audit: the
+     tallest form (Dersler) fills it, so the space under the body is the space
+     above the heading (it was 15px more on the other two). */
+  min-height: 8.5rem;
   /* The padding is `.panel`'s own (--space-6): this block is a panel, and
      it stood 1rem in where every other panel stands 1.5rem. */
 }
@@ -4533,7 +4561,10 @@ table.list td input[aria-invalid='true']:hover:not(:disabled) {
 }
 
 .add-panel-body {
-  align-self: end;
+  /* Row 3 always, so the empty notice row and the 1fr row do not both sit
+     under the body (4th audit). */
+  grid-row: 3;
+  align-self: start;
   min-width: 0;
 }
 
@@ -4757,6 +4788,12 @@ table.sheet-lessons td:last-child {
 .sample-line > svg {
   flex: none;
   color: var(--accent);
+}
+
+/* Last in its panel the line's own 8px bottom margin sat on top of the panel's
+   padding (4th audit: 8px more below than the panel's other edges). */
+.hint.sample-line:last-child {
+  margin-bottom: 0;
 }
 
 .checklist-head .btn,
@@ -6596,7 +6633,7 @@ table.bell-preview td {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  max-width: 26rem;
+  max-width: min(36rem, calc(100vw - 2 * var(--space-6)));
   padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   background: var(--paper);
   color: var(--text);
@@ -7221,18 +7258,19 @@ table.availability thead .hour-clock:empty::before {
 }
 /* "? Yardım" is the last thing that wrapped onto a second row of its own
    ("?" alone, then 1920 at %150). Narrow, it is the "?" and nothing else: the
-   button's text is one text node, so it is CLIPPED to the mark rather than
-   swapped, and its name for a reader is still the whole word. */
+   word is its own span (`.help-word`) and is hidden, so the "?" is centred by
+   the button's own padding and no width is computed. Its name for a reader is
+   still the whole word (the "?" span is aria-hidden, the word stays in the
+   accessible name through its text). */
 @container bar (max-width: 100em) {
   .topbar > .btn.topbar-help:not(.icon) {
-    width: calc(var(--space-3) * 2 + .6em + 2px);
     max-width: none;
     padding-inline: var(--space-3);
     white-space: nowrap;
-    overflow: hidden;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
+  .topbar-help .help-word,
   .topbar-help .more-caret {
     display: none;
   }
@@ -8110,7 +8148,8 @@ table.person-list td:not(.person-status) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--space-3);
+  /* No side padding: the rule beside it then has the same room each side. */
+  padding-inline: 0;
   min-height: 2.25rem;
   font-weight: 600;
   color: var(--ok-ink);
