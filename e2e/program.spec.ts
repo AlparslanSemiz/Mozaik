@@ -2189,7 +2189,10 @@ test.describe('86. Sabitleme', () => {
     await expect(pin).toHaveAttribute('aria-pressed', 'false');
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(0.45, 2);
+    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(
+      isWide ? 0.65 : 0,
+      2,
+    );
   });
 
   // Since 2026-11-16 (Sadeleşme K7) a heading has no menu: what it held was

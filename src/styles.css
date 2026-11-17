@@ -2964,9 +2964,10 @@ table.grid tbody td:hover > .card-pin,
 .card-top {
   font-size: var(--fs-md);
   font-weight: 700;
-  /* Two cards side by side share only the 2px line between them: this keeps
-     the digits off it, and equal-width so "111" and "450" take the same room. */
-  padding-inline: 2px;
+  /* Equal-width digits, so "111" and "450" take the same room. No inline
+     padding here: `gridFit` measures the line's text against the cell minus
+     the line's BOX, so a padding on the line is room it does not count
+     (gorunum.spec 45 went red with 2px). */
   font-variant-numeric: tabular-nums;
 }
 
