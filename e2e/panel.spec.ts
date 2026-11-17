@@ -228,7 +228,7 @@ test.describe('83. Panelden ders aktarma', () => {
     await choose(page, items.filter({ hasText: /^AV ·/ }));
     // Precondition: both blocks are on the grid, and AV's week is shut.
     await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
-      '2 ders yeni',
+      '2 saat yeni',
     );
     await page.getByRole('button', { name: 'Aktar' }).click();
 
