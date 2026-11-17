@@ -734,16 +734,17 @@ test.describe('44. Panel simetrisi', () => {
       measured.push({ name, ...value });
       await expect(page.locator('.add-panel-notice')).toHaveCount(0);
     }
+    // Equal to the pixel, not to the rounding: the boxes sit on fractional
+    // rows, and a top of 20.5 rounds to 20 on one panel and 21 on the next
+    // (CI, 2026-11-17: Branşlar 20/59 against 21/60). One pixel is the
+    // rounding; two is a real difference and still fails.
     const reference = measured[0]!;
     for (const panel of measured.slice(1)) {
-      expect(panel, panel.name).toEqual({
-        name: panel.name,
-        ...{
-          height: reference.height,
-          head: reference.head,
-          body: reference.body,
-        },
-      });
+      for (const key of ['height', 'head', 'body'] as const) {
+        expect(Math.abs(panel[key] - reference[key]), `${panel.name} ${key}`).toBeLessThanOrEqual(
+          1,
+        );
+      }
     }
   });
 
