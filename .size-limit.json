@@ -9,7 +9,7 @@
   {
     "name": "dist/index.html — siteden inen hali (brotli)",
     "path": "dist/index.html",
-    "limit": "310000 B",
+    "limit": "312000 B",
     "gzip": false,
     "brotli": true
   }

@@ -48,6 +48,16 @@ eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni 
 dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
 olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
 
+## 2026-11-17 · Gece denetim döngüsü, 3. tur: boyut eşiği 310 000 → 312 000 B brotli
+
+Üçüncü turun düzeltmeleri (CSS ve ızgara ölçümü, davranış ve erişilebilirlik, metin ve çeviri)
+brotli'yi 309 050'den (main b8d248a) 310 040 B'ye çıkardı (+1,0 kB); ham dosya 1,2 MB eşiğinin
+1 kB altında, ham eşik değişmedi. **Ölçülen** (`scripts/acilis-olc.mjs`, `file://`, CPU 4×, 9
+dönüşümlü koşu; **kirli**, makinede başka işler vardı): medyan hazır 1038 → 1057 ms (+1,8 %),
+ızgara 1230 → 1255 ms (+2,0 %), TBT 633 → 649 ms; aralıklar örtüşüyor, %15 eşiği aşılmadı. Eşik
+Alp'in onayıyla (2026-11-16 22:35) ölçülerek yükseltildi. **Ham pay bitti:** bir sonraki iş ham
+dosyayı 1,2 MB'ın üstüne çıkarırsa CLAUDE.md'nin kuralıyla açılış yeniden ölçülür.
+
 ## 2026-11-17 · Gece denetim döngüsü, 2. tur: boyut eşiği 307 000 → 310 000 B brotli
 
 İki denetim turunun düzeltmeleri (simetri, metin, Program/ızgara, kişi sayfası, erişilebilirlik,

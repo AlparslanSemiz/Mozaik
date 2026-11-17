@@ -68,10 +68,7 @@ function floorOf(table: HTMLElement, lines: string): number {
         )
       : cell === line
         ? HEAD_AIR
-        : cell.getBoundingClientRect().width -
-          line.getBoundingClientRect().width -
-          rule +
-          CARD_AIR;
+        : cell.getBoundingClientRect().width - line.getBoundingClientRect().width - rule + CARD_AIR;
     most = Math.max(most, (text + around) / Math.max(1, cell.colSpan));
   }
   return Math.ceil(most);

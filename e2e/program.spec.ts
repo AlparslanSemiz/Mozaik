@@ -2191,7 +2191,13 @@ test.describe('86. Sabitleme', () => {
       range.selectNodeContents(cell.querySelector('.card-bottom')!);
       const letter = range.getBoundingClientRect();
       const mark = el.getBoundingClientRect();
-      return letter.width > 0 && mark.left < letter.right && letter.left < mark.right && mark.top < letter.bottom && letter.top < mark.bottom;
+      return (
+        letter.width > 0 &&
+        mark.left < letter.right &&
+        letter.left < mark.right &&
+        mark.top < letter.bottom &&
+        letter.top < mark.bottom
+      );
     });
     expect(overLetter, 'sabit kartın raptiyesi oda harfinin üstüne bindi').toBe(false);
 
