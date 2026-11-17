@@ -2140,9 +2140,14 @@ test.describe('86. Sabitleme', () => {
     // WITH NOTHING HOVERED, then with the card hovered.
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    // Faint at rest since the screen audit (2026-11-16): a pin nobody can see
-    // is a pin a reader with low vision never finds. Faint, not full.
-    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(0.45, 2);
+    // On the narrow single card the resting pin is NOT drawn (2nd audit): at
+    // .45 it sat on the room letter. A wide block, which has room beside its
+    // letter, rests at .65 (3:1); that is the CSS rule, `td.block-wide`.
+    const isWide = await pin.evaluate((el) => el.parentElement!.classList.contains('block-wide'));
+    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(
+      isWide ? 0.65 : 0,
+      2,
+    );
     await card.hover();
     await settledMotion(page);
     expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
@@ -2171,6 +2176,11 @@ test.describe('86. Sabitleme', () => {
     await page.mouse.move(4, 4);
     await settledMotion(page);
     expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
+    // The second mark besides the glyph: a filled chip behind it.
+    expect(
+      await pin.evaluate((el) => getComputedStyle(el).backgroundColor),
+      'sabit kartın raptiyesinde dolu zemin yok',
+    ).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
     expect(await card.boundingBox()).toEqual(box);
 
     // ...and the same button takes it off again.
@@ -2179,7 +2189,10 @@ test.describe('86. Sabitleme', () => {
     await expect(pin).toHaveAttribute('aria-pressed', 'false');
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(0.45, 2);
+    expect(await pin.evaluate((el) => Number(getComputedStyle(el).opacity))).toBeCloseTo(
+      isWide ? 0.65 : 0,
+      2,
+    );
   });
 
   // Since 2026-11-16 (Sadeleşme K7) a heading has no menu: what it held was
