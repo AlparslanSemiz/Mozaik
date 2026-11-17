@@ -15,6 +15,7 @@
  */
 
 import { preference, CHANGELOG_SEEN_KEY } from '../leaf/preference';
+import { nothingStored } from './storage';
 
 export interface SurumNotu {
   /** package.json's version at release, e.g. "2.1.0" — no leading "v". */
@@ -83,5 +84,16 @@ export const markChangelogSeen = changelogSeenPreference.write;
 
 export function hasUnseenChangelog(): boolean {
   const latest = SURUM_NOTLARI[0]?.version ?? '';
-  return latest !== '' && changelogSeenPreference.read() !== latest;
+  if (latest === '') return false;
+  const seen = changelogSeenPreference.read();
+  if (seen === latest) return false;
+  // A first run has no earlier release to compare with: the note it opens
+  // with is "seen", and a dot on Hakkında before a single entry was typed
+  // asked a new user to read what changed from something they never had. The
+  // write is checked: where storage does not keep it the dot stays.
+  if (seen === '' && nothingStored()) {
+    markChangelogSeen(latest);
+    return changelogSeenPreference.read() !== latest;
+  }
+  return true;
 }

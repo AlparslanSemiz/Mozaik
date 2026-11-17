@@ -348,7 +348,7 @@ export default function Print({
           </div>
           {/* Before the print window, where it is read: Chromium's own
               word for its destination. */}
-          <p className="hint">{t('PDF için yazdırma penceresinde «PDF olarak kaydet»i seçin.')}</p>
+          <p className="hint">{t("Bir öğretmenin PDF'i: öğretmenin sayfasında PDF kaydet.")}</p>
 
           {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
               normal request and used to mean printing all 45 pages and throwing

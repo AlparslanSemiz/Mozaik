@@ -26,7 +26,7 @@ az soru" burada da geçerli: yeni ekran yok, yeni sekme yok, var olan ızgaranı
 ### Bugün ne var
 
 - Sürükle bırak, takas, havuza düşürme, tek geri al adımı (`drop.ts`, `applyDrop`).
-- Kart üstünde sabitleme ve "Tüm programı sabitle" (K7'den sonra kalanlar).
+- Kart üstünde sabitleme ve "Bütün dersleri sabitle" (K7'den sonra kalanlar).
 - `Yeniden yap` sabitlenenleri yerinde bırakır.
 
 ### Sorun

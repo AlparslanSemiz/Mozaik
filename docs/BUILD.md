@@ -322,7 +322,7 @@ ortamın sırrıdır. Sır yoksa iş bir notla yeşil biter.
 Taşıma: eski kökende açılan sayfa, yalnız site derlemesindeki bir betikle yeni adresin
 manifestini okur (`vite.site.config.ts`, `yeniAdresYoklamasi`); cevap gelirse bir şerit
 çıkar ve **Planları taşı** yeni adresi açıp bütün planları `postMessage` ile verir
-(`platform/storage/move.ts`). Yeni adres Tümünü dosyadan aç'ın sorusuyla sorar, sormadan
+(`platform/storage/move.ts`). Yeni adres Bütün planları dosyadan aç'ın sorusuyla sorar, sormadan
 hiçbir şey yazmaz; cevap gelmezse planlar bir plan dosyasına iner. Eski adresteki veri
 silinmez. Çift tıklanan dosyada `fetch` yok (`site.spec.ts`).
 

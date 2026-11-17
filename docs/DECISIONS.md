@@ -36,6 +36,20 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-17 · İkinci denetim turu: TSX, metin, erişilebilirlik (`denetim/tur2-tsx`)
+
+Alp'in onayıyla, denetimin ikinci turu. Kararlar: yokluğun tek kökü `yok` (`Yok olanlar`,
+`Yok olan ekle…`, `{Ad} bugün yok olarak işaretle`); `Gelmeyen` ve `gelmiyor` ekrandan kalktı (SD3).
+Örnek okul açıkken `Kendi okulumla başla` örneğe dokunmaz, boş bir plan açar ve örneği plan
+seçicide bırakır (veri silmenin yerine ayrı plan); `Geri al` örnek plana döner ve hâlâ boş olan yeni planı
+düşürür. Örnek okulun tanısı okul adı (`Örnek Kurs`), ayrı bir işaret saklanmadı. Bildirimler: aynı anda
+en çok üç, fare ya da odak yalnız 30 sn'ye kadar tutar, başka bir değişiklik olunca eskisinin
+`Geri al`ı kalkar. Sıra sayıları noktalı yazılır (`Salı 6. saatte kapalı`); sınıf adına ek
+getirilmez (`530'da` demek sayının okunuşuna bağlı), `530 sınıfında` kaldı. Boş planın durum çipi
+`empty` düzeyinde ve nötr, yeşil değil. Kişi sayfasının düğme satırı sarmalayıcısız ve işin sırasıyla.
+
+---
+
 ### 2026-11-16 · Denetim turu: kişi sayfası, listeler, yazdır, okul bilgileri (`denetim/kisi`)
 
 Babanın gözüyle denetim, Alp'in onayıyla. Baba programı bugün Excel'de yapıp PDF'e çevirip

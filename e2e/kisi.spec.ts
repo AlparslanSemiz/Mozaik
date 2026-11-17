@@ -293,8 +293,8 @@ test.describe('Kişi sayfası', () => {
     expect(await page.evaluate(() => (window as unknown as { acilan: string }).acilan)).toBe(
       `https://wa.me/905550000001?text=${encodeURIComponent('Ayşe Yılmaz · Haftalık ders programı')}`,
     );
-    await expect(sheet.getByRole('status')).toContainText(`Mozaik – Ayşe Yılmaz – ${day}.pdf`);
-    await expect(sheet.getByRole('status')).toContainText('İndirilenler');
+    await expect(sheet.locator('.sheet-said')).toContainText(`Mozaik – Ayşe Yılmaz – ${day}.pdf`);
+    await expect(sheet.locator('.sheet-said')).toContainText('İndirilenler');
     await page.keyboard.press('Escape');
 
     await page.getByRole('button', { name: 'Mehmet Çelik', exact: true }).click();
@@ -332,7 +332,7 @@ test.describe('Kişi sayfası', () => {
     const download = page.waitForEvent('download');
     await send.click();
     expect((await download).suggestedFilename()).toMatch(/^Mozaik – Ayşe Yılmaz – .*\.pdf$/);
-    await expect(sheet.getByRole('status').first()).toContainText('ataşla ekleyin');
+    await expect(sheet.locator('.sheet-said').first()).toContainText('ataşla ekleyin');
     await page.keyboard.press('Escape');
 
     await openSetup(page, 'Sınıflar');

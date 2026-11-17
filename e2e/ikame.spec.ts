@@ -69,7 +69,7 @@ test.describe('İkame', () => {
     await page.getByRole('button', { name: 'Bugün yok…' }).click();
     await expect(day).toBeVisible();
     // Only the window's button writes the absence.
-    await day.getByRole('button', { name: 'Bugün gelmiyor olarak işaretle' }).click();
+    await day.getByRole('button', { name: 'Ayşe Yılmaz bugün yok olarak işaretle' }).click();
     // Another date moves the one-day absence with it, and back.
     await day.getByLabel('Tarih').fill('2026-11-18');
     await expect(page.getByRole('dialog', { name: 'Çarşamba 18 Kasım' })).toBeVisible();

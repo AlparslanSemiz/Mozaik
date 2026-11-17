@@ -85,7 +85,7 @@ alfabesinde `1` yok. Alfabe değişirse yeni bir plan birinci planın üstüne
 yazar, `library.test.ts` bunu 500 kimlikle sabitler.
 
 ### 30 · İki dosya türü aynı düğmeye düşerse biri ötekini siler
-Üst çubuktaki "Dosyadan aç" bir planı, Ayarlar'daki "Tümünü dosyadan aç" bütün
+Üst çubuktaki "Dosyadan aç" bir planı, Ayarlar'daki "Bütün planları dosyadan aç" bütün
 kitaplığı açar. Uzantı ve ön ek aynı, yanlışını seçmek geri alınamaz. Üç karşı
 önlem birlikte: paket adında `-tumu-` var, `parseState` bir paketi okuyamaz
 (`schemaVersion` yok) ve `parseBundle` bir planı okuyamaz (`bundleVersion`

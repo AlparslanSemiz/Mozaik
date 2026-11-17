@@ -178,6 +178,7 @@ export default function Rooms({ state, change }: PanelProps) {
                             notify(said, 'info', {
                               label: t('Geri al'),
                               run: () => undoIf(next),
+                              expected: next,
                             });
                           }}
                         >

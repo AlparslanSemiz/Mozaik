@@ -142,9 +142,9 @@ export async function openSetup(page: Page, step: string) {
   await goTab(page, people ? step : 'Okul bilgileri');
   await revealRibbon(page);
   await page.locator('.ribbon .step', { hasText: people ? 'Liste' : step }).click();
-  await expect(page.locator('.ribbon .step[aria-pressed="true"]')).toContainText(
-    people ? 'Liste' : step,
-  );
+  await expect(
+    page.locator('.ribbon .step[aria-pressed="true"], .ribbon .step[aria-current="true"]'),
+  ).toContainText(people ? 'Liste' : step);
 }
 
 /**
@@ -242,7 +242,7 @@ export async function openSettings(page: Page, section: string) {
   await page.locator('.ribbon .btn', { hasText: section }).first().click();
   // The section buttons are the strip's two groups (Görünüm is in the second);
   // the theme left the strip (2026-11-16), so one pressed button is the section.
-  await expect(page.locator('.ribbon .ribbon-group .btn[aria-pressed="true"]')).toContainText(
+  await expect(page.locator('.ribbon .ribbon-group .btn[aria-current="true"]')).toContainText(
     section,
   );
 }

@@ -223,7 +223,7 @@ süzgeci, boş ad, blok kırpması). `readPlanFile` hiçbir bozulmada istisna at
 eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırının olmaması (TB9);
 değişmezler tam bu ikisinin etrafından geçer.
 
-"Tümünü dosyadan aç"ın yolu (`readBundlePlans`) TB8'in düzeltmesiyle geldi (2026-10-23):
+"Bütün planları dosyadan aç"ın yolu (`readBundlePlans`) TB8'in düzeltmesiyle geldi (2026-10-23):
 bozuk bir planın yanındaki tam plan hep açılıyor, bozuk olan ya reddediliyor ya bütün, dört
 listeden biri hiç olmayan plan açılmıyor.
 
@@ -400,7 +400,7 @@ ağa çıkılmaması, güncelleme şeridinin davetsiz çıkmaması.
 `npm run test:site` dört dosyayı http üstünde koşar. Üçü `file://` altında olmayan bir
 şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistemi Erişimi. Dördüncüsü
 (`linux-tasima.spec.ts`) Linux uygulamasına geçişi: site kökeninde kurulan planlar
-"Tümünü dosyaya kaydet" ile çıkıp boş depolu yeni bir bağlamda, `file://`'da "Tümünü
+"Bütün planları dosyaya kaydet" ile çıkıp boş depolu yeni bir bağlamda, `file://`'da "Bütün planları
 dosyadan aç" ile içerikleriyle aynı geri geliyor, ve yeni kopya ağa çıkmıyor (B7.28).
 Ölçtükleri: manifest ve simgeler, service worker kaydı, bağlantı kesilince açılma,
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
@@ -632,7 +632,7 @@ dizdiği hafta bu; `relaxLaidOut.test.ts` onda "Olmaz"dan sonraki kaliteyi soruy
 Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
 yanında duruyor ama onlardan değil, `fixtures.test.ts`'in şema döngüsü yalnız sürüm
 numaralı dosyaları (`v1.json` ile `v16.json` arası) okuyor. Üçüncüsü
-`src/fixtures/gercek-paket-v1.json`: aynı okulun en yeni gerçek "Tümünü kaydet" paketi
+`src/fixtures/gercek-paket-v1.json`: aynı okulun en yeni gerçek "Bütün planları kaydet" paketi
 (2026-09-04; paket v1, içinde v14 plan), adları `scripts/adsiz-paket.mjs` ile
 `tam-dolu-kurs.json`'dan, kimlikten kimliğe (TP6, K2). Betik o dosyada olmayan tek bir
 dizeyi bile yazmıyor, bilmediği bir kimlikte duruyor; commit'ten önce gerçek adlar

@@ -24,7 +24,7 @@ import { paletteColor, type State, type Teacher, looksLikeEmail } from '../../le
 import { desktopMail, isDesktop, type EpostaSonucu } from '../../platform/exe';
 import { blockSpans, buildIndex, type Index } from '../../pure/constraints';
 import { teacherMail } from '../../pure/paper';
-import { useT } from '../common';
+import { useAnnounce, useT } from '../common';
 import { sendPdf, sheetFile, whatsappLink } from './send';
 
 interface Props {
@@ -75,12 +75,16 @@ function saver(
   t: Translate,
   setSaved: (name: Saved) => void,
   setSaid: (said: Said) => void,
+  announce: (text: string) => void,
 ) {
   return (id: string): Save =>
     (to) => {
       const file = sheetFile(state, kind, id, colored, t);
       if (file === null) return;
       setSaved(file.name);
+      // Every press is heard, the same file twice included: the visible line
+      // is not a live region (it would not repeat).
+      announce(t('{ad} İndirilenler klasörüne kaydedildi.', { ad: file.name }));
       void sendPdf(file, to).then((opened) => {
         if (!opened) setSaid('wa-olmadi');
       });
@@ -93,7 +97,7 @@ function MailSaid({ said, saved }: { said: Said; saved: Saved }) {
   return (
     <>
       {saved !== null && (
-        <p className="hint sheet-said" role="status">
+        <p className="hint sheet-said">
           {t('{ad} İndirilenler klasörüne kaydedildi. İletiye ya da sohbete ataşla ekleyin.', {
             ad: saved,
           })}
@@ -168,14 +172,14 @@ function MailButton({
 function WhatsappButton({
   url,
   name,
-  label = 'WhatsApp',
+  label,
   save,
   missing,
 }: {
   url: string | null;
   name?: string;
   /** The visible words: the person page says what pressing does. */
-  label?: string;
+  label: string;
   save: Save;
   missing: () => void;
 }) {
@@ -195,94 +199,92 @@ function WhatsappButton({
 }
 
 /**
- * The person page's PDF kaydet: the same file a teacher is sent, one click,
- * with or without an address or a number.
+ * The person page's button row and what it says back. The buttons are DIRECT
+ * children of `.sheet-actions`, in the order of the work: what the page's owner
+ * puts first (`lead`: Yazdır, Bugün yok…), then PDF kaydet, and for a teacher
+ * E-postayla gönder and WhatsApp'la gönder, with no wrapper between. What the
+ * presses answer follows the buttons.
+ *
+ * Pressed without an address or a number, the two sending buttons also put the
+ * keyboard in that box (`onMissing`).
  */
-export function SavePdf({
+export function SheetActions({
   state,
   kind,
   id,
+  teacher,
   colored,
+  lead,
+  note,
+  onMissing,
 }: {
   state: State;
   kind: 'teacher' | 'class';
   id: string;
+  /** Present for a teacher: the sending buttons. */
+  teacher?: Teacher | undefined;
   colored: boolean;
-}) {
-  const t = useT();
-  const [saved, setSaved] = useState<Saved>(null);
-  const save = saver(state, kind, colored, t, setSaved, () => undefined)(id);
-  return (
-    <>
-      <button className="btn" onClick={() => save()}>
-        <FileDown size={16} strokeWidth={2} aria-hidden="true" />
-        {t('PDF kaydet')}
-      </button>
-      <MailSaid said={null} saved={saved} />
-    </>
-  );
-}
-
-/**
- * The person page's Gönder and WhatsApp: the same message as the Çıktı row,
- * or, when there is none, the one sentence that says how to get one. Pressed
- * without an address or a number it also puts the keyboard in that box
- * (`onMissing`).
- */
-export function SendTeacher({
-  state,
-  teacher,
-  colored,
-  onMissing,
-}: {
-  state: State;
-  teacher: Teacher;
-  colored: boolean;
+  lead: ReactNode;
+  /** A line that belongs under the row, before the answers. */
+  note?: ReactNode;
   onMissing: (box: 'email' | 'phone') => void;
 }) {
   const t = useT();
+  const announce = useAnnounce();
   const [said, setSaid] = useState<Said>(null);
   const [saved, setSaved] = useState<Saved>(null);
   const [asked, setAsked] = useState<Why | 'telefon' | null>(null);
   const { why, url } = useMemo(
-    () => mailFor(state, buildIndex(state), blockSpans(state), teacher, t),
+    () =>
+      teacher === undefined
+        ? { why: null, url: '' }
+        : mailFor(state, buildIndex(state), blockSpans(state), teacher, t),
     [state, teacher, t],
   );
-  const send = saver(state, 'teacher', colored, t, setSaved, setSaid)(teacher.id);
+  const send = saver(state, kind, colored, t, setSaved, setSaid, announce)(id);
   const save: Save = (to) => {
     setAsked(null);
     setSaid(null);
     send(to);
   };
   return (
-    <>
-      {why === null ? (
-        <MailButton url={url} setSaid={setSaid} save={save}>
-          {t('E-postayla gönder')}
-        </MailButton>
-      ) : (
-        <button
-          className="btn"
-          onClick={() => {
+    <div className="sheet-actions">
+      {lead}
+      <button className="btn" onClick={() => save()}>
+        <FileDown size={16} strokeWidth={2} aria-hidden="true" />
+        {t('PDF kaydet')}
+      </button>
+      {teacher !== undefined &&
+        (why === null ? (
+          <MailButton url={url} setSaid={setSaid} save={save}>
+            {t('E-postayla gönder')}
+          </MailButton>
+        ) : (
+          <button
+            className="btn"
+            onClick={() => {
+              setSaved(null);
+              setAsked(why);
+              if (why === 'adres yok' || why === 'adres hatalı') onMissing('email');
+            }}
+          >
+            <Mail size={16} strokeWidth={2} aria-hidden="true" />
+            {t('E-postayla gönder')}
+          </button>
+        ))}
+      {teacher !== undefined && (
+        <WhatsappButton
+          url={whatsappLink(teacher, t)}
+          label={t('WhatsApp’la gönder')}
+          save={save}
+          missing={() => {
             setSaved(null);
-            setAsked(why);
-            if (why === 'adres yok' || why === 'adres hatalı') onMissing('email');
+            setAsked('telefon');
+            onMissing('phone');
           }}
-        >
-          <Mail size={16} strokeWidth={2} aria-hidden="true" />
-          {t('E-postayla gönder')}
-        </button>
+        />
       )}
-      <WhatsappButton
-        url={whatsappLink(teacher, t)}
-        label={t('WhatsApp’la gönder')}
-        save={save}
-        missing={() => {
-          setSaved(null);
-          setAsked('telefon');
-          onMissing('phone');
-        }}
-      />
+      {note}
       {asked !== null && (
         <p className="hint sheet-said" role="status">
           {asked === 'telefon'
@@ -297,7 +299,7 @@ export function SendTeacher({
         </p>
       )}
       <MailSaid said={said} saved={saved} />
-    </>
+    </div>
   );
 }
 
@@ -315,7 +317,8 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
       })),
     [state, ix, spans, t],
   );
-  const save = saver(state, 'teacher', colored, t, setSaved, setSaid);
+  const announce = useAnnounce();
+  const save = saver(state, 'teacher', colored, t, setSaved, setSaid, announce);
   // Twenty-five rows saying "adres yok" were the loudest thing in the panel:
   // those with neither address nor number are one sentence under the list.
   const noAddress = rows.filter((r) => r.why === 'adres yok');
@@ -351,7 +354,7 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
                 setSaid={setSaid}
                 save={save(teacher.id)}
               >
-                {t('E-postada aç')}
+                {t('E-postayla gönder')}
               </MailButton>
             )}
             {/* Only with a number: the place to type one is the person page. */}
@@ -359,6 +362,7 @@ export default function MailPanel({ state, ix, spans, colored }: Props) {
               <WhatsappButton
                 url={wa}
                 name={`${teacher.short} · WhatsApp`}
+                label={t('WhatsApp’la gönder')}
                 save={save(teacher.id)}
                 missing={() => undefined}
               />

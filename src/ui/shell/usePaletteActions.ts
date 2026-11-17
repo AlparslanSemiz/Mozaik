@@ -131,7 +131,7 @@ export function usePaletteActions({
       {
         id: 'backup',
         label: t('Planlar ve yedek'),
-        hint: `${school} → ${t('Daha fazla')}`,
+        hint: `${school} → ${t('Planlar ve yedek')}`,
         extra: 'yedek klasör plan otomatik yedekler tümünü ayarlar',
         run: () => goTo({ tab: 'school', section: 'plans' }),
       },
@@ -153,7 +153,7 @@ export function usePaletteActions({
         // Müsaitlik is the person's page since K1: the list is one click
         // from it.
         id: 'closed',
-        label: t('Kapalı saat işaretle'),
+        label: t('Kapalı saatleri işaretle'),
         hint: t('Öğretmenler'),
         extra: 'gelemediği saatler müsait değil kapalı izin müsaitlik',
         run: () => goTo({ tab: 'teachers', people: 'list' }),
@@ -193,7 +193,7 @@ export function usePaletteActions({
       },
       {
         id: 'motion',
-        label: motion === 'kapali' ? t('Animasyonları aç') : t('Animasyonları kapat'),
+        label: motion === 'kapali' ? t('Ekran hareketlerini aç') : t('Ekran hareketlerini kapat'),
         hint: look,
         run: toggleMotion,
       },

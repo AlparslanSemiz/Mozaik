@@ -20,6 +20,7 @@ export * from './More';
 export * from './Help';
 export * from './openBundle';
 export { useReturnFocus } from './returnFocus';
+export { sheetHead } from './sheetHead';
 export * from './deleteFocus';
 export { default as Field } from './Field';
 export { default as LimitBox } from './LimitBox';

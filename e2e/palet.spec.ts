@@ -296,7 +296,9 @@ test.describe('55. Durum çipi — boş proje', () => {
   test('yeni açılışta "Sorun yok" değil, "Henüz ders girilmedi" diyor', async ({ page }) => {
     await open(page);
     const chip = page.locator('.health');
-    await expect(chip).toHaveClass(/ok/);
+    // Not started: neutral, no green (nor the "ok" it was before 2026-11-17).
+    await expect(chip).toHaveClass(/empty/);
+    await expect(chip).not.toHaveClass(/ok/);
     // The chip also carries its narrow-bar words (`.health-short`, hidden here).
     await expect(chip.locator('.health-text')).toHaveText('Henüz ders girilmedi');
   });

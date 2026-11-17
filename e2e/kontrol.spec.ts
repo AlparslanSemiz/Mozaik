@@ -233,7 +233,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     });
 
     const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
-    await expect(panel).toContainText('MÇ Salı 1 saatinde kapalı');
+    await expect(panel).toContainText('MÇ, Salı 1. saatte kapalı');
     await expect(panel).toContainText('hiçbir ders silinmedi');
     // DK7: the verdict and the strip said "Sorun görünmüyor" and "0 engel"
     // while the chip was red and this panel counted the lesson.
@@ -477,7 +477,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     const rows = panel.locator('tbody tr');
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText('511 · AV Fizik');
-    await expect(rows.first()).toContainText('AV Salı 3, 4 saatlerinde kapalı');
+    await expect(rows.first()).toContainText('AV, Salı 3, 4. saatlerde kapalı');
 
     await rows.first().getByRole('button', { name: 'Göster' }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toHaveAttribute(

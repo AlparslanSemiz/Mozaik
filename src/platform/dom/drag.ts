@@ -170,6 +170,8 @@ export function useDrag(
     element: HTMLElement;
     className: string;
     text: string;
+    /** The result's buttons ("Tamam"): meaningless under a hand holding a card, hidden meanwhile. */
+    actions: HTMLElement | null;
   } | null>(null);
   /**
    * The throttle's whole state. `pending` is what the bar WOULD say if it were
@@ -227,10 +229,20 @@ export function useDrag(
     if (savedBar.current !== null) {
       const saved = savedBar.current;
       savedBar.current = null;
+      if (saved.actions !== null) saved.actions.style.display = '';
       const text = saved.element.querySelector<HTMLElement>(':scope > span');
+      // The notice has said what happened; the bar going back to its own
+      // sentence must not be read a second time. Silent while it changes,
+      // polite again a moment after (the attribute is React's).
+      const hush = () => text?.setAttribute('aria-live', 'off');
+      const unhush = () => {
+        window.setTimeout(() => text?.setAttribute('aria-live', 'polite'), 400);
+      };
       const restore = () => {
+        hush();
         saved.element.className = saved.className;
         if (text !== null) text.textContent = saved.text;
+        unhush();
       };
       const why = refusal.current.why;
       refusal.current.why = null;
@@ -241,6 +253,7 @@ export function useDrag(
         // under the hand the whole time and vanished the moment it let go.
         // Put back only if nothing else wrote the bar meanwhile (a run, a
         // result): React owns the text and has already said what it says.
+        hush();
         saved.element.className = 'reason-bar bad';
         text.textContent = why;
         const settle = () => {
@@ -318,7 +331,9 @@ export function useDrag(
         element: bar,
         className: bar.className,
         text: barText.textContent ?? '',
+        actions: bar.querySelector<HTMLElement>('.bar-actions'),
       };
+      if (savedBar.current.actions !== null) savedBar.current.actions.style.display = 'none';
       bar.className = 'reason-bar ok';
       barText.textContent = first;
     }

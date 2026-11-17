@@ -126,7 +126,7 @@ export default function Data({
     keepBefore(state, said);
     const next = replaceState(emptyState(), said);
     if (next === null) notify(said, 'info');
-    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    else notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
   }
 
   function saveAll() {

@@ -71,18 +71,21 @@ export default function GridMenu({
                 drag makes, walked with the arrows. Started on the next task,
                 once the menu has closed; Radix may still be handing focus back, so
                 a cancel finds the card by its cell (Program.tsx onCancel). */}
-            <ContextMenu.Item
-              className="menu-item"
-              disabled={menuPinned || running}
-              onSelect={() => {
-                const { rowId, day, hour } = menuAt;
-                setTimeout(() => cellPick(rowId, day, hour), 0);
-              }}
-            >
-              <Move size={15} strokeWidth={2} aria-hidden="true" />
-              {t('Taşı')}
-              {menuPinned && <span className="menu-why">{t('sabitlenmiş')}</span>}
-            </ContextMenu.Item>
+            {/* A pinned card has no "Taşı": the item above it is the way (it lifts
+                the pin), and a dimmed copy only asked why. */}
+            {!menuPinned && (
+              <ContextMenu.Item
+                className="menu-item"
+                disabled={running}
+                onSelect={() => {
+                  const { rowId, day, hour } = menuAt;
+                  setTimeout(() => cellPick(rowId, day, hour), 0);
+                }}
+              >
+                <Move size={15} strokeWidth={2} aria-hidden="true" />
+                {t('Taşı')}
+              </ContextMenu.Item>
+            )}
             <ContextMenu.Item
               className="menu-item"
               disabled={menuPinned}

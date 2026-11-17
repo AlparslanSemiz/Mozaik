@@ -8,7 +8,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { CalendarX, Printer, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { subjectLabel } from '../../leaf/lang';
 import type { Id, State } from '../../leaf/model';
@@ -23,7 +23,7 @@ import {
   taughtOn,
   weekChanges,
 } from '../../pure/dated';
-import { useReturnFocus, useT } from '../common';
+import { sheetHead, useAnnounce, useReturnFocus, useT } from '../common';
 import { usePrintNow } from '../print';
 
 type Change = (apply: (d: State) => State, label?: string) => void;
@@ -70,13 +70,17 @@ export function DayDialog({
    * absence, closing the window writes nothing. While it is set the date is
    * today's and the date box is not drawn.
    */
-  ask?: (() => void) | undefined;
+  ask?: { id: Id; run: () => void } | undefined;
   onClose: () => void;
   /** Draws the date's week on the Program grid (the strip's chip only). */
   onShow?: () => void;
 }) {
   const t = useT();
+  const announce = useAnnounce();
   const returnFocus = useReturnFocus(date !== null);
+  const askButton = useRef<HTMLButtonElement>(null);
+  /** Whose row takes the focus once the absence is written and the button is gone. */
+  const [focusRow, setFocusRow] = useState<Id | null>(null);
   const [printing, setPrinting] = useState(false);
   const donePrinting = useCallback(() => setPrinting(false), []);
   const iso = date ?? '';
@@ -88,6 +92,13 @@ export function DayDialog({
     a.from <= iso && iso <= a.to ? [{ ...a, i }] : [],
   );
   const title = dayName(iso);
+  useEffect(() => {
+    if (focusRow === null) return;
+    const input = document.querySelector<HTMLElement>(`[data-away="${CSS.escape(focusRow)}"]`);
+    if (input === null) return;
+    input.focus();
+    setFocusRow(null);
+  }, [focusRow, away.length]);
   const room = (classId: Id) => {
     const roomId = state.classes.find((c) => c.id === classId)?.roomId;
     return state.rooms.find((r) => r.id === roomId)?.name ?? '';
@@ -116,9 +127,16 @@ export function DayDialog({
         <Dialog.Content
           className="sheet dated"
           aria-describedby={undefined}
+          // Asked from "Bugün yok…": the one button is what the window is for,
+          // so the keyboard lands on it, and it names the person.
+          onOpenAutoFocus={(e) => {
+            if (ask === undefined) return;
+            e.preventDefault();
+            askButton.current?.focus();
+          }}
           onCloseAutoFocus={returnFocus}
         >
-          <div className="sheet-head">
+          <div className="sheet-head" ref={sheetHead}>
             <div className="sheet-id">
               <Dialog.Title className="sheet-title">{title}</Dialog.Title>
               <span className="sheet-kind">{t('İkame listesi')}</span>
@@ -142,9 +160,19 @@ export function DayDialog({
 
           {ask !== undefined && (
             <div className="form-row">
-              <button className="btn primary" onClick={ask}>
+              <button
+                ref={askButton}
+                className="btn primary"
+                onClick={() => {
+                  const { id, run } = ask;
+                  const ad = nameOf(id) ?? '';
+                  run();
+                  announce(t('{ad} bugün yok olarak işaretlendi.', { ad }));
+                  setFocusRow(id);
+                }}
+              >
                 <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
-                {t('Bugün gelmiyor olarak işaretle')}
+                {t('{ad} bugün yok olarak işaretle', { ad: nameOf(ask.id) ?? '' })}
               </button>
             </div>
           )}
@@ -166,7 +194,7 @@ export function DayDialog({
             </label>
           </div>
 
-          <h3 className="sheet-h">{t('Gelmeyen')}</h3>
+          <h3 className="sheet-h">{t('Yok olanlar')}</h3>
           <div>
             {away.map((a) => (
               <div key={a.i} className="form-row">
@@ -177,6 +205,7 @@ export function DayDialog({
                     type="date"
                     value={a.to}
                     min={a.from}
+                    data-away={a.id}
                     required
                     onChange={(e) => {
                       if (e.target.value !== '') change((d) => setAwayEnd(d, a.i, e.target.value));
@@ -194,14 +223,14 @@ export function DayDialog({
             ))}
           </div>
           <select
-            aria-label={t('Gelmeyen ekle…')}
+            aria-label={t('Yok olan ekle…')}
             value=""
             onChange={(e) => {
               const id = e.target.value;
               if (id !== '') change((d) => addAway(d, id, iso));
             }}
           >
-            <option value="">{t('Gelmeyen ekle…')}</option>
+            <option value="">{t('Yok olan ekle…')}</option>
             {[...state.teachers, ...state.classes]
               .filter((p) => !away.some((a) => a.id === p.id))
               .map((p) => (

@@ -53,7 +53,9 @@ import {
   LimitBox,
   MoreItem,
   MoreMenu,
+  MoreSep,
   MoreSub,
+  sheetHead,
   T,
   useDialogs,
   useKeepBefore,
@@ -62,7 +64,7 @@ import {
   useToast,
   useUndoIf,
 } from '../common';
-import { PrintOne, SavePdf, SendTeacher } from '../print';
+import { PrintOne, SheetActions } from '../print';
 import { DayDialog } from '../dated';
 import { addAway, coverCount, isAway } from '../../pure/dated';
 import { dayStamp } from '../../leaf/app';
@@ -151,21 +153,40 @@ export function Inspector({
    * the dropdown cannot say how many; counted after, because the number is
    * what the reader has to act on next.
    */
-  async function hand(lessonId: string, other: string, teacherId: string) {
+  async function hand(lessonId: string, other: string, teacherId: string, focusRow: string | null) {
     const to = state.teachers.find((x) => x.id === teacherId);
     const lesson = state.lessons.find((x) => x.id === lessonId);
     if (to === undefined || lesson === undefined) return;
     const placed = placedBlocks(state, lesson).length;
+    // A teacher of another subject: the lesson is taught under hers (the
+    // first one, `transferLesson`), which the question says before it happens.
+    const was = lessonSubject(state, lesson);
+    const mine = teacherSubjects(to);
+    const changes = mine.length > 0 && !mine.some((m) => subjectKey(m) === subjectKey(was));
+    const what =
+      placed === 0
+        ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
+        : t(
+            'Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
+            { n: placed },
+          );
     if (
       !(await confirm({
-        title: t('{ne} dersi {kim} öğretmenine geçecek', { ne: other, kim: to.short }),
-        body:
-          placed === 0
-            ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
-            : t(
-                'Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.',
-                { n: placed },
-              ),
+        // The full name: "MB" says who only to somebody who already knows.
+        title: t('{ne} dersi {kim} öğretmenine geçecek', { ne: other, kim: to.name }),
+        body: changes ? (
+          <>
+            {what}
+            <br />
+            {t('Dikkat: ders {eski} idi, {kim} {yeni} öğretmeni; ders {yeni} olarak görünecek.', {
+              eski: subjectLabel(was),
+              kim: to.name,
+              yeni: subjectLabel(mine[0] ?? ''),
+            })}
+          </>
+        ) : (
+          what
+        ),
         confirmLabel: t('Aktar'),
       }))
     ) {
@@ -178,13 +199,23 @@ export function Inspector({
     change((d) => transferLesson(d, lessonId, teacherId).state);
     toast(
       returned === 0
-        ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.short })
+        ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.name })
         : t('{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.', {
             ne: other,
-            kim: to.short,
+            kim: to.name,
             n: returned,
           }),
     );
+    // The menu's button goes with the row on a teacher's page: the keyboard
+    // goes to the next row's, or to the list's heading when there is none.
+    // After the question's own focus return has run.
+    window.setTimeout(() => {
+      const next =
+        focusRow === null
+          ? null
+          : document.querySelector<HTMLElement>(`[data-lesson-menu="${focusRow}"] button`);
+      (next ?? document.getElementById('sheet-lessons-h'))?.focus();
+    }, 150);
   }
 
   /** No question since SD1: the deletion happens, its notice says what went
@@ -200,7 +231,7 @@ export function Inspector({
       document.querySelector<HTMLElement>('.add-row');
     keepBefore(state, said);
     change((d) => (d === state ? next : del(d, id)), said);
-    toast(said, 'info', { label: t('Geri al'), run: () => undoIf(next) });
+    toast(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
     onClose();
   }
 
@@ -519,7 +550,7 @@ export function Inspector({
             matches substrings (pitfalls 49 and 74). */}
         {target.kind !== 'room' && (
           <>
-            <h3 className="sheet-h">
+            <h3 className="sheet-h" id="sheet-lessons-h" tabIndex={-1}>
               {target.kind === 'teacher' ? t('Verdiği dersler') : t('Aldığı dersler')}
             </h3>
             {/* Where this person's lessons are ENTERED, on the page itself:
@@ -529,7 +560,7 @@ export function Inspector({
             {lessons.length > 0 && (
               <table className="sheet-lessons">
                 <tbody>
-                  {lessons.map((x) => {
+                  {lessons.map((x, row) => {
                     const group = state.classes.find((c) => c.id === x.classId);
                     const teacher = state.teachers.find((p) => p.id === x.teacherId);
                     // The short form names the lesson in sentences and
@@ -569,12 +600,26 @@ export function Inspector({
                           />{' '}
                           {t('saat')}
                         </td>
-                        <td>
+                        <td data-lesson-menu={x.id}>
                           <RowMenu
                             state={state}
                             from={x.teacherId}
-                            label={t('{ne} dersi için işlemler', { ne: other })}
-                            pick={(id) => void hand(x.id, other, id)}
+                            subject={lessonSubject(state, x)}
+                            // Two lessons of one class are told apart by their
+                            // branch; on a class's page the other end is the
+                            // teacher's full name.
+                            label={t('{ne} · {brans} dersi için işlemler', {
+                              ne: target.kind === 'teacher' ? other : (teacher?.name ?? other),
+                              brans: subjectLabel(lessonSubject(state, x)),
+                            })}
+                            pick={(id) =>
+                              void hand(
+                                x.id,
+                                other,
+                                id,
+                                target.kind === 'teacher' ? (lessons[row + 1]?.id ?? null) : x.id,
+                              )
+                            }
                           />
                         </td>
                       </tr>
@@ -595,7 +640,7 @@ export function Inspector({
             hovered (2026-11-16). */}
         <p className="hint">
           {target.kind === 'teacher'
-            ? t('Gelemediği saatlere tıklayın.')
+            ? t('Kapalı saatlere tıklayın.')
             : target.kind === 'class'
               ? t('Ders olmayacak saatlere tıklayın.')
               : t(
@@ -798,7 +843,7 @@ export function Inspector({
         >
           {target === null ? null : (
             <>
-              <div className="sheet-head">
+              <div className="sheet-head" ref={sheetHead}>
                 <span
                   className={(view?.facts.short.length ?? 0) > 3 ? 'sheet-mark long' : 'sheet-mark'}
                   style={
@@ -824,53 +869,49 @@ export function Inspector({
                   </Dialog.Title>
                   <span className="sheet-kind">{t(KIND_LABEL[target.kind])}</span>
                 </div>
-                {printable && (
-                  <div className="sheet-actions">
-                    <button className="btn" onClick={() => setPrinting(true)}>
-                      <Printer size={16} strokeWidth={2} aria-hidden="true" />
-                      {t('Yazdır')}
-                    </button>
-                    <button
-                      className="btn"
-                      onClick={() => {
-                        const today = dayStamp(new Date());
-                        // Nothing is written here: the window asks, and
-                        // only its button writes (closing it writes nothing).
-                        const free = !isAway(state, target.id, today);
-                        setMade(false);
-                        setAsking(free);
-                        setAwayOn(today);
-                      }}
-                    >
-                      <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
-                      {t('Bugün yok…')}
-                    </button>
-                    {teacherOf !== undefined && (
-                      <SendTeacher
-                        key={teacherOf.id}
-                        state={state}
-                        teacher={teacherOf}
-                        colored={colored}
-                        onMissing={(box) =>
-                          (box === 'phone' ? phoneBox : emailBox).current?.focus()
-                        }
-                      />
-                    )}
-                    {teacherOf !== undefined && covers[0] > 0 && (
-                      <span className="sheet-said hint">
-                        {t('İkame: bu hafta {m}, toplam {n} saat', { m: covers[1], n: covers[0] })}
-                      </span>
-                    )}
-                    {target.kind !== 'room' && (
-                      <SavePdf
-                        key={target.id}
-                        state={state}
-                        kind={target.kind}
-                        id={target.id}
-                        colored={colored}
-                      />
-                    )}
-                  </div>
+                {printable && target.kind !== 'room' && (
+                  <SheetActions
+                    key={target.id}
+                    state={state}
+                    kind={target.kind}
+                    id={target.id}
+                    teacher={teacherOf}
+                    colored={colored}
+                    onMissing={(box) => (box === 'phone' ? phoneBox : emailBox).current?.focus()}
+                    lead={
+                      <>
+                        <button className="btn" onClick={() => setPrinting(true)}>
+                          <Printer size={16} strokeWidth={2} aria-hidden="true" />
+                          {t('Yazdır')}
+                        </button>
+                        <button
+                          className="btn"
+                          onClick={() => {
+                            const today = dayStamp(new Date());
+                            // Nothing is written here: the window asks, and
+                            // only its button writes (closing it writes nothing).
+                            const free = !isAway(state, target.id, today);
+                            setMade(false);
+                            setAsking(free);
+                            setAwayOn(today);
+                          }}
+                        >
+                          <CalendarX size={16} strokeWidth={2} aria-hidden="true" />
+                          {t('Bugün yok…')}
+                        </button>
+                      </>
+                    }
+                    note={
+                      teacherOf !== undefined && covers[0] > 0 ? (
+                        <span className="sheet-said hint">
+                          {t('İkame: bu hafta {m}, toplam {n} saat', {
+                            m: covers[1],
+                            n: covers[0],
+                          })}
+                        </span>
+                      ) : undefined
+                    }
+                  />
                 )}
                 <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
                   <X size={18} strokeWidth={2.2} />
@@ -885,10 +926,13 @@ export function Inspector({
                 person={made ? target.id : undefined}
                 ask={
                   asking
-                    ? () => {
-                        setMade(true);
-                        setAsking(false);
-                        change((d) => addAway(d, target.id, awayOn ?? dayStamp(new Date())));
+                    ? {
+                        id: target.id,
+                        run: () => {
+                          setMade(true);
+                          setAsking(false);
+                          change((d) => addAway(d, target.id, awayOn ?? dayStamp(new Date())));
+                        },
                       }
                     : undefined
                 }
@@ -996,15 +1040,30 @@ function AddLesson({
 function RowMenu({
   state,
   from,
+  subject,
   label,
   pick,
 }: {
   state: State;
   from: Id;
+  /** The lesson's branch: its teachers of the same branch come first. */
+  subject: string;
   label: string;
   pick: (teacherId: Id) => void;
 }) {
   const t = useT();
+  const others = state.teachers.filter((p) => p.id !== from);
+  const same = others.filter((p) =>
+    teacherSubjects(p).some((m) => subjectKey(m) === subjectKey(subject)),
+  );
+  const rest = others.filter((p) => !same.includes(p));
+  const item = (p: State['teachers'][number]) => (
+    <MoreItem key={p.id} onSelect={() => pick(p.id)}>
+      {[p.short, p.name, teacherSubjects(p).map(subjectLabel).join(', ')]
+        .filter((x) => x !== '')
+        .join(' · ')}
+    </MoreItem>
+  );
   return (
     <MoreMenu
       label=""
@@ -1013,13 +1072,9 @@ function RowMenu({
       icon={<MoreHorizontal size={18} aria-hidden="true" focusable="false" />}
     >
       <MoreSub label={t('Başka öğretmene aktar…')}>
-        {state.teachers
-          .filter((p) => p.id !== from)
-          .map((p) => (
-            <MoreItem key={p.id} onSelect={() => pick(p.id)}>
-              {p.short} · {p.name}
-            </MoreItem>
-          ))}
+        {same.map(item)}
+        {same.length > 0 && rest.length > 0 && <MoreSep />}
+        {rest.map(item)}
       </MoreSub>
     </MoreMenu>
   );

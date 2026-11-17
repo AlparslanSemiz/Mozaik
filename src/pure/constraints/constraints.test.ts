@@ -662,7 +662,7 @@ describe('blocker — sınıf ve derslik kapalı saatleri', () => {
   it('sınıf kapalıysa engeller ve sınıfın adını söyler', () => {
     const d = build();
     d.unavailable[closedKey('s510', 0, 2)] = 1;
-    expect(why(d, 'x1', 0, 2)).toBe('510 sınıfı Pazartesi 3 saatinde kapalı');
+    expect(why(d, 'x1', 0, 2)).toBe('510 sınıfı Pazartesi 3. saatte kapalı');
     expect(why(d, 'x1', 0, 1)).toBeNull();
   });
 
@@ -675,15 +675,15 @@ describe('blocker — sınıf ve derslik kapalı saatleri', () => {
   it('derslik kapalıysa o dersliği kullanan sınıf ders yapamaz', () => {
     const d = build();
     d.unavailable[closedKey('dA', 1, 0)] = 1;
-    expect(why(d, 'x1', 1, 0)).toBe('A dersliği Salı 1 saatinde kapalı');
-    expect(why(d, 'x2', 1, 0)).toBe('A dersliği Salı 1 saatinde kapalı'); // shares room A
+    expect(why(d, 'x1', 1, 0)).toBe('A dersliği Salı 1. saatte kapalı');
+    expect(why(d, 'x2', 1, 0)).toBe('A dersliği Salı 1. saatte kapalı'); // shares room A
     expect(why(d, 'x3', 1, 0)).toBeNull(); // 433 is in room B
   });
 
   it('bloğun ORTASINA denk gelen kapalı saat de engeller', () => {
     const d = build();
     d.unavailable[closedKey('s433', 0, 1)] = 1;
-    expect(why(d, 'x3', 0, 0)).toBe('433 sınıfı Pazartesi 2 saatinde kapalı');
+    expect(why(d, 'x3', 0, 0)).toBe('433 sınıfı Pazartesi 2. saatte kapalı');
   });
 
   it('sınıf silinince onun kapalı saatleri de silinir', () => {
@@ -861,7 +861,7 @@ describe('closedConflicts', () => {
 
     const found = closedConflicts(closed, buildIndex(closed));
     expect(found).toHaveLength(1);
-    expect(found[0]!.reason).toBe('MÇ Pazartesi 1 saatinde kapalı');
+    expect(found[0]!.reason).toBe('MÇ, Pazartesi 1. saatte kapalı');
     expect(found[0]!.lessonId).toBe('x1');
     // The whole point: nothing is removed.
     expect(activeProgram(closed).placements['s510|0|0']).toBe('x1');
@@ -872,7 +872,7 @@ describe('closedConflicts', () => {
     const closed: State = { ...d, unavailable: { ...d.unavailable, 's510|0|0': 1 } };
     const found = closedConflicts(closed, buildIndex(closed));
     expect(found).toHaveLength(1);
-    expect(found[0]!.reason).toBe('510 sınıfı Pazartesi 1 saatinde kapalı');
+    expect(found[0]!.reason).toBe('510 sınıfı Pazartesi 1. saatte kapalı');
   });
 
   it('derslik kapatılınca yakalıyor', () => {
@@ -880,7 +880,7 @@ describe('closedConflicts', () => {
     const closed: State = { ...d, unavailable: { ...d.unavailable, 'dA|0|0': 1 } };
     const found = closedConflicts(closed, buildIndex(closed));
     expect(found).toHaveLength(1);
-    expect(found[0]!.reason).toBe('A dersliği Pazartesi 1 saatinde kapalı');
+    expect(found[0]!.reason).toBe('A dersliği Pazartesi 1. saatte kapalı');
   });
 
   it('bloğun yalnız ortası kapatılsa da o saat yakalanıyor', () => {
@@ -930,7 +930,7 @@ describe('closedConflicts', () => {
 describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', () => {
   it('yerinde duran ders KENDİ hücresini dolu görüyor', () => {
     const d = place(build(), 'x1', 0, 1);
-    expect(why(d, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2 saatinde Matematik var');
+    expect(why(d, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2. saatte Matematik var');
   });
 
   it('kaldırıldıktan sonra aynı hücre serbest', () => {
@@ -956,7 +956,7 @@ describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', (
 
     expect(why(lifted, 'x1', 0, 1)).toBeNull();
     // MÇ is still teaching 511 at hour 2, so that hour stays blocked for x1.
-    expect(why(lifted, 'x1', 0, 2)).toBe('MÇ Pazartesi 3 saatinde 511 sınıfında');
+    expect(why(lifted, 'x1', 0, 2)).toBe('MÇ, Pazartesi 3. saatte 511 sınıfında');
   });
 
   it('sınır kuralı da kaldırılmış hâle göre hesaplanıyor', () => {
@@ -1072,8 +1072,8 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
     occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1, 1); // x1 -> 510, Monday, hour 2
 
     // The class is busy, and so is MÇ.
-    expect(blocker(work, ix, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2 saatinde Matematik var');
-    expect(blocker(work, ix, 'x2', 0, 1)).toBe('MÇ Pazartesi 2 saatinde 510 sınıfında');
+    expect(blocker(work, ix, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2. saatte Matematik var');
+    expect(blocker(work, ix, 'x2', 0, 1)).toBe('MÇ, Pazartesi 2. saatte 510 sınıfında');
     // The room is shared, so 511 cannot use it either.
     expect(why(place(d, 'x1', 0, 1), 'x5', 0, 1)).toBe(blocker(work, ix, 'x5', 0, 1));
   });

@@ -73,7 +73,7 @@ const GROUPS: Group[] = [
       { keys: 'Home End', desc: 'Satırın başına veya sonuna git, Ctrl ile ilk veya son satıra' },
       { keys: 'Delete Backspace', desc: 'Odaklı dersi havuza kaldır' },
       { keys: 'Enter Space', desc: 'Odaklı dersin sağ tık menüsünü aç' },
-      { keys: 'T', desc: 'Odaklı dersi taşımak için al' },
+      { keys: 'T', desc: 'Odaklı dersi taşımak için al (sabitse önce P)' },
       { keys: 'P', desc: 'Odaklı dersi sabitle veya sabitlemeyi kaldır' },
     ],
   },

@@ -49,6 +49,12 @@ export type ToastTone = 'ok' | 'info' | 'warn';
 export interface ToastAction {
   label: string;
   run: () => boolean | void;
+  /**
+   * The state this undo names. The button is taken away as soon as the open
+   * state is any other one (`useToastFollow`), instead of staying to answer
+   * "Arada başka bir değişiklik oldu" when pressed (audit, 2026-11-17).
+   */
+  expected?: unknown;
 }
 
 interface Toast {
@@ -61,12 +67,27 @@ interface Toast {
 type Notify = (text: string, tone?: ToastTone, action?: ToastAction) => void;
 
 const ToastContext = createContext<Notify | null>(null);
+/** Notices on screen at once: the oldest falls when a fourth comes. Three stacked covered the grid. */
+const MAX_SHOWN = 3;
+/** Hovering or focus pauses a notice, but not for ever: a pointer left resting where one appeared kept it a minute. */
+const HOVER_CAP = 30000;
+
+const FollowContext = createContext<(present: unknown) => void>(() => undefined);
 const AnnounceContext = createContext<(text: string) => void>(() => undefined);
 
 export function useToast(): Notify {
   const notify = useContext(ToastContext);
   if (notify === null) throw new Error('useToast bir ToastProvider içinde çağrılmalı');
   return notify;
+}
+
+/**
+ * Tells the notices which state is open now: one whose "Geri al" names another
+ * state loses its button. Called by the component that owns the store.
+ */
+export function useToastFollow(present: unknown): void {
+  const follow = useContext(FollowContext);
+  useEffect(() => follow(present), [follow, present]);
 }
 
 /** Says a sentence to a screen reader only: nothing is drawn (Ctrl+Z's "Geri alındı"). */
@@ -86,6 +107,9 @@ interface Clock {
   timer: number | undefined;
   due: number;
   left: number;
+  /** The latest it may stay when held by the pointer or the focus. */
+  cap: number;
+  held: boolean;
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -94,18 +118,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const next = useRef(1);
   const clocks = useRef(new Map<number, Clock>());
   const region = useRef<HTMLDivElement>(null);
-  const hovered = useRef(false);
+  /** The notices the pointer is over, by id: removing one removes its hold (no `:hover` guess). */
+  const hovered = useRef(new Set<number>());
   const paused = useRef(false);
 
   const drop = useCallback((id: number) => {
     const clock = clocks.current.get(id);
     if (clock?.timer !== undefined) window.clearTimeout(clock.timer);
     clocks.current.delete(id);
+    hovered.current.delete(id);
     setItems((list) => list.filter((t) => t.id !== id));
   }, []);
 
   const run = useCallback(
     (id: number, clock: Clock, ms: number) => {
+      if (clock.timer !== undefined) window.clearTimeout(clock.timer);
+      clock.held = false;
       clock.due = Date.now() + ms;
       clock.left = ms;
       clock.timer = window.setTimeout(() => drop(id), ms);
@@ -113,48 +141,83 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [drop],
   );
 
+  /** Stops one clock; only the cap can still end the notice. */
+  const hold = useCallback(
+    (id: number, clock: Clock) => {
+      if (clock.timer !== undefined) window.clearTimeout(clock.timer);
+      clock.left = Math.max(0, clock.due - Date.now());
+      clock.held = true;
+      clock.timer = window.setTimeout(() => drop(id), Math.max(0, clock.cap - Date.now()));
+    },
+    [drop],
+  );
+
   /** Stops every clock while the reader is on a notice, starts them again after. */
   const settle = useCallback(() => {
     const focused = region.current?.contains(document.activeElement) ?? false;
-    const now = hovered.current || focused;
-    if (now === paused.current) return;
+    const now = hovered.current.size > 0 || focused;
     paused.current = now;
     for (const [id, clock] of clocks.current) {
-      if (now) {
-        if (clock.timer !== undefined) window.clearTimeout(clock.timer);
-        clock.timer = undefined;
-        clock.left = Math.max(0, clock.due - Date.now());
-      } else {
-        run(id, clock, Math.max(clock.left, AFTER_PAUSE));
-      }
+      if (now && !clock.held) hold(id, clock);
+      else if (!now && clock.held) run(id, clock, Math.max(clock.left, AFTER_PAUSE));
     }
-  }, [run]);
+  }, [run, hold]);
 
   const notify = useCallback<Notify>(
     (text, tone = 'ok', action) => {
       const id = next.current++;
-      setItems((list) => [
+      setItems((list) => {
         // Only the newest notice keeps its button (see the top of the file).
-        ...(action === undefined ? list : list.map(({ action: _older, ...item }) => item)),
-        action === undefined ? { id, text, tone } : { id, text, tone, action },
-      ]);
+        const kept = action === undefined ? list : list.map(({ action: _older, ...item }) => item);
+        const all = [
+          ...kept,
+          action === undefined ? { id, text, tone } : { id, text, tone, action },
+        ];
+        // The oldest fall off (their clocks go with them, below).
+        return all.slice(-MAX_SHOWN);
+      });
       const ms = action === undefined ? LIFETIME : ACTION_LIFETIME;
-      const clock: Clock = { timer: undefined, due: Date.now() + ms, left: ms };
+      const clock: Clock = {
+        timer: undefined,
+        due: Date.now() + ms,
+        left: ms,
+        cap: Date.now() + HOVER_CAP,
+        held: false,
+      };
       clocks.current.set(id, clock);
-      if (!paused.current) run(id, clock, ms);
+      if (paused.current) hold(id, clock);
+      else run(id, clock, ms);
     },
-    [run],
+    [run, hold],
   );
 
   // A notice that closes under the pointer or with the focus in it leaves no
   // event behind (nothing fires pointerleave or blur for a removed node), so
-  // the pause is looked at again whenever the list changes.
-  // A removed notice that was under the pointer fires no pointerleave either,
-  // so whether the pointer is still over one is asked of the page itself.
+  // the pause is looked at again whenever the list changes, and the clocks of
+  // notices that fell off the list are let go.
   useEffect(() => {
-    hovered.current = items.length > 0 && (region.current?.matches(':hover') ?? false);
+    const alive = new Set(items.map((i) => i.id));
+    for (const [id, clock] of clocks.current) {
+      if (alive.has(id)) continue;
+      if (clock.timer !== undefined) window.clearTimeout(clock.timer);
+      clocks.current.delete(id);
+      hovered.current.delete(id);
+    }
     settle();
   }, [items, settle]);
+
+  const follow = useCallback((present: unknown) => {
+    setItems((list) => {
+      if (!list.some((i) => i.action?.expected !== undefined && i.action.expected !== present)) {
+        return list;
+      }
+      return list.map((item) =>
+        item.action?.expected !== undefined && item.action.expected !== present
+          ? { id: item.id, text: item.text, tone: item.tone }
+          : item,
+      );
+    });
+  }, []);
 
   // Every pending timer dies with the provider: a setTimeout that fires into
   // an unmounted tree is a React warning and, worse, a leak that survives a
@@ -176,12 +239,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => notify, [notify]);
 
-  const pointerIn = () => {
-    hovered.current = true;
+  const pointerIn = (id: number) => {
+    hovered.current.add(id);
     settle();
   };
-  const pointerOut = () => {
-    hovered.current = false;
+  const pointerOut = (id: number) => {
+    hovered.current.delete(id);
     settle();
   };
   // Where the keyboard was before it came to a notice: "Geri al" takes its
@@ -203,71 +266,73 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   return (
     <ToastContext.Provider value={value}>
-      <AnnounceContext.Provider value={announce}>
-        {children}
-        {/* polite, not assertive: none of these interrupt anything. */}
-        <div
-          className="toasts"
-          role="status"
-          aria-live="polite"
-          ref={region}
-          onFocus={focused}
-          onBlur={blurred}
-        >
-          {items.map((toast) => (
-            <div
-              key={toast.id}
-              className={`toast ${toast.tone}`}
-              onPointerEnter={pointerIn}
-              onPointerLeave={pointerOut}
-            >
-              <span className="toast-icon" aria-hidden="true">
-                {toast.tone === 'ok' ? (
-                  <Check size={16} strokeWidth={2.6} />
-                ) : toast.tone === 'warn' ? (
-                  <CircleAlert size={16} strokeWidth={2.4} />
-                ) : (
-                  <Info size={16} strokeWidth={2.4} />
-                )}
-              </span>
-              <span className="toast-text">
-                {toast.text}
-                {toast.action !== undefined && (
-                  <span className="sr-only"> {t('Geri almak için Ctrl+Z.')}</span>
-                )}
-              </span>
-              {toast.action !== undefined && (
-                <button
-                  className="btn toast-action"
-                  onClick={() => {
-                    const done = toast.action?.run();
-                    drop(toast.id);
-                    if (cameFrom.current?.isConnected === true) cameFrom.current.focus();
-                    if (done === false) {
-                      notify(
-                        t('Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.'),
-                        'warn',
-                      );
-                    }
-                  }}
-                >
-                  {toast.action.label}
-                </button>
-              )}
-              <button
-                className="toast-close"
-                aria-label={t('Kapat')}
-                onClick={() => drop(toast.id)}
+      <FollowContext.Provider value={follow}>
+        <AnnounceContext.Provider value={announce}>
+          {children}
+          {/* polite, not assertive: none of these interrupt anything. */}
+          <div
+            className="toasts"
+            role="status"
+            aria-live="polite"
+            ref={region}
+            onFocus={focused}
+            onBlur={blurred}
+          >
+            {items.map((toast) => (
+              <div
+                key={toast.id}
+                className={`toast ${toast.tone}`}
+                onPointerEnter={() => pointerIn(toast.id)}
+                onPointerLeave={() => pointerOut(toast.id)}
               >
-                <X size={14} strokeWidth={2.4} />
-              </button>
-            </div>
-          ))}
-        </div>
-        <div className="sr-only" role="status" aria-live="polite">
-          {said}
-        </div>
-      </AnnounceContext.Provider>
+                <span className="toast-icon" aria-hidden="true">
+                  {toast.tone === 'ok' ? (
+                    <Check size={16} strokeWidth={2.6} />
+                  ) : toast.tone === 'warn' ? (
+                    <CircleAlert size={16} strokeWidth={2.4} />
+                  ) : (
+                    <Info size={16} strokeWidth={2.4} />
+                  )}
+                </span>
+                <span className="toast-text">
+                  {toast.text}
+                  {toast.action !== undefined && (
+                    <span className="sr-only"> {t('Geri almak için Ctrl+Z.')}</span>
+                  )}
+                </span>
+                {toast.action !== undefined && (
+                  <button
+                    className="btn toast-action"
+                    onClick={() => {
+                      const done = toast.action?.run();
+                      drop(toast.id);
+                      if (cameFrom.current?.isConnected === true) cameFrom.current.focus();
+                      if (done === false) {
+                        notify(
+                          t('Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.'),
+                          'warn',
+                        );
+                      }
+                    }}
+                  >
+                    {toast.action.label}
+                  </button>
+                )}
+                <button
+                  className="toast-close"
+                  aria-label={t('Kapat')}
+                  onClick={() => drop(toast.id)}
+                >
+                  <X size={14} strokeWidth={2.4} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="sr-only" role="status" aria-live="polite">
+            {said}
+          </div>
+        </AnnounceContext.Provider>
+      </FollowContext.Provider>
     </ToastContext.Provider>
   );
 }

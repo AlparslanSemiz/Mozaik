@@ -141,7 +141,13 @@ test.describe('79. Yenilikler', () => {
   test('Ayarlar sekmesindeki nokta, panel açılınca kayboluyor ve kalıcı', async ({ page }) => {
     await open(page);
     const dot = page.locator('.tab[data-section="school"] .tab-dot');
-    // A fresh profile has never seen any version, so the dot starts lit.
+    // A first run has nothing to compare with (2026-11-17): no dot before a
+    // single entry exists, the newest note counts as seen.
+    await expect(dot).toBeHidden();
+    // Somebody who has read an earlier release's notes has an older mark: for
+    // them the dot is lit.
+    await page.evaluate(() => localStorage.setItem('ders-programi-yenilik-gorulen', '2.0.0'));
+    await page.reload();
     await expect(dot).toBeVisible();
 
     await openSettings(page, 'Hakkında');

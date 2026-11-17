@@ -1328,6 +1328,6 @@ test.describe('Çıktı: öğretmene WhatsApp’tan', () => {
     expect(await page.evaluate(() => (window as unknown as { acilan: string }).acilan)).toMatch(
       /^https:\/\/wa\.me\/905550000001\?text=M%C3%87%20%C2%B7%20/,
     );
-    await expect(panel.getByRole('status')).toContainText('İndirilenler');
+    await expect(panel.locator('.sheet-said')).toContainText('İndirilenler');
   });
 });

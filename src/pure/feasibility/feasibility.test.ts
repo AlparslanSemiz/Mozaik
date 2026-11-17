@@ -296,7 +296,7 @@ describe('commonestBlock', () => {
   });
 });
 
-// The father's week said "410A SAY sınıfı Salı 1 saatinde kapalı" for every
+// The father's week said "410A SAY sınıfı Salı 1. saatte kapalı" for every
 // stuck lesson (TODO B5.9): in a class whose open hours match its lessons, the
 // class's own closed hours win commonestBlock's vote. holeReason asks only the
 // hours the class still has empty.
@@ -310,7 +310,7 @@ describe('holeReason', () => {
     const ix = buildIndex(d);
 
     expect(commonestBlock(d, ix, 'x1').reason).toContain('510 sınıfı');
-    expect(holeReason(d, ix, 'x1')).toBe('MÇ Pazartesi 3 saatinde kapalı');
+    expect(holeReason(d, ix, 'x1')).toBe('MÇ, Pazartesi 3. saatte kapalı');
   });
 
   it('boş saatler bloğa uymuyorsa şekli söylüyor', () => {
@@ -334,11 +334,11 @@ describe('holeReason', () => {
     const ix = buildIndex(d);
 
     expect(holeReason(d, ix, 'x1')).toBe(
-      'Tek başına Pazartesi 4 saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor',
+      'Tek başına Pazartesi 4. saate sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor',
     );
     d.lessons.pop();
     expect(holeReason(d, buildIndex(d), 'x1')).toBe(
-      'Pazartesi 4 saatine sığıyor, arama oraya varmadan durdu',
+      'Pazartesi 4. saate sığıyor, arama oraya varmadan durdu',
     );
   });
 
@@ -526,7 +526,7 @@ describe('health', () => {
     // "Sorun yok" on a project somebody has just opened for the first time is
     // the chip saying nothing on the one screen where it could say something.
     const h = health(emptyState());
-    expect(h.level).toBe('ok');
+    expect(h.level).toBe('empty');
     expect(h.message).toBe('Henüz ders girilmedi');
     expect(h).toMatchObject({
       blocked: 0,

@@ -277,7 +277,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           timeout: 20_000,
         },
       )
-      .toContain('Program yapıldı');
+      .toContain('Kalan dizildi');
   });
 
   test('Linux’taki kopya kendini güncellemiyor', async ({ exe }) => {
@@ -340,7 +340,7 @@ test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
           timeout: 20_000,
         },
       )
-      .toContain('Program yapıldı');
+      .toContain('Kalan dizildi');
 
     await exe.oturum.js(
       `const card = document.querySelector('table.grid td .card');

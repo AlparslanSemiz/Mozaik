@@ -59,8 +59,12 @@ interface Bulgu {
   first: string;
 }
 
-async function tara(page: import('@playwright/test').Page): Promise<Bulgu[]> {
-  const sonuc = await new AxeBuilder({ page }).disableRules(KAPALI).analyze();
+async function tara(
+  page: import('@playwright/test').Page,
+  /** Rules that are false alarms in THIS state only, each with its reason at the call. */
+  ayrica: string[] = [],
+): Promise<Bulgu[]> {
+  const sonuc = await new AxeBuilder({ page }).disableRules([...KAPALI, ...ayrica]).analyze();
   return sonuc.violations.map((v) => ({
     id: v.id,
     impact: v.impact ?? 'bilinmiyor',
@@ -258,6 +262,25 @@ test.describe('91. Odak: diyalog kapanınca ve içeriğe geçerken', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toHaveCount(0);
     await expect(more).toBeFocused();
+  });
+
+  test('Daha fazla menüsü açıkken taranıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.locator('.ribbon .more-menu').click();
+    await expect(page.getByRole('menu')).toBeVisible();
+    // A Radix modal menu hides everything behind it with aria-hidden and moves
+    // focus into itself, so on the page behind it axe reports three rules that
+    // are the menu working as designed, not a defect of the page:
+    //   aria-hidden-focus: the page's buttons are hidden yet still focusable
+    //     (Radix traps focus instead of making them inert);
+    //   page-has-heading-one and region: the scan sees only what the open menu
+    //     leaves visible, which has no heading and no landmark.
+    // Only here: every scan without a menu open keeps all three.
+    karsilastir(
+      'Program · Daha fazla açık',
+      await tara(page, ['aria-hidden-focus', 'page-has-heading-one', 'region']),
+    );
   });
 
   test('"?" açıklaması klavyeyle açılıp kapanıyor, odak geri dönüyor', async ({ page }) => {

@@ -365,7 +365,7 @@ export function dropMap(
       );
       if (locked !== undefined) {
         map.set(key, {
-          blocked: t('{sinif} sınıfının {gun} {saat} saatindeki ders sabitlenmiş', {
+          blocked: t('{sinif} sınıfının {gun} {saat}. saatindeki ders sabitlenmiş', {
             sinif: ix.classById.get(lesson.classId)?.name ?? '?',
             gun: d.settings.days[g]?.name ?? `${g + 1}`,
             saat: d.settings.hours[locked.hour] ?? `${locked.hour + 1}`,

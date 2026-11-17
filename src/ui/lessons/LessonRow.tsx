@@ -146,6 +146,7 @@ export function LessonRow({ state, change, lesson: x, rowName, grip }: Props) {
               notify(said, 'info', {
                 label: t('Geri al'),
                 run: () => undoIf(next),
+                expected: next,
               });
             }}
           >
