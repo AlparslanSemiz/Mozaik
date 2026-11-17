@@ -245,4 +245,27 @@ test.describe('36. Site sürümü', () => {
     expect(site).toContain('serviceWorker');
     expect(site).toContain('manifest.webmanifest');
   });
+
+  test('site yalnız kendi kafasında arama ve paylaşım bilgisini taşıyor', async ({}) => {
+    // Search and share tags are for the web address only: the double-clicked
+    // file stays a bare "Mozaik" and says nothing about any address.
+    const site = readFileSync(resolve('dist-site/index.html'), 'utf8');
+    expect(site).toContain('<title>Mozaik · Çevrimdışı haftalık ders programı aracı</title>');
+    expect(site).toContain('rel="canonical" href="https://mozaik.alparslansemiz.com/"');
+    expect(site).toContain(
+      'property="og:image" content="https://mozaik.alparslansemiz.com/og-image.png"',
+    );
+    expect(site).toContain('name="twitter:card" content="summary_large_image"');
+    expect(site).toContain('name="referrer" content="strict-origin-when-cross-origin"');
+    expect(site).toContain('rel="apple-touch-icon"');
+    expect(readFileSync(resolve('dist-site/robots.txt'), 'utf8')).toContain(
+      'Sitemap: https://mozaik.alparslansemiz.com/sitemap.xml',
+    );
+    expect(readFileSync(resolve('dist-site/sitemap.xml'), 'utf8')).toContain(
+      '<loc>https://mozaik.alparslansemiz.com/</loc>',
+    );
+    const single = readFileSync(resolve('dist/index.html'), 'utf8');
+    expect(single).not.toContain('og:image');
+    expect(single).not.toContain('canonical');
+  });
 });
