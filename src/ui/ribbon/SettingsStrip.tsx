@@ -42,7 +42,7 @@ export function settingsStrip({
         className={`${step === undefined ? 'btn' : 'btn step'}${
           s.id === 'about' && changelogUnseen ? ' has-dot' : ''
         }`}
-        aria-current={s.id === ui.section ? 'true' : undefined}
+        aria-current={s.id === ui.section ? 'true' : 'false'}
         data-empty={step === undefined ? undefined : step.count(state) === 0}
         // The unread release note's dot is on its exact door, Hakkında.
         {...(s.id === 'about' && changelogUnseen ? { 'aria-describedby': 'about-news' } : {})}

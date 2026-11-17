@@ -84,7 +84,7 @@ async function go(page: Page, tab: string) {
 
 /** Presses one option and waits for the strip to have finished answering. */
 async function press(page: Page, index: number) {
-  const button = page.locator('.ribbon .btn[aria-pressed]').nth(index);
+  const button = page.locator('.ribbon .btn:is([aria-pressed], [aria-current])').nth(index);
   const name = (await button.innerText()).replace(/\s+/g, ' ').trim();
   await button.click();
   await page.waitForTimeout(200);
@@ -100,7 +100,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
 
     for (const tab of TABS) {
       await go(page, tab);
-      const options = await page.locator('.ribbon .btn[aria-pressed]').count();
+      const options = await page.locator('.ribbon .btn:is([aria-pressed], [aria-current])').count();
       // The guard: a strip with one option cannot prove anything, and a strip
       // with none would make this test free (pitfall 23).
       expect(options, `${tab} şeridinde basılabilir seçenek yok`).toBeGreaterThan(1);
@@ -137,7 +137,7 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
     const section = async (name: string) => {
       await page.locator('.ribbon .btn', { hasText: name }).first().click();
       // Görünüm is in the strip's second group since denetim/kisi.
-      await expect(page.locator('.ribbon .ribbon-group .btn[aria-pressed="true"]')).toContainText(
+      await expect(page.locator('.ribbon .ribbon-group .btn[aria-current="true"]')).toContainText(
         name,
       );
       await page.waitForTimeout(200);
