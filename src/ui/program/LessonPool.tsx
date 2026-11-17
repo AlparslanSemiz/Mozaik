@@ -251,6 +251,26 @@ function LessonPool({
   // tray; a world being loaded is not.
   useLayoutEffect(fit, [cards.length]);
 
+  // The notices stand above the drawer: the root carries the same `--dock-h`
+  // `.program-body` owns (its two writers do not know about the root, so the
+  // body's style is watched), and lets go of it when the drawer goes.
+  useLayoutEffect(() => {
+    const body = handle.current?.closest('.program-body');
+    if (!(body instanceof HTMLElement)) return;
+    const root = document.documentElement;
+    const mirror = () => {
+      const value = body.style.getPropertyValue('--dock-h');
+      if (value !== '') root.style.setProperty('--dock-h', value);
+    };
+    mirror();
+    const watch = new MutationObserver(mirror);
+    watch.observe(body, { attributes: true, attributeFilter: ['style'] });
+    return () => {
+      watch.disconnect();
+      root.style.removeProperty('--dock-h');
+    };
+  }, []);
+
   useEffect(() => {
     const el = handle.current;
     const host = el?.closest('.program-body');

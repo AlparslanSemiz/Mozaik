@@ -275,7 +275,9 @@ export default function Print({
                 onChange={() => toggle(kind, x.id)}
               />
               <span className="row-dot" style={{ background: paletteColor(x.color) }} />
-              {x.label}
+              <span className="pick-name" title={x.label}>
+                {x.label}
+              </span>
             </label>
           ))}
         </div>
