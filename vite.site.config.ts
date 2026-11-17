@@ -74,16 +74,26 @@ if (location.origin === ${JSON.stringify(new URL(ADRES.eski).origin)} && typeof 
  * the beacon is optional, and offline or blocked it simply does not load. Only
  * at the new origin, so localhost, the tests and the old address count nothing;
  * the double-clicked dist/index.html never has it (this file builds dist-site).
+ * Automated browsers (navigator.webdriver) and the owner's own browsers
+ * (?notrack=1 sets localStorage notrack=1, ?notrack=0 clears it) load nothing.
  * The service worker only handles its own origin, so it never caches the beacon.
  */
 const ziyaretSayaci = `
-if (location.origin === ${JSON.stringify(new URL(ADRES.yeni).origin)}) {
+(function () {
+  if (location.origin !== ${JSON.stringify(new URL(ADRES.yeni).origin)}) return;
+  try {
+    var n = new URLSearchParams(location.search).get('notrack');
+    if (n === '1') localStorage.setItem('notrack', '1');
+    else if (n === '0') localStorage.removeItem('notrack');
+  } catch (e) {}
+  try { if (localStorage.getItem('notrack') === '1') return; } catch (e) {}
+  if (navigator.webdriver) return;
   var s = document.createElement('script');
   s.defer = true;
   s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
   s.setAttribute('data-cf-beacon', '{"token": "e166682d551741608b0cfce5d186f123"}');
   document.head.appendChild(s);
-}`;
+})();`;
 
 /**
  * The manifest link and the registration script exist ONLY here.
