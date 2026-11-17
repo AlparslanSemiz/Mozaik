@@ -96,7 +96,7 @@ export default function Data({
   const notify = useToast();
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
-  const loadSample = useLoadSample();
+  const loadSample = useLoadSample(plans);
   const openBundle = useOpenBundle(plans);
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);

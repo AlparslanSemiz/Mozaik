@@ -266,7 +266,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       const count = teacherDayCount(ix, teacher.id, day, hourCount);
       if (count === 0) continue; // a free day is not a breach
       const when = t('{kim} {gun} günü', {
-        kim: teacher.short,
+        kim: teacher.name,
         gun: dayLabel(dayInfo.name),
       });
 
@@ -318,8 +318,6 @@ export function findViolations(d: State, ix: Index): Violation[] {
     const group = ix.classById.get(lesson.classId);
     const limit = lessonLimit(d, lesson, group);
     if (!ruleActive(d, 'maxSameLessonPerDay', limit)) continue;
-    const teacher = ix.teacherById.get(lesson.teacherId);
-
     for (const [day, dayInfo] of d.settings.days.entries()) {
       const count = lessonDayCount(d, lesson, day, hourCount);
       if (count <= limit) continue;
@@ -333,7 +331,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
           {
             sinif: group?.name ?? '?',
             gun: dayLabel(dayInfo.name),
-            kim: teacher?.short ?? '?',
+            kim: subjectLabel(lessonSubject(d, lesson)),
             olan: count,
             sinir: limit,
           },
@@ -385,7 +383,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
           message: t(
             '{kim} {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.',
             {
-              kim: teacher.short,
+              kim: teacher.name,
               gun: dayLabel(dayInfo.name),
               olan: gaps,
               sinir: limit,

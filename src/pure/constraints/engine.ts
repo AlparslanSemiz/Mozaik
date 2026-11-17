@@ -17,6 +17,7 @@ import {
   type State,
   type Teacher,
   closedKey,
+  lessonSubject,
   placementKey,
 } from '../../leaf/model';
 import { activePlacements } from '../grid';
@@ -152,7 +153,7 @@ export function blockerDetail(
       return {
         code: 'teacherClosed',
         message: t('{kim}, {gun} {saat}. saatte kapalı', {
-          kim: teacher.short,
+          kim: teacher.name,
           gun: dayName(),
           saat: hourName,
         }),
@@ -166,8 +167,8 @@ export function blockerDetail(
       const otherClass = other && ix.classById.get(other.classId);
       return {
         code: 'teacherBusy',
-        message: t('{kim}, {gun} {saat}. saatte {sinif} sınıfında', {
-          kim: teacher.short,
+        message: t('{kim} {gun} {saat}. saatte {sinif} sınıfında', {
+          kim: teacher.name,
           gun: dayName(),
           saat: hourName,
           sinif: otherClass?.name ?? t('başka'),
@@ -276,7 +277,7 @@ function limitBreaches(
       out.push({
         name: 'maxConsecutive',
         message: t('{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur', {
-          kim: teacher.short,
+          kim: teacher.name,
           sinir: maxRun,
           olan: run,
         }),
@@ -291,7 +292,7 @@ function limitBreaches(
       out.push({
         name: 'maxPerDay',
         message: t('{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur', {
-          kim: teacher.short,
+          kim: teacher.name,
           gun: dayName(),
           sinir: maxDay,
           olan: count,
@@ -308,7 +309,13 @@ function limitBreaches(
         name: 'maxSameLessonPerDay',
         message: t(
           '{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur',
-          { sinif: group.name, gun: dayName(), kim: teacher.short, sinir: maxSame, olan: count },
+          {
+            sinif: group.name,
+            gun: dayName(),
+            kim: subjectLabel(lessonSubject(d, lesson)),
+            sinir: maxSame,
+            olan: count,
+          },
         ),
       });
     }

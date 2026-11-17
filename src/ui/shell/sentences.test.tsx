@@ -185,13 +185,13 @@ describe('cümle · engelin sebebi', () => {
         "classBusy": "510 sınıfının Salı 1. saatte Matematik var",
         "classClosed": "510 sınıfı Çarşamba 1. saatte kapalı",
         "dayEnd": "2 saatlik ders güne sığmıyor",
-        "maxConsecutive": "AV art arda 1 saatten fazla girmemeli, burada 2 saat olur",
+        "maxConsecutive": "Ayşe Vural art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
         "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
         "roomBusy": "A dersliğinde Salı 1. saatte 510 var",
         "roomClosed": "A dersliği Çarşamba 1. saatte kapalı",
-        "teacherBusy": "MÇ, Salı 1. saatte 510 sınıfında",
-        "teacherClosed": "MÇ, Çarşamba 1. saatte kapalı",
+        "teacherBusy": "Mehmet Çelik Salı 1. saatte 510 sınıfında",
+        "teacherClosed": "Mehmet Çelik, Çarşamba 1. saatte kapalı",
       }
     `);
   });

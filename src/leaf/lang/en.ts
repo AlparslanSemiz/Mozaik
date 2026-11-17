@@ -204,8 +204,6 @@ const EN: Sozluk = {
     "Drag to move · right-click for options",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Drag to move, right-click for options",
-  "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
-    "Pinned. Right-click to unpin",
 
   // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Send to tray",
@@ -753,7 +751,6 @@ const EN: Sozluk = {
   "başka ders": "another lesson",
   "{sinif} sınıfı {gun} {saat}. saatte kapalı": "class {sinif} is closed on {gun} at period {saat}",
   "{kim}, {gun} {saat}. saatte kapalı": "Period {saat} on {gun} is closed for {kim}",
-  "{kim}, {gun} {saat}. saatte {sinif} sınıfında": "{kim} is with class {sinif} on {gun} at period {saat}",
   başka: "another",
   "{derslik} dersliğinde {gun} {saat}. saatte {sinif} var": "room {derslik} has {sinif} on {gun} at period {saat}",
   "başka sınıf": "another class",
@@ -1227,7 +1224,6 @@ const EN: Sozluk = {
   "{ne} dersi {kim} öğretmenine geçecek": "The {ne} lesson will go to {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
     "This lesson is not on the timetable yet, so nothing can be lost.",
-  "Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Its {n} placed lessons will be retried against the new teacher’s open hours; the ones that do not fit go back to the tray.",
   Aktar: "Hand over",
   "{ne} dersi {kim} öğretmenine geçti.": "The {ne} lesson went to {kim}.",
   "{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.":
@@ -1802,6 +1798,12 @@ const EN: Sozluk = {
   "Bu örnek okul.": "This is the sample school.",
   "Kendi okulumla başla": "Start with my own school",
   "? Yardım": "? Help",
+  "Örnek Kurs (örnek)": "Sample School (sample)",
+  "Bu ders sabitlenmiş. Taşımak için sağ tıklayıp Sabitlemeyi kaldır’ı seçin.": "This lesson is pinned. To move it, right-click it and choose Unpin.",
+  "Sabitlenmiş. Sağ tıklayarak sabitlemeyi kaldırabilirsiniz": "Pinned. Right-click to unpin",
+  "{ad} için bu gün ders yok, değişecek ders yok.": "{ad} has no lessons this day, so nothing needs to change.",
+  "{kim} {gun} {saat}. saatte {sinif} sınıfında": "{kim} is with class {sinif} on {gun} at period {saat}",
+  "Programdaki {n} saat yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Its {n} placed hours will be retried against the new teacher’s open hours; the ones that do not fit go back to the tray.",
 };
 
 registerSozluk("en", EN);

@@ -2,6 +2,7 @@
 // swap and the eviction it may cause, their sentences, and `applyDrop`.
 
 import { t } from '../../leaf/i18n';
+import { dayLabel } from '../../leaf/lang';
 import {
   type Id,
   type Lesson,
@@ -107,11 +108,17 @@ function targetBlocks(
   return [...found.values()];
 }
 
-function blockName(ix: Index, ref: BlockRef): string {
+function blockName(ix: Index, ref: BlockRef, when = false): string {
   const lesson = ix.lessonById.get(ref.lessonId);
   const group = ix.classById.get(ref.classId)?.name ?? '?';
-  const teacher = lesson === undefined ? '?' : (ix.teacherById.get(lesson.teacherId)?.short ?? '?');
-  return `${group} · ${teacher}`;
+  const teacher = lesson === undefined ? '?' : (ix.teacherById.get(lesson.teacherId)?.name ?? '?');
+  const name = `${group} · ${teacher}`;
+  if (!when) return name;
+  // Both sides of a swap often read the same ("530 · Murat Bilge" twice, or
+  // two blocks of one teacher): the day and hour tell them apart.
+  const day = dayLabel(ix.settings.days[ref.day]?.name ?? '');
+  const hour = ix.settings.hours[ref.hour] ?? `${ref.hour + 1}`;
+  return `${name} (${t('{gun} {n}. saat', { gun: day, n: hour })})`;
 }
 
 /**
@@ -119,15 +126,15 @@ function blockName(ix: Index, ref: BlockRef): string {
  * counted, or several lessons listed.
  */
 function targetsName(ix: Index, targets: BlockRef[]): string {
-  const names = [...new Set(targets.map((x) => blockName(ix, x)))];
-  if (names.length === 1 && targets.length > 1)
-    return t('{ad} ({n} ders)', { ad: names[0]!, n: targets.length });
-  return names.join(', ');
+  const plain = [...new Set(targets.map((x) => blockName(ix, x)))];
+  if (plain.length === 1 && targets.length > 1)
+    return t('{ad} ({n} ders)', { ad: plain[0]!, n: targets.length });
+  return [...new Set(targets.map((x) => blockName(ix, x, true)))].join(', ');
 }
 
 export function swapDoneNotice(ix: Index, source: BlockRef, targets: BlockRef[]): string {
   return t('{bir} ile {iki} yer değiştirdi', {
-    bir: blockName(ix, source),
+    bir: blockName(ix, source, true),
     iki: targetsName(ix, targets),
   });
 }
@@ -213,7 +220,7 @@ function swapBlocks(
     if (verdict.blocked !== null) {
       return {
         refused: t('Takas olmaz, {ne} eski yerine geçemiyor: {sebep}', {
-          ne: blockName(ix, ref),
+          ne: blockName(ix, ref, true),
           sebep: verdict.blocked,
         }),
       };
@@ -225,7 +232,7 @@ function swapBlocks(
   }
 
   const notice = t('{bir} ile {iki} yer değiştirecek', {
-    bir: blockName(ix, source),
+    bir: blockName(ix, source, true),
     iki: targetsName(ix, ordered),
   });
   const ruleWarning = verdicts.find((v) => v.warning !== null)?.warning ?? null;

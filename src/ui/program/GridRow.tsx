@@ -4,7 +4,7 @@
 import { dayLabel } from '../../leaf/lang';
 import { type Settings, paletteColor } from '../../leaf/model';
 import type { GridRow } from '../../pure/program';
-import { useT } from '../common';
+import { useT, useToast } from '../common';
 import { memo } from 'react';
 import type React from 'react';
 import { useInspect } from './Inspector';
@@ -64,6 +64,32 @@ export const Row = memo(function Row({
   // the app, so this cannot be what re-renders 25 rows of 84 cells (pitfall 10).
   const inspect = useInspect();
   const t = useT();
+  const notify = useToast();
+  /**
+   * A pinned card starts no drag, and until now the hand that tried got
+   * nothing back (the keyboard's T has always said why). Pressing it and then
+   * pulling away says it once, and what to do instead.
+   */
+  const pinnedPull = (down: React.PointerEvent) => {
+    if (down.button !== 0 || !down.isPrimary) return;
+    const { clientX: x0, clientY: y0 } = down;
+    const off = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', off);
+      window.removeEventListener('pointercancel', off);
+    };
+    const move = (e: PointerEvent) => {
+      if (Math.hypot(e.clientX - x0, e.clientY - y0) < 5) return;
+      off();
+      notify(
+        t('Bu ders sabitlenmiş. Taşımak için sağ tıklayıp Sabitlemeyi kaldır’ı seçin.'),
+        'warn',
+      );
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', off);
+    window.addEventListener('pointercancel', off);
+  };
   const closedWord = t('kapalı');
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
@@ -197,7 +223,8 @@ export const Row = memo(function Row({
               draggable={false}
               tabIndex={-1}
               onPointerDown={(e) => {
-                if (!cell.pinned) onCellMoveStart(e, row.id, g, s);
+                if (cell.pinned) pinnedPull(e);
+                else onCellMoveStart(e, row.id, g, s);
               }}
               // A keyboard click (Enter, Space) opens the card's menu, as the
               // shortcuts screen says; it used to send the lesson back to the
@@ -265,7 +292,7 @@ export const Row = memo(function Row({
                       sorun: cell.conflict,
                     })
                   : cell.pinned
-                    ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
+                    ? t('Sabitlenmiş. Sağ tıklayarak sabitlemeyi kaldırabilirsiniz')
                     : t('Sürükleyerek taşıyın · sağ tık: seçenekler')
               }
             >

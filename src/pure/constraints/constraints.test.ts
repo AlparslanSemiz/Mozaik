@@ -250,7 +250,7 @@ describe('blocker — sert kısıtlar', () => {
     const d = build();
     d.unavailable[closedKey('oMC', 0, 0)] = 1;
     const reason = why(d, 'x1', 0, 0);
-    expect(reason).toContain('MÇ');
+    expect(reason).toContain('Mehmet Çelik');
     expect(reason).toContain('kapalı');
   });
 
@@ -258,7 +258,7 @@ describe('blocker — sert kısıtlar', () => {
     // MÇ is in class 510; cannot be in 511 at the same hour.
     const d = place(build(), 'x1', 0, 0);
     const reason = why(d, 'x2', 0, 0);
-    expect(reason).toContain('MÇ');
+    expect(reason).toContain('Mehmet Çelik');
     expect(reason).toContain('510');
   });
 
@@ -707,7 +707,9 @@ describe('blocker — art arda en fazla N saat', () => {
     let d = withRule(build(), 'maxConsecutive', 2, 'block');
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 1);
-    expect(why(d, 'x1', 0, 2)).toBe('MÇ art arda 2 saatten fazla girmemeli, burada 3 saat olur');
+    expect(why(d, 'x1', 0, 2)).toBe(
+      'Mehmet Çelik art arda 2 saatten fazla girmemeli, burada 3 saat olur',
+    );
   });
 
   it('cümle arayüzün dilinde çıkıyor', () => {
@@ -720,7 +722,9 @@ describe('blocker — art arda en fazla N saat', () => {
       let d = withRule(build(), 'maxConsecutive', 2, 'block');
       d = place(d, 'x1', 0, 0);
       d = place(d, 'x2', 0, 1);
-      expect(why(d, 'x1', 0, 2)).toBe('MÇ may teach at most 2 hours in a row; this would make 3');
+      expect(why(d, 'x1', 0, 2)).toBe(
+        'Mehmet Çelik may teach at most 2 hours in a row; this would make 3',
+      );
     } finally {
       setAktifDil(geriAl);
     }
@@ -760,7 +764,7 @@ describe('blocker — günde en fazla N saat', () => {
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 2);
     expect(why(d, 'x1', 0, 3)).toBe(
-      'MÇ Pazartesi günü en fazla 2 saat girmeli, burada 3 saat olur',
+      'Mehmet Çelik Pazartesi günü en fazla 2 saat girmeli, burada 3 saat olur',
     );
     expect(why(d, 'x1', 1, 0)).toBeNull(); // the next day is a fresh budget
   });
@@ -772,7 +776,7 @@ describe('blocker — bir ders günde en fazla N saat', () => {
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x1', 0, 2);
     expect(why(d, 'x1', 0, 3)).toBe(
-      '510 sınıfı Pazartesi günü MÇ dersinden en fazla 2 saat görmeli, burada 3 saat olur',
+      '510 sınıfı Pazartesi günü Matematik dersinden en fazla 2 saat görmeli, burada 3 saat olur',
     );
   });
 
@@ -793,7 +797,7 @@ describe('blocker — bir ders günde en fazla N saat', () => {
     };
     d = place(d, 'x1', 0, 0);
     expect(why(d, 'x1', 0, 2)).toBe(
-      '510 sınıfı Pazartesi günü MÇ dersinden en fazla 1 saat görmeli, burada 2 saat olur',
+      '510 sınıfı Pazartesi günü Matematik dersinden en fazla 1 saat görmeli, burada 2 saat olur',
     );
   });
 
@@ -818,7 +822,7 @@ describe('check — Uyar seviyesi', () => {
     d = place(d, 'x2', 0, 1);
     const v = verdict(d, 'x1', 0, 2);
     expect(v.blocked).toBeNull();
-    expect(v.warning).toBe('MÇ art arda 2 saatten fazla girmemeli, burada 3 saat olur');
+    expect(v.warning).toBe('Mehmet Çelik art arda 2 saatten fazla girmemeli, burada 3 saat olur');
   });
 
   it('Engelle iken uyarı değil engel döner', () => {
@@ -839,7 +843,7 @@ describe('check — Uyar seviyesi', () => {
     let d = withRule(build(), 'maxConsecutive', 1, 'warn');
     d = place(d, 'x1', 0, 0);
     const v = verdict(d, 'x2', 0, 0); // MÇ is already teaching 510 at that hour
-    expect(v.blocked).toContain('MÇ');
+    expect(v.blocked).toContain('Mehmet Çelik');
     expect(v.warning).toBeNull();
   });
 });
@@ -861,7 +865,7 @@ describe('closedConflicts', () => {
 
     const found = closedConflicts(closed, buildIndex(closed));
     expect(found).toHaveLength(1);
-    expect(found[0]!.reason).toBe('MÇ, Pazartesi 1. saatte kapalı');
+    expect(found[0]!.reason).toBe('Mehmet Çelik, Pazartesi 1. saatte kapalı');
     expect(found[0]!.lessonId).toBe('x1');
     // The whole point: nothing is removed.
     expect(activeProgram(closed).placements['s510|0|0']).toBe('x1');
@@ -956,7 +960,7 @@ describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', (
 
     expect(why(lifted, 'x1', 0, 1)).toBeNull();
     // MÇ is still teaching 511 at hour 2, so that hour stays blocked for x1.
-    expect(why(lifted, 'x1', 0, 2)).toBe('MÇ, Pazartesi 3. saatte 511 sınıfında');
+    expect(why(lifted, 'x1', 0, 2)).toBe('Mehmet Çelik Pazartesi 3. saatte 511 sınıfında');
   });
 
   it('sınır kuralı da kaldırılmış hâle göre hesaplanıyor', () => {
@@ -1073,7 +1077,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
 
     // The class is busy, and so is MÇ.
     expect(blocker(work, ix, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2. saatte Matematik var');
-    expect(blocker(work, ix, 'x2', 0, 1)).toBe('MÇ, Pazartesi 2. saatte 510 sınıfında');
+    expect(blocker(work, ix, 'x2', 0, 1)).toBe('Mehmet Çelik Pazartesi 2. saatte 510 sınıfında');
     // The room is shared, so 511 cannot use it either.
     expect(why(place(d, 'x1', 0, 1), 'x5', 0, 1)).toBe(blocker(work, ix, 'x5', 0, 1));
   });
@@ -1174,7 +1178,7 @@ describe('dropMap — üstüne bırakma', () => {
     const v = at(d, 'x1', 0, 0); // try to drop 510 - MÇ on top
     expect(v.blocked).not.toBeNull();
     expect(v.evicts).toEqual([]);
-    expect(v.blocked).toContain('MÇ');
+    expect(v.blocked).toContain('Mehmet Çelik');
   });
 
   it('kapalı saat tahliyeyle açılmaz', () => {
@@ -1421,7 +1425,9 @@ describe('yerleşmiş blokların atomik takası', () => {
     const result = swapAt(d, ref('a', 's510', 0, 0, 2), 0, 2);
 
     expect(result.verdict.action.kind).toBe('swap');
-    expect(result.verdict.warning).toBe('510 · MÇ ile 511 · MÇ (2 ders) yer değiştirecek');
+    expect(result.verdict.warning).toBe(
+      '510 · MÇ (Salı 1. saat) ile 511 · MÇ (2 ders) yer değiştirecek',
+    );
     const after = activeProgram(result.state).placements;
     expect(after[placementKey('s510', 0, 2)]).toBe('a');
     expect(after[placementKey('s510', 0, 3)]).toBe('a');

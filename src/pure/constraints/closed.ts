@@ -64,7 +64,7 @@ export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
     let reason: string | null = null;
     let closedBy: ClosedConflict['closedBy'] | null = null;
     if (d.unavailable[closedKey(teacher.id, day, hour)] !== undefined) {
-      reason = t('{kim}, {ne_zaman} kapalı', { kim: teacher.short, ne_zaman: when });
+      reason = t('{kim}, {ne_zaman} kapalı', { kim: teacher.name, ne_zaman: when });
       closedBy = { kind: 'teacher', id: teacher.id };
     } else if (d.unavailable[closedKey(group.id, day, hour)] !== undefined) {
       reason = t('{sinif} sınıfı {ne_zaman} kapalı', { sinif: group.name, ne_zaman: when });

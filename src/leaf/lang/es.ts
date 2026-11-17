@@ -205,8 +205,6 @@ const ES: Sozluk = {
     "Arrastre para mover · clic derecho para opciones",
   "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın":
     "{sorun}. Arrastre para mover, clic derecho para opciones",
-  "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
-    "Fijada. Clic derecho para soltarla",
 
   // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Enviar a la bandeja",
@@ -764,7 +762,6 @@ const ES: Sozluk = {
   "başka ders": "otra clase",
   "{sinif} sınıfı {gun} {saat}. saatte kapalı": "el grupo {sinif} está cerrado el {gun} a la hora {saat}",
   "{kim}, {gun} {saat}. saatte kapalı": "La hora {saat} del {gun} está cerrada para {kim}",
-  "{kim}, {gun} {saat}. saatte {sinif} sınıfında": "{kim} está con el grupo {sinif} el {gun} a la hora {saat}",
   başka: "otra",
   "{derslik} dersliğinde {gun} {saat}. saatte {sinif} var": "en el aula {derslik} está {sinif} el {gun} a la hora {saat}",
   "başka sınıf": "otro grupo",
@@ -1240,7 +1237,6 @@ const ES: Sozluk = {
   "{ne} dersi {kim} öğretmenine geçecek": "La clase de {ne} pasará a {kim}",
   "Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.":
     "Esta clase aún no está en el horario, así que no hay nada que perder.",
-  "Programdaki {n} ders yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Sus {n} clases colocadas se volverán a probar con las horas abiertas del nuevo profesor; las que no quepan vuelven a la bandeja.",
   Aktar: "Pasar",
   "{ne} dersi {kim} öğretmenine geçti.": "La clase de {ne} pasó a {kim}.",
   "{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.":
@@ -1815,6 +1811,12 @@ const ES: Sozluk = {
   "Bu örnek okul.": "Esta es la escuela de ejemplo.",
   "Kendi okulumla başla": "Empezar con mi propia escuela",
   "? Yardım": "? Ayuda",
+  "Örnek Kurs (örnek)": "Curso de ejemplo (ejemplo)",
+  "Bu ders sabitlenmiş. Taşımak için sağ tıklayıp Sabitlemeyi kaldır’ı seçin.": "Esta clase está fijada. Para moverla, haga clic derecho y elija Quitar fijación.",
+  "Sabitlenmiş. Sağ tıklayarak sabitlemeyi kaldırabilirsiniz": "Fijada. Clic derecho para soltarla",
+  "{ad} için bu gün ders yok, değişecek ders yok.": "{ad} no tiene clases este día, no hay nada que cambiar.",
+  "{kim} {gun} {saat}. saatte {sinif} sınıfında": "{kim} está con el grupo {sinif} el {gun} a la hora {saat}",
+  "Programdaki {n} saat yeni öğretmenin açık saatlerine göre yeniden denenecek; sığmayanlar havuza döner.": "Sus {n} horas colocadas se volverán a probar con las horas abiertas del nuevo profesor; las que no quepan vuelven a la bandeja.",
 };
 
 registerSozluk("es", ES);

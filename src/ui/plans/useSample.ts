@@ -11,10 +11,11 @@
 // of the history. The question used to say "Geri alınamaz" all the same; since
 // 2026-11-15 it says what is true, and the notice offers "Geri al" (TODO SD1).
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDialogs, useKeepBefore, useT, useToast, useUndoIf } from '../common';
 import { markIntroSeen } from '../../platform/prefs';
 import { sampleState } from '../../pure/io';
+import type { PlanControls } from '../common/props';
 import type { State } from '../../leaf/model';
 
 export type LoadSample = (
@@ -22,12 +23,22 @@ export type LoadSample = (
   change: (apply: (d: State) => State, label?: string) => void,
 ) => Promise<boolean>;
 
-export function useLoadSample(): LoadSample {
+/** The name `createPlan` and a first run give a plan nobody has named ("Plan 1", "Plan 2"…). */
+export function isUnnamedPlan(name: string): boolean {
+  return /^Plan \d+$/.test(name);
+}
+
+export function useLoadSample(plans: PlanControls): LoadSample {
   const { confirm } = useDialogs();
   const notify = useToast();
   const undoIf = useUndoIf();
   const keepBefore = useKeepBefore();
   const t = useT();
+  // The notice outlives the render it was made in: its Geri al renames from
+  // the library as it is THEN, never from the one it was made with (a stale
+  // library would write the plans made in between out of the list).
+  const plansNow = useRef(plans);
+  plansNow.current = plans;
 
   return useCallback(
     async (state, change) => {
@@ -60,10 +71,26 @@ export function useLoadSample(): LoadSample {
       // Over a plan that holds work: what a reload can still bring back.
       if (holds) keepBefore(state, said);
       change(() => next, said);
+      // The plan picker would say "Plan 1" for a school that is the sample:
+      // an unnamed plan takes the sample's name, and gives it back with Geri al.
+      // A plan the user named keeps its name.
+      const planId = plansNow.current.planId;
+      const was = plansNow.current.library.plans.find((p) => p.id === planId)?.name ?? null;
+      const sampleName = t('Örnek Kurs (örnek)');
+      const renamed = was !== null && isUnnamedPlan(was);
+      if (renamed) plansNow.current.renamePlan(planId, sampleName);
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
       markIntroSeen();
-      notify(said, 'info', { label: t('Geri al'), run: () => undoIf(next), expected: next });
+      notify(said, 'info', {
+        label: t('Geri al'),
+        run: () => {
+          const done = undoIf(next);
+          if (done !== false && renamed && was !== null) plansNow.current.renamePlan(planId, was);
+          return done;
+        },
+        expected: next,
+      });
       return true;
     },
     [confirm, notify, t, undoIf, keepBefore],
