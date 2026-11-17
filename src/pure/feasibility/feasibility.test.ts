@@ -554,7 +554,7 @@ describe('health', () => {
 
     const h = health(d);
     expect(h.pending).toBe(4);
-    expect(h.message).toContain('4 saat yerleşmedi');
+    expect(h.message).toContain('4 saat bekliyor');
     // Nothing is WRONG with it, but it is not done: green read as done
     // beside "4 saat yerleşmedi" (usability walkthrough, 2026-11-16).
     expect(h.level).toBe('tight');
@@ -637,7 +637,7 @@ describe('health', () => {
       weeklyHours: 3,
       blocks: [],
     });
-    expect(health(d).message).toMatch(/^\d+ saat yerleşmedi$/);
+    expect(health(d).message).toMatch(/^\d+ saat bekliyor$/);
   });
 
   // Pitfall 22, in its third home: one teacher away all week produces sixty

@@ -144,7 +144,7 @@ function MainAction({
       ref={set('make')}
       className="btn primary"
       title={t(
-        'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)',
+        'Bekleyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)',
       )}
       onClick={(e) => press(e, onMake)}
     >
@@ -261,12 +261,12 @@ export function programStrip({
     // happens and the notice offers that click. The pinned cells stay, and so
     // do their pins: nothing takes a pinned block down but unpinning it.
     const next = keepPinnedOnly(state);
-    keepBefore(state, t('Dizilmiş {n} saat havuza döndü.', { n: placed }));
+    keepBefore(state, t('Yerleşmiş {n} saat havuza döndü.', { n: placed }));
     change((d) => (d === state ? next : keepPinnedOnly(d)));
     notify(
       pinnedHours === 0
-        ? t('Dizilmiş {n} saat havuza döndü.', { n: placed })
-        : t('Dizilmiş saatler havuza döndü, sabitlenen {n} saat yerinde.', {
+        ? t('Yerleşmiş {n} saat havuza döndü.', { n: placed })
+        : t('Yerleşmiş saatler havuza döndü, sabitlenen {n} saat yerinde.', {
             n: pinnedHours,
           }),
       'info',

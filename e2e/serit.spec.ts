@@ -655,10 +655,10 @@ test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
   test('tema şeritte değil, yalnız Görünüm panelinde', async ({ page }) => {
     await open(page);
     await openSettings(page, 'Görünüm');
-    await expect(page.locator('.ribbon').getByRole('button', { name: 'Koyu' })).toHaveCount(0);
+    await expect(page.locator('.ribbon').getByRole('button', { name: 'Koyu renk' })).toHaveCount(0);
     await page
       .getByRole('group', { name: 'Tema', exact: true })
-      .getByRole('button', { name: 'Koyu', exact: true })
+      .getByRole('button', { name: 'Koyu renk', exact: true })
       .click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });

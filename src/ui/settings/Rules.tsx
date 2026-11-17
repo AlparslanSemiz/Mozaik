@@ -24,7 +24,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'minPerDay',
     label: 'Öğretmen günde en az',
-    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız sorun listesinde uyarır.',
+    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız Programın durumu’nda sayılır.',
     canBlock: false,
   },
   {
@@ -42,7 +42,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'maxGapsClass',
     label: 'Sınıfın dersleri arasında en fazla boşluk',
-    hint: 'Aynısı sınıf için. Yalnız sorun listesinde uyarır.',
+    hint: 'Aynısı sınıf için. Yalnız Programın durumu’nda sayılır.',
     canBlock: false,
   },
 ];
@@ -97,7 +97,7 @@ export default function Rules({ state, change }: PanelProps) {
             </ul>
           </HelpHead>
           <p className="hint">
-            <T k="Bu sayılar **bütün okul** için; **0** yazmak “sınır yok” demektir." />
+            <T k="Bu sayılar **bütün okul** için. Bir kuralı kapatmak için **Seviye**’yi **Yok** yapın." />
           </p>
           <table className="list">
             <thead>

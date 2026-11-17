@@ -289,6 +289,17 @@ describe('sözlükler kaynakla aynı şeyi konuşuyor', () => {
       .map(([key]) => key);
     expect(bad, bad.join('\n')).toEqual([]);
   });
+
+  // One mark for the apostrophe and one pair of quotes in every sentence the
+  // screen says (audit round 3): ’ and “…”, never ' or ". The Turkish key is the
+  // sentence, so a straight mark in a key shows on screen, and in a translation
+  // it shows in that language.
+  it.each(CEVIRILER)('%s: düz kesme işareti ve düz tırnak YOK', (_dil, sozluk) => {
+    const bad = Object.entries(sozluk)
+      .filter(([key, phrase]) => /[^\W\d_]'[^\W\d_]/u.test(key + phrase) || /["]/.test(key))
+      .map(([key]) => key);
+    expect(bad, bad.join('\n')).toEqual([]);
+  });
 });
 
 // ------------------------------------------------------------ the plurals

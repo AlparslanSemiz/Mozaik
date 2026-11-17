@@ -201,7 +201,7 @@ test.describe('14. Ekran hareketleri', () => {
     expect(moving).toBe(true);
   });
 
-  test('MAKİNE tercihi bir TABAN — "Açık" seçili olsa bile ezemiyor', async ({ page }) => {
+  test('MAKİNE tercihi bir TABAN — "Tam" seçili olsa bile ezemiyor', async ({ page }) => {
     // The contract, and the one assertion here that is about an ordering rather
     // than a value: [data-motion] is written BEFORE the @media block, at equal
     // specificity, so the machine wins. A reader who has asked their computer
@@ -209,7 +209,7 @@ test.describe('14. Ekran hareketleri', () => {
     // program — the setting may only go FURTHER than the machine asked.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await openWithSample(page);
-    await chooseMotion(page, 'Açık');
+    await chooseMotion(page, 'Tam');
 
     const still = await levers(page);
     expect(still.durs.map(ms)).toEqual([0, 0, 0]);
@@ -222,7 +222,7 @@ test.describe('14. Ekran hareketleri', () => {
     await expect(
       page
         .getByRole('group', { name: 'Ekran hareketleri', exact: true })
-        .getByRole('button', { name: 'Açık', exact: true }),
+        .getByRole('button', { name: 'Tam', exact: true }),
     ).toHaveAttribute('aria-pressed', 'true');
   });
 
@@ -230,7 +230,7 @@ test.describe('14. Ekran hareketleri', () => {
     page,
   }) => {
     // First read follows the system, like the theme does. A button reading
-    // "Açık" on a machine where nothing moves would be a lie, and the reader
+    // "Tam" on a machine where nothing moves would be a lie, and the reader
     // would go looking for a broken program instead of a system setting.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page);

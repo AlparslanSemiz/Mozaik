@@ -54,13 +54,13 @@ interface Props {
 /** The two grounds. Named, not toggled: a button that says "Koyu tema" and is
     pressed cannot also be the one that says which theme you are IN. */
 const THEMES: Array<{ id: Theme; label: string }> = [
-  { id: 'light', label: 'Açık' },
-  { id: 'dark', label: 'Koyu' },
+  { id: 'light', label: 'Açık renk' },
+  { id: 'dark', label: 'Koyu renk' },
 ];
 
 /** The three steps, in the order they reduce. */
 const MOTIONS: Array<{ id: Motion; label: string }> = [
-  { id: 'tam', label: 'Açık' },
+  { id: 'tam', label: 'Tam' },
   { id: 'az', label: 'Az' },
   { id: 'kapali', label: 'Kapalı' },
 ];
@@ -197,11 +197,11 @@ export default function Appearance({
         <div className="panel">
           <HelpHead topic="Ekran hareketleri">
             <p>
-              <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik'in işini değiştirmez." />
+              <T k="Bir şey belirirken görülen kısa hareketler; kapatmak Mozaik’in işini değiştirmez." />
             </p>
             <ul>
               <li>
-                <T k="**Açık.** Tasarlandığı gibi." />
+                <T k="**Tam.** Tasarlandığı gibi." />
               </li>
               <li>
                 <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır." />

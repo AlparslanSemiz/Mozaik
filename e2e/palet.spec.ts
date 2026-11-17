@@ -141,7 +141,7 @@ test.describe('53. Durum çipi', () => {
     // Nothing laid out yet: yellow, and it says what is waiting (green only
     // once nothing waits: the usability walkthrough, 2026-11-16).
     await expect(chip).toHaveClass(/tight/);
-    await expect(chip).toContainText('saat yerleşmedi');
+    await expect(chip).toContainText('saat bekliyor');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Kalanı diz', exact: true }).click();

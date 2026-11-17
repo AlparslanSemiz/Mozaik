@@ -38,7 +38,7 @@ test.describe('22. Otomatik dizme', () => {
 
     await autoFill(page);
 
-    await expect(page.locator('.reason-bar')).toContainText('Kalan dizildi');
+    await expect(page.locator('.reason-bar')).toContainText('Bütün');
     await expect(page.locator('.pool-card')).toHaveCount(0);
     expect(await placedHours(page)).toBeGreaterThan(400);
   });
@@ -118,7 +118,7 @@ test.describe('22. Otomatik dizme', () => {
     await page.getByRole('menuitem', { name: 'Yeniden yap' }).click();
     const notice = page.locator('.toast', { hasText: 'yeniden yapıldı' });
     await expect(notice).toBeVisible({ timeout: 30_000 });
-    await expect(bar).toContainText(`Kalan dizildi: ${placed!}`);
+    await expect(bar).toContainText(`Bütün ${placed!}`);
     const first = await week();
     expect(first).not.toBe(before);
     // One undo step brings the week before back.
@@ -330,9 +330,9 @@ test.describe('22. Otomatik dizme', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
     const bar = page.locator('.reason-bar');
-    await expect(bar).toContainText('Kalan dizildi');
+    await expect(bar).toContainText('Bütün');
     await page.keyboard.press('Control+z');
-    await expect(bar).not.toContainText('Kalan dizildi');
+    await expect(bar).not.toContainText('Bütün');
   });
 
   // DK5: Durdur during the suggestion search used to leave "Sınıfların
