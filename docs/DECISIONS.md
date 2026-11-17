@@ -36,6 +36,21 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-17 · Denetim turu 3: tek adlar ve çeviri (`denetim/tur3-metin`)
+
+"Açık" üç şey demesin diye tema `Açık renk` / `Koyu renk`, ekran hareketleri `Tam` / `Az` / `Kapalı`
+oldu; `Açık` yalnız açık saat. Yerleşmemiş saatin tek adı `bekliyor` (çip, sonuç şeridi,
+`Bekleyen dersleri…` ipucu); dizilmiş saat `yerleşmiş` saat oldu. Tam yerleşince şerit `Bütün {n} saat
+yerleşti` der (sayı toplam yerleşik saat). Kurallar'daki `0 = sınır yok` cümlesi kalktı, çünkü
+boşluk kurallarında yanlıştı: kuralı kapatan `Seviye`yi `Yok` yapmaktır. Kesin seçeneği olmayan üç kuralda ipucu yalnız
+`Programın durumu`'nda saydığını söyler; `Uyar` adı geçmez. Kapalı saatler
+ipucu öğretmende ve sınıfta tek cümle. Türkçe metinde kesme `’`, tırnak `“…”`; `i18n.test.ts` iki
+işareti dört sözlükte yakalar. Çeviri: `Yeniden yap` en/es/fr `Place again`/`Colocar de nuevo`/`Placer à nouveau`
+(Redo ile karışmasın), de `Neu einplanen`; Almanca kapalı saat her yerde `gesperrt`, yerleştirme fiili `einplanen`;
+İngilizce `tray` ve sıra sayısı için `period`; es/fr kapalı kalıbı `{ne_zaman} … para {kim}`.
+
+---
+
 ### 2026-11-17 · İkinci denetim turu: TSX, metin, erişilebilirlik (`denetim/tur2-tsx`)
 
 Alp'in onayıyla, denetimin ikinci turu. Kararlar: yokluğun tek kökü `yok` (`Yok olanlar`,

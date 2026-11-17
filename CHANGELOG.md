@@ -170,6 +170,8 @@ release is incomplete, the entry says so.
 - Notices closed on their own only sometimes: one under a resting pointer or a stale hover state stayed for minutes and three stacked over the grid. They now close after 10 s (20 s with "Geri al"), a held one after 30 s at most, three at most are shown, and an older notice loses its "Geri al" once another change has been made.
 - A refused drop is said once, in the warning tone, instead of twice in green; "Hepsi yerleşti" takes the keyboard focus when the button it replaced goes away, a second Enter no longer re-runs "Yeniden yap", and PDF kaydet is announced on every press.
 
+- Audit round 3, names and translation: the theme is "Açık renk" / "Koyu renk" and motion is "Tam" / "Az" / "Kapalı", so "Açık" only means an open hour; an unplaced hour is always one that is "bekliyor"; the Rules note about "0" (wrong for the gap rules) is gone and says to set "Seviye" to "Yok"; the closed-hours hint is one sentence; Turkish text uses one apostrophe and one pair of quotes. In the other languages "Yeniden yap" no longer reads like Redo, German says "gesperrt" and "einplanen" throughout, English says "tray" and "period", and the Spanish and French "closed" sentences read the same way as English.
+
 ### Security
 
 - Windows app: the window now runs under a strict Content Security Policy (no remote scripts, styles, fonts or connections). Updates are only ever downloaded up to the size the release states, and the installer is run from a new folder of its own in the temporary folder. The fast suggestion search's library is loaded only by an installed copy, from its own folder.
