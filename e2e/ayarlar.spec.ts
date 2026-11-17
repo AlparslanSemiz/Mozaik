@@ -343,7 +343,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     const neighbour = await hover(page, 0, 1);
     await expect(neighbour).toHaveClass(/drop-blocked/);
     await expect(page.locator('.reason-bar')).toContainText(
-      'MÇ art arda 1 saatten fazla girmemeli, burada 2 saat olur',
+      /art arda 1 saatten fazla girmemeli, burada 2 saat olur/,
     );
     await page.keyboard.press('Escape');
 
@@ -366,7 +366,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     const list = await openProblems(page);
     await expect(list.getByRole('heading', { name: /Kural aşımları/ })).toBeVisible();
     await expect(list.locator('.panel', { hasText: 'Kural aşımları' })).toContainText(
-      'MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.',
+      /Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor\./,
     );
   });
 });

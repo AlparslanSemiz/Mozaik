@@ -1813,12 +1813,12 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await page.waitForTimeout(150);
     await hover(page, 0, 2);
     await expect(page.locator('.reason-bar')).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 ders) yer değiştirecek',
+      /510 · MÇ \(\S+ \d+\. saat\) ile 511 · MÇ \(2 ders\) yer değiştirecek/,
     );
     await page.mouse.up();
 
     await expect(page.locator('.toast').last()).toContainText(
-      '510 · MÇ ile 511 · MÇ (2 ders) yer değiştirdi',
+      /510 · MÇ \(\S+ \d+\. saat\) ile 511 · MÇ \(2 ders\) yer değiştirdi/,
     );
     // The 2-hour block is one cell two columns wide.
     await expect(cell(2)).toContainText('510');

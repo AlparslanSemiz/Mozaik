@@ -248,7 +248,7 @@ function dayName(d: State, day: number): string {
 function closerSentence(ix: Index, who: Target, at: string): string {
   if (who.kind === 'teacher') {
     return t('{kim}, {ne_zaman} kapalı', {
-      kim: ix.teacherById.get(who.id)?.short ?? '?',
+      kim: ix.teacherById.get(who.id)?.name ?? '?',
       ne_zaman: at,
     });
   }

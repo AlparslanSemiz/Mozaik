@@ -63,7 +63,7 @@ export interface Block {
  *
  * The message is NEVER "there is a clash". This sentence decides the next move
  * of whoever builds the timetable, so it is always concrete:
- * "MÇ o saatte 433 sınıfında".
+ * "Mehmet Çelik Salı 3. saatte 433 sınıfında".
  */
 export function blockerDetail(
   d: State,

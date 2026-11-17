@@ -16,7 +16,7 @@ export interface ClosedConflict {
   teacherId: Id;
   day: number;
   hour: number;
-  /** Concrete, in blocker()'s own voice: "MÇ, Salı 3. saatte kapalı". */
+  /** Concrete, in blocker()'s own voice: "Mehmet Çelik, Salı 3. saatte kapalı". */
   reason: string;
   /**
    * WHO closed the hour: the teacher, the class or the room. Kontrol's
