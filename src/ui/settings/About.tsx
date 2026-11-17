@@ -83,25 +83,25 @@ export function TechRows() {
  * links, nothing fetched: the same policy as the site address below (a new
  * tab, no referrer). The pages live on the author's own site.
  */
-const YAZAR_ADRESI = 'https://alparslansemiz.com/';
-const KUNYE_ADRESI = 'https://alparslansemiz.com/de/impressum/';
-const GIZLILIK_ADRESI = 'https://alparslansemiz.com/de/datenschutz/';
+const SITE = 'https://alparslansemiz.com/';
 
 function LegalLinks() {
   const t = useT();
+  const links = [
+    ['', 'Alparslan Semiz'],
+    ['de/impressum/', t('Künye')],
+    ['de/datenschutz/', t('Gizlilik')],
+  ] as const;
   return (
-    <p className="hint legal-links">
-      <a href={YAZAR_ADRESI} target="_blank" rel="noreferrer">
-        Alparslan Semiz
-      </a>
-      {' · '}
-      <a href={KUNYE_ADRESI} target="_blank" rel="noreferrer">
-        {t('Künye')}
-      </a>
-      {' · '}
-      <a href={GIZLILIK_ADRESI} target="_blank" rel="noreferrer">
-        {t('Gizlilik')}
-      </a>
+    <p className="hint">
+      {links.map(([path, name], i) => (
+        <span key={path}>
+          {i > 0 && ' · '}
+          <a href={SITE + path} target="_blank" rel="noreferrer">
+            {name}
+          </a>
+        </span>
+      ))}
     </p>
   );
 }

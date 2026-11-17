@@ -7234,23 +7234,14 @@ table.availability thead .hour-clock:empty::before {
    whole word. */
 @container bar (max-width: 100em) {
   .topbar > .btn.topbar-help:not(.icon) {
-    position: relative;
-    width: auto;
     max-width: none;
-    padding-inline: var(--space-3);
     white-space: nowrap;
-    justify-content: center;
   }
 
-  /* The word leaves the screen and stays in the name (`.visually-hidden`'s
-     recipe, on the span MoreMenu's `lead` makes). */
+  /* The word leaves the screen and stays in the name: `font-size: 0` keeps it
+     in the accessibility tree (pitfall 56) and costs no box. */
   .topbar-help .help-word {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+    font-size: 0;
   }
 
   .topbar-help .more-caret {
@@ -8154,10 +8145,8 @@ table.person-list td:not(.person-status) {
   .tabstrip {
     grid-auto-columns: max-content;
     min-width: 0;
-    max-width: 100%;
     overflow-x: auto;
     padding-block: var(--space-1);
-    scrollbar-width: thin;
   }
 }
 
@@ -8165,26 +8154,10 @@ table.person-list td:not(.person-status) {
   .ribbon {
     /* Tablet width: everything stays in view on a second row. */
     flex-wrap: wrap;
-    row-gap: var(--space-2);
   }
 
-  /* A rule at the start of a wrapped row separates nothing. */
-  .ribbon > .ribbon-sep {
-    display: none;
-  }
-
-  .ribbon > *,
-  .ribbon .btn {
+  .ribbon > * {
     flex-shrink: 0;
-  }
-
-  .ribbon .btn,
-  .ribbon .ribbon-label {
-    white-space: nowrap;
-  }
-
-  .ribbon > .more-menu {
-    margin-left: auto;
   }
 }
 
@@ -8193,6 +8166,5 @@ table.person-list td:not(.person-status) {
   .ribbon {
     flex-wrap: nowrap;
     overflow-x: auto;
-    scrollbar-width: thin;
   }
 }

@@ -20,14 +20,12 @@ import { useT } from './T';
 
 const ITEM_ICON = { size: 15, 'aria-hidden': true, focusable: false } as const;
 
-/** "? Yardım" as a mark and a word; a label without a mark stays whole. */
+/** "? Yardım" as a mark and a word. */
 function LeadLabel({ text }: { text: string }) {
-  const m = /^(\S)\s+(.+)$/u.exec(text);
-  if (m === null) return <>{text}</>;
   return (
     <>
-      <span aria-hidden="true">{m[1]}</span>
-      <span className="help-word"> {m[2]}</span>
+      <span aria-hidden="true">{text.slice(0, 1)}</span>
+      <span className="help-word">{text.slice(1)}</span>
     </>
   );
 }
