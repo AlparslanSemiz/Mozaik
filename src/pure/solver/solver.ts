@@ -1345,7 +1345,7 @@ function createSearch(
               ? pair
               : capped
                 ? t(
-                    'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
+                    'Haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
                     { istenen: lesson.weeklyHours, olabilen: fits },
                   )
                 : (holeReason(state, finalIx, lesson.id) ??

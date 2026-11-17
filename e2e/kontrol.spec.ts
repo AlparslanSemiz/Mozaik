@@ -515,7 +515,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
   });
 
   // K3: a lesson in the pool says why it is there, and the way out.
-  test('havuzdaki dersin Neden yerleşmedi?si listeyi o derste açar', async ({ page }) => {
+  test('havuzdaki dersin Neden bekliyor? maddesi listeyi o derste açar', async ({ page }) => {
     const away: Record<string, 1> = {};
     for (let s = 0; s < 4; s++) away[`oAV|0|${s}`] = 1;
     await load(page, {
@@ -525,7 +525,7 @@ test.describe('Kontrol — Göster ve satır sayıları', () => {
     });
     await page.keyboard.press('Escape');
     await page.locator('.pool-card[data-lesson="y2"]').click({ button: 'right' });
-    await page.getByRole('menuitem', { name: 'Neden yerleşmedi?' }).click();
+    await page.getByRole('menuitem', { name: 'Neden bekliyor?' }).click();
     const list = page.getByRole('dialog', { name: 'Programın durumu' });
     await expect(list.locator('.lesson-chip[data-lesson="y2"]')).toBeFocused();
     await expect(list.locator('#kontrol-yerlesemeyen')).toContainText('AV 0 saat açık');

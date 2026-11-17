@@ -162,14 +162,20 @@ interface SwapRefusal {
  * they go to its old hours in the same order. A 2-hour block dropped on a
  * teacher's two singles in another class used to find two blocks in the way
  * and offer nothing.
+ *
+ * `cleared` are blocks lifted beside the targets and not moved: the class's
+ * own lessons in the dropped hours, when the question is only why the
+ * teacher's other card cannot take the old hours.
  */
 function swapBlocks(
   d: State,
   source: BlockRef,
   targets: BlockRef[],
+  cleared: BlockRef[] = [],
 ): SwapResult | SwapRefusal | null {
   if (targets.length === 0) return null;
   if (!sameBlock(d, source) || targets.some((x) => !sameBlock(d, x))) return null;
+  if (cleared.some((x) => !sameBlock(d, x))) return null;
   if (
     blockPinned(d, source.classId, source.day, source.hour) ||
     targets.some((x) => blockPinned(d, x.classId, x.day, x.hour))
@@ -197,6 +203,9 @@ function swapBlocks(
 
   let work = liftBlock(d, source.classId, source.day, source.hour);
   for (const x of ordered) work = liftBlock(work, x.classId, x.day, x.hour);
+  // The class's own lessons a drop would send to the pool are out of the way
+  // too, so the question asked of the partner is only whether it can go back.
+  for (const x of cleared) work = liftBlock(work, x.classId, x.day, x.hour);
 
   const verdicts: Verdict[] = [];
   const firstCheck = check(
@@ -387,12 +396,44 @@ export function dropMap(
       for (const h of heads) {
         vacate(activePlacements(work), workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
-      const after = check(work, workIx, lessonId, g, s, size);
+      const afterDetail = blockerDetail(work, workIx, lessonId, g, s, size);
+      const after = verdictAfterBlocker(work, workIx, lessonId, g, s, size, afterDetail);
       for (const h of heads) {
         occupy(activePlacements(work), workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
 
       if (after.blocked !== null) {
+        // The teacher is in another class right there. That card is not what
+        // stops the drop: what does is that it could not take the dragged
+        // card's old hours, and that is the sentence (audit 4, finding 1).
+        if (afterDetail?.code === 'teacherBusy' && source !== null) {
+          const partners = targetBlocks(
+            original,
+            originalIx,
+            lesson,
+            source,
+            g,
+            s,
+            blockSizeFor(d, lesson, size),
+          ).filter((x) => x.classId !== lesson.classId);
+          const cleared = heads.map((h) => ({
+            lessonId: h.lesson.id,
+            classId: h.lesson.classId,
+            day: g,
+            hour: h.hour,
+            size: h.size,
+          }));
+          const back = swapBlocks(original, source, partners, cleared);
+          if (back !== null && 'refused' in back) {
+            map.set(key, {
+              blocked: back.refused,
+              warning: null,
+              evicts: [],
+              action: { kind: 'place' },
+            });
+            continue;
+          }
+        }
         // Evicting did not help: the cell is refused for its own reason, and
         // the sentence the reader gets is that reason, not "class is busy".
         map.set(key, { ...after, evicts: [], action: { kind: 'place' } });

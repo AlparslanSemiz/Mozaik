@@ -76,7 +76,7 @@ export function useLoadSample(plans: PlanControls): LoadSample {
       // A plan the user named keeps its name.
       const planId = plansNow.current.planId;
       const was = plansNow.current.library.plans.find((p) => p.id === planId)?.name ?? null;
-      const sampleName = t('Örnek Kurs (örnek)');
+      const sampleName = t('Örnek okul');
       const renamed = was !== null && isUnnamedPlan(was);
       if (renamed) plansNow.current.renamePlan(planId, sampleName);
       // Whoever has seen the sample once does not need to be shown the line

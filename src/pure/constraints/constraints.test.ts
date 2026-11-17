@@ -1451,6 +1451,41 @@ describe('yerleşmiş blokların atomik takası', () => {
     expect(swapAt(d, ref('a', 's510', 0, 0, 1), 0, 2).verdict.action.kind).not.toBe('swap');
   });
 
+  // Audit 4, finding 1: a card dropped on the class's own lesson, while the
+  // teacher's other card sits in the way, said "MÇ Salı 2. saatte 511
+  // sınıfında" — the dropped-on card. What stops it is that the card cannot
+  // take the old hours.
+  it('öğretmenin öbür kartı eski yere geçemiyorsa sebep onun geçememesidir, kartın kendisi değil', () => {
+    let d = twoClasses(
+      [
+        { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'c', classId: 's510', teacherId: 'oAV', weeklyHours: 1 },
+      ],
+      { 's510|0|0': 'a', 's511|0|2': 'b', 's510|0|2': 'c' },
+    );
+    d = { ...d, unavailable: { [closedKey('s511', 0, 0)]: 1 } };
+    const { verdict } = swapAt(d, ref('a', 's510', 0, 0, 1), 0, 2);
+    expect(verdict.blocked).toContain('511 · MÇ');
+    expect(verdict.blocked).toContain('eski yerine geçemiyor');
+    expect(verdict.blocked).toContain('kapalı');
+    expect(verdict.blocked).not.toContain('511 sınıfında');
+  });
+
+  it('aynı öğretmenin iki kartı: öbürü geçemiyorsa cümle "eski yerine geçemiyor" der', () => {
+    let d = twoClasses(
+      [
+        { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 1 },
+      ],
+      { 's510|0|0': 'a', 's511|0|1': 'b' },
+    );
+    d = { ...d, unavailable: { [closedKey('s511', 0, 0)]: 1 } };
+    const { verdict } = swapAt(d, ref('a', 's510', 0, 0, 1), 0, 1);
+    expect(verdict.blocked).toContain('eski yerine geçemiyor');
+    expect(verdict.blocked).not.toContain('511 sınıfında');
+  });
+
   it('hedeflerden biri sabitse çoklu takas yok', () => {
     let d = twoClasses(
       [

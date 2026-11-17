@@ -38,7 +38,7 @@ import { revealCell, revealPoolCard } from './reveal';
 interface Props {
   state: State;
   status: ReturnType<typeof health>;
-  /** Open, and on which lesson if a pool card's "Neden yerleşmedi?" asked. */
+  /** Open, and on which lesson if a pool card's "Neden bekliyor?" asked. */
   open: { lesson: Id | null } | null;
   onClose: () => void;
   /** Where "Göster" goes, and which part of the list is on screen. */
@@ -426,7 +426,7 @@ function Report({
                   → Kurallar, a relation on the lesson's own sheet (B5.3). */}
               {report.violations.some((v) => v.rule !== 'notSameDay') && (
                 <p className="hint">
-                  <T k="Program, **Okul bilgileri → Kurallar**'da girdiğiniz sınırları aşıyor." />
+                  <T k="Program, **Okul bilgileri → Kurallar**’da girdiğiniz sınırları aşıyor." />
                 </p>
               )}
               {report.violations.some((v) => v.rule === 'notSameDay') && (

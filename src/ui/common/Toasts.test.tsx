@@ -127,6 +127,41 @@ describe('notices', () => {
     grid.remove();
   });
 
+  // Audit 4, finding 8: Escape with the focus inside an OLDER notice closed the
+  // newest one, and the notice under the keyboard stayed.
+  it('Escape closes the notice the focus is in, not the newest', () => {
+    draw();
+    act(() => {
+      say('older', 'info', { label: 'Geri al', run: () => true });
+      say('newer');
+    });
+    const button = host.querySelector<HTMLElement>('.toast .toast-action')!;
+    act(() => button.focus());
+    expect(document.activeElement).toBe(button);
+    act(
+      () =>
+        void button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+    );
+    expect(shown()).toEqual(['newer']);
+  });
+
+  // Audit 4, finding 13: pressed with the pointer there is no place the focus
+  // came from, and it fell to <body>.
+  it('a notice button pressed with the pointer leaves the focus in the content area', () => {
+    draw();
+    const main = document.createElement('main');
+    main.id = 'icerik';
+    main.tabIndex = -1;
+    document.body.append(main);
+    act(() => void say('undoable', 'info', { label: 'Önceki programa dön', run: () => true }));
+    const button = host.querySelector<HTMLElement>('.toast-action')!;
+    act(() => button.focus());
+    act(() => void button.click());
+    expect(shown()).toEqual([]);
+    expect(document.activeElement).toBe(main);
+    main.remove();
+  });
+
   it('the focus goes back where it came from when its notice closes', () => {
     draw();
     const before = document.createElement('button');

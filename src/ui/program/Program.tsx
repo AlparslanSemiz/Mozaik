@@ -170,7 +170,7 @@ function Program({
   // the only way to reach the axis the grid is NOT drawn along.
   const inspect = useInspect();
   // The status chip's problem list, from the bar's "Ayrıntı" and the pool
-  // card's "Neden yerleşmedi?" (K3).
+  // card's "Neden bekliyor?" (K3).
   const goTo = useGoTo();
 
   const undoIf = useUndoIf();

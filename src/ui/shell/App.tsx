@@ -44,6 +44,7 @@ import { useUpdate } from '../../platform/update';
 import Setup, { Start } from '../setup';
 import Lessons from '../lessons';
 import Ribbon from '../ribbon';
+import { followMainAction } from '../ribbon/ProgramStrip';
 import { NOTHING_EXCLUDED, Print, type Excluded } from '../print';
 import Settings from '../settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
@@ -379,6 +380,7 @@ export default function App() {
   // relay, the moved lessons said by name, the week before kept (review,
   // 2026-11-17: the palette ran it without any of the three).
   const makeRest = useCallback(() => {
+    followMainAction();
     solver.start(state, { keepPlaced: true, relay: true }, (next) => {
       const said = movedNotice(state, next);
       if (said === '') return;

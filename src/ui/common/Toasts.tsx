@@ -133,10 +133,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const here = document.activeElement;
     if (
       here instanceof HTMLElement &&
-      region.current?.querySelector(`[data-toast-id="${id}"]`)?.contains(here) === true &&
-      cameFrom.current?.isConnected === true
+      region.current?.querySelector(`[data-toast-id="${id}"]`)?.contains(here) === true
     ) {
-      cameFrom.current.focus();
+      // A press with the pointer leaves no place to go back to: the content
+      // area takes the keyboard rather than <body> (audit 4, finding 13).
+      if (cameFrom.current?.isConnected === true) cameFrom.current.focus();
+      else document.getElementById('icerik')?.focus();
     }
     const clock = clocks.current.get(id);
     if (clock?.timer !== undefined) window.clearTimeout(clock.timer);
@@ -254,7 +256,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => notify, [notify]);
 
-  // Escape closes the newest notice. One sits over the grid's bottom right
+  // Escape closes the notice the focus is in, or else the newest. One sits over the grid's bottom right
   // corner, and the keyboard had no way to clear it. Only from the grid or a
   // notice, and only when nothing else owns the key: an open dialog or menu,
   // a drag in the hand, a suggestion's preview.
@@ -273,8 +275,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       ) {
         return;
       }
-      const newest = region.current?.querySelector<HTMLElement>('.toast:last-child');
-      const id = Number(newest?.dataset.toastId);
+      // The one the keyboard is in, when it is in one: Escape on an older
+      // notice closed a different, newer one (audit 4, finding 8).
+      const own = at instanceof Element ? at.closest<HTMLElement>('[data-toast-id]') : null;
+      const target = own ?? region.current?.querySelector<HTMLElement>('.toast:last-child');
+      const id = Number(target?.dataset.toastId);
       if (!Number.isFinite(id)) return;
       e.preventDefault();
       drop(id);
@@ -352,6 +357,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                       const done = toast.action?.run();
                       drop(toast.id);
                       if (cameFrom.current?.isConnected === true) cameFrom.current.focus();
+                      else {
+                        // Pressed with the pointer there is no place to go
+                        // back to, and Safari does not focus the button at
+                        // all: either way the keyboard would fall to <body>.
+                        const at = document.activeElement;
+                        if (at === null || at === document.body || region.current?.contains(at))
+                          document.getElementById('icerik')?.focus();
+                      }
                       if (done === false) {
                         notify(
                           t('Arada başka bir değişiklik oldu. Ctrl+Z ile adım adım geri alın.'),

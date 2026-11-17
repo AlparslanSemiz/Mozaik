@@ -319,7 +319,7 @@ export default function Summary({
       )}
       <h3>{t('Ders yükü')}</h3>
       <p className="hint">
-        <T k="**Yük**, **Açık**'ı geçerse o sınıfın programı tutmaz." />
+        <T k="**Yük**, **Açık**’ı geçerse o sınıfın programı tutmaz." />
       </p>
       <CapacityRows
         rows={capacity.classes}

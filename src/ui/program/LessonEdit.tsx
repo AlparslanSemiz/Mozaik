@@ -168,7 +168,7 @@ function LessonSheet({
         body:
           preview.returned === 0
             ? t('Yerleşmiş saatler olduğu gibi kalır.')
-            : t('{n} ders havuza döner.', { n: preview.returned }),
+            : t('{n} saat havuza döner.', { n: preview.returned }),
         confirmLabel: t('Aktar'),
         danger: preview.returned > 0,
       }))
@@ -179,7 +179,7 @@ function LessonSheet({
     toast(
       preview.returned === 0
         ? t('Ders {kim} öğretmenine geçti.', { kim: to.short })
-        : t('Ders {kim} öğretmenine geçti. {n} ders havuza döndü.', {
+        : t('Ders {kim} öğretmenine geçti. {n} saat havuza döndü.', {
             kim: to.short,
             n: preview.returned,
           }),

@@ -97,12 +97,12 @@ export default function Plans({ state, plans }: Props) {
           had it the other way round. */}
       <h3>{t('Yeni plan')}</h3>
       <div className="form-row">
-        <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
+        <button className="btn" onClick={() => plans.createPlan(t('Boş plan'), emptyState())}>
           {t('Boş plan')}
         </button>
         <button
           className="btn"
-          onClick={() => plans.createPlan(`${active?.name ?? 'Plan'} kopyası`, state)}
+          onClick={() => plans.createPlan(t('{ad} kopyası', { ad: active?.name ?? 'Plan' }), state)}
         >
           {t('Bu planın kopyası')}
         </button>

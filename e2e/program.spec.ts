@@ -658,7 +658,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     const menu = page.locator('.menu');
     await expect(menu.getByRole('menuitem')).toHaveText([
       // First on a card in the tray since K3 (2026-11-16).
-      'Neden yerleşmedi?',
+      'Neden bekliyor?',
       'Havuza kaldır',
       'Dersi düzenle',
       'Öğretmeni düzenle',

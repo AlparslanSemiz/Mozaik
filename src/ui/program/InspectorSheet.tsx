@@ -199,7 +199,7 @@ export function Inspector({
     const said =
       returned === 0
         ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.name })
-        : t('{ne} dersi {kim} öğretmenine geçti. {n} ders havuza döndü.', {
+        : t('{ne} dersi {kim} öğretmenine geçti. {n} saat havuza döndü.', {
             ne: other,
             kim: to.name,
             n: returned,

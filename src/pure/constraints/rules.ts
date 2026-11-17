@@ -327,11 +327,11 @@ export function findViolations(d: State, ix: Index): Violation[] {
         rule: 'maxSameLessonPerDay',
         level: ruleLevel(d, 'maxSameLessonPerDay'),
         message: t(
-          '{sinif} sınıfı {gun} günü {kim} dersinden {olan} saat görüyor, en fazla {sinir} saat isteniyor.',
+          '{sinif} sınıfı {gun} günü {ders} dersinden {olan} saat görüyor, en fazla {sinir} saat isteniyor.',
           {
             sinif: group?.name ?? '?',
             gun: dayLabel(dayInfo.name),
-            kim: subjectLabel(lessonSubject(d, lesson)),
+            ders: subjectLabel(lessonSubject(d, lesson)),
             olan: count,
             sinir: limit,
           },

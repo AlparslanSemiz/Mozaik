@@ -183,15 +183,29 @@ export function blockerDetail(
       if (busyForRoom !== undefined) {
         const other = ix.lessonById.get(busyForRoom);
         const otherClass = other && ix.classById.get(other.classId);
-        return {
-          code: 'roomBusy',
-          message: t('{derslik} dersliğinde {gun} {saat}. saatte {sinif} var', {
-            derslik: roomName,
-            gun: dayName(),
-            saat: hourName,
-            sinif: otherClass?.name ?? t('başka sınıf'),
-          }),
-        };
+        const otherTeacher = other && ix.teacherById.get(other.teacherId);
+        // Who and what, not only which class: "413 var" left the reader to
+        // go and look (audit 4, finding 2).
+        const message =
+          other === undefined || otherClass === undefined || otherTeacher === undefined
+            ? t('{derslik} dersliğinde {gun} {saat}. saatte {sinif} var', {
+                derslik: roomName,
+                gun: dayName(),
+                saat: hourName,
+                sinif: otherClass?.name ?? t('başka sınıf'),
+              })
+            : t(
+                '{derslik} dersliğinde {gun} {saat}. saatte {sinif} sınıfının {ders} dersi ({kim}) var',
+                {
+                  derslik: roomName,
+                  gun: dayName(),
+                  saat: hourName,
+                  sinif: otherClass.name,
+                  ders: subjectLabel(lessonSubject(d, other)),
+                  kim: otherTeacher.name,
+                },
+              );
+        return { code: 'roomBusy', message };
       }
 
       // 7. Is the room closed at that hour
@@ -308,11 +322,11 @@ function limitBreaches(
       out.push({
         name: 'maxSameLessonPerDay',
         message: t(
-          '{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur',
+          '{sinif} sınıfı {gun} günü {ders} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur',
           {
             sinif: group.name,
             gun: dayName(),
-            kim: subjectLabel(lessonSubject(d, lesson)),
+            ders: subjectLabel(lessonSubject(d, lesson)),
             sinir: maxSame,
             olan: count,
           },

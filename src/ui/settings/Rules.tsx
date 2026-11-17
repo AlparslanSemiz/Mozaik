@@ -30,7 +30,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'maxSameLessonPerDay',
     label: 'Bir sınıf aynı dersten günde en fazla',
-    hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat.',
+    hint: 'Aynı sınıfın aynı dersten bir günde göreceği saat.',
     canBlock: true,
   },
   {
@@ -153,14 +153,18 @@ export default function Rules({ state, change }: PanelProps) {
                     {state.settings.rules[rule.name] === 'off' ? (
                       <span className="hint">–</span>
                     ) : (perRule[rule.name] ?? 0) === 0 ? (
-                      <span className="badge ok">{t('Aşan yok')}</span>
+                      <span className="badge ok">
+                        {rule.name === 'minPerDay' ? t('Altında kalan yok') : t('Aşan yok')}
+                      </span>
                     ) : (
                       <span
                         className={`badge ${
                           state.settings.rules[rule.name] === 'block' ? 'impossible' : 'tight'
                         }`}
                       >
-                        {t('{n} aşım', { n: perRule[rule.name] ?? 0 })}
+                        {t(rule.name === 'minPerDay' ? '{n} altında' : '{n} aşım', {
+                          n: perRule[rule.name] ?? 0,
+                        })}
                       </span>
                     )}
                   </td>

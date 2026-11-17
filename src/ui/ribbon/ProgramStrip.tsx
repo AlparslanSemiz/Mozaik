@@ -47,6 +47,20 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
 type MainKind = 'stop' | 'fix' | 'done' | 'make' | 'none';
 
 /**
+ * Ctrl+K's "Kalanı diz" (audit 4, finding 15): the strip's button was not
+ * pressed, so nothing followed the run, and the palette handed the keyboard
+ * back to wherever it had been. The run's end takes it to "Hepsi yerleşti",
+ * where the button's own press leaves it. Armed with the time, because a run
+ * that never shows "Durdur" must not leave the flag for a later, unrelated one.
+ */
+let paletteRunAt = 0;
+export function followMainAction(): void {
+  paletteRunAt = performance.now();
+}
+/** How long after the palette's run an end still counts as its end. */
+const PALETTE_RUN_MS = 120000;
+
+/**
  * The strip's one main control. Each state is its own keyed element, so a
  * button never turns into another one under the same DOM node (a second Enter
  * on "Kalanı diz" used to land on the "Yeniden yap" that took its place), and
@@ -77,6 +91,14 @@ function MainAction({
   /** A rebuild or stop press this soon after focus arrived is a held or repeated Enter. */
   const guardUntil = useRef(0);
   useEffect(() => {
+    if (paletteRunAt !== 0) {
+      if (performance.now() - paletteRunAt > PALETTE_RUN_MS) paletteRunAt = 0;
+      else if (kind === 'done') {
+        paletteRunAt = 0;
+        refs.current.done?.focus();
+        return;
+      }
+    }
     if (following.current === 0) return;
     const now = performance.now();
     if (kind === 'stop') following.current = Number.POSITIVE_INFINITY;

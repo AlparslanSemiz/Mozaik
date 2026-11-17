@@ -31,7 +31,7 @@ export default function PoolMenu({ poolMenuLesson, container, editLesson, inspec
           onSelect={() => poolMenuLesson !== undefined && why(poolMenuLesson.id)}
         >
           <CircleHelp size={15} strokeWidth={2} aria-hidden="true" />
-          {t('Neden yerleşmedi?')}
+          {t('Neden bekliyor?')}
         </ContextMenu.Item>
         <ContextMenu.Separator className="menu-sep" />
         <ContextMenu.Item className="menu-item" disabled>

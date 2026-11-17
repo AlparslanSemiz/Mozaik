@@ -188,7 +188,7 @@ describe('cümle · engelin sebebi', () => {
         "maxConsecutive": "Ayşe Vural art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
         "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
-        "roomBusy": "A dersliğinde Salı 1. saatte 510 var",
+        "roomBusy": "A dersliğinde Salı 1. saatte 510 sınıfının Matematik dersi (Mehmet Çelik) var",
         "roomClosed": "A dersliği Çarşamba 1. saatte kapalı",
         "teacherBusy": "Mehmet Çelik Salı 1. saatte 510 sınıfında",
         "teacherClosed": "Mehmet Çelik, Çarşamba 1. saatte kapalı",

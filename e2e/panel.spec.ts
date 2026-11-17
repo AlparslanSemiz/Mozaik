@@ -232,7 +232,7 @@ test.describe('83. Panelden ders aktarma', () => {
     );
     await page.getByRole('button', { name: 'Aktar' }).click();
 
-    await expect(page.locator('.toast').last()).toContainText('2 ders havuza döndü');
+    await expect(page.locator('.toast').last()).toContainText('2 saat havuza döndü');
   });
 
   // The whole reason this is not a one-line teacherId write.

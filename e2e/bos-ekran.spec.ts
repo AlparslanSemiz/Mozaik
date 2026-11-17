@@ -101,7 +101,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
         .getByRole('button', { name: 'Kendi okulumla başla' })
         .click();
       const picker = page.getByRole('combobox', { name: 'Plan', exact: true });
-      await expect(picker.locator('option', { hasText: 'Örnek Kurs (örnek)' })).toHaveCount(1);
+      await expect(picker.locator('option', { hasText: 'Örnek okul' })).toHaveCount(1);
       await expect(picker.locator('option', { hasText: 'Plan 1' })).toHaveCount(0);
       await expect(page.locator('.checklist h2')).toBeFocused();
       const notice = page.locator('.toast', { hasText: 'Boş bir plan açıldı' });

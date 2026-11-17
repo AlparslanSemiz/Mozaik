@@ -136,7 +136,7 @@ export default function Notices({
       {saveTrouble === 'baska' && (
         <div className="save-warning" role="alert">
           ⚠{' '}
-          <T k="**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**'ye basın." />{' '}
+          <T k="**Mozaik başka bir pencerede de açık ve plan orada değiştirildi.** Bu penceredeki son değişiklikler kaydedilmedi. **Yenile**’ye basın." />{' '}
           <button className="btn" onClick={() => window.location.reload()}>
             {t('Yenile')}
           </button>
@@ -150,7 +150,7 @@ export default function Notices({
       {saveTrouble === 'okunamadi' && (
         <div className="save-warning" role="alert">
           ⚠{' '}
-          <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**'ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın." />{' '}
+          <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı. **Yenile**’ye basın; plan yine gelmezse kaydettiğiniz plan dosyasını **Dosyadan aç** ile açın." />{' '}
           <button className="btn" onClick={() => window.location.reload()}>
             {t('Yenile')}
           </button>

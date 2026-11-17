@@ -89,10 +89,15 @@ export function Start({
               onOwn();
               // The button goes with the sample line: the keyboard stays on
               // the page, at the heading the new plan starts from.
+              // With the Başlarken list closed there is no `.checklist`: the
+              // one-line way back takes it
+              // (audit 4, finding 9).
               requestAnimationFrame(() =>
-                document
-                  .querySelector<HTMLElement>('.checklist h2, .checklist button, .checklist a')
-                  ?.focus(),
+                (
+                  document.querySelector<HTMLElement>(
+                    '.checklist h2, .checklist button, .checklist a',
+                  ) ?? document.querySelector<HTMLElement>('.checklist-link button')
+                )?.focus(),
               );
             }}
           >

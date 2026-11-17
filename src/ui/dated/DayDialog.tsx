@@ -23,7 +23,7 @@ import {
   taughtOn,
   weekChanges,
 } from '../../pure/dated';
-import { sheetHead, useAnnounce, useReturnFocus, useT } from '../common';
+import { sheetHead, useAnnounce, useReturnFocus, useT, useToast } from '../common';
 import { usePrintNow } from '../print';
 
 type Change = (apply: (d: State) => State, label?: string) => void;
@@ -77,6 +77,7 @@ export function DayDialog({
 }) {
   const t = useT();
   const announce = useAnnounce();
+  const notify = useToast();
   const returnFocus = useReturnFocus(date !== null);
   const askButton = useRef<HTMLButtonElement>(null);
   /** Whose row takes the focus once the absence is written and the button is gone. */
@@ -219,7 +220,16 @@ export function DayDialog({
                     data-away={a.id}
                     required
                     onChange={(e) => {
-                      if (e.target.value !== '') change((d) => setAwayEnd(d, a.i, e.target.value));
+                      const end = e.target.value;
+                      if (end === '') return;
+                      // Said, not quietly undone: the box snapped back and
+                      // nothing told the reader why. A year still being typed
+                      // is not a date yet (audit 4, finding 16).
+                      if (end < a.from) {
+                        if (end >= '2000') notify(t('Son gün, tarihten önce olamaz'), 'warn');
+                        return;
+                      }
+                      change((d) => setAwayEnd(d, a.i, end));
                     }}
                   />
                 </label>
@@ -243,7 +253,10 @@ export function DayDialog({
             value=""
             onChange={(e) => {
               const id = e.target.value;
-              if (id !== '') change((d) => addAway(d, id, iso));
+              if (id === '') return;
+              change((d) => addAway(d, id, iso));
+              // The new row's "Son gün", as the button that adds one lands.
+              setFocusRow(id);
             }}
           >
             <option value="">{t('Yok olan ekle…')}</option>
@@ -261,7 +274,13 @@ export function DayDialog({
               {person !== undefined &&
               away.some((a) => a.id === person) &&
               !taught.some((x) => x.teacherId === person)
-                ? t('{ad} için bu gün ders yok, değişecek ders yok.', { ad: nameOf(person) ?? '' })
+                ? state.classes.some((c) => c.id === person)
+                  ? t('{ad} sınıfı bu gün yok; o günün dersleri yapılmayacak.', {
+                      ad: nameOf(person) ?? '',
+                    })
+                  : t('{ad} bu gün derse girmiyor; değişecek bir şey yok.', {
+                      ad: nameOf(person) ?? '',
+                    })
                 : t('Bu gün değişen ders yok.')}
             </p>
           ) : (

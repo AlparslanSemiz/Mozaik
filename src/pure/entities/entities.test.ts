@@ -776,6 +776,39 @@ describe('transferLesson', () => {
     expect(ix.teacherBusy.size).toBe(2);
   });
 
+  // Audit 4, finding 3: the question counts the open program's HOURS, and the
+  // answer counted blocks of every program ("2 ders havuza döndü").
+  it('havuza dönen SAAT olarak ve yalnız açık programda sayılıyor', () => {
+    let d = twoClasses();
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [2],
+    });
+    d = addLesson(d, {
+      classId: d.classes[1]!.id,
+      teacherId: d.teachers[1]!.id,
+      weeklyHours: 1,
+      blocks: [],
+    });
+    const moving = d.lessons[0]!.id;
+    d = place(d, moving, 0, 0, 2);
+    d = place(d, d.lessons[1]!.id, 0, 1, 1);
+    // A second program with the same two blocks: it must not be counted.
+    const first = activeProgram(d);
+    d = {
+      ...d,
+      programs: [
+        ...d.programs,
+        { ...blankProgram('p2', 'Seçenek 2'), placements: first.placements },
+      ],
+    };
+
+    const { returned } = transferLesson(d, moving, d.teachers[1]!.id);
+    expect(returned).toBe(2);
+  });
+
   it('çakışmayan blok YERİNDE kalıyor', () => {
     let d = twoClasses();
     d = addLesson(d, {

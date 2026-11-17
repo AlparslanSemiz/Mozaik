@@ -8,6 +8,6 @@
  * knows his file by, the button he saved it with is.
  */
 export const WRONG_FILE = [
-  "Bu, Mozaik’in kaydettiği bir dosya değil. 'Kaydet' ile kaydettiğiniz dosyayı seçin.",
+  'Bu, Mozaik’in kaydettiği bir dosya değil. “Kaydet” ile kaydettiğiniz dosyayı seçin.',
   'Excel’deki bir listeyi almak için listelerin başındaki Excel’den yapıştır düğmesini kullanın.',
 ] as const;

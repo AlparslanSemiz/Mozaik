@@ -259,12 +259,14 @@ export default function Print({
           <b>
             {t('{ne} ({secili}/{toplam})', { ne: t(title), secili: chosen, toplam: items.length })}
           </b>
-          <button className="btn" onClick={() => setAll(kind, true)}>
-            {t('Hepsini seç')}
-          </button>
-          <button className="btn" onClick={() => setAll(kind, false)}>
-            {t('Hiçbirini seçme')}
-          </button>
+          <span className="pick-acts">
+            <button className="btn" onClick={() => setAll(kind, true)}>
+              {t('Hepsini seç')}
+            </button>
+            <button className="btn" onClick={() => setAll(kind, false)}>
+              {t('Hiçbirini seçme')}
+            </button>
+          </span>
         </div>
         <div className="pick-items">
           {items.map((x) => (

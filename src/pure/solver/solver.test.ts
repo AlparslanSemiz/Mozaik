@@ -365,7 +365,7 @@ describe('solve — haftanın tutabileceğinden fazlasını isteyen ders', () =>
     const stuck = result.stuck.find((x) => x.lessonId === 'x1')!;
     expect(stuck.missing).toBe(3);
     expect(stuck.reason).toBe(
-      'haftada 6 saat isteniyor, açık saatler ve kurallar en fazla 3 saat veriyor',
+      'Haftada 6 saat isteniyor, açık saatler ve kurallar en fazla 3 saat veriyor',
     );
   });
 });

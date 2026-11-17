@@ -30,7 +30,14 @@ export function MoreMenu({
   align = 'end',
   dot = false,
   ariaLabel,
+  lead,
 }: {
+  /**
+   * A mark drawn before the word and hidden from assistive technology ("?"):
+   * the name stays the word. The word itself is `.help-word`, which a narrow
+   * bar may hide and leave the mark.
+   */
+  lead?: string;
   /** The accessible name when the visible word alone ("?") says too little. */
   ariaLabel?: string;
   children: React.ReactNode;
@@ -71,7 +78,14 @@ export function MoreMenu({
           {...(dot ? { 'aria-describedby': newsId } : {})}
         >
           {icon}
-          {t(label)}
+          {lead === undefined ? (
+            t(label)
+          ) : (
+            <>
+              <span aria-hidden="true">{lead}</span>
+              <span className="help-word"> {t(label)}</span>
+            </>
+          )}
           <ChevronDown size={15} aria-hidden="true" focusable="false" className="more-caret" />
           {dot && <span className="ribbon-dot" aria-hidden="true" />}
           {/* Hidden nodes are left out of the button's name; the description still reads it. */}

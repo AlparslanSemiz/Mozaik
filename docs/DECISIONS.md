@@ -36,6 +36,12 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-11-17 · Dördüncü denetim turu: TSX, davranış ve metin (`denetim/tur4-tsx`)
+
+Kararlar: reddedilen hamlenin sebebi bırakılan kartı değil, öbür kartın eski yere geçememesini söyler (sınıfın kendi dersi araya girse de); derslik çakışması kimi ve hangi dersi söylediğini söyler. Aktarmada havuza dönen `saat` sayılır ve yalnız açık programda, onay cümlesiyle aynı kapsamda. `Neden yerleşmedi?` `Neden bekliyor?` oldu; örnek okulun plan adı `Örnek okul`. Almanca ve İspanyolca `Az` hareketi `Reduziert` / `Reducido`. `Esc` odaktaki bildirimi kapatır, yoksa en yenisini. Bildirim düğmesine fareyle basılınca odak içerik alanına gider. Türkçe metinde ve çevirilerde düz `'` ve `"` yok (`i18n.test.ts` anahtarda ve çeviride yakalar): Türkçe ve İngilizce `’` `“…”`, Almanca `„…“`, İspanyolca `«…»`.
+
+---
+
 ### 2026-11-17 · Üçüncü denetim turu: davranış ve erişilebilirlik (`denetim/tur3-dav`)
 
 Kararlar: Esc ızgaradayken ya da bildirimdeyken en yeni bildirimi kapatır; pencere, menü, tutulan sürükleme ve öneri önizlemesi Esc'i önce alır. Bildirim kapanınca (düğme, süre, Esc) odak geldiği yere döner. `Geri al`ı bir geçmiş adımı olmayan bildirim (plan değişimi) gizli "Ctrl+Z" cümlesi taşımaz. Örnek okul yüklenince adı `Plan N` olan plan `Örnek Kurs (örnek)` olur, kullanıcının verdiği ad kalır; `Geri al` adı geri verir. Sabit kartı fareyle çekmek yalnız uyarır, sürükleme kuralı değişmedi (sabit dersin sürüklenebilmesi Alp'e sorulacak). Sebep cümleleri öğretmeni tam adıyla, dersi branş adıyla söyler; takasta iki taraf gün ve saatle ayrılır. Kendi okulumla başla'da örnek planın adı o yolda değiştirilmedi: aynı turda iki plan yazması bayat kütüphaneyle plan düşürür.

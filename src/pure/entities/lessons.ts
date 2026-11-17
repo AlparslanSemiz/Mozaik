@@ -87,8 +87,8 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
  * teacher's two fields, and the new teacher's fields are their own. Carried
  * over blindly, a lesson silently changes subject.
  *
- * Returns the lesson's blocks that could NOT be re-placed, so the caller can
- * say how many went back to the tray.
+ * Returns the HOURS of the open program's blocks that could NOT be re-placed,
+ * so the caller can say how many went back to the tray.
  */
 export function transferLesson(
   d: State,
@@ -128,8 +128,11 @@ export function transferLesson(
       const ix = buildIndex(grid);
       if (blocker(grid, ix, id, block.day, block.hour, block.size) === null) {
         grid = place(grid, id, block.day, block.hour, block.size);
-      } else {
-        returned++;
+      } else if (program.id === originalActive) {
+        // Hours, and the open program's only: the question asked before the
+        // move counts the open program's hours, so the answer after it has to
+        // (audit 4, finding 3). Other programs' blocks still go back, unsaid.
+        returned += block.size;
       }
     }
     work = grid;

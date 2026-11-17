@@ -313,7 +313,7 @@ export default function Topbar({
       />
 
       {/* "?": search, shortcuts and the first-run list behind one door. */}
-      <MoreMenu label="? Yardım" className="topbar-help" icon={null}>
+      <MoreMenu label="Yardım" lead="?" className="topbar-help" icon={null}>
         <MoreItem
           icon={<SearchIcon size={15} />}
           hint="Ctrl+K"
