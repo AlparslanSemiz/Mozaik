@@ -144,7 +144,7 @@ function MainAction({
       ref={set('make')}
       className="btn primary"
       title={t(
-        'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz',
+        'Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)',
       )}
       onClick={(e) => press(e, onMake)}
     >

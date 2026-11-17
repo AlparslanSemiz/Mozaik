@@ -41,7 +41,7 @@ export interface SolverOptions {
   budgetMs: number;
   /**
    * Which of the many legal weeks to look for. 0 is the week this data has
-   * always given; "Başka bir program yap" asks for another number on every press.
+   * always given; "Yeniden yap" asks for another number on every press.
    */
   seed: number;
   /**

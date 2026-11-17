@@ -1787,7 +1787,7 @@ const EN: Sozluk = {
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placed and pinned; {olay}.",
   "Kalan dizildi, {adlar} yer değiştirdi.": "The rest is placed; {adlar} moved.",
   "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "The rest is placed; {adlar} and {n} more {n:lesson|lessons} moved.",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Places the lessons not yet placed, keeping to the rules; pinned and hand-placed lessons stay",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)": "Places the lessons not yet placed, keeping to the rules; pinned lessons stay (what you place by hand is pinned)",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Lets the lesson move again: Place the rest or Make it again may move it.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Keeps the lesson where it is: Place the rest and Make it again leave it alone.",
   "Bu ders sabitlenmiş. Taşımak için önce P ile sabitlemeyi kaldırın.": "This lesson is pinned. To move it, unpin it first with P.",

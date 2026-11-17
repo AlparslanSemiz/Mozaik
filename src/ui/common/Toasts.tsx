@@ -254,6 +254,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const from = e.relatedTarget;
     if (from instanceof HTMLElement && region.current?.contains(from) !== true) {
       cameFrom.current = from;
+    } else if (!(from instanceof HTMLElement)) {
+      // From nowhere (a pointer press): no stale place from an earlier notice.
+      cameFrom.current = null;
     }
     settle();
   };

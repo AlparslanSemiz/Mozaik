@@ -1800,7 +1800,7 @@ const ES: Sozluk = {
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} colocada y fijada; {olay}.",
   "Kalan dizildi, {adlar} yer değiştirdi.": "El resto está colocado; se movió {adlar}.",
   "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "El resto está colocado; se movieron {adlar} y {n} {n:clase más|clases más}.",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Coloca las clases sin colocar respetando las reglas; las fijadas y las puestas a mano no se tocan",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)": "Coloca las clases sin colocar respetando las reglas; las fijadas no se tocan (lo que coloca a mano queda fijado)",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Permite mover la clase otra vez: Colocar el resto o Rehacer pueden moverla.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Mantiene la clase donde está: Colocar el resto y Rehacer no la tocan.",
   "Bu ders sabitlenmiş. Taşımak için önce P ile sabitlemeyi kaldırın.": "Esta clase está fijada. Para moverla, primero quite la fijación con P.",

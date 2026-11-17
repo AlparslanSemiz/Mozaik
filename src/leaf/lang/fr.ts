@@ -1806,7 +1806,7 @@ const FR: Sozluk = {
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} placé et épinglé ; {olay}.",
   "Kalan dizildi, {adlar} yer değiştirdi.": "Le reste est placé ; {adlar} déplacé.",
   "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "Le reste est placé ; {adlar} et {n} {n:autre cours|autres cours} déplacés.",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Place les cours non placés en respectant les règles ; les cours épinglés ou posés à la main restent",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)": "Place les cours non placés en respectant les règles ; les cours épinglés restent (ce que vous posez à la main est épinglé)",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Rend le cours de nouveau déplaçable : Placer le reste ou Refaire peut le déplacer.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Garde le cours en place : Placer le reste et Refaire n’y touchent pas.",
   "Bu ders sabitlenmiş. Taşımak için önce P ile sabitlemeyi kaldırın.": "Ce cours est épinglé. Pour le déplacer, retirez d’abord l’épingle avec P.",

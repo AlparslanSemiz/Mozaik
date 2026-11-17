@@ -12,7 +12,6 @@
 import { useMemo } from 'react';
 import type { State } from '../../leaf/model';
 import { type Motion, SCALE_STEPS } from '../../platform/prefs';
-import type { SolverRun } from '../../platform/search';
 import { downloadBackup } from '../../platform/storage';
 import type { Place, useT } from '../common';
 
@@ -29,7 +28,6 @@ interface PaletteInputs {
   state: State;
   ribbon: boolean;
   motion: Motion;
-  solver: SolverRun;
   goTo: (place: Place) => void;
   notify: (text: string) => void;
   t: ReturnType<typeof useT>;
@@ -41,13 +39,14 @@ interface PaletteInputs {
   toggleMotion: () => void;
   scale: number;
   chooseScale: (next: number) => void;
+  /** The strip's "Kalanı diz": relay, moved lessons named, week before kept. */
+  makeRest: () => void;
 }
 
 export function usePaletteActions({
   state,
   ribbon,
   motion,
-  solver,
   goTo,
   notify,
   t,
@@ -59,6 +58,7 @@ export function usePaletteActions({
   toggleMotion,
   scale,
   chooseScale,
+  makeRest,
 }: PaletteInputs): PaletteAction[] {
   return useMemo(() => {
     const school = t('Okul bilgileri');
@@ -71,7 +71,7 @@ export function usePaletteActions({
         extra: 'program yap diz otomatik dağıt yerleştir kalan',
         run: () => {
           goTo({ tab: 'program' });
-          solver.start(state, { keepPlaced: true });
+          makeRest();
         },
       },
       {
@@ -208,7 +208,6 @@ export function usePaletteActions({
     state,
     ribbon,
     motion,
-    solver,
     goTo,
     notify,
     t,
@@ -220,5 +219,6 @@ export function usePaletteActions({
     toggleMotion,
     scale,
     chooseScale,
+    makeRest,
   ]);
 }

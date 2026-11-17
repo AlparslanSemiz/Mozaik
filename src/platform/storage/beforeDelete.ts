@@ -12,7 +12,7 @@
 // the sample school over a plan and "Dosyadan aç", the open plan is written to
 // ONE slot (`BEFORE_DELETE_KEY`). The next start offers it once, with a button
 // that puts it back as an ordinary step of the history. A relaid week
-// ("Yeniden yap", "Başka bir program yap") is kept `quiet`: written, never offered.
+// ("Yeniden yap") is kept `quiet`: written, never offered.
 //
 // BOUNDED: one slot, a plan's size. When the storage is full, the plan itself
 // comes first: a refused write drops the slot rather than keep a stale one

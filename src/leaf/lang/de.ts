@@ -1799,7 +1799,7 @@ const DE: Sozluk = {
   "{ders} yerleşti ve sabitlendi; {olay}.": "{ders} gelegt und angeheftet; {olay}.",
   "Kalan dizildi, {adlar} yer değiştirdi.": "Der Rest ist gelegt; {adlar} verschoben.",
   "Kalan dizildi, {adlar} ve {n} ders daha yer değiştirdi.": "Der Rest ist gelegt; {adlar} und {n} weitere {n:Stunde|Stunden} verschoben.",
-  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere ve elle konanlara dokunmaz": "Legt die noch nicht gelegten Stunden nach den Regeln; angeheftete und von Hand gelegte bleiben",
+  "Yerleşmeyen dersleri kurallara uyarak yerleştirir; sabitlenenlere dokunmaz (elle koyduklarınız sabitlenir)": "Legt die noch nicht gelegten Stunden nach den Regeln; angeheftete bleiben (von Hand gelegte werden angeheftet)",
   "Dersi yerinden oynatılabilir yapar: Kalanı diz ya da Yeniden yap taşıyabilir.": "Macht die Stunde wieder beweglich: Rest legen oder Neu erstellen kann sie verschieben.",
   "Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz.": "Hält die Stunde an ihrem Platz: Rest legen und Neu erstellen lassen sie in Ruhe.",
   "Bu ders sabitlenmiş. Taşımak için önce P ile sabitlemeyi kaldırın.": "Diese Stunde ist angeheftet. Zum Verschieben zuerst mit P lösen.",

@@ -689,7 +689,7 @@ describe('iyileştirme — gerçek haftalar', () => {
     }, 60_000);
   }
 
-  it('Başka bir program yap: her tohum başka, aynı tohum aynı hafta', () => {
+  it('Yeniden yap: her tohum başka, aynı tohum aynı hafta', () => {
     const d = emptied(sampleState());
     const run = (seed: number) => solve(d, { keepPlaced: false, seed, budgetMs: 600_000 }).state;
     const weeks = [0, 1, 2].map(run);
