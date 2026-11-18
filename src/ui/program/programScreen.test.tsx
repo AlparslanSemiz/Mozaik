@@ -277,7 +277,7 @@ function drawProgram(state: State, p: ProgramProps = {}) {
   );
 }
 
-function drawPrint(state: State) {
+function drawPrint(state: State, scope: 'classes' | 'teachers' | 'both' = 'both') {
   act(() =>
     root.render(
       <Providers state={state}>
@@ -285,7 +285,7 @@ function drawPrint(state: State) {
           state={state}
           excluded={NOTHING_EXCLUDED}
           setExcluded={() => undefined}
-          scope="both"
+          scope={scope}
           colored
           setColored={() => undefined}
           options={PRINT_DEFAULTS}
@@ -742,5 +742,59 @@ describe('teneffüste blok kesme: ekran ile kâğıt', () => {
         ],
       }
     `);
+  });
+});
+
+// ------------------------------------------------- soru çözüm saatleri (v20)
+
+/** `world()` and two question-solving hours: ZK on Salı 3, AY on Salı 4. */
+function studying(): State {
+  return replaceActiveGrid(world(), {
+    study: { [closedKey('oZK', 0, 2)]: 1, [closedKey('oAY', 0, 3)]: 1 },
+  });
+}
+
+describe('soru çözüm saatleri (B5, B7, B9)', () => {
+  it('öğretmen görünümü: SÇ hücresi ayrı renk sınıfında, boş saat tıklanır, dolu ve kapalı saat değil', () => {
+    drawProgram(studying(), { view: 'teacher' });
+    const zk = container.querySelector('tr[data-row-id="oZK"]')!;
+    const cell = (row: Element, day: number, hour: number) =>
+      row.querySelector<HTMLElement>(`td[data-day="${day}"][data-hour="${hour}"]`)!;
+    expect(cell(zk, 0, 2).classList.contains('study')).toBe(true);
+    expect(text(cell(zk, 0, 2))).toBe('SÇ');
+    expect(cell(zk, 0, 2).getAttribute('aria-label')).toBe('Soru çözüm saati');
+    expect(cell(zk, 0, 2).dataset.slot).toBe('study');
+    expect(cell(zk, 0, 1).dataset.slot).toBe('free');
+    // A lesson's hour and a closed hour of MÇ are neither.
+    const mc = container.querySelector('tr[data-row-id="oMC"]')!;
+    expect(cell(mc, 0, 1).dataset.slot).toBeUndefined();
+    expect(cell(mc, 1, 4).dataset.slot).toBeUndefined();
+    // Another teacher's hour is not drawn on this row.
+    expect(cell(zk, 0, 3).classList.contains('study')).toBe(false);
+    expect(
+      container.querySelector('tr[data-row-id="oAY"] td[data-hour="3"][data-day="0"]')!.className,
+    ).toContain('study');
+  });
+
+  it('sınıf görünümü soru çözümünü çizmiyor ve hücrelere tık yolu vermiyor (B7)', () => {
+    drawProgram(studying(), { view: 'class' });
+    expect(container.querySelector('.study')).toBeNull();
+    expect(container.querySelector('[data-slot]')).toBeNull();
+    expect(container.textContent).not.toContain('SÇ');
+    expect(container.textContent).not.toContain('Soru çözüm');
+  });
+
+  it('sınıf kâğıdında "Soru çözüm" geçmiyor, soru çözümü olan okulda da (B9)', () => {
+    drawPrint(studying(), 'classes');
+    const pages = container.querySelectorAll('.print-page');
+    expect(pages.length).toBe(2);
+    expect(container.innerHTML).not.toContain('Soru çözüm');
+    expect(container.innerHTML).not.toContain('SÇ');
+    // The same pages as for a school with none: a study hour changes nothing here.
+    const withStudy = printLines();
+    act(() => root.unmount());
+    root = createRoot(container);
+    drawPrint(world(), 'classes');
+    expect(printLines()).toEqual(withStudy);
   });
 });

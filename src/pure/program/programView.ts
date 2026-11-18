@@ -24,6 +24,7 @@ import {
   allPinCells,
   placedBlocks,
   placementKey,
+  studyBlocker,
   swapDoneNotice,
   type BlockRef,
   type DropVerdict,
@@ -39,7 +40,7 @@ import {
 } from '../entities';
 import { lessonName } from '../feasibility';
 import { compareTr } from '../listview';
-import { activePinned, activePlacements } from '../grid';
+import { activePinned, activePlacements, activeStudy } from '../grid';
 import type { SuggestionDiff } from '../relax';
 import type { SolverProgress, SolverResult } from '../solver';
 import { t, type Vars } from '../../leaf/i18n';
@@ -94,6 +95,11 @@ export interface GridRow {
   cells: Array<GridCell | null>;
   /** Hours the teacher cannot come. Always false in the class view. */
   closed: boolean[];
+  /**
+   * The teacher's question-solving hours (v20). Always false in the class view:
+   * the class does not have them and its grid never draws them (B7).
+   */
+  study: boolean[];
 }
 
 export function buildRows(
@@ -134,15 +140,18 @@ export function buildRows(
   const hourCount = d.settings.hours.length;
   const n = dayCount * hourCount;
 
+  const studying = activeStudy(d);
   if (view === 'teacher') {
     return d.teachers.map((teacher) => {
       const cells: Array<GridCell | null> = new Array(n).fill(null);
       const closed: boolean[] = new Array(n).fill(false);
+      const study: boolean[] = new Array(n).fill(false);
 
       for (let g = 0; g < dayCount; g++) {
         for (let s = 0; s < hourCount; s++) {
           const i = g * hourCount + s;
           closed[i] = d.unavailable[closedKey(teacher.id, g, s)] !== undefined;
+          study[i] = studying[closedKey(teacher.id, g, s)] !== undefined;
 
           const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
           if (lessonId === undefined) continue;
@@ -183,6 +192,7 @@ export function buildRows(
         color: teacher.color,
         cells,
         closed,
+        study,
       };
     });
   }
@@ -232,6 +242,7 @@ export function buildRows(
       color: group.color,
       cells,
       closed,
+      study: [],
     };
   });
 }
@@ -260,7 +271,8 @@ function sameRow(a: GridRow, b: GridRow): boolean {
     a.secondary !== b.secondary ||
     a.color !== b.color ||
     a.cells.length !== b.cells.length ||
-    a.closed.length !== b.closed.length
+    a.closed.length !== b.closed.length ||
+    a.study.length !== b.study.length
   ) {
     return false;
   }
@@ -269,6 +281,10 @@ function sameRow(a: GridRow, b: GridRow): boolean {
   }
   for (let i = 0; i < a.closed.length; i++) {
     if (a.closed[i] !== b.closed[i]) return false;
+  }
+  // The study hours too, or a row that only gained one keeps its old drawing.
+  for (let i = 0; i < a.study.length; i++) {
+    if (a.study[i] !== b.study[i]) return false;
   }
   return true;
 }
@@ -582,6 +598,13 @@ export interface MenuTarget {
  */
 export interface MenuFacts {
   at: MenuTarget | null;
+  /**
+   * What a CLICK on an empty cell of a teacher's row offers (B5, Alp 2026-11-16):
+   * `free` an hour that may become question solving, `study` one that is,
+   * null a card's menu, a closed hour, an hour the teacher is in a lesson
+   * (B4) or the class view.
+   */
+  slot: 'free' | 'study' | null;
   classId: Id | null;
   pinned: boolean;
   lessonId: Id | undefined;
@@ -595,6 +618,18 @@ export function describeMenu(
   menuTarget: MenuTarget | null,
 ): MenuFacts {
   const menuAt = menuTarget;
+
+  let slot: MenuFacts['slot'] = null;
+  if (menuAt !== null && view === 'teacher') {
+    if (activeStudy(state)[closedKey(menuAt.rowId, menuAt.day, menuAt.hour)] !== undefined) {
+      slot = 'study';
+    } else if (
+      ix.teacherBusy.get(closedKey(menuAt.rowId, menuAt.day, menuAt.hour)) === undefined &&
+      studyBlocker(state, menuAt.rowId, menuAt.day, menuAt.hour) === null
+    ) {
+      slot = 'free';
+    }
+  }
 
   const menuClass =
     menuAt === null ? null : classOfCell(state, view, menuAt.rowId, menuAt.day, menuAt.hour);
@@ -613,6 +648,7 @@ export function describeMenu(
   const menuLesson = menuLessonId === undefined ? undefined : ix.lessonById.get(menuLessonId);
   return {
     at: menuAt,
+    slot,
     classId: menuClass,
     pinned: menuPinned,
     lessonId: menuLessonId,

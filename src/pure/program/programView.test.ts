@@ -163,6 +163,42 @@ describe('ızgara', () => {
     expect(keepSameRows(null, before)).toBe(before);
   });
 
+  it('soru çözüm saati yalnız öğretmen satırında, ve yalnız o satır değişince yeniden çiziliyor', () => {
+    const d = world();
+    const teacherRows = (x: State) => buildRows(x, buildIndex(x), 'teacher', byTeacher, t);
+    const before = teacherRows(d);
+    const withStudy = replaceActiveGrid(d, { study: { [closedKey('oMC', 1, 1)]: 1 } });
+    const after = keepSameRows(before, teacherRows(withStudy));
+    expect(after).not.toBe(before);
+    expect(after[0]?.study[1 * 4 + 1]).toBe(true);
+    expect(after[0]?.study.filter(Boolean)).toHaveLength(1);
+    // Only that teacher's row is new; every other keeps its drawing.
+    expect(after.slice(1).every((row, i) => row === before[i + 1])).toBe(true);
+    // The class view has none, whatever the plan holds.
+    const classRows = buildRows(withStudy, buildIndex(withStudy), 'class', byTeacher, t);
+    expect(classRows.every((row) => row.study.every((x) => !x))).toBe(true);
+  });
+
+  it('boş saate tık: öğretmen görünümünde ekle, soru çözümünde kaldır, dolu saatte ve sınıfta hiçbiri', () => {
+    const d = makeWorld({
+      days: 2,
+      hours: 4,
+      teachers: [{ id: 'oMC', short: 'MÇ' }],
+      lessons: [{ id: 'L1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 }],
+      placements: { [placementKey('s510', 0, 2)]: 'L1' },
+      unavailable: { [closedKey('oMC', 1, 3)]: 1 },
+    });
+    const withOne = replaceActiveGrid(d, { study: { [closedKey('oMC', 0, 0)]: 1 } });
+    const slot = (x: State, view: 'teacher' | 'class', rowId: string, day: number, hour: number) =>
+      describeMenu(x, buildIndex(x), view, { rowId, day, hour }).slot;
+    expect(slot(withOne, 'teacher', 'oMC', 0, 1)).toBe('free');
+    expect(slot(withOne, 'teacher', 'oMC', 0, 0)).toBe('study');
+    expect(slot(withOne, 'teacher', 'oMC', 0, 2)).toBeNull(); // in a lesson (B4)
+    expect(slot(withOne, 'teacher', 'oMC', 1, 3)).toBeNull(); // closed
+    expect(slot(withOne, 'class', 's510', 0, 1)).toBeNull();
+    expect(describeMenu(withOne, buildIndex(withOne), 'teacher', null).slot).toBeNull();
+  });
+
   it('öğretmen görünümünde hücrenin sınıfı o saatteki dersten', () => {
     const d = makeWorld({
       teachers: [{ id: 'oMC', short: 'MÇ' }],
