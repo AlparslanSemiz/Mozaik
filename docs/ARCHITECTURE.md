@@ -95,6 +95,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/constraints/closed.ts` | yerleştikten sonra kapanan saatler (`closedConflicts`, tuzak 16) |
 | `pure/constraints/sanitize.ts` | `sanitize`, her yüklemede ve her ayar değişikliğinde (tuzak 4, 5, 6) |
 | `pure/constraints/pins.ts` | bir kapsamı topluca sabitlemek (`pinScopeCells`, `togglePinScope`) |
+| `pure/constraints/study.ts` | öğretmenin soru çözüm saati (şema v20): konabilir mi (`studyBlocker`), `addStudy`, `removeStudy`; derse karşı kural `engine.ts`'te (`teacherStudy`), çözücü için `grid/programs.ts`'teki `withStudyClosed` |
 | `pure/constraints/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility/index.ts` | programın neden dizilemediği: bölünmeden önceki tek dosyanın dışa açtığı her şey |
 | `pure/feasibility/levels.ts` | kapasite basamağı (`capacityLevel`, `loadStatus`) ve raporun şekilleri |

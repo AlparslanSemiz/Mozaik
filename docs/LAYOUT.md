@@ -229,10 +229,14 @@ Taşı · Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı 
 bir kartta en sık aradığı şey sabitlemeyi kaldırıp yeniden taşımak; `title`'ı ne yaptığını
 söyler ("Dersi bulunduğu yerde tutar: Kalanı diz ve Yeniden yap ona dokunmaz").
 
-- Satır, gün ve saat başlığında ve boş bir hücrede menü açılmaz. `Toplu sabitle` (satırı, sütunu, günü) ve `Geçici görünüm` 2026-11-16'da kalktı (Sadeleşme K7); tek ders kartın raptiyesiyle, bütün hafta Daha fazla'daki `Bütün dersleri sabitle` ile sabitlenir. Havuzdaki bir kartta aynı menü açılır ve ızgaraya ait kalemler kapalıdır.
+- Satır, gün ve saat başlığında ve boş bir hücrede **sağ tık** menü açmaz. `Toplu sabitle` (satırı, sütunu, günü) ve `Geçici görünüm` 2026-11-16'da kalktı (Sadeleşme K7); tek ders kartın raptiyesiyle, bütün hafta Daha fazla'daki `Bütün dersleri sabitle` ile sabitlenir. Havuzdaki bir kartta aynı menü açılır ve ızgaraya ait kalemler kapalıdır.
 - `Öğretmeni düzenle` ve `Sınıfı düzenle` ızgaranın çizilmediği eksene ulaşmanın yolu, satır başı zaten bakılan ekseni açıyor.
 - Menü tabloyu saran tek bir `ContextMenu.Root`. İki bin hücreye birer tetikleyici konmaz, tıklamanın yeri `data-row`, `data-day` ve `data-hour`'dan okunur. Karta gelmeyen bir sağ tıkta `preventDefault()` çağrılır ve Radix'in kendi işleyicisi hiç koşmaz.
 - Dokunmatik ekranda (iPad, 2026-11-16) menü karta yarım saniye basılı tutunca açılır: iOS uzun basışta `contextmenu` göndermez. Yeni bir düğme yok; `platform/dom/longPress.ts` parmağın indiği yere aynı `contextmenu`'yü gönderir, önce bir `pointercancel` ile başlayan sürüklemeyi ve Radix'in kendi 700 ms'lik basışını bitirerek (tuzak 176). 8 pikselden fazla kayan parmak sürüklemedir, menü açılmaz. Fare ve klavye değişmedi.
+
+### Tık menüsü: soru çözüm saati
+
+Yalnız öğretmen görünümünde, boş bir saate **sol tık** tek maddelik küçük bir menü açar: `Soru çözüm saati` (Alp, 2026-11-16, "Giriş yolu"). İki tık olduğu için kazayla eklenmez. Konan saatte (ayrı renk, hücrede `SÇ`) tık yine tek madde gösterir: `Kaldır`. Her ikisi tek geri al adımıdır ve bildirim `Geri al` taşır. Menü kartınkiyle aynı menü ve aynı tetikleyicidir: `Grid.tsx`'in `clickMenu`'su hücrenin `data-slot`'una (`free`, `study`) bakar ve işaretli bir `contextmenu` gönderir, yani sağ tık boş hücrede hâlâ hiçbir şey açmaz. `data-slot` yalnız öğretmen satırında, dersi olmayan ve kapalı olmayan hücrede durur; dersi olan saatte (B4), kapalı saatte ve sınıf görünümünde yoktur. Sınıf görünümü soru çözümünü hiç çizmez (B7). Kuralları DATA.md'de (`ProgramVariant.study`).
 
 ### Sabitleme
 
