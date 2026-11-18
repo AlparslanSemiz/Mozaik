@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 18
+  schemaVersion: 20
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -29,6 +29,7 @@ ProgramVariant {
   id, name
   placements: Record<`${classId}|${day}|${hour}`, lessonId>
   pinned:     Record<`${classId}|${day}|${hour}`, 1>   // sabitlenmiş hücreler
+  study:      Record<`${teacherId}|${day}|${hour}`, 1> // öğretmenin soru çözüm saatleri (v20)
 }
 Settings {
   schoolName: string
@@ -79,6 +80,10 @@ Alanların anlamı:
   - Taban hafta, Kontrol ve çözücü bu katmanı okumaz, ızgara yalnız salt okunur "haftanın görünüşü"nde (`weekView`, bellekte bir kopya); geçen bir tarihin kaydı silinmez, yalnız artık bir şey değiştirmez, ve ikameler öğretmenin adalet sayısı (`coverCount`) olarak kalır.
   - Bir yokluk silinince, kısalınca ya da başka güne taşınınca kaybettiği günlerin o kişiye ait kayıtları da düşer, yoksa ikame sayısında kalırdı.
   - Silinen öğretmenin ya da sınıfın yokluğu, sınıfı, saati, `to` saati ya da yerine gireni silinen kayıt `sanitize()` ile düşer; okunamayan tek bir kayıt (tarih değil, `from > to`, saat sayı değil) okurken tek başına düşer.
+- `ProgramVariant.study`, öğretmenin soru çözüm saatleri (v20, plan: `docs/plan-elle-duzeltme-soru-cozum.md` B):
+  - Ders değil ayrı bir katman: anahtar sınıf değil **öğretmen**, yani hiçbir sınıfı meşgul etmez ve öğrenci programında yoktur. Ders sayısına, sınırlara, pencere sayımına ve yük hesabına girmez. Çözücü yerleştirmez, baba öğretmen görünümünde elle koyar.
+  - Öğretmenin kapalı saati gibi okunur: o saate öğretmenin dersi bırakılamaz (ret "<Ad> o saatte soru çözümünde"), `Kalanı diz` o saati boş bırakır. Dersi olan hücreye soru çözümü konamaz.
+  - Program alternatifine ait, yerleşim ve sabitleme gibi. Silinen öğretmenin, kalkan günün ya da saatin anahtarı `sanitize()` ile düşer; gün listesi değişince `remapDays()` kaydırır, ve Zil/günler önce `settingsLoss()` ile sayıp sorar (tuzak 5).
 - `Lesson.second` dersin öğretmenin ikinci branşından mı verildiği. Öğretmenin ikinci branşı silinince `sanitize()` onu `false` yapar, yoksa ders kimsenin vermediği bir branşı iddia ederdi.
 
 ### Varsayılanlar
@@ -117,8 +122,9 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v17 | `Teacher.email`: öğretmenin adresi; eksik ya da metin olmayan alan `''`, satır sonu ve denetim karakteri düşer |
 | v18 | `dated`: tarihli gelmeyenler ve ikameler; eksik alan boş, okunamayan tek bir kayıt tek başına düşer |
 | v19 | `Teacher.phone`: öğretmenin telefonu; eksik ya da metin olmayan alan `''`, numara karakteri olmayan düşer |
+| v20 | `ProgramVariant.study`: öğretmenin soru çözüm saatleri; eksik ya da metin olmayan alan boş sözlük, öğretmeni ya da günü olmayan anahtar düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v19'a her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v20'ye her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -151,7 +157,7 @@ o plan eski kopyada güncelleme ister.
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v19 çıkarılırken `version === 18` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v20 çıkarılırken `version === 19` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri

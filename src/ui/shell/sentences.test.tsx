@@ -137,7 +137,7 @@ function world(): State {
       },
     ],
     unavailable: {},
-    programs: [{ id: '1', name: 'Program 1', placements: {}, pinned: {} }],
+    programs: [{ id: '1', name: 'Program 1', placements: {}, pinned: {}, study: {} }],
     activeProgramId: '1',
     answers: { accepted: [], refused: [] },
     relations: [],

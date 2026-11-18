@@ -244,13 +244,19 @@ describe('settingsLoss', () => {
     expect(settingsLoss(d, { days: without(d.settings.days, 'Salı') })).toEqual({
       placed: 1,
       pinned: 1,
+      study: 0,
       elsewhere: 0,
     });
   });
 
   it('saat sayısı düşünce taşan saatleri sayar', () => {
     const d = build();
-    expect(settingsLoss(d, { hours: ['1', '2'] })).toEqual({ placed: 1, pinned: 0, elsewhere: 0 });
+    expect(settingsLoss(d, { hours: ['1', '2'] })).toEqual({
+      placed: 1,
+      pinned: 0,
+      study: 0,
+      elsewhere: 0,
+    });
   });
 
   it('hiçbir şey kalkmıyorsa sıfır', () => {
@@ -258,8 +264,31 @@ describe('settingsLoss', () => {
     expect(settingsLoss(d, { days: [...d.settings.days, makeDay('Perşembe')] })).toEqual({
       placed: 0,
       pinned: 0,
+      study: 0,
       elsewhere: 0,
     });
+  });
+
+  // Question-solving hours (v20) are keyed on a day index too (pitfalls 5, 11):
+  // counted before the question, moved with their day, dropped with it.
+  it('soru çözüm saatlerini sayar, günle birlikte kaydırır ve siler', () => {
+    const d0 = build();
+    const t = d0.teachers[0]!.id;
+    const gun = (n: number) => d0.settings.days[n]!.name;
+    const d = {
+      ...d0,
+      programs: d0.programs.map((p) => ({
+        ...p,
+        study: { [`${t}|0|0`]: 1 as const, [`${t}|1|1`]: 1 as const },
+      })),
+    };
+    const next = { days: without(d.settings.days, gun(0)) };
+    expect(settingsLoss(d, next).study).toBe(1);
+    expect(activeProgram(updateSettings(d, next)).study).toEqual({ [`${t}|0|1`]: 1 });
+    // Another alternative's hours are counted with "elsewhere".
+    const other = { ...activeProgram(d), id: 'p2', name: 'Program 2', placements: {}, pinned: {} };
+    const two = { ...d, programs: [...d.programs, other] };
+    expect(settingsLoss(two, next).elsewhere).toBe(1);
   });
 
   // remapDays rewrites every alternative, not only the one on screen.

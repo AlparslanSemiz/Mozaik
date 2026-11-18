@@ -7,7 +7,7 @@ export function blankProgram(
   id: Id = DEFAULT_PROGRAM_ID,
   name = DEFAULT_PROGRAM_NAME,
 ): ProgramVariant {
-  return { id, name, placements: {}, pinned: {} };
+  return { id, name, placements: {}, pinned: {}, study: {} };
 }
 
 /** State is sanitized on every entrance; this fallback only keeps bad callers safe. */
@@ -21,6 +21,7 @@ export function activeProgram(d: State): ProgramVariant {
 
 export const activePlacements = (d: State): Record<string, Id> => activeProgram(d).placements;
 export const activePinned = (d: State): Record<string, 1> => activeProgram(d).pinned;
+export const activeStudy = (d: State): Record<string, 1> => activeProgram(d).study;
 
 function updateActiveProgram(d: State, update: (program: ProgramVariant) => ProgramVariant): State {
   const current = activeProgram(d);
@@ -34,7 +35,7 @@ function updateActiveProgram(d: State, update: (program: ProgramVariant) => Prog
 
 export function replaceActiveGrid(
   d: State,
-  fields: Partial<Pick<ProgramVariant, 'placements' | 'pinned'>>,
+  fields: Partial<Pick<ProgramVariant, 'placements' | 'pinned' | 'study'>>,
 ): State {
   return updateActiveProgram(d, (program) => ({ ...program, ...fields }));
 }
