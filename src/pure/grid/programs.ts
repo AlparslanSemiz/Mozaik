@@ -23,6 +23,23 @@ export const activePlacements = (d: State): Record<string, Id> => activeProgram(
 export const activePinned = (d: State): Record<string, 1> => activeProgram(d).pinned;
 export const activeStudy = (d: State): Record<string, 1> => activeProgram(d).study;
 
+/**
+ * The state as the SOLVERS read it: the active program's question-solving
+ * hours (v20) are the teacher's closed hours, so laying the rest out again
+ * cannot land a lesson on one. Every closed-hour reader the solvers have
+ * already looks in `unavailable`, and a study key (`teacher|day|hour`) is the
+ * very key a closed hour has. Same object back when there is none, so a
+ * week without study hours is searched exactly as before. READ-ONLY: a state
+ * made here must never be saved or handed back as a result, or the study
+ * hours would turn into closed ones for good (the solver reports from the state
+ * it was given).
+ */
+export function withStudyClosed(d: State): State {
+  const study = activeStudy(d);
+  if (Object.keys(study).length === 0) return d;
+  return { ...d, unavailable: { ...d.unavailable, ...study } };
+}
+
 function updateActiveProgram(d: State, update: (program: ProgramVariant) => ProgramVariant): State {
   const current = activeProgram(d);
   const next = update(current);

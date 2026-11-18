@@ -98,11 +98,15 @@ export function stuckReason(
   }
 
   const away = counts.get('teacherClosed') ?? 0;
+  const studying = counts.get('teacherStudy') ?? 0;
   const elsewhere = counts.get('teacherBusy') ?? 0;
   const room = (counts.get('roomBusy') ?? 0) + (counts.get('roomClosed') ?? 0);
   const rule = (counts.get('rule') ?? 0) + (counts.get('relatedDay') ?? 0);
   const parts: string[] = [];
   if (away > 0) parts.push(t('{kim} {n} saatinde kapalı', { kim: teacher.short, n: away }));
+  if (studying > 0) {
+    parts.push(t('{kim} {n} saatinde soru çözümünde', { kim: teacher.short, n: studying }));
+  }
   if (elsewhere > 0) {
     parts.push(t('{n} saatinde {kim} başka sınıfta', { n: elsewhere, kim: teacher.short }));
   }
@@ -113,7 +117,7 @@ export function stuckReason(
   if (rule > 0) parts.push(t('{n} saatinde bir kural izin vermiyor', { n: rule }));
   // Hours that would take one hour of it but not its card: without this the
   // sentence said "3 boş saati var" and then accounted for one.
-  const open = holes - away - elsewhere - room - rule;
+  const open = holes - away - studying - elsewhere - room - rule;
   const size = pendingBlocks(d, lesson)[0] ?? 1;
   if (open > 0 && parts.length > 0 && size > 1) {
     parts.push(t('{n} saatine {boy} saatlik ders sığmıyor', { n: open, boy: size }));

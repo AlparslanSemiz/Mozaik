@@ -5,7 +5,7 @@
  * (`engine.ts`), reading blocks off the grid (`blocks.ts`), putting one down
  * and taking it back (`placing.ts`), what a drop does (`drop.ts`), hours closed
  * after placing (`closed.ts`), `sanitize` (`sanitize.ts`) and pinning a scope
- * (`pins.ts`). The rules are `rules.ts`. What this file opens is exactly what
+ * (`pins.ts`) and a teacher's question-solving hours (`study.ts`). The rules are `rules.ts`. What this file opens is exactly what
  * `constraints.ts` exported before the split; helpers the files share stay in.
  */
 
@@ -35,6 +35,7 @@ export {
   type DropRequest,
 } from './drop';
 export { closedConflicts, type ClosedConflict } from './closed';
+export { studyBlocker, addStudy, removeStudy } from './study';
 export { sanitize } from './sanitize';
 export { allPinCells, togglePinAll } from './pins';
 export * from './rules';

@@ -30,7 +30,7 @@ import {
 import { t } from '../../leaf/i18n';
 import { closedKey, placementKey, type Id, type Lesson, type State } from '../../leaf/model';
 import { commonestBlock, holeReason, lessonName } from '../feasibility';
-import { activePinned, activePlacements, replaceActiveGrid } from '../grid';
+import { activePinned, activePlacements, replaceActiveGrid, withStudyClosed } from '../grid';
 import { createImprover, rng, type Improver } from './improve';
 import { bindingPair, shortfalls } from './shortfall';
 
@@ -268,11 +268,15 @@ export function fixedCells(base: State, keepPlaced: boolean): Record<string, Id>
 }
 
 function createSearch(
-  base: State,
+  /** What the caller handed in, and what a result is made from. */
+  given: State,
   opts: SolverOptions,
   /** The repair's patience; the second run of `relay` is given less (`RELAY_STALL_PER_BLOCK`). */
   repairStallPerBlock = REPAIR_STALL_PER_BLOCK,
 ): Solver {
+  // A question-solving hour is a closed hour to everything below (v20); only
+  // the result goes back to `given`, so it never carries them as closed.
+  const base = withStudyClosed(given);
   const dayCount = base.settings.days.length;
   const hourCount = base.settings.hours.length;
   const cellCount = dayCount * hourCount;
@@ -1297,7 +1301,7 @@ function createSearch(
     const changed =
       Object.keys(best).length !== Object.keys(basePlacements).length ||
       Object.keys(best).some((k) => basePlacements[k] !== best[k]);
-    const state: State = changed ? replaceActiveGrid(base, { placements: best }) : base;
+    const state: State = changed ? replaceActiveGrid(given, { placements: best }) : given;
 
     // The stuck report is read off the BEST assignment, not off wherever the
     // search stopped — that is the grid the user is about to look at.
@@ -1552,7 +1556,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     if (kept >= Object.keys(activePlacements(base)).length) return false;
     // A week whose loads do not fit its open hours cannot be laid out by any
     // order of the cards; the second run would only spend the time.
-    return shortfalls(base).size === 0;
+    return shortfalls(withStudyClosed(base)).size === 0;
   };
 
   const settle = (second: SolverResult): SolverResult => {
