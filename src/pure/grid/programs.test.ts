@@ -116,7 +116,13 @@ describe('programı boşalt', () => {
   it('yalnız sabitlenen hücreler kalır, sabitlemeleriyle; öteki programlar değişmez', () => {
     let d = place(place(world(), 'x1', 0, 0), 'x2', 1, 0);
     d = setBlockPinned(d, 's1', 0, 0, true);
-    const other = addProgram(d, { id: 'p2', name: 'İki', placements: { k: 'x2' }, pinned: {}, study: {} });
+    const other = addProgram(d, {
+      id: 'p2',
+      name: 'İki',
+      placements: { k: 'x2' },
+      pinned: {},
+      study: {},
+    });
     const back = switchProgram(other, d.activeProgramId);
 
     const out = keepPinnedOnly(back);
