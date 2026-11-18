@@ -26,6 +26,25 @@ const SITE = 'https://mozaik.alparslansemiz.com/';
 const BASLIK = 'Mozaik · Çevrimdışı haftalık ders programı aracı';
 const ACIKLAMA = 'Haftalık ders programı dizme aracı. Kurulum yok, hesap yok, internet gerekmez.';
 
+/**
+ * Structured data for the one page (SoftwareApplication). Site build only: the
+ * double-clicked file says nothing about any address. A <script type=
+ * "application/ld+json"> is data, not code - it has no src, so it passes the
+ * one-file grep in site.yml, and the page carries no CSP it could trip.
+ */
+const YAPILANDIRILMIS_VERI = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Mozaik',
+  url: SITE,
+  description: ACIKLAMA,
+  inLanguage: 'tr',
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Any',
+  image: SITE + 'og-image.png',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'TRY' },
+});
+
 /** Registration is guarded twice: no service worker API, or not http(s). */
 const REGISTER = `
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
@@ -124,6 +143,12 @@ function siteShell(): Plugin {
             injectTo: 'head' as const,
           },
           { tag: 'link', attrs: { rel: 'canonical', href: SITE }, injectTo: 'head' as const },
+          {
+            tag: 'script',
+            attrs: { type: 'application/ld+json' },
+            children: YAPILANDIRILMIS_VERI,
+            injectTo: 'head' as const,
+          },
           {
             tag: 'link',
             attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: './apple-touch-icon.png' },
