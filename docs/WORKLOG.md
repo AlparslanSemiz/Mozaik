@@ -19,7 +19,8 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-17 sabah. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
+Son güncelleme: 2026-11-18. **Site denetimi (PR #94):** dar ekran taşması, site meta etiketleri, Hakkında'da künye/gizlilik bağlantıları; ham boyut payı 18 B.
+Önceki: 2026-11-17 sabah. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
 tarihli girdilerde, kararlar DECISIONS'ta.
 
 **2026-11-17 gece denetim döngüsü.** 4 denetim turu (simetri, metin, Program/ızgara, kişi/liste/
@@ -55,6 +56,10 @@ eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni 
 **Açık notlar.** SD9 (Daha fazla menüsü Windows UIA'da Hakkında'yı açmıyor; NVDA/Narrator ile
 dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
 olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
+
+## 2026-11-18 · Site denetimi düzeltmeleri (PR #94)
+
+Dört sitelik denetimin Mozaik kısmı. Dar ekran: 375 px'te `scrollWidth` 518 → 375, 768 px'te 768 (beş sekmede ölçüldü); sekme şeridi dar çubukta kendi kutusunda kayıyor, şerit 768'de sarılıyor; "? Yardım" kesilmiyor (`MoreMenu` `lead`). Site derlemesi (`vite.site.config.ts`): title, description, canonical, Open Graph/Twitter, `site/og-image.png` (1200×630, gerçek ekrandan), `robots.txt`, `sitemap.xml`, apple-touch-icon, referrer meta; masaüstü `dist/index.html`'de bu etiketler yok (`e2e/site.spec.ts`). Ayarlar → Hakkında: "Alparslan Semiz · Künye · Gizlilik" (beş dil), alparslansemiz.com Impressum/Datenschutz'a gider (orada Mozaik bölümü var). Koşulanlar: lint, tipler, sınır, vitest 1824, Playwright 812/813 (kalan `kayma.spec.ts:128` main'de de kırık), site 31, ekran 2. Boyut: ham 1 199 982 B (sınır 1 200 000, pay 18 B), brotli 310,34 kB. Yapılmayan: statik ilk ekran iskeleti (dil/tema titremesi). Dikkat: `denetim/tur4-css` ve `tur4-tsx` aynı yerlere dokunuyor; birleştirirken çakışabilir.
 
 ## 2026-11-17 · Gece denetim döngüsü, 3. tur: boyut eşiği 310 000 → 312 000 B brotli
 

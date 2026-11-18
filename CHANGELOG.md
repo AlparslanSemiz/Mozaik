@@ -23,6 +23,9 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- About: a line with the author's name, legal notice (Impressum) and privacy (Datenschutz) links, in all five languages.
+- Website: page title, description, link previews (Open Graph) and search-engine files.
+
 - A lesson you drop or swap by hand is pinned where you put it, so "Kalanı diz" and "Yeniden yap" leave it alone; the notice says so and "Geri al" undoes the move and the pin together. A drop onto a cell that refuses now says why, in a notice and on the bar, instead of nothing.
 - Send a teacher their timetable as a PDF: on the teacher's page and in Print, "WhatsApp" saves the sheet as `Mozaik – Name – date.pdf` in Downloads and opens the chat with that teacher's number; the e-mail button saves the same file to attach. A class's page has "Save PDF". Teachers have a phone field (schema v19); the number only goes into the WhatsApp link you click.
 - Every printed sheet has a line at the top with the plan, the date and "Page 2 of 5"; class sheets explain the teacher codes ("MÇ Mehmet Çelik"); no printed text is smaller than 7 pt; "Save as PDF" suggests a file name like `Mozaik – 510 – 2026-11-16`. The print date is now on by default.
@@ -111,6 +114,8 @@ release is incomplete, the entry says so.
 - A teacher's page: the lesson row's "…" menu is named by its subject, "Başka öğretmene aktar…" lists the teachers of the same subject first and each line names the subject, the question names the teacher in full and warns when the subject changes; the buttons row is PDF kaydet, E-postayla gönder, WhatsApp'la gönder with icons.
 
 ### Fixed
+
+- Narrow screens (phone and tablet width): the tab strip and ribbon no longer overflow or overlap; the Help button keeps its label.
 
 - In Safari, leaving the Program tab and coming back kept the timetable but jumped it back to the top-left corner; it now stays where you left it.
 - In the .exe, downloading an update no longer gives up after five minutes in all, which a slow line could never beat for the 31 MB installer: it stops only when no data arrives for a minute, and Settings → About shows how far it is.
