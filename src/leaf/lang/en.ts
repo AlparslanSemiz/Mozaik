@@ -1129,6 +1129,8 @@ const EN: Sozluk = {
   "Sınıf görünümü": "Class view",
   Görünüm: "View",
   Hakkında: "About",
+  Künye: "Legal notice",
+  Gizlilik: "Privacy",
   "Planlar ve yedek": "Plans and backup",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Choose a teacher and enter all the classes they teach, one after another",

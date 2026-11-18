@@ -21,6 +21,11 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 import { surumBilgisi, surumEki } from './scripts/surum.mjs';
 import { sozlukPaketi } from './scripts/sozluk-paket.mjs';
 
+/** What a search result and a shared link say, from the manifest's own description. */
+const SITE = 'https://mozaik.alparslansemiz.com/';
+const BASLIK = 'Mozaik · Çevrimdışı haftalık ders programı aracı';
+const ACIKLAMA = 'Haftalık ders programı dizme aracı. Kurulum yok, hesap yok, internet gerekmez.';
+
 /** Registration is guarded twice: no service worker API, or not http(s). */
 const REGISTER = `
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
@@ -102,23 +107,106 @@ function siteShell(): Plugin {
     name: 'ders-programi-site-shell',
     transformIndexHtml: {
       order: 'post',
-      handler: () => [
-        {
-          tag: 'link',
-          attrs: { rel: 'manifest', href: './manifest.webmanifest' },
-          injectTo: 'head' as const,
-        },
-        {
-          tag: 'meta',
-          attrs: { name: 'theme-color', content: '#2e4ba8' },
-          injectTo: 'head' as const,
-        },
-        {
-          tag: 'script',
-          children: REGISTER + yeniAdresYoklamasi + ziyaretSayaci,
-          injectTo: 'body' as const,
-        },
-      ],
+      handler: (html: string) => ({
+        // The page's own name, for the tab and for a search result. Only the
+        // site says it: index.html stays a bare "Mozaik" for the file the
+        // father double-clicks, so the two builds differ in <head> alone.
+        html: html.replace('<title>Mozaik</title>', `<title>${BASLIK}</title>`),
+        tags: [
+          {
+            tag: 'meta',
+            attrs: { name: 'description', content: ACIKLAMA },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'referrer', content: 'strict-origin-when-cross-origin' },
+            injectTo: 'head' as const,
+          },
+          { tag: 'link', attrs: { rel: 'canonical', href: SITE }, injectTo: 'head' as const },
+          {
+            tag: 'link',
+            attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: './apple-touch-icon.png' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:type', content: 'website' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:title', content: BASLIK },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:description', content: ACIKLAMA },
+            injectTo: 'head' as const,
+          },
+          { tag: 'meta', attrs: { property: 'og:url', content: SITE }, injectTo: 'head' as const },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:image', content: SITE + 'og-image.png' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:image:width', content: '1200' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:image:height', content: '630' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:image:alt', content: 'Mozaik: dolu bir haftalık ders programı' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { property: 'og:locale', content: 'tr_TR' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'twitter:card', content: 'summary_large_image' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'twitter:title', content: BASLIK },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'twitter:description', content: ACIKLAMA },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'twitter:image', content: SITE + 'og-image.png' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'link',
+            attrs: { rel: 'manifest', href: './manifest.webmanifest' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'meta',
+            attrs: { name: 'theme-color', content: '#2e4ba8' },
+            injectTo: 'head' as const,
+          },
+          {
+            tag: 'script',
+            children: REGISTER + yeniAdresYoklamasi + ziyaretSayaci,
+            injectTo: 'body' as const,
+          },
+        ],
+      }),
     },
   };
 }

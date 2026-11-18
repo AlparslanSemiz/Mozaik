@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mozaik.alparslansemiz.com/sitemap.xml

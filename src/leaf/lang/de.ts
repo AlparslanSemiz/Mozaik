@@ -1143,6 +1143,8 @@ const DE: Sozluk = {
   "Sınıf görünümü": "Klassenansicht",
   Görünüm: "Ansicht",
   Hakkında: "Über",
+  Künye: "Impressum",
+  Gizlilik: "Datenschutz",
   "Planlar ve yedek": "Pläne und Sicherung",
   "Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin":
     "Wählen Sie eine Lehrkraft und tragen Sie alle ihre Klassen nacheinander ein",
