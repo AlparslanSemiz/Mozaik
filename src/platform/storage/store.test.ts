@@ -779,7 +779,8 @@ describe('parseState — v12 → v13: dört saatlik bloklar', () => {
     expect(blockPlan(migrated.lessons[0]!)).toEqual([3, 3, 2, 1, 1]);
     expect(migrated.lessons[1]!.blocks).toEqual([3]);
     expect(blockPlan(migrated.lessons[1]!)).toEqual([3, 1]);
-    expect(migrated.programs).toEqual(originalPrograms);
+    // v20 gave every alternative an empty set of question-solving hours.
+    expect(migrated.programs).toEqual(originalPrograms.map((p: object) => ({ ...p, study: {} })));
     expect(migrated.activeProgramId).toBe('program-2');
   });
 });

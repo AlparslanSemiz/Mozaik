@@ -142,6 +142,11 @@ eşik 1 320 000'den 1 200 000'e indi (45 kB pay, CLAUDE.md'nin ölçüm çizgisi
 306 000'de kaldı, payı 10,5 kB. Bugün bağlayıcı olan brotli: yeni bir cümle artık ham boya bir
 kez anahtar ve dört çeviri olarak giriyor, ama brotli hâline girdiği kadar girmeye devam ediyor
 (WORKLOG 2026-11-16, DECISIONS aynı gün).
+`soru-cozum/cekirdek` (2026-11-19, şema v20, tık menüsü, dört dilde on cümle) ham boyu 1 199 982'den
+1 205 625 bayta çıkardı (+5,6 kB), ve CLAUDE.md'nin ölçüm çizgisi aşıldı: `file://` açılışı 4×
+yavaşlatılmış işlemcide ölçüldü (9 dönüşümlü koşu, medyan hazır 1169 → 1171 ms, ızgara 1434 → 1445
+ms, %15 eşiği aşılmadı), ham eşik 1 210 000'e yükseltildi (4,4 kB pay). Brotli 311,49 kB, eşik
+312 000'de kaldı. Ölçüm kirli (Mac, `temiz-kosul.sh` Linux'a özel).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

@@ -1822,6 +1822,16 @@ const FR: Sozluk = {
   "Tam": "Complet",
   "Okula geldiği gün boşuna gelmesin. Yalnız Programın durumu’nda sayılır.": "Qu’on ne vienne pas à l’école pour rien. Ne compte que dans l’État de l’emploi du temps.",
   "Kapatmak ya da açmak istediğiniz saate tıklayın.": "Cliquez sur l’heure que vous voulez fermer ou rouvrir.",
+  "Soru çözüm saati": "Heure d’exercices",
+  "SÇ": "EX",
+  "Kaldır": "Retirer",
+  "{kim} o saatte soru çözümünde": "{kim} est en séance d’exercices à cette heure",
+  "{kim} {n} saatinde soru çözümünde": "{kim} est en séance d’exercices pour {n} d’entre elles",
+  "{n} soru çözüm saati de kalkacak.": "{n} {n:heure d’exercices|heures d’exercices} seront aussi retirées.",
+  "Geri al ile geri getirebilirsiniz.": "Vous pouvez les rétablir avec Annuler.",
+  "{kim}, {gun} {saat}. saat": "{kim}, {gun}, heure {saat}",
+  "Soru çözüm saati eklendi: {yer}.": "Heure d’exercices ajoutée : {yer}.",
+  "Soru çözüm saati kaldırıldı: {yer}.": "Heure d’exercices retirée : {yer}.",
 };
 
 registerSozluk("fr", FR);

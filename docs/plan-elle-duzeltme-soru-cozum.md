@@ -1,6 +1,6 @@
 # Plan · Elle düzeltme ve soru çözüm saatleri
 
-Tarih: 2026-11-16. Durum: **A1 ve A2 yapıldı (`denetim/program` dalında); B bölümü plan, kod yok; açık sorular cevaplandı (Alp, 2026-11-16).** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
+Tarih: 2026-11-16. Durum: **A1 ve A2 yapıldı (`denetim/program` dalında); B çekirdek yapıldı (`soru-cozum/cekirdek`, 2026-11-19); B6, B8, B10 plan; açık sorular cevaplandı (Alp, 2026-11-16).** Kaynak: Alp'in aktardığı babanın iki alışkanlığı.
 Bu dosya işin niçinini ve önerilen yolu tutar; uygulamaya geçerken maddeler [TODO.md](TODO.md)'ye
 numaralı olarak taşınır, verilen kararlar [DECISIONS.md](DECISIONS.md)'ye yazılır.
 
@@ -68,6 +68,14 @@ ikinci elle taşıma önce raptiyeye basmayı ister.
 ---
 
 ## B · Soru çözüm saatleri
+
+**Yapıldı: B çekirdek** (`soru-cozum/cekirdek`, 2026-11-19): şema v20 (`ProgramVariant.study`,
+göç boş sözlük), B1 (ders bırakılamaz, "<Ad> o saatte soru çözümünde"; `Kalanı diz` kapalı saat gibi
+okur ve sonuç kapalı saat taşımaz), B2/B3 (sınıfı meşgul etmez, hiçbir sayıma girmez), B4, B5 (Alp'in
+"Giriş yolu"yla: boş saate tık, tek maddelik menü `Soru çözüm saati`, konanda `Kaldır`, tek geri al
+adımı), B7 (yalnız öğretmen görünümü, sınıf görünümü çizmez) ve B9 (sınıf kâğıdında "Soru çözüm"
+geçmediğini sabitleyen test). Gün ya da saat kalkınca anahtarlar `placements` gibi sayılıp sorulur ve
+silinir. Yapılmayan: B6, B8, B10, A3, A4, A5. Açık bırakılanlar WORKLOG 2026-11-19'da.
 
 ### Ne
 

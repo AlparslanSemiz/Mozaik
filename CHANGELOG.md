@@ -23,6 +23,7 @@ release is incomplete, the entry says so.
 
 ### Added
 
+- Question-solving hours: in a teacher's row, click an empty hour and choose "Soru çözüm saati" (it shows as "SÇ" in its own colour); click it again and choose "Kaldır" to take it away, and "Geri al" undoes either. No lesson can be dropped on one, "Kalanı diz" lays the rest out around it, and it never shows in a class's timetable or on a class's printed sheet. Schema v20.
 - About: a line with the author's name, legal notice (Impressum) and privacy (Datenschutz) links, in all five languages.
 - Website: page title, description, link previews (Open Graph) and search-engine files.
 

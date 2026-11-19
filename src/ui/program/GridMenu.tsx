@@ -4,7 +4,7 @@
 // only draws it and hands each choice back to Program.
 
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { Move, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
+import { BookOpenCheck, Move, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import type { Id } from '../../leaf/model';
 import type { InspectKind } from '../../pure/entities';
 import type { MenuFacts } from '../../pure/program';
@@ -23,6 +23,8 @@ interface Props {
   editLesson: (lessonId: Id) => void;
   inspect: (kind: InspectKind, id: string) => void;
   togglePin: () => void;
+  /** The click menu of an empty hour (B5): make it question solving, or take it away. */
+  studySet: (rowId: string, day: number, hour: number, on: boolean) => void;
 }
 
 export default function GridMenu({
@@ -34,6 +36,7 @@ export default function GridMenu({
   editLesson,
   inspect,
   togglePin,
+  studySet,
 }: Props) {
   const t = useT();
   const { at: menuAt, pinned: menuPinned, lessonId: menuLessonId, lesson: menuLesson } = facts;
@@ -41,7 +44,23 @@ export default function GridMenu({
   return (
     <ContextMenu.Portal container={container}>
       <ContextMenu.Content className="menu" collisionPadding={8}>
-        {menuAt !== null && (
+        {/* A click on an empty hour of a teacher's row (B5): ONE item, so it
+            takes two taps to add one and cannot happen by accident. */}
+        {menuAt !== null && facts.slot !== null && (
+          <ContextMenu.Item
+            className="menu-item"
+            disabled={running}
+            onSelect={() => studySet(menuAt.rowId, menuAt.day, menuAt.hour, facts.slot === 'free')}
+          >
+            {facts.slot === 'free' ? (
+              <BookOpenCheck size={15} aria-hidden="true" />
+            ) : (
+              <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
+            )}
+            {facts.slot === 'free' ? t('Soru çözüm saati') : t('Kaldır')}
+          </ContextMenu.Item>
+        )}
+        {menuAt !== null && facts.slot === null && (
           <>
             {/* THE FIRST ITEM since 2026-11-16: a hand placement pins itself
                 now, and the one thing a hand wants next to a placed lesson

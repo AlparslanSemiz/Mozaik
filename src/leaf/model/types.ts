@@ -337,6 +337,12 @@ export interface ProgramVariant {
   placements: Record<string, Id>;
   /** `${classId}|${day}|${hour}` -> 1. Pins belong to this alternative only. */
   pinned: Record<string, 1>;
+  /**
+   * `${teacherId}|${day}|${hour}` -> 1 (schema v20). A teacher's question-
+   * solving hour: not a lesson, never a class's hour, and the solver does not
+   * place it, the father does. Belongs to this alternative only, like pins.
+   */
+  study: Record<string, 1>;
 }
 
 /**
@@ -394,5 +400,7 @@ export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
  *      base week. A file below it has none. An older copy refuses a v18 file
  *      as "newer" rather than opening it and dropping the field on save.
  * v19: Teacher.phone — the number WhatsApp opens. A file below it has none.
+ * v20: ProgramVariant.study — a teacher's question-solving hours. A file below
+ *      it has none, and an empty map is what none means.
  */
-export const SCHEMA_VERSION = 19;
+export const SCHEMA_VERSION = 20;

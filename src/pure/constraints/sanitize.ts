@@ -143,14 +143,37 @@ export function sanitize(d: State): State {
       pinned[key] = 1;
     }
 
+    // Question-solving hours (schema v20) name a teacher, a day and an hour:
+    // one whose teacher was deleted, or whose day or hour is gone, goes with
+    // them (pitfalls 4 and 5).
+    const study: Record<string, 1> = {};
+    for (const key in program.study) {
+      const parts = parseKey(key);
+      if (
+        parts === null ||
+        !teacherIds.has(parts.id) ||
+        !Number.isInteger(parts.day) ||
+        parts.day < 0 ||
+        parts.day >= dayCount ||
+        !Number.isInteger(parts.hour) ||
+        parts.hour < 0 ||
+        parts.hour >= hourCount
+      ) {
+        programChanged = true;
+        continue;
+      }
+      study[key] = 1;
+    }
+
     if (!programChanged) {
       const samePlacements =
         Object.keys(placements).length === Object.keys(program.placements).length;
       const samePins = Object.keys(pinned).length === Object.keys(program.pinned).length;
-      if (samePlacements && samePins) return program;
+      const sameStudy = Object.keys(study).length === Object.keys(program.study).length;
+      if (samePlacements && samePins && sameStudy) return program;
     }
     changed = true;
-    return { id, name, placements, pinned };
+    return { id, name, placements, pinned, study };
   });
 
   const activeProgramId = programs.some((program) => program.id === d.activeProgramId)

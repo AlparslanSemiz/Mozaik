@@ -20,7 +20,7 @@ import {
   lessonSubject,
   placementKey,
 } from '../../leaf/model';
-import { activePlacements } from '../grid';
+import { activePlacements, activeStudy } from '../grid';
 import {
   lessonDayCount,
   lessonLimit,
@@ -47,6 +47,7 @@ export type BlockCode =
   | 'classBusy'
   | 'classClosed'
   | 'teacherClosed'
+  | 'teacherStudy'
   | 'teacherBusy'
   | 'roomBusy'
   | 'roomClosed'
@@ -115,6 +116,7 @@ export function blockerDetail(
   const dayName = () =>
     (named ??= dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 })));
   const placements = activePlacements(d);
+  const study = activeStudy(d);
 
   for (let i = 0; i < block; i++) {
     const h = hour + i;
@@ -157,6 +159,15 @@ export function blockerDetail(
           gun: dayName(),
           saat: hourName,
         }),
+      };
+    }
+
+    // 4b. Is the teacher in question solving at that hour (v20). Not a class's
+    // hour and not a lesson, but the teacher is as taken as in a lesson.
+    if (study[closedKey(teacher.id, day, h)] !== undefined) {
+      return {
+        code: 'teacherStudy',
+        message: t('{kim} o saatte soru çözümünde', { kim: teacher.name }),
       };
     }
 

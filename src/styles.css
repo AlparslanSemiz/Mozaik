@@ -2718,6 +2718,23 @@ table.grid tbody td.unavailable {
   }
 }
 
+/* A teacher's QUESTION-SOLVING hour (v20, plan B): not a lesson and no class's
+   hour, so it is a coloured cell with "SÇ" and not a card. The word is in the
+   cell; the colour is the lessons' section ink on a tint of the paper, which
+   no card colour, closed hatch or crosshair uses. Only in a teacher's row. */
+table.grid tbody td.study {
+  background: color-mix(in oklab, var(--sec-lessons) 16%, var(--paper));
+  color: var(--sec-lessons);
+  font-weight: 600;
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+/* A click on an empty hour of a teacher's row opens the one-item menu. */
+table.grid tbody td[data-slot] {
+  cursor: pointer;
+}
+
 /* A placed lesson card */
 .card {
   color: var(--on-color);
@@ -3157,8 +3174,8 @@ td.drop-blocked {
    row, and the row you are dragging over is the row under the cursor. The fix
    is to not paint it in the first place: `:not(.dragging)` on the source rule,
    and no override at all. */
-table.grid:not(.dragging) tbody td.col-hot:not(.unavailable),
-table.grid:not(.dragging) tbody tr:hover > td:not(.unavailable) {
+table.grid:not(.dragging) tbody td.col-hot:not(.unavailable):not(.study),
+table.grid:not(.dragging) tbody tr:hover > td:not(.unavailable):not(.study) {
   background: var(--accent-bg);
 }
 

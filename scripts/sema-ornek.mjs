@@ -32,7 +32,7 @@ import { join } from 'node:path';
 const OUT = join(import.meta.dirname, '..', 'src', 'fixtures');
 
 /**
- * A small school in TODAY's shape (v18). Small on purpose: a fixture is read
+ * A small school in TODAY's shape (v20). Small on purpose: a fixture is read
  * by a person when a migration breaks. It still carries the awkward parts,
  * because those are where a migration goes wrong: a second subject, a lesson
  * taught under it, a two-hour block, a three-hour block, a lesson with no
@@ -210,6 +210,20 @@ function v19() {
   };
 }
 
+/**
+ * Today's shape (v20): v19 and the question-solving hours. AV has one on
+ * Salı's sixth hour, an hour she teaches nothing; the key names the teacher,
+ * not a class.
+ */
+function v20() {
+  const raw = v19();
+  return {
+    ...raw,
+    schemaVersion: 20,
+    programs: raw.programs.map((p) => ({ ...p, study: { 'tAV|0|5': 1 } })),
+  };
+}
+
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
 /** The single program's grid, as every version before v12 stored it: at the top. */
@@ -224,9 +238,14 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v19 with sixteen steps undone.
+ * key. The chain is applied in order, so v3 is v20 with seventeen steps undone.
  */
 const DOWN = {
+  19: (raw) => {
+    // v20 brought the question-solving hours. Below it a program has none.
+    raw.schemaVersion = 19;
+    for (const p of raw.programs) delete p.study;
+  },
   18: (raw) => {
     // v19 brought the teacher's phone. Below it a teacher has none.
     raw.schemaVersion = 18;
@@ -366,13 +385,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v19();
-writeFileSync(join(OUT, 'v19.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v20();
+writeFileSync(join(OUT, 'v20.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`19 örnek dosya yazıldı: ${OUT}`);
+console.log(`20 örnek dosya yazıldı: ${OUT}`);

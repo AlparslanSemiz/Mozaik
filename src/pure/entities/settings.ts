@@ -83,6 +83,7 @@ export function remapDays(d: State, nextDays: Day[]): State {
       ...program,
       placements: move(program.placements),
       pinned: move(program.pinned),
+      study: move(program.study),
     })),
     answers: { accepted: keep(d.answers.accepted), refused: keep(d.answers.refused) },
   };
@@ -108,6 +109,8 @@ export function updateSettings(d: State, next: Partial<Settings>): State {
 export interface SettingsLoss {
   placed: number;
   pinned: number;
+  /** Question-solving hours (v20) on the program on screen, and on the others. */
+  study: number;
   elsewhere: number;
 }
 
@@ -120,11 +123,16 @@ export function settingsLoss(d: State, next: Partial<Settings>): SettingsLoss {
   for (const program of d.programs) {
     if (program.id === before.id) continue;
     const kept = after.programs.find((x) => x.id === program.id);
-    elsewhere += size(program.placements) - (kept === undefined ? 0 : size(kept.placements));
+    elsewhere +=
+      size(program.placements) -
+      (kept === undefined ? 0 : size(kept.placements)) +
+      size(program.study) -
+      (kept === undefined ? 0 : size(kept.study));
   }
   return {
     placed: size(before.placements) - size(now.placements),
     pinned: size(before.pinned) - size(now.pinned),
+    study: size(before.study) - size(now.study),
     elsewhere,
   };
 }

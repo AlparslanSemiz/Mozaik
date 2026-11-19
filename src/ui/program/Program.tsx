@@ -25,9 +25,12 @@ import {
   blockPinned,
   buildIndex,
   closedKey,
+  addStudy,
   applyDrop,
   dropMap,
   removeBlock,
+  removeStudy,
+  studyBlocker,
   pendingBlocks,
   placementKey,
   setBlockPinned,
@@ -407,6 +410,41 @@ function Program({
     [change, classAt, notify, state, t],
   );
 
+  /**
+   * A teacher's question-solving hour, put down or taken away from the click
+   * menu of an empty hour (B5). One step of the history, and the notice names
+   * exactly that step for its "Geri al". Asked of the state it acts on, so a
+   * lesson that got there since (B4) says no instead of being overwritten.
+   */
+  const studySet = useCallback(
+    (rowId: string, day: number, hour: number, on: boolean) => {
+      const teacher = state.teachers.find((x) => x.id === rowId);
+      if (teacher === undefined) return;
+      const next = on ? addStudy(state, rowId, day, hour) : removeStudy(state, rowId, day, hour);
+      if (next === state) {
+        const why = on ? studyBlocker(state, rowId, day, hour) : null;
+        if (why !== null) notify(why, 'warn');
+        return;
+      }
+      change((d) =>
+        d === state ? next : on ? addStudy(d, rowId, day, hour) : removeStudy(d, rowId, day, hour),
+      );
+      const where = t('{kim}, {gun} {saat}. saat', {
+        kim: teacher.name,
+        gun: dayLabel(state.settings.days[day]?.name ?? ''),
+        saat: state.settings.hours[hour] ?? hour + 1,
+      });
+      notify(
+        on
+          ? t('Soru çözüm saati eklendi: {yer}.', { yer: where })
+          : t('Soru çözüm saati kaldırıldı: {yer}.', { yer: where }),
+        'info',
+        { label: t('Geri al'), run: () => undoIf(next), expected: next },
+      );
+    },
+    [change, notify, state, t, undoIf],
+  );
+
   const togglePin = useCallback(() => {
     if (menuAt === null) return;
     pinCell(menuAt.rowId, menuAt.day, menuAt.hour);
@@ -702,6 +740,7 @@ function Program({
               editLesson={editLesson}
               inspect={inspect}
               togglePin={togglePin}
+              studySet={studySet}
             />
           }
         />

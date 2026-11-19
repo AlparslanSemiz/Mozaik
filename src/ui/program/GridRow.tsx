@@ -91,6 +91,7 @@ export const Row = memo(function Row({
     window.addEventListener('pointercancel', off);
   };
   const closedWord = t('kapalı');
+  const studyWord = t('Soru çözüm saati');
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
     for (let s = 0; s < hourCount; s++) {
@@ -111,7 +112,10 @@ export const Row = memo(function Row({
       }
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
-      const closed = row.closed[i] === true;
+      const study = cell === null && row.study[i] === true;
+      // Closed only where nothing else is drawn: a question-solving hour on an
+      // hour closed afterwards still reads as what it is.
+      const closed = row.closed[i] === true && !study;
       // A LATER hour of a block, i.e. the cell whose neighbour to the left said
       // it continues. A day boundary resets it: `continues` never crosses one.
       const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
@@ -166,6 +170,7 @@ export const Row = memo(function Row({
         !spans && cell !== null && cell.continues ? 'block-cont' : '',
         inBlock ? 'block-in' : '',
         cell === null && closed ? 'unavailable' : '',
+        study ? 'study' : '',
         band.trim(),
       ]
         .filter(Boolean)
@@ -194,10 +199,22 @@ export const Row = memo(function Row({
           // Drawn by the stylesheet, not a "×" in the cell: 669 text nodes
           // on the father's week, each one shaped and laid out on the open
           // (styles.css, `td.unavailable`).
-          aria-label={cell === null && closed ? closedWord : undefined}
+          aria-label={study ? studyWord : cell === null && closed ? closedWord : undefined}
+          // What a CLICK on this cell may do (Grid.tsx): only on a teacher's
+          // row, only where no lesson stands, and not on a closed hour.
+          data-slot={
+            row.kind !== 'teacher' || cell !== null
+              ? undefined
+              : study
+                ? 'study'
+                : closed
+                  ? undefined
+                  : 'free'
+          }
           className={className}
           title={cell !== null && cell.conflict === null ? `${top} ${cell.bottom}` : undefined}
         >
+          {study && <span aria-hidden="true">{t('SÇ')}</span>}
           {cell !== null ? (
             // A left click used to REMOVE the block, which made moving a lesson
             // mean deleting it and dragging it out of the pool again. Now:

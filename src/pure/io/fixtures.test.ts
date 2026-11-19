@@ -548,6 +548,37 @@ describe('şema örnekleri — öğretmenin telefonu (v19)', () => {
   });
 });
 
+describe('şema örnekleri — soru çözüm saatleri (v20)', () => {
+  it.each(VERSIONS)('v%i dosyasının soru çözüm saatleri doğru geliyor', (version) => {
+    // v20 brought them. A file below it has none, and an empty map is what none means.
+    expect(activeProgram(parse(version)).study).toEqual(version >= 20 ? { 'tAV|0|5': 1 } : {});
+  });
+
+  it('günü ya da öğretmeni olmayan ve okunamayan anahtar tek başına düşüyor', () => {
+    const state = edited<{ programs: Array<{ study: Record<string, unknown> }> }>(
+      SCHEMA_VERSION,
+      (raw) => {
+        raw.programs[0]!.study = {
+          'tAV|0|5': 1,
+          'tAV|9|0': 1,
+          'tAV|0|9': 1,
+          'yok|0|0': 1,
+          saçma: 1,
+        };
+      },
+    );
+    expect(state).not.toBeNull();
+    expect(activeProgram(state!).study).toEqual({ 'tAV|0|5': 1 });
+  });
+
+  it('metin olmayan alan boş sözlük sayılıyor', () => {
+    const state = edited<{ programs: Array<{ study: unknown }> }>(SCHEMA_VERSION, (raw) => {
+      raw.programs[0]!.study = 'bozuk';
+    });
+    expect(activeProgram(state!).study).toEqual({});
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**

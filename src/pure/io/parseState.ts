@@ -476,6 +476,7 @@ export function parseState(text: string): State | null {
     version === 16 ||
     version === 17 ||
     version === 18 ||
+    version === 19 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -583,6 +584,8 @@ export function parseState(text: string): State | null {
               name: asText(program.name, ''),
               placements: asMap<Id>(program.placements),
               pinned: asMap<1>(program.pinned),
+              // v20. Every file below it has none, and none is right.
+              study: asMap<1>(program.study),
             }))
           : [
               {

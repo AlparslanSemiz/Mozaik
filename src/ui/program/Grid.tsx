@@ -127,6 +127,31 @@ function GridInner({
    * here runs before Radix's own handler (it composes ours first and checks
    * `defaultPrevented`), so an empty cell keeps behaving as it always did.
    */
+  /**
+   * A CLICK on an empty hour of a teacher's row opens a one-item menu (B5,
+   * Alp 2026-11-16): "Soru çözüm saati", or "Kaldır" on one that is. Two taps,
+   * so it cannot be added by accident. It is the same menu and the same
+   * trigger as the card's, asked the way the keyboard's Enter asks a card's:
+   * a `contextmenu` at the point, flagged so `openMenu` knows this one is
+   * wanted. A right click on an empty cell still opens nothing.
+   */
+  const asked = useRef(false);
+  const clickMenu = (e: React.MouseEvent) => {
+    if (e.button !== 0 || e.detail === 0) return;
+    const td = (e.target as Element).closest?.('td[data-slot]');
+    if (td == null) return;
+    asked.current = true;
+    td.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: e.clientX,
+        clientY: e.clientY,
+      }),
+    );
+    asked.current = false;
+  };
+
   const openMenu = (e: React.MouseEvent) => {
     const element = e.target as Element;
     // Through the CELL and not through `.card`, because the card is no longer
@@ -135,6 +160,14 @@ function GridInner({
     const td = element.closest?.('td[data-row]') as HTMLElement | null | undefined;
     const card = td?.querySelector('.card') ?? null;
     if (card != null && td != null) {
+      onMenu({
+        rowId: td.dataset.row ?? '',
+        day: Number(td.dataset.day),
+        hour: Number(td.dataset.hour),
+      });
+      return;
+    }
+    if (asked.current && td != null && td.dataset.slot !== undefined) {
       onMenu({
         rowId: td.dataset.row ?? '',
         day: Number(td.dataset.day),
@@ -158,7 +191,13 @@ function GridInner({
         <ContextMenu.Trigger asChild onContextMenu={openMenu} onPointerDown={startLongPress}>
           {/* role=grid: the arrows belong to the table (platform/dom/gridKeys.ts),
               and a screen reader in browse mode would otherwise keep them. */}
-          <table className="grid" role="grid" style={columns} aria-describedby="grid-keys">
+          <table
+            className="grid"
+            role="grid"
+            style={columns}
+            aria-describedby="grid-keys"
+            onClick={clickMenu}
+          >
             <caption className="sr-only">
               {t('Haftalık dersler')} · {firstColumnTitle}
             </caption>

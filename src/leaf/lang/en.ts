@@ -1802,6 +1802,16 @@ const EN: Sozluk = {
   "Tam": "Full",
   "Okula geldiği gün boşuna gelmesin. Yalnız Programın durumu’nda sayılır.": "So that nobody comes in for nothing on a day they are at school. Counted only in Timetable status.",
   "Kapatmak ya da açmak istediğiniz saate tıklayın.": "Click the hour you want to close or open.",
+  "Soru çözüm saati": "Question-solving hour",
+  "SÇ": "QS",
+  "Kaldır": "Remove",
+  "{kim} o saatte soru çözümünde": "{kim} is in question solving then",
+  "{kim} {n} saatinde soru çözümünde": "{kim} is in question solving in {n} of them",
+  "{n} soru çözüm saati de kalkacak.": "{n} question-solving {n:hour|hours} will go too.",
+  "Geri al ile geri getirebilirsiniz.": "You can bring them back with Undo.",
+  "{kim}, {gun} {saat}. saat": "{kim}, {gun}, period {saat}",
+  "Soru çözüm saati eklendi: {yer}.": "Question-solving hour added: {yer}.",
+  "Soru çözüm saati kaldırıldı: {yer}.": "Question-solving hour removed: {yer}.",
 };
 
 registerSozluk("en", EN);

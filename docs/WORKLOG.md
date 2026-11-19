@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-11-18. **Site denetimi (PR #94):** dar ekran taşması, site meta etiketleri, Hakkında'da künye/gizlilik bağlantıları; ham boyut payı 18 B.
+Son güncelleme: 2026-11-19. **Soru çözüm saatleri, çekirdek (`soru-cozum/cekirdek`, PR bekliyor):** şema v20, B1/B4/B5/B7/B9, ham boyut eşiği 1 210 000 (aşağıda). Önceki: 2026-11-18. **Site denetimi (PR #94):** dar ekran taşması, site meta etiketleri, Hakkında'da künye/gizlilik bağlantıları; ham boyut payı 18 B.
 Önceki: 2026-11-17 sabah. Bu blok yeni bir oturumun başlangıç noktası; ayrıntı aşağıdaki
 tarihli girdilerde, kararlar DECISIONS'ta.
 
@@ -56,6 +56,44 @@ eşik bunun için yükseltilmedi (hedef makine yavaş). Sonraki sürümler yeni 
 **Açık notlar.** SD9 (Daha fazla menüsü Windows UIA'da Hakkında'yı açmıyor; NVDA/Narrator ile
 dene), kartın satır içi `background`'u çakışma köşesini ve açılmış saat taramasını örtüyor
 olabilir (doğrulanmadı), WhatsApp yolu gerçek Windows'ta denenmedi. Tuzaklarda en büyük numara 222.
+
+## 2026-11-19 · Soru çözüm saatleri, çekirdek (`soru-cozum/cekirdek`)
+
+Plan: `docs/plan-elle-duzeltme-soru-cozum.md` B; Alp'in 2026-11-16 "Giriş yolu" kararıyla. **Yapıldı:** şema v20
+(`ProgramVariant.study`, `teacher|day|hour`, göç boş sözlük, `v20.json` örneği, v1-v19 bayt bayt aynı);
+B1 (`blockerDetail` `teacherStudy`: "<Ad> o saatte soru çözümünde"; çözücü `withStudyClosed` ile aynı saati
+kapalı sayar, sonucu verilen durumdan kurar, yani soru çözümü kapalı saate dönüşmez); B2/B3 (öğretmenin saati,
+`teacherBusy`'ye girmez: sınıf meşgul olmaz, ders sayısı, sınır, pencere ve yük görmez); B4 (`studyBlocker`:
+dersi olan ya da kapalı saate konmaz); B5 (boş saate tık → `Soru çözüm saati`, konanda `Kaldır`, bildirimde
+`Geri al`, tek adım); B7 (yalnız öğretmen satırı; sınıf görünümü çizmez, `data-slot` yok); B9 (sınıf kâğıdının
+HTML'inde "Soru çözüm" ve "SÇ" yok, `programScreen.test.tsx`). Gün ya da saat kalkınca anahtar `remapDays` ile
+kayar, `sanitize` ile düşer, Zil ve günler `settingsLoss().study` ile önce sayıp sorar (tuzak 5, yeni sayı: "{n} soru
+çözüm saati de kalkacak."). `Takılan ders` açıklaması soru çözümünü ayrı sayar.
+
+**Aldığım kararlar.** (1) Çözücü yolu: `withStudyClosed` (study anahtarları `unavailable`'a katılmış salt okunur kopya)
+yalnız `createSearch`'in içinde; öneri araması (`relax`) bu kopyayı okumuyor, ama her önerisi `verifySuggestion`'da
+`blocker()`'dan geçtiği için soru çözümüne ders koyan bir öneri reddedilir. (2) Kapalı saate soru çözümü konmaz
+(öğretmen gelemiyor); sonradan kapanırsa soru çözümü kalır ve çizilir. (3) `Programı boşalt` soru çözümüne dokunmaz
+(ders değil). (4) Tık menüsü, kartın bağlam menüsünün aynısı: sol tık, işaretli sentetik `contextmenu`; sağ tık boş
+hücrede hâlâ hiçbir şey açmaz. (5) Dört sözlüğe on cümle çevrildi; "SÇ" kısaltması dile göre (QS, AS, RP, EX).
+
+**Boyut.** Ham `dist/index.html` 1 199 982 → 1 205 625 B (+5,6 kB), CLAUDE.md'nin 1,2 MB çizgisi aşıldı; brotli 311,49 kB
+(eşik 312 000, pay 510 B). Açılış ölçüldü (`scripts/acilis-olc.mjs`, `file://`, CPU 4×, 9 dönüşümlü koşu, taban = `origin/main`
+09fe80a, tam dolu dizili kurs; **kirli**, Mac, başka işler vardı): medyan hazır 1169 → 1171 ms (+0,2 %), ızgara 1434 → 1445 ms
+(+0,8 %), TBT 813 → 822 ms; %15 eşiği aşılmadı. Ham eşik 1 200 000 → 1 210 000 (`.size-limit.json`, BUILD.md).
+
+**Koşulanlar** (Mac, `soru-cozum/cekirdek`): `tsc` ve `tsc -p tsconfig.tools.json` temiz, `npm run sinir` 0 ihlal, `npm run lint`
+temiz, prettier `--check` (CI'daki Biçim adımının komutu) temiz, `knip` yalnız iki eski ignoreBinaries ipucu (`tauri-driver`,
+`pgrep`), `vitest run` 84 dosya geçti 2 atlandı, 1999 test geçti 5 atlandı (belge kapısı dahil), `size-limit` ham 4,38 kB payla,
+brotli geçiyor. Playwright (Chromium) 287 test geçti: `soru-cozum`, `program`, `otomatik`, `ayarlar`, `dokunmatik`, `klavye`, `bildirim`,
+`erisim`, `izgara`, `yazdir`, `temel`, `kontrol`. **Koşulmayan:** tüm Playwright süiti (yalnız bu on iki dosya), WebKit/Firefox, site
+ve çözücü yapılandırmaları, Rust/Tauri (dokunulmadı), Windows. Tıklama testi `e2e/soru-cozum.spec.ts`: diz → öğretmen satırında boş saate
+tık → Soru çözüm saati → bir dersi havuza at → Kalanı diz → soru çözümü yerinde, kartı yok, saklı durumda o saatte öğretmenin dersi yok
+→ Sınıf görünümünde `.study` ve `data-slot` yok → Kaldır → Geri al.
+
+**Açık / yapılmayan.** B6, B8 (öğretmen kâğıdı ve PDF/WhatsApp/e-posta soru çözümünü henüz içermiyor), B10, A3. Klavyeyle boş saate menü yolu yok
+(yeni yol fareye ve dokunmaya bağlı, klavye için denenmedi). `feasibility` raporu (`Programın durumu`'ndaki kapasite sayıları) soru
+çözümünü öğretmenin açık saati sayıyor; yalnız bilgi, çözücüyü etkilemiyor. İkame ("Bugün kim yok?") soru çözümündeki öğretmeni boş sayıyor.
 
 ## 2026-11-18 · Site denetimi düzeltmeleri (PR #94)
 

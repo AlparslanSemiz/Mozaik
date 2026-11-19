@@ -65,16 +65,20 @@ export default function School({ state, change }: PanelProps) {
     where: string,
     confirmLabel: string,
   ): Promise<boolean> {
-    if (loss.placed === 0 && loss.pinned === 0 && loss.elsewhere === 0) return true;
+    if (loss.placed === 0 && loss.pinned === 0 && loss.study === 0 && loss.elsewhere === 0)
+      return true;
     const body = [
       loss.placed > 0 ? where : '',
       loss.pinned > 0
         ? t('Bunların {n} saati sabitli, sabitlemeleri de kalkacak.', { n: loss.pinned })
         : '',
+      loss.study > 0 ? t('{n} soru çözüm saati de kalkacak.', { n: loss.study }) : '',
       loss.elsewhere > 0
         ? t('Bu plandaki öteki programlarda da {n} saat kalkacak.', { n: loss.elsewhere })
         : '',
-      t('Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.'),
+      loss.placed > 0 || loss.pinned > 0 || loss.elsewhere > 0
+        ? t('Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.')
+        : t('Geri al ile geri getirebilirsiniz.'),
     ].filter((x) => x !== '');
     return confirm({ title, body: body.join(' '), confirmLabel, danger: true });
   }
