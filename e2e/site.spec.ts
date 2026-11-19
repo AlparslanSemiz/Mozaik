@@ -258,6 +258,14 @@ test.describe('36. Site sürümü', () => {
     expect(site).toContain('name="twitter:card" content="summary_large_image"');
     expect(site).toContain('name="referrer" content="strict-origin-when-cross-origin"');
     expect(site).toContain('rel="apple-touch-icon"');
+    // JSON-LD: geçerli JSON, doğru tür, adresi canonical ile aynı.
+    const ld = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(site);
+    const ldMetin = ld?.[1];
+    expect(ldMetin).toBeDefined();
+    const veri = JSON.parse(ldMetin ?? '') as Record<string, unknown>;
+    expect(veri['@type']).toBe('SoftwareApplication');
+    expect(veri.url).toBe('https://mozaik.alparslansemiz.com/');
+    expect(veri.name).toBe('Mozaik');
     expect(readFileSync(resolve('dist-site/robots.txt'), 'utf8')).toContain(
       'Sitemap: https://mozaik.alparslansemiz.com/sitemap.xml',
     );
@@ -267,5 +275,6 @@ test.describe('36. Site sürümü', () => {
     const single = readFileSync(resolve('dist/index.html'), 'utf8');
     expect(single).not.toContain('og:image');
     expect(single).not.toContain('canonical');
+    expect(single).not.toContain('ld+json');
   });
 });
